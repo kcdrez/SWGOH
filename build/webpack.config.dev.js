@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const jquery = require('jquery');
 const { VueLoaderPlugin } = require('vue-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+// const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'development',
@@ -11,8 +12,9 @@ module.exports = {
     './src/app.js'
   ],
   resolve: {
+    extensions: ['.tsx', '.ts', '.js', '.vue'],
     alias: {
-      'vue$': 'vue/dist/vue.esm.js'
+      'vue': 'vue/dist/vue.esm-bundler.js'
     }
   },
   devServer: {
