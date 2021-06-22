@@ -1316,7 +1316,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var vue_
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var vue_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-router */ \"./node_modules/vue-router/dist/vue-router.esm-bundler.js\");\n/* harmony import */ var _pages_homepage_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../pages/homepage.vue */ \"./src/pages/homepage.vue\");\n\r\n\r\n\r\nconst routes = [\r\n  {\r\n    path: '/',\r\n    name: 'home',\r\n    component: _pages_homepage_vue__WEBPACK_IMPORTED_MODULE_0__.default\r\n  }\r\n]\r\n\r\nconst router = (0,vue_router__WEBPACK_IMPORTED_MODULE_1__.createRouter)({\r\n  history: (0,vue_router__WEBPACK_IMPORTED_MODULE_1__.createWebHistory)(),\r\n  routes\r\n});\r\n\r\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (router);\n\n//# sourceURL=webpack://swgoh/./src/router/router.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var vue_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-router */ \"./node_modules/vue-router/dist/vue-router.esm-bundler.js\");\n/* harmony import */ var _pages_homepage_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../pages/homepage.vue */ \"./src/pages/homepage.vue\");\n\r\n\r\n\r\nconst routes = [\r\n  {\r\n    path: '/',\r\n    name: 'home',\r\n    component: _pages_homepage_vue__WEBPACK_IMPORTED_MODULE_0__.default\r\n  }\r\n]\r\n\r\nconst router = (0,vue_router__WEBPACK_IMPORTED_MODULE_1__.createRouter)({\r\n  // history: createWebHistory(),\r\n  routes\r\n});\r\n\r\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (router);\n\n//# sourceURL=webpack://swgoh/./src/router/router.js?");
 
 /***/ }),
 
@@ -1416,7 +1416,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("a3dae4d1a83d8fce2a6c")
+/******/ 		__webpack_require__.h = () => ("1b47f81b3aeeafd6a131")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
