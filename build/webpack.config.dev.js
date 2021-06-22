@@ -9,7 +9,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: [
-    './src/app.js'
+    './src/main.ts'
   ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.vue'],
@@ -29,21 +29,19 @@ module.exports = {
         test: /\.vue$/,
         use: 'vue-loader'
       },
-      // {
-      // 	test: /\.css$/,
-      // 	use: [
-      // 		'css-loader', 'vue-style-loader'
-      // 	]
-      // },
+      {
+        test: /\.tsx?$/,
+        loader: 'ts-loader',
+        options: {
+          appendTsSuffixTo: [/\.vue$/]
+        },
+        exclude: /node_modules/
+      },
       {
       	test: /\.scss$/,
       	use: [ 'vue-style-loader', 'css-loader', 
       		{
-      			loader: 'sass-loader',
-      			options: { 
-      				// sassOptions: { indentedSyntax: true },
-      				// prependData: 'src/styles/variables.scss'
-      			}
+      			loader: 'sass-loader'
       		}
     		]
       },

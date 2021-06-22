@@ -1,20 +1,13 @@
 import { createApp } from 'vue';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min.js';
-import './styles/main.scss';
+
+import App from './App.vue';
 import store from './vuex-store/store';
 import router from './router/router';
+import './styles/main.scss';
 
-const app = {
-  template: `<div>
-    <router-view></router-view>
-  </div>`,
-  created() {
-  }
-};
-
-createApp(app)
+createApp(App)
   .use(store)
   .use(router)
   .mount('#app');
