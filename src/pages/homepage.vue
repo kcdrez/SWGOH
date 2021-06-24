@@ -12,17 +12,12 @@
   export default defineComponent({
     data() {
       return {
-        count: 0
       }
     },
     mounted() {
-      // const r = this.count.split("");
-      console.log(this.test());
     },
     methods: {
-      test(): number {
-        return 0;
-      }
+
     }
   });
 </script>
