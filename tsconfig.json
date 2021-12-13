@@ -23,6 +23,6 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-  ],
+, "src/api/swgoh.gg.ts"  ],
   "exclude": ["node_modules"]
 }

@@ -1,10 +1,12 @@
 import { InjectionKey } from "vue";
 import { createStore, Store } from "vuex";
-import apiClient from "../api/client";
+import apiClientHelp from "../api/swgoh.help";
+import apiClientGG from "../api/swgoh.gg";
 import { Unit } from "../api/interfaces";
 
 interface State {
-  apiClient: apiClient | null;
+  helpClient: apiClientHelp | null;
+  ggClient: apiClientGG | null;
   unit: Unit | null;
 }
 
@@ -12,12 +14,14 @@ export const key: InjectionKey<Store<State>> = Symbol();
 
 const store = createStore<State>({
   state: {
-    apiClient: null,
+    helpClient: null,
+    ggClient: null,
     unit: null,
   },
   mutations: {
-    SET_CLIENT(state, client) {
-      state.apiClient = client;
+    SET_CLIENT(state, {helpClient, ggClient}) {
+      state.helpClient = helpClient;
+      state.ggClient = ggClient;
     },
     SET_UNIT(state, payload) {
       state.unit = payload;
@@ -25,26 +29,32 @@ const store = createStore<State>({
   },
   actions: {
     async initialize({ commit, state, dispatch }) {
-      const client = new apiClient();
-      await client.connect();
+      const helpClient = new apiClientHelp();
+      await helpClient.connect();
 
-      commit("SET_CLIENT", client);
+      const ggClient = new apiClientGG();
+      console.log(await ggClient.gear());
 
-      await dispatch("fetchUnit", "AHSOKATANO");
+      commit("SET_CLIENT", {
+        helpClient, ggClient
+      });
+
+      // await dispatch("fetchUnit", "AHSOKATANO");
       // await dispatch("fetchPlayers");
-      await dispatch("fetchData");
+      // await dispatch("fetchData");
+      // await state.apiClient?.debug()
     },
     async fetchPlayers({ state }) {
-      const response = await state.apiClient?.fetchPlayer("843518525");
+      const response = await state.helpClient?.fetchPlayer("843518525");
       console.log(response);
     },
     async fetchUnit({ state, commit }, id) {
-      const response = await state.apiClient?.fetchUnit(id);
+      const response = await state.helpClient?.fetchUnit(id);
       commit("SET_UNIT", response);
       console.log(response);
     },
     async fetchData({ state }) {
-      const response = await state.apiClient?.fetchData("equipmentList");
+      const response = await state.helpClient?.fetchData("equipmentList");
       console.log(response);
     },
   },

@@ -1,12 +1,10 @@
 import axios from "axios";
 
 export default class apiClient {
-  baseUrl = "";
+  baseUrl = "https://api.swgoh.help";
   token = null;
 
-  constructor() {
-    this.baseUrl = "https://api.swgoh.help";
-  }
+  constructor() {}
 
   private async fetch(url: string, payload: any) {
     return (
@@ -65,5 +63,8 @@ export default class apiClient {
     return await this.fetch(this.baseUrl + "/swgoh/data", {
       collection: "equipmentList",
     });
+  }
+  async debug() {
+    return await axios.get("https://6814-184-96-186-220.ngrok.io/player/843518525")
   }
 }
