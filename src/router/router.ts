@@ -5,6 +5,7 @@ import {
 } from "vue-router";
 import HomePage from "../pages/homepage.vue";
 import UnitPage from "../pages/unitPage.vue";
+import ShardCalculatorPage from "../pages/shardCalculator.vue";
 
 const routes = [
   {
@@ -15,8 +16,12 @@ const routes = [
   {
     path: "/unit/:unitId",
     name: "UnitPage",
-    component: UnitPage,
-    // props: true,
+    component: UnitPage
+  },
+  {
+    path: "/shard-calculator",
+    name: "ShardCalculatorPage",
+    component: ShardCalculatorPage
   },
 ];
 

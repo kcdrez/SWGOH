@@ -1,28 +1,18 @@
 <template>
   <div>
-    <div v-if="unit">
-      <h1>This is the page for {{ unit.name }}</h1>
-      <div v-if="unit.relic_level > 1">
-        Relic Level: {{ unit.relic_level + 1 }}
-      </div>
-      <div>
-        Shards:
-        <input type="text" v-model.number="shards" />
-        <input type="text" v-model.number="dropRate" />
-        <button class="btn btn-primary" @click="calculate">Calculate</button>
-        <div v-if="date">{{date}} ({{days}} Days from today)</div>
-      </div>
-      <div>
-        Gear:
-        <div>Gear Level: {{ unit.gear_level }}</div>
-        <div v-for="gear in unit.gear" :key="gear.slot">
-          <div>Slot: {{ gear.slot }}</div>
-          <div>Equipped: {{ gear.is_obtained ? "Yes" : "No" }}</div>
-          <div>Name: {{ gearName(gear) }}</div>
-        </div>
+    <div class="input-group">
+      <!-- <div class="input-group-prepend">
+        <span class="input-group-text" id="">First and last name</span>
+      </div> -->
+      <input type="text" class="form-control" placeholder="Unit Name" v-model="unit">
+      <input type="text" class="form-control" placeholder="Current Shards" v-model="shards">
+      <input type="text" class="form-control" placeholder="Refreshes per Day" v-model="refreshes">
+      <input type="text" class="form-control" placeholder="Drop Rate" v-model="dropRate">
+      <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" @click="calculate">Button</button>
       </div>
     </div>
-    <div v-else>Loading unit page</div>
+    <div v-if="date">{{date}} ({{days}} Days from today)</div>
   </div>
 </template>
 
@@ -33,9 +23,10 @@ import { UnitData, PlayerUnit, UnitGear, Gear } from "../api/interfaces";
 import moment from 'moment';
 
 export default defineComponent({
-  name: "UnitPage",
+  name: "ShardCalculatorRow",
   data() {
     return {
+      unit: '',
       shards: 0,
       dropRate: 1,
       refreshes: 0,

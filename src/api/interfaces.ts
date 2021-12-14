@@ -16,7 +16,7 @@ export interface Player {
 }
 
 export interface UnitData {
-  data: _unit;
+  data: PlayerUnit;
 }
 
 interface _playerData {
@@ -27,11 +27,12 @@ interface _playerData {
   //battles history data
 }
 
-interface _unit {
+export interface PlayerUnit {
   name: string;
   base_id: string;
   gear: UnitGear[];
   gear_level: number;
+  rarity: number;
   // level: number;
   // omicron_abilities: any[];
   // zeta_abilities: any[];
