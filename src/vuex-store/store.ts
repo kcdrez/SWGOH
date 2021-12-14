@@ -2,12 +2,14 @@ import { InjectionKey } from "vue";
 import { createStore, Store } from "vuex";
 import apiClientHelp from "../api/swgoh.help";
 import apiClientGG from "../api/swgoh.gg";
-import { Unit } from "../api/interfaces";
+import { Unit, Gear, Player, UnitData } from "../api/interfaces";
 
 interface State {
   helpClient: apiClientHelp | null;
   ggClient: apiClientGG | null;
   unit: Unit | null;
+  gearList: Gear[];
+  player: Player | null;
 }
 
 export const key: InjectionKey<Store<State>> = Symbol();
@@ -17,14 +19,22 @@ const store = createStore<State>({
     helpClient: null,
     ggClient: null,
     unit: null,
+    gearList: [],
+    player: null,
   },
   mutations: {
-    SET_CLIENT(state, {helpClient, ggClient}) {
+    SET_CLIENT(state, { helpClient, ggClient }) {
       state.helpClient = helpClient;
       state.ggClient = ggClient;
     },
     SET_UNIT(state, payload) {
       state.unit = payload;
+    },
+    SET_GEAR(state, payload: Gear[]) {
+      state.gearList = payload;
+    },
+    SET_PLAYER(state, payload: any) {
+      state.player = payload;
     },
   },
   actions: {
@@ -33,29 +43,40 @@ const store = createStore<State>({
       await helpClient.connect();
 
       const ggClient = new apiClientGG();
-      console.log(await ggClient.gear());
 
       commit("SET_CLIENT", {
-        helpClient, ggClient
+        helpClient,
+        ggClient,
       });
+      const gearList = await ggClient.gear();
+      const player = await ggClient.player("843518525");
+      // const units = await state.helpClient?.fetchUnit([
+      //   "AHSOKATANO",
+      //   "MAGMATROOPER",
+      // ]);
+      // console.log(units);
+
+      // const allUnits = await helpClient.fetchAllUnits();
+      // console.log(allUnits);
+
+      commit("SET_GEAR", gearList);
+      commit("SET_PLAYER", player);
 
       // await dispatch("fetchUnit", "AHSOKATANO");
+      // await dispatch("fetchUnit", ["AHSOKATANO", "MAGMATROOPER"]);
       // await dispatch("fetchPlayers");
       // await dispatch("fetchData");
       // await state.apiClient?.debug()
     },
     async fetchPlayers({ state }) {
       const response = await state.helpClient?.fetchPlayer("843518525");
-      console.log(response);
     },
     async fetchUnit({ state, commit }, id) {
       const response = await state.helpClient?.fetchUnit(id);
       commit("SET_UNIT", response);
-      console.log(response);
     },
     async fetchData({ state }) {
       const response = await state.helpClient?.fetchData("equipmentList");
-      console.log(response);
     },
   },
 });

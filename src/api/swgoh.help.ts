@@ -40,14 +40,29 @@ export default class apiClient {
     });
   }
 
-  async fetchUnit(id: string) {
-    const response = await this.fetch(this.baseUrl + "/swgoh/data", {
-      collection: "unitsList",
-      match: {
-        id,
-      },
-    });
-    return response[0];
+  async fetchUnit(id: string | string[]) {
+    //todo: figure out how to pass in an or condition?
+    if (typeof id === "string") {
+      const response = await this.fetch(this.baseUrl + "/swgoh/data", {
+        collection: "unitsList",
+        match: {
+          id,
+        },
+      });
+      return response[0];
+    } else {
+      const requests = id.map((x) => {
+        return this.fetch(this.baseUrl + "/swgoh/data", {
+          collection: "unitsList",
+          match: {
+            id: x,
+          },
+        });
+      });
+      return await Promise.all(requests).then((results) => {
+        return results.map((x) => x[0]);
+      });
+    }
   }
   async fetchAllUnits() {
     return await this.fetch(this.baseUrl + "/swgoh/data", {
@@ -65,6 +80,8 @@ export default class apiClient {
     });
   }
   async debug() {
-    return await axios.get("https://6814-184-96-186-220.ngrok.io/player/843518525")
+    return await axios.get(
+      "https://6814-184-96-186-220.ngrok.io/player/843518525"
+    );
   }
 }

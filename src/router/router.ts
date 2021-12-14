@@ -4,12 +4,19 @@ import {
   createWebHashHistory,
 } from "vue-router";
 import HomePage from "../pages/homepage.vue";
+import UnitPage from "../pages/unitPage.vue";
 
 const routes = [
   {
     path: "/",
     name: "home",
     component: HomePage,
+  },
+  {
+    path: "/unit/:unitId",
+    name: "UnitPage",
+    component: UnitPage,
+    // props: true,
   },
 ];
 
