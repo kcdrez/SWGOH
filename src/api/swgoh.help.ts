@@ -6,18 +6,14 @@ export default class apiClient {
 
   constructor() {}
 
-  private async fetch(url: string, payload: any) {
+  private async fetch(url: string, payload: any = {}) {
     return (
-      await axios.post(
-        url,
-        Object.assign(payload, { language: "ENG_US", enums: true }),
-        {
-          headers: {
-            "content-type": "application/json",
-            authorization: `Bearer ${this.token}`,
-          },
-        }
-      )
+      await axios.post(url, Object.assign(payload, { language: "ENG_US" }), {
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${this.token}`,
+        },
+      })
     ).data;
   }
 
@@ -79,6 +75,15 @@ export default class apiClient {
       collection: "equipmentList",
     });
   }
+
+  async fetchBattles() {
+    return await this.fetch(this.baseUrl + "/swgoh/battles");
+  }
+
+  async fetchEvents() {
+    return await this.fetch(this.baseUrl + "/swgoh/events");
+  }
+
   async debug() {
     return await axios.get(
       "https://6814-184-96-186-220.ngrok.io/player/843518525"

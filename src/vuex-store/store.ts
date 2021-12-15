@@ -10,6 +10,7 @@ interface State {
   unit: Unit | null;
   gearList: Gear[];
   player: Player | null;
+  gearLocations: any[];
 }
 
 export const key: InjectionKey<Store<State>> = Symbol();
@@ -21,6 +22,7 @@ const store = createStore<State>({
     unit: null,
     gearList: [],
     player: null,
+    gearLocations: [],
   },
   mutations: {
     SET_CLIENT(state, { helpClient, ggClient }) {
@@ -32,6 +34,9 @@ const store = createStore<State>({
     },
     SET_GEAR(state, payload: Gear[]) {
       state.gearList = payload;
+    },
+    SET_GEAR_LOCATIONS(state, payload: any) {
+      state.gearLocations = payload;
     },
     SET_PLAYER(state, payload: any) {
       state.player = payload;
@@ -48,8 +53,25 @@ const store = createStore<State>({
         helpClient,
         ggClient,
       });
-      const gearList = await ggClient.gear();
+      let gearList = await ggClient.gear();
       const player = await ggClient.player("843518525");
+      const gearLocations = await helpClient.fetchGear();
+
+      gearList = gearList.map((gear: any) => {
+        const match = gearLocations.find((x: any) => x.id === gear.base_id);
+        if (match) {
+          const { lookupMissionList, raidLookupList, actionLinkLookupList } =
+            match;
+          return {
+            ...gear,
+            lookupMissionList,
+            raidLookupList,
+            actionLinkLookupList,
+          };
+        } else {
+          return gear;
+        }
+      });
       // const units = await state.helpClient?.fetchUnit([
       //   "AHSOKATANO",
       //   "MAGMATROOPER",
@@ -59,10 +81,14 @@ const store = createStore<State>({
       // const allUnits = await helpClient.fetchAllUnits();
       // console.log(allUnits);
 
+      // const x = await helpClient.fetchEvents();
+      // console.log(x);
+
       commit("SET_GEAR", gearList);
+      // commit("SET_GEAR_LOCATIONS", gearLocations);
       commit("SET_PLAYER", player);
 
-      // await dispatch("fetchUnit", "AHSOKATANO");
+      // await dispatch("fetchUnit", "C3POCHEWBACCA");
       // await dispatch("fetchUnit", ["AHSOKATANO", "MAGMATROOPER"]);
       // await dispatch("fetchPlayers");
       // await dispatch("fetchData");
@@ -77,6 +103,7 @@ const store = createStore<State>({
     },
     async fetchData({ state }) {
       const response = await state.helpClient?.fetchData("equipmentList");
+      console.log(response);
     },
   },
 });
