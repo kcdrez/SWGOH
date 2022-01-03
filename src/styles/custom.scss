@@ -1,0 +1,165 @@
+@import "./variables.scss";
+
+//Variable overwrites go above this line
+@import "bootstrap";
+//class overwrites go below this line
+
+//Buttons
+.btn-primary {
+  color: $primary-text-light;
+
+  &:disabled {
+    color: $primary-light-2;
+  }
+}
+
+.btn-secondary {
+  color: $secondary-text-light;
+
+  &:disabled {
+    color: $secondary-text-light;
+  }
+}
+
+.btn-success {
+  color: $success-text-light;
+
+  &:disabled {
+    color: $success-light-2;
+  }
+}
+
+.btn-danger {
+  color: $danger-text-light;
+
+  &:disabled {
+    color: $danger-light-2;
+  }
+}
+
+.btn-warning {
+  color: $warning-text-light;
+
+  &:disabled {
+    color: $warning-light-2;
+  }
+}
+
+//Cards
+.card {
+  .card-header {
+    background-color: $background-light-3;
+    color: $dark;
+  }
+  .card-body {
+    background-color: $background-light-2;
+    color: $dark;
+  }
+}
+
+//Navbar
+nav.navbar-light {
+  $hover-color: lighten($background-light-3, 5%);
+  background-color: $background-light-3;
+
+  .nav-link {
+    color: $dark !important;
+
+    &:hover {
+      background-color: $hover-color;
+      border-radius: 5px;
+    }
+  }
+
+  .dropdown-menu {
+    background-color: $background-light-3;
+
+    .dropdown-item {
+      &:hover {
+        background-color: $hover-color;
+      }
+    }
+  }
+  .navbar-text {
+    color: $dark;
+  }
+}
+
+//Modal
+.modal-content {
+  .modal-header,
+  .modal-footer {
+    background-color: $background-light-1;
+    color: $light;
+    border-bottom-color: $light;
+  }
+  .modal-body {
+    background-color: $background-light-2;
+    color: $dark;
+  }
+  .modal-footer {
+    border-top-color: $light;
+  }
+}
+
+//vuejs-dialog
+.dg-main-content {
+  background-color: $background-light-2 !important;
+  color: $light;
+  padding: 0 !important;
+
+  .dg-title {
+    background-color: $background-light-1;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    padding: 1rem;
+    margin: 0;
+    border-bottom: $light solid 1px;
+    font-family: "Komica";
+    font-size-adjust: 0.8;
+  }
+  .dg-content {
+    padding: 1rem;
+    border-bottom: $light solid 1px;
+  }
+  .dg-content-body {
+    border: none;
+    padding: 0;
+  }
+  .dg-content-footer {
+    background-color: $background-light-1;
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: end;
+    padding: 0.75rem;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+
+    > * {
+      margin: 0.25rem;
+    }
+
+    button {
+      font-weight: initial;
+      border: $dark 1px solid !important;
+      padding: 0.375rem 0.75rem;
+
+      &.dg-btn--cancel {
+        @include button-variant($secondary, $secondary);
+        color: $secondary-text-light;
+      }
+
+      &.dg-btn--ok {
+        @include button-variant($success, $success);
+        color: $success-text-light;
+      }
+    }
+  }
+}
+
+.form-control {
+  background-color: $background-light-5;
+}

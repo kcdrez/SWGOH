@@ -1,0 +1,52 @@
+@import "./custom.scss";
+@import "./mixins.scss";
+
+// @font-face {
+//   font-family: "Komica";
+//   src: url("fonts/KOMTITK_.ttf");
+// }
+
+body {
+  background-color: $background;
+  color: $light;
+
+  a {
+    color: $primary-light-1;
+
+    &:hover {
+      color: $primary-light-1;
+    }
+  }
+
+  table {
+    thead {
+      background-color: black;
+      color: white;
+    }
+  }
+
+  .section-header {
+    @include shadow-dark();
+  }
+}
+
+.c-pointer {
+  cursor: pointer;
+}
+.c-help {
+  cursor: help;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+.card-header {
+  h3 {
+    @include shadow-light();
+  }
+}
+
+.modal-title {
+  @include shadow-dark();
+}

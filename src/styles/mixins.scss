@@ -1,0 +1,7 @@
+@mixin shadow-dark {
+  text-shadow: 2px 2px 2px black;
+}
+
+@mixin shadow-light {
+  text-shadow: 2px 2px 2px white;
+}

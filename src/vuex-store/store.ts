@@ -2,7 +2,15 @@ import { InjectionKey } from "vue";
 import { createStore, Store } from "vuex";
 import apiClientHelp from "../api/swgoh.help";
 import apiClientGG from "../api/swgoh.gg";
-import { Unit, Gear, Player, UnitData } from "../api/interfaces";
+import { Unit, Gear, Player, UnitData, Mission } from "../api/interfaces";
+import {
+  difficultyIds,
+  tableIds,
+  mapIds,
+  missionIds,
+  challenges,
+} from "../api/locationMapping";
+import { unvue } from "../utils";
 
 interface State {
   helpClient: apiClientHelp | null;
@@ -11,6 +19,7 @@ interface State {
   gearList: Gear[];
   player: Player | null;
   gearLocations: any[];
+  ownedGear: any;
 }
 
 export const key: InjectionKey<Store<State>> = Symbol();
@@ -23,6 +32,42 @@ const store = createStore<State>({
     gearList: [],
     player: null,
     gearLocations: [],
+    ownedGear: {},
+  },
+  getters: {
+    gearLocation(state: State) {
+      return (missions: Mission[]): string[] => {
+        const locations: string[] = [];
+        missions.forEach((mission) => {
+          const {
+            campaignId,
+            campaignNodeDifficulty,
+            campaignMapId,
+            campaignMissionId,
+            campaignNodeId,
+          } = mission.missionIdentifier;
+          const difficulty: any = difficultyIds[campaignNodeDifficulty];
+          const table: any = tableIds[campaignId];
+          const level: any = mapIds[campaignMapId];
+          const node: any = missionIds[campaignMissionId];
+
+          if (campaignMapId === "CHALLENGES") {
+            const label = `Daily Challenges (${challenges[campaignNodeId]})`;
+            if (!locations.includes(label)) {
+              locations.push(label);
+            }
+          } else if (table) {
+            locations.push(`${table} ${level}-${node} (${difficulty})`);
+          }
+        });
+        return locations;
+      };
+    },
+    gearOwnedCount(state: State) {
+      return (gear: Gear): number => {
+        return state.ownedGear[gear.base_id] || 0;
+      };
+    },
   },
   mutations: {
     SET_CLIENT(state, { helpClient, ggClient }) {
@@ -41,6 +86,9 @@ const store = createStore<State>({
     SET_PLAYER(state, payload: any) {
       state.player = payload;
     },
+    SET_GEAR_OWNED(state, payload) {
+      state.ownedGear = payload;
+    },
   },
   actions: {
     async initialize({ commit, state, dispatch }) {
@@ -56,6 +104,10 @@ const store = createStore<State>({
       let gearList = await ggClient.gear();
       const player = await ggClient.player("843518525");
       const gearLocations = await helpClient.fetchGear();
+      const gearOwned = JSON.parse(
+        window.localStorage.getItem("ownedGear") || "{}"
+      );
+      commit("SET_GEAR_OWNED", gearOwned);
 
       gearList = gearList.map((gear: any) => {
         const match = gearLocations.find((x: any) => x.id === gear.base_id);
@@ -72,20 +124,8 @@ const store = createStore<State>({
           return gear;
         }
       });
-      // const units = await state.helpClient?.fetchUnit([
-      //   "AHSOKATANO",
-      //   "MAGMATROOPER",
-      // ]);
-      // console.log(units);
-
-      // const allUnits = await helpClient.fetchAllUnits();
-      // console.log(allUnits);
-
-      // const x = await helpClient.fetchEvents();
-      // console.log(x);
 
       commit("SET_GEAR", gearList);
-      // commit("SET_GEAR_LOCATIONS", gearLocations);
       commit("SET_PLAYER", player);
 
       // await dispatch("fetchUnit", "C3POCHEWBACCA");
@@ -102,39 +142,50 @@ const store = createStore<State>({
       commit("SET_UNIT", response);
     },
     async fetchData({ state }) {
-      const response = await state.helpClient?.fetchData("equipmentList");
+      const response = await state.helpClient?.fetchData("effectList");
       console.log(response);
+    },
+    saveOwnedCount({ state, commit }, { count, base_id }) {
+      const countData = unvue(state.ownedGear);
+      countData[base_id] = count;
+      commit("SET_GEAR_OWNED", countData);
+      window.localStorage.setItem("ownedGear", JSON.stringify(countData));
     },
   },
 });
 
 export default store;
 
-// abilityList
+// abilityList - list of all abilities and tiers
+// equipmentList - List of all gear
+
+//Unklikely to use
+// guildRaidList - Generic raid info
+// guildExchangeItemList - Exchangeable gear
+
+//Not Helpful data:
 // battleEnvironmentsList
 // battleTargetingRuleList
 // categoryList
+// tableList
+// raidConfigList
+// requirementList
+// recipeList
+
 // challengeList
 // challengeStyleList
 // effectList
 // environmentCollectionList
-// equipmentList
 // eventSamplingList
-// guildExchangeItemList
-// guildRaidList
 // helpEntryList
 // materialList
 // playerTitleList
 // powerUpBundleList
-// raidConfigList
-// recipeList
-// requirementList
 // skillList
 // starterGuildList
 // statModList
 // statModSetList
 // statProgressionList
-// tableList
 // targetingSetList
 // territoryBattleDefinitionList
 // territoryWarDefinitionList
