@@ -1,74 +1,130 @@
 <template>
-  <div>
+  <div class="container unit-page">
     <div v-if="unit">
-      <!-- <div v-if="unit.relic_level > 1">
-        Relic Level: {{ unit.relic_level + 1 }}
-      </div> -->
-      <h1>
-        Gear Needed to get {{ unit.name }} from Gear Level
-        {{ currentGearLevel }} to 13:
+      <h1 class="collapse-header">
+        <a data-bs-toggle="collapse" href="#gearSection"> Gear Planner </a>
       </h1>
-      <div class="input-group input-group-sm w-25">
-        <span class="input-group-text label-count"
-          >Standard Energy Refreshes:</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="refreshes.standard"
-          min="0"
-        />
+      <div class="collapse show" id="gearSection">
+        <h3 class="gear-header">
+          Gear Needed to get {{ unit.name }} from Gear Level
+          {{ currentGearLevel }} to
+          <select v-model.number="gearTarget">
+            <option v-for="num in gearOptions" :value="num" :key="num">
+              Gear {{ num }}
+            </option>
+          </select>
+          :
+        </h3>
+        <h3>
+          It will take approximately {{ totalDays }} days to get to Gear Level
+          {{ gearTarget }}.
+        </h3>
+        <div>
+          Note: This planner assumes the cheapest possible node is farmed by
+          energy.
+        </div>
+        <div class="input-group input-group-sm w-50">
+          <span
+            class="input-group-text c-help"
+            title="Energy used on Light and Dark side tables"
+            >Standard Energy:</span
+          >
+          <span
+            class="input-group-text c-help"
+            title="How many times you refresh the energy using crystals"
+            >Daily Refreshes:</span
+          >
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="refreshes.standard"
+            min="0"
+          />
+          <span
+            class="input-group-text c-help"
+            title="How much of your daily energy used for farming other things (i.e. character shards)"
+            >Daily Energy Used:</span
+          >
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="energy.standard"
+            min="0"
+            :max="145 + refreshes.standard * 120 + 135"
+          />
+        </div>
+        <div class="input-group input-group-sm my-2 w-50">
+          <span class="input-group-text" title="Energy used on fleet/ship nodes"
+            >Fleet Energy:</span
+          >
+          <span
+            class="input-group-text c-help"
+            title="How many times you refresh the energy using crystals"
+            >Daily Refreshes:</span
+          >
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="refreshes.fleet"
+            min="0"
+          />
+          <span
+            class="input-group-text c-help"
+            title="How much of your daily energy used for farming other things (i.e. character shards)"
+            >Daily Energy Used:</span
+          >
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="energy.fleet"
+            min="0"
+            :max="145 + refreshes.fleet * 120 + 45"
+          />
+        </div>
+        <table class="table table-bordered table-dark table-sm table-striped">
+          <thead>
+            <tr>
+              <th width="15%">Image</th>
+              <th width="20%">Salvage Name</th>
+              <th width="20%">Locations</th>
+              <th width="20%">Amount</th>
+              <th width="10%">Est. Time</th>
+              <th width="15%">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="salvage in fullSalvageList" :key="salvage.base_id">
+              <td><img :src="salvage.image" class="d-block m-auto" /></td>
+              <td>{{ salvage.name }}</td>
+              <td>
+                <ul class="m-0">
+                  <li
+                    v-for="(l, index) in gearLocation(
+                      salvage.lookupMissionList
+                    )"
+                    :key="index"
+                  >
+                    {{ l }}
+                  </li>
+                </ul>
+              </td>
+              <td>
+                <Salvage :salvage="salvage" />
+              </td>
+              <td>{{ timeEstimation(salvage) }} Days</td>
+              <td>
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn btn-primary">Left</button>
+                  <button type="button" class="btn btn-secondary">
+                    Middle
+                  </button>
+                  <button type="button" class="btn btn-info">Right</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="input-group input-group-sm my-2 w-25">
-        <span class="input-group-text label-count"
-          >Fleet Energy Refreshes:</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="refreshes.fleet"
-          min="0"
-        />
-      </div>
-      <table class="table table-bordered table-dark table-sm table-striped">
-        <thead>
-          <tr>
-            <th width="15%">Image</th>
-            <th width="20%">Salvage Name</th>
-            <th width="20%">Locations</th>
-            <th width="20%">Amount</th>
-            <th width="10%">Est. Time</th>
-            <th width="15%">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="salvage in fullSalvageList" :key="salvage.base_id">
-            <td><img :src="salvage.image" class="d-block m-auto" /></td>
-            <td>{{ salvage.name }}</td>
-            <td>
-              <ul class="m-0">
-                <li
-                  v-for="(l, index) in gearLocation(salvage.lookupMissionList)"
-                  :key="index"
-                >
-                  {{ l }}
-                </li>
-              </ul>
-            </td>
-            <td>
-              <Salvage :salvage="salvage" />
-            </td>
-            <td>{{ timeEstimation(salvage) }} Days</td>
-            <td>
-              <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-primary">Left</button>
-                <button type="button" class="btn btn-secondary">Middle</button>
-                <button type="button" class="btn btn-info">Right</button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
     <div v-else>Loading unit page</div>
   </div>
@@ -77,7 +133,13 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
-import { UnitData, PlayerUnit, UnitGear, Gear } from "../api/interfaces";
+import {
+  UnitData,
+  PlayerUnit,
+  UnitGear,
+  Gear,
+  Mission,
+} from "../api/interfaces";
 import moment from "moment";
 import { unvue } from "../utils";
 import Salvage from "../components/salvage.vue";
@@ -100,6 +162,12 @@ export default defineComponent({
         cantina: 0,
         character: 0,
       },
+      energy: {
+        standard: 0,
+        fleet: 0,
+        cantina: 0,
+      },
+      gearTarget: 13,
     };
   },
   computed: {
@@ -122,7 +190,7 @@ export default defineComponent({
     },
     fullGearListByLevel(): any[] {
       if (this.unit) {
-        const { gear_level } = this.unit;
+        const { gear_level, gear } = this.unit;
         const futureGear =
           this.fullUnitData?.unitTierList.filter(
             (x: any) => x.tier >= gear_level
@@ -131,9 +199,20 @@ export default defineComponent({
         return futureGear.map((gear: any) => {
           return {
             tier: gear.tier,
-            gear: gear.equipmentSetList.map((id: string) => {
-              return this.findGearData(id);
-            }),
+            gear: gear.equipmentSetList
+              .map((id: string, index: number) => {
+                let alreadyEquipped = false;
+                if (gear.tier === this.unit?.gear_level) {
+                  alreadyEquipped = this.unit?.gear[index].is_obtained || false;
+                }
+
+                if (alreadyEquipped) {
+                  return null;
+                } else {
+                  return this.findGearData(id);
+                }
+              })
+              .filter((x: any) => !!x),
           };
         });
       } else {
@@ -143,19 +222,21 @@ export default defineComponent({
     fullSalvageList(): any[] {
       let list: any[] = [];
       this.fullGearListByLevel.forEach((tier: any) => {
-        tier.gear.forEach((gear: any) => {
-          gear.ingredients.forEach(({ gear, amount }: any) => {
-            const gearData = { ...this.findGearData(gear), amount };
-            const exists = list.find(
-              (x: any) => x.base_id === gearData.base_id
-            );
-            if (exists) {
-              exists.amount += amount;
-            } else {
-              list.push(gearData);
-            }
+        if (tier.tier + 1 <= this.gearTarget) {
+          tier.gear.forEach((gear: any) => {
+            gear.ingredients.forEach(({ gear, amount }: any) => {
+              const gearData = { ...this.findGearData(gear), amount };
+              const exists = list.find(
+                (x: any) => x.base_id === gearData.base_id
+              );
+              if (exists) {
+                exists.amount += amount;
+              } else {
+                list.push(gearData);
+              }
+            });
           });
-        });
+        }
       });
       return list;
     },
@@ -168,6 +249,37 @@ export default defineComponent({
       } else {
         return null;
       }
+    },
+    totalDays(): number {
+      let totalStandard = 0;
+      let totalFleet = 0;
+      let totalChallenges = 0;
+      this.fullSalvageList.forEach((gear: Gear) => {
+        const isChallenge = gear.lookupMissionList.some(
+          (x: Mission) => x.missionIdentifier.campaignMapId === "CHALLENGES"
+        );
+        const isFleet = gear.lookupMissionList.some(
+          (x: Mission) => x.missionIdentifier.campaignId === "C01SP"
+        );
+        if (isChallenge) {
+          totalChallenges = Math.max(
+            this.timeEstimation(gear),
+            totalChallenges
+          );
+        } else if (isFleet) {
+          totalFleet += this.timeEstimation(gear);
+        } else {
+          totalStandard += this.timeEstimation(gear);
+        }
+      });
+      return Math.max(totalStandard, totalFleet, totalChallenges);
+    },
+    gearOptions(): number[] {
+      const list = [];
+      for (let i = (this.unit?.gear_level || 0) + 1; i <= 13; i++) {
+        list.push(i);
+      }
+      return list;
     },
   },
   methods: {
@@ -219,7 +331,7 @@ export default defineComponent({
           } = mission.missionIdentifier;
 
           if (["C01SP", "C01D", "C01L"].includes(campaignId)) {
-            let missionEnergy = 0;
+            let missionEnergy = 1;
             const node = Number(campaignMissionId.replace(/\D/g, ""));
 
             if (node <= 4) {
@@ -235,17 +347,21 @@ export default defineComponent({
             }
 
             if (missionEnergy < energy) {
-              const droprate = 0.2;
+              const dropRate = 0.2;
               const refreshes = ["C01D", "C01L"].includes(campaignId)
                 ? this.refreshes.standard
                 : this.refreshes.fleet;
               const extraEnergy = ["C01D", "C01L"].includes(campaignId)
                 ? 135
                 : 45;
-              const totalEnergy = 240 + extraEnergy + 120 * refreshes;
+              const otherEnergy = ["C01D", "C01L"].includes(campaignId)
+                ? this.energy.standard
+                : this.energy.fleet;
+              const totalEnergy =
+                240 + extraEnergy + 120 * refreshes - otherEnergy;
 
               const chancesPerDay = totalEnergy / missionEnergy;
-              const piecesPerDay = chancesPerDay * droprate;
+              const piecesPerDay = chancesPerDay * dropRate;
               totalDays = remaining / piecesPerDay;
               energy = missionEnergy;
             }
@@ -254,7 +370,7 @@ export default defineComponent({
             totalDays = remaining / (60 / 7);
           }
         });
-        return totalDays;
+        return Math.round(totalDays);
       } else {
         return 0;
       }
@@ -265,16 +381,40 @@ export default defineComponent({
   },
   watch: {
     unit(newVal: PlayerUnit) {
-      this.fetchUnit(newVal.base_id);
+      if (newVal) {
+        this.fetchUnit(newVal.base_id);
+      }
     },
   },
 });
 </script>
 
 <style lang="scss" scoped>
+.unit-page {
+  max-width: 90%;
+}
+
+.gear-header {
+  select {
+    width: 115px;
+    font-size: 1.25rem;
+  }
+}
+
 td {
   img {
     max-width: 40px;
+  }
+}
+
+.collapse-header {
+  text-shadow: 2px 2px 2px black;
+
+  a {
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 </style>

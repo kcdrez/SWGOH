@@ -2,7 +2,7 @@ import { InjectionKey } from "vue";
 import { createStore, Store } from "vuex";
 import apiClientHelp from "../api/swgoh.help";
 import apiClientGG from "../api/swgoh.gg";
-import { Unit, Gear, Player, UnitData, Mission } from "../api/interfaces";
+import { Unit, Gear, Player, UnitData, Mission, loadingState } from "../api/interfaces";
 import {
   difficultyIds,
   tableIds,
@@ -12,7 +12,7 @@ import {
 } from "../api/locationMapping";
 import { unvue } from "../utils";
 
-interface State {
+export interface State {
   helpClient: apiClientHelp | null;
   ggClient: apiClientGG | null;
   unit: Unit | null;
@@ -20,6 +20,8 @@ interface State {
   player: Player | null;
   gearLocations: any[];
   ownedGear: any;
+  allyCode: string;
+  requestState: loadingState;
 }
 
 export const key: InjectionKey<Store<State>> = Symbol();
@@ -33,6 +35,8 @@ const store = createStore<State>({
     player: null,
     gearLocations: [],
     ownedGear: {},
+    allyCode: "",
+    requestState: loadingState.ready
   },
   getters: {
     gearLocation(state: State) {
@@ -70,6 +74,9 @@ const store = createStore<State>({
     },
   },
   mutations: {
+    SET_REQUEST_STATE(state, payload: loadingState) {
+      state.requestState = payload;
+    },
     SET_CLIENT(state, { helpClient, ggClient }) {
       state.helpClient = helpClient;
       state.ggClient = ggClient;
@@ -89,9 +96,14 @@ const store = createStore<State>({
     SET_GEAR_OWNED(state, payload) {
       state.ownedGear = payload;
     },
+    SET_ALLY_CODE(state, payload) {
+      state.allyCode = payload;
+    },
   },
   actions: {
     async initialize({ commit, state, dispatch }) {
+      commit("SET_REQUEST_STATE", loadingState.loading);
+
       const helpClient = new apiClientHelp();
       await helpClient.connect();
 
@@ -102,7 +114,6 @@ const store = createStore<State>({
         ggClient,
       });
       let gearList = await ggClient.gear();
-      const player = await ggClient.player("843518525");
       const gearLocations = await helpClient.fetchGear();
       const gearOwned = JSON.parse(
         window.localStorage.getItem("ownedGear") || "{}"
@@ -126,13 +137,31 @@ const store = createStore<State>({
       });
 
       commit("SET_GEAR", gearList);
-      commit("SET_PLAYER", player);
+
+      const allyCode = window.localStorage.getItem("allyCode") || "";
+      if (allyCode) {
+        dispatch("fetchPlayer", allyCode);
+      }
 
       // await dispatch("fetchUnit", "C3POCHEWBACCA");
       // await dispatch("fetchUnit", ["AHSOKATANO", "MAGMATROOPER"]);
       // await dispatch("fetchPlayers");
       // await dispatch("fetchData");
       // await state.apiClient?.debug()
+      commit("SET_REQUEST_STATE", loadingState.ready);
+    },
+    async fetchPlayer({ state, commit }, allyCode: string | number) {
+      commit("SET_REQUEST_STATE", loadingState.loading);
+      const player = await state.ggClient?.player(allyCode.toString());
+      if (player) {
+        commit("SET_PLAYER", player);
+        commit("SET_ALLY_CODE", allyCode);
+        window.localStorage.setItem("allyCode", allyCode.toString());
+      }
+      commit("SET_REQUEST_STATE", loadingState.ready);
+    },
+    resetPlayer({ commit }) {
+      commit("SET_PLAYER", null);
     },
     async fetchPlayers({ state }) {
       const response = await state.helpClient?.fetchPlayer("843518525");

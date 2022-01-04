@@ -14,7 +14,13 @@
       </button>
       <div class="collapse navbar-collapse" id="navbar-toggler">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item dropdown">
+          <li class="nav-item">
+            <a class="nav-link" title="Click to change player details" href="#" @click="resetPlayer"
+              >{{ player?.data.name }}</a
+            >
+          </li>
+          <li>
+            <!-- <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
               role="button"
@@ -29,6 +35,7 @@
                 >
               </li>
             </ul>
+          </li> -->
           </li>
         </ul>
       </div>
@@ -41,6 +48,8 @@
 
 <script>
 import { version } from "../../package.json";
+import { mapActions, mapState } from 'vuex';
+
 export default {
   name: "NavBar",
   data() {
@@ -48,6 +57,12 @@ export default {
       version,
     };
   },
+  computed: {
+    ...mapState(["player"])
+  },
+  methods: {
+    ...mapActions(["resetPlayer"])
+  }
 };
 </script>
 

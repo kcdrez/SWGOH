@@ -1,8 +1,11 @@
 <template>
   <div v-if="player">
-    <h1>{{ player.data.name }}</h1>
     <div>
-      <input type="text" v-model="searchText" />
+      <input
+        class="form-control form-control-sm"
+        type="text"
+        v-model="searchText"
+      />
       <router-link
         v-for="unit in filteredUnits"
         :key="unit.data.base_id"

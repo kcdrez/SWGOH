@@ -1,3 +1,8 @@
+export enum loadingState {
+  loading = "LOADING",
+  ready = "READY"
+}
+
 export interface Unit {
   id: string;
   thumbnailName: string;

@@ -2,9 +2,6 @@
   <div>
     <div class="input-group input-group-sm">
       <span class="input-group-text label-count">Owned:</span>
-      <!-- <span class="input-group-text owned-count" v-if="!editing">
-        {{ owned }}
-      </span> -->
       <input
         class="form-control owned-count"
         type="number"
