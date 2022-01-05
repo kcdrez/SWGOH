@@ -12,7 +12,11 @@
       >
       or send an email to drezzinator@gmail.com.
     </div>
-    <div class="text-center my-2" title="Loading Player Data" v-if="requestState === 'LOADING'">
+    <div
+      class="text-center my-2"
+      title="Loading Player Data"
+      v-if="requestState === 'LOADING'"
+    >
       <i class="fas fa-spinner fa-spin fa-5x"></i>
     </div>
     <template v-else>
@@ -55,7 +59,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState(["unit", "gearList", "player", 'requestState']),
+    ...mapState(["unit", "gearList", "player", "requestState"]),
     allyCode: {
       get(): string {
         return this.$store.state.allyCode;
@@ -72,7 +76,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.home-page::v-deep a {
+:v-deep a {
   text-shadow: 2px 2px 2px black;
   text-decoration: none;
   &:hover {

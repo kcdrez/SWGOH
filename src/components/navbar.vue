@@ -15,7 +15,11 @@
       <div class="collapse navbar-collapse" id="navbar-toggler">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" title="Click to change player details" href="#" @click="resetPlayer"
+            <a
+              class="nav-link"
+              title="Click to change player details"
+              href="#"
+              @click="resetPlayer"
               >{{ player?.data.name }}</a
             >
           </li>
@@ -46,23 +50,23 @@
   </nav>
 </template>
 
-<script>
-import { version } from "../../package.json";
-import { mapActions, mapState } from 'vuex';
+<script lang="ts">
+import config from "../../package.json";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "NavBar",
   data() {
     return {
-      version,
+      version: config.version,
     };
   },
   computed: {
-    ...mapState(["player"])
+    ...mapState(["player"]),
   },
   methods: {
-    ...mapActions(["resetPlayer"])
-  }
+    ...mapActions(["resetPlayer"]),
+  },
 };
 </script>
 
