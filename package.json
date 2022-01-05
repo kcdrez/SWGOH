@@ -1,12 +1,11 @@
 {
   "name": "swgoh",
-  "version": "0.0.3",
+  "version": "0.0.3 alpha",
   "description": "A webapp of tools for the video game Star Wars: Galaxy of Heroes",
   "main": "main.ts",
   "private": true,
   "dependencies": {
     "@popperjs/core": "^2.9.2",
-    "api-swgoh-help": "^3.3.0",
     "axios": "^0.21.1",
     "bootstrap": "^5.0.1",
     "jquery": "^3.6.0",
