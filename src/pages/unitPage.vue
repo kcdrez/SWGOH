@@ -2,7 +2,7 @@
   <div class="container unit-page">
     <div v-if="unit">
       <h1 class="collapse-header">
-        <a data-bs-toggle="collapse" href="#gearSection"> Gear Planner </a>
+        <a data-bs-toggle="collapse" href="#gearSection">Gear Planner</a>
       </h1>
       <div class="collapse show" id="gearSection">
         <h3 class="gear-header">
@@ -84,15 +84,32 @@
         <table class="table table-bordered table-dark table-sm table-striped">
           <thead>
             <tr class="text-center">
-              <th width="20%">Salvage Name</th>
-              <th width="20%">Locations</th>
-              <th width="20%">Amount</th>
-              <th width="10%">Est. Time</th>
-              <th width="15%">Actions</th>
+              <th width="20%">
+                <div class="c-pointer" @click="sortBy('name')">
+                  Salvage Name
+                  <i class="fas mx-1" :class="sortIcon('name')"></i>
+                </div>
+                <input class="form-control form-control-sm mx-auto my-1 w-75" placeholder="Search" v-model="searchName">
+              </th>
+              <th width="20%" class="c-pointer" @click="sortBy('location')">
+                Locations
+                <i class="fas mx-1" :class="sortIcon('location')"></i>
+              </th>
+              <th width="20%" class="c-pointer" @click="sortBy('amount')">
+                Amount
+                <i class="fas mx-1" :class="sortIcon('amount')"></i>
+              </th>
+              <th width="10%" class="c-pointer" @click="sortBy('time')">
+                Est. Time
+                <i class="fas mx-1" :class="sortIcon('time')"></i>
+              </th>
+              <th width="15%">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="salvage in fullSalvageList" :key="salvage.base_id">
+            <tr v-for="salvage in filteredSalvageList" :key="salvage.base_id">
               <td class="text-center">
                 <div class="text-center gear-border" :class="`gear-tier-${salvage.tier}`">
                   <img :src="salvage.image" />
@@ -127,6 +144,12 @@
             </tr>
           </tbody>
         </table>
+      </div>
+      <h1 class="collapse-header">
+        <a data-bs-toggle="collapse" href="#relicSection">Relic Planner</a>
+      </h1>
+      <div class="collapse" id="relicSection">
+        This feature is currently in development.
       </div>
     </div>
     <div v-else>Loading unit page</div>
@@ -171,6 +194,9 @@ export default defineComponent({
         cantina: 0,
       },
       gearTarget: 13,
+      sortMethod: "name",
+      sortDir: 'asc',
+      searchName: ''
     };
   },
   computed: {
@@ -222,8 +248,8 @@ export default defineComponent({
         return [];
       }
     },
-    fullSalvageList(): any[] {
-      let list: any[] = [];
+    fullSalvageList(): Gear[] {
+      let list: Gear[] = [];
       this.fullGearListByLevel.forEach((tier: any) => {
         if (tier.tier + 1 <= this.gearTarget) {
           tier.gear.forEach((gear: any) => {
@@ -241,7 +267,48 @@ export default defineComponent({
           });
         }
       });
-      return list;
+
+      return list.sort((a: Gear, b: Gear) => {
+        if (this.sortMethod === 'name') {
+          const compareA = a.name.replace(/^MK \d /i, '');
+          const compareB = b.name.replace(/^MK \d /i, '');
+          if (this.sortDir === 'asc') {
+            return compareA > compareB ? 1: -1;
+          } else {
+            return compareA < compareB ? -1: 1;
+          }
+        } else if (this.sortMethod === 'locations') {
+          const locationsA = this.gearLocation(a.lookupMissionList);
+          const locationsB = this.gearLocation(b.lookupMissionList);
+          if (this.sortDir === 'asc') {
+            return locationsA[0] > locationsB[0] ? 1: -1;
+          } else {
+            return locationsA[0] < locationsB[0] ? -1: 1;
+          }
+        } else if (this.sortMethod === 'amount') {
+          if (this.sortDir === 'asc') {
+            return a.amount - b.amount;
+          } else {
+            return b.amount - a.amount;
+          }
+        } else if (this.sortMethod === 'time') {
+          const compareA = this.timeEstimation(a);
+          const compareB = this.timeEstimation(b);
+          if (this.sortDir === 'asc') {
+            return compareA - compareB;
+          } else {
+            return compareB - compareA;
+          }
+        }
+        return 0
+      });
+    },
+    filteredSalvageList(): Gear[] {
+      return this.fullSalvageList.filter((gear) => {
+        const name = gear.name.toLowerCase().replace(/\s/g, '');
+        const compare = this.searchName.toLowerCase().replace(/\s/g, '');
+        return name.includes(compare)
+      });
     },
     currentGearLevel(): number | null {
       if (this.unit) {
@@ -378,6 +445,21 @@ export default defineComponent({
         return 0;
       }
     },
+    sortBy(type: string): void {
+      if (this.sortMethod === type) {
+        this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortDir = 'asc';
+      }
+      this.sortMethod = type;
+    },
+    sortIcon(type: string): string {
+      if (this.sortMethod === type) {
+        return this.sortDir === 'asc' ? 'fa-sort-down' : 'fa-sort-up'
+      } else {
+        return 'fa-sort'
+      }
+    }
   },
   created() {
     this.fetchUnit(this.$route.params.unitId);
@@ -451,6 +533,12 @@ td {
   &-1 {
     border-color: #97d2d3;
     background: radial-gradient(#4391a3,#000 80%);
+  }
+}
+
+thead {
+  tr {
+    vertical-align: top;
   }
 }
 </style>

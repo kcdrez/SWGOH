@@ -64,7 +64,7 @@ const store = createStore<State>({
             locations.push(`${table} ${level}-${node} (${difficulty})`);
           }
         });
-        return locations;
+        return locations.sort((a, b) => a > b ? 1 : -1);
       };
     },
     gearOwnedCount(state: State) {
