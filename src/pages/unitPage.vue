@@ -83,8 +83,7 @@
         </div>
         <table class="table table-bordered table-dark table-sm table-striped">
           <thead>
-            <tr>
-              <th width="15%">Image</th>
+            <tr class="text-center">
               <th width="20%">Salvage Name</th>
               <th width="20%">Locations</th>
               <th width="20%">Amount</th>
@@ -94,8 +93,12 @@
           </thead>
           <tbody>
             <tr v-for="salvage in fullSalvageList" :key="salvage.base_id">
-              <td><img :src="salvage.image" class="d-block m-auto" /></td>
-              <td>{{ salvage.name }}</td>
+              <td class="text-center">
+                <div class="text-center gear-border" :class="`gear-tier-${salvage.tier}`">
+                  <img :src="salvage.image" />
+                </div>
+                <div>{{ salvage.name }}</div>
+              </td>
               <td>
                 <ul class="m-0">
                   <li
@@ -415,6 +418,39 @@ td {
     &:hover {
       text-decoration: underline;
     }
+  }
+}
+
+.gear-border {
+  border: 2px solid;
+  max-width: 45px;
+  margin: auto;
+
+  img {
+    max-width: 40px;
+  }
+}
+
+.gear-tier {
+  &-12 {
+    border-color: #f1c752;
+    background: radial-gradient(#997300,#000 80%);
+  }
+  &-11, &-7, &-9 {
+    border-color: #844df1;
+    background: radial-gradient(#4700a7,#000 80%);
+  }
+  &-4 {
+    border-color: #51bcf6;
+    background: radial-gradient(#004b65,#000 80%);
+  }
+  &-2 {
+    border-color: #aff65b;
+    background: radial-gradient(#4c9601,#000 80%);
+  }
+  &-1 {
+    border-color: #97d2d3;
+    background: radial-gradient(#4391a3,#000 80%);
   }
 }
 </style>
