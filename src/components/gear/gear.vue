@@ -8,7 +8,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
-import { Gear } from "../api/interfaces";
+import { Gear } from "../../api/interfaces";
 
 export default defineComponent({
   name: "Gear",

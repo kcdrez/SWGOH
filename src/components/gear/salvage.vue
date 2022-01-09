@@ -26,7 +26,7 @@
     </div>
     <div class="input-group input-group-sm mt-2">
       <span class="input-group-text label-count">Needed:</span>
-      <span class="input-group-text owned-count">{{ salvage.amount }}</span>
+      <span class="input-group-text needed-count">{{ salvage.amount }}</span>
     </div>
   </div>
 </template>
@@ -34,7 +34,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
-import { Gear } from "../api/interfaces";
+import { Gear } from "../../api/interfaces";
 
 export default defineComponent({
   name: "Salvage",
@@ -51,7 +51,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters(["gearOwnedCount"]),
+    ...mapGetters("gear", ["gearOwnedCount"]),
   },
   methods: {
     save() {
@@ -73,10 +73,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.owned-count {
-  width: 100px;
-  max-width: 100px;
-  min-width: 100px;
+.needed-count {
+  flex: 1 1 auto;
 }
 .label-count {
   width: 75px;

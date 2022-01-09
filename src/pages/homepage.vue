@@ -12,14 +12,7 @@
       >
       or send an email to drezzinator@gmail.com.
     </div>
-    <div
-      class="text-center my-2"
-      title="Loading Player Data"
-      v-if="requestState === 'LOADING'"
-    >
-      <i class="fas fa-spinner fa-spin fa-5x"></i>
-    </div>
-    <template v-else>
+    <Loading :state="requestState" message="Loading Player Data" size="lg">
       <div v-if="!player">
         <div>Enter your ally code:</div>
         <div class="input-group input-group-sm w-50">
@@ -35,7 +28,7 @@
         </div>
       </div>
       <Player v-else :player="player" />
-    </template>
+    </Loading>
     <!-- <div v-if="unit">
       <img :src="`https://game-assets.swgoh.gg/${unit.thumbnailName}.png`" />
     </div> -->
@@ -46,7 +39,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
-import Gear from "../components/gear.vue";
+import Gear from "../components/gear/gear.vue";
 import Player from "../components/player.vue";
 
 export default defineComponent({
