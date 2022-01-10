@@ -10,7 +10,7 @@ import {
   challenges,
 } from "../api/locationMapping";
 import { loadingState } from '../enums/loading';
-import rootStore, { State as RootState } from './store'
+import { State as RootState } from './store'
 import { unvue } from '../utils'
 
 interface State {
