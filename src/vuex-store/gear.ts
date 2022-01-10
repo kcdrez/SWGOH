@@ -66,6 +66,11 @@ const store = {
         return state.ownedGear[gear.base_id] || 0;
       };
     },
+    findGearData(state: State) {
+      return (id: string): Gear | undefined => {
+        return state.gearList.find((el: Gear) => el.base_id === id);
+      }
+    }
   },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {

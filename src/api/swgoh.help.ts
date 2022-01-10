@@ -1,10 +1,12 @@
 import axios from "axios";
 
+import { Unit } from './interfaces'
+
 export default class apiClient {
   baseUrl = "https://api.swgoh.help";
   token = null;
 
-  constructor() {}
+  constructor() { }
 
   private async fetch(url: string, payload: any = {}) {
     return (
@@ -36,29 +38,15 @@ export default class apiClient {
     });
   }
 
-  async fetchUnit(id: string | string[]) {
+  async fetchUnit(id: string): Promise<Unit> {
     //todo: figure out how to pass in an or condition?
-    if (typeof id === "string") {
-      const response = await this.fetch(this.baseUrl + "/swgoh/data", {
-        collection: "unitsList",
-        match: {
-          id,
-        },
-      });
-      return response[0];
-    } else {
-      const requests = id.map((x) => {
-        return this.fetch(this.baseUrl + "/swgoh/data", {
-          collection: "unitsList",
-          match: {
-            id: x,
-          },
-        });
-      });
-      return await Promise.all(requests).then((results) => {
-        return results.map((x) => x[0]);
-      });
-    }
+    const response = await this.fetch(this.baseUrl + "/swgoh/data", {
+      collection: "unitsList",
+      match: {
+        id,
+      },
+    });
+    return response[0];
   }
   async fetchAllUnits() {
     return await this.fetch(this.baseUrl + "/swgoh/data", {

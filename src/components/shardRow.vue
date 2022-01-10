@@ -80,7 +80,7 @@ export default defineComponent({
     } as dataModel;
   },
   computed: {
-    ...mapState(["player"]),
+    ...mapState("player", ["player"]),
   },
   methods: {
     findUnitMatch() {

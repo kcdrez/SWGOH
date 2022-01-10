@@ -180,28 +180,15 @@ export default defineComponent({
   },
   computed: {
     ...mapState("gear", ["gearList", "gearLocations", "requestState"]),
-    ...mapState({
-      fullUnitData: "unit",
-      player: "player",
-    }),
-    ...mapGetters("gear", ["gearLocation", "gearOwnedCount"]),
-    unit(): PlayerUnit | null {
-      const match: UnitData = this.player?.units.find((u: UnitData) => {
-        return u.data.base_id === this.$route.params.unitId;
-      });
-      if (match) {
-        return match.data;
-      } else {
-        return null;
-      }
-    },
+    ...mapState("unit", ["unit"]),
+    ...mapGetters("gear", ["gearLocation", "gearOwnedCount", "findGearData"]),
+    ...mapGetters("unit", ["currentGearLevel"]),
     fullGearListByLevel(): any[] {
       if (this.unit) {
         const { gear_level, gear } = this.unit;
         const futureGear =
-          this.fullUnitData?.unitTierList.filter(
-            (x: any) => x.tier >= gear_level
-          ) || [];
+          this.unit?.unitTierList.filter((x: any) => x.tier >= gear_level) ||
+          [];
 
         return futureGear.map((gear: any) => {
           return {
@@ -288,16 +275,6 @@ export default defineComponent({
         return name.includes(compare);
       });
     },
-    currentGearLevel(): number | null {
-      if (this.unit) {
-        return (
-          this.unit?.gear_level +
-          this.unit.gear.filter((x) => x.is_obtained).length / 10
-        );
-      } else {
-        return null;
-      }
-    },
     totalDays(): number {
       let totalStandard = 0;
       let totalFleet = 0;
@@ -331,9 +308,6 @@ export default defineComponent({
     },
   },
   methods: {
-    findGearData(id: string) {
-      return this.gearList.find((el: any) => el.base_id === id);
-    },
     timeEstimation(gear: Gear): number {
       const owned: number = this.gearOwnedCount(gear);
       const remaining = gear.amount - owned;

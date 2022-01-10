@@ -52,10 +52,12 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState(["unit", "gearList", "player", "requestState"]),
+    ...mapState(["requestState"]),
+    ...mapState("player", ["player"]),
     allyCode: {
       get(): string {
-        return this.$store.state.allyCode;
+        return "";
+        // return this.$store.state.player.allyCode;
       },
       set(value: string) {
         this.$store.commit("SET_ALLY_CODE", value);
@@ -63,7 +65,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(["fetchPlayer"]),
+    ...mapActions("player", ["fetchPlayer"]),
   },
 });
 </script>

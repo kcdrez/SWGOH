@@ -2,24 +2,14 @@ import { InjectionKey } from "vue";
 import { createStore, Store } from "vuex";
 import apiClientHelp from "../api/swgoh.help";
 import apiClientGG from "../api/swgoh.gg";
-import { Unit, Gear, Player, UnitData, Mission } from "../api/interfaces";
-import {
-  difficultyIds,
-  tableIds,
-  mapIds,
-  missionIds,
-  challenges,
-} from "../api/locationMapping";
-import { unvue } from "../utils";
 import { store as gearStore } from './gear'
+import { store as unitStore } from './unit'
+import { store as playerStore } from './player'
 import { loadingState } from '../enums/loading';
 
 export interface State {
   helpClient: apiClientHelp | null;
   ggClient: apiClientGG | null;
-  unit: Unit | null;
-  player: Player | null;
-  allyCode: string;
   requestState: loadingState;
 }
 
@@ -27,14 +17,13 @@ export const key: InjectionKey<Store<State>> = Symbol();
 
 const store = createStore<State>({
   modules: {
-    gear: gearStore
+    gear: gearStore,
+    unit: unitStore,
+    player: playerStore
   },
   state: {
     helpClient: null,
     ggClient: null,
-    unit: null,
-    player: null,
-    allyCode: "",
     requestState: loadingState.initial
   },
   getters: {},
@@ -45,16 +34,7 @@ const store = createStore<State>({
     SET_CLIENT(state, { helpClient, ggClient }) {
       state.helpClient = helpClient;
       state.ggClient = ggClient;
-    },
-    SET_UNIT(state, payload) {
-      state.unit = payload;
-    },
-    SET_PLAYER(state, payload: any) {
-      state.player = payload;
-    },
-    SET_ALLY_CODE(state, payload) {
-      state.allyCode = payload;
-    },
+    }
   },
   actions: {
     async initialize({ commit, state, dispatch }) {
@@ -69,11 +49,6 @@ const store = createStore<State>({
         helpClient,
         ggClient,
       });
-
-      const allyCode = window.localStorage.getItem("allyCode") || "";
-      if (allyCode) {
-        dispatch("fetchPlayer", allyCode);
-      }
 
       // await dispatch("fetchUnit", "C3POCHEWBACCA");
       // await dispatch("fetchUnit", ["AHSOKATANO", "MAGMATROOPER"]);
@@ -99,10 +74,6 @@ const store = createStore<State>({
     },
     async fetchPlayers({ state }) {
       const response = await state.helpClient?.fetchPlayer("843518525");
-    },
-    async fetchUnit({ state, commit }, id) {
-      const response = await state.helpClient?.fetchUnit(id);
-      commit("SET_UNIT", response);
     },
     async fetchData({ state }) {
       const response = await state.helpClient?.fetchData("effectList");

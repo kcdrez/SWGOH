@@ -1,0 +1,69 @@
+import { InjectionKey } from "vue";
+import { createStore, Store, ActionContext } from "vuex";
+import apiClientHelp from "../api/swgoh.help";
+import apiClientGG from "../api/swgoh.gg";
+import { Unit, Gear, Player, UnitData, Mission } from "../api/interfaces";
+import {
+  difficultyIds,
+  tableIds,
+  mapIds,
+  missionIds,
+  challenges,
+} from "../api/locationMapping";
+import { unvue } from "../utils";
+import { store as gearStore } from './gear'
+import { store as unitStore } from './unit'
+import { loadingState } from '../enums/loading';
+import rootStore, { State as RootState } from './store';
+
+interface State {
+  player: Player | null;
+  allyCode: string;
+  requestState: loadingState;
+}
+
+type ActionCtx = ActionContext<State, RootState>;
+
+const store = {
+  state: {
+    player: null,
+    allyCode: "",
+    requestState: loadingState.initial
+  },
+  getters: {},
+  mutations: {
+    SET_REQUEST_STATE(state: State, payload: loadingState) {
+      state.requestState = payload;
+    },
+    SET_PLAYER(state: State, payload: any) {
+      state.player = payload;
+    },
+    SET_ALLY_CODE(state: State, payload: any) {
+      state.allyCode = payload;
+    }
+  },
+  actions: {
+    initialize({ dispatch }: ActionCtx) {
+      console.log('init player module')
+      const allyCode = window.localStorage.getItem("allyCode") || "";
+      if (allyCode) {
+        dispatch("fetchPlayer", allyCode);
+      }
+    },
+    async fetchPlayer({ state, commit, rootState }: ActionCtx, allyCode: string | number) {
+      commit("SET_REQUEST_STATE", loadingState.loading);
+      const player = await rootState.ggClient?.player(allyCode.toString());
+      if (player) {
+        commit("SET_PLAYER", player);
+        commit("SET_ALLY_CODE", allyCode);
+        window.localStorage.setItem("allyCode", allyCode.toString());
+      }
+      commit("SET_REQUEST_STATE", loadingState.ready);
+    },
+    resetPlayer({ commit }: ActionCtx) {
+      commit("SET_PLAYER", null);
+    },
+  },
+};
+
+export { store, State };

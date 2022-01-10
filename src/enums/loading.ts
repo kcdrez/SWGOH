@@ -1,7 +1,8 @@
 export enum loadingState {
   loading = "LOADING",
   ready = "READY",
-  initial = "INITIAL"
+  initial = "INITIAL",
+  error = "ERROR"
 }
 
 export enum loadingSize {

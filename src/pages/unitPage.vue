@@ -7,7 +7,7 @@
     >
       <img
         class="d-block m-auto"
-        :src="`https://game-assets.swgoh.gg/${fullUnitData?.thumbnailName}.png`"
+        :src="`https://game-assets.swgoh.gg/${unit?.thumbnailName}.png`"
       />
       <h1 class="collapse-header">
         <a data-bs-toggle="collapse" href="#gearSection">Gear Planner</a>
@@ -56,23 +56,10 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState({
-      fullUnitData: "unit",
-      player: "player",
-    }),
-    unit(): PlayerUnit | null {
-      const match: UnitData = this.player?.units.find((u: UnitData) => {
-        return u.data.base_id === this.$route.params.unitId;
-      });
-      if (match) {
-        return match.data;
-      } else {
-        return null;
-      }
-    },
+    ...mapState("unit", ["unit"]),
   },
   methods: {
-    ...mapActions(["fetchUnit"]),
+    ...mapActions("unit", ["fetchUnit"]),
     calculate() {
       let remainingShards = 330;
       const stars = Number(this.unit?.rarity);
@@ -94,13 +81,6 @@ export default defineComponent({
   },
   created() {
     this.fetchUnit(this.$route.params.unitId);
-  },
-  watch: {
-    unit(newVal: PlayerUnit) {
-      if (newVal) {
-        this.fetchUnit(newVal.base_id);
-      }
-    },
   },
 });
 </script>

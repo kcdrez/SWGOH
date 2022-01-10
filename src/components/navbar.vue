@@ -62,10 +62,10 @@ export default {
     };
   },
   computed: {
-    ...mapState(["player"]),
+    ...mapState("player", ["player"]),
   },
   methods: {
-    ...mapActions(["resetPlayer"]),
+    ...mapActions("player", ["resetPlayer"]),
   },
 };
 </script>
