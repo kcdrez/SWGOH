@@ -48,13 +48,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
-import { Unit, UnitData, PlayerUnit, UnitGear, Gear } from "../api/interfaces";
+// import { Unit, UnitData, PlayerUnit, UnitGear, Gear } from "../types/unit";
 import moment from "moment";
-
-interface unit {
-  id: string;
-  name: string;
-}
+import { CombinedUnit } from "../types/unit";
 
 interface dataModel {
   unit: string;
@@ -63,7 +59,7 @@ interface dataModel {
   refreshes: number;
   days: number;
   date: string;
-  matches: PlayerUnit[];
+  matches: CombinedUnit[];
 }
 
 export default defineComponent({
@@ -80,7 +76,7 @@ export default defineComponent({
     } as dataModel;
   },
   computed: {
-    ...mapState(["player"]),
+    ...mapState("player", ["player"]),
   },
   methods: {
     findUnitMatch() {
@@ -101,28 +97,26 @@ export default defineComponent({
       //   });
 
       this.matches = (
-        this.player?.units.filter((unit: UnitData) => {
-          const sanitizedName = unit.data.name
+        this.player?.units.filter((unit: CombinedUnit) => {
+          const sanitizedName = unit.name
             .replace(/[^a-zA-Z0-9]/g, "")
             .toLowerCase();
           const findName = this.unit.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
           return sanitizedName.includes(findName);
         }) || []
-      )
-        .map((unit: UnitData) => unit.data)
-        .sort((a: PlayerUnit, b: PlayerUnit) => {
-          return a.name > b.name ? 1 : -1;
-        });
+      ).sort((a: CombinedUnit, b: CombinedUnit) => {
+        return a.name > b.name ? 1 : -1;
+      });
 
       if (this.matches.length === 1) {
         this.calculate(this.matches[0]);
       }
     },
-    calculate(unit: PlayerUnit) {
+    calculate(unit: CombinedUnit) {
       let remainingShards = 330;
 
       // const matches = this.player?.units.filter((unit: Unit) => {});
-      const stars = Number(unit.rarity);
+      const stars = Number(unit.stars);
 
       remainingShards -= stars >= 7 ? 100 : 0;
       remainingShards -= stars >= 6 ? 85 : 0;

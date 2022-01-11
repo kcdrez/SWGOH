@@ -20,7 +20,7 @@
               title="Click to change player details"
               href="#"
               @click="resetPlayer"
-              >{{ player?.data.name }}</a
+              >{{ player?.name }}</a
             >
           </li>
           <li>
@@ -62,10 +62,10 @@ export default {
     };
   },
   computed: {
-    ...mapState(["player"]),
+    ...mapState("player", ["player"]),
   },
   methods: {
-    ...mapActions(["resetPlayer"]),
+    ...mapActions("player", ["resetPlayer"]),
   },
 };
 </script>

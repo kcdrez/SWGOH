@@ -1,20 +1,23 @@
 <template>
   <div>
     <navbar />
-    <router-view></router-view>
+    <router-view v-if="requestState === 'READY'"></router-view>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import navbar from "./components/navbar.vue";
 
 export default defineComponent({
   name: "App",
   components: { navbar },
+  computed: {
+    ...mapState(["requestState"]),
+  },
   methods: {
-    ...mapActions(["initialize", "fetchPlayers"]),
+    ...mapActions(["initialize"]),
   },
   async created() {
     await this.initialize();
