@@ -1,7 +1,19 @@
-export enum loadingState {
-  loading = "LOADING",
-  ready = "READY"
-}
+export interface CombinedUnit extends PlayerUnit, Unit { }
+
+// export interface CombinedUnit {
+//   base_id: string; //player
+//   ability_data: any[]; //player
+//   gear: UnitGear[] //player
+//   gear_level: number; //player
+//   name: string; //player
+//   relic_tier: string; //player
+//   // zeta_abilities: any[]; //player
+//   // omicron_abilities: any[]; //player
+//   // baseId: string; //unit
+//   // id: string; //unit
+//   // nameKey: string //unit
+//   thumbnailName: string; //unit
+// }
 
 export interface Unit {
   id: string;
@@ -48,6 +60,7 @@ export interface PlayerUnit {
   // stats: any[];
   ability_data: _unitAbility[];
   url: string;
+  unitTierList: any[];
 }
 export interface UnitGear {
   base_id: string;

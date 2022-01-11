@@ -1,78 +1,36 @@
-import { InjectionKey } from "vue";
-import { createStore, Store } from "vuex";
+import { createStore } from "vuex";
 import apiClientHelp from "../api/swgoh.help";
 import apiClientGG from "../api/swgoh.gg";
-import { Unit, Gear, Player, UnitData, Mission, loadingState } from "../api/interfaces";
-import {
-  difficultyIds,
-  tableIds,
-  mapIds,
-  missionIds,
-  challenges,
-} from "../api/locationMapping";
-import { unvue } from "../utils";
+import { store as gearStore, State as GearState } from './gear'
+import { store as unitStore, State as UnitState } from './unit'
+import { store as playerStore, State as PlayerState } from './player'
+import { loadingState } from '../enums/loading';
 
 export interface State {
   helpClient: apiClientHelp | null;
   ggClient: apiClientGG | null;
-  unit: Unit | null;
-  gearList: Gear[];
-  player: Player | null;
-  gearLocations: any[];
-  ownedGear: any;
-  allyCode: string;
   requestState: loadingState;
+  //modules' state
+  player: PlayerState,
+  unit: UnitState,
+  gear: GearState
 }
 
-export const key: InjectionKey<Store<State>> = Symbol();
-
 const store = createStore<State>({
+  modules: {
+    gear: gearStore,
+    unit: unitStore,
+    player: playerStore
+  },
   state: {
     helpClient: null,
     ggClient: null,
-    unit: null,
-    gearList: [],
-    player: null,
-    gearLocations: [],
-    ownedGear: {},
-    allyCode: "",
-    requestState: loadingState.ready
+    requestState: loadingState.initial,
+    player: playerStore.state,
+    gear: gearStore.state,
+    unit: unitStore.state
   },
-  getters: {
-    gearLocation(state: State) {
-      return (missions: Mission[]): string[] => {
-        const locations: string[] = [];
-        missions.forEach((mission) => {
-          const {
-            campaignId,
-            campaignNodeDifficulty,
-            campaignMapId,
-            campaignMissionId,
-            campaignNodeId,
-          } = mission.missionIdentifier;
-          const difficulty: any = difficultyIds[campaignNodeDifficulty];
-          const table: any = tableIds[campaignId];
-          const level: any = mapIds[campaignMapId];
-          const node: any = missionIds[campaignMissionId];
-
-          if (campaignMapId === "CHALLENGES") {
-            const label = `Daily Challenges (${challenges[campaignNodeId]})`;
-            if (!locations.includes(label)) {
-              locations.push(label);
-            }
-          } else if (table) {
-            locations.push(`${table} ${level}-${node} (${difficulty})`);
-          }
-        });
-        return locations;
-      };
-    },
-    gearOwnedCount(state: State) {
-      return (gear: Gear): number => {
-        return state.ownedGear[gear.base_id] || 0;
-      };
-    },
-  },
+  getters: {},
   mutations: {
     SET_REQUEST_STATE(state, payload: loadingState) {
       state.requestState = payload;
@@ -80,25 +38,7 @@ const store = createStore<State>({
     SET_CLIENT(state, { helpClient, ggClient }) {
       state.helpClient = helpClient;
       state.ggClient = ggClient;
-    },
-    SET_UNIT(state, payload) {
-      state.unit = payload;
-    },
-    SET_GEAR(state, payload: Gear[]) {
-      state.gearList = payload;
-    },
-    SET_GEAR_LOCATIONS(state, payload: any) {
-      state.gearLocations = payload;
-    },
-    SET_PLAYER(state, payload: any) {
-      state.player = payload;
-    },
-    SET_GEAR_OWNED(state, payload) {
-      state.ownedGear = payload;
-    },
-    SET_ALLY_CODE(state, payload) {
-      state.allyCode = payload;
-    },
+    }
   },
   actions: {
     async initialize({ commit, state, dispatch }) {
@@ -113,73 +53,15 @@ const store = createStore<State>({
         helpClient,
         ggClient,
       });
-      let gearList = await ggClient.gear();
-      const gearLocations = await helpClient.fetchGear();
-      const gearOwned = JSON.parse(
-        window.localStorage.getItem("ownedGear") || "{}"
-      );
-      commit("SET_GEAR_OWNED", gearOwned);
-
-      gearList = gearList.map((gear: any) => {
-        const match = gearLocations.find((x: any) => x.id === gear.base_id);
-        if (match) {
-          const { lookupMissionList, raidLookupList, actionLinkLookupList } =
-            match;
-          return {
-            ...gear,
-            lookupMissionList,
-            raidLookupList,
-            actionLinkLookupList,
-          };
-        } else {
-          return gear;
-        }
-      });
-
-      commit("SET_GEAR", gearList);
-
-      const allyCode = window.localStorage.getItem("allyCode") || "";
-      if (allyCode) {
-        dispatch("fetchPlayer", allyCode);
-      }
-
-      // await dispatch("fetchUnit", "C3POCHEWBACCA");
-      // await dispatch("fetchUnit", ["AHSOKATANO", "MAGMATROOPER"]);
-      // await dispatch("fetchPlayers");
-      // await dispatch("fetchData");
-      // await state.apiClient?.debug()
       commit("SET_REQUEST_STATE", loadingState.ready);
-    },
-    async fetchPlayer({ state, commit }, allyCode: string | number) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      const player = await state.ggClient?.player(allyCode.toString());
-      if (player) {
-        commit("SET_PLAYER", player);
-        commit("SET_ALLY_CODE", allyCode);
-        window.localStorage.setItem("allyCode", allyCode.toString());
-      }
-      commit("SET_REQUEST_STATE", loadingState.ready);
-    },
-    resetPlayer({ commit }) {
-      commit("SET_PLAYER", null);
-    },
-    async fetchPlayers({ state }) {
-      const response = await state.helpClient?.fetchPlayer("843518525");
-    },
-    async fetchUnit({ state, commit }, id) {
-      const response = await state.helpClient?.fetchUnit(id);
-      commit("SET_UNIT", response);
+
+      await dispatch("player/initialize", { root: true });
+      dispatch("gear/fetchGear", { root: true });
     },
     async fetchData({ state }) {
       const response = await state.helpClient?.fetchData("effectList");
       console.log(response);
-    },
-    saveOwnedCount({ state, commit }, { count, base_id }) {
-      const countData = unvue(state.ownedGear);
-      countData[base_id] = count;
-      commit("SET_GEAR_OWNED", countData);
-      window.localStorage.setItem("ownedGear", JSON.stringify(countData));
-    },
+    }
   },
 });
 

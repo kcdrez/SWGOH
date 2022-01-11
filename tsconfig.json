@@ -13,9 +13,16 @@
     "baseUrl": ".",
     // "types": ["webpack-env", "node"],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ],
     "resolveJsonModule": true
   },
   "include": [
@@ -24,7 +31,10 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "src/api/swgoh.gg.ts"
+    "src/api/swgoh.gg.ts",
+    "src/enums"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
