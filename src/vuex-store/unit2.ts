@@ -15,7 +15,7 @@ const b = storeBuilder.module<State>(moduleName, new State());
 
 export const getters = {
   get currentGearLevel(): number {
-    return b.read((state) => {
+    return b.read((state: State) => {
       if (state.unit) {
         return (
           state.unit?.gear_level +

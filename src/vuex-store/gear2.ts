@@ -36,7 +36,7 @@ type findGearDataFn = (id: string) => Gear | undefined;
 export const getters = {
   get gearLocation(): gearLocationFn {
     return (missions: Mission[]): string[] => {
-      return b.read((_state) => {
+      return b.read((_state: State) => {
         const locations: string[] = [];
         missions?.forEach((mission) => {
           const {
@@ -66,14 +66,14 @@ export const getters = {
   },
   get gearOwnedCount(): gearOwnedCountFn {
     return (gear: Gear): number => {
-      return b.read((state) => {
+      return b.read((state: State) => {
         return state.ownedGear[gear.base_id] || 0;
       })();
     };
   },
   get findGearData(): findGearDataFn {
     return (id: string): Gear | undefined => {
-      return b.read((state) => {
+      return b.read((state: State) => {
         return state.gearList.find((el: Gear) => el.base_id === id);
       })();
     };
