@@ -3695,7 +3695,7 @@ eval("module.exports = JSON.parse('{\"name\":\"swgoh\",\"version\":\"0.0.5.alpha
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("467bd3881a9095eda820")
+/******/ 		__webpack_require__.h = () => ("25cafa546eed17a3dcf2")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
