@@ -1,67 +1,49 @@
 import { createStore } from "vuex";
-import apiClientHelp from "../api/swgoh.help";
-import apiClientGG from "../api/swgoh.gg";
-import { store as gearStore, State as GearState } from './gear'
-import { store as unitStore, State as UnitState } from './unit'
-import { store as playerStore, State as PlayerState } from './player'
-import { loadingState } from '../enums/loading';
+import { store as gearStore, State as GearState } from "./gear";
+import { store as unitStore, State as UnitState } from "./unit";
+import { store as playerStore, State as PlayerState } from "./player";
+import { loadingState } from "../enums/loading";
+import { ApiClient, apiClient } from "../api/api-client";
 
 export interface State {
-  helpClient: apiClientHelp | null;
-  ggClient: apiClientGG | null;
+  apiClient: ApiClient;
   requestState: loadingState;
   //modules' state
-  player: PlayerState,
-  unit: UnitState,
-  gear: GearState
+  player: PlayerState;
+  unit: UnitState;
+  gear: GearState;
 }
 
 const store = createStore<State>({
   modules: {
     gear: gearStore,
     unit: unitStore,
-    player: playerStore
+    player: playerStore,
   },
   state: {
-    helpClient: null,
-    ggClient: null,
+    apiClient: apiClient,
     requestState: loadingState.initial,
     player: playerStore.state,
     gear: gearStore.state,
-    unit: unitStore.state
+    unit: unitStore.state,
   },
   getters: {},
   mutations: {
     SET_REQUEST_STATE(state, payload: loadingState) {
       state.requestState = payload;
     },
-    SET_CLIENT(state, { helpClient, ggClient }) {
-      state.helpClient = helpClient;
-      state.ggClient = ggClient;
-    }
   },
   actions: {
     async initialize({ commit, state, dispatch }) {
       commit("SET_REQUEST_STATE", loadingState.loading);
-
-      const helpClient = new apiClientHelp();
-      await helpClient.connect();
-
-      const ggClient = new apiClientGG();
-
-      commit("SET_CLIENT", {
-        helpClient,
-        ggClient,
-      });
-      commit("SET_REQUEST_STATE", loadingState.ready);
-
       await dispatch("player/initialize", { root: true });
       dispatch("gear/fetchGear", { root: true });
+      commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    async fetchData({ state }) {
-      const response = await state.helpClient?.fetchData("effectList");
-      console.log(response);
-    }
+    // async fetchData({ state }) {
+    //   const response = await state.apiClient?.fetchData("effectList");
+    //   console.log(response);
+    // },
   },
 });
 

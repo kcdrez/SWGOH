@@ -8,11 +8,11 @@
       />
       <router-link
         v-for="unit in filteredUnits"
-        :key="unit.data.base_id"
-        :to="{ name: 'UnitPage', params: { unitId: unit.data.base_id } }"
+        :key="unit.base_id"
+        :to="{ name: 'UnitPage', params: { unitId: unit.base_id } }"
         class="d-block"
       >
-        {{ unit.data.name }}
+        {{ unit.name }}
       </router-link>
     </div>
   </div>
@@ -21,7 +21,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
-import { Player, UnitData } from "../api/interfaces";
+import { Player, PlayerUnit } from "../types/player";
 
 export default defineComponent({
   name: "Player",
@@ -37,15 +37,15 @@ export default defineComponent({
     };
   },
   computed: {
-    filteredUnits(): UnitData[] {
+    filteredUnits(): PlayerUnit[] {
       return this.player.units
         .filter((unit) => {
-          return unit.data.name
+          return unit.name
             .toLowerCase()
             .includes(this.searchText.toLowerCase());
         })
         .sort((a, b) => {
-          return a.data.name.toLowerCase() > b.data.name.toLowerCase() ? 1 : -1;
+          return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
         });
     },
   },

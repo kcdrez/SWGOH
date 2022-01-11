@@ -20,7 +20,7 @@
               title="Click to change player details"
               href="#"
               @click="resetPlayer"
-              >{{ player?.data.name }}</a
+              >{{ player?.name }}</a
             >
           </li>
           <li>

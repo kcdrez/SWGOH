@@ -1,8 +1,9 @@
 import { ActionContext } from "vuex";
 
-import { CombinedUnit, UnitData } from "../api/interfaces";
-import { loadingState } from '../enums/loading';
-import { State as RootState } from './store';
+import { CombinedUnit } from "../types/unit";
+import { PlayerUnit } from "../types/player";
+import { loadingState } from "../enums/loading";
+import { State as RootState } from "./store";
 
 interface State {
   requestState: loadingState;
@@ -40,16 +41,19 @@ const store = {
   actions: {
     async fetchUnit({ state, commit, rootState }: ActionCtx, id: string) {
       commit("SET_REQUEST_STATE", loadingState.loading);
-      const response = await rootState.helpClient?.fetchUnit(id);
-      const match = rootState.player?.player?.units.find((u: UnitData) => u.data.base_id === response?.id);
+      const response = await rootState.apiClient?.fetchUnit(id);
+      console.log(rootState.player.player);
+      const match = rootState.player.player?.units.find(
+        (u: PlayerUnit) => u.id === response?.id
+      );
       if (match && response) {
-        commit("SET_UNIT", { ...match.data, ...response });
+        commit("SET_UNIT", { ...match, ...response });
         commit("SET_REQUEST_STATE", loadingState.ready);
       } else {
         commit("SET_REQUEST_STATE", loadingState.error);
       }
     },
-  }
-}
+  },
+};
 
 export { store, State };

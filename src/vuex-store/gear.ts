@@ -1,16 +1,16 @@
 import { ActionContext } from "vuex";
 
-import { Gear, Mission } from "../api/interfaces";
+import { Gear, Mission } from "../types/gear";
 import {
   difficultyIds,
   tableIds,
   mapIds,
   missionIds,
   challenges,
-} from "../api/locationMapping";
-import { loadingState } from '../enums/loading';
-import { State as RootState } from './store'
-import { unvue } from '../utils'
+} from "../types/locationMapping";
+import { loadingState } from "../enums/loading";
+import { State as RootState } from "./store";
+import { unvue } from "../utils";
 
 interface State {
   requestState: loadingState;
@@ -19,7 +19,7 @@ interface State {
   ownedGear: any;
 }
 
-type ActionCtx = ActionContext<State, RootState>
+type ActionCtx = ActionContext<State, RootState>;
 
 const store = {
   namespaced: true,
@@ -27,7 +27,7 @@ const store = {
     requestState: loadingState.initial,
     gearList: [],
     gearLocations: [],
-    ownedGear: {}
+    ownedGear: {},
   },
   getters: {
     gearLocation(_state: State) {
@@ -55,7 +55,7 @@ const store = {
             locations.push(`${table} ${level}-${node} (${difficulty})`);
           }
         });
-        return locations.sort((a, b) => a > b ? 1 : -1);
+        return locations.sort((a, b) => (a > b ? 1 : -1));
       };
     },
     gearOwnedCount(state: State) {
@@ -66,8 +66,8 @@ const store = {
     findGearData(state: State) {
       return (id: string): Gear | undefined => {
         return state.gearList.find((el: Gear) => el.base_id === id);
-      }
-    }
+      };
+    },
   },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
@@ -87,29 +87,11 @@ const store = {
     async fetchGear({ commit, rootState }: ActionCtx) {
       commit("SET_REQUEST_STATE", loadingState.loading);
 
-      let gearList = await rootState.ggClient?.gear();
-      const gearLocations = await rootState.helpClient?.fetchGear();
+      let gearList = await rootState.apiClient?.fetchGearList();
       const gearOwned = JSON.parse(
         window.localStorage.getItem("ownedGear") || "{}"
       );
       commit("SET_GEAR_OWNED", gearOwned);
-
-      gearList = gearList.map((gear: any) => {
-        const match = gearLocations.find((x: any) => x.id === gear.base_id);
-        if (match) {
-          const { lookupMissionList, raidLookupList, actionLinkLookupList } =
-            match;
-          return {
-            ...gear,
-            lookupMissionList,
-            raidLookupList,
-            actionLinkLookupList,
-          };
-        } else {
-          return gear;
-        }
-      });
-
       commit("SET_GEAR", gearList);
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
@@ -119,7 +101,7 @@ const store = {
       commit("SET_GEAR_OWNED", countData);
       window.localStorage.setItem("ownedGear", JSON.stringify(countData));
     },
-  }
-}
+  },
+};
 
 export { store, State };

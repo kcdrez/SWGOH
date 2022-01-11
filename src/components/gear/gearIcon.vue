@@ -10,7 +10,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
-import { Gear } from "../../api/interfaces";
+import { Gear } from "../../types/gear";
 
 export default defineComponent({
   name: "GearIcon",

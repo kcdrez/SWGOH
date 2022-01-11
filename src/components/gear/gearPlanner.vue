@@ -140,13 +140,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
-import {
-  UnitData,
-  PlayerUnit,
-  UnitGear,
-  Gear,
-  Mission,
-} from "../../api/interfaces";
+import { Gear, Mission } from "../../types/gear";
 import moment from "moment";
 import { unvue } from "../../utils";
 import Salvage from "./salvage.vue";
