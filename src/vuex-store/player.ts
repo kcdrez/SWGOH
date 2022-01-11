@@ -1,20 +1,7 @@
-import { InjectionKey } from "vue";
-import { createStore, Store, ActionContext } from "vuex";
-import apiClientHelp from "../api/swgoh.help";
-import apiClientGG from "../api/swgoh.gg";
-import { Unit, Gear, Player, UnitData, Mission } from "../api/interfaces";
-import {
-  difficultyIds,
-  tableIds,
-  mapIds,
-  missionIds,
-  challenges,
-} from "../api/locationMapping";
-import { unvue } from "../utils";
-import { store as gearStore } from './gear'
-import { store as unitStore } from './unit'
+import { ActionContext, StoreOptions } from "vuex";
+import { Player } from "../api/interfaces";
 import { loadingState } from '../enums/loading';
-import rootStore, { State as RootState } from './store';
+import { State as RootState } from './store';
 
 interface State {
   player: Player | null;
@@ -25,6 +12,7 @@ interface State {
 type ActionCtx = ActionContext<State, RootState>;
 
 const store = {
+  namespaced: true,
   state: {
     player: null,
     allyCode: "",
@@ -44,7 +32,6 @@ const store = {
   },
   actions: {
     initialize({ dispatch }: ActionCtx) {
-      console.log('init player module')
       const allyCode = window.localStorage.getItem("allyCode") || "";
       if (allyCode) {
         dispatch("fetchPlayer", allyCode);

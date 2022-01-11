@@ -56,8 +56,7 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     allyCode: {
       get(): string {
-        return "";
-        // return this.$store.state.player.allyCode;
+        return this.$store.state.player.allyCode;
       },
       set(value: string) {
         this.$store.commit("SET_ALLY_CODE", value);

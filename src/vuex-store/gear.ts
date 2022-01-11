@@ -1,7 +1,6 @@
-import { InjectionKey } from "vue";
-import { createStore, Store, ActionContext } from "vuex";
+import { ActionContext } from "vuex";
 
-import { Unit, Gear, Player, UnitData, Mission } from "../api/interfaces";
+import { Gear, Mission } from "../api/interfaces";
 import {
   difficultyIds,
   tableIds,
@@ -10,7 +9,7 @@ import {
   challenges,
 } from "../api/locationMapping";
 import { loadingState } from '../enums/loading';
-import rootStore, { State as RootState } from './store'
+import { State as RootState } from './store'
 import { unvue } from '../utils'
 
 interface State {
@@ -19,8 +18,6 @@ interface State {
   gearLocations: any[];
   ownedGear: any;
 }
-
-const key: InjectionKey<Store<State>> = Symbol();
 
 type ActionCtx = ActionContext<State, RootState>
 
@@ -33,7 +30,7 @@ const store = {
     ownedGear: {}
   },
   getters: {
-    gearLocation(state: State) {
+    gearLocation(_state: State) {
       return (missions: Mission[]): string[] => {
         const locations: string[] = [];
         missions?.forEach((mission) => {
@@ -125,6 +122,4 @@ const store = {
   }
 }
 
-// rootStore.registerModule("gear", store);
-
-export { store, key, State };
+export { store, State };

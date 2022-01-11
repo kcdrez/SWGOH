@@ -15,10 +15,6 @@
         It will take approximately {{ totalDays }} days to get to Gear Level
         {{ gearTarget }}.
       </h3>
-      <div>
-        Note: This planner assumes the cheapest possible node is farmed by
-        energy.
-      </div>
       <div class="input-group input-group-sm w-50">
         <span
           class="input-group-text c-help energy-text"
@@ -105,7 +101,7 @@
               Est. Time
               <i class="fas mx-1" :class="sortIcon('time')"></i>
             </th>
-            <th width="15%">Actions</th>
+            <!-- <th width="15%">Actions</th> -->
           </tr>
         </thead>
         <tbody>
@@ -126,14 +122,14 @@
             <td>
               <Salvage :salvage="salvage" />
             </td>
-            <td>{{ timeEstimation(salvage) }} Days</td>
-            <td>
+            <td class="text-center">{{ timeEstimation(salvage) }} Days</td>
+            <!-- <td>
               <div class="btn-group btn-group-sm" role="group">
                 <button type="button" class="btn btn-primary">Left</button>
                 <button type="button" class="btn btn-secondary">Middle</button>
                 <button type="button" class="btn btn-info">Right</button>
               </div>
-            </td>
+            </td> -->
           </tr>
         </tbody>
       </table>

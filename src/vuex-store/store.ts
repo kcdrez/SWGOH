@@ -1,19 +1,20 @@
-import { InjectionKey } from "vue";
-import { createStore, Store } from "vuex";
+import { createStore } from "vuex";
 import apiClientHelp from "../api/swgoh.help";
 import apiClientGG from "../api/swgoh.gg";
-import { store as gearStore } from './gear'
-import { store as unitStore } from './unit'
-import { store as playerStore } from './player'
+import { store as gearStore, State as GearState } from './gear'
+import { store as unitStore, State as UnitState } from './unit'
+import { store as playerStore, State as PlayerState } from './player'
 import { loadingState } from '../enums/loading';
 
 export interface State {
   helpClient: apiClientHelp | null;
   ggClient: apiClientGG | null;
   requestState: loadingState;
+  //modules' state
+  player: PlayerState,
+  unit: UnitState,
+  gear: GearState
 }
-
-export const key: InjectionKey<Store<State>> = Symbol();
 
 const store = createStore<State>({
   modules: {
@@ -24,7 +25,10 @@ const store = createStore<State>({
   state: {
     helpClient: null,
     ggClient: null,
-    requestState: loadingState.initial
+    requestState: loadingState.initial,
+    player: playerStore.state,
+    gear: gearStore.state,
+    unit: unitStore.state
   },
   getters: {},
   mutations: {
@@ -49,31 +53,10 @@ const store = createStore<State>({
         helpClient,
         ggClient,
       });
-
-      // await dispatch("fetchUnit", "C3POCHEWBACCA");
-      // await dispatch("fetchUnit", ["AHSOKATANO", "MAGMATROOPER"]);
-      // await dispatch("fetchPlayers");
-      // await dispatch("fetchData");
-      // await state.apiClient?.debug()
       commit("SET_REQUEST_STATE", loadingState.ready);
 
+      await dispatch("player/initialize", { root: true });
       dispatch("gear/fetchGear", { root: true });
-    },
-    async fetchPlayer({ state, commit }, allyCode: string | number) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      const player = await state.ggClient?.player(allyCode.toString());
-      if (player) {
-        commit("SET_PLAYER", player);
-        commit("SET_ALLY_CODE", allyCode);
-        window.localStorage.setItem("allyCode", allyCode.toString());
-      }
-      commit("SET_REQUEST_STATE", loadingState.ready);
-    },
-    resetPlayer({ commit }) {
-      commit("SET_PLAYER", null);
-    },
-    async fetchPlayers({ state }) {
-      const response = await state.helpClient?.fetchPlayer("843518525");
     },
     async fetchData({ state }) {
       const response = await state.helpClient?.fetchData("effectList");
