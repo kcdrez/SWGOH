@@ -41,6 +41,7 @@ import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 import Gear from "../components/gear/gear.vue";
 import Player from "../components/player.vue";
+import playerStore from "../vuex-store/player2";
 
 export default defineComponent({
   name: "HomePage",
@@ -56,10 +57,10 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     allyCode: {
       get(): string {
-        return this.$store.state.player.allyCode;
+        return playerStore.state.allyCode;
       },
       set(value: string) {
-        this.$store.commit("player/SET_ALLY_CODE", value);
+        playerStore.mutations.SET_ALLY_CODE(value);
       },
     },
   },

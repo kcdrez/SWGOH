@@ -4,7 +4,7 @@ import "./styles/main.scss";
 import "bootstrap/dist/js/bootstrap.min.js";
 
 import App from "./App.vue";
-import { store } from "./vuex-store/store";
+import store from "./vuex-store";
 import router from "./router/router";
 import "./styles/main.scss";
 
