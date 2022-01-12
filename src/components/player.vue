@@ -8,7 +8,7 @@
       />
       <router-link
         v-for="unit in filteredUnits"
-        :key="unit.base_id"
+        :key="unit.id"
         :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
         class="d-block"
       >
