@@ -45,12 +45,6 @@ import Player from "../components/player.vue";
 export default defineComponent({
   name: "HomePage",
   components: { Gear, Player },
-  data() {
-    return {
-      // allyCode: "", //843518525
-      // ...mapState(["allyCode"]),
-    };
-  },
   computed: {
     ...mapState(["requestState"]),
     ...mapState("player", ["player"]),
