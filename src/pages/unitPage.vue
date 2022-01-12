@@ -1,11 +1,10 @@
 <template>
   <div class="container unit-page">
-    <Error :state="requestState" />
-    <Loading
-      :state="unit ? 'READY' : 'LOADING'"
-      message="Loading Unit Data"
-      size="lg"
-    >
+    <Error
+      :state="requestState"
+      :message="`Unable to find a unit with the ID of ${$route.params.unitId}.`"
+    />
+    <Loading :state="requestState" message="Loading Unit Data" size="lg">
       <img
         class="d-block m-auto"
         :src="`https://game-assets.swgoh.gg/${unit?.thumbnailName}.png`"

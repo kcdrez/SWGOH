@@ -1,10 +1,10 @@
 <template>
-  <div>
-    <!-- v-if="state === 'ERROR'" -->
+  <div v-if="state === 'ERROR'">
     <img
       src="images/stormtrooper-lego-stretcher.jpg"
-      class="d-block m-auto w-75"
+      class="d-block m-auto w-50"
     />
+    <h3 class="text-center">Oops! We may have had some casualties.</h3>
     <h3 class="text-center">{{ message }}</h3>
   </div>
 </template>
@@ -22,7 +22,7 @@ export default defineComponent({
     },
     message: {
       type: String,
-      default: "Oops! We may have some casulties. Please try again later.",
+      default: "Please try again later.",
     },
   },
 });

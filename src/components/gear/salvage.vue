@@ -17,7 +17,7 @@
           <i class="fas fa-save"></i>
         </button>
         <button type="button" class="btn btn-warning" @click="editing = false">
-          <i class="fas fa-cancel"></i>
+          <i class="fas fa-ban"></i>
         </button>
       </template>
       <button type="button" class="btn btn-primary" @click="edit" v-else>
@@ -64,7 +64,7 @@ export default defineComponent({
         (this.$refs?.saveButton as any).focus();
       });
     },
-    ...mapActions(["saveOwnedCount"]),
+    ...mapActions("gear", ["saveOwnedCount"]),
   },
   created() {
     this.owned = this.gearOwnedCount(this.salvage);
