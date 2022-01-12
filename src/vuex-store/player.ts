@@ -27,6 +27,9 @@ const store = {
       state.player = payload;
     },
     SET_ALLY_CODE(state: State, payload: any) {
+      if (payload === "kcdrez") {
+        payload = "843518525"
+      }
       state.allyCode = payload;
     },
   },
