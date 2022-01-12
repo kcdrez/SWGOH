@@ -59,7 +59,7 @@ export default defineComponent({
         return this.$store.state.player.allyCode;
       },
       set(value: string) {
-        this.$store.commit("SET_ALLY_CODE", value);
+        this.$store.commit("player/SET_ALLY_CODE", value);
       },
     },
   },
@@ -70,7 +70,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-:v-deep a {
+::v-deep(a) {
   text-shadow: 2px 2px 2px black;
   text-decoration: none;
   &:hover {
