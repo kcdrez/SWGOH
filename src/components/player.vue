@@ -5,6 +5,7 @@
         class="form-control form-control-sm"
         type="text"
         v-model="searchText"
+        placeholder="Search for Unit"
       />
       <router-link
         v-for="unit in filteredUnits"

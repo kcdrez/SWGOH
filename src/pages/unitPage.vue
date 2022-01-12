@@ -1,5 +1,6 @@
 <template>
   <div class="container unit-page">
+    <Error :state="requestState" />
     <Loading
       :state="unit ? 'READY' : 'LOADING'"
       message="Loading Unit Data"
@@ -43,11 +44,17 @@
               <li>
                 Assumes the cheapest (by energy) node is farmed (e.g. if salvage
                 is obtainable in both Normal and Hard nodes, the Normal node
-                will be used in calculation)
+                will be used in calculation).
               </li>
               <li>
                 For gear obtained from Daily Challenges, it is assumed that an
                 average of 60 per week is obtained.
+              </li>
+              <li>
+                The time estimation is based solely on getting gear from node
+                farming and does not account for gear obtained in any other
+                method (TW, TB, GAC, stores, etc.). A future version of this
+                tool may account for some of these things.
               </li>
             </ul>
           </div>
@@ -72,10 +79,11 @@ import { mapState, mapActions } from "vuex";
 import moment from "moment";
 import GearPlanner from "../components/gear/gearPlanner.vue";
 import Loading from "../components/loading.vue";
+import Error from "../components/error.vue";
 
 export default defineComponent({
   name: "UnitPage",
-  components: { GearPlanner, Loading },
+  components: { GearPlanner, Loading, Error },
   data() {
     return {
       shards: 0,
@@ -91,31 +99,15 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("unit", ["unit"]),
+    ...mapState("unit", ["unit", "requestState"]),
   },
   methods: {
     ...mapActions("unit", ["fetchUnit"]),
-    calculate() {
-      let remainingShards = 330;
-      const stars = Number(this.unit?.rarity);
-
-      remainingShards -= stars >= 7 ? 100 : 0;
-      remainingShards -= stars >= 6 ? 85 : 0;
-      remainingShards -= stars >= 5 ? 65 : 0;
-      remainingShards -= stars >= 4 ? 30 : 0;
-      remainingShards -= stars >= 3 ? 25 : 0;
-      remainingShards -= stars >= 2 ? 15 : 0;
-      remainingShards -= stars >= 1 ? 10 : 0;
-
-      this.days =
-        (remainingShards - this.shards) /
-        (2 * this.dropRate) /
-        (1 + this.refreshes.character);
-      this.date = moment().add(this.days, "days").format("MM/DD/YYYY");
-    },
   },
-  created() {
-    this.fetchUnit(this.$route.params.unitId);
+  async created() {
+    try {
+      await this.fetchUnit(this.$route.params.unitId);
+    } catch (err) {}
   },
 });
 </script>

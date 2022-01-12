@@ -26,11 +26,17 @@ const store = {
     SET_PLAYER(state: State, payload: any) {
       state.player = payload;
     },
-    SET_ALLY_CODE(state: State, payload: any) {
+    SET_ALLY_CODE(state: State, payload: string | null) {
       if (payload === "kcdrez") {
         payload = "843518525"
       }
-      state.allyCode = payload;
+      if (typeof payload === 'string') {
+        state.allyCode = payload;
+        window.localStorage.setItem("allyCode", payload);
+      } else {
+        state.allyCode = '';
+        window.localStorage.removeItem('allyCode')
+      }
     },
   },
   actions: {
@@ -42,21 +48,25 @@ const store = {
     },
     async fetchPlayer(
       { commit, rootState }: ActionCtx,
-      allyCode: string | number
+      allyCode: string
     ) {
       commit("SET_REQUEST_STATE", loadingState.loading);
-      const player: Player = await rootState.apiClient?.fetchPlayer(
-        allyCode.toString()
-      );
-      if (player) {
+      try {
+        const player: Player = await rootState.apiClient?.fetchPlayer(
+          allyCode
+        );
         commit("SET_PLAYER", player);
         commit("SET_ALLY_CODE", allyCode);
-        window.localStorage.setItem("allyCode", allyCode.toString());
+        commit("SET_REQUEST_STATE", loadingState.ready);
+
+      } catch (err) {
+        console.error(err)
+        commit("SET_REQUEST_STATE", loadingState.error);
       }
-      commit("SET_REQUEST_STATE", loadingState.ready);
     },
     resetPlayer({ commit }: ActionCtx) {
       commit("SET_PLAYER", null);
+      commit("SET_ALLY_CODE", null);
     },
   },
 };

@@ -1,0 +1,29 @@
+<template>
+  <div>
+    <!-- v-if="state === 'ERROR'" -->
+    <img
+      src="images/stormtrooper-lego-stretcher.jpg"
+      class="d-block m-auto w-75"
+    />
+    <h3 class="text-center">{{ message }}</h3>
+  </div>
+</template>
+
+<script lang="ts">
+import { loadingState } from "../enums/loading";
+import { defineComponent, PropType } from "vue";
+
+export default defineComponent({
+  name: "Error",
+  props: {
+    state: {
+      type: String as PropType<loadingState>,
+      required: true,
+    },
+    message: {
+      type: String,
+      default: "Oops! We may have some casulties. Please try again later.",
+    },
+  },
+});
+</script>

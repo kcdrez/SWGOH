@@ -17,7 +17,12 @@
         <div>Enter your ally code:</div>
         <div class="input-group input-group-sm w-50">
           <span class="input-group-text">Ally Code:</span>
-          <input class="form-control" type="number" v-model.number="allyCode" />
+          <input
+            class="form-control"
+            type="text"
+            v-model="allyCode"
+            @keypress="validateAllyCode($event)"
+          />
           <button
             type="button"
             class="btn btn-success"
@@ -26,13 +31,13 @@
             GO!
           </button>
         </div>
+        <div class="text-danger shadow-text" v-if="requestState === 'ERROR'">
+          An error occured retrieving the player data with that ally code.
+          Please verify that the code is correct and try again.
+        </div>
       </div>
       <Player v-else :player="player" />
     </Loading>
-    <!-- <div v-if="unit">
-      <img :src="`https://game-assets.swgoh.gg/${unit.thumbnailName}.png`" />
-    </div> -->
-    <!-- <Gear v-for="gear in gearList" :gear="gear" :key="gear.base_id" /> -->
   </div>
 </template>
 
@@ -41,13 +46,13 @@ import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 import Gear from "../components/gear/gear.vue";
 import Player from "../components/player.vue";
+import Loading from "../components/loading.vue";
 
 export default defineComponent({
   name: "HomePage",
-  components: { Gear, Player },
+  components: { Gear, Player, Loading },
   computed: {
-    ...mapState(["requestState"]),
-    ...mapState("player", ["player"]),
+    ...mapState("player", ["player", "requestState"]),
     allyCode: {
       get(): string {
         return this.$store.state.player.allyCode;
@@ -59,6 +64,12 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("player", ["fetchPlayer"]),
+    validateAllyCode(e: KeyboardEvent) {
+      const keyCode = e.keyCode ? e.keyCode : e.which;
+      if (keyCode < 48 || keyCode > 57) {
+        e.preventDefault();
+      }
+    },
   },
 });
 </script>

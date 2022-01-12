@@ -50,3 +50,7 @@ button:disabled {
 .modal-title {
   @include shadow-dark();
 }
+
+.shadow-text {
+  text-shadow: 2px 2px 2px black;
+}
