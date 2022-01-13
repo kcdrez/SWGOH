@@ -41,9 +41,13 @@ export default defineComponent({
     filteredUnits(): PlayerUnit[] {
       return this.player.units
         .filter((unit) => {
-          return unit.name
-            .toLowerCase()
-            .includes(this.searchText.toLowerCase());
+          if (unit) {
+            return unit.name
+              .toLowerCase()
+              .includes(this.searchText.toLowerCase());
+          } else {
+            return false;
+          }
         })
         .sort((a, b) => {
           return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;

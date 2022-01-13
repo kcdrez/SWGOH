@@ -44,16 +44,18 @@ const store = {
       try {
         const response = await rootState.apiClient?.fetchUnit(id);
         const match = rootState.player.player?.units.find(
-          (u: PlayerUnit) => u.id === response?.id
+          (u: PlayerUnit) => u?.id === response?.id
         );
         if (match && response) {
           commit("SET_UNIT", { ...match, ...response });
           commit("SET_REQUEST_STATE", loadingState.ready);
         } else {
+
           commit("SET_REQUEST_STATE", loadingState.error);
         }
       } catch (err: any) {
         commit("SET_REQUEST_STATE", loadingState.error);
+        console.error(err);
         throw new Error(err);
       }
     },
