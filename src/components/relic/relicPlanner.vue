@@ -1,10 +1,10 @@
 <template>
-  <div class="collapse show" id="gearSection">
+  <div class="collapse show" id="relicSection">
     <Loading :state="requestState" size="md" message="Loading Gear Data">
       <h3 class="gear-header">
         Relic Mats Needed to get {{ unit.name }} from Relic Level
         {{ currentRelicLevel }} to
-        <select v-model.number="gearTarget">
+        <select v-model.number="relicTarget">
           <option v-for="num in relicOptions" :value="num" :key="num">
             Relic {{ num }}
           </option>
@@ -15,7 +15,7 @@
         It will take approximately {{ totalDays }} days to get to Relic Level
         {{ relicTarget }}.
       </h3>
-      <div class="input-group input-group-sm w-50">
+      <div class="input-group input-group-sm w-50 mb-3">
         <span
           class="input-group-text c-help energy-text"
           title="Energy used on Light and Dark side tables"
@@ -75,24 +75,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="mat in relicMatList" :key="mat.base_id">
+          <tr v-for="mat in filteredRelics" :key="mat.id">
             <td class="text-center">
-              <RelicIcon :mat="mat" />
+              <RelicIcon :item="mat" />
             </td>
+            <td class="text-center align-middle">{{ mat.location.node }}</td>
             <td>
-              <ul class="m-0">
-                <li
-                  v-for="(l, index) in gearLocation(mat.lookupMissionList)"
-                  :key="index"
-                >
-                  {{ l }}
-                </li>
-              </ul>
+              <OwnedAmount :item="mat" :needed="amountNeeded(mat)" />
             </td>
-            <td>
-              <Salvage :salvage="salvage" />
+            <td class="text-center align-middle">
+              {{ timeEstimation(mat) }} Days
             </td>
-            <td class="text-center">{{ timeEstimation(salvage) }} Days</td>
             <!-- <td>
               <div class="btn-group btn-group-sm" role="group">
                 <button type="button" class="btn btn-primary">Left</button>
@@ -109,17 +102,16 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapActions, mapGetters } from "vuex";
-import { Gear, Mission } from "../../types/gear";
-import moment from "moment";
-import { unvue } from "../../utils";
-import Salvage from "./salvage.vue";
-import GearIcon from "./gearIcon.vue";
+import { mapState } from "vuex";
+
+import { Relic } from "../../types/relic";
+import OwnedAmount from "./owned.vue";
+import RelicIcon from "./relicIcon.vue";
 import Loading from "../loading.vue";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
-  components: { Salvage, GearIcon, Loading },
+  components: { OwnedAmount, RelicIcon, Loading },
   data() {
     return {
       refreshes: {
@@ -128,135 +120,106 @@ export default defineComponent({
       energy: {
         cantina: 0,
       },
-      relicTarget: 13,
-      sortMethod: "name",
+      relicTarget: 7,
+      sortMethod: "",
       sortDir: "asc",
       searchName: "",
-      relicMatConfig: {
-        //https://docs.google.com/spreadsheets/d/10ReT0Q_4yYGd_fU45Clv7XYs23a96xpWgIxLVrg9Eqg/edit#gid=769217271
-        white: {
-          dropRate: 1.37,
-          amount: {
-            1: 0,
-            2: 15,
-            3: 20,
-            4: 20,
-            5: 20,
-            6: 20,
-            7: 20,
-            8: 20,
-            9: 30,
-          },
-        },
-        green: {
-          dropRate: 0.93,
-          amount: {
-            1: 0,
-            2: 0,
-            3: 15,
-            4: 25,
-            5: 25,
-            6: 25,
-            7: 25,
-            8: 25,
-            9: 30,
-          },
-        },
-        blue: {
-          dropRate: 0.66,
-          amount: {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 15,
-            6: 25,
-            7: 35,
-            8: 45,
-            9: 55,
-          },
-        },
-      },
     };
   },
   computed: {
-    ...mapState("gear", ["gearList", "gearLocations", "requestState"]),
     ...mapState("unit", ["unit"]),
-    ...mapGetters("gear", ["gearLocation", "gearOwnedCount", "findGearData"]),
-    ...mapGetters("unit", ["currentGearLevel"]),
+    ...mapState("relic", ["requestState", "ownedRelics", "relicConfig"]),
     totalDays(): number {
-      return 0; //todo
+      return (Object.values(this.relicConfig) as Array<Relic>).reduce(
+        (acc, el) => {
+          return acc + this.timeEstimation(el);
+        },
+        0
+      );
     },
     relicOptions(): number[] {
       const list = [];
-      for (let i = (this.unit?.relic_tier || 1) + 1; i <= 9; i++) {
+      for (let i = this.currentRelicLevel; i <= 9; i++) {
         list.push(i);
       }
       return list;
     },
+    currentRelicLevel(): number {
+      return this.unit?.relic_tier || 1;
+    },
+    filteredRelics(): Relic[] {
+      const list: Relic[] = Object.values(this.relicConfig);
+      return list
+        .sort((a: Relic, b: Relic) => {
+          if (this.sortMethod === "name") {
+            const compareA = a.name.toLowerCase();
+            const compareB = b.name.toLowerCase();
+            if (this.sortDir === "asc") {
+              return compareA > compareB ? 1 : -1;
+            } else {
+              return compareA > compareB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "locations") {
+            const compareA = a.location.node.toLowerCase();
+            const compareB = b.location.node.toLowerCase();
+            if (this.sortDir === "asc") {
+              return compareA > compareB ? 1 : -1;
+            } else {
+              return compareA > compareB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "amount") {
+            const compareA = this.amountNeeded(a);
+            const compareB = this.amountNeeded(b);
+            if (this.sortDir === "asc") {
+              return compareA - compareB;
+            } else {
+              return compareB - compareA;
+            }
+          } else if (this.sortMethod === "time") {
+            const compareA = this.timeEstimation(a);
+            const compareB = this.timeEstimation(b);
+            if (this.sortDir === "asc") {
+              return compareA - compareB;
+            } else {
+              return compareB - compareA;
+            }
+          }
+          return 0;
+        })
+        .filter((relic) => {
+          const name = relic.name.toLowerCase().replace(/\s/g, "");
+          const id = relic.id.toLowerCase().replace(/\s/g, "");
+          const compare = this.searchName.toLowerCase().replace(/\s/g, "");
+          return name.includes(compare) || id.includes(compare);
+        });
+    },
   },
   methods: {
-    timeEstimation(gear: Gear): number {
-      const owned: number = this.gearOwnedCount(gear);
-      const remaining = gear.amount - owned;
+    timeEstimation(mat: Relic): number {
+      const owned: number = this.ownedRelics[mat.id] || 0;
+      const totalAmount: number = this.amountNeeded(mat);
+      const remaining: number = totalAmount - owned;
 
       if (remaining > 0) {
-        let energy = 100;
-        let totalDays = 0;
-
-        gear.lookupMissionList.forEach((mission) => {
-          const {
-            campaignId,
-            campaignNodeDifficulty,
-            campaignMapId,
-            campaignMissionId,
-            campaignNodeId,
-          } = mission.missionIdentifier;
-
-          if (["C01SP", "C01D", "C01L"].includes(campaignId)) {
-            let missionEnergy = 1;
-            const node = Number(campaignMissionId.replace(/\D/g, ""));
-
-            if (node <= 4) {
-              missionEnergy = 6;
-            } else if (node >= 6) {
-              missionEnergy = 8;
-            } else if (node >= 9) {
-              missionEnergy = 10;
-            }
-
-            if (campaignNodeDifficulty === 5) {
-              missionEnergy *= 2;
-            }
-
-            if (missionEnergy < energy) {
-              const dropRate = 0.2;
-              const refreshes = ["C01D", "C01L"].includes(campaignId)
-                ? this.refreshes.standard
-                : this.refreshes.fleet;
-              const extraEnergy = ["C01D", "C01L"].includes(campaignId)
-                ? 135
-                : 45;
-              const otherEnergy = ["C01D", "C01L"].includes(campaignId)
-                ? this.energy.standard
-                : this.energy.fleet;
-              const totalEnergy =
-                240 + extraEnergy + 120 * refreshes - otherEnergy;
-
-              const chancesPerDay = totalEnergy / missionEnergy;
-              const piecesPerDay = chancesPerDay * dropRate;
-              totalDays = remaining / piecesPerDay;
-              energy = missionEnergy;
-            }
-          } else if (campaignMapId === "CHALLENGES") {
-            energy = 0;
-            totalDays = remaining / (60 / 7);
-          }
-        });
-        return Math.round(totalDays);
+        const totalEnergy =
+          120 + 45 + 120 * this.refreshes.cantina - this.energy.cantina;
+        const triesPerDay = totalEnergy / mat.location.energy;
+        const amountPerDay = triesPerDay * mat.dropRate;
+        return Math.round(remaining / amountPerDay);
       } else {
         return 0;
       }
+    },
+    amountNeeded(mat: Relic): number {
+      const amountMap = mat.amount;
+      let amount = 0;
+      for (let i = this.currentRelicLevel; i <= this.relicTarget; i++) {
+        const key = i.toString();
+        if (i in amountMap) {
+          amount += amountMap[key];
+        }
+      }
+      return amount;
     },
     sortBy(type: string): void {
       if (this.sortMethod === type) {

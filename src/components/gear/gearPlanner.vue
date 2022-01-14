@@ -1,5 +1,5 @@
 <template>
-  <div class="collapse show" id="gearSection">
+  <div class="collapse" id="gearSection">
     <Loading :state="requestState" size="md" message="Loading Gear Data">
       <h3 class="gear-header">
         Gear Needed to get {{ unit.name }} from Gear Level
@@ -139,11 +139,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapActions, mapGetters } from "vuex";
+import { mapState, mapGetters } from "vuex";
+
 import { Gear, Mission } from "../../types/gear";
-import moment from "moment";
-import { unvue } from "../../utils";
-import Salvage from "./salvage.vue";
+import Salvage from "./owned.vue";
 import GearIcon from "./gearIcon.vue";
 import Loading from "../loading.vue";
 

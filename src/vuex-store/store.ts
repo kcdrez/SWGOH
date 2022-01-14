@@ -2,6 +2,7 @@ import { createStore } from "vuex";
 import { store as gearStore, State as GearState } from "./gear";
 import { store as unitStore, State as UnitState } from "./unit";
 import { store as playerStore, State as PlayerState } from "./player";
+import { store as relicStore, State as RelicState } from "./relic";
 import { loadingState } from "../enums/loading";
 import { ApiClient, apiClient } from "../api/api-client";
 
@@ -9,23 +10,26 @@ export interface State {
   apiClient: ApiClient;
   requestState: loadingState;
   //modules' state
-  player: PlayerState;
-  unit: UnitState;
   gear: GearState;
+  relic: RelicState;
+  unit: UnitState;
+  player: PlayerState;
 }
 
 const store = createStore<State>({
   modules: {
     gear: gearStore,
+    relic: relicStore,
     unit: unitStore,
     player: playerStore,
   },
   state: {
     apiClient: apiClient,
     requestState: loadingState.initial,
-    player: playerStore.state,
     gear: gearStore.state,
+    relic: relicStore.state,
     unit: unitStore.state,
+    player: playerStore.state,
   },
   getters: {},
   mutations: {
@@ -38,6 +42,7 @@ const store = createStore<State>({
       commit("SET_REQUEST_STATE", loadingState.loading);
       await dispatch("player/initialize", { root: true });
       dispatch("gear/fetchGear", { root: true });
+      dispatch("relic/initialize", { root: true });
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     // async fetchData({ state }) {

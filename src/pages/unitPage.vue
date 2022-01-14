@@ -22,9 +22,7 @@
       <h1 class="collapse-header">
         <a data-bs-toggle="collapse" href="#relicSection">Relic Planner</a>
       </h1>
-      <div class="collapse" id="relicSection">
-        This feature is currently in development.
-      </div>
+      <RelicPlanner />
     </Loading>
     <div class="modal fade" id="gearAssumptionsModal" tabindex="-1">
       <div class="modal-dialog">
@@ -75,14 +73,14 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
-import moment from "moment";
 import GearPlanner from "../components/gear/gearPlanner.vue";
+import RelicPlanner from "../components/relic/relicPlanner.vue";
 import Loading from "../components/loading.vue";
 import Error from "../components/error.vue";
 
 export default defineComponent({
   name: "UnitPage",
-  components: { GearPlanner, Loading, Error },
+  components: { GearPlanner, RelicPlanner, Loading, Error },
   data() {
     return {
       shards: 0,

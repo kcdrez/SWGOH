@@ -9,7 +9,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
 import { Gear } from "../../types/gear";
 
 export default defineComponent({
