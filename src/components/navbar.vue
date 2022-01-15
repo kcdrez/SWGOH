@@ -23,23 +23,23 @@
               >{{ player?.name }}</a
             >
           </li>
-          <li>
-            <!-- <li class="nav-item dropdown">
+          <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
               role="button"
               data-bs-toggle="dropdown"
             >
-              Units
+              Planner
             </a>
             <ul class="dropdown-menu">
               <li>
-                <router-link class="dropdown-item" to="/unit/DARTHMALAK"
-                  >Malak (Debug)</router-link
+                <router-link
+                  class="dropdown-item"
+                  :to="{ name: 'GeneralPlannerPage' }"
+                  >General Planner</router-link
                 >
               </li>
             </ul>
-          </li> -->
           </li>
         </ul>
       </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="collapse show" id="relicSection">
+  <div class="collapse" id="relicSection">
     <Loading :state="requestState" size="md" message="Loading Gear Data">
       <h3 class="gear-header">
         Relic Mats Needed to get {{ unit.name }} from Relic Level

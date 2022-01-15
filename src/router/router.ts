@@ -6,6 +6,7 @@ import {
 import HomePage from "../pages/homepage.vue";
 import UnitPage from "../pages/unitPage.vue";
 import ShardCalculatorPage from "../pages/shardCalculator.vue";
+import GeneralPlannerPage from "../pages/generalPlanner.vue";
 
 const routes = [
   {
@@ -16,12 +17,17 @@ const routes = [
   {
     path: "/unit/:unitId",
     name: "UnitPage",
-    component: UnitPage
+    component: UnitPage,
   },
   {
     path: "/shard-calculator",
     name: "ShardCalculatorPage",
-    component: ShardCalculatorPage
+    component: ShardCalculatorPage,
+  },
+  {
+    path: "/general-planner",
+    name: "GeneralPlannerPage",
+    component: GeneralPlannerPage,
   },
 ];
 
