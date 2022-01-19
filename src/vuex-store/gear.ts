@@ -11,15 +11,15 @@ import {
 import { loadingState } from "../enums/loading";
 import { State as RootState } from "./store";
 import { unvue } from "../utils";
-import { CombinedUnit } from "@/types/unit";
+import { Unit } from "@/types/unit";
 
 interface State {
   requestState: loadingState;
   gearList: Gear[];
   gearLocations: any[];
   ownedGear: any;
-  refreshes: { standard: number, fleet: number },
-  energy: { standard: number, fleet: number }
+  refreshes: { standard: number; fleet: number };
+  energy: { standard: number; fleet: number };
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -32,7 +32,7 @@ const store = {
     gearLocations: [],
     ownedGear: {},
     refreshes: { standard: 0, fleet: 0 },
-    energy: { standard: 0, fleet: 0 }
+    energy: { standard: 0, fleet: 0 },
   },
   getters: {
     gearLocation(_state: State) {
@@ -80,7 +80,7 @@ const store = {
           list.push(i);
         }
         return list;
-      }
+      };
     },
     timeEstimation(state: State, getters: any) {
       return (gear: Gear): number => {
@@ -144,10 +144,10 @@ const store = {
         } else {
           return 0;
         }
-      }
+      };
     },
     totalDays(state: State, getters: any) {
-      return (unit: CombinedUnit, gearTarget: number): any => {
+      return (unit: Unit, gearTarget: number): any => {
         let totalStandard = 0;
         let totalFleet = 0;
         let totalChallenges = 0;
@@ -170,15 +170,14 @@ const store = {
           }
         });
         return Math.max(totalStandard, totalFleet, totalChallenges);
-      }
+      };
     },
     fullGearListByLevel(state: State, getters: any) {
-      return (unit: CombinedUnit): any[] => {
+      return (unit: Unit): any[] => {
         if (unit) {
           const { gear_level } = unit;
           const futureGear =
-            unit?.unitTierList.filter((x: any) => x.tier >= gear_level) ||
-            [];
+            unit?.unitTierList.filter((x: any) => x.tier >= gear_level) || [];
 
           return futureGear.map((gear: any) => {
             return {
@@ -202,10 +201,10 @@ const store = {
         } else {
           return [];
         }
-      }
+      };
     },
     fullSalvageList(state: State, getters: any) {
-      return (unit: CombinedUnit, gearTarget: number): Gear[] => {
+      return (unit: Unit, gearTarget: number): Gear[] => {
         let list: Gear[] = [];
         getters.fullGearListByLevel(unit).forEach((tier: any) => {
           if (tier.tier + 1 <= gearTarget) {
@@ -225,7 +224,7 @@ const store = {
           }
         });
         return list;
-      }
+      };
     },
   },
   mutations: {
@@ -241,12 +240,18 @@ const store = {
     SET_GEAR_OWNED(state: State, payload: any) {
       state.ownedGear = payload;
     },
-    UPDATE_REFRESHES(state: State, payload: { value: number, type: "standard" | "fleet" }) {
-      state.refreshes[payload.type] = payload.value
+    UPDATE_REFRESHES(
+      state: State,
+      payload: { value: number; type: "standard" | "fleet" }
+    ) {
+      state.refreshes[payload.type] = payload.value;
     },
-    UPDATE_ENERGY(state: State, payload: { value: number, type: "standard" | "fleet" }) {
-      state.energy[payload.type] = payload.value
-    }
+    UPDATE_ENERGY(
+      state: State,
+      payload: { value: number; type: "standard" | "fleet" }
+    ) {
+      state.energy[payload.type] = payload.value;
+    },
   },
   actions: {
     async fetchGear({ commit, rootState }: ActionCtx) {

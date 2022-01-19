@@ -16,8 +16,9 @@
         :
       </h3>
       <h3>
-        It will take approximately {{ totalDays }} days to get to Relic Level
-        {{ relicTarget }}.
+        It will take approximately
+        {{ totalDays(currentRelicLevel, relicTarget) }} days to get to Relic
+        Level {{ relicTarget }}.
       </h3>
       <div class="input-group input-group-sm w-50 mb-3">
         <span
@@ -120,6 +121,7 @@ import { Relic } from "../../types/relic";
 import OwnedAmount from "./owned.vue";
 import RelicIcon from "./relicIcon.vue";
 import Loading from "../loading.vue";
+import { UpdateItem } from "../../types/planner";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
@@ -132,7 +134,6 @@ export default defineComponent({
       energy: {
         cantina: 0,
       },
-      relicTarget: 7,
       sortMethod: "",
       sortDir: "asc",
       searchName: "",
@@ -141,18 +142,12 @@ export default defineComponent({
   computed: {
     ...mapState("unit", ["unit"]),
     ...mapState("relic", ["requestState", "ownedRelics", "relicConfig"]),
-    ...mapGetters("relic", ["relicOptions", "timeEstimation", "amountNeeded"]),
-    totalDays(): number {
-      return (Object.values(this.relicConfig) as Array<Relic>).reduce(
-        (acc, el) => {
-          return (
-            acc +
-            this.timeEstimation(el, this.currentRelicLevel, this.relicTarget)
-          );
-        },
-        0
-      );
-    },
+    ...mapGetters("relic", [
+      "relicOptions",
+      "timeEstimation",
+      "amountNeeded",
+      "totalDays",
+    ]),
     currentRelicLevel(): number {
       return this.unit?.relic_tier || 1;
     },
@@ -202,19 +197,19 @@ export default defineComponent({
           return name.includes(compare) || id.includes(compare);
         });
     },
-    // _gearTarget: {
-    //   get(): number {
-    //     return this.$store.getters["planner/gearTarget"](this.unit);
-    //   },
-    //   set(value: number) {
-    //     const payload: UpdateItem = {
-    //       type: "gear",
-    //       value,
-    //       unitId: this.unit.id,
-    //     };
-    //     this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
-    //   },
-    // },
+    relicTarget: {
+      get(): number {
+        return this.$store.getters["planner/relicTarget"](this.unit.id);
+      },
+      set(value: number) {
+        const payload: UpdateItem = {
+          type: "relic",
+          value,
+          unitId: this.unit.id,
+        };
+        this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
+      },
+    },
   },
   methods: {
     sortBy(type: string): void {

@@ -83,7 +83,7 @@ import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 import Loading from "../components/loading.vue";
 import Error from "../components/error.vue";
-import { CombinedUnit } from "../types/unit";
+import { Unit } from "../types/unit";
 import { UpdateItem } from "../types/planner";
 
 export default defineComponent({
@@ -118,7 +118,7 @@ export default defineComponent({
         return "fa-sort";
       }
     },
-    getCurLevel(unit: CombinedUnit): string {
+    getCurLevel(unit: Unit): string {
       const gearLevel = this.currentGearLevel(unit);
       if (gearLevel < 13) {
         return `Gear ${gearLevel}`;
@@ -128,7 +128,7 @@ export default defineComponent({
         return `Gear 13`;
       }
     },
-    levelOptions(unit: CombinedUnit): string[] {
+    levelOptions(unit: Unit): string[] {
       const gearOptions = this.gearOptions(unit.gear_level).map(
         (x: number) => "Gear " + x
       );

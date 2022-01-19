@@ -14,8 +14,8 @@ interface State {
   requestState: loadingState;
   relicConfig: ConfigType;
   ownedRelics: any;
-  refreshes: { cantina: number },
-  energy: { cantina: number }
+  refreshes: { cantina: number };
+  energy: { cantina: number };
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -27,7 +27,7 @@ const store = {
     relicConfig: relicConfig,
     ownedRelics: {},
     refreshes: { cantina: 0 },
-    energy: { cantina: 0 }
+    energy: { cantina: 0 },
   },
   getters: {
     relicOptions(_state: State) {
@@ -37,7 +37,7 @@ const store = {
           list.push(i);
         }
         return list;
-      }
+      };
     },
     timeEstimation(state: State, getters: any) {
       return (mat: Relic, level: number, target: number): number => {
@@ -54,7 +54,7 @@ const store = {
         } else {
           return 0;
         }
-      }
+      };
     },
     amountNeeded(_state: State) {
       return (mat: Relic, level: number, target: number): number => {
@@ -67,7 +67,17 @@ const store = {
           }
         }
         return amount;
-      }
+      };
+    },
+    totalDays(state: State, getters: any) {
+      return (curLevel: number, target: number): number => {
+        return (Object.values(state.relicConfig) as Array<Relic>).reduce(
+          (acc, el) => {
+            return acc + getters.timeEstimation(el, curLevel, target);
+          },
+          0
+        );
+      };
     },
   },
   mutations: {

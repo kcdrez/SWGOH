@@ -218,7 +218,7 @@ export default defineComponent({
     },
     gearTarget: {
       get(): number {
-        return this.$store.getters["planner/gearTarget"](this.unit);
+        return this.$store.getters["planner/gearTarget"](this.unit.id) || 13;
       },
       set(value: number) {
         const payload: UpdateItem = {

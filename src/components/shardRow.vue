@@ -50,7 +50,7 @@ import { defineComponent } from "vue";
 import { mapState } from "vuex";
 // import { Unit, UnitData, PlayerUnit, UnitGear, Gear } from "../types/unit";
 import moment from "moment";
-import { CombinedUnit } from "../types/unit";
+import { Unit } from "../types/unit";
 
 interface dataModel {
   unit: string;
@@ -59,7 +59,7 @@ interface dataModel {
   refreshes: number;
   days: number;
   date: string;
-  matches: CombinedUnit[];
+  matches: Unit[];
 }
 
 export default defineComponent({
@@ -97,14 +97,14 @@ export default defineComponent({
       //   });
 
       this.matches = (
-        this.player?.units.filter((unit: CombinedUnit) => {
+        this.player?.units.filter((unit: Unit) => {
           const sanitizedName = unit.name
             .replace(/[^a-zA-Z0-9]/g, "")
             .toLowerCase();
           const findName = this.unit.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
           return sanitizedName.includes(findName);
         }) || []
-      ).sort((a: CombinedUnit, b: CombinedUnit) => {
+      ).sort((a: Unit, b: Unit) => {
         return a.name > b.name ? 1 : -1;
       });
 
@@ -112,7 +112,7 @@ export default defineComponent({
         this.calculate(this.matches[0]);
       }
     },
-    calculate(unit: CombinedUnit) {
+    calculate(unit: Unit) {
       let remainingShards = 330;
 
       // const matches = this.player?.units.filter((unit: Unit) => {});
