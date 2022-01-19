@@ -163,3 +163,13 @@ nav.navbar-light {
 .form-control {
   background-color: $background-light-5;
 }
+
+//toast
+.toast-success {
+  background-color: $success !important;
+}
+
+.toast-warning {
+  background-color: $warning !important;
+  color: $dark !important;
+}

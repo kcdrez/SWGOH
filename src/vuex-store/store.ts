@@ -3,6 +3,7 @@ import { store as gearStore, State as GearState } from "./gear";
 import { store as unitStore, State as UnitState } from "./unit";
 import { store as playerStore, State as PlayerState } from "./player";
 import { store as relicStore, State as RelicState } from "./relic";
+import { store as plannerStore, State as PlannerState } from "./planner";
 import { loadingState } from "../enums/loading";
 import { ApiClient, apiClient } from "../api/api-client";
 
@@ -14,6 +15,7 @@ export interface State {
   relic: RelicState;
   unit: UnitState;
   player: PlayerState;
+  planner: PlannerState;
 }
 
 const store = createStore<State>({
@@ -22,6 +24,7 @@ const store = createStore<State>({
     relic: relicStore,
     unit: unitStore,
     player: playerStore,
+    planner: plannerStore
   },
   state: {
     apiClient: apiClient,
@@ -30,6 +33,7 @@ const store = createStore<State>({
     relic: relicStore.state,
     unit: unitStore.state,
     player: playerStore.state,
+    planner: plannerStore.state
   },
   getters: {},
   mutations: {
@@ -43,6 +47,7 @@ const store = createStore<State>({
       await dispatch("player/initialize", { root: true });
       dispatch("gear/fetchGear", { root: true });
       dispatch("relic/initialize", { root: true });
+      dispatch("planner/initialize", { root: true });
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     // async fetchData({ state }) {

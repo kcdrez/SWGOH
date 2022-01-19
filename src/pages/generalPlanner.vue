@@ -51,12 +51,24 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
+        <tr v-for="unit in unitList" :key="unit.id">
           <td class="text-center">1</td>
-          <td class="text-center">Jedi Knight Luke</td>
-          <td class="text-center">Gear 10</td>
-          <td class="text-center">Relic 7</td>
-          <td class="text-center">01/01/22 (10 days)</td>
+          <td class="text-center">{{ unit.name }}</td>
+          <td class="text-center">{{ getCurLevel(unit) }}</td>
+          <td class="text-center">
+            <select
+              class="form-control form-control-sm"
+              :value="getTarget(unit)"
+              @input="changeTarget(unit, $event)"
+            >
+              <option v-for="opt in levelOptions(unit)" :value="opt" :key="opt">
+                {{ opt }}
+              </option>
+            </select>
+          </td>
+          <td class="text-center">
+            {{ totalDays(unit, unit.gearTarget) }} Days
+          </td>
           <td class="text-center">01/01/22 (10 days)</td>
           <td class="text-center">01/01/22 (10 days)</td>
           <td></td>
@@ -68,9 +80,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions, mapGetters } from "vuex";
 import Loading from "../components/loading.vue";
 import Error from "../components/error.vue";
+import { CombinedUnit } from "../types/unit";
+import { UpdateItem } from "../types/planner";
 
 export default defineComponent({
   name: "GeneralPlannerPage",
@@ -79,9 +93,15 @@ export default defineComponent({
     return {
       sortDir: "",
       sortMethod: "",
+      searchName: "",
     };
   },
-  computed: {},
+  computed: {
+    ...mapGetters("planner", ["unitList"]),
+    ...mapGetters("unit", ["currentGearLevel"]),
+    ...mapGetters("gear", ["gearOptions", "totalDays"]),
+    ...mapGetters("relic", ["relicOptions"]),
+  },
   methods: {
     sortBy(type: string): void {
       if (this.sortMethod === type) {
@@ -96,6 +116,45 @@ export default defineComponent({
         return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
       } else {
         return "fa-sort";
+      }
+    },
+    getCurLevel(unit: CombinedUnit): string {
+      const gearLevel = this.currentGearLevel(unit);
+      if (gearLevel < 13) {
+        return `Gear ${gearLevel}`;
+      } else if (unit.relic_tier > 1) {
+        return `Relic ${unit.relic_tier - 1}`;
+      } else {
+        return `Gear 13`;
+      }
+    },
+    levelOptions(unit: CombinedUnit): string[] {
+      const gearOptions = this.gearOptions(unit.gear_level).map(
+        (x: number) => "Gear " + x
+      );
+      const relicOptions = this.relicOptions(unit.relic_tier).map(
+        (x: number) => "Relic " + x
+      );
+      return [...gearOptions, ...relicOptions];
+    },
+    getTarget(unit: any): string {
+      if (unit.relicTarget >= 1) {
+        return "Relic " + unit.relicTarget;
+      } else {
+        return "Gear " + unit.gearTarget;
+      }
+    },
+    changeTarget(unit: any, event: any) {
+      const { value } = event.target;
+      const numMatches = value.match(/(\d+)/);
+      const strMatches = value.match(/([a-zA-Z]+)/);
+      if (numMatches && strMatches) {
+        const payload: UpdateItem = {
+          type: strMatches[0].toLowerCase(),
+          value: Number(numMatches[0]),
+          unitId: unit.id,
+        };
+        this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
       }
     },
   },

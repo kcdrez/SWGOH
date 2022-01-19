@@ -14,6 +14,8 @@ interface State {
   requestState: loadingState;
   relicConfig: ConfigType;
   ownedRelics: any;
+  refreshes: { cantina: number },
+  energy: { cantina: number }
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -24,8 +26,50 @@ const store = {
     requestState: loadingState.initial,
     relicConfig: relicConfig,
     ownedRelics: {},
+    refreshes: { cantina: 0 },
+    energy: { cantina: 0 }
   },
-  getters: {},
+  getters: {
+    relicOptions(_state: State) {
+      return (relicLevel: number): number[] => {
+        const list = [];
+        for (let i = relicLevel; i <= 9; i++) {
+          list.push(i);
+        }
+        return list;
+      }
+    },
+    timeEstimation(state: State, getters: any) {
+      return (mat: Relic, level: number, target: number): number => {
+        const owned: number = state.ownedRelics[mat.id] || 0;
+        const totalAmount: number = getters.amountNeeded(mat, level, target);
+        const remaining: number = totalAmount - owned;
+
+        if (remaining > 0) {
+          const totalEnergy =
+            120 + 45 + 120 * state.refreshes.cantina - state.energy.cantina;
+          const triesPerDay = totalEnergy / mat.location.energy;
+          const amountPerDay = triesPerDay * mat.dropRate;
+          return Math.round(remaining / amountPerDay);
+        } else {
+          return 0;
+        }
+      }
+    },
+    amountNeeded(_state: State) {
+      return (mat: Relic, level: number, target: number): number => {
+        const amountMap = mat.amount;
+        let amount = 0;
+        for (let i = level; i <= target; i++) {
+          const key = i.toString();
+          if (i in amountMap) {
+            amount += amountMap[key];
+          }
+        }
+        return amount;
+      }
+    },
+  },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;

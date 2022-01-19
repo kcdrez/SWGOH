@@ -5,7 +5,11 @@
         Relic Mats Needed to get {{ unit.name }} from Relic Level
         {{ currentRelicLevel }} to
         <select v-model.number="relicTarget">
-          <option v-for="num in relicOptions" :value="num" :key="num">
+          <option
+            v-for="num in relicOptions(unit.relic_tier)"
+            :value="num"
+            :key="num"
+          >
             Relic {{ num }}
           </option>
         </select>
@@ -81,10 +85,18 @@
             </td>
             <td class="text-center align-middle">{{ mat.location.node }}</td>
             <td>
-              <OwnedAmount :item="mat" :needed="amountNeeded(mat)" />
+              <OwnedAmount
+                :item="mat"
+                :needed="
+                  amountNeeded(mat, this.currentRelicLevel, this.relicTarget)
+                "
+              />
             </td>
             <td class="text-center align-middle">
-              {{ timeEstimation(mat) }} Days
+              {{
+                timeEstimation(mat, this.currentRelicLevel, this.relicTarget)
+              }}
+              Days
             </td>
             <!-- <td>
               <div class="btn-group btn-group-sm" role="group">
@@ -102,7 +114,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState } from "vuex";
+import { mapGetters, mapState } from "vuex";
 
 import { Relic } from "../../types/relic";
 import OwnedAmount from "./owned.vue";
@@ -129,20 +141,17 @@ export default defineComponent({
   computed: {
     ...mapState("unit", ["unit"]),
     ...mapState("relic", ["requestState", "ownedRelics", "relicConfig"]),
+    ...mapGetters("relic", ["relicOptions", "timeEstimation", "amountNeeded"]),
     totalDays(): number {
       return (Object.values(this.relicConfig) as Array<Relic>).reduce(
         (acc, el) => {
-          return acc + this.timeEstimation(el);
+          return (
+            acc +
+            this.timeEstimation(el, this.currentRelicLevel, this.relicTarget)
+          );
         },
         0
       );
-    },
-    relicOptions(): number[] {
-      const list = [];
-      for (let i = this.currentRelicLevel; i <= 9; i++) {
-        list.push(i);
-      }
-      return list;
     },
     currentRelicLevel(): number {
       return this.unit?.relic_tier || 1;
@@ -193,34 +202,21 @@ export default defineComponent({
           return name.includes(compare) || id.includes(compare);
         });
     },
+    // _gearTarget: {
+    //   get(): number {
+    //     return this.$store.getters["planner/gearTarget"](this.unit);
+    //   },
+    //   set(value: number) {
+    //     const payload: UpdateItem = {
+    //       type: "gear",
+    //       value,
+    //       unitId: this.unit.id,
+    //     };
+    //     this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
+    //   },
+    // },
   },
   methods: {
-    timeEstimation(mat: Relic): number {
-      const owned: number = this.ownedRelics[mat.id] || 0;
-      const totalAmount: number = this.amountNeeded(mat);
-      const remaining: number = totalAmount - owned;
-
-      if (remaining > 0) {
-        const totalEnergy =
-          120 + 45 + 120 * this.refreshes.cantina - this.energy.cantina;
-        const triesPerDay = totalEnergy / mat.location.energy;
-        const amountPerDay = triesPerDay * mat.dropRate;
-        return Math.round(remaining / amountPerDay);
-      } else {
-        return 0;
-      }
-    },
-    amountNeeded(mat: Relic): number {
-      const amountMap = mat.amount;
-      let amount = 0;
-      for (let i = this.currentRelicLevel; i <= this.relicTarget; i++) {
-        const key = i.toString();
-        if (i in amountMap) {
-          amount += amountMap[key];
-        }
-      }
-      return amount;
-    },
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
