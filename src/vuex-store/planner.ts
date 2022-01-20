@@ -54,10 +54,7 @@ const store = {
         JSON.stringify(state.targetConfig)
       );
     },
-    UPDATE_PLANNER_ITEM(
-      state: State,
-      { unitId, type, value, updateBoth }: UpdateItem
-    ) {
+    UPDATE_PLANNER_ITEM(state: State, { unitId, type, value }: UpdateItem) {
       if (!state.targetConfig[unitId]) {
         state.targetConfig[unitId] = {
           gear: { target: 0 },
@@ -65,24 +62,13 @@ const store = {
         };
       }
 
-      if (type === "gear") {
-        if (updateBoth) {
-          state.targetConfig[unitId].relic.target = 0;
-        }
-        state.targetConfig[unitId].gear.target = value;
-      } else {
-        if (updateBoth) {
-          state.targetConfig[unitId].gear.target = 13;
-        }
-        state.targetConfig[unitId].relic.target = value;
-      }
+      state.targetConfig[unitId][type].target = value;
       window.localStorage.setItem(
         "generalPlanner",
         JSON.stringify(state.targetConfig)
       );
     },
     UPSERT_UNIT(state: State, id: string) {
-      console.log("UPSERT_UNIT", id);
       const index = state.unitList.findIndex((x) => x === id);
       if (index >= 0) {
         state.unitList.splice(index, 1, id);
@@ -95,7 +81,6 @@ const store = {
       );
     },
     SET_UNIT_LIST(state: State, payload: string[]) {
-      console.log("SET_UNIT_LIST", payload);
       state.unitList = payload;
       window.localStorage.setItem(
         "generalPlanner-unitList",
@@ -127,7 +112,6 @@ const store = {
           });
         }
       });
-      console.log("init planner done");
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     addUnit({ commit }: ActionCtx, id: string) {
@@ -135,6 +119,10 @@ const store = {
     },
     updatePlannerTarget({ commit }: ActionCtx, payload: UpdateItem) {
       commit("UPDATE_PLANNER_ITEM", payload);
+    },
+    initPlannerTarget({ commit }: ActionCtx, unitId: string) {
+      commit("UPDATE_PLANNER_ITEM", { unitId, type: "gear", value: 13 });
+      commit("UPDATE_PLANNER_ITEM", { unitId, type: "relic", value: 5 });
     },
   },
 };

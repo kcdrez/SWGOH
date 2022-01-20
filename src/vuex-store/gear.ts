@@ -74,9 +74,9 @@ const store = {
       };
     },
     gearOptions(_state: State) {
-      return (gearlLevel: number): number[] => {
+      return (gearLevel: number): number[] => {
         const list = [];
-        for (let i = (gearlLevel || 0) + 1; i <= 13; i++) {
+        for (let i = (gearLevel || 0) + 1; i <= 13; i++) {
           list.push(i);
         }
         return list;

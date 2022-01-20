@@ -1,142 +1,151 @@
 <template>
   <div class="collapse" id="gearSection">
     <Loading :state="requestState" size="md" message="Loading Gear Data">
-      <h3 class="gear-header">
-        Gear Needed to get {{ unit.name }} from Gear Level
-        {{ currentGearLevel(unit) }} to
-        <select v-model.number="gearTarget">
-          <option
-            v-for="num in gearOptions(unit.gear_level)"
-            :value="num"
-            :key="num"
+      <template v-if="unit.gear_level < 13">
+        <h3 class="gear-header">
+          Gear Needed to get {{ unit.name }} from Gear Level
+          {{ currentGearLevel(unit) }} to
+          <select v-model.number="gearTarget">
+            <option
+              v-for="num in gearOptions(unit.gear_level)"
+              :value="num"
+              :key="num"
+            >
+              Gear {{ num }}
+            </option>
+          </select>
+          :
+        </h3>
+        <h3>
+          It will take approximately {{ totalDays(unit) }} day{{
+            totalDays(unit) === 1 ? "" : "s"
+          }}
+          to get to Gear Level {{ gearTarget }}.
+        </h3>
+        <div class="input-group input-group-sm w-50">
+          <span
+            class="input-group-text c-help energy-text"
+            title="Energy used on Light and Dark side tables"
+            >Standard Energy:</span
           >
-            Gear {{ num }}
-          </option>
-        </select>
-        :
-      </h3>
-      <h3>
-        It will take approximately {{ totalDays(unit) }} days to get to Gear
-        Level {{ gearTarget }}.
-      </h3>
-      <div class="input-group input-group-sm w-50">
-        <span
-          class="input-group-text c-help energy-text"
-          title="Energy used on Light and Dark side tables"
-          >Standard Energy:</span
-        >
-        <span
-          class="input-group-text c-help"
-          title="How many times you refresh the energy using crystals"
-          >Daily Refreshes:</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="refreshesStandard"
-          min="0"
-        />
-        <span
-          class="input-group-text c-help"
-          title="How much of your daily energy used for farming other things (i.e. character shards)"
-          >Daily Energy Used:</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="energySpentStandard"
-          min="0"
-          :max="145 + refreshesStandard * 120 + 135"
-        />
-      </div>
-      <div class="input-group input-group-sm my-2 w-50">
-        <span
-          class="input-group-text c-help energy-text"
-          title="Energy used on fleet/ship nodes"
-          >Fleet Energy:</span
-        >
-        <span
-          class="input-group-text c-help"
-          title="How many times you refresh the energy using crystals"
-          >Daily Refreshes:</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="refreshesFleet"
-          min="0"
-        />
-        <span
-          class="input-group-text c-help"
-          title="How much of your daily energy used for farming other things (e.g. character shards)"
-          >Daily Energy Used:</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="energySpentFleet"
-          min="0"
-          :max="145 + refreshesFleet * 120 + 45"
-        />
-      </div>
-      <table class="table table-bordered table-dark table-sm table-striped">
-        <thead>
-          <tr class="text-center">
-            <th width="20%">
-              <div class="c-pointer" @click="sortBy('name')">
-                Salvage Name
-                <i class="fas mx-1" :class="sortIcon('name')"></i>
-              </div>
-              <input
-                class="form-control form-control-sm mx-auto my-1 w-75"
-                placeholder="Search"
-                v-model="searchName"
-              />
-            </th>
-            <th width="20%" class="c-pointer" @click="sortBy('location')">
-              Locations
-              <i class="fas mx-1" :class="sortIcon('location')"></i>
-            </th>
-            <th width="20%" class="c-pointer" @click="sortBy('amount')">
-              Amount
-              <i class="fas mx-1" :class="sortIcon('amount')"></i>
-            </th>
-            <th width="10%" class="c-pointer" @click="sortBy('time')">
-              Est. Time
-              <i class="fas mx-1" :class="sortIcon('time')"></i>
-            </th>
-            <!-- <th width="15%">Actions</th> -->
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="salvage in filteredSalvageList" :key="salvage.base_id">
-            <td class="text-center">
-              <GearIcon :gear="salvage" />
-            </td>
-            <td>
-              <ul class="m-0">
-                <li
-                  v-for="(l, index) in gearLocation(salvage.lookupMissionList)"
-                  :key="index"
-                >
-                  {{ l }}
-                </li>
-              </ul>
-            </td>
-            <td>
-              <Salvage :salvage="salvage" />
-            </td>
-            <td class="text-center">{{ timeEstimation(salvage) }} Days</td>
-            <!-- <td>
+          <span
+            class="input-group-text c-help"
+            title="How many times you refresh the energy using crystals"
+            >Daily Refreshes:</span
+          >
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="refreshesStandard"
+            min="0"
+          />
+          <span
+            class="input-group-text c-help"
+            title="How much of your daily energy used for farming other things (i.e. character shards)"
+            >Daily Energy Used:</span
+          >
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="energySpentStandard"
+            min="0"
+            :max="145 + refreshesStandard * 120 + 135"
+          />
+        </div>
+        <div class="input-group input-group-sm my-2 w-50">
+          <span
+            class="input-group-text c-help energy-text"
+            title="Energy used on fleet/ship nodes"
+            >Fleet Energy:</span
+          >
+          <span
+            class="input-group-text c-help"
+            title="How many times you refresh the energy using crystals"
+            >Daily Refreshes:</span
+          >
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="refreshesFleet"
+            min="0"
+          />
+          <span
+            class="input-group-text c-help"
+            title="How much of your daily energy used for farming other things (e.g. character shards)"
+            >Daily Energy Used:</span
+          >
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="energySpentFleet"
+            min="0"
+            :max="145 + refreshesFleet * 120 + 45"
+          />
+        </div>
+        <table class="table table-bordered table-dark table-sm table-striped">
+          <thead>
+            <tr class="text-center">
+              <th width="20%">
+                <div class="c-pointer" @click="sortBy('name')">
+                  Salvage Name
+                  <i class="fas mx-1" :class="sortIcon('name')"></i>
+                </div>
+                <input
+                  class="form-control form-control-sm mx-auto my-1 w-75"
+                  placeholder="Search"
+                  v-model="searchName"
+                />
+              </th>
+              <th width="20%" class="c-pointer" @click="sortBy('location')">
+                Locations
+                <i class="fas mx-1" :class="sortIcon('location')"></i>
+              </th>
+              <th width="20%" class="c-pointer" @click="sortBy('amount')">
+                Amount
+                <i class="fas mx-1" :class="sortIcon('amount')"></i>
+              </th>
+              <th width="10%" class="c-pointer" @click="sortBy('time')">
+                Est. Time
+                <i class="fas mx-1" :class="sortIcon('time')"></i>
+              </th>
+              <!-- <th width="15%">Actions</th> -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="salvage in filteredSalvageList" :key="salvage.base_id">
+              <td class="text-center">
+                <GearIcon :gear="salvage" />
+              </td>
+              <td>
+                <ul class="m-0">
+                  <li
+                    v-for="(l, index) in gearLocation(
+                      salvage.lookupMissionList
+                    )"
+                    :key="index"
+                  >
+                    {{ l }}
+                  </li>
+                </ul>
+              </td>
+              <td>
+                <Salvage :salvage="salvage" />
+              </td>
+              <td class="text-center">{{ timeEstimation(salvage) }} Days</td>
+              <!-- <td>
               <div class="btn-group btn-group-sm" role="group">
                 <button type="button" class="btn btn-primary">Left</button>
                 <button type="button" class="btn btn-secondary">Middle</button>
                 <button type="button" class="btn btn-info">Right</button>
               </div>
             </td> -->
-          </tr>
-        </tbody>
-      </table>
+            </tr>
+          </tbody>
+        </table>
+      </template>
+      <template v-else>
+        <h3>{{ unit.name }} is already at gear level 13.</h3>
+      </template>
     </Loading>
   </div>
 </template>

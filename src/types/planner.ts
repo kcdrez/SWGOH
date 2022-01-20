@@ -15,7 +15,6 @@ export interface UpdateItem {
   unitId: string;
   type: "gear" | "relic";
   value: number;
-  updateBoth?: boolean;
 }
 
 export interface UnitPlannerItem {

@@ -17,7 +17,8 @@
       </h3>
       <h3>
         It will take approximately
-        {{ totalDays(unit) }} days to get to Relic Level {{ relicTarget }}.
+        {{ totalDays(unit) }} day{{ totalDays(unit) === 1 ? "" : "s" }} to get
+        to Relic Level {{ relicTarget }}.
       </h3>
       <div class="input-group input-group-sm w-50 mb-3">
         <span
@@ -148,7 +149,7 @@ export default defineComponent({
       "totalDays",
     ]),
     currentRelicLevel(): number {
-      return this.unit?.relic_tier || 1;
+      return this.unit?.relic_tier < 0 ? 0 : this.unit.relic_tier;
     },
     filteredRelics(): Relic[] {
       const list: Relic[] = Object.values(this.relicConfig);

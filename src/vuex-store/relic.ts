@@ -34,6 +34,9 @@ const store = {
     relicOptions(_state: State) {
       return (relicLevel: number): number[] => {
         const list = [];
+        if (relicLevel < 0) {
+          relicLevel = 0;
+        }
         for (let i = relicLevel; i <= 9; i++) {
           list.push(i);
         }
@@ -72,7 +75,6 @@ const store = {
     },
     totalDays(state: State, getters: any, rootState: RootState) {
       return (unit: Unit): number => {
-        console.log(unit);
         const { target } = rootState.planner.targetConfig[unit.id].relic;
         return (Object.values(state.relicConfig) as Array<Relic>).reduce(
           (acc, el) => {

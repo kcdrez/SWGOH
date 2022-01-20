@@ -3,7 +3,7 @@
     <table class="table table-bordered table-dark table-sm table-striped">
       <thead>
         <tr class="text-center align-middle">
-          <th width="5%">Priority</th>
+          <!-- <th width="5%">Priority</th> -->
           <th width="20%">
             <div class="c-pointer" @click="sortBy('name')">
               Unit Name
@@ -52,17 +52,40 @@
       </thead>
       <tbody>
         <tr v-for="unit in unitList" :key="unit.id">
-          <td class="text-center">1</td>
-          <td class="text-center">{{ unit.name }}</td>
+          <!-- <td class="text-center">1</td> -->
+          <td class="text-center">
+            <router-link
+              :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+              >{{ unit.name }}</router-link
+            >
+          </td>
           <td class="text-center">{{ getCurLevel(unit) }}</td>
           <td class="text-center">
             <select
-              class="form-control form-control-sm"
-              :value="getTarget(unit)"
-              @input="changeTarget(unit, $event)"
+              class="form-control form-control-sm mb-1"
+              :value="unit.gearTarget"
+              @input="changeTarget(unit, 'gear', $event)"
+              v-if="unit.gear_level < 13"
             >
-              <option v-for="opt in levelOptions(unit)" :value="opt" :key="opt">
-                {{ opt }}
+              <option
+                v-for="num in gearOptions(unit.gear_level)"
+                :value="num"
+                :key="num"
+              >
+                Gear {{ num }}
+              </option>
+            </select>
+            <select
+              :value="unit.relicTarget"
+              @input="changeTarget(unit, 'relic', $event)"
+              class="form-control form-control-sm"
+            >
+              <option
+                v-for="num in relicOptions(unit.relic_tier)"
+                :value="num"
+                :key="num"
+              >
+                Relic {{ num }}
               </option>
             </select>
           </td>
@@ -91,8 +114,8 @@ import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 import Loading from "../components/loading.vue";
 import Error from "../components/error.vue";
-import { Unit } from "../types/unit";
-import { UpdateItem } from "../types/planner";
+import { Unit, UnitGear } from "../types/unit";
+import { UnitPlannerItem, UpdateItem } from "../types/planner";
 import moment from "moment";
 
 export default defineComponent({
@@ -133,7 +156,7 @@ export default defineComponent({
         return "fa-sort";
       }
     },
-    getCurLevel(unit: Unit): string {
+    getCurLevel(unit: UnitPlannerItem & Unit): string {
       const gearLevel = this.currentGearLevel(unit);
       if (gearLevel < 13) {
         return `Gear ${gearLevel}`;
@@ -143,35 +166,18 @@ export default defineComponent({
         return `Gear 13`;
       }
     },
-    levelOptions(unit: Unit): string[] {
-      const gearOptions = this.gearOptions(unit.gear_level).map(
-        (x: number) => "Gear " + x
-      );
-      const relicOptions = this.relicOptions(unit.relic_tier).map(
-        (x: number) => "Relic " + x
-      );
-      return [...gearOptions, ...relicOptions];
-    },
-    getTarget(unit: any): string {
-      if (unit.relicTarget >= 1) {
-        return "Relic " + unit.relicTarget;
-      } else {
-        return "Gear " + unit.gearTarget;
-      }
-    },
-    changeTarget(unit: any, event: any) {
+    changeTarget(
+      unit: UnitPlannerItem & Unit,
+      type: "gear" | "relic",
+      event: any
+    ) {
       const { value } = event.target;
-      const numMatches = value.match(/(\d+)/);
-      const strMatches = value.match(/([a-zA-Z]+)/);
-      if (numMatches && strMatches) {
-        const payload: UpdateItem = {
-          type: strMatches[0].toLowerCase(),
-          value: Number(numMatches[0]),
-          unitId: unit.id,
-          updateBoth: true, //todo just separate this out to two different select dropdowns
-        };
-        this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
-      }
+      const payload: UpdateItem = {
+        type,
+        value: Number(value),
+        unitId: unit.id,
+      };
+      this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
     },
     getDate(days: number): string {
       return moment().add(days, "days").format("MM-DD-YYYY");

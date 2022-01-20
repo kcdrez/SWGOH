@@ -47,28 +47,12 @@ const store = {
         const exists = rootState.player.player?.units.find((x) => x.id === id);
         if (exists) {
           commit("SET_UNIT", exists);
-          dispatch(
-            "planner/updatePlannerTarget",
-            {
-              unitId: exists.id,
-              type: "relic",
-              value: 5,
-            },
-            { root: true }
-          );
+          dispatch("planner/initPlannerTarget", exists.id, { root: true });
           commit("SET_REQUEST_STATE", loadingState.ready);
         } else {
           const response = await rootState.apiClient?.fetchUnit(id);
           commit("SET_UNIT", response);
-          dispatch(
-            "planner/updatePlannerTarget",
-            {
-              unitId: response.id,
-              type: "relic",
-              value: 5,
-            },
-            { root: true }
-          );
+          dispatch("planner/initPlannerTarget", response.id, { root: true });
           commit("SET_REQUEST_STATE", loadingState.ready);
         }
       } catch (err: any) {
