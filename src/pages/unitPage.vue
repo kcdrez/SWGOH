@@ -9,6 +9,12 @@
         class="d-block m-auto"
         :src="`https://game-assets.swgoh.gg/${unit?.thumbnailName}.png`"
       />
+      <button
+        class="btn btn-secondary text-dark mx-auto my-2 d-block"
+        @click="add()"
+      >
+        Add to General Planner
+      </button>
       <h1 class="collapse-header">
         <a data-bs-toggle="collapse" href="#gearSection">Gear Planner</a>
         <i
@@ -73,6 +79,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
+
 import GearPlanner from "../components/gear/gearPlanner.vue";
 import RelicPlanner from "../components/relic/relicPlanner.vue";
 import Loading from "../components/loading.vue";
@@ -97,9 +104,31 @@ export default defineComponent({
   },
   computed: {
     ...mapState("unit", ["unit", "requestState"]),
+    ...mapState("planner", ["unitList"]),
   },
   methods: {
     ...mapActions("unit", ["fetchUnit"]),
+    ...mapActions("planner", ["addUnit"]),
+    add(): void {
+      if (this.unitList.find((x: string) => x === this.unit.id)) {
+        this.$toast(
+          `${this.unit.name} is already added to the General Planner`,
+          {
+            positionY: "top",
+            class: "toast-warning",
+          }
+        );
+      } else {
+        this.addUnit(this.unit.id);
+        this.$toast(
+          `${this.unit.name} successfully added to the General Planner`,
+          {
+            positionY: "top",
+            class: "toast-success",
+          }
+        );
+      }
+    },
   },
   async created() {
     try {

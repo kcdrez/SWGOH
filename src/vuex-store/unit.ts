@@ -1,13 +1,12 @@
 import { ActionContext } from "vuex";
 
-import { CombinedUnit } from "../types/unit";
-import { PlayerUnit } from "../types/player";
+import { Unit } from "../types/unit";
 import { loadingState } from "../enums/loading";
 import { State as RootState } from "./store";
 
 interface State {
   requestState: loadingState;
-  unit: CombinedUnit | null;
+  unit: Unit | null;
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -19,39 +18,58 @@ const store = {
     unit: null,
   },
   getters: {
-    currentGearLevel(state: State): number {
-      if (state.unit) {
-        return (
-          state.unit?.gear_level +
-          state.unit.gear.filter((x: any) => x.is_obtained).length / 10
-        );
-      } else {
-        return 0;
-      }
+    currentGearLevel(_state: State, _getters: any, rootState: RootState) {
+      //move to gear module
+      return (unit: Unit): number => {
+        if (unit) {
+          return (
+            unit.gear_level +
+            unit.gear.filter((x: any) => x.is_obtained).length / 10
+          );
+        } else {
+          return 0;
+        }
+      };
     },
   },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;
     },
-    SET_UNIT(state: State, payload: CombinedUnit) {
+    SET_UNIT(state: State, payload: Unit) {
       state.unit = payload;
     },
   },
   actions: {
-    async fetchUnit({ state, commit, rootState }: ActionCtx, id: string) {
+    async fetchUnit({ commit, rootState, dispatch }: ActionCtx, id: string) {
       commit("SET_REQUEST_STATE", loadingState.loading);
       try {
-        const response = await rootState.apiClient?.fetchUnit(id);
-        const match = rootState.player.player?.units.find(
-          (u: PlayerUnit) => u?.id === response?.id
-        );
-        if (match && response) {
-          commit("SET_UNIT", { ...match, ...response });
+        const exists = rootState.player.player?.units.find((x) => x.id === id);
+        if (exists) {
+          commit("SET_UNIT", exists);
+          dispatch(
+            "planner/updatePlannerTarget",
+            {
+              unitId: exists.id,
+              type: "relic",
+              value: 5,
+            },
+            { root: true }
+          );
           commit("SET_REQUEST_STATE", loadingState.ready);
         } else {
-
-          commit("SET_REQUEST_STATE", loadingState.error);
+          const response = await rootState.apiClient?.fetchUnit(id);
+          commit("SET_UNIT", response);
+          dispatch(
+            "planner/updatePlannerTarget",
+            {
+              unitId: response.id,
+              type: "relic",
+              value: 5,
+            },
+            { root: true }
+          );
+          commit("SET_REQUEST_STATE", loadingState.ready);
         }
       } catch (err: any) {
         commit("SET_REQUEST_STATE", loadingState.error);

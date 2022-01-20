@@ -22,7 +22,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
-import { Player, PlayerUnit } from "../types/player";
+
+import { Player } from "../types/player";
+import { Unit } from "../types/unit";
 
 export default defineComponent({
   name: "Player",
@@ -38,7 +40,7 @@ export default defineComponent({
     };
   },
   computed: {
-    filteredUnits(): PlayerUnit[] {
+    filteredUnits(): Unit[] {
       return this.player.units
         .filter((unit) => {
           if (unit) {

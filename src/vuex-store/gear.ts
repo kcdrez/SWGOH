@@ -11,12 +11,15 @@ import {
 import { loadingState } from "../enums/loading";
 import { State as RootState } from "./store";
 import { unvue } from "../utils";
+import { Unit } from "@/types/unit";
 
 interface State {
   requestState: loadingState;
   gearList: Gear[];
   gearLocations: any[];
   ownedGear: any;
+  refreshes: { standard: number; fleet: number };
+  energy: { standard: number; fleet: number };
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -28,6 +31,8 @@ const store = {
     gearList: [],
     gearLocations: [],
     ownedGear: {},
+    refreshes: { standard: 0, fleet: 0 },
+    energy: { standard: 0, fleet: 0 },
   },
   getters: {
     gearLocation(_state: State) {
@@ -68,6 +73,160 @@ const store = {
         return state.gearList.find((el: Gear) => el.base_id === id);
       };
     },
+    gearOptions(_state: State) {
+      return (gearlLevel: number): number[] => {
+        const list = [];
+        for (let i = (gearlLevel || 0) + 1; i <= 13; i++) {
+          list.push(i);
+        }
+        return list;
+      };
+    },
+    timeEstimation(state: State, getters: any) {
+      return (gear: Gear): number => {
+        const owned: number = getters.gearOwnedCount(gear);
+        const remaining = gear.amount - owned;
+
+        if (remaining > 0) {
+          let energy = 100;
+          let totalDays = 0;
+
+          gear.lookupMissionList.forEach((mission) => {
+            const {
+              campaignId,
+              campaignNodeDifficulty,
+              campaignMapId,
+              campaignMissionId,
+              campaignNodeId,
+            } = mission.missionIdentifier;
+
+            if (["C01SP", "C01D", "C01L"].includes(campaignId)) {
+              let missionEnergy = 1;
+              const node = Number(campaignMissionId.replace(/\D/g, ""));
+
+              if (node <= 4) {
+                missionEnergy = 6;
+              } else if (node >= 6) {
+                missionEnergy = 8;
+              } else if (node >= 9) {
+                missionEnergy = 10;
+              }
+
+              if (campaignNodeDifficulty === 5) {
+                missionEnergy *= 2;
+              }
+
+              if (missionEnergy < energy) {
+                const dropRate = 0.2;
+                const refreshes = ["C01D", "C01L"].includes(campaignId)
+                  ? state.refreshes.standard
+                  : state.refreshes.fleet;
+                const extraEnergy = ["C01D", "C01L"].includes(campaignId)
+                  ? 135
+                  : 45;
+                const otherEnergy = ["C01D", "C01L"].includes(campaignId)
+                  ? state.energy.standard
+                  : state.energy.fleet;
+                const totalEnergy =
+                  240 + extraEnergy + 120 * refreshes - otherEnergy;
+
+                const chancesPerDay = totalEnergy / missionEnergy;
+                const piecesPerDay = chancesPerDay * dropRate;
+                totalDays = remaining / piecesPerDay;
+                energy = missionEnergy;
+              }
+            } else if (campaignMapId === "CHALLENGES") {
+              energy = 0;
+              totalDays = remaining / (60 / 7);
+            }
+          });
+          return Math.round(totalDays);
+        } else {
+          return 0;
+        }
+      };
+    },
+    totalDays(_state: State, getters: any, rootState: RootState) {
+      return (unit: Unit): any => {
+        const { target } = rootState.planner.targetConfig[unit.id].gear;
+        let totalStandard = 0;
+        let totalFleet = 0;
+        let totalChallenges = 0;
+        getters.fullSalvageList(unit, target).forEach((gear: Gear) => {
+          const isChallenge = gear.lookupMissionList.some(
+            (x: Mission) => x.missionIdentifier.campaignMapId === "CHALLENGES"
+          );
+          const isFleet = gear.lookupMissionList.some(
+            (x: Mission) => x.missionIdentifier.campaignId === "C01SP"
+          );
+          if (isChallenge) {
+            totalChallenges = Math.max(
+              getters.timeEstimation(gear),
+              totalChallenges
+            );
+          } else if (isFleet) {
+            totalFleet += getters.timeEstimation(gear);
+          } else {
+            totalStandard += getters.timeEstimation(gear);
+          }
+        });
+        return Math.max(totalStandard, totalFleet, totalChallenges);
+      };
+    },
+    fullGearListByLevel(state: State, getters: any) {
+      return (unit: Unit): any[] => {
+        if (unit) {
+          const { gear_level } = unit;
+          const futureGear =
+            unit?.unitTierList.filter((x: any) => x.tier >= gear_level) || [];
+
+          return futureGear.map((gear: any) => {
+            return {
+              tier: gear.tier,
+              gear: gear.equipmentSetList
+                .map((id: string, index: number) => {
+                  let alreadyEquipped = false;
+                  if (gear.tier === unit?.gear_level) {
+                    alreadyEquipped = unit?.gear[index].is_obtained || false;
+                  }
+
+                  if (alreadyEquipped) {
+                    return null;
+                  } else {
+                    return getters.findGearData(id);
+                  }
+                })
+                .filter((x: any) => !!x),
+            };
+          });
+        } else {
+          return [];
+        }
+      };
+    },
+    fullSalvageList(state: State, getters: any) {
+      return (unit: Unit, gearTarget: number): Gear[] => {
+        let list: Gear[] = [];
+        getters.fullGearListByLevel(unit).forEach((tier: any) => {
+          if (tier.tier + 1 <= gearTarget) {
+            tier.gear.forEach((gear: any) => {
+              gear.ingredients.forEach(({ gear, amount }: any) => {
+                const gearData = { ...getters.findGearData(gear), amount };
+                const exists = list.find(
+                  (x: any) => x.base_id === gearData.base_id
+                );
+                if (exists) {
+                  exists.amount += amount;
+                } else {
+                  list.push(gearData);
+                }
+              });
+            });
+          }
+        });
+        return list;
+      };
+    },
   },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
@@ -81,6 +240,18 @@ const store = {
     },
     SET_GEAR_OWNED(state: State, payload: any) {
       state.ownedGear = payload;
+    },
+    UPDATE_REFRESHES(
+      state: State,
+      payload: { value: number; type: "standard" | "fleet" }
+    ) {
+      state.refreshes[payload.type] = payload.value;
+    },
+    UPDATE_ENERGY(
+      state: State,
+      payload: { value: number; type: "standard" | "fleet" }
+    ) {
+      state.energy[payload.type] = payload.value;
     },
   },
   actions: {

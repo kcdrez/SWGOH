@@ -1,19 +1,23 @@
 <template>
-  <div class="collapse show" id="relicSection">
+  <div class="collapse" id="relicSection">
     <Loading :state="requestState" size="md" message="Loading Gear Data">
       <h3 class="gear-header">
         Relic Mats Needed to get {{ unit.name }} from Relic Level
         {{ currentRelicLevel }} to
         <select v-model.number="relicTarget">
-          <option v-for="num in relicOptions" :value="num" :key="num">
+          <option
+            v-for="num in relicOptions(unit.relic_tier)"
+            :value="num"
+            :key="num"
+          >
             Relic {{ num }}
           </option>
         </select>
         :
       </h3>
       <h3>
-        It will take approximately {{ totalDays }} days to get to Relic Level
-        {{ relicTarget }}.
+        It will take approximately
+        {{ totalDays(unit) }} days to get to Relic Level {{ relicTarget }}.
       </h3>
       <div class="input-group input-group-sm w-50 mb-3">
         <span
@@ -81,10 +85,18 @@
             </td>
             <td class="text-center align-middle">{{ mat.location.node }}</td>
             <td>
-              <OwnedAmount :item="mat" :needed="amountNeeded(mat)" />
+              <OwnedAmount
+                :item="mat"
+                :needed="
+                  amountNeeded(mat, this.currentRelicLevel, this.relicTarget)
+                "
+              />
             </td>
             <td class="text-center align-middle">
-              {{ timeEstimation(mat) }} Days
+              {{
+                timeEstimation(mat, this.currentRelicLevel, this.relicTarget)
+              }}
+              Days
             </td>
             <!-- <td>
               <div class="btn-group btn-group-sm" role="group">
@@ -102,12 +114,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState } from "vuex";
+import { mapGetters, mapState } from "vuex";
 
 import { Relic } from "../../types/relic";
 import OwnedAmount from "./owned.vue";
 import RelicIcon from "./relicIcon.vue";
 import Loading from "../loading.vue";
+import { UpdateItem } from "../../types/planner";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
@@ -120,7 +133,6 @@ export default defineComponent({
       energy: {
         cantina: 0,
       },
-      relicTarget: 7,
       sortMethod: "",
       sortDir: "asc",
       searchName: "",
@@ -129,21 +141,12 @@ export default defineComponent({
   computed: {
     ...mapState("unit", ["unit"]),
     ...mapState("relic", ["requestState", "ownedRelics", "relicConfig"]),
-    totalDays(): number {
-      return (Object.values(this.relicConfig) as Array<Relic>).reduce(
-        (acc, el) => {
-          return acc + this.timeEstimation(el);
-        },
-        0
-      );
-    },
-    relicOptions(): number[] {
-      const list = [];
-      for (let i = this.currentRelicLevel; i <= 9; i++) {
-        list.push(i);
-      }
-      return list;
-    },
+    ...mapGetters("relic", [
+      "relicOptions",
+      "timeEstimation",
+      "amountNeeded",
+      "totalDays",
+    ]),
     currentRelicLevel(): number {
       return this.unit?.relic_tier || 1;
     },
@@ -193,34 +196,21 @@ export default defineComponent({
           return name.includes(compare) || id.includes(compare);
         });
     },
+    relicTarget: {
+      get(): number {
+        return this.$store.getters["planner/relicTarget"](this.unit.id);
+      },
+      set(value: number) {
+        const payload: UpdateItem = {
+          type: "relic",
+          value,
+          unitId: this.unit.id,
+        };
+        this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
+      },
+    },
   },
   methods: {
-    timeEstimation(mat: Relic): number {
-      const owned: number = this.ownedRelics[mat.id] || 0;
-      const totalAmount: number = this.amountNeeded(mat);
-      const remaining: number = totalAmount - owned;
-
-      if (remaining > 0) {
-        const totalEnergy =
-          120 + 45 + 120 * this.refreshes.cantina - this.energy.cantina;
-        const triesPerDay = totalEnergy / mat.location.energy;
-        const amountPerDay = triesPerDay * mat.dropRate;
-        return Math.round(remaining / amountPerDay);
-      } else {
-        return 0;
-      }
-    },
-    amountNeeded(mat: Relic): number {
-      const amountMap = mat.amount;
-      let amount = 0;
-      for (let i = this.currentRelicLevel; i <= this.relicTarget; i++) {
-        const key = i.toString();
-        if (i in amountMap) {
-          amount += amountMap[key];
-        }
-      }
-      return amount;
-    },
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";

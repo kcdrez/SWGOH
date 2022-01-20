@@ -3,17 +3,21 @@
     <Loading :state="requestState" size="md" message="Loading Gear Data">
       <h3 class="gear-header">
         Gear Needed to get {{ unit.name }} from Gear Level
-        {{ currentGearLevel }} to
+        {{ currentGearLevel(unit) }} to
         <select v-model.number="gearTarget">
-          <option v-for="num in gearOptions" :value="num" :key="num">
+          <option
+            v-for="num in gearOptions(unit.gear_level)"
+            :value="num"
+            :key="num"
+          >
             Gear {{ num }}
           </option>
         </select>
         :
       </h3>
       <h3>
-        It will take approximately {{ totalDays }} days to get to Gear Level
-        {{ gearTarget }}.
+        It will take approximately {{ totalDays(unit) }} days to get to Gear
+        Level {{ gearTarget }}.
       </h3>
       <div class="input-group input-group-sm w-50">
         <span
@@ -29,7 +33,7 @@
         <input
           class="form-control"
           type="number"
-          v-model.number="refreshes.standard"
+          v-model.number="refreshesStandard"
           min="0"
         />
         <span
@@ -40,9 +44,9 @@
         <input
           class="form-control"
           type="number"
-          v-model.number="energy.standard"
+          v-model.number="energySpentStandard"
           min="0"
-          :max="145 + refreshes.standard * 120 + 135"
+          :max="145 + refreshesStandard * 120 + 135"
         />
       </div>
       <div class="input-group input-group-sm my-2 w-50">
@@ -59,7 +63,7 @@
         <input
           class="form-control"
           type="number"
-          v-model.number="refreshes.fleet"
+          v-model.number="refreshesFleet"
           min="0"
         />
         <span
@@ -70,9 +74,9 @@
         <input
           class="form-control"
           type="number"
-          v-model.number="energy.fleet"
+          v-model.number="energySpentFleet"
           min="0"
-          :max="145 + refreshes.fleet * 120 + 45"
+          :max="145 + refreshesFleet * 120 + 45"
         />
       </div>
       <table class="table table-bordered table-dark table-sm table-striped">
@@ -145,23 +149,13 @@ import { Gear, Mission } from "../../types/gear";
 import Salvage from "./owned.vue";
 import GearIcon from "./gearIcon.vue";
 import Loading from "../loading.vue";
+import { UpdateItem } from "../../types/planner";
 
 export default defineComponent({
   name: "GearPlannerComponent",
   components: { Salvage, GearIcon, Loading },
   data() {
     return {
-      refreshes: {
-        standard: 0,
-        fleet: 0,
-        cantina: 0,
-      },
-      energy: {
-        standard: 0,
-        fleet: 0,
-        cantina: 0,
-      },
-      gearTarget: 13,
       sortMethod: "name",
       sortDir: "asc",
       searchName: "",
@@ -170,195 +164,117 @@ export default defineComponent({
   computed: {
     ...mapState("gear", ["gearList", "gearLocations", "requestState"]),
     ...mapState("unit", ["unit"]),
-    ...mapGetters("gear", ["gearLocation", "gearOwnedCount", "findGearData"]),
+    ...mapGetters("gear", [
+      "gearLocation",
+      "gearOwnedCount",
+      "findGearData",
+      "gearOptions",
+      "timeEstimation",
+      "fullSalvageList",
+      "totalDays",
+    ]),
     ...mapGetters("unit", ["currentGearLevel"]),
-    fullGearListByLevel(): any[] {
-      if (this.unit) {
-        const { gear_level, gear } = this.unit;
-        const futureGear =
-          this.unit?.unitTierList.filter((x: any) => x.tier >= gear_level) ||
-          [];
-
-        return futureGear.map((gear: any) => {
-          return {
-            tier: gear.tier,
-            gear: gear.equipmentSetList
-              .map((id: string, index: number) => {
-                let alreadyEquipped = false;
-                if (gear.tier === this.unit?.gear_level) {
-                  alreadyEquipped = this.unit?.gear[index].is_obtained || false;
-                }
-
-                if (alreadyEquipped) {
-                  return null;
-                } else {
-                  return this.findGearData(id);
-                }
-              })
-              .filter((x: any) => !!x),
-          };
-        });
-      } else {
-        return [];
-      }
-    },
-    fullSalvageList(): Gear[] {
-      let list: Gear[] = [];
-      this.fullGearListByLevel.forEach((tier: any) => {
-        if (tier.tier + 1 <= this.gearTarget) {
-          tier.gear.forEach((gear: any) => {
-            gear.ingredients.forEach(({ gear, amount }: any) => {
-              const gearData = { ...this.findGearData(gear), amount };
-              const exists = list.find(
-                (x: any) => x.base_id === gearData.base_id
-              );
-              if (exists) {
-                exists.amount += amount;
-              } else {
-                list.push(gearData);
-              }
-            });
-          });
-        }
-      });
-
-      return list.sort((a: Gear, b: Gear) => {
-        if (this.sortMethod === "name") {
-          const compareA = a.name.toLowerCase();
-          const compareB = b.name.toLowerCase();
-          if (this.sortDir === "asc") {
-            return compareA > compareB ? 1 : -1;
-          } else {
-            return compareA > compareB ? -1 : 1;
-          }
-        } else if (this.sortMethod === "locations") {
-          const locationsA = this.gearLocation(a.lookupMissionList);
-          const locationsB = this.gearLocation(b.lookupMissionList);
-          if (this.sortDir === "asc") {
-            return locationsA[0] > locationsB[0] ? 1 : -1;
-          } else {
-            return locationsA[0] < locationsB[0] ? -1 : 1;
-          }
-        } else if (this.sortMethod === "amount") {
-          if (this.sortDir === "asc") {
-            return a.amount - b.amount;
-          } else {
-            return b.amount - a.amount;
-          }
-        } else if (this.sortMethod === "time") {
-          const compareA = this.timeEstimation(a);
-          const compareB = this.timeEstimation(b);
-          if (this.sortDir === "asc") {
-            return compareA - compareB;
-          } else {
-            return compareB - compareA;
-          }
-        }
-        return 0;
-      });
-    },
     filteredSalvageList(): Gear[] {
-      return this.fullSalvageList.filter((gear) => {
-        const name = gear.name.toLowerCase().replace(/\s/g, "");
-        const compare = this.searchName.toLowerCase().replace(/\s/g, "");
-        return name.includes(compare);
-      });
+      return this.fullSalvageList(this.unit, this.gearTarget)
+        .sort((a: Gear, b: Gear) => {
+          if (this.sortMethod === "name") {
+            const compareA = a.name.toLowerCase();
+            const compareB = b.name.toLowerCase();
+            if (this.sortDir === "asc") {
+              return compareA > compareB ? 1 : -1;
+            } else {
+              return compareA > compareB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "locations") {
+            const locationsA = this.gearLocation(a.lookupMissionList);
+            const locationsB = this.gearLocation(b.lookupMissionList);
+            if (this.sortDir === "asc") {
+              return locationsA[0] > locationsB[0] ? 1 : -1;
+            } else {
+              return locationsA[0] < locationsB[0] ? -1 : 1;
+            }
+          } else if (this.sortMethod === "amount") {
+            if (this.sortDir === "asc") {
+              return a.amount - b.amount;
+            } else {
+              return b.amount - a.amount;
+            }
+          } else if (this.sortMethod === "time") {
+            const compareA = this.timeEstimation(a);
+            const compareB = this.timeEstimation(b);
+            if (this.sortDir === "asc") {
+              return compareA - compareB;
+            } else {
+              return compareB - compareA;
+            }
+          }
+          return 0;
+        })
+        .filter((gear: Gear) => {
+          const name = gear.name.toLowerCase().replace(/\s/g, "");
+          const compare = this.searchName.toLowerCase().replace(/\s/g, "");
+          return name.includes(compare);
+        });
     },
-    totalDays(): number {
-      let totalStandard = 0;
-      let totalFleet = 0;
-      let totalChallenges = 0;
-      this.fullSalvageList.forEach((gear: Gear) => {
-        const isChallenge = gear.lookupMissionList.some(
-          (x: Mission) => x.missionIdentifier.campaignMapId === "CHALLENGES"
-        );
-        const isFleet = gear.lookupMissionList.some(
-          (x: Mission) => x.missionIdentifier.campaignId === "C01SP"
-        );
-        if (isChallenge) {
-          totalChallenges = Math.max(
-            this.timeEstimation(gear),
-            totalChallenges
-          );
-        } else if (isFleet) {
-          totalFleet += this.timeEstimation(gear);
-        } else {
-          totalStandard += this.timeEstimation(gear);
-        }
-      });
-      return Math.max(totalStandard, totalFleet, totalChallenges);
+    gearTarget: {
+      get(): number {
+        return this.$store.getters["planner/gearTarget"](this.unit.id) || 13;
+      },
+      set(value: number) {
+        const payload: UpdateItem = {
+          type: "gear",
+          value,
+          unitId: this.unit.id,
+        };
+        this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
+      },
     },
-    gearOptions(): number[] {
-      const list = [];
-      for (let i = (this.unit?.gear_level || 0) + 1; i <= 13; i++) {
-        list.push(i);
-      }
-      return list;
+    refreshesStandard: {
+      get(): number {
+        return this.$store.state.gear.refreshes.standard;
+      },
+      set(value: number) {
+        this.$store.commit("gear/UPDATE_REFRESHES", {
+          value,
+          type: "standard",
+        });
+      },
+    },
+    refreshesFleet: {
+      get(): number {
+        return this.$store.state.gear.refreshes.fleet;
+      },
+      set(value: number) {
+        this.$store.commit("gear/UPDATE_REFRESHES", {
+          value,
+          type: "fleet",
+        });
+      },
+    },
+    energySpentStandard: {
+      get(): number {
+        return this.$store.state.gear.energy.standard;
+      },
+      set(value: number) {
+        this.$store.commit("gear/UPDATE_ENERGY", {
+          value,
+          type: "standard",
+        });
+      },
+    },
+    energySpentFleet: {
+      get(): number {
+        return this.$store.state.gear.energy.fleet;
+      },
+      set(value: number) {
+        this.$store.commit("gear/UPDATE_ENERGY", {
+          value,
+          type: "fleet",
+        });
+      },
     },
   },
   methods: {
-    timeEstimation(gear: Gear): number {
-      const owned: number = this.gearOwnedCount(gear);
-      const remaining = gear.amount - owned;
-
-      if (remaining > 0) {
-        let energy = 100;
-        let totalDays = 0;
-
-        gear.lookupMissionList.forEach((mission) => {
-          const {
-            campaignId,
-            campaignNodeDifficulty,
-            campaignMapId,
-            campaignMissionId,
-            campaignNodeId,
-          } = mission.missionIdentifier;
-
-          if (["C01SP", "C01D", "C01L"].includes(campaignId)) {
-            let missionEnergy = 1;
-            const node = Number(campaignMissionId.replace(/\D/g, ""));
-
-            if (node <= 4) {
-              missionEnergy = 6;
-            } else if (node >= 6) {
-              missionEnergy = 8;
-            } else if (node >= 9) {
-              missionEnergy = 10;
-            }
-
-            if (campaignNodeDifficulty === 5) {
-              missionEnergy *= 2;
-            }
-
-            if (missionEnergy < energy) {
-              const dropRate = 0.2;
-              const refreshes = ["C01D", "C01L"].includes(campaignId)
-                ? this.refreshes.standard
-                : this.refreshes.fleet;
-              const extraEnergy = ["C01D", "C01L"].includes(campaignId)
-                ? 135
-                : 45;
-              const otherEnergy = ["C01D", "C01L"].includes(campaignId)
-                ? this.energy.standard
-                : this.energy.fleet;
-              const totalEnergy =
-                240 + extraEnergy + 120 * refreshes - otherEnergy;
-
-              const chancesPerDay = totalEnergy / missionEnergy;
-              const piecesPerDay = chancesPerDay * dropRate;
-              totalDays = remaining / piecesPerDay;
-              energy = missionEnergy;
-            }
-          } else if (campaignMapId === "CHALLENGES") {
-            energy = 0;
-            totalDays = remaining / (60 / 7);
-          }
-        });
-        return Math.round(totalDays);
-      } else {
-        return 0;
-      }
-    },
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
