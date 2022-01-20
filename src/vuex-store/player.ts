@@ -3,6 +3,7 @@ import { Player } from "../types/player";
 import { Unit } from "../types/unit";
 import { loadingState } from "../enums/loading";
 import { State as RootState } from "./store";
+import { maxGearLevel } from "./gear";
 
 interface State {
   player: Player | null;
@@ -19,27 +20,7 @@ const store = {
     allyCode: "",
     requestState: loadingState.initial,
   },
-  getters: {
-    getCurLevel(state: State, getters: any, rootState: any, rootGetters: any) {
-      return (unitId: string): string => {
-        const match: Unit | undefined = state.player?.units.find(
-          (x) => x.id === unitId
-        );
-        if (match) {
-          const gearLevel = rootGetters.unit.currentGearLevel(match);
-          if (gearLevel < 13) {
-            return `Gear ${gearLevel}`;
-          } else if (match.relic_tier > 1) {
-            return `Relic ${match.relic_tier - 1}`;
-          } else {
-            return `Gear 13`;
-          }
-        } else {
-          return "";
-        }
-      };
-    },
-  },
+  getters: {},
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;

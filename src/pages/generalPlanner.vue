@@ -65,7 +65,7 @@
               class="form-control form-control-sm mb-1"
               :value="unit.gearTarget"
               @input="changeTarget(unit, 'gear', $event)"
-              v-if="unit.gear_level < 13"
+              v-if="unit.gear_level < maxGearLevel"
             >
               <option
                 v-for="num in gearOptions(unit.gear_level)"
@@ -139,6 +139,7 @@ export default defineComponent({
       relicOptions: "relicOptions",
       relicTotalDays: "totalDays",
     }),
+    ...mapState("gear", ["maxGearLevel"]),
   },
   methods: {
     sortBy(type: string): void {
@@ -158,12 +159,12 @@ export default defineComponent({
     },
     getCurLevel(unit: UnitPlannerItem & Unit): string {
       const gearLevel = this.currentGearLevel(unit);
-      if (gearLevel < 13) {
+      if (gearLevel < this.maxGearLevel) {
         return `Gear ${gearLevel}`;
-      } else if (unit.relic_tier > 1) {
-        return `Relic ${unit.relic_tier - 1}`;
+      } else if (unit.relic_tier > 0) {
+        return `Relic ${unit.relic_tier}`;
       } else {
-        return `Gear 13`;
+        return `Gear ${this.maxGearLevel}`;
       }
     },
     changeTarget(

@@ -13,6 +13,8 @@ import { State as RootState } from "./store";
 import { unvue } from "../utils";
 import { Unit } from "@/types/unit";
 
+export const maxGearLevel = 13;
+
 interface State {
   requestState: loadingState;
   gearList: Gear[];
@@ -20,6 +22,7 @@ interface State {
   ownedGear: any;
   refreshes: { standard: number; fleet: number };
   energy: { standard: number; fleet: number };
+  maxGearLevel: number;
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -33,6 +36,7 @@ const store = {
     ownedGear: {},
     refreshes: { standard: 0, fleet: 0 },
     energy: { standard: 0, fleet: 0 },
+    maxGearLevel,
   },
   getters: {
     gearLocation(_state: State) {
@@ -76,7 +80,7 @@ const store = {
     gearOptions(_state: State) {
       return (gearLevel: number): number[] => {
         const list = [];
-        for (let i = (gearLevel || 0) + 1; i <= 13; i++) {
+        for (let i = (gearLevel || 0) + 1; i <= maxGearLevel; i++) {
           list.push(i);
         }
         return list;

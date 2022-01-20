@@ -1,7 +1,7 @@
 <template>
   <div class="collapse" id="gearSection">
     <Loading :state="requestState" size="md" message="Loading Gear Data">
-      <template v-if="unit.gear_level < 13">
+      <template v-if="unit.gear_level < maxGearLevel">
         <h3 class="gear-header">
           Gear Needed to get {{ unit.name }} from Gear Level
           {{ currentGearLevel(unit) }} to
@@ -144,7 +144,7 @@
         </table>
       </template>
       <template v-else>
-        <h3>{{ unit.name }} is already at gear level 13.</h3>
+        <h3>{{ unit.name }} is already at gear level {{ maxGearLevel }}.</h3>
       </template>
     </Loading>
   </div>
@@ -171,7 +171,12 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("gear", ["gearList", "gearLocations", "requestState"]),
+    ...mapState("gear", [
+      "gearList",
+      "gearLocations",
+      "requestState",
+      "maxGearLevel",
+    ]),
     ...mapState("unit", ["unit"]),
     ...mapGetters("gear", [
       "gearLocation",
@@ -227,7 +232,10 @@ export default defineComponent({
     },
     gearTarget: {
       get(): number {
-        return this.$store.getters["planner/gearTarget"](this.unit.id) || 13;
+        return (
+          this.$store.getters["planner/gearTarget"](this.unit.id) ||
+          this.maxGearLevel
+        );
       },
       set(value: number) {
         const payload: UpdateItem = {

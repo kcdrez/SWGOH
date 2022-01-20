@@ -7,6 +7,8 @@ import relicConfig from "../types/relicMapping";
 import { Relic } from "../types/relic";
 import { Unit } from "../types/unit";
 
+export const maxRelicLevel = 9;
+
 type ConfigType = {
   [key: string]: Relic;
 };
@@ -37,7 +39,7 @@ const store = {
         if (relicLevel < 0) {
           relicLevel = 0;
         }
-        for (let i = relicLevel; i <= 9; i++) {
+        for (let i = relicLevel; i <= maxRelicLevel; i++) {
           list.push(i);
         }
         return list;
@@ -91,6 +93,12 @@ const store = {
     },
     SET_OWNED_RELICS(state: State, payload: any) {
       state.ownedRelics = payload;
+    },
+    UPDATE_REFRESHES(state: State, amount: number) {
+      state.refreshes.cantina = amount;
+    },
+    UPDATE_ENERGY(state: State, amount: number) {
+      state.energy.cantina = amount;
     },
   },
   actions: {

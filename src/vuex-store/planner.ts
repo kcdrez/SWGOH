@@ -4,6 +4,7 @@ import { loadingState } from "../enums/loading";
 import { State as RootState } from "./store";
 import { unvue } from "../utils";
 import { ConfigType, UpdateItem, UnitPlannerItem } from "../types/planner";
+import { maxGearLevel } from "./gear";
 
 interface State {
   requestState: loadingState;
@@ -121,7 +122,11 @@ const store = {
       commit("UPDATE_PLANNER_ITEM", payload);
     },
     initPlannerTarget({ commit }: ActionCtx, unitId: string) {
-      commit("UPDATE_PLANNER_ITEM", { unitId, type: "gear", value: 13 });
+      commit("UPDATE_PLANNER_ITEM", {
+        unitId,
+        type: "gear",
+        value: maxGearLevel,
+      });
       commit("UPDATE_PLANNER_ITEM", { unitId, type: "relic", value: 5 });
     },
   },

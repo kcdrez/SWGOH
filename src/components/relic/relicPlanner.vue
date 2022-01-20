@@ -34,7 +34,7 @@
         <input
           class="form-control"
           type="number"
-          v-model.number="refreshes.cantina"
+          v-model.number="refreshes"
           min="0"
         />
         <span
@@ -45,9 +45,9 @@
         <input
           class="form-control"
           type="number"
-          v-model.number="energy.cantina"
+          v-model.number="energy"
           min="0"
-          :max="165 + refreshes.cantina * 120"
+          :max="165 + refreshes * 120"
         />
       </div>
       <table class="table table-bordered table-dark table-sm table-striped">
@@ -128,12 +128,6 @@ export default defineComponent({
   components: { OwnedAmount, RelicIcon, Loading },
   data() {
     return {
-      refreshes: {
-        cantina: 0,
-      },
-      energy: {
-        cantina: 0,
-      },
       sortMethod: "",
       sortDir: "asc",
       searchName: "",
@@ -208,6 +202,22 @@ export default defineComponent({
           unitId: this.unit.id,
         };
         this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
+      },
+    },
+    refreshes: {
+      get(): number {
+        return this.$store.state.relic.refreshes.cantina;
+      },
+      set(value: number) {
+        this.$store.commit("relic/UPDATE_REFRESHES", value);
+      },
+    },
+    energy: {
+      get(): number {
+        return this.$store.state.relic.energy.cantina;
+      },
+      set(value: number) {
+        this.$store.commit("relic/UPDATE_ENERGY", value);
       },
     },
   },
