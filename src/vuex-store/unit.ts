@@ -1,7 +1,7 @@
 import { ActionContext } from "vuex";
 
 import { Unit } from "../types/unit";
-import { loadingState } from "../enums/loading";
+import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 
 interface State {

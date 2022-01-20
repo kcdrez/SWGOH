@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default defineComponent({
   name: "Salvage",

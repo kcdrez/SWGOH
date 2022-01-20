@@ -4,7 +4,7 @@ import { store as unitStore, State as UnitState } from "./unit";
 import { store as playerStore, State as PlayerState } from "./player";
 import { store as relicStore, State as RelicState } from "./relic";
 import { store as plannerStore, State as PlannerState } from "./planner";
-import { loadingState } from "../enums/loading";
+import { loadingState } from "../types/loading";
 import { ApiClient, apiClient } from "../api/api-client";
 
 export interface State {

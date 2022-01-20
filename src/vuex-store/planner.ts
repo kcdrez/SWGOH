@@ -1,9 +1,8 @@
-import { ActionContext, Getter } from "vuex";
+import { ActionContext } from "vuex";
 
-import { loadingState } from "../enums/loading";
+import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
-import { unvue } from "../utils";
-import { ConfigType, UpdateItem, UnitPlannerItem } from "../types/planner";
+import { ConfigType, UpdateItem } from "../types/planner";
 import { maxGearLevel } from "./gear";
 
 interface State {
@@ -88,6 +87,10 @@ const store = {
         JSON.stringify(state.unitList)
       );
     },
+    REMOVE_UNIT(state: State, id: string) {
+      const index = state.unitList.findIndex((x) => x === id);
+      state.unitList.splice(index, 1);
+    },
   },
   actions: {
     async initialize({ commit, dispatch }: ActionCtx) {
@@ -128,6 +131,9 @@ const store = {
         value: maxGearLevel,
       });
       commit("UPDATE_PLANNER_ITEM", { unitId, type: "relic", value: 5 });
+    },
+    removeUnit({ commit }: ActionCtx, id: string) {
+      commit("REMOVE_UNIT", id);
     },
   },
 };

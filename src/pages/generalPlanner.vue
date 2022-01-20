@@ -3,7 +3,6 @@
     <table class="table table-bordered table-dark table-sm table-striped">
       <thead>
         <tr class="text-center align-middle">
-          <!-- <th width="5%">Priority</th> -->
           <th width="20%">
             <div class="c-pointer" @click="sortBy('name')">
               Unit Name
@@ -47,12 +46,11 @@
             Est. Completed Date
             <i class="fas mx-1" :class="sortIcon('completed')"></i>
           </th>
-          <!-- <th>Notes</th> -->
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="unit in unitList" :key="unit.id">
-          <!-- <td class="text-center">1</td> -->
           <td class="text-center">
             <router-link
               :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
@@ -102,7 +100,21 @@
               getDate(relicTotalDays(unit) + gearTotalDays(unit))
             }})
           </td>
-          <!-- <td></td> -->
+          <td>
+            <div
+              class="btn-group btn-group-sm d-block text-center"
+              role="group"
+            >
+              <button
+                type="button"
+                class="btn btn-danger"
+                title="Remove from general planner"
+                @click="remove(unit)"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -112,11 +124,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
+import moment from "moment";
+
 import Loading from "../components/loading.vue";
 import Error from "../components/error.vue";
-import { Unit, UnitGear } from "../types/unit";
+import { Unit } from "../types/unit";
 import { UnitPlannerItem, UpdateItem } from "../types/planner";
-import moment from "moment";
 
 export default defineComponent({
   name: "GeneralPlannerPage",
@@ -142,6 +155,7 @@ export default defineComponent({
     ...mapState("gear", ["maxGearLevel"]),
   },
   methods: {
+    ...mapActions("planner", ["removeUnit"]),
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
@@ -182,6 +196,16 @@ export default defineComponent({
     },
     getDate(days: number): string {
       return moment().add(days, "days").format("MM-DD-YYYY");
+    },
+    remove(unit: Unit & UnitPlannerItem) {
+      this.removeUnit(unit.id);
+      this.$toast(
+        `${unit.name} was successfully removed from the general planner`,
+        {
+          positionY: "top",
+          class: "toast-success",
+        }
+      );
     },
   },
   async created() {},

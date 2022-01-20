@@ -8,6 +8,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+
 import ShardRow from "../components/shardRow.vue";
 
 interface unit {

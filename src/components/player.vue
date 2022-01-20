@@ -21,7 +21,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState } from "vuex";
 
 import { Player } from "../types/player";
 import { Unit } from "../types/unit";

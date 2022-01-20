@@ -9,8 +9,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions, mapGetters } from "vuex";
-import { loadingState, loadingSize } from "../enums/loading";
+import { loadingState, loadingSize } from "../types/loading";
 
 export default defineComponent({
   name: "LoadingComponent",

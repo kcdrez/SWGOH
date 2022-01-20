@@ -154,7 +154,7 @@
 import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 
-import { Gear, Mission } from "../../types/gear";
+import { Gear } from "../../types/gear";
 import Salvage from "./owned.vue";
 import GearIcon from "./gearIcon.vue";
 import Loading from "../loading.vue";

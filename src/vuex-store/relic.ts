@@ -1,6 +1,6 @@
 import { ActionContext } from "vuex";
 
-import { loadingState } from "../enums/loading";
+import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { unvue } from "../utils";
 import relicConfig from "../types/relicMapping";

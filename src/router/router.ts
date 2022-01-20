@@ -1,8 +1,4 @@
-import {
-  createRouter,
-  createWebHistory,
-  createWebHashHistory,
-} from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import HomePage from "../pages/homepage.vue";
 import UnitPage from "../pages/unitPage.vue";
 import ShardCalculatorPage from "../pages/shardCalculator.vue";

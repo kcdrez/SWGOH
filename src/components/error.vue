@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { loadingState } from "../enums/loading";
+import { loadingState } from "../types/loading";
 import { defineComponent, PropType } from "vue";
 
 export default defineComponent({

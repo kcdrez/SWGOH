@@ -1,9 +1,7 @@
-import { ActionContext, StoreOptions } from "vuex";
+import { ActionContext } from "vuex";
 import { Player } from "../types/player";
-import { Unit } from "../types/unit";
-import { loadingState } from "../enums/loading";
+import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
-import { maxGearLevel } from "./gear";
 
 interface State {
   player: Player | null;
