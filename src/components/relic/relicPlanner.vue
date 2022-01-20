@@ -17,8 +17,7 @@
       </h3>
       <h3>
         It will take approximately
-        {{ totalDays(currentRelicLevel, relicTarget) }} days to get to Relic
-        Level {{ relicTarget }}.
+        {{ totalDays(unit) }} days to get to Relic Level {{ relicTarget }}.
       </h3>
       <div class="input-group input-group-sm w-50 mb-3">
         <span

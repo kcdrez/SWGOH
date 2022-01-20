@@ -146,12 +146,13 @@ const store = {
         }
       };
     },
-    totalDays(state: State, getters: any) {
-      return (unit: Unit, gearTarget: number): any => {
+    totalDays(_state: State, getters: any, rootState: RootState) {
+      return (unit: Unit): any => {
+        const { target } = rootState.planner.targetConfig[unit.id].gear;
         let totalStandard = 0;
         let totalFleet = 0;
         let totalChallenges = 0;
-        getters.fullSalvageList(unit, gearTarget).forEach((gear: Gear) => {
+        getters.fullSalvageList(unit, target).forEach((gear: Gear) => {
           const isChallenge = gear.lookupMissionList.some(
             (x: Mission) => x.missionIdentifier.campaignMapId === "CHALLENGES"
           );

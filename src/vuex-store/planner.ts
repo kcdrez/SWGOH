@@ -3,11 +3,12 @@ import { ActionContext, Getter } from "vuex";
 import { loadingState } from "../enums/loading";
 import { State as RootState } from "./store";
 import { unvue } from "../utils";
-import { ConfigType, UpdateItem } from "../types/planner";
+import { ConfigType, UpdateItem, UnitPlannerItem } from "../types/planner";
 
 interface State {
   requestState: loadingState;
-  plannerConfig: ConfigType;
+  targetConfig: ConfigType;
+  unitList: string[];
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -16,26 +17,27 @@ const store = {
   namespaced: true,
   state: {
     requestState: loadingState.initial,
-    plannerConfig: {},
+    targetConfig: {},
+    unitList: [],
   },
   getters: {
     gearTarget(state: State) {
       return (unitId: string): number => {
-        return state.plannerConfig[unitId]?.gear.target;
+        return state.targetConfig[unitId]?.gear.target;
       };
     },
     relicTarget(state: State) {
       return (unitId: string): number => {
-        return state.plannerConfig[unitId]?.relic.target;
+        return state.targetConfig[unitId]?.relic.target;
       };
     },
-    unitList(state: State, getters: any, rootState: RootState) {
-      return Object.keys(state.plannerConfig).map((id: string) => {
+    unitList(state: State, _getters: any, rootState: RootState) {
+      return state.unitList.map((id: string) => {
         const match = rootState.player.player?.units.find((x) => x.id === id);
         return {
           id,
-          gearTarget: state.plannerConfig[id]?.gear.target,
-          relicTarget: state.plannerConfig[id]?.relic.target,
+          gearTarget: state.targetConfig[id]?.gear.target,
+          relicTarget: state.targetConfig[id]?.relic.target,
           ...match,
         };
       });
@@ -46,63 +48,90 @@ const store = {
       state.requestState = payload;
     },
     UPDATE_PLANNER(state: State, payload: ConfigType) {
-      state.plannerConfig = payload;
+      state.targetConfig = payload;
       window.localStorage.setItem(
         "generalPlanner",
-        JSON.stringify(state.plannerConfig)
+        JSON.stringify(state.targetConfig)
       );
     },
-    UPDATE_PLANNER_ITEM(state: State, { unitId, type, value }: UpdateItem) {
-      if (!state.plannerConfig[unitId]) {
-        state.plannerConfig[unitId] = {
+    UPDATE_PLANNER_ITEM(
+      state: State,
+      { unitId, type, value, updateBoth }: UpdateItem
+    ) {
+      if (!state.targetConfig[unitId]) {
+        state.targetConfig[unitId] = {
           gear: { target: 0 },
           relic: { target: 0 },
         };
       }
+
       if (type === "gear") {
-        state.plannerConfig[unitId].relic.target = 0;
-        state.plannerConfig[unitId].gear.target = value;
+        if (updateBoth) {
+          state.targetConfig[unitId].relic.target = 0;
+        }
+        state.targetConfig[unitId].gear.target = value;
       } else {
-        state.plannerConfig[unitId].gear.target = 13;
-        state.plannerConfig[unitId].relic.target = value;
+        if (updateBoth) {
+          state.targetConfig[unitId].gear.target = 13;
+        }
+        state.targetConfig[unitId].relic.target = value;
       }
       window.localStorage.setItem(
         "generalPlanner",
-        JSON.stringify(state.plannerConfig)
+        JSON.stringify(state.targetConfig)
+      );
+    },
+    UPSERT_UNIT(state: State, id: string) {
+      console.log("UPSERT_UNIT", id);
+      const index = state.unitList.findIndex((x) => x === id);
+      if (index >= 0) {
+        state.unitList.splice(index, 1, id);
+      } else {
+        state.unitList.push(id);
+      }
+      window.localStorage.setItem(
+        "generalPlanner-unitList",
+        JSON.stringify(state.unitList)
+      );
+    },
+    SET_UNIT_LIST(state: State, payload: string[]) {
+      console.log("SET_UNIT_LIST", payload);
+      state.unitList = payload;
+      window.localStorage.setItem(
+        "generalPlanner-unitList",
+        JSON.stringify(state.unitList)
       );
     },
   },
   actions: {
     async initialize({ commit, dispatch }: ActionCtx) {
-      const data: ConfigType = JSON.parse(
+      commit("SET_REQUEST_STATE", loadingState.loading);
+      const targetData: ConfigType = JSON.parse(
         window.localStorage.getItem("generalPlanner") || "{}"
       );
-      await Promise.all(
-        //might have to put a limiter on this
-        Object.keys(data).map((id) =>
-          dispatch("unit/fetchUnit", id, { root: true })
-        )
+      const unitListData: string[] = JSON.parse(
+        window.localStorage.getItem("generalPlanner-unitList") || "[]"
       );
-      commit("UPDATE_PLANNER", data);
+      await Promise.all(
+        //might have to put a limiter on this if the list is really big
+        unitListData.map((id) => dispatch("unit/fetchUnit", id, { root: true }))
+      );
+      commit("UPDATE_PLANNER", targetData);
+      commit("SET_UNIT_LIST", unitListData);
+      unitListData.forEach((id) => {
+        if (!(id in targetData)) {
+          commit("UPDATE_PLANNER_ITEM", {
+            id,
+            type: "relic",
+            value: 5,
+          });
+        }
+      });
+      console.log("init planner done");
+      commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    addUnit(
-      { commit }: ActionCtx,
-      {
-        unitId,
-        gearTarget,
-        relicTarget,
-      }: { unitId: string; gearTarget: number; relicTarget: number }
-    ) {
-      commit("UPDATE_PLANNER_ITEM", {
-        type: "gear",
-        value: gearTarget,
-        unitId,
-      });
-      commit("UPDATE_PLANNER_ITEM", {
-        type: "relic",
-        value: relicTarget,
-        unitId,
-      });
+    addUnit({ commit }: ActionCtx, id: string) {
+      commit("UPSERT_UNIT", id);
     },
     updatePlannerTarget({ commit }: ActionCtx, payload: UpdateItem) {
       commit("UPDATE_PLANNER_ITEM", payload);

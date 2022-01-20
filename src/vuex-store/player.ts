@@ -39,8 +39,6 @@ const store = {
         }
       };
     },
-    // getCurLevel(unit: CombinedUnit): string {
-    // },
   },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {

@@ -24,7 +24,7 @@ const store = createStore<State>({
     relic: relicStore,
     unit: unitStore,
     player: playerStore,
-    planner: plannerStore
+    planner: plannerStore,
   },
   state: {
     apiClient: apiClient,
@@ -33,7 +33,7 @@ const store = createStore<State>({
     relic: relicStore.state,
     unit: unitStore.state,
     player: playerStore.state,
-    planner: plannerStore.state
+    planner: plannerStore.state,
   },
   getters: {},
   mutations: {
@@ -45,9 +45,9 @@ const store = createStore<State>({
     async initialize({ commit, state, dispatch }) {
       commit("SET_REQUEST_STATE", loadingState.loading);
       await dispatch("player/initialize", { root: true });
-      dispatch("gear/fetchGear", { root: true });
-      dispatch("relic/initialize", { root: true });
-      dispatch("planner/initialize", { root: true });
+      await dispatch("gear/fetchGear", { root: true });
+      await dispatch("relic/initialize", { root: true });
+      await dispatch("planner/initialize", { root: true });
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     // async fetchData({ state }) {

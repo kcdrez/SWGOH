@@ -11,7 +11,7 @@
       />
       <button
         class="btn btn-secondary text-dark mx-auto my-2 d-block"
-        @click="add({ unitId: unit.id })"
+        @click="add()"
       >
         Add to General Planner
       </button>
@@ -104,13 +104,13 @@ export default defineComponent({
   },
   computed: {
     ...mapState("unit", ["unit", "requestState"]),
-    ...mapState("planner", ["plannerConfig"]),
+    ...mapState("planner", ["unitList"]),
   },
   methods: {
     ...mapActions("unit", ["fetchUnit"]),
     ...mapActions("planner", ["addUnit"]),
-    add(payload: any): void {
-      if (this.unit.id in this.plannerConfig) {
+    add(): void {
+      if (this.unitList.find((x: string) => x === this.unit.id)) {
         this.$toast(
           `${this.unit.name} is already added to the General Planner`,
           {
@@ -119,7 +119,7 @@ export default defineComponent({
           }
         );
       } else {
-        this.addUnit(payload);
+        this.addUnit(this.unit.id);
         this.$toast(
           `${this.unit.name} successfully added to the General Planner`,
           {
@@ -128,7 +128,6 @@ export default defineComponent({
           }
         );
       }
-      // toast.success("Added!", { position: POSITION.BOTTOM_LEFT });
     },
   },
   async created() {

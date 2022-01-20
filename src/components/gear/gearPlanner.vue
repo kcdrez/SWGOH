@@ -16,8 +16,8 @@
         :
       </h3>
       <h3>
-        It will take approximately {{ totalDays(unit, gearTarget) }} days to get
-        to Gear Level {{ gearTarget }}.
+        It will take approximately {{ totalDays(unit) }} days to get to Gear
+        Level {{ gearTarget }}.
       </h3>
       <div class="input-group input-group-sm w-50">
         <span

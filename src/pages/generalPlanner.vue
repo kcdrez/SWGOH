@@ -47,7 +47,7 @@
             Est. Completed Date
             <i class="fas mx-1" :class="sortIcon('completed')"></i>
           </th>
-          <th>Notes</th>
+          <!-- <th>Notes</th> -->
         </tr>
       </thead>
       <tbody>
@@ -67,11 +67,19 @@
             </select>
           </td>
           <td class="text-center">
-            {{ totalDays(unit, unit.gearTarget) }} Days
+            {{ gearTotalDays(unit) }} Days ({{ getDate(gearTotalDays(unit)) }})
           </td>
-          <td class="text-center">01/01/22 (10 days)</td>
-          <td class="text-center">01/01/22 (10 days)</td>
-          <td></td>
+          <td class="text-center">
+            {{ relicTotalDays(unit) }} Days ({{
+              getDate(relicTotalDays(unit))
+            }})
+          </td>
+          <td class="text-center">
+            {{ relicTotalDays(unit) + gearTotalDays(unit) }} Days ({{
+              getDate(relicTotalDays(unit) + gearTotalDays(unit))
+            }})
+          </td>
+          <!-- <td></td> -->
         </tr>
       </tbody>
     </table>
@@ -85,6 +93,7 @@ import Loading from "../components/loading.vue";
 import Error from "../components/error.vue";
 import { Unit } from "../types/unit";
 import { UpdateItem } from "../types/planner";
+import moment from "moment";
 
 export default defineComponent({
   name: "GeneralPlannerPage",
@@ -99,8 +108,14 @@ export default defineComponent({
   computed: {
     ...mapGetters("planner", ["unitList"]),
     ...mapGetters("unit", ["currentGearLevel"]),
-    ...mapGetters("gear", ["gearOptions", "totalDays"]),
-    ...mapGetters("relic", ["relicOptions"]),
+    ...mapGetters("gear", {
+      gearOptions: "gearOptions",
+      gearTotalDays: "totalDays",
+    }),
+    ...mapGetters("relic", {
+      relicOptions: "relicOptions",
+      relicTotalDays: "totalDays",
+    }),
   },
   methods: {
     sortBy(type: string): void {
@@ -153,9 +168,13 @@ export default defineComponent({
           type: strMatches[0].toLowerCase(),
           value: Number(numMatches[0]),
           unitId: unit.id,
+          updateBoth: true, //todo just separate this out to two different select dropdowns
         };
         this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
       }
+    },
+    getDate(days: number): string {
+      return moment().add(days, "days").format("MM-DD-YYYY");
     },
   },
   async created() {},

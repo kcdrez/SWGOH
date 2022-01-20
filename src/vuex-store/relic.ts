@@ -5,6 +5,7 @@ import { State as RootState } from "./store";
 import { unvue } from "../utils";
 import relicConfig from "../types/relicMapping";
 import { Relic } from "../types/relic";
+import { Unit } from "../types/unit";
 
 type ConfigType = {
   [key: string]: Relic;
@@ -69,11 +70,13 @@ const store = {
         return amount;
       };
     },
-    totalDays(state: State, getters: any) {
-      return (curLevel: number, target: number): number => {
+    totalDays(state: State, getters: any, rootState: RootState) {
+      return (unit: Unit): number => {
+        console.log(unit);
+        const { target } = rootState.planner.targetConfig[unit.id].relic;
         return (Object.values(state.relicConfig) as Array<Relic>).reduce(
           (acc, el) => {
-            return acc + getters.timeEstimation(el, curLevel, target);
+            return acc + getters.timeEstimation(el, unit.relic_tier, target);
           },
           0
         );

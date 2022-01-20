@@ -3,7 +3,7 @@
     <div class="text-center my-2" v-if="state === 'LOADING'">
       <i class="fas fa-spinner fa-spin" :class="sizeClass" :title="message" />
     </div>
-    <slot v-else-if="state === 'READY'" />
+    <slot v-else />
   </div>
 </template>
 
