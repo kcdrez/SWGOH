@@ -1,5 +1,5 @@
 <template>
-  <div class="collapse" id="gearSection">
+  <div class="collapse">
     <Loading :state="requestState" size="md" message="Loading Gear Data">
       <template v-if="unit.gear_level < maxGearLevel">
         <h3 class="gear-header">
@@ -82,66 +82,7 @@
             :max="145 + refreshesFleet * 120 + 45"
           />
         </div>
-        <table class="table table-bordered table-dark table-sm table-striped">
-          <thead>
-            <tr class="text-center">
-              <th width="20%">
-                <div class="c-pointer" @click="sortBy('name')">
-                  Salvage Name
-                  <i class="fas mx-1" :class="sortIcon('name')"></i>
-                </div>
-                <input
-                  class="form-control form-control-sm mx-auto my-1 w-75"
-                  placeholder="Search"
-                  v-model="searchName"
-                />
-              </th>
-              <th width="20%" class="c-pointer" @click="sortBy('location')">
-                Locations
-                <i class="fas mx-1" :class="sortIcon('location')"></i>
-              </th>
-              <th width="20%" class="c-pointer" @click="sortBy('amount')">
-                Amount
-                <i class="fas mx-1" :class="sortIcon('amount')"></i>
-              </th>
-              <th width="10%" class="c-pointer" @click="sortBy('time')">
-                Est. Time
-                <i class="fas mx-1" :class="sortIcon('time')"></i>
-              </th>
-              <!-- <th width="15%">Actions</th> -->
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="salvage in filteredSalvageList" :key="salvage.base_id">
-              <td class="text-center">
-                <GearIcon :gear="salvage" />
-              </td>
-              <td>
-                <ul class="m-0">
-                  <li
-                    v-for="(l, index) in gearLocation(
-                      salvage.lookupMissionList
-                    )"
-                    :key="index"
-                  >
-                    {{ l }}
-                  </li>
-                </ul>
-              </td>
-              <td>
-                <Salvage :salvage="salvage" />
-              </td>
-              <td class="text-center">{{ timeEstimation(salvage) }} Days</td>
-              <!-- <td>
-              <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-primary">Left</button>
-                <button type="button" class="btn btn-secondary">Middle</button>
-                <button type="button" class="btn btn-info">Right</button>
-              </div>
-            </td> -->
-            </tr>
-          </tbody>
-        </table>
+        <GearTable :gearList="fullSalvageList(this.unit, this.gearTarget)" />
       </template>
       <template v-else>
         <h3>{{ unit.name }} is already at gear level {{ maxGearLevel }}.</h3>
@@ -154,82 +95,18 @@
 import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 
-import { Gear } from "../../types/gear";
-import Salvage from "./owned.vue";
-import GearIcon from "./gearIcon.vue";
 import Loading from "../loading.vue";
 import { UpdateItem } from "../../types/planner";
+import GearTable from "./gearTable.vue";
 
 export default defineComponent({
   name: "GearPlannerComponent",
-  components: { Salvage, GearIcon, Loading },
-  data() {
-    return {
-      sortMethod: "name",
-      sortDir: "asc",
-      searchName: "",
-    };
-  },
+  components: { Loading, GearTable },
   computed: {
-    ...mapState("gear", [
-      "gearList",
-      "gearLocations",
-      "requestState",
-      "maxGearLevel",
-    ]),
+    ...mapState("gear", ["requestState", "maxGearLevel"]),
     ...mapState("unit", ["unit"]),
-    ...mapGetters("gear", [
-      "gearLocation",
-      "gearOwnedCount",
-      "findGearData",
-      "gearOptions",
-      "timeEstimation",
-      "fullSalvageList",
-      "totalDays",
-    ]),
+    ...mapGetters("gear", ["gearOptions", "fullSalvageList", "totalDays"]),
     ...mapGetters("unit", ["currentGearLevel"]),
-    filteredSalvageList(): Gear[] {
-      return this.fullSalvageList(this.unit, this.gearTarget)
-        .sort((a: Gear, b: Gear) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "locations") {
-            const locationsA = this.gearLocation(a.lookupMissionList);
-            const locationsB = this.gearLocation(b.lookupMissionList);
-            if (this.sortDir === "asc") {
-              return locationsA[0] > locationsB[0] ? 1 : -1;
-            } else {
-              return locationsA[0] < locationsB[0] ? -1 : 1;
-            }
-          } else if (this.sortMethod === "amount") {
-            if (this.sortDir === "asc") {
-              return a.amount - b.amount;
-            } else {
-              return b.amount - a.amount;
-            }
-          } else if (this.sortMethod === "time") {
-            const compareA = this.timeEstimation(a);
-            const compareB = this.timeEstimation(b);
-            if (this.sortDir === "asc") {
-              return compareA - compareB;
-            } else {
-              return compareB - compareA;
-            }
-          }
-          return 0;
-        })
-        .filter((gear: Gear) => {
-          const name = gear.name.toLowerCase().replace(/\s/g, "");
-          const compare = this.searchName.toLowerCase().replace(/\s/g, "");
-          return name.includes(compare);
-        });
-    },
     gearTarget: {
       get(): number {
         return (
@@ -289,23 +166,6 @@ export default defineComponent({
           type: "fleet",
         });
       },
-    },
-  },
-  methods: {
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
     },
   },
 });

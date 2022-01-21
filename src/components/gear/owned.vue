@@ -54,6 +54,7 @@ export default defineComponent({
     ...mapGetters("gear", ["gearOwnedCount"]),
   },
   methods: {
+    ...mapActions("gear", ["saveOwnedCount"]),
     save() {
       this.editing = false;
       this.saveOwnedCount({ count: this.owned, base_id: this.salvage.base_id });
@@ -64,7 +65,6 @@ export default defineComponent({
         (this.$refs?.saveButton as any).focus();
       });
     },
-    ...mapActions("gear", ["saveOwnedCount"]),
   },
   created() {
     this.owned = this.gearOwnedCount(this.salvage);

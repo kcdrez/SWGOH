@@ -24,7 +24,7 @@
           data-bs-target="#gearAssumptionsModal"
         ></i>
       </h1>
-      <GearPlanner />
+      <GearPlanner id="gearSection" />
       <h1 class="collapse-header">
         <a data-bs-toggle="collapse" href="#relicSection">Relic Planner</a>
       </h1>

@@ -1,6 +1,6 @@
 import { ActionContext } from "vuex";
 
-import { Gear, Mission } from "../types/gear";
+import { Gear, Mission, ConfigType, OwnedCount } from "../types/gear";
 import {
   difficultyIds,
   tableIds,
@@ -10,8 +10,7 @@ import {
 } from "../types/locationMapping";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
-import { unvue } from "../utils";
-import { Unit } from "@/types/unit";
+import { Unit } from "../types/unit";
 
 export const maxGearLevel = 13;
 
@@ -19,7 +18,7 @@ interface State {
   requestState: loadingState;
   gearList: Gear[];
   gearLocations: any[];
-  ownedGear: any;
+  gearConfig: ConfigType;
   refreshes: { standard: number; fleet: number };
   energy: { standard: number; fleet: number };
   maxGearLevel: number;
@@ -33,7 +32,7 @@ const store = {
     requestState: loadingState.initial,
     gearList: [],
     gearLocations: [],
-    ownedGear: {},
+    gearConfig: {},
     refreshes: { standard: 0, fleet: 0 },
     energy: { standard: 0, fleet: 0 },
     maxGearLevel,
@@ -69,7 +68,7 @@ const store = {
     },
     gearOwnedCount(state: State) {
       return (gear: Gear): number => {
-        return state.ownedGear[gear.base_id] || 0;
+        return state.gearConfig[gear.base_id]?.owned || 0;
       };
     },
     findGearData(state: State) {
@@ -88,6 +87,9 @@ const store = {
     },
     timeEstimation(state: State, getters: any) {
       return (gear: Gear): number => {
+        if (state.gearConfig[gear.base_id]?.irrelevant) {
+          return 0;
+        }
         const owned: number = getters.gearOwnedCount(gear);
         const remaining = gear.amount - owned;
 
@@ -150,7 +152,7 @@ const store = {
         }
       };
     },
-    totalDays(_state: State, getters: any, rootState: RootState) {
+    totalDays(state: State, getters: any, rootState: RootState) {
       return (unit: Unit): any => {
         const { target } = rootState.planner.targetConfig[unit.id].gear;
         let totalStandard = 0;
@@ -163,7 +165,9 @@ const store = {
           const isFleet = gear.lookupMissionList.some(
             (x: Mission) => x.missionIdentifier.campaignId === "C01SP"
           );
-          if (isChallenge) {
+          if (state.gearConfig[gear.base_id]?.irrelevant) {
+            //do nothing
+          } else if (isChallenge) {
             totalChallenges = Math.max(
               getters.timeEstimation(gear),
               totalChallenges
@@ -243,7 +247,21 @@ const store = {
       state.gearLocations = payload;
     },
     SET_GEAR_OWNED(state: State, payload: any) {
-      state.ownedGear = payload;
+      state.gearConfig = payload;
+      window.localStorage.setItem(
+        "gearConfig",
+        JSON.stringify(state.gearConfig)
+      );
+    },
+    UPSERT_OWNED_GEAR(state: State, payload: OwnedCount) {
+      state.gearConfig[payload.base_id] = {
+        owned: payload.count || 0,
+        irrelevant: payload.irrelevant,
+      };
+      window.localStorage.setItem(
+        "gearConfig",
+        JSON.stringify(state.gearConfig)
+      );
     },
     UPDATE_REFRESHES(
       state: State,
@@ -264,17 +282,14 @@ const store = {
 
       let gearList = await rootState.apiClient?.fetchGearList();
       const gearOwned = JSON.parse(
-        window.localStorage.getItem("ownedGear") || "{}"
+        window.localStorage.getItem("gearConfig") || "{}"
       );
       commit("SET_GEAR_OWNED", gearOwned);
       commit("SET_GEAR", gearList);
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    saveOwnedCount({ state, commit }: ActionCtx, { count, base_id }: any) {
-      const countData = unvue(state.ownedGear);
-      countData[base_id] = count;
-      commit("SET_GEAR_OWNED", countData);
-      window.localStorage.setItem("ownedGear", JSON.stringify(countData));
+    saveOwnedCount({ commit }: ActionCtx, data: OwnedCount) {
+      commit("UPSERT_OWNED_GEAR", data);
     },
   },
 };

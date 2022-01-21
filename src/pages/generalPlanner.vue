@@ -88,17 +88,13 @@
             </select>
           </td>
           <td class="text-center">
-            {{ gearTotalDays(unit) }} Days ({{ getDate(gearTotalDays(unit)) }})
+            {{ $filters.dateTime(gearTotalDays(unit)) }}
           </td>
           <td class="text-center">
-            {{ relicTotalDays(unit) }} Days ({{
-              getDate(relicTotalDays(unit))
-            }})
+            {{ $filters.dateTime(relicTotalDays(unit)) }}
           </td>
           <td class="text-center">
-            {{ relicTotalDays(unit) + gearTotalDays(unit) }} Days ({{
-              getDate(relicTotalDays(unit) + gearTotalDays(unit))
-            }})
+            {{ $filters.dateTime(relicTotalDays(unit) + gearTotalDays(unit)) }}
           </td>
           <td>
             <div
@@ -118,22 +114,24 @@
         </tr>
       </tbody>
     </table>
+    <GearTable :gearList="fullGearList" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
-import moment from "moment";
 
 import Loading from "../components/loading.vue";
 import Error from "../components/error.vue";
 import { Unit } from "../types/unit";
 import { UnitPlannerItem, UpdateItem } from "../types/planner";
+import GearTable from "../components/gear/gearTable.vue";
+import { Gear } from "../types/gear";
 
 export default defineComponent({
   name: "GeneralPlannerPage",
-  components: { Loading, Error },
+  components: { Loading, Error, GearTable },
   data() {
     return {
       sortDir: "",
@@ -142,17 +140,36 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("planner", ["unitList"]),
+    ...mapGetters("planner", ["unitList", "gearTarget"]),
     ...mapGetters("unit", ["currentGearLevel"]),
     ...mapGetters("gear", {
       gearOptions: "gearOptions",
       gearTotalDays: "totalDays",
+      fullSalvageListByUnit: "fullSalvageList",
     }),
     ...mapGetters("relic", {
       relicOptions: "relicOptions",
       relicTotalDays: "totalDays",
     }),
     ...mapState("gear", ["maxGearLevel"]),
+    fullGearList(): Gear[] {
+      const list: Gear[] = [];
+      this.unitList.forEach((unit: Unit) => {
+        const unitGearList = this.fullSalvageListByUnit(
+          unit,
+          this.gearTarget(unit.id)
+        );
+        unitGearList.forEach((gear: Gear) => {
+          const match = list.find((el) => gear.base_id === el.base_id);
+          if (match) {
+            match.amount += gear.amount;
+          } else {
+            list.push(gear);
+          }
+        });
+      });
+      return list;
+    },
   },
   methods: {
     ...mapActions("planner", ["removeUnit"]),
@@ -193,9 +210,6 @@ export default defineComponent({
         unitId: unit.id,
       };
       this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
-    },
-    getDate(days: number): string {
-      return moment().add(days, "days").format("MM-DD-YYYY");
     },
     remove(unit: Unit & UnitPlannerItem) {
       this.removeUnit(unit.id);

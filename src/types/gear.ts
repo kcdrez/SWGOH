@@ -69,3 +69,24 @@ interface MissionNode {
   campaignMissionId: keyof missionTypes;
   campaignNodeId: keyof nodeTypes;
 }
+
+export type ConfigType = {
+  [key: string]: {
+    owned: number;
+    irrelevant: boolean;
+  };
+};
+/*
+{
+  id: {
+    owned: 0,
+    irrelevant: true
+  }
+}
+*/
+
+export type OwnedCount = {
+  count: number;
+  base_id: string;
+  irrelevant: boolean;
+};
