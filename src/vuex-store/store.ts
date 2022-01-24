@@ -4,6 +4,7 @@ import { store as unitStore, State as UnitState } from "./unit";
 import { store as playerStore, State as PlayerState } from "./player";
 import { store as relicStore, State as RelicState } from "./relic";
 import { store as plannerStore, State as PlannerState } from "./planner";
+import { store as speedStore, State as SpeedState } from "./speed";
 import { loadingState } from "../types/loading";
 import { ApiClient, apiClient } from "../api/api-client";
 
@@ -16,6 +17,7 @@ export interface State {
   unit: UnitState;
   player: PlayerState;
   planner: PlannerState;
+  speed: SpeedState;
 }
 
 const store = createStore<State>({
@@ -25,6 +27,7 @@ const store = createStore<State>({
     unit: unitStore,
     player: playerStore,
     planner: plannerStore,
+    speed: speedStore
   },
   state: {
     apiClient: apiClient,
@@ -34,6 +37,7 @@ const store = createStore<State>({
     unit: unitStore.state,
     player: playerStore.state,
     planner: plannerStore.state,
+    speed: speedStore.state
   },
   getters: {},
   mutations: {

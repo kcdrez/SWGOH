@@ -39,6 +39,13 @@
                   >General Planner</router-link
                 >
               </li>
+              <li>
+                <router-link
+                  class="dropdown-item"
+                  :to="{ name: 'SpeedClockingPage' }"
+                  >Speed Clocking</router-link
+                >
+              </li>
             </ul>
           </li>
         </ul>

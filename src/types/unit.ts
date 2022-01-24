@@ -37,7 +37,7 @@ interface Ability {
   name: string;
 }
 
-interface Mod {
+export interface Mod {
   id: string;
   level: number;
   tier: number;
