@@ -12,23 +12,24 @@
       >
         <thead>
           <tr class="text-center">
-            <td>Unit</td>
-            <td>Base Speed</td>
-            <td>Square</td>
-            <td>Arrow</td>
-            <td>Diamond</td>
-            <td>Triangle</td>
-            <td>Circle</td>
-            <td>Cross</td>
-            <td>Set Bonus</td>
-            <td>Leader/Unique</td>
-            <td>Total</td>
+            <td width="10%">Unit</td>
+            <!-- <td>Base Speed</td> -->
+            <td width="10%">Square</td>
+            <td width="10%">Arrow</td>
+            <td width="10%">Diamond</td>
+            <td width="10%">Triangle</td>
+            <td width="10%">Circle</td>
+            <td width="10%">Cross</td>
+            <td width="10%">Set Bonus</td>
+            <td width="10%">Sub Total</td>
+            <td width="10%">Leader/Unique</td>
+            <td width="10%">Total</td>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="unit in team.units" :key="unit.id">
+          <tr v-for="unit in team.units" :key="unit.id" class="text-center">
             <td>{{ unit.name }}</td>
-            <td></td>
+            <!-- <td></td> -->
             <td>{{ speedValueFromMod(unit.mods[0]) }}</td>
             <td>{{ speedValueFromMod(unit.mods[1]) }}</td>
             <td>{{ speedValueFromMod(unit.mods[2]) }}</td>
@@ -36,8 +37,16 @@
             <td>{{ speedValueFromMod(unit.mods[4]) }}</td>
             <td>{{ speedValueFromMod(unit.mods[5]) }}</td>
             <td>{{ hasSpeedSet(unit) ? "Yes" : "No" }}</td>
-            <td>Leader/Unique</td>
             <td>{{ unit.stats["5"] }}</td>
+            <td>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                v-model="unit.speedBonus"
+                min="0"
+              />
+            </td>
+            <td>{{ unit.stats["5"] + (unit.speedBonus || 0) }}</td>
           </tr>
           <tr>
             <td colspan="11">

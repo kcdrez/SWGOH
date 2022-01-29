@@ -1,20 +1,17 @@
 <template>
   <div v-if="player">
-    <div>
-      <input
-        class="form-control form-control-sm"
-        type="text"
-        v-model="searchText"
-        placeholder="Search for Unit"
+    <SearchInput :list="player.units" @select="selected = $event" />
+    <div v-if="selected" class="text-center">
+      <img
+        class="d-block mx-auto my-1"
+        :src="`https://game-assets.swgoh.gg/${selected?.thumbnailName}.png`"
       />
       <router-link
-        v-for="unit in filteredUnits"
-        :key="unit.id"
-        :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-        class="d-block"
+        as="button"
+        class="btn btn-primary"
+        :to="{ name: 'UnitPage', params: { unitId: selected.id } }"
+        >View Details</router-link
       >
-        {{ unit.name }}
-      </router-link>
     </div>
   </div>
 </template>
@@ -23,10 +20,11 @@
 import { defineComponent } from "vue";
 
 import { Player } from "../types/player";
-import { Unit } from "../types/unit";
+import SearchInput from "./search-input.vue";
 
 export default defineComponent({
   name: "Player",
+  components: { SearchInput },
   props: {
     player: {
       type: Object as () => Player,
@@ -35,27 +33,8 @@ export default defineComponent({
   },
   data() {
     return {
-      searchText: "",
+      selected: null,
     };
   },
-  computed: {
-    filteredUnits(): Unit[] {
-      return this.player.units
-        .filter((unit) => {
-          if (unit) {
-            return unit.name
-              .toLowerCase()
-              .includes(this.searchText.toLowerCase());
-          } else {
-            return false;
-          }
-        })
-        .sort((a, b) => {
-          return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
-        });
-    },
-  },
-  mounted() {},
-  methods: {},
 });
 </script>

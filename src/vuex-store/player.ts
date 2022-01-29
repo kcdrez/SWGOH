@@ -49,7 +49,8 @@ const store = {
     async fetchPlayer({ commit, rootState }: ActionCtx, allyCode: string) {
       commit("SET_REQUEST_STATE", loadingState.loading);
       try {
-        const player: Player = await rootState.apiClient?.fetchPlayer(allyCode);
+        const player = await rootState.apiClient?.fetchPlayer(allyCode);
+        commit("gear/SET_GEAR_OWNED", player.gear, { root: true });
         commit("SET_PLAYER", player);
         commit("SET_ALLY_CODE", allyCode);
         commit("SET_REQUEST_STATE", loadingState.ready);

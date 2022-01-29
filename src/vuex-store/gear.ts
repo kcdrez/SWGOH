@@ -11,6 +11,7 @@ import {
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { Unit } from "../types/unit";
+import { apiClient } from "../api/api-client";
 
 export const maxGearLevel = 13;
 
@@ -248,20 +249,12 @@ const store = {
     },
     SET_GEAR_OWNED(state: State, payload: any) {
       state.gearConfig = payload;
-      window.localStorage.setItem(
-        "gearConfig",
-        JSON.stringify(state.gearConfig)
-      );
     },
     UPSERT_OWNED_GEAR(state: State, payload: OwnedCount) {
       state.gearConfig[payload.base_id] = {
         owned: payload.count || 0,
         irrelevant: payload.irrelevant,
       };
-      window.localStorage.setItem(
-        "gearConfig",
-        JSON.stringify(state.gearConfig)
-      );
     },
     UPDATE_REFRESHES(
       state: State,
@@ -281,15 +274,15 @@ const store = {
       commit("SET_REQUEST_STATE", loadingState.loading);
 
       let gearList = await rootState.apiClient?.fetchGearList();
-      const gearOwned = JSON.parse(
-        window.localStorage.getItem("gearConfig") || "{}"
-      );
-      commit("SET_GEAR_OWNED", gearOwned);
+      // commit("SET_GEAR_OWNED", gearOwned);
       commit("SET_GEAR", gearList);
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    saveOwnedCount({ commit }: ActionCtx, data: OwnedCount) {
+    saveOwnedCount({ commit, state, rootState }: ActionCtx, data: OwnedCount) {
       commit("UPSERT_OWNED_GEAR", data);
+      if (rootState.player?.player) {
+        apiClient.saveGearData(rootState.player.player.id, state.gearConfig);
+      }
     },
   },
 };
