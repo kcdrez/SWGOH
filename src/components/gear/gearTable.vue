@@ -29,7 +29,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="salvage in filteredSalvageList" :key="salvage.base_id">
+      <tr v-for="salvage in filteredSalvageList" :key="salvage.id">
         <td class="text-center">
           <GearIcon :gear="salvage" />
         </td>
@@ -37,11 +37,11 @@
           <button
             class="btn btn-sm btn-info m-auto d-block"
             data-bs-toggle="collapse"
-            :href="`#locations-${salvage.base_id}`"
+            :href="`#locations-${salvage.id}`"
           >
             Show/Hide Locations
           </button>
-          <ul class="m-0 collapse" :id="`locations-${salvage.base_id}`">
+          <ul class="m-0 collapse" :id="`locations-${salvage.id}`">
             <li
               v-for="(l, index) in gearLocation(salvage.lookupMissionList)"
               :key="index"
@@ -51,7 +51,7 @@
           </ul>
         </td>
         <td>
-          <Salvage :salvage="salvage" />
+          <OwnedAmount :salvage="salvage" />
         </td>
         <td class="text-center">
           {{ $filters.dateTime(timeEstimation(salvage)) }}
@@ -81,7 +81,7 @@
       </tr>
     </thead>
     <tbody id="irrelevantSection" class="collapse">
-      <tr v-for="salvage in irrelevantGear" :key="salvage.base_id">
+      <tr v-for="salvage in irrelevantGear" :key="salvage.id">
         <td colspan="4" class="text-center"><GearIcon :gear="salvage" /></td>
         <td>
           <div class="btn-group btn-group-sm d-block text-center" role="group">
@@ -105,12 +105,12 @@ import { defineComponent, PropType } from "vue";
 import { mapActions, mapGetters, mapState } from "vuex";
 
 import { Gear } from "../../types/gear";
-import Salvage from "./owned.vue";
+import OwnedAmount from "./owned.vue";
 import GearIcon from "./gearIcon.vue";
 
 export default defineComponent({
   name: "GearTable",
-  components: { Salvage, GearIcon },
+  components: { OwnedAmount, GearIcon },
   props: {
     gearList: {
       required: true,
@@ -134,8 +134,8 @@ export default defineComponent({
     filteredSalvageList(): Gear[] {
       return this.gearList
         .filter((gear: Gear) => {
-          if (gear.base_id in this.gearConfig) {
-            if (this.gearConfig[gear.base_id].irrelevant) {
+          if (gear.id in this.gearConfig) {
+            if (this.gearConfig[gear.id].irrelevant) {
               return false;
             }
           }
@@ -180,8 +180,8 @@ export default defineComponent({
     },
     irrelevantGear(): Gear[] {
       return this.gearList.filter((gear: Gear) => {
-        if (gear.base_id in this.gearConfig) {
-          if (this.gearConfig[gear.base_id].irrelevant) {
+        if (gear.id in this.gearConfig) {
+          if (this.gearConfig[gear.id].irrelevant) {
             return true;
           }
         }
@@ -208,7 +208,7 @@ export default defineComponent({
     },
     markRelevant(salvage: Gear, isRelevant: boolean) {
       this.saveOwnedCount({
-        base_id: salvage.base_id,
+        id: salvage.id,
         count: salvage.owned,
         irrelevant: isRelevant,
       });

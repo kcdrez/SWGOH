@@ -4,6 +4,7 @@ import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { ConfigType, UpdateItem } from "../types/planner";
 import { maxGearLevel } from "./gear";
+import { apiClient } from "../api/api-client";
 
 interface State {
   requestState: loadingState;
@@ -48,11 +49,9 @@ const store = {
       state.requestState = payload;
     },
     UPDATE_PLANNER(state: State, payload: ConfigType) {
-      state.targetConfig = payload;
-      window.localStorage.setItem(
-        "generalPlanner",
-        JSON.stringify(state.targetConfig)
-      );
+      if (payload) {
+        state.targetConfig = payload;
+      }
     },
     UPDATE_PLANNER_ITEM(state: State, { unitId, type, value }: UpdateItem) {
       if (!state.targetConfig[unitId]) {
@@ -63,10 +62,6 @@ const store = {
       }
 
       state.targetConfig[unitId][type].target = value;
-      window.localStorage.setItem(
-        "generalPlanner",
-        JSON.stringify(state.targetConfig)
-      );
     },
     UPSERT_UNIT(state: State, id: string) {
       const index = state.unitList.findIndex((x) => x === id);
@@ -75,17 +70,11 @@ const store = {
       } else {
         state.unitList.push(id);
       }
-      window.localStorage.setItem(
-        "generalPlanner-unitList",
-        JSON.stringify(state.unitList)
-      );
     },
     SET_UNIT_LIST(state: State, payload: string[]) {
-      state.unitList = payload;
-      window.localStorage.setItem(
-        "generalPlanner-unitList",
-        JSON.stringify(state.unitList)
-      );
+      if (payload) {
+        state.unitList = payload;
+      }
     },
     REMOVE_UNIT(state: State, id: string) {
       const index = state.unitList.findIndex((x) => x === id);
@@ -93,22 +82,16 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit, dispatch }: ActionCtx) {
+    async initialize({ commit, dispatch }: ActionCtx, payload: any) {
       commit("SET_REQUEST_STATE", loadingState.loading);
-      const targetData: ConfigType = JSON.parse(
-        window.localStorage.getItem("generalPlanner") || "{}"
-      );
-      const unitListData: string[] = JSON.parse(
-        window.localStorage.getItem("generalPlanner-unitList") || "[]"
-      );
       await Promise.all(
         //might have to put a limiter on this if the list is really big
-        unitListData.map((id) => dispatch("unit/fetchUnit", id, { root: true }))
+        (payload?.unitList || []).map((id: string) => dispatch("unit/fetchUnit", id, { root: true }))
       );
-      commit("UPDATE_PLANNER", targetData);
-      commit("SET_UNIT_LIST", unitListData);
-      unitListData.forEach((id) => {
-        if (!(id in targetData)) {
+      commit("UPDATE_PLANNER", payload.targetData);
+      commit("SET_UNIT_LIST", payload.unitList);
+      (payload?.unitList || []).forEach((id: string) => {
+        if (!(id in payload.targetData)) {
           commit("UPDATE_PLANNER_ITEM", {
             id,
             type: "relic",
@@ -118,23 +101,35 @@ const store = {
       });
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    addUnit({ commit }: ActionCtx, id: string) {
+    addUnit({ commit, dispatch }: ActionCtx, id: string) {
       commit("UPSERT_UNIT", id);
+      dispatch("save");
     },
-    updatePlannerTarget({ commit }: ActionCtx, payload: UpdateItem) {
+    updatePlannerTarget({ commit, dispatch }: ActionCtx, payload: UpdateItem) {
       commit("UPDATE_PLANNER_ITEM", payload);
+      dispatch("save");
     },
-    initPlannerTarget({ commit }: ActionCtx, unitId: string) {
-      commit("UPDATE_PLANNER_ITEM", {
-        unitId,
-        type: "gear",
-        value: maxGearLevel,
-      });
-      commit("UPDATE_PLANNER_ITEM", { unitId, type: "relic", value: 5 });
+    initPlannerTarget({ commit, dispatch, state }: ActionCtx, unitId: string) {
+      const exists = state.unitList.find(x => x === unitId)
+      if (!exists) {
+        commit("UPDATE_PLANNER_ITEM", {
+          unitId,
+          type: "gear",
+          value: maxGearLevel,
+        });
+        commit("UPDATE_PLANNER_ITEM", { unitId, type: "relic", value: 5 });
+        dispatch("save");
+      }
     },
-    removeUnit({ commit }: ActionCtx, id: string) {
+    removeUnit({ commit, dispatch }: ActionCtx, id: string) {
       commit("REMOVE_UNIT", id);
+      dispatch("save");
     },
+    save({ rootState, state }: ActionCtx) {
+      if (rootState.player.player) {
+        apiClient.savePlannerData(rootState.player.player.id, { targetData: state.targetConfig, unitList: state.unitList });
+      }
+    }
   },
 };
 

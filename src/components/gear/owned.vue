@@ -57,7 +57,7 @@ export default defineComponent({
     ...mapActions("gear", ["saveOwnedCount"]),
     save() {
       this.editing = false;
-      this.saveOwnedCount({ count: this.owned, base_id: this.salvage.base_id });
+      this.saveOwnedCount({ count: this.owned, id: this.salvage.id });
     },
     edit() {
       this.editing = true;

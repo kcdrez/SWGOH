@@ -6,3 +6,7 @@ export interface Relic {
   image: string;
   name: string;
 }
+
+export type RelicConfigType = {
+  [key: string]: Relic;
+};

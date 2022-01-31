@@ -160,7 +160,7 @@ export default defineComponent({
           this.gearTarget(unit.id)
         );
         unitGearList.forEach((gear: Gear) => {
-          const match = list.find((el) => gear.base_id === el.base_id);
+          const match = list.find((el) => gear.id === el.id);
           if (match) {
             match.amount += gear.amount;
           } else {
@@ -209,7 +209,7 @@ export default defineComponent({
         value: Number(value),
         unitId: unit.id,
       };
-      this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
+      this.$store.dispatch("planner/updatePlannerTarget", payload);
     },
     remove(unit: Unit & UnitPlannerItem) {
       this.removeUnit(unit.id);

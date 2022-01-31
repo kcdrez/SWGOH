@@ -50,8 +50,6 @@ const store = createStore<State>({
       commit("SET_REQUEST_STATE", loadingState.loading);
       await dispatch("player/initialize", { root: true });
       await dispatch("gear/fetchGear", { root: true });
-      await dispatch("relic/initialize", { root: true });
-      await dispatch("planner/initialize", { root: true });
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     // async fetchData({ state }) {

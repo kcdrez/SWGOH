@@ -1,10 +1,11 @@
 export interface Gear {
-  base_id: string;
+  id: string;
   image: string;
   name: string;
   owned: number;
   amount: number;
   lookupMissionList: Mission[];
+  tier: number;
 }
 
 export interface Mission {
@@ -76,17 +77,9 @@ export type ConfigType = {
     irrelevant: boolean;
   };
 };
-/*
-{
-  id: {
-    owned: 0,
-    irrelevant: true
-  }
-}
-*/
 
 export type OwnedCount = {
   count: number;
-  base_id: string;
+  id: string;
   irrelevant: boolean;
 };

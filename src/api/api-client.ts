@@ -3,13 +3,14 @@ import axios from "axios";
 import { Player } from "../types/player";
 import { ConfigType, Gear } from "../types/gear";
 import { Unit } from "../types/unit";
+import { RelicConfigType } from "../types/relic";
 
 class ApiClient {
-  // baseUrl = "https://7ly6sjvvj1.execute-api.us-east-1.amazonaws.com/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
   // baseUrl = "http://7739-184-96-186-220.ngrok.io";
   baseUrl = "http://localhost:3000/dev";
 
-  constructor() {}
+  constructor() { }
 
   async fetchPlayer(allyCode: string): Promise<Player> {
     const response = await axios.get(`${this.baseUrl}/player/${allyCode}`);
@@ -28,6 +29,14 @@ class ApiClient {
 
   async saveGearData(playerId: string, gearData: ConfigType) {
     await axios.patch(`${this.baseUrl}/gear/${playerId}`, { gear: gearData });
+  }
+
+  async saveRelicData(playerId: string, relicData: RelicConfigType) {
+    await axios.patch(`${this.baseUrl}/relic/${playerId}`, { relic: relicData });
+  }
+
+  async savePlannerData(playerId: string, plannerData: any) {
+    await axios.patch(`${this.baseUrl}/player/planner/${playerId}`, { planner: plannerData });
   }
 }
 

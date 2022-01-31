@@ -4,18 +4,15 @@ import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { unvue } from "../utils";
 import relicConfig from "../types/relicMapping";
-import { Relic } from "../types/relic";
+import { Relic, RelicConfigType } from "../types/relic";
 import { Unit } from "../types/unit";
+import { apiClient } from "../api/api-client";
 
 export const maxRelicLevel = 9;
 
-type ConfigType = {
-  [key: string]: Relic;
-};
-
 interface State {
   requestState: loadingState;
-  relicConfig: ConfigType;
+  relicConfig: RelicConfigType;
   ownedRelics: any;
   refreshes: { cantina: number };
   energy: { cantina: number };
@@ -92,7 +89,9 @@ const store = {
       state.requestState = payload;
     },
     SET_OWNED_RELICS(state: State, payload: any) {
-      state.ownedRelics = payload;
+      if (payload) {
+        state.ownedRelics = payload;
+      }
     },
     UPDATE_REFRESHES(state: State, amount: number) {
       state.refreshes.cantina = amount;
@@ -102,23 +101,16 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit }: ActionCtx) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-
-      const relicsOwned = JSON.parse(
-        window.localStorage.getItem("ownedRelics") || "{}"
-      );
-      commit("SET_OWNED_RELICS", relicsOwned);
-      commit("SET_REQUEST_STATE", loadingState.ready);
-    },
     saveOwnedCount(
-      { state, commit }: ActionCtx,
+      { state, commit, rootState }: ActionCtx,
       { count, id }: { count: number; id: string }
     ) {
       const countData = unvue(state.ownedRelics);
       countData[id] = count;
       commit("SET_OWNED_RELICS", countData);
-      window.localStorage.setItem("ownedRelics", JSON.stringify(countData));
+      if (rootState.player?.player) {
+        apiClient.saveRelicData(rootState.player.player.id, state.ownedRelics);
+      }
     },
   },
 };

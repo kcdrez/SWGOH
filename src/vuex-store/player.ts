@@ -46,11 +46,13 @@ const store = {
         await dispatch("fetchPlayer", allyCode);
       }
     },
-    async fetchPlayer({ commit, rootState }: ActionCtx, allyCode: string) {
+    async fetchPlayer({ commit, dispatch, rootState }: ActionCtx, allyCode: string) {
       commit("SET_REQUEST_STATE", loadingState.loading);
       try {
         const player = await rootState.apiClient?.fetchPlayer(allyCode);
         commit("gear/SET_GEAR_OWNED", player.gear, { root: true });
+        commit("relic/SET_OWNED_RELICS", player.relic, { root: true });
+        await dispatch("planner/initialize", player.planner, { root: true });
         commit("SET_PLAYER", player);
         commit("SET_ALLY_CODE", allyCode);
         commit("SET_REQUEST_STATE", loadingState.ready);

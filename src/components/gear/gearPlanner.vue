@@ -120,7 +120,7 @@ export default defineComponent({
           value,
           unitId: this.unit.id,
         };
-        this.$store.commit("planner/UPDATE_PLANNER_ITEM", payload);
+        this.$store.dispatch("planner/updatePlannerTarget", payload);
       },
     },
     refreshesStandard: {

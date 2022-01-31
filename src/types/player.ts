@@ -6,6 +6,8 @@ export interface Player {
   units: Unit[];
   id: string;
   gear?: any;
+  relic?: any;
+  planner?: any;
 }
 
 export interface EquippedGear {

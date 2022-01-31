@@ -69,12 +69,12 @@ const store = {
     },
     gearOwnedCount(state: State) {
       return (gear: Gear): number => {
-        return state.gearConfig[gear.base_id]?.owned || 0;
+        return state.gearConfig[gear.id]?.owned || 0;
       };
     },
     findGearData(state: State) {
       return (id: string): Gear | undefined => {
-        return state.gearList.find((el: Gear) => el.base_id === id);
+        return state.gearList.find((el: Gear) => el.id === id);
       };
     },
     gearOptions(_state: State) {
@@ -88,7 +88,7 @@ const store = {
     },
     timeEstimation(state: State, getters: any) {
       return (gear: Gear): number => {
-        if (state.gearConfig[gear.base_id]?.irrelevant) {
+        if (state.gearConfig[gear.id]?.irrelevant) {
           return 0;
         }
         const owned: number = getters.gearOwnedCount(gear);
@@ -166,7 +166,7 @@ const store = {
           const isFleet = gear.lookupMissionList.some(
             (x: Mission) => x.missionIdentifier.campaignId === "C01SP"
           );
-          if (state.gearConfig[gear.base_id]?.irrelevant) {
+          if (state.gearConfig[gear.id]?.irrelevant) {
             //do nothing
           } else if (isChallenge) {
             totalChallenges = Math.max(
@@ -188,6 +188,7 @@ const store = {
           const { gear_level } = unit;
           const futureGear =
             unit?.unitTierList.filter((x: any) => x.tier >= gear_level) || [];
+
 
           return futureGear.map((gear: any) => {
             return {
@@ -217,12 +218,13 @@ const store = {
       return (unit: Unit, gearTarget: number): Gear[] => {
         let list: Gear[] = [];
         getters.fullGearListByLevel(unit).forEach((tier: any) => {
+          console.log(tier)
           if (tier.tier + 1 <= gearTarget) {
             tier.gear.forEach((gear: any) => {
               gear.ingredients.forEach(({ gear, amount }: any) => {
                 const gearData = { ...getters.findGearData(gear), amount };
                 const exists = list.find(
-                  (x: any) => x.base_id === gearData.base_id
+                  (x: any) => x.id === gearData.id
                 );
                 if (exists) {
                   exists.amount += amount;
@@ -251,7 +253,7 @@ const store = {
       state.gearConfig = payload;
     },
     UPSERT_OWNED_GEAR(state: State, payload: OwnedCount) {
-      state.gearConfig[payload.base_id] = {
+      state.gearConfig[payload.id] = {
         owned: payload.count || 0,
         irrelevant: payload.irrelevant,
       };
