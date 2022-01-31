@@ -209,7 +209,7 @@ export default defineComponent({
         return this.$store.state.relic.refreshes.cantina;
       },
       set(value: number) {
-        this.$store.commit("relic/UPDATE_REFRESHES", value);
+        this.$store.dispatch("relic/updateRefreshes", value);
       },
     },
     energy: {
@@ -217,7 +217,7 @@ export default defineComponent({
         return this.$store.state.relic.energy.cantina;
       },
       set(value: number) {
-        this.$store.commit("relic/UPDATE_ENERGY", value);
+        this.$store.dispatch("relic/updateEnergy", value);
       },
     },
   },

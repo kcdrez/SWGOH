@@ -3,6 +3,7 @@ import { ActionContext } from "vuex";
 import { Unit } from "../types/unit";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
+import { apiClient } from "../api/api-client";
 
 interface State {
   requestState: loadingState;
@@ -50,7 +51,7 @@ const store = {
           dispatch("planner/initPlannerTarget", exists.id, { root: true });
           commit("SET_REQUEST_STATE", loadingState.ready);
         } else {
-          const response = await rootState.apiClient?.fetchUnit(id);
+          const response = await apiClient.fetchUnit(id);
           commit("SET_UNIT", response);
           dispatch("planner/initPlannerTarget", response.id, { root: true });
           commit("SET_REQUEST_STATE", loadingState.ready);

@@ -12,8 +12,14 @@ import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { Unit } from "../types/unit";
 import { apiClient } from "../api/api-client";
+import { PlayerResponse } from "../types/player";
 
 export const maxGearLevel = 13;
+
+type updateEnergy = {
+  value: number;
+  type: "standard" | "fleet";
+};
 
 interface State {
   requestState: loadingState;
@@ -189,7 +195,6 @@ const store = {
           const futureGear =
             unit?.unitTierList.filter((x: any) => x.tier >= gear_level) || [];
 
-
           return futureGear.map((gear: any) => {
             return {
               tier: gear.tier,
@@ -218,14 +223,11 @@ const store = {
       return (unit: Unit, gearTarget: number): Gear[] => {
         let list: Gear[] = [];
         getters.fullGearListByLevel(unit).forEach((tier: any) => {
-          console.log(tier)
           if (tier.tier + 1 <= gearTarget) {
             tier.gear.forEach((gear: any) => {
               gear.ingredients.forEach(({ gear, amount }: any) => {
                 const gearData = { ...getters.findGearData(gear), amount };
-                const exists = list.find(
-                  (x: any) => x.id === gearData.id
-                );
+                const exists = list.find((x: any) => x.id === gearData.id);
                 if (exists) {
                   exists.amount += amount;
                 } else {
@@ -258,24 +260,44 @@ const store = {
         irrelevant: payload.irrelevant,
       };
     },
-    UPDATE_REFRESHES(
-      state: State,
-      payload: { value: number; type: "standard" | "fleet" }
-    ) {
+    UPDATE_REFRESHES(state: State, payload: updateEnergy) {
       state.refreshes[payload.type] = payload.value;
     },
-    UPDATE_ENERGY(
-      state: State,
-      payload: { value: number; type: "standard" | "fleet" }
-    ) {
+    UPDATE_ENERGY(state: State, payload: updateEnergy) {
       state.energy[payload.type] = payload.value;
     },
   },
   actions: {
-    async fetchGear({ commit, rootState }: ActionCtx) {
+    initialize({ commit }: ActionCtx, player: PlayerResponse) {
+      commit("SET_GEAR_OWNED", player.gear);
+
+      const refreshStandard: updateEnergy = {
+        type: "standard",
+        value: player.energyData?.refreshes?.standard || 0,
+      };
+      const refreshFleet: updateEnergy = {
+        type: "fleet",
+        value: player.energyData?.refreshes?.fleet || 0,
+      };
+
+      const energyStandard: updateEnergy = {
+        type: "standard",
+        value: player.energyData?.energy?.standard || 0,
+      };
+      const energyFleet: updateEnergy = {
+        type: "fleet",
+        value: player.energyData?.energy?.fleet || 0,
+      };
+
+      commit("UPDATE_REFRESHES", refreshStandard);
+      commit("UPDATE_REFRESHES", refreshFleet);
+      commit("UPDATE_ENERGY", energyStandard);
+      commit("UPDATE_ENERGY", energyFleet);
+    },
+    async fetchGear({ commit }: ActionCtx) {
       commit("SET_REQUEST_STATE", loadingState.loading);
 
-      let gearList = await rootState.apiClient?.fetchGearList();
+      let gearList = await apiClient.fetchGearList();
       // commit("SET_GEAR_OWNED", gearOwned);
       commit("SET_GEAR", gearList);
       commit("SET_REQUEST_STATE", loadingState.ready);
@@ -285,6 +307,14 @@ const store = {
       if (rootState.player?.player) {
         apiClient.saveGearData(rootState.player.player.id, state.gearConfig);
       }
+    },
+    updateRefreshes({ commit, dispatch }: ActionCtx, payload: updateEnergy) {
+      commit("UPDATE_REFRESHES", payload);
+      dispatch("player/saveEnergy", null, { root: true });
+    },
+    updateEnergy({ commit, dispatch }: ActionCtx, payload: updateEnergy) {
+      commit("UPDATE_ENERGY", payload);
+      dispatch("player/saveEnergy", null, { root: true });
     },
   },
 };

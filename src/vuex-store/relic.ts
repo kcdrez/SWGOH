@@ -7,6 +7,7 @@ import relicConfig from "../types/relicMapping";
 import { Relic, RelicConfigType } from "../types/relic";
 import { Unit } from "../types/unit";
 import { apiClient } from "../api/api-client";
+import { PlayerResponse } from "@/types/player";
 
 export const maxRelicLevel = 9;
 
@@ -101,6 +102,11 @@ const store = {
     },
   },
   actions: {
+    initialize({ commit }: ActionCtx, player: PlayerResponse) {
+      commit("SET_OWNED_RELICS", player.relic);
+      commit("UPDATE_REFRESHES", player.energyData?.refreshes?.cantina || 0);
+      commit("UPDATE_ENERGY", player.energyData?.energy?.cantina || 0);
+    },
     saveOwnedCount(
       { state, commit, rootState }: ActionCtx,
       { count, id }: { count: number; id: string }
@@ -111,6 +117,14 @@ const store = {
       if (rootState.player?.player) {
         apiClient.saveRelicData(rootState.player.player.id, state.ownedRelics);
       }
+    },
+    updateRefreshes({ commit, dispatch }: ActionCtx, amount: number) {
+      commit("UPDATE_REFRESHES", amount);
+      dispatch("player/saveEnergy", null, { root: true });
+    },
+    updateEnergy({ commit, dispatch }: ActionCtx, amount: number) {
+      commit("UPDATE_ENERGY", amount);
+      dispatch("player/saveEnergy", null, { root: true });
     },
   },
 };

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { Player } from "../types/player";
+import { PlayerResponse } from "../types/player";
 import { ConfigType, Gear } from "../types/gear";
 import { Unit } from "../types/unit";
 import { RelicConfigType } from "../types/relic";
@@ -10,9 +10,9 @@ class ApiClient {
   // baseUrl = "http://7739-184-96-186-220.ngrok.io";
   baseUrl = "http://localhost:3000/dev";
 
-  constructor() { }
+  constructor() {}
 
-  async fetchPlayer(allyCode: string): Promise<Player> {
+  async fetchPlayer(allyCode: string): Promise<PlayerResponse> {
     const response = await axios.get(`${this.baseUrl}/player/${allyCode}`);
     return response.data;
   }
@@ -32,11 +32,24 @@ class ApiClient {
   }
 
   async saveRelicData(playerId: string, relicData: RelicConfigType) {
-    await axios.patch(`${this.baseUrl}/relic/${playerId}`, { relic: relicData });
+    await axios.patch(`${this.baseUrl}/relic/${playerId}`, {
+      relic: relicData,
+    });
   }
 
   async savePlannerData(playerId: string, plannerData: any) {
-    await axios.patch(`${this.baseUrl}/player/planner/${playerId}`, { planner: plannerData });
+    await axios.patch(`${this.baseUrl}/player/planner/${playerId}`, {
+      planner: plannerData,
+    });
+  }
+
+  async saveEnergyData(playerId: string, energyData: any) {
+    if (!!playerId) {
+      await axios.patch(
+        `${this.baseUrl}/player/energy/${playerId}`,
+        energyData
+      );
+    }
   }
 }
 

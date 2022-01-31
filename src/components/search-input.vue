@@ -74,7 +74,6 @@ export default defineComponent({
   },
   methods: {
     selectItem(item: any) {
-      console.log("selecting", item);
       this.searchText = item[this.searchBy];
       this.showList = false;
       this.$emit("select", item);

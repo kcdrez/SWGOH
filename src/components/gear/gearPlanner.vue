@@ -128,7 +128,7 @@ export default defineComponent({
         return this.$store.state.gear.refreshes.standard;
       },
       set(value: number) {
-        this.$store.commit("gear/UPDATE_REFRESHES", {
+        this.$store.dispatch("gear/updateRefreshes", {
           value,
           type: "standard",
         });
@@ -139,7 +139,7 @@ export default defineComponent({
         return this.$store.state.gear.refreshes.fleet;
       },
       set(value: number) {
-        this.$store.commit("gear/UPDATE_REFRESHES", {
+        this.$store.dispatch("gear/updateRefreshes", {
           value,
           type: "fleet",
         });
@@ -150,7 +150,7 @@ export default defineComponent({
         return this.$store.state.gear.energy.standard;
       },
       set(value: number) {
-        this.$store.commit("gear/UPDATE_ENERGY", {
+        this.$store.dispatch("gear/updateEnergy", {
           value,
           type: "standard",
         });
@@ -161,7 +161,7 @@ export default defineComponent({
         return this.$store.state.gear.energy.fleet;
       },
       set(value: number) {
-        this.$store.commit("gear/UPDATE_ENERGY", {
+        this.$store.dispatch("gear/updateEnergy", {
           value,
           type: "fleet",
         });
