@@ -77,7 +77,7 @@
               <td width="7%">Triangle</td>
               <td width="7%">Circle</td>
               <td width="7%">Cross</td>
-              <td width="10%">Set Bonus</td>
+              <td width="10%">Speed Set Bonus?</td>
               <td width="10%">Sub Total</td>
               <td width="10%">Leader/Unique</td>
               <td width="10%">Total</td>
@@ -143,7 +143,10 @@
         :text="`Are you sure you want to delete this team (${
           deleteTarget ? deleteTarget.name : ''
         })? This cannot be undone.`"
-        @confirm="deleteTeam(deleteTarget)"
+        @confirm="
+          deleteTeam(deleteTarget);
+          deleteTarget = null;
+        "
         @cancel="cancelDelete"
       />
     </Loading>

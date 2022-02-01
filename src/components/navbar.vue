@@ -7,13 +7,13 @@
       <button
         class="navbar-toggler"
         type="button"
-        data-toggle="collapse"
-        data-target="#navbar-toggler"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbar-toggler"
       >
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbar-toggler">
-        <ul class="navbar-nav mr-auto">
+        <ul class="navbar-nav me-auto">
           <li class="nav-item">
             <a
               class="nav-link"
@@ -47,9 +47,9 @@
             </ul>
           </li>
         </ul>
-      </div>
-      <div class="navbar-text">
-        <small>Version: {{ version }}</small>
+        <div class="navbar-text">
+          <small>Version: {{ version }}</small>
+        </div>
       </div>
     </div>
   </nav>
