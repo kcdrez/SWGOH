@@ -84,12 +84,6 @@ const store = {
   actions: {
     async initialize({ commit, dispatch }: ActionCtx, payload: any) {
       commit("SET_REQUEST_STATE", loadingState.loading);
-      await Promise.all(
-        //might have to put a limiter on this if the list is really big
-        (payload?.unitList || []).map((id: string) =>
-          dispatch("unit/fetchUnit", id, { root: true })
-        )
-      );
       commit("UPDATE_PLANNER", payload.targetData);
       commit("SET_UNIT_LIST", payload.unitList);
       (payload?.unitList || []).forEach((id: string) => {
@@ -101,6 +95,12 @@ const store = {
           });
         }
       });
+      await Promise.all(
+        //might have to put a limiter on this if the list is really big
+        (payload?.unitList || []).map((id: string) =>
+          dispatch("unit/fetchUnit", id, { root: true })
+        )
+      );
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     addUnit({ commit, dispatch }: ActionCtx, id: string) {
