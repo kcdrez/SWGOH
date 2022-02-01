@@ -1,9 +1,9 @@
 <template>
   <div class="position-relative">
     <input
+      class="form-control form-control-sm"
       type="text"
       v-model="searchText"
-      class="w-100"
       @focus="showList = true"
       @blur="blur"
     />

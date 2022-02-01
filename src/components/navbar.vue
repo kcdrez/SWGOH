@@ -40,10 +40,8 @@
                 >
               </li>
               <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'SpeedClockingPage' }"
-                  >Speed Clocking</router-link
+                <router-link class="dropdown-item" :to="{ name: 'TeamPage' }"
+                  >Teams</router-link
                 >
               </li>
             </ul>

@@ -3,6 +3,7 @@ import { Player, PlayerResponse } from "../types/player";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
+import { Unit } from "../types/unit";
 
 interface State {
   player: Player | null;
@@ -19,7 +20,13 @@ const store = {
     allyCode: "",
     requestState: loadingState.initial,
   },
-  getters: {},
+  getters: {
+    unitData(state: State) {
+      return (unitId: string): Unit | undefined => {
+        return state.player?.units.find((x) => x.id === unitId);
+      };
+    },
+  },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;
@@ -51,13 +58,12 @@ const store = {
       commit("SET_REQUEST_STATE", loadingState.loading);
       try {
         const player = await apiClient.fetchPlayer(allyCode);
-        // commit("gear/SET_GEAR_OWNED", player.gear, { root: true });
-        // commit("relic/SET_OWNED_RELICS", player.relic, { root: true });
+        commit("SET_PLAYER", player);
+        commit("SET_ALLY_CODE", allyCode);
         await dispatch("planner/initialize", player.planner, { root: true });
         dispatch("relic/initialize", player, { root: true });
         dispatch("gear/initialize", player, { root: true });
-        commit("SET_PLAYER", player);
-        commit("SET_ALLY_CODE", allyCode);
+        dispatch("speed/initialize", player, { root: true });
         commit("SET_REQUEST_STATE", loadingState.ready);
       } catch (err) {
         console.error(err);
@@ -68,7 +74,7 @@ const store = {
       commit("SET_PLAYER", null);
       commit("SET_ALLY_CODE", null);
     },
-    saveEnergy({ state, rootState }: ActionCtx) {
+    saveEnergy({ rootState }: ActionCtx) {
       const { refreshes: cantinaRefreshes, energy: cantinaEnergy } =
         rootState.relic;
       const { refreshes: otherRefreshes, energy: otherEnergy } = rootState.gear;

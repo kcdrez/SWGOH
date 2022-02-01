@@ -12,6 +12,7 @@ export interface PlayerResponse extends Player {
   relic?: any;
   planner?: any;
   energyData?: any;
+  teams?: any[];
 }
 
 export interface EquippedGear {

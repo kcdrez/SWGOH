@@ -4,6 +4,7 @@ import { PlayerResponse } from "../types/player";
 import { ConfigType, Gear } from "../types/gear";
 import { Unit } from "../types/unit";
 import { RelicConfigType } from "../types/relic";
+import { Team } from "../types/speed";
 
 class ApiClient {
   // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
@@ -49,6 +50,12 @@ class ApiClient {
         `${this.baseUrl}/player/energy/${playerId}`,
         energyData
       );
+    }
+  }
+
+  async updateTeams(playerId: string, teams: any[]) {
+    if (!!playerId) {
+      await axios.patch(`${this.baseUrl}/player/teams/${playerId}`, { teams });
     }
   }
 }
