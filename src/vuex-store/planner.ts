@@ -86,7 +86,9 @@ const store = {
       commit("SET_REQUEST_STATE", loadingState.loading);
       await Promise.all(
         //might have to put a limiter on this if the list is really big
-        (payload?.unitList || []).map((id: string) => dispatch("unit/fetchUnit", id, { root: true }))
+        (payload?.unitList || []).map((id: string) =>
+          dispatch("unit/fetchUnit", id, { root: true })
+        )
       );
       commit("UPDATE_PLANNER", payload.targetData);
       commit("SET_UNIT_LIST", payload.unitList);
@@ -110,7 +112,7 @@ const store = {
       dispatch("save");
     },
     initPlannerTarget({ commit, dispatch, state }: ActionCtx, unitId: string) {
-      const exists = state.unitList.find(x => x === unitId)
+      const exists = state.unitList.find((x) => x === unitId);
       if (!exists) {
         commit("UPDATE_PLANNER_ITEM", {
           unitId,
@@ -127,9 +129,12 @@ const store = {
     },
     save({ rootState, state }: ActionCtx) {
       if (rootState.player.player) {
-        apiClient.savePlannerData(rootState.player.player.id, { targetData: state.targetConfig, unitList: state.unitList });
+        apiClient.savePlannerData(rootState.player.player.id, {
+          targetData: state.targetConfig,
+          unitList: state.unitList,
+        });
       }
-    }
+    },
   },
 };
 

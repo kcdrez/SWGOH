@@ -48,12 +48,10 @@ const store = {
         const exists = rootState.player.player?.units.find((x) => x.id === id);
         if (exists) {
           commit("SET_UNIT", exists);
-          dispatch("planner/initPlannerTarget", exists.id, { root: true });
           commit("SET_REQUEST_STATE", loadingState.ready);
         } else {
           const response = await apiClient.fetchUnit(id);
           commit("SET_UNIT", response);
-          dispatch("planner/initPlannerTarget", response.id, { root: true });
           commit("SET_REQUEST_STATE", loadingState.ready);
         }
       } catch (err: any) {
