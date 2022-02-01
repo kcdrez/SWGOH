@@ -24,11 +24,11 @@
           data-bs-target="#gearAssumptionsModal"
         ></i>
       </h1>
-      <GearPlanner id="gearSection" />
+      <GearPlanner id="gearSection" class="collapse" />
       <h1 class="collapse-header">
         <a data-bs-toggle="collapse" href="#relicSection">Relic Planner</a>
       </h1>
-      <RelicPlanner />
+      <RelicPlanner id="relicSection" class="collapse" />
     </Loading>
     <div class="modal fade" id="gearAssumptionsModal" tabindex="-1">
       <div class="modal-dialog">

@@ -1,94 +1,92 @@
 <template>
-  <div class="collapse">
-    <Loading :state="requestState" size="md" message="Loading Gear Data">
-      <template v-if="unit.gear_level < maxGearLevel">
-        <h3 class="gear-header">
-          Gear Needed to get {{ unit.name }} from Gear Level
-          {{ currentGearLevel(unit) }} to
-          <select v-model.number="gearTarget">
-            <option
-              v-for="num in gearOptions(unit.gear_level)"
-              :value="num"
-              :key="num"
-            >
-              Gear {{ num }}
-            </option>
-          </select>
-          :
-        </h3>
-        <h3>
-          It will take approximately {{ totalDays(unit) }} day{{
-            totalDays(unit) === 1 ? "" : "s"
-          }}
-          to get to Gear Level {{ gearTarget }}.
-        </h3>
-        <div class="input-group input-group-sm w-50">
-          <span
-            class="input-group-text c-help energy-text"
-            title="Energy used on Light and Dark side tables"
-            >Standard Energy:</span
+  <Loading :state="requestState" size="md" message="Loading Gear Data">
+    <template v-if="unit.gear_level < maxGearLevel">
+      <h3 class="gear-header">
+        Gear Needed to get {{ unit.name }} from Gear Level
+        {{ currentGearLevel(unit) }} to
+        <select v-model.number="gearTarget">
+          <option
+            v-for="num in gearOptions(unit.gear_level)"
+            :value="num"
+            :key="num"
           >
-          <span
-            class="input-group-text c-help"
-            title="How many times you refresh the energy using crystals"
-            >Daily Refreshes:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="refreshesStandard"
-            min="0"
-          />
-          <span
-            class="input-group-text c-help"
-            title="How much of your daily energy used for farming other things (i.e. character shards)"
-            >Daily Energy Used:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="energySpentStandard"
-            min="0"
-            :max="145 + refreshesStandard * 120 + 135"
-          />
-        </div>
-        <div class="input-group input-group-sm my-2 w-50">
-          <span
-            class="input-group-text c-help energy-text"
-            title="Energy used on fleet/ship nodes"
-            >Fleet Energy:</span
-          >
-          <span
-            class="input-group-text c-help"
-            title="How many times you refresh the energy using crystals"
-            >Daily Refreshes:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="refreshesFleet"
-            min="0"
-          />
-          <span
-            class="input-group-text c-help"
-            title="How much of your daily energy used for farming other things (e.g. character shards)"
-            >Daily Energy Used:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="energySpentFleet"
-            min="0"
-            :max="145 + refreshesFleet * 120 + 45"
-          />
-        </div>
-        <GearTable :gearList="fullSalvageList(this.unit, this.gearTarget)" />
-      </template>
-      <template v-else>
-        <h3>{{ unit.name }} is already at gear level {{ maxGearLevel }}.</h3>
-      </template>
-    </Loading>
-  </div>
+            Gear {{ num }}
+          </option>
+        </select>
+        :
+      </h3>
+      <h3>
+        It will take approximately {{ totalDays(unit) }} day{{
+          totalDays(unit) === 1 ? "" : "s"
+        }}
+        to get to Gear Level {{ gearTarget }}.
+      </h3>
+      <div class="input-group input-group-sm w-50">
+        <span
+          class="input-group-text c-help energy-text"
+          title="Energy used on Light and Dark side tables"
+          >Standard Energy:</span
+        >
+        <span
+          class="input-group-text c-help"
+          title="How many times you refresh the energy using crystals"
+          >Daily Refreshes:</span
+        >
+        <input
+          class="form-control"
+          type="number"
+          v-model.number="refreshesStandard"
+          min="0"
+        />
+        <span
+          class="input-group-text c-help"
+          title="How much of your daily energy used for farming other things (i.e. character shards)"
+          >Daily Energy Used:</span
+        >
+        <input
+          class="form-control"
+          type="number"
+          v-model.number="energySpentStandard"
+          min="0"
+          :max="145 + refreshesStandard * 120 + 135"
+        />
+      </div>
+      <div class="input-group input-group-sm my-2 w-50">
+        <span
+          class="input-group-text c-help energy-text"
+          title="Energy used on fleet/ship nodes"
+          >Fleet Energy:</span
+        >
+        <span
+          class="input-group-text c-help"
+          title="How many times you refresh the energy using crystals"
+          >Daily Refreshes:</span
+        >
+        <input
+          class="form-control"
+          type="number"
+          v-model.number="refreshesFleet"
+          min="0"
+        />
+        <span
+          class="input-group-text c-help"
+          title="How much of your daily energy used for farming other things (e.g. character shards)"
+          >Daily Energy Used:</span
+        >
+        <input
+          class="form-control"
+          type="number"
+          v-model.number="energySpentFleet"
+          min="0"
+          :max="145 + refreshesFleet * 120 + 45"
+        />
+      </div>
+      <GearTable :gearList="fullSalvageList(this.unit, this.gearTarget)" />
+    </template>
+    <template v-else>
+      <h3>{{ unit.name }} is already at gear level {{ maxGearLevel }}.</h3>
+    </template>
+  </Loading>
 </template>
 
 <script lang="ts">
