@@ -1,116 +1,112 @@
 <template>
-  <div class="collapse" id="relicSection">
-    <Loading :state="requestState" size="md" message="Loading Gear Data">
-      <h3 class="gear-header">
-        Relic Mats Needed to get {{ unit.name }} from Relic Level
-        {{ currentRelicLevel }} to
-        <select v-model.number="relicTarget">
-          <option
-            v-for="num in relicOptions(unit.relic_tier)"
-            :value="num"
-            :key="num"
-          >
-            Relic {{ num }}
-          </option>
-        </select>
-        :
-      </h3>
-      <h3>
-        It will take approximately
-        {{ totalDays(unit) }} day{{ totalDays(unit) === 1 ? "" : "s" }} to get
-        to Relic Level {{ relicTarget }}.
-      </h3>
-      <div class="input-group input-group-sm w-50 mb-3">
-        <span
-          class="input-group-text c-help energy-text"
-          title="Energy used on Light and Dark side tables"
-          >Cantina Energy:</span
+  <Loading :state="requestState" size="md" message="Loading Gear Data">
+    <h3 class="gear-header">
+      Relic Mats Needed to get {{ unit.name }} from Relic Level
+      {{ currentRelicLevel }} to
+      <select v-model.number="relicTarget">
+        <option
+          v-for="num in relicOptions(unit.relic_tier)"
+          :value="num"
+          :key="num"
         >
-        <span
-          class="input-group-text c-help"
-          title="How many times you refresh the energy using crystals"
-          >Daily Refreshes:</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="refreshes"
-          min="0"
-        />
-        <span
-          class="input-group-text c-help"
-          title="How much of your daily cantina energy used for farming other things (i.e. character shards)"
-          >Daily Energy Used:</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="energy"
-          min="0"
-          :max="165 + refreshes * 120"
-        />
-      </div>
-      <table class="table table-bordered table-dark table-sm table-striped">
-        <thead>
-          <tr class="text-center">
-            <th width="20%">
-              <div class="c-pointer" @click="sortBy('name')">
-                Mat Name
-                <i class="fas mx-1" :class="sortIcon('name')"></i>
-              </div>
-              <input
-                class="form-control form-control-sm mx-auto my-1 w-75"
-                placeholder="Search"
-                v-model="searchName"
-              />
-            </th>
-            <th width="20%" class="c-pointer" @click="sortBy('location')">
-              Locations
-              <i class="fas mx-1" :class="sortIcon('location')"></i>
-            </th>
-            <th width="20%" class="c-pointer" @click="sortBy('amount')">
-              Amount
-              <i class="fas mx-1" :class="sortIcon('amount')"></i>
-            </th>
-            <th width="10%" class="c-pointer" @click="sortBy('time')">
-              Est. Time
-              <i class="fas mx-1" :class="sortIcon('time')"></i>
-            </th>
-            <!-- <th width="15%">Actions</th> -->
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="mat in filteredRelics" :key="mat.id">
-            <td class="text-center">
-              <RelicIcon :item="mat" />
-            </td>
-            <td class="text-center align-middle">{{ mat.location.node }}</td>
-            <td>
-              <OwnedAmount
-                :item="mat"
-                :needed="
-                  amountNeeded(mat, this.currentRelicLevel, this.relicTarget)
-                "
-              />
-            </td>
-            <td class="text-center align-middle">
-              {{
-                timeEstimation(mat, this.currentRelicLevel, this.relicTarget)
-              }}
-              Days
-            </td>
-            <!-- <td>
+          Relic {{ num }}
+        </option>
+      </select>
+      :
+    </h3>
+    <h3>
+      It will take approximately
+      {{ totalDays(unit) }} day{{ totalDays(unit) === 1 ? "" : "s" }} to get to
+      Relic Level {{ relicTarget }}.
+    </h3>
+    <div class="input-group input-group-sm w-50 mb-3">
+      <span
+        class="input-group-text c-help energy-text"
+        title="Energy used on Light and Dark side tables"
+        >Cantina Energy:</span
+      >
+      <span
+        class="input-group-text c-help"
+        title="How many times you refresh the energy using crystals"
+        >Daily Refreshes:</span
+      >
+      <input
+        class="form-control"
+        type="number"
+        v-model.number="refreshes"
+        min="0"
+      />
+      <span
+        class="input-group-text c-help"
+        title="How much of your daily cantina energy used for farming other things (i.e. character shards)"
+        >Daily Energy Used:</span
+      >
+      <input
+        class="form-control"
+        type="number"
+        v-model.number="energy"
+        min="0"
+        :max="165 + refreshes * 120"
+      />
+    </div>
+    <table class="table table-bordered table-dark table-sm table-striped">
+      <thead>
+        <tr class="text-center">
+          <th width="20%">
+            <div class="c-pointer" @click="sortBy('name')">
+              Mat Name
+              <i class="fas mx-1" :class="sortIcon('name')"></i>
+            </div>
+            <input
+              class="form-control form-control-sm mx-auto my-1 w-75"
+              placeholder="Search"
+              v-model="searchName"
+            />
+          </th>
+          <th width="20%" class="c-pointer" @click="sortBy('location')">
+            Locations
+            <i class="fas mx-1" :class="sortIcon('location')"></i>
+          </th>
+          <th width="20%" class="c-pointer" @click="sortBy('amount')">
+            Amount
+            <i class="fas mx-1" :class="sortIcon('amount')"></i>
+          </th>
+          <th width="10%" class="c-pointer" @click="sortBy('time')">
+            Est. Time
+            <i class="fas mx-1" :class="sortIcon('time')"></i>
+          </th>
+          <!-- <th width="15%">Actions</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="mat in filteredRelics" :key="mat.id">
+          <td class="text-center">
+            <RelicIcon :item="mat" />
+          </td>
+          <td class="text-center align-middle">{{ mat.location.node }}</td>
+          <td>
+            <OwnedAmount
+              :item="mat"
+              :needed="
+                amountNeeded(mat, this.currentRelicLevel, this.relicTarget)
+              "
+            />
+          </td>
+          <td class="text-center align-middle">
+            {{ timeEstimation(mat, this.currentRelicLevel, this.relicTarget) }}
+            Days
+          </td>
+          <!-- <td>
               <div class="btn-group btn-group-sm" role="group">
                 <button type="button" class="btn btn-primary">Left</button>
                 <button type="button" class="btn btn-secondary">Middle</button>
                 <button type="button" class="btn btn-info">Right</button>
               </div>
             </td> -->
-          </tr>
-        </tbody>
-      </table>
-    </Loading>
-  </div>
+        </tr>
+      </tbody>
+    </table>
+  </Loading>
 </template>
 
 <script lang="ts">
