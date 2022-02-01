@@ -20,11 +20,9 @@
 import { defineComponent } from "vue";
 
 import { Player } from "../types/player";
-import SearchInput from "./search-input.vue";
 
 export default defineComponent({
   name: "Player",
-  components: { SearchInput },
   props: {
     player: {
       type: Object as () => Player,

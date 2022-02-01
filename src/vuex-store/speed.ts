@@ -62,9 +62,24 @@ const store = {
         match.units.push({ id: payload.unit.id, speedBonus: 0 });
       }
     },
+    REMOVE_UNIT(state: State, payload: { teamId: string; unit: Unit }) {
+      const matchTeam = state.teams.find((x) => x.id === payload.teamId);
+      if (matchTeam) {
+        const unitIndex = matchTeam.units.findIndex((x) => x.id === payload.unit.id);
+        if (unitIndex >= 0) {
+          matchTeam.units.splice(unitIndex, 1)
+        }
+      }
+    },
+    DELETE_TEAM(state: State, team: Team) {
+      const index = state.teams.findIndex((x) => x.id === team.id);
+      if (index >= 0) {
+        state.teams.splice(index, 1);
+      }
+    }
   },
   actions: {
-    initialize({ commit, rootState }: ActionCtx, player: PlayerResponse) {
+    initialize({ commit }: ActionCtx, player: PlayerResponse) {
       player.teams?.forEach((team) => {
         commit("UPSERT_TEAM", team);
       });
@@ -86,6 +101,17 @@ const store = {
       data: { teamId: string; unit: Unit }
     ) {
       commit("ADD_UNIT", data);
+      dispatch("saveTeams");
+    },
+    removeUnit(
+      { commit, dispatch }: ActionCtx,
+      data: { teamId: string; unit: Unit }
+    ) {
+      commit("REMOVE_UNIT", data);
+      dispatch("saveTeams");
+    },
+    deleteTeam({ commit, dispatch }: ActionCtx, team: Team) {
+      commit("DELETE_TEAM", team)
       dispatch("saveTeams");
     },
     saveTeams({ rootState, state }: ActionCtx) {

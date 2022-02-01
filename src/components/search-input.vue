@@ -1,7 +1,7 @@
 <template>
   <div class="position-relative">
     <input
-      class="form-control form-control-sm"
+      class="form-control form-control-sm search-text"
       type="text"
       v-model="searchText"
       @focus="showList = true"
@@ -98,6 +98,7 @@ export default defineComponent({
   overflow: auto;
   position: absolute;
   width: 100%;
+  z-index: 100;
 
   li {
     padding: 3px 10px;
@@ -116,6 +117,6 @@ export default defineComponent({
 }
 
 input {
-  padding-left: 40px;
+  padding-left: 40px !important;
 }
 </style>

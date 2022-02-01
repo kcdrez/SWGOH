@@ -9,6 +9,8 @@ import App from "./App.vue";
 import store from "./vuex-store/store";
 import router from "./router/router";
 import "./styles/main.scss";
+import Confirm from './components/confirm.vue'
+import SearchInput from './components/search-input.vue'
 
 const app = createApp(App);
 
@@ -19,4 +21,9 @@ app.config.globalProperties.$filters = {
   },
 };
 
-app.use(Toaster).use(store).use(router).mount("#app");
+app.use(Toaster)
+  .use(store)
+  .use(router)
+  .component('Confirm', Confirm)
+  .component('SearchInput', SearchInput)
+  .mount("#app");
