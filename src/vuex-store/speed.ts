@@ -23,16 +23,18 @@ const store = {
   },
   getters: {
     speedValueFromMod(_state: State) {
-      return (mod: Mod): number => {
-        if (mod.primaryStat.unitStat === 5) {
-          return mod.primaryStat.value;
-        } else {
-          const match = mod.secondaryStat.find((x) => x.unitStat === 5);
-          if (match) {
-            return match.value;
+      return (mod: Mod | undefined): string => {
+        if (mod) {
+          if (mod.primaryStat.unitStat === 5) {
+            return mod.primaryStat.value.toString();
+          } else {
+            const match = mod.secondaryStat.find((x) => x.unitStat === 5);
+            if (match) {
+              return match.value.toString();
+            }
           }
         }
-        return 0;
+        return "-";
       };
     },
     hasSpeedSet(_state: State) {
@@ -82,9 +84,11 @@ const store = {
   },
   actions: {
     initialize({ commit }: ActionCtx, player: PlayerResponse) {
+      commit("SET_REQUEST_STATE", loadingState.loading);
       player.teams?.forEach((team) => {
         commit("UPSERT_TEAM", team);
       });
+      commit("SET_REQUEST_STATE", loadingState.ready);
     },
     addTeam({ commit, dispatch }: ActionCtx, team: Team) {
       if (!team) {
