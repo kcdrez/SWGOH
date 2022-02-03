@@ -1,7 +1,7 @@
 <template>
   <div>
     <navbar />
-    <router-view v-if="requestState === 'READY'"></router-view>
+    <router-view></router-view>
   </div>
 </template>
 

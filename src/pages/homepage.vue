@@ -36,7 +36,7 @@
           Please verify that the code is correct and try again.
         </div>
       </div>
-      <Player v-else :player="player" />
+      <Player v-else />
     </Loading>
   </div>
 </template>

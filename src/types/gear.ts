@@ -6,6 +6,7 @@ export interface Gear {
   amount: number;
   lookupMissionList: Mission[];
   tier: number;
+  neededBy?: { name: string; id: string }[];
 }
 
 export interface Mission {

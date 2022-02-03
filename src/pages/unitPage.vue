@@ -78,12 +78,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions, mapGetters } from "vuex";
 
 import GearPlanner from "../components/gear/gearPlanner.vue";
 import RelicPlanner from "../components/relic/relicPlanner.vue";
 import Loading from "../components/loading.vue";
 import Error from "../components/error.vue";
+import { loadingState } from "../types/loading";
 
 export default defineComponent({
   name: "UnitPage",
@@ -103,8 +104,13 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("unit", ["unit", "requestState"]),
+    ...mapState("unit", ["unit"]),
     ...mapState("planner", ["unitList"]),
+    ...mapState("player", { playerRequestState: "requestState" }),
+    ...mapGetters(["someLoading"]),
+    requestState(): loadingState {
+      return this.someLoading(["unit", "planner"]);
+    },
   },
   methods: {
     ...mapActions("unit", ["fetchUnit"]),
@@ -130,10 +136,17 @@ export default defineComponent({
       }
     },
   },
+  watch: {
+    async playerRequestState(newVal) {
+      if (newVal === loadingState.ready) {
+        await this.fetchUnit(this.$route.params.unitId);
+      }
+    },
+  },
   async created() {
-    try {
+    if (this.playerRequestState === loadingState.ready) {
       await this.fetchUnit(this.$route.params.unitId);
-    } catch (err) {}
+    }
   },
 });
 </script>

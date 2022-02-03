@@ -5,6 +5,7 @@ export interface Relic {
   amount: any;
   image: string;
   name: string;
+  neededBy?: { name: string; id: string }[];
 }
 
 export type RelicConfigType = {

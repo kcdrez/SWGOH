@@ -163,6 +163,7 @@ import Error from "../components/error.vue";
 import { Unit } from "../types/unit";
 import { Team } from "../types/speed";
 import { unvue } from "../utils";
+import { loadingState } from "../types/loading";
 
 type dataModel = {
   selected: null | Unit;
@@ -183,13 +184,16 @@ export default defineComponent({
     } as dataModel;
   },
   computed: {
-    ...mapState("player", ["player", "requestState"]),
+    ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapState("speed", ["teams"]),
     ...mapGetters("speed", ["speedValueFromMod", "hasSpeedSet"]),
+    ...mapGetters(["someLoading"]),
+    requestState(): loadingState {
+      return this.someLoading(["player", "speed"]);
+    },
   },
   methods: {
-    ...mapActions("unit", ["fetchUnit"]),
     ...mapActions("speed", [
       "addTeam",
       "addUnit",

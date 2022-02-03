@@ -48,11 +48,13 @@ const store = {
     },
   },
   actions: {
-    async initialize({ dispatch }: ActionCtx) {
+    async initialize({ dispatch, commit }: ActionCtx) {
+      commit("SET_REQUEST_STATE", loadingState.loading);
       const allyCode = window.localStorage.getItem("allyCode") || "";
       if (allyCode) {
         await dispatch("fetchPlayer", allyCode);
       }
+      commit("SET_REQUEST_STATE", loadingState.ready);
     },
     async fetchPlayer({ commit, dispatch }: ActionCtx, allyCode: string) {
       commit("SET_REQUEST_STATE", loadingState.loading);

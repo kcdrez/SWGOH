@@ -10,7 +10,7 @@ import {
 } from "../types/locationMapping";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
-import { Unit } from "../types/unit";
+import { isUnit, Unit, UnitBasic } from "../types/unit";
 import { apiClient } from "../api/api-client";
 import { PlayerResponse } from "../types/player";
 
@@ -160,7 +160,7 @@ const store = {
       };
     },
     totalDays(state: State, getters: any, rootState: RootState) {
-      return (unit: Unit): any => {
+      return (unit: Unit | UnitBasic): any => {
         const { target } = rootState.planner.targetConfig[unit.id].gear;
         let totalStandard = 0;
         let totalFleet = 0;
@@ -188,10 +188,11 @@ const store = {
         return Math.max(totalStandard, totalFleet, totalChallenges);
       };
     },
-    fullGearListByLevel(state: State, getters: any) {
-      return (unit: Unit): any[] => {
+    fullGearListByLevel(_state: State, getters: any) {
+      return (unit: Unit | UnitBasic): any[] => {
         if (unit) {
-          const { gear_level } = unit;
+          // const { gear_level } = unit;
+          const gear_level = isUnit(unit) ? unit.gear_level : 0;
           const futureGear =
             unit?.unitTierList.filter((x: any) => x.tier >= gear_level) || [];
 
@@ -201,7 +202,7 @@ const store = {
               gear: gear.equipmentSetList
                 .map((id: string, index: number) => {
                   let alreadyEquipped = false;
-                  if (gear.tier === unit?.gear_level) {
+                  if (gear.tier === gear_level && isUnit(unit)) {
                     alreadyEquipped = unit?.gear[index].is_obtained || false;
                   }
 
@@ -219,8 +220,8 @@ const store = {
         }
       };
     },
-    fullSalvageList(state: State, getters: any) {
-      return (unit: Unit, gearTarget: number): Gear[] => {
+    fullSalvageList(_state: State, getters: any) {
+      return (unit: Unit | UnitBasic, gearTarget: number): Gear[] => {
         let list: Gear[] = [];
         getters.fullGearListByLevel(unit).forEach((tier: any) => {
           if (tier.tier + 1 <= gearTarget) {
@@ -269,6 +270,7 @@ const store = {
   },
   actions: {
     initialize({ commit }: ActionCtx, player: PlayerResponse) {
+      commit("SET_REQUEST_STATE", loadingState.loading);
       commit("SET_GEAR_OWNED", player.gear);
 
       const refreshStandard: updateEnergy = {
@@ -293,12 +295,12 @@ const store = {
       commit("UPDATE_REFRESHES", refreshFleet);
       commit("UPDATE_ENERGY", energyStandard);
       commit("UPDATE_ENERGY", energyFleet);
+      commit("SET_REQUEST_STATE", loadingState.ready);
     },
     async fetchGear({ commit }: ActionCtx) {
       commit("SET_REQUEST_STATE", loadingState.loading);
 
       let gearList = await apiClient.fetchGearList();
-      // commit("SET_GEAR_OWNED", gearOwned);
       commit("SET_GEAR", gearList);
       commit("SET_REQUEST_STATE", loadingState.ready);
     },

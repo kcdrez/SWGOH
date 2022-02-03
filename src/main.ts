@@ -16,8 +16,12 @@ const app = createApp(App);
 
 app.config.globalProperties.$filters = {
   dateTime(value: number): string {
-    const date = moment().add(value, "days").format("MM-DD-YYYY");
-    return `${value} Days (${date})`;
+    if (value <= 0) {
+      return "-";
+    } else {
+      const date = moment().add(value, "days").format("MM-DD-YYYY");
+      return `${value} Days (${date})`;
+    }
   },
 };
 

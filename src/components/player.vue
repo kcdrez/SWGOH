@@ -1,6 +1,6 @@
 <template>
-  <div v-if="player">
-    <SearchInput :list="player.units" @select="selected = $event" />
+  <div>
+    <SearchInput :list="unitList" @select="selected = $event" />
     <div v-if="selected" class="text-center">
       <img
         class="d-block mx-auto my-1"
@@ -18,16 +18,12 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
-import { Player } from "../types/player";
+import { mapState } from "vuex";
 
 export default defineComponent({
   name: "Player",
-  props: {
-    player: {
-      type: Object as () => Player,
-      default: () => null,
-    },
+  computed: {
+    ...mapState("unit", ["unitList"]),
   },
   data() {
     return {

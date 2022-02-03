@@ -1,6 +1,6 @@
 <template>
   <Loading :state="requestState" size="md" message="Loading Gear Data">
-    <template v-if="unit.gear_level < maxGearLevel">
+    <template v-if="currentGearLevel(unit) < maxGearLevel">
       <h3 class="gear-header">
         Gear Needed to get {{ unit.name }} from Gear Level
         {{ currentGearLevel(unit) }} to
@@ -96,15 +96,20 @@ import { mapState, mapGetters } from "vuex";
 import Loading from "../loading.vue";
 import { UpdateItem } from "../../types/planner";
 import GearTable from "./gearTable.vue";
+import { loadingState } from "../../types/loading";
 
 export default defineComponent({
   name: "GearPlannerComponent",
   components: { Loading, GearTable },
   computed: {
-    ...mapState("gear", ["requestState", "maxGearLevel"]),
+    ...mapState("gear", ["maxGearLevel"]),
     ...mapState("unit", ["unit"]),
     ...mapGetters("gear", ["gearOptions", "fullSalvageList", "totalDays"]),
     ...mapGetters("unit", ["currentGearLevel"]),
+    ...mapGetters(["someLoading"]),
+    requestState(): loadingState {
+      return this.someLoading(["gear", "unit"]);
+    },
     gearTarget: {
       get(): number {
         return (

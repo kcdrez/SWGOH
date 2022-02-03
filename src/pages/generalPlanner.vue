@@ -1,121 +1,126 @@
 <template>
-  <div class="container general-planner-page">
-    <table class="table table-bordered table-dark table-sm table-striped">
-      <thead>
-        <tr class="text-center align-middle">
-          <th width="20%">
-            <div class="c-pointer" @click="sortBy('name')">
-              Unit Name
-              <i class="fas mx-1" :class="sortIcon('name')"></i>
-            </div>
-            <input
-              class="form-control form-control-sm mx-auto my-1 w-75"
-              placeholder="Search"
-              v-model="searchName"
-            />
-          </th>
-          <th width="10%" class="c-pointer" @click="sortBy('curLevel')">
-            Current Level
-            <i class="fas mx-1" :class="sortIcon('curLevel')"></i>
-          </th>
-          <th width="10%" class="c-pointer" @click="sortBy('targetLevel')">
-            Target Level
-            <i class="fas mx-1" :class="sortIcon('targetLevel')"></i>
-          </th>
-          <!-- <th width="20%" class="c-pointer" @click="sortBy('zeta')">
+  <Loading :state="requestState" message="Loading Planner Data" size="lg">
+    <div class="container general-planner-page">
+      <table class="table table-bordered table-dark table-sm table-striped">
+        <thead class="sticky-header">
+          <tr class="text-center align-middle">
+            <th width="20%">
+              <div class="c-pointer" @click="sortBy('name')">
+                Unit Name
+                <i class="fas mx-1" :class="sortIcon('name')"></i>
+              </div>
+              <input
+                class="form-control form-control-sm mx-auto my-1 w-75"
+                placeholder="Search"
+                v-model="searchName"
+              />
+            </th>
+            <th width="10%" class="c-pointer" @click="sortBy('curLevel')">
+              Current Level
+              <i class="fas mx-1" :class="sortIcon('curLevel')"></i>
+            </th>
+            <th width="10%" class="c-pointer" @click="sortBy('targetLevel')">
+              Target Level
+              <i class="fas mx-1" :class="sortIcon('targetLevel')"></i>
+            </th>
+            <!-- <th width="20%" class="c-pointer" @click="sortBy('zeta')">
             Zetas
             <i class="fas mx-1" :class="sortIcon('zeta')"></i>
           </th> -->
-          <!-- <th width="10%" class="c-pointer" @click="sortBy('unlock')">
+            <!-- <th width="10%" class="c-pointer" @click="sortBy('unlock')">
             Est. 7*
             <i class="fas mx-1" :class="sortIcon('unlock')"></i>
           </th> -->
-          <!-- <th width="10%" class="c-pointer" @click="sortBy('estZeta')">
+            <!-- <th width="10%" class="c-pointer" @click="sortBy('estZeta')">
             Est. Zetas
             <i class="fas mx-1" :class="sortIcon('estZeta')"></i>
           </th> -->
-          <th width="15%" class="c-pointer" @click="sortBy('estGear')">
-            Est. Gear Level
-            <i class="fas mx-1" :class="sortIcon('estGear')"></i>
-          </th>
-          <th width="15%" class="c-pointer" @click="sortBy('estRelic')">
-            Est. Relic Level
-            <i class="fas mx-1" :class="sortIcon('estRelic')"></i>
-          </th>
-          <th width="15%" class="c-pointer" @click="sortBy('completed')">
-            Est. Completed Date
-            <i class="fas mx-1" :class="sortIcon('completed')"></i>
-          </th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="unit in unitList" :key="unit.id">
-          <td class="text-center">
-            <router-link
-              :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-              >{{ unit.name }}</router-link
-            >
-          </td>
-          <td class="text-center">{{ getCurLevel(unit) }}</td>
-          <td class="text-center">
-            <select
-              class="form-control form-control-sm mb-1"
-              :value="unit.gearTarget"
-              @input="changeTarget(unit, 'gear', $event)"
-              v-if="unit.gear_level < maxGearLevel"
-            >
-              <option
-                v-for="num in gearOptions(unit.gear_level)"
-                :value="num"
-                :key="num"
+            <th width="15%" class="c-pointer" @click="sortBy('estGear')">
+              Est. Gear Level
+              <i class="fas mx-1" :class="sortIcon('estGear')"></i>
+            </th>
+            <th width="15%" class="c-pointer" @click="sortBy('estRelic')">
+              Est. Relic Level
+              <i class="fas mx-1" :class="sortIcon('estRelic')"></i>
+            </th>
+            <th width="15%" class="c-pointer" @click="sortBy('completed')">
+              Est. Completed Date
+              <i class="fas mx-1" :class="sortIcon('completed')"></i>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="unit in fullUnitList" :key="unit.id">
+            <td class="text-center">
+              <router-link
+                :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+                >{{ unit.name }}</router-link
               >
-                Gear {{ num }}
-              </option>
-            </select>
-            <select
-              :value="unit.relicTarget"
-              @input="changeTarget(unit, 'relic', $event)"
-              class="form-control form-control-sm"
-            >
-              <option
-                v-for="num in relicOptions(unit.relic_tier)"
-                :value="num"
-                :key="num"
+            </td>
+            <td class="text-center">{{ getCurLevel(unit) }}</td>
+            <td class="text-center">
+              <select
+                class="form-control form-control-sm mb-1"
+                :value="unit.gearTarget"
+                @input="changeTarget(unit, 'gear', $event)"
+                v-if="(unit.gear_level || 0) < maxGearLevel"
               >
-                Relic {{ num }}
-              </option>
-            </select>
-          </td>
-          <td class="text-center">
-            {{ $filters.dateTime(gearTotalDays(unit)) }}
-          </td>
-          <td class="text-center">
-            {{ $filters.dateTime(relicTotalDays(unit)) }}
-          </td>
-          <td class="text-center">
-            {{ $filters.dateTime(relicTotalDays(unit) + gearTotalDays(unit)) }}
-          </td>
-          <td>
-            <div
-              class="btn-group btn-group-sm d-block text-center"
-              role="group"
-            >
-              <button
-                type="button"
-                class="btn btn-danger"
-                title="Remove from general planner"
-                @click="remove(unit)"
+                <option
+                  v-for="num in gearOptions(unit.gear_level)"
+                  :value="num"
+                  :key="num"
+                >
+                  Gear {{ num }}
+                </option>
+              </select>
+              <select
+                :value="unit.relicTarget"
+                @input="changeTarget(unit, 'relic', $event)"
+                class="form-control form-control-sm"
               >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <GearTable :gearList="fullGearList" />
-  </div>
+                <option
+                  v-for="num in relicOptions(unit.relic_tier)"
+                  :value="num"
+                  :key="num"
+                >
+                  Relic {{ num }}
+                </option>
+              </select>
+            </td>
+            <td class="text-center">
+              {{ $filters.dateTime(gearTotalDays(unit)) }}
+            </td>
+            <td class="text-center">
+              {{ $filters.dateTime(relicTotalDays(unit)) }}
+            </td>
+            <td class="text-center">
+              {{
+                $filters.dateTime(relicTotalDays(unit) + gearTotalDays(unit))
+              }}
+            </td>
+            <td>
+              <div
+                class="btn-group btn-group-sm d-block text-center"
+                role="group"
+              >
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  title="Remove from general planner"
+                  @click="remove(unit)"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <GearTable :gearList="fullGearList" showRequiredByUnit />
+      <RelicTable :relicList="fullRelicList" showRequiredByUnit />
+    </div>
+  </Loading>
 </template>
 
 <script lang="ts">
@@ -127,11 +132,13 @@ import Error from "../components/error.vue";
 import { Unit } from "../types/unit";
 import { UnitPlannerItem, UpdateItem } from "../types/planner";
 import GearTable from "../components/gear/gearTable.vue";
+import RelicTable from "../components/relic/relicTable.vue";
 import { Gear } from "../types/gear";
+import { loadingState } from "@/types/loading";
 
 export default defineComponent({
   name: "GeneralPlannerPage",
-  components: { Loading, Error, GearTable },
+  components: { Loading, Error, GearTable, RelicTable },
   data() {
     return {
       sortDir: "",
@@ -140,7 +147,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("planner", ["unitList", "gearTarget"]),
+    ...mapGetters("planner", ["fullUnitList", "gearTarget"]),
     ...mapGetters("unit", ["currentGearLevel"]),
     ...mapGetters("gear", {
       gearOptions: "gearOptions",
@@ -152,9 +159,10 @@ export default defineComponent({
       relicTotalDays: "totalDays",
     }),
     ...mapState("gear", ["maxGearLevel"]),
+    ...mapGetters(["someLoading"]),
     fullGearList(): Gear[] {
       const list: Gear[] = [];
-      this.unitList.forEach((unit: Unit) => {
+      this.fullUnitList.forEach((unit: Unit) => {
         const unitGearList = this.fullSalvageListByUnit(
           unit,
           this.gearTarget(unit.id)
@@ -163,12 +171,19 @@ export default defineComponent({
           const match = list.find((el) => gear.id === el.id);
           if (match) {
             match.amount += gear.amount;
+            match.neededBy?.push({ name: unit.name, id: unit.id });
           } else {
-            list.push(gear);
+            list.push({
+              ...gear,
+              neededBy: [{ name: unit.name, id: unit.id }],
+            });
           }
         });
       });
       return list;
+    },
+    requestState(): loadingState {
+      return this.someLoading(["planner", "unit", "gear", "relic", "planner"]);
     },
   },
   methods: {
@@ -222,7 +237,6 @@ export default defineComponent({
       );
     },
   },
-  async created() {},
 });
 </script>
 

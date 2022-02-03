@@ -1,3 +1,5 @@
+//todo Dark Hard seem to be off
+
 export const difficultyIds = {
   4: "Normal",
   5: "Hard",

@@ -1,10 +1,13 @@
-export interface Unit {
+export interface UnitBasic {
   id: string;
   name: string;
-  gear_level: number;
   thumbnailName: string;
-  nameKey: string;
   unitTierList: UnitTier[];
+}
+
+export interface Unit extends UnitBasic {
+  gear_level: number;
+  nameKey: string;
   tier: number;
   level: number;
   power: number;
@@ -17,6 +20,10 @@ export interface Unit {
   mods: Mod[];
   crew: Crew[];
   stars: number;
+}
+
+export function isUnit(unit: Unit | UnitBasic): unit is Unit {
+  return unit ? (<Unit>unit).gear_level !== undefined : false;
 }
 
 export interface UnitGear {

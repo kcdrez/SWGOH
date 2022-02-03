@@ -49,63 +49,10 @@
         :max="165 + refreshes * 120"
       />
     </div>
-    <table class="table table-bordered table-dark table-sm table-striped">
-      <thead>
-        <tr class="text-center">
-          <th width="20%">
-            <div class="c-pointer" @click="sortBy('name')">
-              Mat Name
-              <i class="fas mx-1" :class="sortIcon('name')"></i>
-            </div>
-            <input
-              class="form-control form-control-sm mx-auto my-1 w-75"
-              placeholder="Search"
-              v-model="searchName"
-            />
-          </th>
-          <th width="20%" class="c-pointer" @click="sortBy('location')">
-            Locations
-            <i class="fas mx-1" :class="sortIcon('location')"></i>
-          </th>
-          <th width="20%" class="c-pointer" @click="sortBy('amount')">
-            Amount
-            <i class="fas mx-1" :class="sortIcon('amount')"></i>
-          </th>
-          <th width="10%" class="c-pointer" @click="sortBy('time')">
-            Est. Time
-            <i class="fas mx-1" :class="sortIcon('time')"></i>
-          </th>
-          <!-- <th width="15%">Actions</th> -->
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="mat in filteredRelics" :key="mat.id">
-          <td class="text-center">
-            <RelicIcon :item="mat" />
-          </td>
-          <td class="text-center align-middle">{{ mat.location.node }}</td>
-          <td>
-            <OwnedAmount
-              :item="mat"
-              :needed="
-                amountNeeded(mat, this.currentRelicLevel, this.relicTarget)
-              "
-            />
-          </td>
-          <td class="text-center align-middle">
-            {{ timeEstimation(mat, this.currentRelicLevel, this.relicTarget) }}
-            Days
-          </td>
-          <!-- <td>
-              <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-primary">Left</button>
-                <button type="button" class="btn btn-secondary">Middle</button>
-                <button type="button" class="btn btn-info">Right</button>
-              </div>
-            </td> -->
-        </tr>
-      </tbody>
-    </table>
+    <RelicTable
+      :relicList="relicList"
+      :targetLevels="[{ level: currentRelicLevel, target: relicTarget }]"
+    />
   </Loading>
 </template>
 
@@ -113,79 +60,25 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { Relic } from "../../types/relic";
-import OwnedAmount from "./owned.vue";
-import RelicIcon from "./relicIcon.vue";
 import Loading from "../loading.vue";
+import RelicTable from "./relicTable.vue";
 import { UpdateItem } from "../../types/planner";
+import { loadingState } from "../../types/loading";
+import { Relic } from "../../types/relic";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
-  components: { OwnedAmount, RelicIcon, Loading },
-  data() {
-    return {
-      sortMethod: "",
-      sortDir: "asc",
-      searchName: "",
-    };
-  },
+  components: { Loading, RelicTable },
   computed: {
+    ...mapState("relic", ["relicConfig"]),
     ...mapState("unit", ["unit"]),
-    ...mapState("relic", ["requestState", "ownedRelics", "relicConfig"]),
-    ...mapGetters("relic", [
-      "relicOptions",
-      "timeEstimation",
-      "amountNeeded",
-      "totalDays",
-    ]),
+    ...mapGetters("relic", ["relicOptions", "totalDays"]),
+    ...mapGetters(["someLoading"]),
+    requestState(): loadingState {
+      return this.someLoading(["relic", "unit"]);
+    },
     currentRelicLevel(): number {
       return this.unit?.relic_tier < 0 ? 0 : this.unit.relic_tier;
-    },
-    filteredRelics(): Relic[] {
-      const list: Relic[] = Object.values(this.relicConfig);
-      return list
-        .sort((a: Relic, b: Relic) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "locations") {
-            const compareA = a.location.node.toLowerCase();
-            const compareB = b.location.node.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "amount") {
-            const compareA = this.amountNeeded(a);
-            const compareB = this.amountNeeded(b);
-            if (this.sortDir === "asc") {
-              return compareA - compareB;
-            } else {
-              return compareB - compareA;
-            }
-          } else if (this.sortMethod === "time") {
-            const compareA = this.timeEstimation(a);
-            const compareB = this.timeEstimation(b);
-            if (this.sortDir === "asc") {
-              return compareA - compareB;
-            } else {
-              return compareB - compareA;
-            }
-          }
-          return 0;
-        })
-        .filter((relic) => {
-          const name = relic.name.toLowerCase().replace(/\s/g, "");
-          const id = relic.id.toLowerCase().replace(/\s/g, "");
-          const compare = this.searchName.toLowerCase().replace(/\s/g, "");
-          return name.includes(compare) || id.includes(compare);
-        });
     },
     relicTarget: {
       get(): number {
@@ -216,22 +109,8 @@ export default defineComponent({
         this.$store.dispatch("relic/updateEnergy", value);
       },
     },
-  },
-  methods: {
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
+    relicList(): Relic[] {
+      return Object.values(this.relicConfig);
     },
   },
 });
