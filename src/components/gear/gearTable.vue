@@ -139,7 +139,7 @@ import { defineComponent, PropType } from "vue";
 import { mapActions, mapGetters, mapState } from "vuex";
 
 import { Gear } from "../../types/gear";
-import OwnedAmount from "./owned.vue";
+import OwnedAmount from "./gearOwned.vue";
 import GearIcon from "./gearIcon.vue";
 import GearProgressBar from "./gearProgressBar.vue";
 

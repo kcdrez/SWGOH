@@ -60,7 +60,6 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import Loading from "../loading.vue";
 import RelicTable from "./relicTable.vue";
 import { UpdateItem } from "../../types/planner";
 import { loadingState } from "../../types/loading";
@@ -68,7 +67,7 @@ import { Relic } from "../../types/relic";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
-  components: { Loading, RelicTable },
+  components: { RelicTable },
   computed: {
     ...mapState("relic", ["relicConfig"]),
     ...mapState("unit", ["unit"]),

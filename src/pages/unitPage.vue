@@ -15,19 +15,23 @@
       >
         Add to General Planner
       </button>
-      <h1 class="collapse-header">
-        <a data-bs-toggle="collapse" href="#gearSection">Gear Planner</a>
+      <div class="collapse-header section-header">
+        <h3 class="w-100" data-bs-toggle="collapse" href="#gearSection">
+          <div class="d-inline">Gear Planner</div>
+        </h3>
         <i
           class="far fa-question-circle show-help"
           title="Click to view the assumptions this calculator makes"
           data-bs-toggle="modal"
           data-bs-target="#gearAssumptionsModal"
         ></i>
-      </h1>
+      </div>
       <GearPlanner id="gearSection" class="collapse" />
-      <h1 class="collapse-header">
-        <a data-bs-toggle="collapse" href="#relicSection">Relic Planner</a>
-      </h1>
+      <div class="collapse-header section-header mt-3">
+        <h3 class="w-100" data-bs-toggle="collapse" href="#relicSection">
+          <div class="d-inline">Relic Planner</div>
+        </h3>
+      </div>
       <RelicPlanner id="relicSection" class="collapse" />
     </Loading>
     <div class="modal fade" id="gearAssumptionsModal" tabindex="-1">
@@ -82,13 +86,11 @@ import { mapState, mapActions, mapGetters } from "vuex";
 
 import GearPlanner from "../components/gear/gearPlanner.vue";
 import RelicPlanner from "../components/relic/relicPlanner.vue";
-import Loading from "../components/loading.vue";
-import Error from "../components/error.vue";
 import { loadingState } from "../types/loading";
 
 export default defineComponent({
   name: "UnitPage",
-  components: { GearPlanner, RelicPlanner, Loading, Error },
+  components: { GearPlanner, RelicPlanner },
   data() {
     return {
       shards: 0,
@@ -174,7 +176,12 @@ export default defineComponent({
 .show-help {
   cursor: pointer;
   color: $primary-light-1;
-  margin: 0 0.5rem;
   font-size: 1.5rem;
+  position: relative;
+  left: calc(-50% + 100px);
+
+  &:hover {
+    color: $primary-light-2;
+  }
 }
 </style>

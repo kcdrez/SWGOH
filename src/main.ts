@@ -11,6 +11,9 @@ import router from "./router/router";
 import "./styles/main.scss";
 import Confirm from "./components/confirm.vue";
 import SearchInput from "./components/search-input.vue";
+import ProgressBar from "./components/progressBar.vue";
+import Loading from "./components/loading.vue";
+import Error from "./components/error.vue";
 
 const app = createApp(App);
 
@@ -31,4 +34,7 @@ app
   .use(router)
   .component("Confirm", Confirm)
   .component("SearchInput", SearchInput)
+  .component("ProgressBar", ProgressBar)
+  .component("Loading", Loading)
+  .component("Error", Error)
   .mount("#app");

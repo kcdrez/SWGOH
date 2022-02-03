@@ -1,61 +1,91 @@
 <template>
-  <table class="table table-bordered table-dark table-sm table-striped">
-    <thead>
-      <tr class="text-center align-middle">
-        <th width="20%">
-          <div class="c-pointer" @click="sortBy('name')">
-            Mat Name
-            <i class="fas mx-1" :class="sortIcon('name')"></i>
-          </div>
-          <input
-            class="form-control form-control-sm mx-auto my-1 w-75"
-            placeholder="Search"
-            v-model="searchName"
-          />
-        </th>
-        <th width="20%" class="c-pointer" @click="sortBy('location')">
-          Locations
-          <i class="fas mx-1" :class="sortIcon('location')"></i>
-        </th>
-        <th width="20%" class="c-pointer" @click="sortBy('amount')">
-          Amount
-          <i class="fas mx-1" :class="sortIcon('amount')"></i>
-        </th>
-        <th width="10%" class="c-pointer" @click="sortBy('time')">
-          Est. Time
-          <i class="fas mx-1" :class="sortIcon('time')"></i>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="mat in filteredRelics" :key="mat.id">
-        <td class="text-center">
-          <RelicIcon :item="mat" />
-        </td>
-        <td class="text-center align-middle">{{ mat.location.node }}</td>
-        <td>
-          <OwnedAmount :item="mat" :needed="amountNeeded(mat, targetLevels)" />
-        </td>
-        <td class="text-center align-middle">
-          {{ timeEstimation(mat, targetLevels) }}
-          Days
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div>
+    <table class="table table-bordered table-dark table-sm table-striped">
+      <thead class="sticky-header">
+        <tr class="text-center align-middle">
+          <th :width="showRequiredByUnit ? '15%' : '20%'">
+            <div class="c-pointer" @click="sortBy('name')">
+              Mat Name
+              <i class="fas mx-1" :class="sortIcon('name')"></i>
+            </div>
+            <input
+              class="form-control form-control-sm mx-auto my-1 w-75"
+              placeholder="Search"
+              v-model="searchName"
+            />
+          </th>
+          <th
+            :width="showRequiredByUnit ? '15%' : '20%'"
+            class="c-pointer"
+            @click="sortBy('location')"
+          >
+            Locations
+            <i class="fas mx-1" :class="sortIcon('location')"></i>
+          </th>
+          <th
+            :width="showRequiredByUnit ? '15%' : '20%'"
+            class="c-pointer"
+            @click="sortBy('amount')"
+          >
+            Amount/Progress
+            <i class="fas mx-1" :class="sortIcon('amount')"></i>
+          </th>
+          <th v-if="showRequiredByUnit" width="15%">Required By</th>
+          <th width="10%" class="c-pointer" @click="sortBy('time')">
+            Est. Time
+            <i class="fas mx-1" :class="sortIcon('time')"></i>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="mat in filteredRelics" :key="mat.id">
+          <td class="text-center">
+            <RelicIcon :item="mat" />
+          </td>
+          <td class="text-center align-middle">{{ mat.location.node }}</td>
+          <td>
+            <OwnedAmount
+              :item="mat"
+              :needed="amountNeeded(mat, targetLevels)"
+            />
+            <RelicProgressBar
+              :item="mat"
+              :amountNeeded="amountNeeded(mat, targetLevels)"
+              class="mt-2"
+            />
+          </td>
+          <td v-if="showRequiredByUnit">
+            <ul>
+              <li v-for="unit in mat.neededBy" :key="unit.id">
+                <router-link
+                  :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+                  >{{ unit.name }}</router-link
+                >
+              </li>
+            </ul>
+          </td>
+          <td class="text-center align-middle">
+            {{ timeEstimation(mat, targetLevels) }}
+            Days
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapGetters, mapState } from "vuex";
+import { mapGetters } from "vuex";
 
 import { Relic } from "../../types/relic";
-import OwnedAmount from "./owned.vue";
+import OwnedAmount from "./relicOwned.vue";
 import RelicIcon from "./relicIcon.vue";
+import RelicProgressBar from "./relicProgressBar.vue";
 
 export default defineComponent({
   name: "RelicTable",
-  components: { OwnedAmount, RelicIcon },
+  components: { OwnedAmount, RelicIcon, RelicProgressBar },
   props: {
     relicList: {
       required: true,
@@ -69,6 +99,10 @@ export default defineComponent({
           return "level" in x && "target" in x;
         });
       },
+    },
+    showRequiredByUnit: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -100,18 +134,16 @@ export default defineComponent({
               return compareA > compareB ? -1 : 1;
             }
           } else if (this.sortMethod === "amount") {
-            //need to pass an array to these functions
-            const compareA = this.amountNeeded(a);
-            const compareB = this.amountNeeded(b);
+            const compareA = this.amountNeeded(a, this.targetLevels);
+            const compareB = this.amountNeeded(b, this.targetLevels);
             if (this.sortDir === "asc") {
               return compareA - compareB;
             } else {
               return compareB - compareA;
             }
           } else if (this.sortMethod === "time") {
-            //need to pass an array to these functions
-            const compareA = this.timeEstimation(a);
-            const compareB = this.timeEstimation(b);
+            const compareA = this.timeEstimation(a, this.targetLevels);
+            const compareB = this.timeEstimation(b, this.targetLevels);
             if (this.sortDir === "asc") {
               return compareA - compareB;
             } else {

@@ -1,12 +1,5 @@
 <template>
-  <div class="progress">
-    <div
-      class="progress-bar bg-success progress-bar-striped"
-      role="progressbar"
-      :style="`width: ${percent}%`"
-    ></div>
-    <div class="progress-value">{{ percent }}%</div>
-  </div>
+  <ProgressBar :percent="percent" />
 </template>
 
 <script lang="ts">
@@ -21,9 +14,6 @@ export default defineComponent({
       type: Object as () => Gear,
       required: true,
     },
-  },
-  data() {
-    return {};
   },
   computed: {
     ...mapGetters("gear", ["gearOwnedCount"]),
@@ -42,8 +32,6 @@ export default defineComponent({
       }
     },
   },
-  methods: {},
-  created() {},
 });
 </script>
 

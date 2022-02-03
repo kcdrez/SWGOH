@@ -93,14 +93,13 @@
 import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 
-import Loading from "../loading.vue";
 import { UpdateItem } from "../../types/planner";
 import GearTable from "./gearTable.vue";
 import { loadingState } from "../../types/loading";
 
 export default defineComponent({
   name: "GearPlannerComponent",
-  components: { Loading, GearTable },
+  components: { GearTable },
   computed: {
     ...mapState("gear", ["maxGearLevel"]),
     ...mapState("unit", ["unit"]),

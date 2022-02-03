@@ -26,21 +26,24 @@
     </div>
     <div class="input-group input-group-sm mt-2">
       <span class="input-group-text label-count">Needed:</span>
-      <span class="input-group-text needed-count">{{ salvage.amount }}</span>
+      <span class="input-group-text needed-count">{{ needed }}</span>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
-import { Gear } from "../../types/gear";
+import { mapActions, mapState } from "vuex";
 
 export default defineComponent({
-  name: "Salvage",
+  name: "RelicOwned",
   props: {
-    salvage: {
-      type: Object as () => Gear,
+    item: {
+      type: Object,
+      required: true,
+    },
+    needed: {
+      type: Number,
       required: true,
     },
   },
@@ -51,13 +54,12 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("gear", ["gearOwnedCount"]),
+    ...mapState("relic", ["ownedRelics"]),
   },
   methods: {
-    ...mapActions("gear", ["saveOwnedCount"]),
     save() {
       this.editing = false;
-      this.saveOwnedCount({ count: this.owned, id: this.salvage.id });
+      this.saveOwnedCount({ count: this.owned, id: this.item.id });
     },
     edit() {
       this.editing = true;
@@ -65,9 +67,10 @@ export default defineComponent({
         (this.$refs?.saveButton as any).focus();
       });
     },
+    ...mapActions("relic", ["saveOwnedCount"]),
   },
   created() {
-    this.owned = this.gearOwnedCount(this.salvage);
+    this.owned = this.ownedRelics[this.item.id] || 0;
   },
 });
 </script>

@@ -66,7 +66,7 @@ const store = {
         let amount = 0;
 
         arr.forEach(({ level, target }) => {
-          for (let i = level; i <= target; i++) {
+          for (let i = level + 1; i <= target; i++) {
             const key = i.toString();
             if (i in amountMap) {
               amount += amountMap[key];

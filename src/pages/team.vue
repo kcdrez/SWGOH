@@ -158,8 +158,6 @@ import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 import { v4 as uuid } from "uuid";
 
-import Loading from "../components/loading.vue";
-import Error from "../components/error.vue";
 import { Unit } from "../types/unit";
 import { Team } from "../types/speed";
 import { unvue } from "../utils";
@@ -174,7 +172,6 @@ type dataModel = {
 
 export default defineComponent({
   name: "TeamPage",
-  components: { Loading, Error },
   data() {
     return {
       selected: null,
