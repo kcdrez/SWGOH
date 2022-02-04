@@ -102,8 +102,11 @@ const store = {
       });
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    addUnit({ commit, dispatch }: ActionCtx, id: string) {
+    addUnit({ commit, dispatch, state }: ActionCtx, id: string) {
       commit("UPSERT_UNIT", id);
+      if (!(id in state.targetConfig)) {
+        dispatch("initPlannerTarget", id);
+      }
       dispatch("save");
     },
     updatePlannerTarget({ commit, dispatch }: ActionCtx, payload: UpdateItem) {

@@ -270,13 +270,8 @@ export default defineComponent({
     width: 100%;
     margin: auto;
 
-    .search-input {
+    ::v-deep(.search-input) {
       width: calc(100% - 100px);
-
-      ::v-deep(input) {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-      }
     }
     button {
       width: 100px;

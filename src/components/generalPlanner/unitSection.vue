@@ -166,7 +166,7 @@ export default defineComponent({
     remove(unit: Unit & UnitPlannerItem) {
       this.removeUnit(unit.id);
       this.$toast(
-        `${unit.name} was successfully removed from the general planner`,
+        `${unit.name} was successfully removed from the General Planner`,
         {
           positionY: "top",
           class: "toast-success",

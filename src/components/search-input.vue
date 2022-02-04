@@ -1,5 +1,5 @@
 <template>
-  <div class="position-relative">
+  <div class="position-relative search-input">
     <input
       class="form-control form-control-sm search-text"
       type="text"
