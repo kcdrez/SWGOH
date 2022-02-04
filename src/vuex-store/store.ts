@@ -7,8 +7,11 @@ import { store as plannerStore, State as PlannerState } from "./planner";
 import { store as speedStore, State as SpeedState } from "./speed";
 import { loadingState } from "../types/loading";
 
+type ModuleTypes = "gear" | "relic" | "unit" | "player" | "planner" | "speed";
+
 export interface State {
   requestState: loadingState;
+  collapseSections: any;
   //modules' state
   gear: GearState;
   relic: RelicState;
@@ -29,6 +32,7 @@ const store = createStore<State>({
   },
   state: {
     requestState: loadingState.initial,
+    collapseSections: {},
     gear: gearStore.state,
     relic: relicStore.state,
     unit: unitStore.state,
@@ -36,62 +40,52 @@ const store = createStore<State>({
     planner: plannerStore.state,
     speed: speedStore.state,
   },
-  getters: {},
+  getters: {
+    someLoading(state: State) {
+      return (moduleNames: ModuleTypes[]): loadingState => {
+        const someLoading = moduleNames.some((name) => {
+          if (name in state) {
+            const { requestState } = state[name];
+            return requestState !== loadingState.ready;
+          } else {
+            return false;
+          }
+        });
+        return someLoading ? loadingState.loading : loadingState.ready;
+      };
+    },
+  },
   mutations: {
     SET_REQUEST_STATE(state, payload: loadingState) {
       state.requestState = payload;
     },
+    TOGGLE_COLLAPSE(state, { name, hidden }: any) {
+      state.collapseSections[name] = hidden;
+    },
+    SET_COLLAPSE(state, payload) {
+      state.collapseSections = payload;
+    },
   },
   actions: {
-    async initialize({ commit, state, dispatch }) {
+    async initialize({ commit, dispatch }) {
       commit("SET_REQUEST_STATE", loadingState.loading);
+      const collapseData = JSON.parse(
+        window.localStorage.getItem("collapseSections") || "{}"
+      );
+      commit("SET_COLLAPSE", collapseData);
       await dispatch("player/initialize", { root: true });
+      await dispatch("unit/initialize", { root: true });
       await dispatch("gear/fetchGear", { root: true });
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    // async fetchData({ state }) {
-    //   const response = await state.apiClient?.fetchData("effectList");
-    //   console.log(response);
-    // },
+    toggleCollapse({ commit, state }, payload) {
+      commit("TOGGLE_COLLAPSE", payload);
+      window.localStorage.setItem(
+        "collapseSections",
+        JSON.stringify(state.collapseSections)
+      );
+    },
   },
 });
 
 export default store;
-
-// abilityList - list of all abilities and tiers
-// equipmentList - List of all gear
-
-//Unklikely to use
-// guildRaidList - Generic raid info
-// guildExchangeItemList - Exchangeable gear
-
-//Not Helpful data:
-// battleEnvironmentsList
-// battleTargetingRuleList
-// categoryList
-// tableList
-// raidConfigList
-// requirementList
-// recipeList
-
-// challengeList
-// challengeStyleList
-// effectList
-// environmentCollectionList
-// eventSamplingList
-// helpEntryList
-// materialList
-// playerTitleList
-// powerUpBundleList
-// skillList
-// starterGuildList
-// statModList
-// statModSetList
-// statProgressionList
-// targetingSetList
-// territoryBattleDefinitionList
-// territoryWarDefinitionList
-// unitsList
-// unlockAnnouncementDefinitionList
-// warDefinitionList
-// xpTableList

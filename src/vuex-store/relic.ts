@@ -5,7 +5,7 @@ import { State as RootState } from "./store";
 import { unvue } from "../utils";
 import relicConfig from "../types/relicMapping";
 import { Relic, RelicConfigType } from "../types/relic";
-import { Unit } from "../types/unit";
+import { isUnit, Unit, UnitBasic } from "../types/unit";
 import { apiClient } from "../api/api-client";
 import { PlayerResponse } from "@/types/player";
 
@@ -37,16 +37,16 @@ const store = {
         if (relicLevel < 0) {
           relicLevel = 0;
         }
-        for (let i = relicLevel; i <= maxRelicLevel; i++) {
+        for (let i = (relicLevel || 0) + 1; i <= maxRelicLevel; i++) {
           list.push(i);
         }
         return list;
       };
     },
     timeEstimation(state: State, getters: any) {
-      return (mat: Relic, level: number, target: number): number => {
+      return (mat: Relic, arr: { level: number; target: number }[]): number => {
         const owned: number = state.ownedRelics[mat.id] || 0;
-        const totalAmount: number = getters.amountNeeded(mat, level, target);
+        const totalAmount: number = getters.amountNeeded(mat, arr);
         const remaining: number = totalAmount - owned;
 
         if (remaining > 0) {
@@ -61,24 +61,30 @@ const store = {
       };
     },
     amountNeeded(_state: State) {
-      return (mat: Relic, level: number, target: number): number => {
+      return (mat: Relic, arr: { level: number; target: number }[]): number => {
         const amountMap = mat.amount;
         let amount = 0;
-        for (let i = level; i <= target; i++) {
-          const key = i.toString();
-          if (i in amountMap) {
-            amount += amountMap[key];
+
+        arr.forEach(({ level, target }) => {
+          for (let i = level + 1; i <= target; i++) {
+            const key = i.toString();
+            if (i in amountMap) {
+              amount += amountMap[key];
+            }
           }
-        }
+        });
         return amount;
       };
     },
     totalDays(state: State, getters: any, rootState: RootState) {
-      return (unit: Unit): number => {
+      return (unit: Unit | UnitBasic): number => {
         const { target } = rootState.planner.targetConfig[unit.id].relic;
         return (Object.values(state.relicConfig) as Array<Relic>).reduce(
           (acc, el) => {
-            return acc + getters.timeEstimation(el, unit.relic_tier, target);
+            const relicLevel = isUnit(unit) ? unit.relic_tier : 0;
+            return (
+              acc + getters.timeEstimation(el, [{ level: relicLevel, target }])
+            );
           },
           0
         );
@@ -103,9 +109,11 @@ const store = {
   },
   actions: {
     initialize({ commit }: ActionCtx, player: PlayerResponse) {
+      commit("SET_REQUEST_STATE", loadingState.loading);
       commit("SET_OWNED_RELICS", player.relic);
       commit("UPDATE_REFRESHES", player.energyData?.refreshes?.cantina || 0);
       commit("UPDATE_ENERGY", player.energyData?.energy?.cantina || 0);
+      commit("SET_REQUEST_STATE", loadingState.ready);
     },
     saveOwnedCount(
       { state, commit, rootState }: ActionCtx,

@@ -6,6 +6,7 @@
       v-model="searchText"
       @focus="showList = true"
       @blur="blur"
+      @keypress.enter="enterPress"
     />
     <i class="fas fa-search magnifying-glass"></i>
     <ul class="list-container" v-if="showList">
@@ -82,6 +83,30 @@ export default defineComponent({
       setTimeout(() => {
         this.showList = false;
       }, 300);
+    },
+    submit(val: any, clearSelection: boolean) {
+      const match = this.list.find((x: any) => {
+        return x[this.searchBy] === val;
+      });
+      if (match) {
+        this.$emit("select", match);
+      } else if (clearSelection) {
+        this.$emit("select", null);
+      }
+    },
+    enterPress() {
+      if (this.filteredList.length > 0) {
+        const selected = this.filteredList[0];
+        this.showList = false;
+        this.$emit("select", selected);
+        this.$emit("enterPress", selected);
+        this.searchText = "";
+      }
+    },
+  },
+  watch: {
+    searchText(newVal) {
+      this.submit(newVal, true);
     },
   },
 });

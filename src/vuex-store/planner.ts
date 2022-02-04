@@ -32,14 +32,18 @@ const store = {
         return state.targetConfig[unitId]?.relic.target;
       };
     },
-    unitList(state: State, _getters: any, rootState: RootState) {
+    fullUnitList(state: State, _getters: any, rootState: RootState) {
       return state.unitList.map((id: string) => {
-        const match = rootState.player.player?.units.find((x) => x.id === id);
+        const matchOwned = rootState.player.player?.units.find(
+          (x) => x.id === id
+        );
+        const matchUnowned = rootState.unit.unitList.find((x) => x.id === id);
         return {
           id,
           gearTarget: state.targetConfig[id]?.gear.target,
           relicTarget: state.targetConfig[id]?.relic.target,
-          ...match,
+          ...matchOwned,
+          ...matchUnowned,
         };
       });
     },
@@ -95,12 +99,6 @@ const store = {
           });
         }
       });
-      await Promise.all(
-        //might have to put a limiter on this if the list is really big
-        (payload?.unitList || []).map((id: string) =>
-          dispatch("unit/fetchUnit", id, { root: true })
-        )
-      );
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     addUnit({ commit, dispatch }: ActionCtx, id: string) {

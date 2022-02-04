@@ -27,6 +27,7 @@
             class="form-control"
             v-model="editTeamTarget.name"
             v-if="editTeamTarget && editTeamTarget.id === team.id"
+            :ref="`team-${team.id}`"
             @keypress.enter="updateTeam(team)"
           />
           <span class="input-group-text flex-fill" v-else>{{ team.name }}</span>
@@ -119,18 +120,23 @@
               </td>
             </tr>
             <tr>
-              <td colspan="12">
-                <div class="input-group input-group-sm">
-                  <SearchInput
-                    :list="player.units"
-                    @select="selected = $event"
-                  />
-                  <button
-                    class="btn btn-sm btn-primary"
-                    @click="add(team, selected)"
-                  >
-                    Add
-                  </button>
+              <td colspan="12" class="text-center">
+                <div class="add-unit-container">
+                  <div class="input-group input-group-sm">
+                    <SearchInput
+                      class="search-input"
+                      :list="player.units"
+                      @select="selected = $event"
+                      @enterPress="add(team, $event)"
+                    />
+                    <button
+                      class="btn btn-sm btn-primary"
+                      :disabled="!selected"
+                      @click="add(team, selected)"
+                    >
+                      Add Unit
+                    </button>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -158,11 +164,10 @@ import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 import { v4 as uuid } from "uuid";
 
-import Loading from "../components/loading.vue";
-import Error from "../components/error.vue";
 import { Unit } from "../types/unit";
 import { Team } from "../types/speed";
 import { unvue } from "../utils";
+import { loadingState } from "../types/loading";
 
 type dataModel = {
   selected: null | Unit;
@@ -173,7 +178,6 @@ type dataModel = {
 
 export default defineComponent({
   name: "TeamPage",
-  components: { Loading, Error },
   data() {
     return {
       selected: null,
@@ -183,13 +187,16 @@ export default defineComponent({
     } as dataModel;
   },
   computed: {
-    ...mapState("player", ["player", "requestState"]),
+    ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapState("speed", ["teams"]),
     ...mapGetters("speed", ["speedValueFromMod", "hasSpeedSet"]),
+    ...mapGetters(["someLoading"]),
+    requestState(): loadingState {
+      return this.someLoading(["player", "speed"]);
+    },
   },
   methods: {
-    ...mapActions("unit", ["fetchUnit"]),
     ...mapActions("speed", [
       "addTeam",
       "addUnit",
@@ -218,12 +225,17 @@ export default defineComponent({
         this.addUnit({ teamId: team.id, unit });
       }
     },
-    speedBonusChange(unit: any) {
+    speedBonusChange() {
       //todo debouncer
       this.saveTeams();
     },
     editTeam(team: Team) {
       this.editTeamTarget = unvue(team);
+      this.$nextTick(() => {
+        if (this.$refs[`team-${team.id}`]) {
+          (this.$refs[`team-${team.id}`] as HTMLElement[])[0].focus();
+        }
+      });
     },
     saveTeam() {
       this.addTeam(this.editTeamTarget);
@@ -246,5 +258,29 @@ export default defineComponent({
 <style lang="scss" scoped>
 .speed-clocking-page {
   max-width: 90%;
+}
+
+.add-unit-container {
+  width: 25%;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0.5rem 0;
+
+  .input-group {
+    width: 100%;
+    margin: auto;
+
+    .search-input {
+      width: calc(100% - 100px);
+
+      ::v-deep(input) {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+    }
+    button {
+      width: 100px;
+    }
+  }
 }
 </style>

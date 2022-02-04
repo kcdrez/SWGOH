@@ -18,15 +18,37 @@ body {
     }
   }
 
+  .collapse.show {
+    .sticky-header {
+      position: sticky;
+      z-index: 4;
+      top: 56px;
+    }
+  }
+
   table {
-    thead th {
-      background-color: black !important;
-      color: white;
+    thead {
+      th {
+        background-color: black !important;
+        color: white;
+      }
     }
   }
 
   .section-header {
-    @include shadow-dark();
+    background-color: black;
+    text-align: center;
+    padding: 0.5rem 0;
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      cursor: pointer;
+      margin: 0;
+    }
   }
 }
 
