@@ -102,8 +102,11 @@ const store = {
       });
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    addUnit({ commit, dispatch }: ActionCtx, id: string) {
+    addUnit({ commit, dispatch, state }: ActionCtx, id: string) {
       commit("UPSERT_UNIT", id);
+      if (!(id in state.targetConfig)) {
+        dispatch("initPlannerTarget", id);
+      }
       dispatch("save");
     },
     updatePlannerTarget({ commit, dispatch }: ActionCtx, payload: UpdateItem) {
@@ -123,7 +126,11 @@ const store = {
         let relicValue = 1;
         if (playerUnit) {
           gearValue = Math.min(playerUnit.gear_level + 1, maxGearLevel);
-          relicValue = Math.min(playerUnit.relic_tier + 1, maxRelicLevel);
+          if (playerUnit.relic_tier === -1) {
+            relicValue = 1;
+          } else {
+            relicValue = Math.min(playerUnit.relic_tier + 1, maxRelicLevel);
+          }
         }
         commit("UPDATE_PLANNER_ITEM", {
           unitId,

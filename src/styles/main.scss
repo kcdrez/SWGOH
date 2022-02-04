@@ -76,3 +76,12 @@ button:disabled {
 .shadow-text {
   text-shadow: 2px 2px 2px black;
 }
+
+.input-group {
+  .search-input {
+    input {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+}
