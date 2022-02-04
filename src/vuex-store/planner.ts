@@ -5,6 +5,7 @@ import { State as RootState } from "./store";
 import { ConfigType, UpdateItem } from "../types/planner";
 import { maxGearLevel } from "./gear";
 import { apiClient } from "../api/api-client";
+import { maxRelicLevel } from "./relic";
 
 interface State {
   requestState: loadingState;
@@ -86,10 +87,10 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit, dispatch }: ActionCtx, payload: any) {
+    async initialize({ commit }: ActionCtx, payload: any) {
       commit("SET_REQUEST_STATE", loadingState.loading);
-      commit("UPDATE_PLANNER", payload.targetData);
-      commit("SET_UNIT_LIST", payload.unitList);
+      commit("UPDATE_PLANNER", payload?.targetData || {});
+      commit("SET_UNIT_LIST", payload?.unitList || []);
       (payload?.unitList || []).forEach((id: string) => {
         if (!(id in payload.targetData)) {
           commit("UPDATE_PLANNER_ITEM", {
@@ -109,15 +110,31 @@ const store = {
       commit("UPDATE_PLANNER_ITEM", payload);
       dispatch("save");
     },
-    initPlannerTarget({ commit, dispatch, state }: ActionCtx, unitId: string) {
-      const exists = state.unitList.find((x) => x === unitId);
+    initPlannerTarget(
+      { commit, dispatch, state, rootState }: ActionCtx,
+      unitId: string
+    ) {
+      const exists = unitId in state.targetConfig;
       if (!exists) {
+        const playerUnit = rootState.player.player?.units.find(
+          (x) => x.id === unitId
+        );
+        let gearValue = maxGearLevel;
+        let relicValue = 1;
+        if (playerUnit) {
+          gearValue = Math.min(playerUnit.gear_level + 1, maxGearLevel);
+          relicValue = Math.min(playerUnit.relic_tier + 1, maxRelicLevel);
+        }
         commit("UPDATE_PLANNER_ITEM", {
           unitId,
           type: "gear",
-          value: maxGearLevel,
+          value: gearValue,
         });
-        commit("UPDATE_PLANNER_ITEM", { unitId, type: "relic", value: 5 });
+        commit("UPDATE_PLANNER_ITEM", {
+          unitId,
+          type: "relic",
+          value: relicValue,
+        });
         dispatch("save");
       }
     },
