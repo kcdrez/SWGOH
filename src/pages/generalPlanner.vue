@@ -1,9 +1,16 @@
 <template>
   <Loading :state="requestState" message="Loading Planner Data" size="lg">
     <div class="container general-planner-page">
-      <UnitSection />
-      <GearSection />
-      <RelicSection />
+      <div v-if="fullUnitList.length === 0">
+        You have no units in the General Planner. Navigate to the
+        <router-link :to="{ name: 'home' }">home page</router-link> and select a
+        unit to add to the General Planner.
+      </div>
+      <template v-else>
+        <UnitSection />
+        <GearSection />
+        <RelicSection />
+      </template>
     </div>
   </Loading>
 </template>
@@ -22,6 +29,7 @@ export default defineComponent({
   components: { UnitSection, GearSection, RelicSection },
   computed: {
     ...mapGetters(["someLoading"]),
+    ...mapGetters("planner", ["fullUnitList"]),
     requestState(): loadingState {
       return this.someLoading(["planner", "unit", "gear", "relic", "planner"]);
     },
