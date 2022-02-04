@@ -59,7 +59,10 @@ const store = {
     async fetchPlayer({ commit, dispatch }: ActionCtx, allyCode: string) {
       commit("SET_REQUEST_STATE", loadingState.loading);
       try {
-        const player = await apiClient.fetchPlayer(allyCode);
+        let player = await apiClient.fetchPlayer(allyCode);
+        if (!player.id) {
+          player = await apiClient.createPlayer(allyCode);
+        }
         commit("SET_PLAYER", player);
         commit("SET_ALLY_CODE", allyCode);
         await dispatch("planner/initialize", player.planner, { root: true });

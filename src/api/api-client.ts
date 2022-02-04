@@ -17,6 +17,11 @@ class ApiClient {
     return response.data;
   }
 
+  async createPlayer(allyCode: string): Promise<PlayerResponse> {
+    const response = await axios.post(`${this.baseUrl}/player/${allyCode}`);
+    return response.data;
+  }
+
   async fetchGearList(): Promise<Gear[]> {
     const response = await axios.get(`${this.baseUrl}/gear`);
     return response.data;
