@@ -14,6 +14,7 @@
         <div @click="selectItem(item)">{{ item[displayBy] }}</div>
       </li>
     </ul>
+    <i class="fas fa-times clear-contents" @click="clear"></i>
   </div>
 </template>
 
@@ -103,6 +104,10 @@ export default defineComponent({
         this.searchText = "";
       }
     },
+    clear() {
+      this.showList = false;
+      this.searchText = "";
+    },
   },
   watch: {
     searchText(newVal) {
@@ -134,11 +139,24 @@ export default defineComponent({
   }
 }
 
-.magnifying-glass {
+.magnifying-glass,
+.clear-contents {
   position: absolute;
   color: $dark;
-  left: 10px;
   top: 7px;
+}
+
+.magnifying-glass {
+  left: 10px;
+}
+
+.clear-contents {
+  right: 10px;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.25);
+  }
 }
 
 input {
