@@ -123,7 +123,11 @@ const store = {
         let relicValue = 1;
         if (playerUnit) {
           gearValue = Math.min(playerUnit.gear_level + 1, maxGearLevel);
-          relicValue = Math.min(playerUnit.relic_tier + 1, maxRelicLevel);
+          if (playerUnit.relic_tier === -1) {
+            relicValue = 1;
+          } else {
+            relicValue = Math.min(playerUnit.relic_tier + 1, maxRelicLevel);
+          }
         }
         commit("UPDATE_PLANNER_ITEM", {
           unitId,

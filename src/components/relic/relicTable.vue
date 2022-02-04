@@ -25,10 +25,10 @@
           <th
             :width="showRequiredByUnit ? '15%' : '20%'"
             class="c-pointer"
-            @click="sortBy('amount')"
+            @click="sortBy('progress')"
           >
             Amount/Progress
-            <i class="fas mx-1" :class="sortIcon('amount')"></i>
+            <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
           <th v-if="showRequiredByUnit" width="15%">Required By</th>
           <th width="10%" class="c-pointer" @click="sortBy('time')">
@@ -76,7 +76,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapGetters } from "vuex";
+import { mapGetters, mapState } from "vuex";
 
 import { Relic } from "../../types/relic";
 import OwnedAmount from "./relicOwned.vue";
@@ -114,6 +114,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters("relic", ["timeEstimation", "amountNeeded"]),
+    ...mapState("relic", ["ownedRelics"]),
     filteredRelics(): Relic[] {
       return (this.relicList as Relic[])
         .sort((a: Relic, b: Relic) => {
@@ -133,13 +134,18 @@ export default defineComponent({
             } else {
               return compareA > compareB ? -1 : 1;
             }
-          } else if (this.sortMethod === "amount") {
-            const compareA = this.amountNeeded(a, this.targetLevels);
-            const compareB = this.amountNeeded(b, this.targetLevels);
+          } else if (this.sortMethod === "progress") {
+            const progressA =
+              (this.ownedRelics[a.id] || 0) /
+              this.amountNeeded(a, this.targetLevels);
+            const progressB =
+              (this.ownedRelics[b.id] || 0) /
+              this.amountNeeded(b, this.targetLevels);
+
             if (this.sortDir === "asc") {
-              return compareA - compareB;
+              return progressA - progressB;
             } else {
-              return compareB - compareA;
+              return progressB - progressA;
             }
           } else if (this.sortMethod === "time") {
             const compareA = this.timeEstimation(a, this.targetLevels);
