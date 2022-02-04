@@ -1,59 +1,66 @@
 <template>
-  <Loading :state="requestState" size="md" message="Loading Gear Data">
-    <h3 class="gear-header">
-      Relic Mats Needed to get {{ unit.name }} from Relic Level
-      {{ currentRelicLevel }} to
-      <select v-model.number="relicTarget">
-        <option
-          v-for="num in relicOptions(unit.relic_tier)"
-          :value="num"
-          :key="num"
+  <div>
+    <div class="collapse-header section-header mt-3">
+      <h3 class="w-100" data-bs-toggle="collapse" href="#relicSection">
+        <div class="d-inline">Relic Planner</div>
+      </h3>
+    </div>
+    <div id="relicSection" class="collapse" ref="relicSection">
+      <h3 class="relic-header">
+        Relic Mats Needed to get {{ unit.name }} from Relic Level
+        {{ currentRelicLevel }} to
+        <select v-model.number="relicTarget">
+          <option
+            v-for="num in relicOptions(unit.relic_tier)"
+            :value="num"
+            :key="num"
+          >
+            Relic {{ num }}
+          </option>
+        </select>
+        :
+      </h3>
+      <h3>
+        It will take approximately
+        {{ totalDays(unit) }} day{{ totalDays(unit) === 1 ? "" : "s" }} to get
+        to Relic Level {{ relicTarget }}.
+      </h3>
+      <div class="input-group input-group-sm w-50 mb-3">
+        <span
+          class="input-group-text c-help energy-text"
+          title="Energy used on Light and Dark side tables"
+          >Cantina Energy:</span
         >
-          Relic {{ num }}
-        </option>
-      </select>
-      :
-    </h3>
-    <h3>
-      It will take approximately
-      {{ totalDays(unit) }} day{{ totalDays(unit) === 1 ? "" : "s" }} to get to
-      Relic Level {{ relicTarget }}.
-    </h3>
-    <div class="input-group input-group-sm w-50 mb-3">
-      <span
-        class="input-group-text c-help energy-text"
-        title="Energy used on Light and Dark side tables"
-        >Cantina Energy:</span
-      >
-      <span
-        class="input-group-text c-help"
-        title="How many times you refresh the energy using crystals"
-        >Daily Refreshes:</span
-      >
-      <input
-        class="form-control"
-        type="number"
-        v-model.number="refreshes"
-        min="0"
-      />
-      <span
-        class="input-group-text c-help"
-        title="How much of your daily cantina energy used for farming other things (i.e. character shards)"
-        >Daily Energy Used:</span
-      >
-      <input
-        class="form-control"
-        type="number"
-        v-model.number="energy"
-        min="0"
-        :max="165 + refreshes * 120"
+        <span
+          class="input-group-text c-help"
+          title="How many times you refresh the energy using crystals"
+          >Daily Refreshes:</span
+        >
+        <input
+          class="form-control"
+          type="number"
+          v-model.number="refreshes"
+          min="0"
+        />
+        <span
+          class="input-group-text c-help"
+          title="How much of your daily cantina energy used for farming other things (i.e. character shards)"
+          >Daily Energy Used:</span
+        >
+        <input
+          class="form-control"
+          type="number"
+          v-model.number="energy"
+          min="0"
+          :max="165 + refreshes * 120"
+        />
+      </div>
+      <RelicTable
+        :relicList="relicList"
+        :targetLevels="[{ level: currentRelicLevel, target: relicTarget }]"
       />
     </div>
-    <RelicTable
-      :relicList="relicList"
-      :targetLevels="[{ level: currentRelicLevel, target: relicTarget }]"
-    />
-  </Loading>
+  </div>
 </template>
 
 <script lang="ts">
@@ -64,6 +71,7 @@ import RelicTable from "./relicTable.vue";
 import { UpdateItem } from "../../types/planner";
 import { loadingState } from "../../types/loading";
 import { Relic } from "../../types/relic";
+import { setupEvents } from "../../utils";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
@@ -112,11 +120,14 @@ export default defineComponent({
       return Object.values(this.relicConfig);
     },
   },
+  mounted() {
+    setupEvents(this.$refs.relicSection as HTMLElement, "relicPlanner");
+  },
 });
 </script>
 
 <style lang="scss" scoped>
-.gear-header {
+.relic-header {
   select {
     width: 115px;
     font-size: 1.25rem;

@@ -11,6 +11,7 @@ type ModuleTypes = "gear" | "relic" | "unit" | "player" | "planner" | "speed";
 
 export interface State {
   requestState: loadingState;
+  collapseSections: any;
   //modules' state
   gear: GearState;
   relic: RelicState;
@@ -31,6 +32,7 @@ const store = createStore<State>({
   },
   state: {
     requestState: loadingState.initial,
+    collapseSections: {},
     gear: gearStore.state,
     relic: relicStore.state,
     unit: unitStore.state,
@@ -57,14 +59,31 @@ const store = createStore<State>({
     SET_REQUEST_STATE(state, payload: loadingState) {
       state.requestState = payload;
     },
+    TOGGLE_COLLAPSE(state, { name, hidden }: any) {
+      state.collapseSections[name] = hidden;
+    },
+    SET_COLLAPSE(state, payload) {
+      state.collapseSections = payload;
+    },
   },
   actions: {
     async initialize({ commit, dispatch }) {
       commit("SET_REQUEST_STATE", loadingState.loading);
+      const collapseData = JSON.parse(
+        window.localStorage.getItem("collapseSections") || "{}"
+      );
+      commit("SET_COLLAPSE", collapseData);
       await dispatch("player/initialize", { root: true });
       await dispatch("unit/initialize", { root: true });
       await dispatch("gear/fetchGear", { root: true });
       commit("SET_REQUEST_STATE", loadingState.ready);
+    },
+    toggleCollapse({ commit, state }, payload) {
+      commit("TOGGLE_COLLAPSE", payload);
+      window.localStorage.setItem(
+        "collapseSections",
+        JSON.stringify(state.collapseSections)
+      );
     },
   },
 });
