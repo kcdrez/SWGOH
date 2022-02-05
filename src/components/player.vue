@@ -2,10 +2,7 @@
   <div>
     <SearchInput :list="unitList" @select="selected = $event" />
     <div v-if="selected" class="text-center">
-      <img
-        class="d-block mx-auto my-1"
-        :src="`https://game-assets.swgoh.gg/${selected?.thumbnailName}.png`"
-      />
+      <img class="d-block mx-auto my-1" :src="selected?.image" />
       <router-link
         as="button"
         class="btn btn-primary"

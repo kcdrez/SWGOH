@@ -1,8 +1,8 @@
 export interface UnitBasic {
   id: string;
   name: string;
-  thumbnailName: string;
-  unitTierList: UnitTier[];
+  image: string;
+  gear_levels: UnitTier[];
 }
 
 export interface Unit extends UnitBasic {
@@ -20,6 +20,10 @@ export interface Unit extends UnitBasic {
   mods: Mod[];
   crew: Crew[];
   stars: number;
+  categories: string[];
+  ability_classes: string[];
+  role: string;
+  alignment: string;
 }
 
 export function isUnit(unit: Unit | UnitBasic): unit is Unit {
