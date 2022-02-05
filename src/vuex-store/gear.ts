@@ -194,7 +194,7 @@ const store = {
           // const { gear_level } = unit;
           const gear_level = isUnit(unit) ? unit.gear_level : 0;
           const futureGear =
-            unit?.unitTierList.filter((x: any) => x.tier >= gear_level) || [];
+            unit?.gear_levels.filter((x: any) => x.tier >= gear_level) || [];
 
           return futureGear.map((gear: any) => {
             return {

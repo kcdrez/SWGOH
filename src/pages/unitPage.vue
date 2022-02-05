@@ -5,10 +5,7 @@
       :message="`Unable to find a unit with the ID of ${$route.params.unitId}.`"
     />
     <Loading :state="requestState" message="Loading Unit Data" size="lg">
-      <img
-        class="d-block m-auto"
-        :src="`https://game-assets.swgoh.gg/${unit?.thumbnailName}.png`"
-      />
+      <img class="d-block m-auto" :src="unit?.image" />
       <button
         class="btn btn-secondary text-dark mx-auto my-2 d-block"
         @click="add()"

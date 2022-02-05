@@ -28,7 +28,7 @@
             v-model="editTeamTarget.name"
             v-if="editTeamTarget && editTeamTarget.id === team.id"
             :ref="`team-${team.id}`"
-            @keypress.enter="updateTeam(team)"
+            @keypress.enter="saveTeam"
           />
           <span class="input-group-text flex-fill" v-else>{{ team.name }}</span>
           <button
@@ -68,45 +68,142 @@
             <i class="fas fa-trash"></i>
           </button>
         </div>
+        <div class="d-flex mb-2 justify-content-evenly">
+          <div>Select a game mode to apply Omicron abilities:</div>
+          <div class="form-check mr-2">
+            <input
+              class="form-check-input"
+              type="radio"
+              :id="`any-${team.id}`"
+              v-model="team.gameMode"
+              value=""
+              @change="saveTeam(team)"
+            />
+            <label class="form-check-label" :for="`any-${team.id}`">
+              Any
+            </label>
+          </div>
+          <div class="form-check mr-2">
+            <input
+              class="form-check-input"
+              type="radio"
+              :id="`tw-${team.id}`"
+              v-model="team.gameMode"
+              value="Territory Wars"
+              @change="saveTeam(team)"
+            />
+            <label class="form-check-label" :for="`tw-${team.id}`">
+              Territory Wars
+            </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              :id="`tb-${team.id}`"
+              v-model="team.gameMode"
+              value="Territory Battles"
+              @change="saveTeam(team)"
+            />
+            <label class="form-check-label" :for="`tb-${team.id}`">
+              Territory Battles
+            </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              :id="`gac-${team.id}`"
+              v-model="team.gameMode"
+              value="Grand Arena"
+              @change="saveTeam(team)"
+            />
+            <label class="form-check-label" :for="`gac-${team.id}`">
+              Grand Arena
+            </label>
+          </div>
+        </div>
         <table class="table table-bordered table-dark table-sm table-striped">
           <thead>
             <tr class="text-center">
-              <td width="10%">Unit</td>
-              <td width="7%">Square</td>
-              <td width="7%">Arrow</td>
-              <td width="7%">Diamond</td>
-              <td width="7%">Triangle</td>
-              <td width="7%">Circle</td>
-              <td width="7%">Cross</td>
-              <td width="10%">Speed Set Bonus?</td>
+              <td width="10%">Is Leader?</td>
+              <td width="20%">Unit</td>
+              <td width="25%">Mods</td>
               <td width="10%">Sub Total</td>
-              <td width="10%">Leader/Unique</td>
+              <td width="15%">Leader/Unique</td>
               <td width="10%">Total</td>
-              <td width="8%">Actions</td>
+              <td width="10%">Actions</td>
             </tr>
           </thead>
           <tbody>
             <tr v-for="unit in team.units" :key="unit.id" class="text-center">
-              <td>{{ unitData(unit.id).name }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[0]) }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[1]) }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[2]) }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[3]) }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[4]) }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[5]) }}</td>
-              <td>{{ hasSpeedSet(unitData(unit.id)) ? "Yes" : "No" }}</td>
+              <td class="text-left">
+                <div class="form-check d-flex justify-content-center">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    v-model="unit.isLeader"
+                    :disabled="disableLeader(team, unit.id)"
+                    @change="speedBonusChange()"
+                  />
+                </div>
+              </td>
+              <td>
+                <router-link
+                  :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+                  >{{ unitData(unit.id).name }}</router-link
+                >
+              </td>
+              <td>
+                <div class="mods-list">
+                  <ul>
+                    <li>
+                      Square: {{ speedValueFromMod(unitData(unit.id).mods[0]) }}
+                    </li>
+                    <li>
+                      Diamond:
+                      {{ speedValueFromMod(unitData(unit.id).mods[2]) }}
+                    </li>
+                    <li>
+                      Circle: {{ speedValueFromMod(unitData(unit.id).mods[4]) }}
+                    </li>
+                  </ul>
+                  <ul>
+                    <li>
+                      Arrow: {{ speedValueFromMod(unitData(unit.id).mods[1]) }}
+                    </li>
+                    <li>
+                      Triangle:
+                      {{ speedValueFromMod(unitData(unit.id).mods[3]) }}
+                    </li>
+                    <li>
+                      Cross: {{ speedValueFromMod(unitData(unit.id).mods[5]) }}
+                    </li>
+                  </ul>
+                </div>
+                <div class="my-2">
+                  Speed Set:
+                  {{ hasSpeedSet(unitData(unit.id)) ? "Yes" : "No" }}
+                </div>
+              </td>
               <td>{{ unitData(unit.id).stats["5"] }}</td>
               <td>
                 <input
                   type="number"
                   class="form-control form-control-sm"
                   v-model="unit.speedBonus"
-                  @change="speedBonusChange(unit)"
+                  @change="speedBonusChange()"
                   min="0"
                 />
+                <div>Leader Bonus: {{ leaderSpeedBonus(team, unit) }}</div>
+                <div>Unique Bonus: {{ uniqueSpeedBonus(team, unit) }}</div>
+                <div>
+                  Team Members Uniques:
+                  {{ speedBonusFromTeamMembers(team, unit) }}
+                </div>
               </td>
               <td>
-                {{ unitData(unit.id).stats["5"] + (unit.speedBonus || 0) }}
+                {{ grandTotal(team, unit) }}
               </td>
               <td>
                 <button
@@ -119,8 +216,8 @@
                 </button>
               </td>
             </tr>
-            <tr>
-              <td colspan="12" class="text-center">
+            <tr v-if="team.units.length < 5">
+              <td colspan="7" class="text-center">
                 <div class="add-unit-container">
                   <div class="input-group input-group-sm">
                     <SearchInput
@@ -163,9 +260,10 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 import { v4 as uuid } from "uuid";
+import _ from "lodash";
 
 import { Unit } from "../types/unit";
-import { Team } from "../types/speed";
+import { Team, TeamMember } from "../types/speed";
 import { unvue } from "../utils";
 import { loadingState } from "../types/loading";
 
@@ -181,7 +279,7 @@ export default defineComponent({
   data() {
     return {
       selected: null,
-      newTeamName: "",
+      newTeamName: "abc",
       editTeamTarget: null,
       deleteTarget: null,
     } as dataModel;
@@ -190,7 +288,13 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapState("speed", ["teams"]),
-    ...mapGetters("speed", ["speedValueFromMod", "hasSpeedSet"]),
+    ...mapGetters("speed", [
+      "speedValueFromMod",
+      "hasSpeedSet",
+      "leaderSpeedBonus",
+      "uniqueSpeedBonus",
+      "speedBonusFromTeamMembers",
+    ]),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
       return this.someLoading(["player", "speed"]);
@@ -225,9 +329,18 @@ export default defineComponent({
         this.addUnit({ teamId: team.id, unit });
       }
     },
-    speedBonusChange() {
-      //todo debouncer
+    speedBonusChange: _.debounce(function fn(this: any) {
       this.saveTeams();
+    }, 300),
+    disableLeader(team: Team, unitId: string) {
+      return team.units.some((unit) => {
+        if (unit.isLeader) {
+          if (unit.id !== unitId) {
+            return true;
+          }
+        }
+        return false;
+      });
     },
     editTeam(team: Team) {
       this.editTeamTarget = unvue(team);
@@ -237,8 +350,11 @@ export default defineComponent({
         }
       });
     },
-    saveTeam() {
-      this.addTeam(this.editTeamTarget);
+    saveTeam(team?: Team) {
+      if (!team) {
+        team = unvue(this.editTeamTarget);
+      }
+      this.addTeam(team);
       this.editTeamTarget = null;
     },
     confirmDeleteTeam(team: Team) {
@@ -250,6 +366,15 @@ export default defineComponent({
     },
     removeUnitFromTeam(team: Team, unit: Unit) {
       this.removeUnit({ teamId: team.id, unit });
+    },
+    grandTotal(team: Team, unit: TeamMember) {
+      return (
+        this.unitData(unit.id).stats["5"] +
+        (unit.speedBonus || 0) +
+        this.leaderSpeedBonus(team, unit) +
+        this.uniqueSpeedBonus(team, unit) +
+        this.speedBonusFromTeamMembers(team, unit)
+      );
     },
   },
 });
@@ -276,6 +401,17 @@ export default defineComponent({
     button {
       width: 100px;
     }
+  }
+}
+
+.mods-list {
+  display: flex;
+  justify-content: center;
+
+  ul {
+    margin: 0 1rem;
+    padding: 0;
+    list-style: none;
   }
 }
 </style>
