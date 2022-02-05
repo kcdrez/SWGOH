@@ -10,7 +10,7 @@ import {
 } from "../types/locationMapping";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
-import { isUnit, Unit, UnitBasic } from "../types/unit";
+import { isUnit, Unit, UnitBasic, UnitTier } from "../types/unit";
 import { apiClient } from "../api/api-client";
 import { PlayerResponse } from "../types/player";
 
@@ -189,20 +189,20 @@ const store = {
       };
     },
     fullGearListByLevel(_state: State, getters: any) {
-      return (unit: Unit | UnitBasic): any[] => {
+      return (unit: Unit | UnitBasic): UnitTier[] => {
         if (unit) {
-          // const { gear_level } = unit;
           const gear_level = isUnit(unit) ? unit.gear_level : 0;
-          const futureGear =
-            unit?.gear_levels.filter((x: any) => x.tier >= gear_level) || [];
+          const futureGear = (unit?.gear_levels || []).filter(
+            ({ tier }: UnitTier) => tier >= gear_level
+          );
 
-          return futureGear.map((gear: any) => {
+          return futureGear.map(({ gear, tier }: UnitTier) => {
             return {
-              tier: gear.tier,
-              gear: gear.equipmentSetList
+              tier,
+              gear: gear
                 .map((id: string, index: number) => {
                   let alreadyEquipped = false;
-                  if (gear.tier === gear_level && isUnit(unit)) {
+                  if (tier === gear_level && isUnit(unit)) {
                     alreadyEquipped = unit?.gear[index].is_obtained || false;
                   }
 
@@ -212,7 +212,7 @@ const store = {
                     return getters.findGearData(id);
                   }
                 })
-                .filter((x: any) => !!x),
+                .filter((x: UnitTier | null) => !!x),
             };
           });
         } else {

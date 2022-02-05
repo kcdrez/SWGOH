@@ -39,11 +39,11 @@
       </thead>
       <tbody>
         <tr v-for="mat in filteredRelics" :key="mat.id">
-          <td class="text-center">
+          <td class="text-center align-middle">
             <RelicIcon :item="mat" />
           </td>
           <td class="text-center align-middle">{{ mat.location.node }}</td>
-          <td>
+          <td class="align-middle">
             <OwnedAmount
               :item="mat"
               :needed="amountNeeded(mat, targetLevels)"
@@ -65,8 +65,11 @@
             </ul>
           </td>
           <td class="text-center align-middle">
-            {{ timeEstimation(mat, targetLevels) }}
-            Days
+            <div v-if="timeEstimation(mat, targetLevels) >= 0">
+              {{ timeEstimation(mat, targetLevels) }}
+              Days
+            </div>
+            <div v-else>-</div>
           </td>
         </tr>
       </tbody>
@@ -126,7 +129,7 @@ export default defineComponent({
             } else {
               return compareA > compareB ? -1 : 1;
             }
-          } else if (this.sortMethod === "locations") {
+          } else if (this.sortMethod === "location") {
             const compareA = a.location.node.toLowerCase();
             const compareB = b.location.node.toLowerCase();
             if (this.sortDir === "asc") {
@@ -135,14 +138,23 @@ export default defineComponent({
               return compareA > compareB ? -1 : 1;
             }
           } else if (this.sortMethod === "progress") {
-            const progressA =
-              (this.ownedRelics[a.id] || 0) /
-              this.amountNeeded(a, this.targetLevels);
-            const progressB =
-              (this.ownedRelics[b.id] || 0) /
-              this.amountNeeded(b, this.targetLevels);
+            const amountNeededA = this.amountNeeded(a, this.targetLevels);
+            const amountNeededB = this.amountNeeded(b, this.targetLevels);
+
+            if (amountNeededA === 0 && amountNeededB === 0) {
+              return 0;
+            } else if (amountNeededA === 0) {
+              return this.sortDir === "asc" ? 1 : -1;
+            } else if (amountNeededB === 0) {
+              return this.sortDir === "asc" ? -1 : 1;
+            }
+
+            const progressA = (this.ownedRelics[a.id] || 0) / amountNeededA;
+            const progressB = (this.ownedRelics[b.id] || 0) / amountNeededB;
 
             if (this.sortDir === "asc") {
+              if (this.amountNeeded(a, this.targetLevels) <= 0) {
+              }
               return progressA - progressB;
             } else {
               return progressB - progressA;

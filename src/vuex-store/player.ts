@@ -1,5 +1,8 @@
 import { ActionContext } from "vuex";
-import { Player, PlayerResponse } from "../types/player";
+import moment from "moment";
+import momentTz from "moment-timezone";
+
+import { Player } from "../types/player";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
@@ -24,6 +27,18 @@ const store = {
     unitData(state: State) {
       return (unitId: string): Unit | undefined => {
         return state.player?.units.find((x) => x.id === unitId);
+      };
+    },
+    lastUpdated(state: State): { fromNow: string; timestamp: string } {
+      const fullTimezone = momentTz.tz.guess();
+      const timezoneOffset = new Date().getTimezoneOffset();
+      const timezone =
+        momentTz.tz.zone(fullTimezone)?.abbr(timezoneOffset) || "";
+      return {
+        fromNow: moment(state.player?.updated).fromNow(),
+        timestamp:
+          moment(state.player?.updated).format("MMM D, YYYY @H:mma ") +
+          timezone,
       };
     },
   },

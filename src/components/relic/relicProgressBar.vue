@@ -25,6 +25,10 @@ export default defineComponent({
       return this.ownedRelics[this.item.id] || 0;
     },
     percent() {
+      if (this.amountNeeded <= 0) {
+        return 100;
+      }
+
       const val = (this.ownedAmount / this.amountNeeded) * 100;
       if (val >= 100) {
         return 100;

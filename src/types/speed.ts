@@ -3,6 +3,9 @@ export interface Team {
   name: string;
   units: TeamMember[];
   gameMode?: string;
+  sortDir?: "asc" | "desc";
+  sortMethod?: SortType;
+  searchName?: string;
 }
 
 export interface TeamMember {
@@ -10,6 +13,8 @@ export interface TeamMember {
   speedBonus: number;
   isLeader?: boolean;
 }
+
+export type SortType = "leader" | "name" | "subtotal" | "total" | undefined;
 export interface SpeedConfig {
   [key: string]: UnitSpeedAbility;
 }
