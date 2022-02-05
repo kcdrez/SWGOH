@@ -1,6 +1,6 @@
 {
   "name": "swgoh",
-  "version": "0.1.17.alpha",
+  "version": "0.1.18.alpha",
   "description": "A webapp of tools for the video game Star Wars: Galaxy of Heroes",
   "main": "main.ts",
   "private": true,
@@ -14,6 +14,7 @@
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^1.6.0",
     "moment": "^2.29.1",
+    "moment-timezone": "^0.5.34",
     "typescript": "^4.3.4",
     "vue": "^3.1.1",
     "vue-dk-toast": "^3.0.1",

@@ -59,9 +59,9 @@ export interface Mod {
   secondaryStat: { unitStat: number; value: number; roll: number }[];
 }
 
-interface UnitTier {
+export interface UnitTier {
   tier: number;
-  equipmentSetList: string[];
+  gear: string[];
 }
 
 interface Crew {

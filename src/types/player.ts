@@ -5,6 +5,7 @@ export interface Player {
   name: string;
   units: Unit[];
   id: string;
+  updated: number;
 }
 
 export interface PlayerResponse extends Player {

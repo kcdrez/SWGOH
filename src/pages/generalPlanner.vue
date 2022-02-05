@@ -1,6 +1,7 @@
 <template>
   <Loading :state="requestState" message="Loading Planner Data" size="lg">
     <div class="container general-planner-page">
+      <LastUpdated />
       <div v-if="fullUnitList.length === 0">
         You have no units in the General Planner.
       </div>
@@ -54,7 +55,7 @@ export default defineComponent({
     ...mapGetters("planner", ["fullUnitList"]),
     ...mapState("unit", ["unitList"]),
     requestState(): loadingState {
-      return this.someLoading(["planner", "unit", "gear", "relic", "planner"]);
+      return this.someLoading(["planner", "unit", "gear", "relic"]);
     },
   },
   methods: {
