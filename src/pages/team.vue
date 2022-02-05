@@ -125,18 +125,47 @@
         </div>
         <table class="table table-bordered table-dark table-sm table-striped">
           <thead>
-            <tr class="text-center">
-              <td width="10%">Is Leader?</td>
-              <td width="20%">Unit</td>
+            <tr class="text-center align-middle">
+              <td width="10%">
+                <div class="c-pointer" @click="sortBy(team, 'leader')">
+                  Is Leader?
+                  <i class="fas mx-1" :class="sortIcon(team, 'leader')"></i>
+                </div>
+              </td>
+              <td width="20%">
+                <div class="c-pointer" @click="sortBy(team, 'name')">
+                  Unit
+                  <i class="fas mx-1" :class="sortIcon(team, 'name')"></i>
+                </div>
+                <input
+                  class="form-control form-control-sm mx-auto my-1 w-75"
+                  placeholder="Search"
+                  v-model="team.searchName"
+                />
+              </td>
               <td width="25%">Mods</td>
-              <td width="10%">Sub Total</td>
+              <td width="10%">
+                <div class="c-pointer" @click="sortBy(team, 'subtotal')">
+                  Sub Total
+                  <i class="fas mx-1" :class="sortIcon(team, 'subtotal')"></i>
+                </div>
+              </td>
               <td width="15%">Leader/Unique</td>
-              <td width="10%">Total</td>
+              <td width="10%">
+                <div class="c-pointer" @click="sortBy(team, 'total')">
+                  Total
+                  <i class="fas mx-1" :class="sortIcon(team, 'total')"></i>
+                </div>
+              </td>
               <td width="10%">Actions</td>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="unit in team.units" :key="unit.id" class="text-center">
+            <tr
+              v-for="unit in sortTeamUnits(team)"
+              :key="unit.id"
+              class="text-center"
+            >
               <td class="text-left">
                 <div class="form-check d-flex justify-content-center">
                   <input
@@ -267,7 +296,7 @@ import { v4 as uuid } from "uuid";
 import _ from "lodash";
 
 import { Unit } from "../types/unit";
-import { Team, TeamMember } from "../types/speed";
+import { SortType, Team, TeamMember } from "../types/speed";
 import { unvue } from "../utils";
 import { loadingState } from "../types/loading";
 
@@ -379,6 +408,65 @@ export default defineComponent({
         this.uniqueSpeedBonus(team, unit) +
         this.speedBonusFromTeamMembers(team, unit)
       );
+    },
+    sortIcon(team: Team, type: SortType): string {
+      if (
+        team.sortMethod === type ||
+        (team.sortMethod === undefined && type === "total")
+      ) {
+        return team.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
+      } else {
+        return "fa-sort";
+      }
+    },
+    sortBy(team: Team, type: SortType): void {
+      if (team.sortMethod === type) {
+        team.sortDir = team.sortDir === "asc" ? "desc" : "asc";
+      } else {
+        team.sortDir = "asc";
+      }
+      team.sortMethod = type;
+      this.saveTeam(team);
+    },
+    sortTeamUnits(team: Team): TeamMember[] {
+      return team.units.sort((a, b) => {
+        if (team.sortMethod === "name") {
+          const compareA: string = this.unitData(a.id).name.toLowerCase();
+          const compareB: string = this.unitData(b.id).name.toLowerCase();
+          if (team.sortDir === "asc") {
+            return compareA > compareB ? 1 : -1;
+          } else {
+            return compareA > compareB ? -1 : 1;
+          }
+        } else if (team.sortMethod === "leader") {
+          if (a.isLeader) {
+            return team.sortDir === "asc" ? -1 : 1;
+          } else if (b.isLeader) {
+            return team.sortDir === "asc" ? 1 : -1;
+          }
+          return 0;
+        } else if (team.sortMethod === "subtotal") {
+          const compareA: number = this.unitData(a.id).stats["5"];
+          const compareB: number = this.unitData(b.id).stats["5"];
+          if (team.sortDir === "asc") {
+            return compareA - compareB;
+          } else {
+            return compareB - compareA;
+          }
+        } else if (
+          team.sortMethod === "total" ||
+          team.sortMethod === undefined
+        ) {
+          const compareA: number = this.grandTotal(team, a);
+          const compareB: number = this.grandTotal(team, b);
+          if (team.sortDir === "asc") {
+            return compareA - compareB;
+          } else {
+            return compareB - compareA;
+          }
+        }
+        return 0;
+      });
     },
   },
 });

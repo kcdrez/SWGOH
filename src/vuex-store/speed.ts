@@ -201,6 +201,7 @@ const store = {
           id: uuid(),
           name: "Default Name",
           units: [],
+          // sortMethod: "total"
         });
       } else {
         commit("UPSERT_TEAM", team);
