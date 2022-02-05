@@ -188,17 +188,21 @@
               </td>
               <td>{{ unitData(unit.id).stats["5"] }}</td>
               <td>
-                <input
+                <!-- <input
                   type="number"
                   class="form-control form-control-sm"
                   v-model="unit.speedBonus"
                   @change="speedBonusChange()"
                   min="0"
-                />
-                <div>Leader Bonus: {{ leaderSpeedBonus(team, unit) }}</div>
-                <div>Unique Bonus: {{ uniqueSpeedBonus(team, unit) }}</div>
-                <div>
-                  Team Members Uniques:
+                /> -->
+                <div v-if="leaderSpeedBonus(team, unit) > 0">
+                  Leader Bonus: {{ leaderSpeedBonus(team, unit) }}
+                </div>
+                <div v-if="uniqueSpeedBonus(team, unit) > 0">
+                  Unique Bonus: {{ uniqueSpeedBonus(team, unit) }}
+                </div>
+                <div v-if="speedBonusFromTeamMembers(team, unit) > 0">
+                  Other Bonuses:
                   {{ speedBonusFromTeamMembers(team, unit) }}
                 </div>
               </td>
@@ -370,7 +374,7 @@ export default defineComponent({
     grandTotal(team: Team, unit: TeamMember) {
       return (
         this.unitData(unit.id).stats["5"] +
-        (unit.speedBonus || 0) +
+        // (unit.speedBonus || 0) +
         this.leaderSpeedBonus(team, unit) +
         this.uniqueSpeedBonus(team, unit) +
         this.speedBonusFromTeamMembers(team, unit)
