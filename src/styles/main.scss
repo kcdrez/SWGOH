@@ -101,3 +101,15 @@ button:disabled {
     }
   }
 }
+
+.show-on-mobile {
+  @media only screen and (min-width: 981px) {
+    display: none;
+  }
+}
+
+.show-on-desktop {
+  @media only screen and (max-width: 980px) {
+    display: none;
+  }
+}

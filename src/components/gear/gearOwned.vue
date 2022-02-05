@@ -79,4 +79,12 @@ export default defineComponent({
 .label-count {
   width: 75px;
 }
+
+@media only screen and (max-width: 600px) {
+  .owned-count,
+  .needed-count {
+    text-align: center;
+    display: block;
+  }
+}
 </style>

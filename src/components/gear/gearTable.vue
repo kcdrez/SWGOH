@@ -1,6 +1,117 @@
 <template>
   <div>
-    <table class="table table-bordered table-dark table-sm table-striped mb-0">
+    <table
+      class="table table-bordered table-dark table-sm table-striped mb-0 show-on-mobile"
+    >
+      <thead>
+        <tr class="text-center align-middle">
+          <th>
+            <div>Gear Info</div>
+            <div class="sort-methods">
+              <div class="input-group input-group-sm my-2">
+                <span class="input-group-text">Sort By:</span>
+                <select
+                  class="form-control"
+                  @change="sortMethod = $event.target.value"
+                >
+                  <option value="name">Name</option>
+                  <option value="location">Location</option>
+                  <option value="progress">Progress</option>
+                  <option value="time">Time Remaining</option>
+                </select>
+              </div>
+              <div class="input-group input-group-sm my-2">
+                <span class="input-group-text">Sort Direction:</span>
+                <select
+                  class="form-control"
+                  @change="sortDir = $event.target.value"
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </div>
+              <div class="input-group input-group-sm my-2">
+                <span class="input-group-text">Search:</span>
+                <input
+                  class="form-control"
+                  v-model="searchText"
+                  placeholder="Search by name"
+                />
+              </div>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="salvage in filteredSalvageList" :key="salvage.id">
+          <div class="gear-row">
+            <GearIcon :gear="salvage" class="text-center" />
+            <div
+              v-if="gearLocation(salvage.lookupMissionList).length <= 0"
+              class="text-center"
+            >
+              No known farmable locations.
+            </div>
+            <div v-else>
+              <button
+                class="btn btn-sm btn-info m-auto d-block"
+                data-bs-toggle="collapse"
+                :href="`#locations-${salvage.id}`"
+              >
+                Show/Hide Locations
+              </button>
+              <ul
+                class="m-0 p-0 collapse text-center"
+                :id="`locations-${salvage.id}`"
+              >
+                <li
+                  v-for="(l, index) in gearLocation(salvage.lookupMissionList)"
+                  :key="index"
+                >
+                  {{ l }}
+                </li>
+              </ul>
+            </div>
+            <div>
+              <OwnedAmount :salvage="salvage" class="owned-amount" />
+              <GearProgressBar :gear="salvage" class="mt-2" />
+            </div>
+            <ul v-if="showRequiredByUnit">
+              <li v-for="unit in salvage.neededBy" :key="unit.id">
+                <router-link
+                  :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+                  >{{ unit.name }}</router-link
+                >
+              </li>
+            </ul>
+            <div class="text-center estimation">
+              <Timestamp
+                :displayText="`${timeEstimation(salvage)} days`"
+                label="Estimated Completion:"
+                :title="$filters.daysFromNow(timeEstimation(salvage))"
+                displayClasses="d-inline"
+              />
+            </div>
+            <div
+              class="btn-group btn-group-sm d-block text-center"
+              role="group"
+            >
+              <button
+                type="button"
+                class="btn btn-warning text-dark"
+                title="Mark this salvage as irrelevant, removing it from the planner estimation"
+                @click="markRelevant(salvage, true)"
+              >
+                <i class="fas fa-toilet"></i>
+              </button>
+            </div>
+          </div>
+        </tr>
+      </tbody>
+    </table>
+    <table
+      class="table table-bordered table-dark table-sm table-striped mb-0 show-on-desktop"
+    >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
           <th width="20%">
@@ -11,7 +122,7 @@
             <input
               class="form-control form-control-sm mx-auto my-1 w-75"
               placeholder="Search"
-              v-model="searchName"
+              v-model="searchText"
             />
           </th>
           <th
@@ -44,21 +155,29 @@
             <GearIcon :gear="salvage" />
           </td>
           <td>
-            <button
-              class="btn btn-sm btn-info m-auto d-block"
-              data-bs-toggle="collapse"
-              :href="`#locations-${salvage.id}`"
+            <div
+              v-if="gearLocation(salvage.lookupMissionList).length <= 0"
+              class="text-center"
             >
-              Show/Hide Locations
-            </button>
-            <ul class="m-0 collapse" :id="`locations-${salvage.id}`">
-              <li
-                v-for="(l, index) in gearLocation(salvage.lookupMissionList)"
-                :key="index"
+              No known farmable locations.
+            </div>
+            <template v-else>
+              <button
+                class="btn btn-sm btn-info m-auto d-block"
+                data-bs-toggle="collapse"
+                :href="`#locations-${salvage.id}`"
               >
-                {{ l }}
-              </li>
-            </ul>
+                Show/Hide Locations
+              </button>
+              <ul class="m-0 collapse" :id="`locations-${salvage.id}`">
+                <li
+                  v-for="(l, index) in gearLocation(salvage.lookupMissionList)"
+                  :key="index"
+                >
+                  {{ l }}
+                </li>
+              </ul>
+            </template>
           </td>
           <td>
             <OwnedAmount :salvage="salvage" />
@@ -75,7 +194,13 @@
             </ul>
           </td>
           <td class="text-center">
-            {{ $filters.dateTime(timeEstimation(salvage)) }}
+            <Timestamp
+              :displayText="`${timeEstimation(salvage)} day${
+                timeEstimation(salvage) === 1 ? '' : 's'
+              }`"
+              :title="$filters.daysFromNow(timeEstimation(salvage))"
+              displayClasses="d-inline"
+            />
           </td>
           <td>
             <div
@@ -95,7 +220,9 @@
         </tr>
       </tbody>
     </table>
-    <table class="table table-bordered table-dark table-sm table-striped">
+    <table
+      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
+    >
       <thead
         class="c-pointer sticky-header"
         data-bs-toggle="collapse"
@@ -142,10 +269,11 @@ import { Gear } from "../../types/gear";
 import OwnedAmount from "./gearOwned.vue";
 import GearIcon from "./gearIcon.vue";
 import GearProgressBar from "./gearProgressBar.vue";
+import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
   name: "GearTable",
-  components: { OwnedAmount, GearIcon, GearProgressBar },
+  components: { OwnedAmount, GearIcon, GearProgressBar, Timestamp },
   props: {
     gearList: {
       required: true,
@@ -158,9 +286,9 @@ export default defineComponent({
   },
   data() {
     return {
-      sortDir: "",
-      sortMethod: "",
-      searchName: "",
+      sortDir: "asc",
+      sortMethod: "name",
+      searchText: "",
     };
   },
   computed: {
@@ -180,7 +308,7 @@ export default defineComponent({
             }
           }
           const name = gear.name.toLowerCase().replace(/\s/g, "");
-          const compare = this.searchName.toLowerCase().replace(/\s/g, "");
+          const compare = this.searchText.toLowerCase().replace(/\s/g, "");
           return name.includes(compare);
         })
         .sort((a: Gear, b: Gear) => {
@@ -233,7 +361,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("gear", ["saveOwnedCount"]),
-    sortBy(type: string): void {
+    sortBy(type: string, changeDirection: boolean = true): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
       } else {
@@ -258,3 +386,36 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+@import "../../styles/variables.scss";
+
+.gear-row {
+  > * {
+    padding: 0.5rem 1rem;
+
+    &:not(:last-child) {
+      border-bottom: solid $gray-5 1px;
+    }
+  }
+}
+
+.sort-methods {
+  @media only screen and (min-width: 768px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.show-on-mobile {
+  tr:not(:last-child) {
+    border-bottom: black solid 3px;
+  }
+}
+
+.estimation {
+  ::v-deep(.display-container) {
+    display: inline-block;
+  }
+}
+</style>

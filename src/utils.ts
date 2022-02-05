@@ -1,3 +1,4 @@
+import moment from "moment";
 import store from "./vuex-store/store";
 
 export function unvue(data: any) {
@@ -17,4 +18,8 @@ export function setupEvents(el: HTMLElement, name: string) {
   el.addEventListener("shown.bs.collapse", () => {
     store.dispatch("toggleCollapse", { name, hidden: false });
   });
+}
+
+export function formatDate(date: any, format: string) {
+  return moment(date).format(format);
 }

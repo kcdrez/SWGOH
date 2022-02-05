@@ -19,13 +19,16 @@ import LastUpdated from "./components/lastUpdated.vue";
 const app = createApp(App);
 
 app.config.globalProperties.$filters = {
-  dateTime(value: number): string {
+  dateTime(value: number, format: string = "MMM D, YYYY"): string {
     if (value <= 0) {
       return "-";
     } else {
-      const date = moment().add(value, "days").format("MM-DD-YYYY");
+      const date = moment().add(value, "days").format(format);
       return `${value} Days (${date})`;
     }
+  },
+  daysFromNow(days: number, format: string = "MMM D, YYYY"): string {
+    return moment().add(days, "days").format(format);
   },
 };
 
