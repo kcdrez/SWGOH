@@ -52,9 +52,11 @@ const store = {
         if (remaining > 0) {
           const totalEnergy =
             120 + 45 + 120 * state.refreshes.cantina - state.energy.cantina;
-          const triesPerDay = totalEnergy / mat.location.energy;
-          const amountPerDay = triesPerDay * mat.dropRate;
-          return Math.round(remaining / amountPerDay);
+          const triesPerDay = mat.location.energy
+            ? totalEnergy / mat.location.energy
+            : 0;
+          const amountPerDay = mat.dropRate ? triesPerDay * mat.dropRate : 0;
+          return amountPerDay === 0 ? -1 : Math.round(remaining / amountPerDay);
         } else {
           return 0;
         }

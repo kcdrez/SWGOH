@@ -65,8 +65,11 @@
             </ul>
           </td>
           <td class="text-center align-middle">
-            {{ timeEstimation(mat, targetLevels) }}
-            Days
+            <div v-if="timeEstimation(mat, targetLevels) >= 0">
+              {{ timeEstimation(mat, targetLevels) }}
+              Days
+            </div>
+            <div v-else>-</div>
           </td>
         </tr>
       </tbody>
