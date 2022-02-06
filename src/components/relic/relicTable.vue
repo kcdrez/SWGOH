@@ -61,14 +61,16 @@
                 class="mt-2"
               />
             </div>
-            <ul v-if="showRequiredByUnit">
-              <li v-for="unit in mat.neededBy" :key="unit.id">
-                <router-link
-                  :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-                  >{{ unit.name }}</router-link
-                >
-              </li>
-            </ul>
+            <div v-if="showRequiredByUnit">
+              <ul class="text-center p-0 my-2">
+                <li v-for="unit in mat.neededBy" :key="unit.id">
+                  <router-link
+                    :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+                    >{{ unit.name }}</router-link
+                  >
+                </li>
+              </ul>
+            </div>
             <div class="text-center estimation">
               <Timestamp
                 v-if="timeEstimation(mat, targetLevels) >= 0"
