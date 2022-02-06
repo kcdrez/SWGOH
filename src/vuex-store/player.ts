@@ -35,10 +35,12 @@ const store = {
       const timezone =
         momentTz.tz.zone(fullTimezone)?.abbr(timezoneOffset) || "";
       return {
-        fromNow: moment(state.player?.updated).fromNow(),
+        fromNow: moment.utc(state.player?.updated).local().fromNow(),
         timestamp:
-          moment(state.player?.updated).format("MMM D, YYYY @H:mma ") +
-          timezone,
+          moment
+            .utc(state.player?.updated)
+            .local()
+            .format("MMM D, YYYY @h:mma ") + timezone,
       };
     },
   },
