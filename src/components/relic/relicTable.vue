@@ -1,6 +1,91 @@
 <template>
   <div>
-    <table class="table table-bordered table-dark table-sm table-striped">
+    <table
+      class="table table-bordered table-dark table-sm table-striped show-on-mobile"
+    >
+      <thead>
+        <tr class="text-center align-middle">
+          <th>
+            <div>Relic Info</div>
+            <div class="sort-methods">
+              <div class="input-group input-group-sm my-2">
+                <span class="input-group-text">Sort By:</span>
+                <select
+                  class="form-control"
+                  @change="sortMethod = $event.target.value"
+                >
+                  <option value="name">Name</option>
+                  <option value="location">Location</option>
+                  <option value="progress">Progress</option>
+                  <option value="time">Time Remaining</option>
+                </select>
+              </div>
+              <div class="input-group input-group-sm my-2">
+                <span class="input-group-text">Sort Direction:</span>
+                <select
+                  class="form-control"
+                  @change="sortDir = $event.target.value"
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </div>
+              <div class="input-group input-group-sm my-2">
+                <span class="input-group-text">Search:</span>
+                <input
+                  class="form-control"
+                  v-model="searchText"
+                  placeholder="Search by name"
+                />
+              </div>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="mat in filteredRelics" :key="mat.id">
+          <div class="relic-row">
+            <RelicIcon :item="mat" class="text-center" />
+            <div class="text-center">
+              {{ mat.location.node || "No known farmable locations." }}
+            </div>
+            <div class="py-3">
+              <OwnedAmount
+                class="owned-amount"
+                :item="mat"
+                :needed="amountNeeded(mat, targetLevels)"
+              />
+              <RelicProgressBar
+                :item="mat"
+                :amountNeeded="amountNeeded(mat, targetLevels)"
+                class="mt-2"
+              />
+            </div>
+            <ul v-if="showRequiredByUnit">
+              <li v-for="unit in mat.neededBy" :key="unit.id">
+                <router-link
+                  :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+                  >{{ unit.name }}</router-link
+                >
+              </li>
+            </ul>
+            <div class="text-center estimation">
+              <Timestamp
+                v-if="timeEstimation(mat, targetLevels) >= 0"
+                :displayText="`${timeEstimation(mat, targetLevels)} days`"
+                label="Estimated Completion:"
+                :title="$filters.daysFromNow(timeEstimation(mat, targetLevels))"
+                displayClasses="d-inline"
+              />
+              <div v-else>-</div>
+            </div>
+          </div>
+        </tr>
+      </tbody>
+    </table>
+    <table
+      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
+    >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
           <th :width="showRequiredByUnit ? '15%' : '20%'">
@@ -11,7 +96,7 @@
             <input
               class="form-control form-control-sm mx-auto my-1 w-75"
               placeholder="Search"
-              v-model="searchName"
+              v-model="searchText"
             />
           </th>
           <th
@@ -85,10 +170,11 @@ import { Relic } from "../../types/relic";
 import OwnedAmount from "./relicOwned.vue";
 import RelicIcon from "./relicIcon.vue";
 import RelicProgressBar from "./relicProgressBar.vue";
+import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
   name: "RelicTable",
-  components: { OwnedAmount, RelicIcon, RelicProgressBar },
+  components: { OwnedAmount, RelicIcon, RelicProgressBar, Timestamp },
   props: {
     relicList: {
       required: true,
@@ -110,9 +196,9 @@ export default defineComponent({
   },
   data() {
     return {
-      sortMethod: "",
+      sortMethod: "name",
       sortDir: "asc",
-      searchName: "",
+      searchText: "",
     };
   },
   computed: {
@@ -173,7 +259,7 @@ export default defineComponent({
         .filter((relic: Relic) => {
           const name = relic.name.toLowerCase().replace(/\s/g, "");
           const id = relic.id.toLowerCase().replace(/\s/g, "");
-          const compare = this.searchName.toLowerCase().replace(/\s/g, "");
+          const compare = this.searchText.toLowerCase().replace(/\s/g, "");
           return name.includes(compare) || id.includes(compare);
         });
     },
@@ -197,3 +283,36 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+@import "../../styles/variables.scss";
+
+.relic-row {
+  > * {
+    padding: 0.5rem 1rem;
+
+    &:not(:last-child) {
+      border-bottom: solid $gray-5 1px;
+    }
+  }
+}
+
+.sort-methods {
+  @media only screen and (min-width: 768px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.show-on-mobile {
+  tr:not(:last-child) {
+    border-bottom: black solid 3px;
+  }
+}
+
+.estimation {
+  ::v-deep(.display-container) {
+    display: inline-block;
+  }
+}
+</style>

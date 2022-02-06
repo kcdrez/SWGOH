@@ -72,7 +72,7 @@
                 </li>
               </ul>
             </div>
-            <div>
+            <div class="py-3">
               <OwnedAmount :salvage="salvage" class="owned-amount" />
               <GearProgressBar :gear="salvage" class="mt-2" />
             </div>

@@ -15,7 +15,7 @@
       <template v-if="currentGearLevel(unit) < maxGearLevel">
         <div class="gear-header">
           <div class="current-level">
-            Current Level: <b>{{ currentGearLevel(unit) }}</b>
+            Current Gear Level: <b>{{ currentGearLevel(unit) }}</b>
           </div>
           <div class="target-level">
             Target Level:
@@ -48,7 +48,7 @@
             >
             <span
               class="input-group-text c-help refresh-text"
-              title="How many times you refresh the energy using crystals"
+              title="How many times you refresh the energy using crystals per day"
               >Daily Refreshes:</span
             >
             <input
@@ -80,7 +80,7 @@
             >
             <span
               class="input-group-text c-help refresh-text"
-              title="How many times you refresh the energy using crystals"
+              title="How many times you refresh the fleet energy using crystals per day"
               >Daily Refreshes:</span
             >
             <input
@@ -164,12 +164,11 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapGetters, mapActions } from "vuex";
-import moment from "moment";
 
 import { UpdateItem } from "../../types/planner";
 import GearTable from "./gearTable.vue";
 import { loadingState } from "../../types/loading";
-import { setupEvents, formatDate } from "../../utils";
+import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
@@ -308,6 +307,8 @@ export default defineComponent({
   .energy-text {
     background: $dark;
     color: $light;
+    width: 130px;
+    display: block;
   }
 
   .refresh-text,
@@ -394,10 +395,5 @@ table {
   &:hover {
     color: $primary-light-2;
   }
-}
-
-.energy-text {
-  width: 130px;
-  display: block;
 }
 </style>

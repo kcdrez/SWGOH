@@ -84,9 +84,10 @@ const store = {
         return (Object.values(state.relicConfig) as Array<Relic>).reduce(
           (acc, el) => {
             const relicLevel = isUnit(unit) ? unit.relic_tier : 0;
-            return (
-              acc + getters.timeEstimation(el, [{ level: relicLevel, target }])
-            );
+            const days = getters.timeEstimation(el, [
+              { level: relicLevel, target },
+            ]);
+            return days > 0 ? acc + days : acc;
           },
           0
         );
