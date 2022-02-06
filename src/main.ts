@@ -30,6 +30,15 @@ app.config.globalProperties.$filters = {
   daysFromNow(days: number, format: string = "MMM D, YYYY"): string {
     return moment().add(days, "days").format(format);
   },
+  pluralText(days: number, single: string, plural: string = "") {
+    let text = days.toString();
+    if (days === 1) {
+      text += ` ${single}`;
+    } else {
+      text += plural === "" ? ` ${single}s` : ` ${plural}`;
+    }
+    return text;
+  },
 };
 
 app

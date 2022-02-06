@@ -130,7 +130,7 @@ const store = {
               }
 
               if (missionEnergy < energy) {
-                const dropRate = 0.2;
+                const dropRate = 0.2; //todo
                 const refreshes = ["C01D", "C01L"].includes(campaignId)
                   ? state.refreshes.standard
                   : state.refreshes.fleet;
@@ -153,7 +153,7 @@ const store = {
               totalDays = remaining / (60 / 7);
             }
           });
-          return Math.round(totalDays);
+          return Math.ceil(totalDays);
         } else {
           return 0;
         }

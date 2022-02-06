@@ -197,9 +197,7 @@
           </td>
           <td class="text-center">
             <Timestamp
-              :displayText="`${timeEstimation(salvage)} day${
-                timeEstimation(salvage) === 1 ? '' : 's'
-              }`"
+              :displayText="$filters.pluralText(timeEstimation(salvage), 'day')"
               :title="$filters.daysFromNow(timeEstimation(salvage))"
               displayClasses="d-inline"
             />

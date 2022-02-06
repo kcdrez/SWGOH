@@ -27,9 +27,7 @@
         class="time-estimate"
         label="Estimated completion:"
         :title="$filters.daysFromNow(totalDays(unit))"
-        :displayText="`${totalDays(unit)} day${
-          totalDays(unit) === 1 ? '' : 's'
-        }`"
+        :displayText="$filters.pluralText(totalDays(unit), 'day')"
         displayClasses="d-inline"
       />
       <div class="cantina-energy-container">
