@@ -112,7 +112,9 @@ nav.navbar-light {
   .input-group-text,
   input,
   button,
-  button:disabled {
+  button:disabled,
+  select,
+  select:disabled {
     border: 1px solid $dark;
   }
 }

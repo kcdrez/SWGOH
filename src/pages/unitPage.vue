@@ -7,6 +7,7 @@
     <Loading :state="requestState" message="Loading Unit Data" size="lg">
       <LastUpdated />
       <img class="d-block m-auto" :src="unit?.image" />
+      <h4 class="text-center">{{ unit.name }}</h4>
       <button
         class="btn btn-secondary text-dark mx-auto my-2 d-block"
         @click="add()"

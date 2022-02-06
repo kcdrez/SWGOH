@@ -13,85 +13,93 @@
     </div>
     <div id="gearSection" class="collapse" ref="gearSection">
       <template v-if="currentGearLevel(unit) < maxGearLevel">
-        <h3 class="gear-header">
-          Gear Needed to get {{ unit.name }} from Gear Level
-          {{ currentGearLevel(unit) }} to
-          <select v-model.number="gearTarget">
-            <option
-              v-for="num in gearOptions(unit.gear_level)"
-              :value="num"
-              :key="num"
-            >
-              Gear {{ num }}
-            </option>
-          </select>
-          :
-        </h3>
-        <h3>
-          It will take approximately {{ totalDays(unit) }} day{{
-            totalDays(unit) === 1 ? "" : "s"
-          }}
-          to get to Gear Level {{ gearTarget }}.
-        </h3>
-        <div class="input-group input-group-sm w-50">
-          <span
-            class="input-group-text c-help energy-text"
-            title="Energy used on Light and Dark side tables"
-            >Standard Energy:</span
-          >
-          <span
-            class="input-group-text c-help"
-            title="How many times you refresh the energy using crystals"
-            >Daily Refreshes:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="refreshesStandard"
-            min="0"
-          />
-          <span
-            class="input-group-text c-help"
-            title="How much of your daily energy used for farming other things (i.e. character shards)"
-            >Daily Energy Used:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="energySpentStandard"
-            min="0"
-            :max="145 + refreshesStandard * 120 + 135"
-          />
+        <div class="gear-header">
+          <div class="current-level">
+            Current Gear Level: <b>{{ currentGearLevel(unit) }}</b>
+          </div>
+          <div class="target-level">
+            Target Level:
+            <select v-model.number="gearTarget">
+              <option
+                v-for="num in gearOptions(unit.gear_level)"
+                :value="num"
+                :key="num"
+              >
+                Gear {{ num }}
+              </option>
+            </select>
+          </div>
         </div>
-        <div class="input-group input-group-sm my-2 w-50">
-          <span
-            class="input-group-text c-help energy-text"
-            title="Energy used on fleet/ship nodes"
-            >Fleet Energy:</span
-          >
-          <span
-            class="input-group-text c-help"
-            title="How many times you refresh the energy using crystals"
-            >Daily Refreshes:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="refreshesFleet"
-            min="0"
-          />
-          <span
-            class="input-group-text c-help"
-            title="How much of your daily energy used for farming other things (e.g. character shards)"
-            >Daily Energy Used:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="energySpentFleet"
-            min="0"
-            :max="145 + refreshesFleet * 120 + 45"
-          />
+        <Timestamp
+          class="time-estimate"
+          label="Estimated completion:"
+          :title="$filters.daysFromNow(totalDays(unit))"
+          :displayText="$filters.pluralText(totalDays(unit), 'day')"
+          displayClasses="d-inline"
+        />
+        <div class="standard-energy-container">
+          <div class="input-group input-group-sm">
+            <span
+              class="input-group-text c-help energy-text"
+              title="Energy used on Light and Dark side tables"
+              >Standard Energy:</span
+            >
+            <span
+              class="input-group-text c-help refresh-text"
+              title="How many times you refresh the energy using crystals per day"
+              >Daily Refreshes:</span
+            >
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="refreshesStandard"
+              min="0"
+            />
+            <span
+              class="input-group-text c-help energy-spent-text"
+              title="How much of your daily energy used for farming other things (i.e. character shards)"
+              >Daily Energy Used:</span
+            >
+            <input
+              class="form-control energy-spent-input"
+              type="number"
+              v-model.number="energySpentStandard"
+              min="0"
+              :max="145 + refreshesStandard * 120 + 135"
+            />
+          </div>
+        </div>
+        <div class="fleet-energy-container">
+          <div class="input-group input-group-sm">
+            <span
+              class="input-group-text c-help energy-text"
+              title="Energy used on fleet/ship nodes"
+              >Fleet Energy:</span
+            >
+            <span
+              class="input-group-text c-help refresh-text"
+              title="How many times you refresh the fleet energy using crystals per day"
+              >Daily Refreshes:</span
+            >
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="refreshesFleet"
+              min="0"
+            />
+            <span
+              class="input-group-text c-help energy-spent-text"
+              title="How much of your daily energy used for farming other things (e.g. character shards)"
+              >Daily Energy Used:</span
+            >
+            <input
+              class="form-control energy-spent-input"
+              type="number"
+              v-model.number="energySpentFleet"
+              min="0"
+              :max="145 + refreshesFleet * 120 + 45"
+            />
+          </div>
         </div>
         <GearTable :gearList="fullSalvageList(this.unit, this.gearTarget)" />
       </template>
@@ -159,10 +167,11 @@ import { UpdateItem } from "../../types/planner";
 import GearTable from "./gearTable.vue";
 import { loadingState } from "../../types/loading";
 import { setupEvents } from "../../utils";
+import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
   name: "GearPlannerComponent",
-  components: { GearTable },
+  components: { GearTable, Timestamp },
   computed: {
     ...mapState("gear", ["maxGearLevel"]),
     ...mapState("unit", ["unit"]),
@@ -246,10 +255,110 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
 
+.gear-header,
+.time-estimate {
+  font-size: 1.25rem;
+  margin: 0.25rem 0;
+}
+
 .gear-header {
   select {
     width: 115px;
-    font-size: 1.25rem;
+  }
+
+  @media only screen and (min-width: 600px) and (max-width: 1200px) {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  @media only screen and (min-width: 1200px) {
+    display: flex;
+    justify-content: center;
+
+    .target-level,
+    .current-level {
+      margin: 0 2rem;
+    }
+  }
+
+  @media only screen and (max-width: 600px) {
+    text-align: center;
+
+    .target-level {
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+.time-estimate {
+  text-align: center;
+
+  ::v-deep(span) {
+    font-weight: bold;
+  }
+}
+
+.standard-energy-container,
+.fleet-energy-container {
+  margin-bottom: 1rem;
+
+  .energy-text {
+    background: $dark;
+    color: $light;
+    width: 130px;
+    display: block;
+  }
+
+  .refresh-text,
+  .energy-spent-text {
+    background: $gray-4;
+    color: $light;
+  }
+
+  @media only screen and (min-width: 1300px) {
+    width: 48%;
+    display: inline-block;
+  }
+
+  @media only screen and (max-width: 680px) {
+    .input-group {
+      display: block;
+
+      * {
+        width: 100%;
+      }
+
+      .energy-text {
+        border-radius: 0.2rem 0.2rem 0 0 !important;
+      }
+      .energy-spent-input {
+        border-radius: 0 0 0.2rem 0.2rem !important;
+      }
+
+      .refresh-text,
+      .energy-spent-text,
+      .energy-spent-input,
+      input {
+        display: block;
+        border-top: none;
+        text-align: center;
+        //everything except the first element is off so the following is used to compensate :shrug:
+        position: relative;
+        left: 1px;
+      }
+    }
+  }
+}
+
+.standard-energy-container {
+  @media only screen and (min-width: 1300px) {
+    margin-right: 1rem;
+  }
+}
+
+.fleet-energy-container {
+  @media only screen and (min-width: 1300px) {
+    margin-left: 1rem;
   }
 }
 
@@ -284,10 +393,5 @@ table {
   &:hover {
     color: $primary-light-2;
   }
-}
-
-.energy-text {
-  width: 130px;
-  display: block;
 }
 </style>
