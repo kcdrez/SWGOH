@@ -220,9 +220,7 @@
         </tr>
       </tbody>
     </table>
-    <table
-      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
-    >
+    <table class="table table-bordered table-dark table-sm table-striped">
       <thead
         class="c-pointer sticky-header"
         data-bs-toggle="collapse"
@@ -240,7 +238,7 @@
           <td :colspan="showRequiredByUnit ? '5' : '4'" class="text-center">
             <GearIcon :gear="salvage" />
           </td>
-          <td>
+          <td class="align-middle">
             <div
               class="btn-group btn-group-sm d-block text-center"
               role="group"
