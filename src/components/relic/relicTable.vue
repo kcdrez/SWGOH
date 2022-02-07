@@ -47,6 +47,7 @@
           <div class="swgoh-row">
             <RelicIcon :item="mat" class="text-center" />
             <div class="text-center">
+              Acquired at:
               {{ mat.location.node || "No known farmable locations." }}
             </div>
             <div class="py-3">
@@ -61,8 +62,9 @@
                 class="mt-2"
               />
             </div>
-            <div v-if="showRequiredByUnit">
-              <ul class="text-center p-0 my-2">
+            <div v-if="showRequiredByUnit && mat?.neededBy">
+              <div class="text-center">Required By:</div>
+              <ul class="text-center p-0 mt-1 mb-2">
                 <li v-for="unit in mat.neededBy" :key="unit.id">
                   <router-link
                     :to="{ name: 'UnitPage', params: { unitId: unit.id } }"

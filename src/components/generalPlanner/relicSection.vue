@@ -32,17 +32,21 @@ export default defineComponent({
   computed: {
     ...mapGetters("planner", ["fullUnitList", "relicTarget"]),
     ...mapState("relic", ["relicConfig"]),
+    ...mapGetters("relic", ["currentRelicLevel"]),
     fullRelicList(): Relic[] {
       const list: Relic[] = unvue(Object.values(this.relicConfig));
       this.fullUnitList.forEach((unit: Unit) => {
-        const level = unit?.relic_tier < 0 ? 0 : unit.relic_tier;
+        const level = this.currentRelicLevel(unit);
         const target = this.relicTarget(unit.id);
+
         if (level < target) {
-          list.forEach((x) => {
-            if (x.neededBy) {
-              x.neededBy.push({ name: unit.name, id: unit.id });
-            } else {
-              x.neededBy = [{ name: unit.name, id: unit.id }];
+          list.forEach((relic: Relic) => {
+            if (relic.amount[target] > 0) {
+              if (relic.neededBy) {
+                relic.neededBy.push({ name: unit.name, id: unit.id });
+              } else {
+                relic.neededBy = [{ name: unit.name, id: unit.id }];
+              }
             }
           });
         }
@@ -52,7 +56,7 @@ export default defineComponent({
     relicTargetLevels(): any[] {
       const list: any[] = [];
       this.fullUnitList.forEach((unit: Unit) => {
-        const level = unit?.relic_tier < 0 ? 0 : unit.relic_tier;
+        const level = this.currentRelicLevel(unit);
         const target = this.relicTarget(unit.id);
         list.push({ level, target });
       });

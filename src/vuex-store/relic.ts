@@ -28,6 +28,15 @@ const store = {
     energy: { cantina: 0 },
   },
   getters: {
+    currentRelicLevel(_state: State) {
+      return (unit: Unit): number => {
+        if (!unit?.relic_tier) {
+          return 0;
+        } else {
+          return unit.relic_tier < 0 ? 0 : unit.relic_tier;
+        }
+      };
+    },
     relicOptions(_state: State) {
       return (relicLevel: number): number[] => {
         const list = [];
