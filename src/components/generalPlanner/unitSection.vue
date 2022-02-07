@@ -318,12 +318,12 @@ export default defineComponent({
     ...mapGetters("gear", {
       gearOptions: "gearOptions",
       gearTotalDays: "totalDays",
+      currentGearLevel: "currentGearLevel",
     }),
     ...mapGetters("relic", {
       relicOptions: "relicOptions",
       relicTotalDays: "totalDays",
     }),
-    ...mapGetters("unit", ["currentGearLevel"]),
     ...mapState("gear", ["maxGearLevel"]),
   },
   methods: {

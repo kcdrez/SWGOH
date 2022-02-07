@@ -45,6 +45,18 @@ const store = {
     maxGearLevel, //todo move to just exported from the types file instead of being in the store
   },
   getters: {
+    currentGearLevel(_state: State, _getters: any) {
+      return (unit: Unit | UnitBasic): number => {
+        if (isUnit(unit)) {
+          return (
+            unit.gear_level +
+            unit.gear.filter((x: any) => x.is_obtained).length / 10
+          );
+        } else {
+          return 0;
+        }
+      };
+    },
     gearLocation(_state: State) {
       return (missions: Mission[]): string[] => {
         const locations: string[] = [];

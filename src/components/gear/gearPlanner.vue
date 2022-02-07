@@ -109,8 +109,12 @@ export default defineComponent({
   computed: {
     ...mapState("gear", ["maxGearLevel"]),
     ...mapState("unit", ["unit"]),
-    ...mapGetters("gear", ["gearOptions", "fullSalvageList", "totalDays"]),
-    ...mapGetters("unit", ["currentGearLevel"]),
+    ...mapGetters("gear", [
+      "gearOptions",
+      "fullSalvageList",
+      "totalDays",
+      "currentGearLevel",
+    ]),
     ...mapGetters(["someLoading"]),
     ...mapState(["collapseSections"]),
     requestState(): loadingState {
