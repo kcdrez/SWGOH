@@ -118,7 +118,7 @@
         </tbody>
       </table>
       <table
-        class="table table-bordered table-dark table-sm table-striped m-0 show-on-mobile"
+        class="table table-bordered table-dark table-sm table-striped m-0 show-on-mobile swgoh-table"
       >
         <thead>
           <tr class="text-center align-middle">
@@ -162,7 +162,7 @@
         </thead>
         <tbody>
           <tr v-for="unit in fullUnitList" :key="unit.id">
-            <div class="unit-row">
+            <div class="swgoh-row">
               <div class="text-center">
                 <router-link
                   :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
@@ -210,7 +210,7 @@
                   !unit.is_ship
                 "
               >
-                <div class="text-center">
+                <div class="estimation">
                   <Timestamp
                     :displayText="
                       $filters.pluralText(gearTotalDays(unit), 'day')
@@ -220,7 +220,7 @@
                     displayClasses="d-inline"
                   />
                 </div>
-                <div class="text-center">
+                <div class="estimation">
                   <Timestamp
                     :displayText="
                       $filters.pluralText(relicTotalDays(unit), 'day')
@@ -231,7 +231,7 @@
                   />
                 </div>
               </template>
-              <div class="text-center" v-if="!unit.is_ship">
+              <div class="estimation" v-if="!unit.is_ship">
                 <Timestamp
                   :displayText="
                     $filters.pluralText(
@@ -363,15 +363,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
 
-.unit-row {
-  > * {
-    padding: 0.5rem 1rem;
-
-    &:not(:last-child) {
-      border-bottom: solid $gray-5 1px;
-    }
-  }
-
+.swgoh-row {
   .target-container {
     select {
       margin: 0.5rem 0;
@@ -391,19 +383,6 @@ export default defineComponent({
         min-width: 125px;
       }
     }
-  }
-}
-
-.sort-methods {
-  @media only screen and (min-width: 768px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-.show-on-mobile {
-  tr:not(:last-child) {
-    border-bottom: black solid 3px;
   }
 }
 </style>

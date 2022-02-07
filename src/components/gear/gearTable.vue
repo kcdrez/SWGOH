@@ -2,7 +2,7 @@
   <div>
     <template v-if="filteredSalvageList.length > 0">
       <table
-        class="table table-bordered table-dark table-sm table-striped mb-0 show-on-mobile"
+        class="table table-bordered table-dark table-sm table-striped mb-0 show-on-mobile swgoh-table"
       >
         <thead>
           <tr class="text-center align-middle">
@@ -45,7 +45,7 @@
         </thead>
         <tbody>
           <tr v-for="salvage in filteredSalvageList" :key="salvage.id">
-            <div class="gear-row">
+            <div class="swgoh-row">
               <GearIcon :gear="salvage" class="text-center" />
               <div
                 v-if="gearLocation(salvage.lookupMissionList).length <= 0"
@@ -89,7 +89,7 @@
                   </li>
                 </ul>
               </div>
-              <div class="text-center estimation">
+              <div class="estimation">
                 <Timestamp
                   :displayText="
                     $filters.pluralText(timeEstimation(salvage), 'day')
@@ -407,35 +407,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
-.gear-row {
-  > * {
-    padding: 0.5rem 1rem;
-
-    &:not(:last-child) {
-      border-bottom: solid $gray-5 1px;
-    }
-  }
-}
-
-.sort-methods {
-  @media only screen and (min-width: 768px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-.show-on-mobile {
-  tr:not(:last-child) {
-    border-bottom: black solid 3px;
-  }
-}
-
-.estimation {
-  ::v-deep(.display-container) {
-    display: inline-block;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-mobile"
+      class="table table-bordered table-dark table-sm table-striped show-on-mobile swgoh-table"
     >
       <thead>
         <tr class="text-center align-middle">
@@ -44,7 +44,7 @@
       </thead>
       <tbody>
         <tr v-for="mat in filteredRelics" :key="mat.id">
-          <div class="relic-row">
+          <div class="swgoh-row">
             <RelicIcon :item="mat" class="text-center" />
             <div class="text-center">
               {{ mat.location.node || "No known farmable locations." }}
@@ -71,7 +71,7 @@
                 </li>
               </ul>
             </div>
-            <div class="text-center estimation">
+            <div class="estimation">
               <Timestamp
                 v-if="timeEstimation(mat, targetLevels) >= 0"
                 :displayText="
@@ -292,35 +292,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
-.relic-row {
-  > * {
-    padding: 0.5rem 1rem;
-
-    &:not(:last-child) {
-      border-bottom: solid $gray-5 1px;
-    }
-  }
-}
-
-.sort-methods {
-  @media only screen and (min-width: 768px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-.show-on-mobile {
-  tr:not(:last-child) {
-    border-bottom: black solid 3px;
-  }
-}
-
-.estimation {
-  ::v-deep(.display-container) {
-    display: inline-block;
-  }
-}
-</style>
+<style lang="scss" scoped></style>
