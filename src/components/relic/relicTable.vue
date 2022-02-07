@@ -73,22 +73,21 @@
             </div>
             <div class="estimation">
               <Timestamp
-                v-if="timeEstimation(mat, targetLevels) >= 0"
+                :timeLength="timeEstimation(mat, targetLevels)"
                 :displayText="
                   $filters.pluralText(timeEstimation(mat, targetLevels), 'day')
                 "
-                label="Estimated Completion:"
                 :title="$filters.daysFromNow(timeEstimation(mat, targetLevels))"
                 displayClasses="d-inline"
+                label="Estimated Completion:"
               />
-              <div v-else>-</div>
             </div>
           </div>
         </tr>
       </tbody>
     </table>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
+      class="table table-bordered table-dark table-sm table-striped show-on-desktop swgoh-table"
     >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
@@ -154,11 +153,14 @@
             </ul>
           </td>
           <td class="text-center align-middle">
-            <div v-if="timeEstimation(mat, targetLevels) >= 0">
-              {{ timeEstimation(mat, targetLevels) }}
-              Days
-            </div>
-            <div v-else>-</div>
+            <Timestamp
+              :timeLength="timeEstimation(mat, targetLevels)"
+              :displayText="
+                $filters.pluralText(timeEstimation(mat, targetLevels), 'day')
+              "
+              :title="$filters.daysFromNow(timeEstimation(mat, targetLevels))"
+              displayClasses="d-inline"
+            />
           </td>
         </tr>
       </tbody>

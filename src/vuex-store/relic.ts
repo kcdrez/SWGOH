@@ -46,8 +46,8 @@ const store = {
     timeEstimation(state: State, getters: any) {
       return (mat: Relic, arr: { level: number; target: number }[]): number => {
         const owned: number = state.ownedRelics[mat.id] || 0;
-        const totalAmount: number = getters.amountNeeded(mat, arr);
-        const remaining: number = totalAmount - owned;
+        const amountNeeded: number = getters.amountNeeded(mat, arr);
+        const remaining: number = amountNeeded - owned;
 
         if (remaining > 0) {
           const totalEnergy =
@@ -57,6 +57,8 @@ const store = {
             : 0;
           const amountPerDay = mat.dropRate ? triesPerDay * mat.dropRate : 0;
           return amountPerDay === 0 ? -1 : Math.round(remaining / amountPerDay);
+        } else if (amountNeeded === 0 && remaining > 0) {
+          return -1;
         } else {
           return 0;
         }

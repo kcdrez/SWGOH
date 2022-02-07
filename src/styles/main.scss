@@ -102,6 +102,15 @@ button:disabled {
   }
 }
 
+.swgoh-table {
+  .completed {
+    color: $success-light-1;
+  }
+  .unknown {
+    color: $warning;
+  }
+}
+
 .show-on-mobile {
   @media only screen and (min-width: 981px) {
     display: none;
@@ -133,7 +142,8 @@ button:disabled {
         text-align: center;
 
         .display-container {
-          display: block;
+          display: table;
+          margin: auto;
         }
       }
     }

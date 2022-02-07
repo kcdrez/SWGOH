@@ -76,6 +76,7 @@
             </div>
             <div class="estimation" v-if="showUnitName">
               <Timestamp
+                :timeLength="shardTimeEstimation(unit)"
                 :displayText="
                   $filters.pluralText(shardTimeEstimation(unit), 'day')
                 "
@@ -159,6 +160,7 @@
           </td>
           <td class="text-center align-middle" v-if="showUnitName">
             <Timestamp
+              :timeLength="shardTimeEstimation(unit)"
               :displayText="
                 $filters.pluralText(shardTimeEstimation(unit), 'day')
               "

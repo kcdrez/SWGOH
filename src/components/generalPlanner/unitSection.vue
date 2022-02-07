@@ -9,7 +9,7 @@
     </div>
     <div id="unit-section-table" class="collapse" ref="unitSection">
       <table
-        class="table table-bordered table-dark table-sm table-striped m-0 show-on-desktop"
+        class="table table-bordered table-dark table-sm table-striped m-0 show-on-desktop swgoh-table"
       >
         <thead class="sticky-header">
           <tr class="text-center align-middle">
@@ -89,15 +89,37 @@
               </template>
             </td>
             <td class="text-center">
-              {{ $filters.dateTime(gearTotalDays(unit)) }}
+              <Timestamp
+                :timeLength="gearTotalDays(unit)"
+                :displayText="$filters.pluralText(gearTotalDays(unit), 'day')"
+                :title="$filters.daysFromNow(gearTotalDays(unit))"
+                displayClasses="d-inline"
+              />
             </td>
             <td class="text-center">
-              {{ $filters.dateTime(relicTotalDays(unit)) }}
+              <Timestamp
+                :timeLength="relicTotalDays(unit)"
+                :displayText="$filters.pluralText(relicTotalDays(unit), 'day')"
+                :title="$filters.daysFromNow(relicTotalDays(unit))"
+                displayClasses="d-inline"
+              />
             </td>
             <td class="text-center">
-              {{
-                $filters.dateTime(relicTotalDays(unit) + gearTotalDays(unit))
-              }}
+              <Timestamp
+                :timeLength="relicTotalDays(unit) + gearTotalDays(unit)"
+                :displayText="
+                  $filters.pluralText(
+                    relicTotalDays(unit) + gearTotalDays(unit),
+                    'day'
+                  )
+                "
+                :title="
+                  $filters.daysFromNow(
+                    relicTotalDays(unit) + gearTotalDays(unit)
+                  )
+                "
+                displayClasses="d-inline"
+              />
             </td>
             <td>
               <div
@@ -212,6 +234,7 @@
               >
                 <div class="estimation">
                   <Timestamp
+                    :timeLength="gearTotalDays(unit)"
                     :displayText="
                       $filters.pluralText(gearTotalDays(unit), 'day')
                     "
@@ -222,6 +245,7 @@
                 </div>
                 <div class="estimation">
                   <Timestamp
+                    :timeLength="relicTotalDays(unit)"
                     :displayText="
                       $filters.pluralText(relicTotalDays(unit), 'day')
                     "
@@ -233,6 +257,7 @@
               </template>
               <div class="estimation" v-if="!unit.is_ship">
                 <Timestamp
+                  :timeLength="relicTotalDays(unit) + gearTotalDays(unit)"
                   :displayText="
                     $filters.pluralText(
                       relicTotalDays(unit) + gearTotalDays(unit),

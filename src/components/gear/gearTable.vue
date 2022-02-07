@@ -91,6 +91,7 @@
               </div>
               <div class="estimation">
                 <Timestamp
+                  :timeLength="timeEstimation(salvage)"
                   :displayText="
                     $filters.pluralText(timeEstimation(salvage), 'day')
                   "
@@ -117,7 +118,7 @@
         </tbody>
       </table>
       <table
-        class="table table-bordered table-dark table-sm table-striped mb-0 show-on-desktop"
+        class="table table-bordered table-dark table-sm table-striped mb-0 show-on-desktop swgoh-table"
       >
         <thead class="sticky-header">
           <tr class="text-center align-middle">
@@ -204,6 +205,7 @@
             </td>
             <td class="text-center">
               <Timestamp
+                :timeLength="timeEstimation(salvage)"
                 :displayText="
                   $filters.pluralText(timeEstimation(salvage), 'day')
                 "
