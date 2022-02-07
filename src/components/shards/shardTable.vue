@@ -1,7 +1,7 @@
 <template>
   <div>
     <table
-      class="table table-bordered table-dark table-sm table-striped mb-0 show-on-mobile"
+      class="table table-bordered table-dark table-sm table-striped mb-0 show-on-mobile swgoh-table"
     >
       <thead>
         <tr class="text-center align-middle">
@@ -44,7 +44,7 @@
       </thead>
       <tbody>
         <tr v-for="unit in filteredUnitList" :key="unit.id">
-          <div class="gear-row">
+          <div class="swgoh-row">
             <div>
               <UnitIcon
                 :unit="unit"
@@ -74,8 +74,9 @@
             <div>
               <NodesPerDay :unit="unit" />
             </div>
-            <div class="text-center estimation" v-if="showUnitName">
+            <div class="estimation" v-if="showUnitName">
               <Timestamp
+                :timeLength="shardTimeEstimation(unit)"
                 :displayText="
                   $filters.pluralText(shardTimeEstimation(unit), 'day')
                 "
@@ -159,6 +160,7 @@
           </td>
           <td class="text-center align-middle" v-if="showUnitName">
             <Timestamp
+              :timeLength="shardTimeEstimation(unit)"
               :displayText="
                 $filters.pluralText(shardTimeEstimation(unit), 'day')
               "
@@ -291,29 +293,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
 
-.gear-row {
-  > * {
-    padding: 0.5rem 1rem;
-
-    &:not(:last-child) {
-      border-bottom: solid $gray-5 1px;
-    }
-  }
-}
-
-.sort-methods {
-  @media only screen and (min-width: 768px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-.show-on-mobile {
-  tr:not(:last-child) {
-    border-bottom: black solid 3px;
-  }
-}
-
 .show-on-desktop {
   @media only screen and (max-width: 1500px) {
     ::v-deep(.nodes-container) {
@@ -346,12 +325,6 @@ export default defineComponent({
         }
       }
     }
-  }
-}
-
-.estimation {
-  ::v-deep(.display-container) {
-    display: inline-block;
   }
 }
 </style>

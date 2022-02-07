@@ -11,3 +11,5 @@ export interface Relic {
 export type RelicConfigType = {
   [key: string]: Relic;
 };
+
+export const maxRelicLevel = 9;

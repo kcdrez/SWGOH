@@ -102,9 +102,51 @@ button:disabled {
   }
 }
 
+.swgoh-table {
+  .completed {
+    color: $success-light-1;
+  }
+  .unknown {
+    color: $warning;
+  }
+}
+
 .show-on-mobile {
   @media only screen and (min-width: 981px) {
     display: none;
+  }
+
+  &.swgoh-table {
+    tr:not(:last-child) {
+      border-bottom: black solid 3px;
+    }
+    ul {
+      list-style: none;
+    }
+    .sort-methods {
+      @media only screen and (min-width: 768px) {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+    .swgoh-row {
+      > * {
+        padding: 0.5rem 1rem;
+
+        &:not(:last-child) {
+          border-bottom: solid $gray-5 1px;
+        }
+      }
+
+      .estimation {
+        text-align: center;
+
+        .display-container {
+          display: table;
+          margin: auto;
+        }
+      }
+    }
   }
 }
 

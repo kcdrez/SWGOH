@@ -20,21 +20,7 @@ const store = {
     unit: null,
     unitList: [],
   },
-  getters: {
-    currentGearLevel(_state: State, _getters: any) {
-      //move to gear module
-      return (unit: Unit | UnitBasic): number => {
-        if (isUnit(unit)) {
-          return (
-            unit.gear_level +
-            unit.gear.filter((x: any) => x.is_obtained).length / 10
-          );
-        } else {
-          return 0;
-        }
-      };
-    },
-  },
+  getters: {},
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;

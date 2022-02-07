@@ -1,11 +1,11 @@
 import { ActionContext } from "vuex";
 
 import { loadingState } from "../types/loading";
-import { State as RootState } from "./store";
+import { maxGearLevel } from "../types/gear";
+import { maxRelicLevel } from "../types/relic";
 import { ConfigType, UpdateItem } from "../types/planner";
-import { maxGearLevel } from "./gear";
+import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
-import { maxRelicLevel } from "./relic";
 
 interface State {
   requestState: loadingState;

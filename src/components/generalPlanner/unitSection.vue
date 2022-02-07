@@ -9,7 +9,7 @@
     </div>
     <div id="unit-section-table" class="collapse" ref="unitSection">
       <table
-        class="table table-bordered table-dark table-sm table-striped m-0 show-on-desktop"
+        class="table table-bordered table-dark table-sm table-striped m-0 show-on-desktop swgoh-table"
       >
         <thead class="sticky-header">
           <tr class="text-center align-middle">
@@ -89,15 +89,37 @@
               </template>
             </td>
             <td class="text-center">
-              {{ $filters.dateTime(gearTotalDays(unit)) }}
+              <Timestamp
+                :timeLength="gearTotalDays(unit)"
+                :displayText="$filters.pluralText(gearTotalDays(unit), 'day')"
+                :title="$filters.daysFromNow(gearTotalDays(unit))"
+                displayClasses="d-inline"
+              />
             </td>
             <td class="text-center">
-              {{ $filters.dateTime(relicTotalDays(unit)) }}
+              <Timestamp
+                :timeLength="relicTotalDays(unit)"
+                :displayText="$filters.pluralText(relicTotalDays(unit), 'day')"
+                :title="$filters.daysFromNow(relicTotalDays(unit))"
+                displayClasses="d-inline"
+              />
             </td>
             <td class="text-center">
-              {{
-                $filters.dateTime(relicTotalDays(unit) + gearTotalDays(unit))
-              }}
+              <Timestamp
+                :timeLength="relicTotalDays(unit) + gearTotalDays(unit)"
+                :displayText="
+                  $filters.pluralText(
+                    relicTotalDays(unit) + gearTotalDays(unit),
+                    'day'
+                  )
+                "
+                :title="
+                  $filters.daysFromNow(
+                    relicTotalDays(unit) + gearTotalDays(unit)
+                  )
+                "
+                displayClasses="d-inline"
+              />
             </td>
             <td>
               <div
@@ -118,7 +140,7 @@
         </tbody>
       </table>
       <table
-        class="table table-bordered table-dark table-sm table-striped m-0 show-on-mobile"
+        class="table table-bordered table-dark table-sm table-striped m-0 show-on-mobile swgoh-table"
       >
         <thead>
           <tr class="text-center align-middle">
@@ -162,7 +184,7 @@
         </thead>
         <tbody>
           <tr v-for="unit in fullUnitList" :key="unit.id">
-            <div class="unit-row">
+            <div class="swgoh-row">
               <div class="text-center">
                 <router-link
                   :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
@@ -210,8 +232,9 @@
                   !unit.is_ship
                 "
               >
-                <div class="text-center">
+                <div class="estimation">
                   <Timestamp
+                    :timeLength="gearTotalDays(unit)"
                     :displayText="
                       $filters.pluralText(gearTotalDays(unit), 'day')
                     "
@@ -220,8 +243,9 @@
                     displayClasses="d-inline"
                   />
                 </div>
-                <div class="text-center">
+                <div class="estimation">
                   <Timestamp
+                    :timeLength="relicTotalDays(unit)"
                     :displayText="
                       $filters.pluralText(relicTotalDays(unit), 'day')
                     "
@@ -231,8 +255,9 @@
                   />
                 </div>
               </template>
-              <div class="text-center" v-if="!unit.is_ship">
+              <div class="estimation" v-if="!unit.is_ship">
                 <Timestamp
+                  :timeLength="relicTotalDays(unit) + gearTotalDays(unit)"
                   :displayText="
                     $filters.pluralText(
                       relicTotalDays(unit) + gearTotalDays(unit),
@@ -275,6 +300,7 @@ import { mapActions, mapGetters, mapState } from "vuex";
 
 import { UnitPlannerItem, UpdateItem } from "../../types/planner";
 import { Unit } from "../../types/unit";
+import { maxGearLevel } from "../../types/gear";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
 
@@ -286,6 +312,7 @@ export default defineComponent({
       sortDir: "asc",
       sortMethod: "name",
       searchText: "",
+      maxGearLevel,
     };
   },
   computed: {
@@ -293,13 +320,12 @@ export default defineComponent({
     ...mapGetters("gear", {
       gearOptions: "gearOptions",
       gearTotalDays: "totalDays",
+      currentGearLevel: "currentGearLevel",
     }),
     ...mapGetters("relic", {
       relicOptions: "relicOptions",
       relicTotalDays: "totalDays",
     }),
-    ...mapGetters("unit", ["currentGearLevel"]),
-    ...mapState("gear", ["maxGearLevel"]),
   },
   methods: {
     ...mapActions("planner", ["removeUnit"]),
@@ -363,15 +389,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
 
-.unit-row {
-  > * {
-    padding: 0.5rem 1rem;
-
-    &:not(:last-child) {
-      border-bottom: solid $gray-5 1px;
-    }
-  }
-
+.swgoh-row {
   .target-container {
     select {
       margin: 0.5rem 0;
@@ -391,19 +409,6 @@ export default defineComponent({
         min-width: 125px;
       }
     }
-  }
-}
-
-.sort-methods {
-  @media only screen and (min-width: 768px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-.show-on-mobile {
-  tr:not(:last-child) {
-    border-bottom: black solid 3px;
   }
 }
 </style>

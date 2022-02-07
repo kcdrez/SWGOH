@@ -1,7 +1,7 @@
 <template>
   <div>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-mobile"
+      class="table table-bordered table-dark table-sm table-striped show-on-mobile swgoh-table"
     >
       <thead>
         <tr class="text-center align-middle">
@@ -44,9 +44,10 @@
       </thead>
       <tbody>
         <tr v-for="mat in filteredRelics" :key="mat.id">
-          <div class="relic-row">
+          <div class="swgoh-row">
             <RelicIcon :item="mat" class="text-center" />
             <div class="text-center">
+              Acquired at:
               {{ mat.location.node || "No known farmable locations." }}
             </div>
             <div class="py-3">
@@ -61,8 +62,9 @@
                 class="mt-2"
               />
             </div>
-            <div v-if="showRequiredByUnit">
-              <ul class="text-center p-0 my-2">
+            <div v-if="showRequiredByUnit && mat?.neededBy">
+              <div class="text-center">Required By:</div>
+              <ul class="text-center p-0 mt-1 mb-2">
                 <li v-for="unit in mat.neededBy" :key="unit.id">
                   <router-link
                     :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
@@ -71,24 +73,23 @@
                 </li>
               </ul>
             </div>
-            <div class="text-center estimation">
+            <div class="estimation">
               <Timestamp
-                v-if="timeEstimation(mat, targetLevels) >= 0"
+                :timeLength="timeEstimation(mat, targetLevels)"
                 :displayText="
                   $filters.pluralText(timeEstimation(mat, targetLevels), 'day')
                 "
-                label="Estimated Completion:"
                 :title="$filters.daysFromNow(timeEstimation(mat, targetLevels))"
                 displayClasses="d-inline"
+                label="Estimated Completion:"
               />
-              <div v-else>-</div>
             </div>
           </div>
         </tr>
       </tbody>
     </table>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
+      class="table table-bordered table-dark table-sm table-striped show-on-desktop swgoh-table"
     >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
@@ -154,11 +155,14 @@
             </ul>
           </td>
           <td class="text-center align-middle">
-            <div v-if="timeEstimation(mat, targetLevels) >= 0">
-              {{ timeEstimation(mat, targetLevels) }}
-              Days
-            </div>
-            <div v-else>-</div>
+            <Timestamp
+              :timeLength="timeEstimation(mat, targetLevels)"
+              :displayText="
+                $filters.pluralText(timeEstimation(mat, targetLevels), 'day')
+              "
+              :title="$filters.daysFromNow(timeEstimation(mat, targetLevels))"
+              displayClasses="d-inline"
+            />
           </td>
         </tr>
       </tbody>
@@ -292,35 +296,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
-.relic-row {
-  > * {
-    padding: 0.5rem 1rem;
-
-    &:not(:last-child) {
-      border-bottom: solid $gray-5 1px;
-    }
-  }
-}
-
-.sort-methods {
-  @media only screen and (min-width: 768px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-.show-on-mobile {
-  tr:not(:last-child) {
-    border-bottom: black solid 3px;
-  }
-}
-
-.estimation {
-  ::v-deep(.display-container) {
-    display: inline-block;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

@@ -42,20 +42,6 @@ import { loadingState } from "../types/loading";
 export default defineComponent({
   name: "UnitPage",
   components: { GearPlanner, RelicPlanner, ShardPlanner, UnitIcon },
-  data() {
-    return {
-      shards: 0,
-      dropRate: 1,
-      days: 0,
-      date: "",
-      editing: {
-        owned: false,
-      },
-      refreshes: {
-        character: 0,
-      },
-    };
-  },
   computed: {
     ...mapState("unit", ["unit"]),
     ...mapState("planner", ["unitList"]),

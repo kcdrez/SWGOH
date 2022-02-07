@@ -1,6 +1,12 @@
 import { ActionContext } from "vuex";
 
-import { Gear, Mission, ConfigType, OwnedCount } from "../types/gear";
+import {
+  Gear,
+  Mission,
+  ConfigType,
+  OwnedCount,
+  maxGearLevel,
+} from "../types/gear";
 import {
   difficultyIds,
   tableIds,
@@ -14,8 +20,6 @@ import { isUnit, Unit, UnitBasic, UnitTier } from "../types/unit";
 import { apiClient } from "../api/api-client";
 import { PlayerResponse } from "../types/player";
 
-export const maxGearLevel = 13;
-
 type updateEnergy = {
   value: number;
   type: "standard" | "fleet";
@@ -28,7 +32,6 @@ interface State {
   gearConfig: ConfigType;
   refreshes: { standard: number; fleet: number };
   energy: { standard: number; fleet: number };
-  maxGearLevel: number;
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -42,9 +45,20 @@ const store = {
     gearConfig: {},
     refreshes: { standard: 0, fleet: 0 },
     energy: { standard: 0, fleet: 0 },
-    maxGearLevel,
   },
   getters: {
+    currentGearLevel(_state: State, _getters: any) {
+      return (unit: Unit | UnitBasic): number => {
+        if (isUnit(unit)) {
+          return (
+            unit.gear_level +
+            unit.gear.filter((x: any) => x.is_obtained).length / 10
+          );
+        } else {
+          return 0;
+        }
+      };
+    },
     gearLocation(_state: State) {
       return (missions: Mission[]): string[] => {
         const locations: string[] = [];
@@ -94,8 +108,12 @@ const store = {
     },
     timeEstimation(state: State, getters: any) {
       return (gear: Gear): number => {
+        const locations = getters.gearLocation(gear.lookupMissionList);
+
         if (state.gearConfig[gear.id]?.irrelevant) {
           return 0;
+        } else if (locations.length <= 0) {
+          return -1;
         }
         const owned: number = getters.gearOwnedCount(gear);
         const remaining = gear.amount - owned;
@@ -172,17 +190,16 @@ const store = {
           const isFleet = gear.lookupMissionList.some(
             (x: Mission) => x.missionIdentifier.campaignId === "C01SP"
           );
-          if (state.gearConfig[gear.id]?.irrelevant) {
+          const timeToGet = getters.timeEstimation(gear);
+
+          if (state.gearConfig[gear.id]?.irrelevant || timeToGet < 0) {
             //do nothing
           } else if (isChallenge) {
-            totalChallenges = Math.max(
-              getters.timeEstimation(gear),
-              totalChallenges
-            );
+            totalChallenges = Math.max(timeToGet, totalChallenges);
           } else if (isFleet) {
-            totalFleet += getters.timeEstimation(gear);
+            totalFleet += timeToGet;
           } else {
-            totalStandard += getters.timeEstimation(gear);
+            totalStandard += timeToGet;
           }
         });
         return Math.max(totalStandard, totalFleet, totalChallenges);

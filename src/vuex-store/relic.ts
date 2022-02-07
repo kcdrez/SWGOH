@@ -4,13 +4,10 @@ import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { unvue } from "../utils";
 import relicConfig from "../types/relicMapping";
-import { Relic, RelicConfigType } from "../types/relic";
+import { Relic, RelicConfigType, maxRelicLevel } from "../types/relic";
 import { isUnit, Unit, UnitBasic } from "../types/unit";
 import { apiClient } from "../api/api-client";
 import { PlayerResponse } from "@/types/player";
-
-export const maxRelicLevel = 9;
-
 interface State {
   requestState: loadingState;
   relicConfig: RelicConfigType;
@@ -31,6 +28,15 @@ const store = {
     energy: { cantina: 0 },
   },
   getters: {
+    currentRelicLevel(_state: State) {
+      return (unit: Unit): number => {
+        if (!unit?.relic_tier) {
+          return 0;
+        } else {
+          return unit.relic_tier < 0 ? 0 : unit.relic_tier;
+        }
+      };
+    },
     relicOptions(_state: State) {
       return (relicLevel: number): number[] => {
         const list = [];
@@ -46,8 +52,8 @@ const store = {
     timeEstimation(state: State, getters: any) {
       return (mat: Relic, arr: { level: number; target: number }[]): number => {
         const owned: number = state.ownedRelics[mat.id] || 0;
-        const totalAmount: number = getters.amountNeeded(mat, arr);
-        const remaining: number = totalAmount - owned;
+        const amountNeeded: number = getters.amountNeeded(mat, arr);
+        const remaining: number = amountNeeded - owned;
 
         if (remaining > 0) {
           const totalEnergy =
@@ -57,6 +63,8 @@ const store = {
             : 0;
           const amountPerDay = mat.dropRate ? triesPerDay * mat.dropRate : 0;
           return amountPerDay === 0 ? -1 : Math.round(remaining / amountPerDay);
+        } else if (amountNeeded === 0 && remaining > 0) {
+          return -1;
         } else {
           return 0;
         }

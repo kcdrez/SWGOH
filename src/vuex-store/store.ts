@@ -8,7 +8,14 @@ import { store as speedStore, State as SpeedState } from "./speed";
 import { store as shardStore, State as ShardState } from "./shards";
 import { loadingState } from "../types/loading";
 
-type ModuleTypes = "gear" | "relic" | "unit" | "player" | "planner" | "speed";
+type ModuleTypes =
+  | "gear"
+  | "relic"
+  | "unit"
+  | "player"
+  | "planner"
+  | "speed"
+  | "shards";
 
 export interface State {
   requestState: loadingState;
