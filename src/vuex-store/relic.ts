@@ -4,13 +4,10 @@ import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { unvue } from "../utils";
 import relicConfig from "../types/relicMapping";
-import { Relic, RelicConfigType } from "../types/relic";
+import { Relic, RelicConfigType, maxRelicLevel } from "../types/relic";
 import { isUnit, Unit, UnitBasic } from "../types/unit";
 import { apiClient } from "../api/api-client";
 import { PlayerResponse } from "@/types/player";
-
-export const maxRelicLevel = 9;
-
 interface State {
   requestState: loadingState;
   relicConfig: RelicConfigType;

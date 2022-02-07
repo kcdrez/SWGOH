@@ -1,15 +1,12 @@
 <template>
-  <div>
+  <div v-if="unit.stars < 7">
     <div class="collapse-header section-header mt-3">
       <h3 class="w-100" data-bs-toggle="collapse" href="#shardSection">
         <div class="d-inline">Shard Planner</div>
       </h3>
     </div>
     <div id="shardSection" class="collapse" ref="shardSection">
-      <h5 v-if="unit.stars === 7" class="my-1 text-center">
-        {{ unit.name }} is already at 7 stars.
-      </h5>
-      <h5 v-else-if="unitNodes(unit).length === 0" class="my-1 text-center">
+      <h5 v-if="unitNodes(unit).length === 0" class="my-1 text-center">
         This unit is not currently farmable.
       </h5>
       <template v-else>
@@ -102,7 +99,9 @@ export default defineComponent({
     ...mapActions(["toggleCollapse"]),
   },
   mounted() {
-    setupEvents(this.$refs.shardSection as HTMLElement, "shardPlanner");
+    if (this.unit.stars < 7) {
+      setupEvents(this.$refs.shardSection as HTMLElement, "shardPlanner");
+    }
   },
 });
 </script>

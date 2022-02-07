@@ -5,7 +5,7 @@ import { State as RootState } from "./store";
 import { ConfigType, UpdateItem } from "../types/planner";
 import { maxGearLevel } from "./gear";
 import { apiClient } from "../api/api-client";
-import { maxRelicLevel } from "./relic";
+import { maxRelicLevel } from "../types/relic";
 
 interface State {
   requestState: loadingState;

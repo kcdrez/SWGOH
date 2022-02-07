@@ -42,7 +42,7 @@ const store = {
     gearConfig: {},
     refreshes: { standard: 0, fleet: 0 },
     energy: { standard: 0, fleet: 0 },
-    maxGearLevel,
+    maxGearLevel, //todo move to just exported from the types file instead of being in the store
   },
   getters: {
     gearLocation(_state: State) {
@@ -94,8 +94,12 @@ const store = {
     },
     timeEstimation(state: State, getters: any) {
       return (gear: Gear): number => {
+        const locations = getters.gearLocation(gear.lookupMissionList);
+
         if (state.gearConfig[gear.id]?.irrelevant) {
           return 0;
+        } else if (locations.length <= 0) {
+          return -1;
         }
         const owned: number = getters.gearOwnedCount(gear);
         const remaining = gear.amount - owned;
@@ -172,17 +176,16 @@ const store = {
           const isFleet = gear.lookupMissionList.some(
             (x: Mission) => x.missionIdentifier.campaignId === "C01SP"
           );
-          if (state.gearConfig[gear.id]?.irrelevant) {
+          const timeToGet = getters.timeEstimation(gear);
+
+          if (state.gearConfig[gear.id]?.irrelevant || timeToGet < 0) {
             //do nothing
           } else if (isChallenge) {
-            totalChallenges = Math.max(
-              getters.timeEstimation(gear),
-              totalChallenges
-            );
+            totalChallenges = Math.max(timeToGet, totalChallenges);
           } else if (isFleet) {
-            totalFleet += getters.timeEstimation(gear);
+            totalFleet += timeToGet;
           } else {
-            totalStandard += getters.timeEstimation(gear);
+            totalStandard += timeToGet;
           }
         });
         return Math.max(totalStandard, totalFleet, totalChallenges);

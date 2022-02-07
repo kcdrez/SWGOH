@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!unit.is_ship">
+  <div v-if="!unit.is_ship && currentGearLevel(unit) < maxGearLevel">
     <div class="collapse-header section-header">
       <h3 class="w-100" data-bs-toggle="collapse" href="#gearSection">
         <div class="d-inline">Gear Planner</div>
@@ -12,42 +12,35 @@
       ></i>
     </div>
     <div id="gearSection" class="collapse" ref="gearSection">
-      <template v-if="currentGearLevel(unit) < maxGearLevel">
-        <div class="gear-header">
-          <div class="current-level">
-            Current Gear Level: <b>{{ currentGearLevel(unit) }}</b>
-          </div>
-          <div class="target-level">
-            Target Level:
-            <select v-model.number="gearTarget">
-              <option
-                v-for="num in gearOptions(unit.gear_level)"
-                :value="num"
-                :key="num"
-              >
-                Gear {{ num }}
-              </option>
-            </select>
-          </div>
+      <div class="gear-header">
+        <div class="current-level">
+          Current Gear Level: <b>{{ currentGearLevel(unit) }}</b>
         </div>
-        <Timestamp
-          class="time-estimate"
-          label="Estimated completion:"
-          :title="$filters.daysFromNow(totalDays(unit))"
-          :displayText="$filters.pluralText(totalDays(unit), 'day')"
-          displayClasses="d-inline"
-        />
-        <EnergySpent showFleet showStandard />
-        <GearTable
-          :gearList="fullSalvageList(this.unit, this.gearTarget)"
-          showHeader
-        />
-      </template>
-      <template v-else>
-        <h3 class="mb-0">
-          {{ unit.name }} is already at gear level {{ maxGearLevel }}.
-        </h3>
-      </template>
+        <div class="target-level">
+          Target Level:
+          <select v-model.number="gearTarget">
+            <option
+              v-for="num in gearOptions(unit.gear_level)"
+              :value="num"
+              :key="num"
+            >
+              Gear {{ num }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <Timestamp
+        class="time-estimate"
+        label="Estimated completion:"
+        :title="$filters.daysFromNow(totalDays(unit))"
+        :displayText="$filters.pluralText(totalDays(unit), 'day')"
+        displayClasses="d-inline"
+      />
+      <EnergySpent showFleet showStandard />
+      <GearTable
+        :gearList="fullSalvageList(this.unit, this.gearTarget)"
+        showHeader
+      />
     </div>
     <div class="modal fade" id="gearAssumptionsModal" tabindex="-1">
       <div class="modal-dialog">
@@ -144,7 +137,10 @@ export default defineComponent({
     ...mapActions(["toggleCollapse"]),
   },
   mounted() {
-    if (!this.unit.is_ship) {
+    if (
+      !this.unit.is_ship &&
+      this.currentGearLevel(this.unit) < this.maxGearLevel
+    ) {
       setupEvents(this.$refs.gearSection as HTMLElement, "gearPlanner");
     }
   },

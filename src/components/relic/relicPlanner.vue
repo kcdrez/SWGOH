@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!unit.is_ship">
+  <div v-if="!unit.is_ship && currentRelicLevel < maxRelicLevel">
     <div class="collapse-header section-header mt-3">
       <h3 class="w-100" data-bs-toggle="collapse" href="#relicSection">
         <div class="d-inline">Relic Planner</div>
@@ -49,12 +49,17 @@ import Timestamp from "../timestamp.vue";
 import EnergySpent from "../energySpent.vue";
 import { UpdateItem } from "../../types/planner";
 import { loadingState } from "../../types/loading";
-import { Relic } from "../../types/relic";
+import { Relic, maxRelicLevel } from "../../types/relic";
 import { setupEvents } from "../../utils";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
   components: { RelicTable, Timestamp, EnergySpent },
+  data() {
+    return {
+      maxRelicLevel,
+    };
+  },
   computed: {
     ...mapState("relic", ["relicConfig"]),
     ...mapState("unit", ["unit"]),
@@ -64,7 +69,11 @@ export default defineComponent({
       return this.someLoading(["relic", "unit"]);
     },
     currentRelicLevel(): number {
-      return this.unit?.relic_tier < 0 ? 0 : this.unit.relic_tier;
+      if (!this.unit?.relic_tier) {
+        return 0;
+      } else {
+        return this.unit.relic_tier < 0 ? 0 : this.unit.relic_tier;
+      }
     },
     relicTarget: {
       get(): number {
@@ -84,7 +93,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    if (!this.unit.is_ship) {
+    if (!this.unit.is_ship && this.currentRelicLevel < maxRelicLevel) {
       setupEvents(this.$refs.relicSection as HTMLElement, "relicPlanner");
     }
   },
