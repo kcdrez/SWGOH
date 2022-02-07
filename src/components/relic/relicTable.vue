@@ -6,7 +6,7 @@
       <thead>
         <tr class="text-center align-middle">
           <th>
-            <div>Relic Info</div>
+            <div v-if="showHeader">Relic Info</div>
             <div class="sort-methods">
               <div class="input-group input-group-sm my-2">
                 <span class="input-group-text">Sort By:</span>
@@ -74,7 +74,9 @@
             <div class="text-center estimation">
               <Timestamp
                 v-if="timeEstimation(mat, targetLevels) >= 0"
-                :displayText="`${timeEstimation(mat, targetLevels)} days`"
+                :displayText="
+                  $filters.pluralText(timeEstimation(mat, targetLevels), 'day')
+                "
                 label="Estimated Completion:"
                 :title="$filters.daysFromNow(timeEstimation(mat, targetLevels))"
                 displayClasses="d-inline"
@@ -192,6 +194,10 @@ export default defineComponent({
       },
     },
     showRequiredByUnit: {
+      type: Boolean,
+      default: false,
+    },
+    showHeader: {
       type: Boolean,
       default: false,
     },

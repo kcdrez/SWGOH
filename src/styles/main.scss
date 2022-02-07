@@ -108,6 +108,12 @@ button:disabled {
   }
 }
 
+.hide-on-mobile {
+  @media only screen and (max-width: 981px) {
+    display: none !important;
+  }
+}
+
 .show-on-desktop {
   @media only screen and (max-width: 980px) {
     display: none;

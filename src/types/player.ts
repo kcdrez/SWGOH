@@ -14,6 +14,7 @@ export interface PlayerResponse extends Player {
   planner?: any;
   energyData?: any;
   teams?: any[];
+  shards: any;
 }
 
 export interface EquippedGear {

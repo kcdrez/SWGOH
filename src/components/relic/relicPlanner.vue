@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!unit.is_ship">
     <div class="collapse-header section-header mt-3">
       <h3 class="w-100" data-bs-toggle="collapse" href="#relicSection">
         <div class="d-inline">Relic Planner</div>
@@ -30,41 +30,11 @@
         :displayText="$filters.pluralText(totalDays(unit), 'day')"
         displayClasses="d-inline"
       />
-      <div class="cantina-energy-container">
-        <div class="input-group input-group-sm">
-          <span
-            class="input-group-text c-help energy-text"
-            title="Energy used on the cantina table"
-            >Cantina Energy:</span
-          >
-          <span
-            class="input-group-text c-help refresh-text"
-            title="How many times you refresh the cantina energy using crystals per day"
-            >Daily Refreshes:</span
-          >
-          <input
-            class="form-control refresh-input"
-            type="number"
-            v-model.number="refreshes"
-            min="0"
-          />
-          <span
-            class="input-group-text c-help cantina-spent-text"
-            title="How much of your daily energy used for farming other things (i.e. character shards)"
-            >Daily Energy Used:</span
-          >
-          <input
-            class="form-control cantina-spent-input"
-            type="number"
-            v-model.number="energy"
-            min="0"
-            :max="165 + refreshes * 120"
-          />
-        </div>
-      </div>
+      <EnergySpent showCantina />
       <RelicTable
         :relicList="relicList"
         :targetLevels="[{ level: currentRelicLevel, target: relicTarget }]"
+        showHeader
       />
     </div>
   </div>
@@ -76,6 +46,7 @@ import { mapGetters, mapState } from "vuex";
 
 import RelicTable from "./relicTable.vue";
 import Timestamp from "../timestamp.vue";
+import EnergySpent from "../energySpent.vue";
 import { UpdateItem } from "../../types/planner";
 import { loadingState } from "../../types/loading";
 import { Relic } from "../../types/relic";
@@ -83,7 +54,7 @@ import { setupEvents } from "../../utils";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
-  components: { RelicTable, Timestamp },
+  components: { RelicTable, Timestamp, EnergySpent },
   computed: {
     ...mapState("relic", ["relicConfig"]),
     ...mapState("unit", ["unit"]),
@@ -108,28 +79,14 @@ export default defineComponent({
         this.$store.dispatch("planner/updatePlannerTarget", payload);
       },
     },
-    refreshes: {
-      get(): number {
-        return this.$store.state.relic.refreshes.cantina;
-      },
-      set(value: number) {
-        this.$store.dispatch("relic/updateRefreshes", value);
-      },
-    },
-    energy: {
-      get(): number {
-        return this.$store.state.relic.energy.cantina;
-      },
-      set(value: number) {
-        this.$store.dispatch("relic/updateEnergy", value);
-      },
-    },
     relicList(): Relic[] {
       return Object.values(this.relicConfig);
     },
   },
   mounted() {
-    setupEvents(this.$refs.relicSection as HTMLElement, "relicPlanner");
+    if (!this.unit.is_ship) {
+      setupEvents(this.$refs.relicSection as HTMLElement, "relicPlanner");
+    }
   },
 });
 </script>
@@ -172,70 +129,11 @@ export default defineComponent({
   }
 }
 
-.cantina-energy-container {
-  margin-bottom: 1rem;
-
-  .energy-text {
-    background: $dark;
-    color: $light;
-    width: 130px;
-    display: block;
-  }
-
-  .refresh-text,
-  .cantina-spent-text {
-    background: $gray-4;
-    color: $light;
-  }
-
-  @media only screen and (min-width: 1300px) {
-    width: 48%;
-    display: inline-block;
-  }
-
-  @media only screen and (max-width: 680px) {
-    .input-group {
-      display: block;
-
-      * {
-        width: 100%;
-      }
-
-      .energy-text {
-        border-radius: 0.2rem 0.2rem 0 0 !important;
-      }
-      .cantina-spent-input {
-        border-radius: 0 0 0.2rem 0.2rem !important;
-      }
-
-      .refresh-text,
-      .cantina-spent-text,
-      .cantina-spent-input,
-      input {
-        display: block;
-        border-top: none;
-        text-align: center;
-        //everything except the first element is off so the following is used to compensate :shrug:
-        position: relative;
-        left: 1px;
-      }
-    }
-  }
-}
-
 .time-estimate {
   text-align: center;
 
   ::v-deep(span) {
     font-weight: bold;
-  }
-}
-
-table {
-  thead {
-    tr {
-      vertical-align: top;
-    }
   }
 }
 

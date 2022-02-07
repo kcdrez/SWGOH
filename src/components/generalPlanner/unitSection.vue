@@ -57,33 +57,36 @@
             </td>
             <td class="text-center">{{ getCurLevel(unit) }}</td>
             <td class="text-center">
-              <select
-                class="form-control form-control-sm mb-1"
-                :value="unit.gearTarget"
-                @input="changeTarget(unit, 'gear', $event)"
-                v-if="(unit.gear_level || 0) < maxGearLevel"
-              >
-                <option
-                  v-for="num in gearOptions(unit.gear_level)"
-                  :value="num"
-                  :key="num"
+              <div v-if="unit.is_ship">-</div>
+              <template v-else>
+                <select
+                  class="form-control form-control-sm mb-1"
+                  :value="unit.gearTarget"
+                  @input="changeTarget(unit, 'gear', $event)"
+                  v-if="(unit.gear_level || 0) < maxGearLevel"
                 >
-                  Gear {{ num }}
-                </option>
-              </select>
-              <select
-                :value="unit.relicTarget"
-                @input="changeTarget(unit, 'relic', $event)"
-                class="form-control form-control-sm"
-              >
-                <option
-                  v-for="num in relicOptions(unit.relic_tier)"
-                  :value="num"
-                  :key="num"
+                  <option
+                    v-for="num in gearOptions(unit.gear_level)"
+                    :value="num"
+                    :key="num"
+                  >
+                    Gear {{ num }}
+                  </option>
+                </select>
+                <select
+                  :value="unit.relicTarget"
+                  @input="changeTarget(unit, 'relic', $event)"
+                  class="form-control form-control-sm"
                 >
-                  Relic {{ num }}
-                </option>
-              </select>
+                  <option
+                    v-for="num in relicOptions(unit.relic_tier)"
+                    :value="num"
+                    :key="num"
+                  >
+                    Relic {{ num }}
+                  </option>
+                </select>
+              </template>
             </td>
             <td class="text-center">
               {{ $filters.dateTime(gearTotalDays(unit)) }}
@@ -166,11 +169,11 @@
                   >{{ unit.name }}</router-link
                 >
               </div>
-              <div class="text-center">
+              <div class="text-center" v-if="!unit.is_ship">
                 <div>Current Level:</div>
                 <div>{{ getCurLevel(unit) }}</div>
               </div>
-              <div class="target-container">
+              <div class="target-container" v-if="!unit.is_ship">
                 <div class="target-level">Target Level:</div>
                 <select
                   class="form-control form-control-sm"
@@ -201,7 +204,11 @@
                 </select>
               </div>
               <template
-                v-if="gearTotalDays(unit) > 0 && relicTotalDays(unit) > 0"
+                v-if="
+                  gearTotalDays(unit) > 0 &&
+                  relicTotalDays(unit) > 0 &&
+                  !unit.is_ship
+                "
               >
                 <div class="text-center">
                   <Timestamp
@@ -224,7 +231,7 @@
                   />
                 </div>
               </template>
-              <div class="text-center">
+              <div class="text-center" v-if="!unit.is_ship">
                 <Timestamp
                   :displayText="
                     $filters.pluralText(
@@ -336,7 +343,9 @@ export default defineComponent({
     },
     getCurLevel(unit: UnitPlannerItem & Unit): string {
       const gearLevel = this.currentGearLevel(unit);
-      if (gearLevel < this.maxGearLevel) {
+      if (unit.is_ship) {
+        return "-";
+      } else if (gearLevel < this.maxGearLevel) {
         return `Gear ${gearLevel}`;
       } else if (unit.relic_tier > 0) {
         return `Relic ${unit.relic_tier}`;

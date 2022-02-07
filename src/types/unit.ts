@@ -24,6 +24,7 @@ export interface Unit extends UnitBasic {
   ability_classes: string[];
   role: string;
   alignment: string;
+  is_ship?: boolean;
 }
 
 export function isUnit(unit: Unit | UnitBasic): unit is Unit {
