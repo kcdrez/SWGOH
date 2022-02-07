@@ -258,7 +258,7 @@ const store = {
     UPSERT_OWNED_GEAR(state: State, payload: OwnedCount) {
       state.gearConfig[payload.id] = {
         owned: payload.count || 0,
-        irrelevant: payload.irrelevant,
+        irrelevant: !!payload.irrelevant,
       };
     },
     UPDATE_REFRESHES(state: State, payload: updateEnergy) {

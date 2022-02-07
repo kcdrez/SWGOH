@@ -82,5 +82,5 @@ export type ConfigType = {
 export type OwnedCount = {
   count: number;
   id: string;
-  irrelevant: boolean;
+  irrelevant?: boolean;
 };

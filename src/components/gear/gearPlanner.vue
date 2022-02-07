@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!unit.is_ship">
     <div class="collapse-header section-header">
       <h3 class="w-100" data-bs-toggle="collapse" href="#gearSection">
         <div class="d-inline">Gear Planner</div>
@@ -37,71 +37,11 @@
           :displayText="$filters.pluralText(totalDays(unit), 'day')"
           displayClasses="d-inline"
         />
-        <div class="standard-energy-container">
-          <div class="input-group input-group-sm">
-            <span
-              class="input-group-text c-help energy-text"
-              title="Energy used on Light and Dark side tables"
-              >Standard Energy:</span
-            >
-            <span
-              class="input-group-text c-help refresh-text"
-              title="How many times you refresh the energy using crystals per day"
-              >Daily Refreshes:</span
-            >
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="refreshesStandard"
-              min="0"
-            />
-            <span
-              class="input-group-text c-help energy-spent-text"
-              title="How much of your daily energy used for farming other things (i.e. character shards)"
-              >Daily Energy Used:</span
-            >
-            <input
-              class="form-control energy-spent-input"
-              type="number"
-              v-model.number="energySpentStandard"
-              min="0"
-              :max="145 + refreshesStandard * 120 + 135"
-            />
-          </div>
-        </div>
-        <div class="fleet-energy-container">
-          <div class="input-group input-group-sm">
-            <span
-              class="input-group-text c-help energy-text"
-              title="Energy used on fleet/ship nodes"
-              >Fleet Energy:</span
-            >
-            <span
-              class="input-group-text c-help refresh-text"
-              title="How many times you refresh the fleet energy using crystals per day"
-              >Daily Refreshes:</span
-            >
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="refreshesFleet"
-              min="0"
-            />
-            <span
-              class="input-group-text c-help energy-spent-text"
-              title="How much of your daily energy used for farming other things (e.g. character shards)"
-              >Daily Energy Used:</span
-            >
-            <input
-              class="form-control energy-spent-input"
-              type="number"
-              v-model.number="energySpentFleet"
-              min="0"
-              :max="145 + refreshesFleet * 120 + 45"
-            />
-          </div>
-        </div>
-        <GearTable :gearList="fullSalvageList(this.unit, this.gearTarget)" />
+        <EnergySpent showFleet showStandard />
+        <GearTable
+          :gearList="fullSalvageList(this.unit, this.gearTarget)"
+          showHeader
+        />
       </template>
       <template v-else>
         <h3 class="mb-0">
@@ -165,13 +105,14 @@ import { mapState, mapGetters, mapActions } from "vuex";
 
 import { UpdateItem } from "../../types/planner";
 import GearTable from "./gearTable.vue";
+import EnergySpent from "../energySpent.vue";
 import { loadingState } from "../../types/loading";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
   name: "GearPlannerComponent",
-  components: { GearTable, Timestamp },
+  components: { GearTable, Timestamp, EnergySpent },
   computed: {
     ...mapState("gear", ["maxGearLevel"]),
     ...mapState("unit", ["unit"]),
@@ -198,56 +139,14 @@ export default defineComponent({
         this.$store.dispatch("planner/updatePlannerTarget", payload);
       },
     },
-    refreshesStandard: {
-      get(): number {
-        return this.$store.state.gear.refreshes.standard;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateRefreshes", {
-          value,
-          type: "standard",
-        });
-      },
-    },
-    refreshesFleet: {
-      get(): number {
-        return this.$store.state.gear.refreshes.fleet;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateRefreshes", {
-          value,
-          type: "fleet",
-        });
-      },
-    },
-    energySpentStandard: {
-      get(): number {
-        return this.$store.state.gear.energy.standard;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateEnergy", {
-          value,
-          type: "standard",
-        });
-      },
-    },
-    energySpentFleet: {
-      get(): number {
-        return this.$store.state.gear.energy.fleet;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateEnergy", {
-          value,
-          type: "fleet",
-        });
-      },
-    },
   },
   methods: {
     ...mapActions(["toggleCollapse"]),
   },
   mounted() {
-    setupEvents(this.$refs.gearSection as HTMLElement, "gearPlanner");
+    if (!this.unit.is_ship) {
+      setupEvents(this.$refs.gearSection as HTMLElement, "gearPlanner");
+    }
   },
 });
 </script>
@@ -295,78 +194,6 @@ export default defineComponent({
 
   ::v-deep(span) {
     font-weight: bold;
-  }
-}
-
-.standard-energy-container,
-.fleet-energy-container {
-  margin-bottom: 1rem;
-
-  .energy-text {
-    background: $dark;
-    color: $light;
-    width: 130px;
-    display: block;
-  }
-
-  .refresh-text,
-  .energy-spent-text {
-    background: $gray-4;
-    color: $light;
-  }
-
-  @media only screen and (min-width: 1300px) {
-    width: 48%;
-    display: inline-block;
-  }
-
-  @media only screen and (max-width: 680px) {
-    .input-group {
-      display: block;
-
-      * {
-        width: 100%;
-      }
-
-      .energy-text {
-        border-radius: 0.2rem 0.2rem 0 0 !important;
-      }
-      .energy-spent-input {
-        border-radius: 0 0 0.2rem 0.2rem !important;
-      }
-
-      .refresh-text,
-      .energy-spent-text,
-      .energy-spent-input,
-      input {
-        display: block;
-        border-top: none;
-        text-align: center;
-        //everything except the first element is off so the following is used to compensate :shrug:
-        position: relative;
-        left: 1px;
-      }
-    }
-  }
-}
-
-.standard-energy-container {
-  @media only screen and (min-width: 1300px) {
-    margin-right: 1rem;
-  }
-}
-
-.fleet-energy-container {
-  @media only screen and (min-width: 1300px) {
-    margin-left: 1rem;
-  }
-}
-
-table {
-  thead {
-    tr {
-      vertical-align: top;
-    }
   }
 }
 

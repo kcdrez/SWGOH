@@ -6,16 +6,25 @@
     />
     <Loading :state="requestState" message="Loading Unit Data" size="lg">
       <LastUpdated />
-      <img class="d-block m-auto" :src="unit?.image" />
-      <h4 class="text-center">{{ unit.name }}</h4>
-      <button
-        class="btn btn-secondary text-dark mx-auto my-2 d-block"
-        @click="add()"
-      >
-        Add to General Planner
-      </button>
+      <UnitIcon :unit="unit" class="text-center">
+        <div
+          class="btn-group btn-group-sm d-block text-center my-2"
+          role="group"
+        >
+          <button class="btn btn-primary" @click="addToGeneralPlanner()">
+            Add to General Planner
+          </button>
+          <button
+            class="btn btn-secondary text-dark"
+            @click="addToShardPlanner()"
+          >
+            Add to Shard Planner
+          </button>
+        </div>
+      </UnitIcon>
       <GearPlanner />
       <RelicPlanner />
+      <ShardPlanner />
     </Loading>
   </div>
 </template>
@@ -26,11 +35,13 @@ import { mapState, mapActions, mapGetters } from "vuex";
 
 import GearPlanner from "../components/gear/gearPlanner.vue";
 import RelicPlanner from "../components/relic/relicPlanner.vue";
+import ShardPlanner from "../components/shards/shardPlanner.vue";
+import UnitIcon from "../components/units/unitIcon.vue";
 import { loadingState } from "../types/loading";
 
 export default defineComponent({
   name: "UnitPage",
-  components: { GearPlanner, RelicPlanner },
+  components: { GearPlanner, RelicPlanner, ShardPlanner, UnitIcon },
   data() {
     return {
       shards: 0,
@@ -49,6 +60,7 @@ export default defineComponent({
     ...mapState("unit", ["unit"]),
     ...mapState("planner", ["unitList"]),
     ...mapState("player", { playerRequestState: "requestState" }),
+    ...mapGetters("shards", { shardPlannerList: "plannerList" }),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
       return this.someLoading(["unit", "planner"]);
@@ -56,8 +68,13 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("unit", ["fetchUnit"]),
-    ...mapActions("planner", ["addUnit"]),
-    add(): void {
+    ...mapActions("planner", {
+      addUnitToGeneralPlanner: "addUnit",
+    }),
+    ...mapActions("shards", {
+      addUnitToShardPlanner: "addUnit",
+    }),
+    addToGeneralPlanner(): void {
       if (this.unitList.find((x: string) => x === this.unit.id)) {
         this.$toast(
           `${this.unit.name} is already added to the General Planner`,
@@ -67,9 +84,26 @@ export default defineComponent({
           }
         );
       } else {
-        this.addUnit(this.unit.id);
+        this.addUnitToGeneralPlanner(this.unit.id);
         this.$toast(
           `${this.unit.name} successfully added to the General Planner`,
+          {
+            positionY: "top",
+            class: "toast-success",
+          }
+        );
+      }
+    },
+    addToShardPlanner(): void {
+      if (this.shardPlannerList.find((x: string) => x === this.unit.id)) {
+        this.$toast(`${this.unit.name} is already added to the Shard Planner`, {
+          positionY: "top",
+          class: "toast-warning",
+        });
+      } else {
+        this.addUnitToShardPlanner(this.unit.id);
+        this.$toast(
+          `${this.unit.name} successfully added to the Shard Planner`,
           {
             positionY: "top",
             class: "toast-success",

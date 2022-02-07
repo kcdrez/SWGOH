@@ -5,6 +5,7 @@ import { store as playerStore, State as PlayerState } from "./player";
 import { store as relicStore, State as RelicState } from "./relic";
 import { store as plannerStore, State as PlannerState } from "./planner";
 import { store as speedStore, State as SpeedState } from "./speed";
+import { store as shardStore, State as ShardState } from "./shards";
 import { loadingState } from "../types/loading";
 
 type ModuleTypes = "gear" | "relic" | "unit" | "player" | "planner" | "speed";
@@ -19,6 +20,7 @@ export interface State {
   player: PlayerState;
   planner: PlannerState;
   speed: SpeedState;
+  shards: ShardState;
 }
 
 const store = createStore<State>({
@@ -29,6 +31,7 @@ const store = createStore<State>({
     player: playerStore,
     planner: plannerStore,
     speed: speedStore,
+    shards: shardStore,
   },
   state: {
     requestState: loadingState.initial,
@@ -39,6 +42,7 @@ const store = createStore<State>({
     player: playerStore.state,
     planner: plannerStore.state,
     speed: speedStore.state,
+    shards: shardStore.state,
   },
   getters: {
     someLoading(state: State) {

@@ -21,7 +21,7 @@ const store = {
     unitList: [],
   },
   getters: {
-    currentGearLevel(_state: State, _getters: any, rootState: RootState) {
+    currentGearLevel(_state: State, _getters: any) {
       //move to gear module
       return (unit: Unit | UnitBasic): number => {
         if (isUnit(unit)) {
@@ -49,8 +49,8 @@ const store = {
   actions: {
     async initialize({ commit }: ActionCtx) {
       commit("SET_REQUEST_STATE", loadingState.loading);
-      const response = await apiClient.fetchAllUnits();
-      commit("SET_ALL_UNITS", response);
+      const unitsList = await apiClient.fetchAllUnits();
+      commit("SET_ALL_UNITS", unitsList);
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     async fetchUnit({ commit, rootState, dispatch }: ActionCtx, id: string) {

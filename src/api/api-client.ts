@@ -3,6 +3,7 @@ import axios from "axios";
 import { PlayerResponse } from "../types/player";
 import { ConfigType, Gear } from "../types/gear";
 import { Unit, UnitBasic } from "../types/unit";
+import { OwnedShardsMap } from "../types/shards";
 import { RelicConfigType } from "../types/relic";
 
 class ApiClient {
@@ -71,6 +72,17 @@ class ApiClient {
   async speedData() {
     const response = await axios.get(`${this.baseUrl}/unit/speedAbilities`);
     return response.data;
+  }
+
+  async fetchFarmingData() {
+    const response = await axios.get(`${this.baseUrl}/unit/shardFarming`);
+    return response.data;
+  }
+
+  async saveShardFarming(playerId: string, shardData: OwnedShardsMap) {
+    await axios.patch(`${this.baseUrl}/player/shards/${playerId}`, {
+      shards: shardData,
+    });
   }
 }
 
