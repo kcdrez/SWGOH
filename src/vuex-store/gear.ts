@@ -1,6 +1,12 @@
 import { ActionContext } from "vuex";
 
-import { Gear, Mission, ConfigType, OwnedCount } from "../types/gear";
+import {
+  Gear,
+  Mission,
+  ConfigType,
+  OwnedCount,
+  maxGearLevel,
+} from "../types/gear";
 import {
   difficultyIds,
   tableIds,
@@ -14,8 +20,6 @@ import { isUnit, Unit, UnitBasic, UnitTier } from "../types/unit";
 import { apiClient } from "../api/api-client";
 import { PlayerResponse } from "../types/player";
 
-export const maxGearLevel = 13;
-
 type updateEnergy = {
   value: number;
   type: "standard" | "fleet";
@@ -28,7 +32,6 @@ interface State {
   gearConfig: ConfigType;
   refreshes: { standard: number; fleet: number };
   energy: { standard: number; fleet: number };
-  maxGearLevel: number;
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -42,7 +45,6 @@ const store = {
     gearConfig: {},
     refreshes: { standard: 0, fleet: 0 },
     energy: { standard: 0, fleet: 0 },
-    maxGearLevel, //todo move to just exported from the types file instead of being in the store
   },
   getters: {
     currentGearLevel(_state: State, _getters: any) {

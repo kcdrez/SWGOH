@@ -1,3 +1,5 @@
+export const maxGearLevel = 13;
+
 export interface Gear {
   id: string;
   image: string;

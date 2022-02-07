@@ -97,17 +97,22 @@ import { defineComponent } from "vue";
 import { mapState, mapGetters, mapActions } from "vuex";
 
 import { UpdateItem } from "../../types/planner";
+import { loadingState } from "../../types/loading";
+import { maxGearLevel } from "../../types/gear";
 import GearTable from "./gearTable.vue";
 import EnergySpent from "../energySpent.vue";
-import { loadingState } from "../../types/loading";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
   name: "GearPlannerComponent",
   components: { GearTable, Timestamp, EnergySpent },
+  data() {
+    return {
+      maxGearLevel,
+    };
+  },
   computed: {
-    ...mapState("gear", ["maxGearLevel"]),
     ...mapState("unit", ["unit"]),
     ...mapGetters("gear", [
       "gearOptions",

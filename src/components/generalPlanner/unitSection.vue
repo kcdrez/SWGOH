@@ -300,6 +300,7 @@ import { mapActions, mapGetters, mapState } from "vuex";
 
 import { UnitPlannerItem, UpdateItem } from "../../types/planner";
 import { Unit } from "../../types/unit";
+import { maxGearLevel } from "../../types/gear";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
 
@@ -311,6 +312,7 @@ export default defineComponent({
       sortDir: "asc",
       sortMethod: "name",
       searchText: "",
+      maxGearLevel,
     };
   },
   computed: {
@@ -324,7 +326,6 @@ export default defineComponent({
       relicOptions: "relicOptions",
       relicTotalDays: "totalDays",
     }),
-    ...mapState("gear", ["maxGearLevel"]),
   },
   methods: {
     ...mapActions("planner", ["removeUnit"]),
