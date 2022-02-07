@@ -65,9 +65,11 @@ nav.navbar-light {
   .nav-link {
     color: $dark !important;
 
-    &:hover {
-      background-color: $hover-color;
-      border-radius: 5px;
+    @media only screen and (min-width: 992px) {
+      &:hover {
+        background-color: $hover-color;
+        border-radius: 5px;
+      }
     }
   }
 
@@ -80,6 +82,12 @@ nav.navbar-light {
         background-color: $hover-color;
         color: $dark;
       }
+    }
+
+    @media only screen and (max-width: 992px) {
+      border-color: transparent;
+      padding: 0;
+      margin: 0;
     }
   }
   .navbar-text {
