@@ -4,7 +4,8 @@ import { store as unitStore, State as UnitState } from "./unit";
 import { store as playerStore, State as PlayerState } from "./player";
 import { store as relicStore, State as RelicState } from "./relic";
 import { store as plannerStore, State as PlannerState } from "./planner";
-import { store as speedStore, State as SpeedState } from "./speed";
+import { store as teamsStore, State as TeamsState } from "./teams";
+import { store as opponentsStore, State as OpponentsState } from "./opponents";
 import { store as shardStore, State as ShardState } from "./shards";
 import { loadingState } from "../types/loading";
 
@@ -14,8 +15,9 @@ type ModuleTypes =
   | "unit"
   | "player"
   | "planner"
-  | "speed"
-  | "shards";
+  | "teams"
+  | "shards"
+  | "opponents";
 
 export interface State {
   requestState: loadingState;
@@ -26,8 +28,9 @@ export interface State {
   unit: UnitState;
   player: PlayerState;
   planner: PlannerState;
-  speed: SpeedState;
+  teams: TeamsState;
   shards: ShardState;
+  opponents: OpponentsState;
 }
 
 const store = createStore<State>({
@@ -37,8 +40,9 @@ const store = createStore<State>({
     unit: unitStore,
     player: playerStore,
     planner: plannerStore,
-    speed: speedStore,
+    teams: teamsStore,
     shards: shardStore,
+    opponents: opponentsStore,
   },
   state: {
     requestState: loadingState.initial,
@@ -48,8 +52,9 @@ const store = createStore<State>({
     unit: unitStore.state,
     player: playerStore.state,
     planner: plannerStore.state,
-    speed: speedStore.state,
+    teams: teamsStore.state,
     shards: shardStore.state,
+    opponents: opponentsStore.state,
   },
   getters: {
     someLoading(state: State) {

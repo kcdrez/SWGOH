@@ -39,6 +39,12 @@ app.config.globalProperties.$filters = {
     }
     return text;
   },
+  numbersOnly(e: KeyboardEvent) {
+    const keyCode = e.keyCode ? e.keyCode : e.which;
+    if (keyCode < 48 || keyCode > 57) {
+      e.preventDefault();
+    }
+  },
 };
 
 app

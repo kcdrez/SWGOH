@@ -1,5 +1,5 @@
 <template>
-  <div class="container speed-clocking-page">
+  <div class="container teams-page">
     <Error :state="requestState" :message="`Unable to find player data.`" />
     <Loading :state="requestState" message="Loading Player Data" size="lg">
       <LastUpdated />
@@ -445,7 +445,7 @@ import { v4 as uuid } from "uuid";
 import _ from "lodash";
 
 import { Unit } from "../types/unit";
-import { SortType, Team, TeamMember } from "../types/speed";
+import { SortType, Team, TeamMember } from "../types/teams";
 import { unvue } from "../utils";
 import { loadingState } from "../types/loading";
 
@@ -461,7 +461,7 @@ export default defineComponent({
   data() {
     return {
       selected: null,
-      newTeamName: "abc",
+      newTeamName: "",
       editTeamTarget: null,
       deleteTarget: null,
     } as dataModel;
@@ -469,8 +469,8 @@ export default defineComponent({
   computed: {
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
-    ...mapState("speed", ["teams"]),
-    ...mapGetters("speed", [
+    ...mapState("teams", ["teams"]),
+    ...mapGetters("teams", [
       "speedValueFromMod",
       "hasSpeedSet",
       "leaderSpeedBonus",
@@ -479,11 +479,11 @@ export default defineComponent({
     ]),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
-      return this.someLoading(["player", "speed"]);
+      return this.someLoading(["player", "teams"]);
     },
   },
   methods: {
-    ...mapActions("speed", [
+    ...mapActions("teams", [
       "addTeam",
       "addUnit",
       "saveTeams",
@@ -552,7 +552,6 @@ export default defineComponent({
     grandTotal(team: Team, unit: TeamMember) {
       return (
         this.unitData(unit.id).stats["5"] +
-        // (unit.speedBonus || 0) +
         this.leaderSpeedBonus(team, unit) +
         this.uniqueSpeedBonus(team, unit) +
         this.speedBonusFromTeamMembers(team, unit)
@@ -628,7 +627,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../styles/variables.scss";
 
-.speed-clocking-page {
+.teams-page {
   max-width: 90%;
 }
 

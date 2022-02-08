@@ -3,6 +3,7 @@ import HomePage from "../pages/homepage.vue";
 import UnitPage from "../pages/unitPage.vue";
 import GeneralPlannerPage from "../pages/generalPlanner.vue";
 import TeamPage from "../pages/team.vue";
+import MatchUpPage from "../pages/matchUpPage.vue";
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: "/teams",
     name: "TeamPage",
     component: TeamPage,
+  },
+  {
+    path: "/matchup",
+    name: "MatchUpPage",
+    component: MatchUpPage,
   },
 ];
 
