@@ -71,10 +71,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
-import _ from "lodash";
 
-import { Unit } from "../types/unit";
-import { SortType, Team, TeamMember } from "../types/teams";
+import { Team } from "../types/teams";
 import { loadingState } from "../types/loading";
 import TeamTable from "../components/teams/teamTable.vue";
 
