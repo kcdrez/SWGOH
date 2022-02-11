@@ -1,3 +1,4 @@
+import { MatchPayload, Team } from "./teams";
 import { Unit } from "./unit";
 
 export interface Player {
@@ -15,6 +16,13 @@ export interface PlayerResponse extends Player {
   energyData?: any;
   teams?: any[];
   shards: any;
+}
+
+export interface OpponentResponse {
+  opponentAllyCode: string;
+  teams: Team[];
+  id: string;
+  matches: { opponentTeamId: string; playerTeamId: string; gameMode: string }[];
 }
 
 export interface EquippedGear {

@@ -1,18 +1,25 @@
 import { ActionContext } from "vuex";
 import { v4 as uuid } from "uuid";
 
-import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
-import { SpeedAbility, Team } from "../types/teams";
-import { Unit } from "../types/unit";
 import { apiClient } from "../api/api-client";
-import { Player, PlayerResponse } from "../types/player";
+import { loadingState } from "../types/loading";
+import {
+  Match,
+  MatchPayload,
+  SpeedAbility,
+  Team,
+  TeamMember,
+} from "../types/teams";
+import { Unit } from "../types/unit";
+import { OpponentResponse, Player, PlayerResponse } from "../types/player";
 
 interface State {
   requestState: loadingState;
   player: Player | null;
   teams: Team[];
   allyCode: string;
+  matches: Match[];
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -24,6 +31,7 @@ const store = {
     teams: [],
     allyCode: "",
     player: null,
+    matches: [],
   },
   getters: {},
   mutations: {
@@ -32,6 +40,9 @@ const store = {
     },
     SET_TEAMS(state: State, payload: Team[]) {
       state.teams = payload;
+    },
+    SET_MATCHES(state: State, payload: Match[]) {
+      state.matches = payload;
     },
     UPSERT_TEAM(state: State, payload: Team) {
       const index = state.teams.findIndex((x) => x.id === payload.id);
@@ -44,7 +55,7 @@ const store = {
     ADD_UNIT(state: State, payload: { teamId: string; unit: Unit }) {
       const match = state.teams.find((x) => x.id === payload.teamId);
       if (match) {
-        match.units.push({ id: payload.unit.id, speedBonus: 0 });
+        match.units.push({ id: payload.unit.id });
       }
     },
     REMOVE_UNIT(state: State, payload: { teamId: string; unit: Unit }) {
@@ -70,33 +81,108 @@ const store = {
     SET_ALLY_CODE(state: State, payload: string | null) {
       if (typeof payload === "string") {
         state.allyCode = payload;
-        window.localStorage.setItem("opponentAllyCode", payload);
       } else {
         state.allyCode = "";
-        window.localStorage.removeItem("opponentAllyCode");
       }
+    },
+    UPSERT_MATCH(state: State, payload: Match) {
+      if (!payload.id) {
+        payload.id = uuid();
+      }
+      const index = state.matches.findIndex((x) => x.id === payload.id);
+      if (index >= 0) {
+        state.matches.splice(index, 1, payload);
+      } else {
+        state.matches.push(payload);
+      }
+    },
+    REMOVE_MATCH(state: State, matchId: string) {
+      const matchIndex = state.matches.findIndex((x) => x.id === matchId);
+      if (matchIndex >= 0) {
+        state.matches.splice(matchIndex, 1);
+      }
+    },
+    RESET(state: State) {
+      state.allyCode = "";
+      state.matches = [];
+      state.player = null;
+      state.teams = [];
     },
   },
   actions: {
-    async initialize({ commit, dispatch }: ActionCtx, player: PlayerResponse) {
+    async initialize(
+      { commit, dispatch, state, rootState }: ActionCtx,
+      player: PlayerResponse
+    ) {
       //todo: handle player.opponent
       commit("SET_REQUEST_STATE", loadingState.loading);
-      const allyCode = window.localStorage.getItem("opponentAllyCode") || "";
-      if (allyCode) {
-        await dispatch("fetchPlayer", allyCode);
+
+      if (player.id) {
+        const playerResponse: OpponentResponse = await apiClient.fetchOpponent(
+          player.id
+        );
+        await dispatch("fetchPlayer", playerResponse.opponentAllyCode);
+        commit("SET_TEAMS", playerResponse?.teams || []);
+
+        const matches: Match[] = (playerResponse?.matches || []).reduce(
+          (acc: Match[], { opponentTeamId, playerTeamId, gameMode }) => {
+            const opponentTeam: Team | undefined = state.teams.find(
+              (team) => team.id === opponentTeamId
+            );
+            const playerTeam: Team | undefined = rootState.teams.teams.find(
+              (team) => team.id === playerTeamId
+            );
+            if (opponentTeam && playerTeam) {
+              acc.push({
+                opponentTeamId,
+                playerTeamId,
+                gameMode,
+                units: [
+                  ...opponentTeam.units.map((x) => {
+                    return { ...x, owner: state.player?.name || "" };
+                  }),
+                  ...playerTeam.units.map((x) => {
+                    return { ...x, owner: player.name };
+                  }),
+                ],
+                id: uuid(),
+                name: playerTeam.name + " Versus " + opponentTeam.name,
+              });
+            }
+            if (!opponentTeam) {
+              console.error(
+                "Could not find matching opponent team",
+                opponentTeamId
+              );
+            }
+            if (!playerTeam) {
+              console.error(
+                "Could not find matching player team",
+                playerTeamId
+              );
+            }
+            return acc;
+          },
+          []
+        );
+
+        commit("SET_MATCHES", matches);
       }
+
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     async fetchPlayer({ commit }: ActionCtx, allyCode: string) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      try {
-        const player = await apiClient.fetchPlayer(allyCode);
-        commit("SET_OPPONENT", player);
-        commit("SET_ALLY_CODE", allyCode);
-        commit("SET_REQUEST_STATE", loadingState.ready);
-      } catch (err) {
-        console.error(err);
-        commit("SET_REQUEST_STATE", loadingState.error);
+      if (allyCode) {
+        commit("SET_REQUEST_STATE", loadingState.loading);
+        try {
+          const player = await apiClient.fetchPlayer(allyCode);
+          commit("SET_OPPONENT", player);
+          commit("SET_ALLY_CODE", allyCode);
+          commit("SET_REQUEST_STATE", loadingState.ready);
+        } catch (err) {
+          console.error(err);
+          commit("SET_REQUEST_STATE", loadingState.error);
+        }
       }
     },
     addTeam({ commit, dispatch }: ActionCtx, team: Team) {
@@ -105,7 +191,6 @@ const store = {
           id: uuid(),
           name: "Default Name",
           units: [],
-          // sortMethod: "total"
         });
       } else {
         commit("UPSERT_TEAM", team);
@@ -117,6 +202,7 @@ const store = {
       data: { teamId: string; unit: Unit }
     ) {
       commit("ADD_UNIT", data);
+      dispatch("refreshMatches", { opponentTeamId: data.teamId });
       dispatch("saveTeams");
     },
     removeUnit(
@@ -124,14 +210,102 @@ const store = {
       data: { teamId: string; unit: Unit }
     ) {
       commit("REMOVE_UNIT", data);
+      dispatch("refreshMatches", { opponentTeamId: data.teamId });
       dispatch("saveTeams");
     },
     deleteTeam({ commit, dispatch }: ActionCtx, team: Team) {
       commit("DELETE_TEAM", team);
+      dispatch("refreshMatches", { opponentTeamId: team.id });
       dispatch("saveTeams");
     },
     saveTeams({ rootState, state }: ActionCtx) {
-      apiClient.updateTeams(rootState.player.player?.id || "", state.teams);
+      apiClient.updateOpponentTeams(
+        rootState.player.player?.id || "",
+        state.allyCode,
+        state.teams
+      );
+    },
+    saveMatches({ rootState, state }: ActionCtx) {
+      apiClient.updateMatches(rootState.player.player?.id || "", state.matches);
+    },
+    addMatch(
+      { dispatch, commit, state, rootState }: ActionCtx,
+      matchData: MatchPayload & { ignoreSave: boolean }
+    ) {
+      if (matchData.playerTeam && matchData.opponentTeam) {
+        const units: TeamMember[] = [
+          ...(matchData.playerTeam?.units || []).map((x) => {
+            return { ...x, owner: rootState.player.player?.name };
+          }),
+          ...(matchData.opponentTeam?.units || []).map((x) => {
+            return { ...x, owner: state.player?.name };
+          }),
+        ];
+        const match: Match = {
+          id: matchData?.id ? matchData.id : uuid(),
+          playerTeamId: matchData.playerTeam.id,
+          opponentTeamId: matchData.opponentTeam.id,
+          units,
+          gameMode: "",
+          name: `${matchData.playerTeam.name} Versus ${matchData.opponentTeam.name}`,
+          // sortDir?: "asc" | "desc";
+          // sortMethod?: SortType;
+          // searchName?: string;
+        };
+
+        commit("UPSERT_MATCH", match);
+
+        if (!matchData?.ignoreSave) {
+          dispatch("saveMatches");
+        }
+      }
+    },
+    removeMatch(
+      { dispatch, commit }: ActionCtx,
+      data: { matchId: string; ignoreSave?: boolean }
+    ) {
+      commit("REMOVE_MATCH", data.matchId);
+      if (!data.ignoreSave) {
+        dispatch("saveMatches");
+      }
+    },
+    // removeMatch({ commit }: ActionCtx, matchId: string) {},
+    async deleteOpponent({ rootState, commit }: ActionCtx) {
+      await apiClient.deleteOpponent(rootState.player.player?.id);
+      commit("RESET");
+    },
+    refreshMatches(
+      { rootState, dispatch, state, commit }: ActionCtx,
+      data: { playerTeamId?: string; opponentTeamId?: string }
+    ) {
+      let saveChanges = false;
+      state.matches.forEach((match) => {
+        if (
+          match.playerTeamId === data.playerTeamId ||
+          match.opponentTeamId === data.opponentTeamId
+        ) {
+          const playerTeam: Team | undefined = rootState.teams.teams.find(
+            (t) => t.id === match.playerTeamId
+          );
+          const opponentTeam: Team | undefined = state.teams.find(
+            (t) => t.id === match.opponentTeamId
+          );
+          if (!playerTeam || !opponentTeam) {
+            dispatch("removeMatch", { matchId: match.id, ignoreSave: true });
+          } else {
+            dispatch("addMatch", {
+              playerTeam,
+              opponentTeam,
+              id: match.id,
+              ignoreSave: true,
+            });
+          }
+          saveChanges = true;
+        }
+      });
+      if (saveChanges) {
+        dispatch("saveMatches");
+      }
     },
   },
 };
@@ -235,7 +409,11 @@ function getUniqueAbilitySpeed(
           anyTagsMatch(teamMemberData, unitData.id, ability?.scalesBy || [])
         ) {
           if (ability.scalesBy?.includes("Self")) {
-            total += getSpeedAmount(ability.value, teamMemberData.stats["5"]);
+            if (ability.scaleSource === "total") {
+              total += getSpeedAmount(ability.value, teamMemberData.stats["5"]);
+            } else {
+              total += getSpeedAmount(ability.value, teamMemberData.stats["5"]);
+            }
           } else {
             total += getSpeedAmount(ability.value, unitData.stats["5"]);
           }

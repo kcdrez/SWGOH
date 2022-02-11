@@ -10,6 +10,9 @@
     />
     <i class="fas fa-search magnifying-glass"></i>
     <ul class="list-container" v-if="showList">
+      <li v-if="filteredList.length === 0" class="no-selection">
+        No available selections
+      </li>
       <li v-for="item in filteredList" :key="item[id]">
         <div @click="selectItem(item)">{{ item[displayBy] }}</div>
       </li>
@@ -133,7 +136,7 @@ export default defineComponent({
   li {
     padding: 3px 10px;
 
-    &:hover {
+    &:not(.no-selection):hover {
       background-color: $gray-7;
     }
   }
