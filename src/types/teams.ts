@@ -10,8 +10,8 @@ export interface Team {
 
 export interface TeamMember {
   id: string;
-  speedBonus: number;
   isLeader?: boolean;
+  owner?: string;
 }
 
 export type SortType = "leader" | "name" | "subtotal" | "total" | undefined;
@@ -29,6 +29,7 @@ interface BasicSpeedAbility {
   tags?: string[];
   note?: string;
   scalesBy?: string[];
+  scaleSource?: "total" | "unique";
 }
 export interface SpeedAbility extends BasicSpeedAbility {
   special?: BasicSpeedAbility;
@@ -37,4 +38,15 @@ export interface SpeedAbility extends BasicSpeedAbility {
 
 interface OmicronAbility extends SpeedAbility {
   mode: "Territory War" | "Territory Battle" | "Grand Arena";
+}
+
+export interface MatchPayload {
+  playerTeam: Team | null;
+  opponentTeam: Team | null;
+  id?: string;
+}
+
+export interface Match extends Team {
+  playerTeamId: string;
+  opponentTeamId: string;
 }

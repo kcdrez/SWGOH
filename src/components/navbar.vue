@@ -29,7 +29,7 @@
               role="button"
               data-bs-toggle="dropdown"
             >
-              Planner
+              Planning
             </a>
             <ul class="dropdown-menu">
               <li>
@@ -42,6 +42,11 @@
               <li>
                 <router-link class="dropdown-item" :to="{ name: 'TeamPage' }"
                   >Teams</router-link
+                >
+              </li>
+              <li>
+                <router-link class="dropdown-item" :to="{ name: 'MatchUpPage' }"
+                  >Match Up</router-link
                 >
               </li>
             </ul>
