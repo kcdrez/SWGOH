@@ -14,15 +14,6 @@
       </button>
       <div class="collapse navbar-collapse" id="navbar-toggler">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              title="Click to change player details"
-              href="#"
-              @click="resetPlayer"
-              >{{ player?.name }}</a
-            >
-          </li>
           <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
@@ -47,8 +38,26 @@
             </ul>
           </li>
         </ul>
-        <div class="navbar-text">
-          <small>Version: {{ version }}</small>
+        <div class="d-flex">
+          <a
+            class="nav-link dropdown-toggle"
+            role="button"
+            data-bs-toggle="dropdown"
+          >
+            {{ player?.name || "Profile" }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li @click="resetPlayer" v-if="player">
+              <div class="dropdown-item">Logout</div>
+            </li>
+            <li>
+              <div class="dropdown-item versions">
+                <div>Version</div>
+                <div class="client">C: {{ version }}</div>
+                <!-- <div>S: server version</div> -->
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -80,5 +89,16 @@ nav {
   position: sticky;
   top: 0;
   z-index: 5;
+}
+
+.versions {
+  &:hover {
+    background: none !important;
+  }
+  .client,
+  .server {
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+  }
 }
 </style>
