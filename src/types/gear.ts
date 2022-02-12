@@ -1,3 +1,5 @@
+export const maxGearLevel = 13;
+
 export interface Gear {
   id: string;
   image: string;
@@ -6,6 +8,7 @@ export interface Gear {
   amount: number;
   lookupMissionList: Mission[];
   tier: number;
+  neededBy?: { name: string; id: string }[];
 }
 
 export interface Mission {
@@ -81,5 +84,5 @@ export type ConfigType = {
 export type OwnedCount = {
   count: number;
   id: string;
-  irrelevant: boolean;
+  irrelevant?: boolean;
 };

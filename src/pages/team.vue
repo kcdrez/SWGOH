@@ -1,8 +1,9 @@
 <template>
-  <div class="container speed-clocking-page">
+  <div class="container teams-page">
     <Error :state="requestState" :message="`Unable to find player data.`" />
     <Loading :state="requestState" message="Loading Player Data" size="lg">
-      <div class="input-group input-group-sm w-50 my-3">
+      <LastUpdated />
+      <div class="input-group input-group-sm new-team">
         <input
           type="text"
           class="form-control"
@@ -19,131 +20,23 @@
           Add New Team
         </button>
       </div>
-      <template v-for="team in teams" :key="team.id">
-        <hr class="w-100 border-dark border" />
-        <div class="input-group input-group-sm w-50 my-3">
-          <input
-            type="text"
-            class="form-control"
-            v-model="editTeamTarget.name"
-            v-if="editTeamTarget && editTeamTarget.id === team.id"
-            @keypress.enter="updateTeam(team)"
-          />
-          <span class="input-group-text flex-fill" v-else>{{ team.name }}</span>
-          <button
-            class="btn btn-primary"
-            type="button"
-            title="Edit team name"
-            v-if="!editTeamTarget"
-            @click="editTeam(team)"
-          >
-            <i class="fas fa-edit"></i>
-          </button>
-          <template v-if="editTeamTarget && editTeamTarget.id === team.id">
-            <button
-              class="btn btn-warning"
-              type="button"
-              title="Cancel changes"
-              @click="editTeamTarget = null"
-            >
-              <i class="fas fa-ban"></i>
-            </button>
-            <button
-              class="btn btn-success"
-              type="button"
-              @click="saveTeam"
-              :disabled="team.name.trim() === ''"
-              title="Save name changes"
-            >
-              <i class="fas fa-save"></i>
-            </button>
-          </template>
-          <button
-            class="btn btn-danger"
-            type="button"
-            @click="confirmDeleteTeam(team)"
-            title="Delete team"
-          >
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-        <table class="table table-bordered table-dark table-sm table-striped">
-          <thead>
-            <tr class="text-center">
-              <td width="10%">Unit</td>
-              <td width="7%">Square</td>
-              <td width="7%">Arrow</td>
-              <td width="7%">Diamond</td>
-              <td width="7%">Triangle</td>
-              <td width="7%">Circle</td>
-              <td width="7%">Cross</td>
-              <td width="10%">Set Bonus</td>
-              <td width="10%">Sub Total</td>
-              <td width="10%">Leader/Unique</td>
-              <td width="10%">Total</td>
-              <td width="8%">Actions</td>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="unit in team.units" :key="unit.id" class="text-center">
-              <td>{{ unitData(unit.id).name }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[0]) }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[1]) }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[2]) }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[3]) }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[4]) }}</td>
-              <td>{{ speedValueFromMod(unitData(unit.id).mods[5]) }}</td>
-              <td>{{ hasSpeedSet(unitData(unit.id)) ? "Yes" : "No" }}</td>
-              <td>{{ unitData(unit.id).stats["5"] }}</td>
-              <td>
-                <input
-                  type="number"
-                  class="form-control form-control-sm"
-                  v-model="unit.speedBonus"
-                  @change="speedBonusChange(unit)"
-                  min="0"
-                />
-              </td>
-              <td>
-                {{ unitData(unit.id).stats["5"] + (unit.speedBonus || 0) }}
-              </td>
-              <td>
-                <button
-                  type="button"
-                  class="btn btn-danger btn-sm"
-                  title="Remove from this team"
-                  @click="removeUnit({ teamId: team.id, unit })"
-                >
-                  <i class="fas fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="12">
-                <div class="input-group input-group-sm">
-                  <SearchInput
-                    :list="player.units"
-                    @select="selected = $event"
-                  />
-                  <button
-                    class="btn btn-sm btn-primary"
-                    @click="add(team, selected)"
-                  >
-                    Add
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </template>
+      <TeamTable
+        v-for="team in teams"
+        :key="team.id"
+        :team="team"
+        @delete="confirmDeleteTeam(team)"
+        size="lg"
+      />
       <Confirm
         :isOpen="deleteTarget !== null"
         title="Are you sure?"
         :text="`Are you sure you want to delete this team (${
           deleteTarget ? deleteTarget.name : ''
         })? This cannot be undone.`"
-        @confirm="deleteTeam(deleteTarget)"
+        @confirm="
+          deleteTeam(deleteTarget);
+          deleteTarget = null;
+        "
         @cancel="cancelDelete"
       />
     </Loading>
@@ -155,45 +48,33 @@ import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 import { v4 as uuid } from "uuid";
 
-import Loading from "../components/loading.vue";
-import Error from "../components/error.vue";
-import { Unit } from "../types/unit";
-import { Team } from "../types/speed";
-import { unvue } from "../utils";
+import { Team } from "../types/teams";
+import { loadingState } from "../types/loading";
+import TeamTable from "../components/teams/teamTable.vue";
 
 type dataModel = {
-  selected: null | Unit;
   newTeamName: string;
-  editTeamTarget: null | Team;
   deleteTarget: null | Team;
 };
 
 export default defineComponent({
   name: "TeamPage",
-  components: { Loading, Error },
+  components: { TeamTable },
   data() {
     return {
-      selected: null,
       newTeamName: "",
-      editTeamTarget: null,
       deleteTarget: null,
     } as dataModel;
   },
   computed: {
-    ...mapState("player", ["player", "requestState"]),
-    ...mapGetters("player", ["unitData"]),
-    ...mapState("speed", ["teams"]),
-    ...mapGetters("speed", ["speedValueFromMod", "hasSpeedSet"]),
+    ...mapState("teams", ["teams"]),
+    ...mapGetters(["someLoading"]),
+    requestState(): loadingState {
+      return this.someLoading(["player", "teams"]);
+    },
   },
   methods: {
-    ...mapActions("unit", ["fetchUnit"]),
-    ...mapActions("speed", [
-      "addTeam",
-      "addUnit",
-      "saveTeams",
-      "deleteTeam",
-      "removeUnit",
-    ]),
+    ...mapActions("teams", ["addTeam", "deleteTeam"]),
     addNewTeam() {
       if (this.newTeamName.trim() !== "") {
         this.addTeam({
@@ -204,44 +85,137 @@ export default defineComponent({
         this.newTeamName = "";
       }
     },
-    add(team: Team, unit: Unit) {
-      const exists = team.units.find((x) => x.id === unit.id);
-      if (exists) {
-        this.$toast(`${unit.name} is already added to ${team.name}.`, {
-          positionY: "top",
-          class: "toast-warning",
-        });
-      } else {
-        this.addUnit({ teamId: team.id, unit });
-      }
-    },
-    speedBonusChange(unit: any) {
-      //todo debouncer
-      this.saveTeams();
-    },
-    editTeam(team: Team) {
-      this.editTeamTarget = unvue(team);
-    },
-    saveTeam() {
-      this.addTeam(this.editTeamTarget);
-      this.editTeamTarget = null;
-    },
     confirmDeleteTeam(team: Team) {
       this.deleteTarget = team;
     },
     cancelDelete() {
       this.deleteTarget = null;
-      this.editTeamTarget = null;
-    },
-    removeUnitFromTeam(team: Team, unit: Unit) {
-      this.removeUnit({ teamId: team.id, unit });
     },
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.speed-clocking-page {
+@import "../styles/variables.scss";
+
+.teams-page {
   max-width: 90%;
+}
+
+.show-on-desktop {
+  .add-unit-container {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0.5rem 0;
+
+    .input-group {
+      width: 100%;
+      margin: auto;
+
+      ::v-deep(.search-input) {
+        width: calc(100% - 100px);
+      }
+      button {
+        width: 100px;
+      }
+    }
+  }
+}
+
+.mods-list {
+  display: flex;
+  justify-content: center;
+
+  ul {
+    margin: 0 1rem;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+.new-team,
+.rename-team {
+  width: 50%;
+  margin: 1rem 0;
+
+  @media only screen and (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.game-modes {
+  display: flex;
+  margin-bottom: 0.5rem;
+  justify-content: space-evenly;
+
+  @media only screen and (max-width: 500px) {
+    display: block;
+  }
+
+  @media only screen and (min-width: 501px) and (max-width: 991px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    *:not(.form-check) {
+      grid-column: 1 / 3;
+      text-align: center;
+    }
+
+    .form-check {
+      min-width: 141px;
+
+      &:nth-child(2n) {
+        justify-self: right;
+        margin-right: 1rem;
+      }
+
+      &:nth-child(2n + 1) {
+        justify-self: left;
+        margin-left: 1rem;
+      }
+    }
+  }
+}
+
+.sort-methods {
+  @media only screen and (min-width: 768px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.team-row {
+  > * {
+    padding: 0.5rem 1rem;
+
+    &:not(:last-child) {
+      border-bottom: solid $gray-5 1px;
+    }
+  }
+
+  .leader-container {
+    display: flex;
+
+    .form-check {
+      margin: auto;
+    }
+  }
+}
+
+.show-on-mobile {
+  tr:not(:last-child) {
+    border-bottom: black solid 3px;
+  }
+
+  .add-unit-container {
+    margin: 0.5rem;
+
+    ::v-deep(.search-input) {
+      width: calc(100% - 75px);
+    }
+    button {
+      min-width: 75px;
+    }
+  }
 }
 </style>

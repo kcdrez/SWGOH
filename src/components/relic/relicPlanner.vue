@@ -1,115 +1,42 @@
 <template>
-  <div class="collapse" id="relicSection">
-    <Loading :state="requestState" size="md" message="Loading Gear Data">
-      <h3 class="gear-header">
-        Relic Mats Needed to get {{ unit.name }} from Relic Level
-        {{ currentRelicLevel }} to
-        <select v-model.number="relicTarget">
-          <option
-            v-for="num in relicOptions(unit.relic_tier)"
-            :value="num"
-            :key="num"
-          >
-            Relic {{ num }}
-          </option>
-        </select>
-        :
+  <div v-if="!unit.is_ship && relicLevel < maxRelicLevel">
+    <div class="collapse-header section-header mt-3">
+      <h3 class="w-100" data-bs-toggle="collapse" href="#relicSection">
+        <div class="d-inline">Relic Planner</div>
       </h3>
-      <h3>
-        It will take approximately
-        {{ totalDays(unit) }} day{{ totalDays(unit) === 1 ? "" : "s" }} to get
-        to Relic Level {{ relicTarget }}.
-      </h3>
-      <div class="input-group input-group-sm w-50 mb-3">
-        <span
-          class="input-group-text c-help energy-text"
-          title="Energy used on Light and Dark side tables"
-          >Cantina Energy:</span
-        >
-        <span
-          class="input-group-text c-help"
-          title="How many times you refresh the energy using crystals"
-          >Daily Refreshes:</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="refreshes"
-          min="0"
-        />
-        <span
-          class="input-group-text c-help"
-          title="How much of your daily cantina energy used for farming other things (i.e. character shards)"
-          >Daily Energy Used:</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="energy"
-          min="0"
-          :max="165 + refreshes * 120"
-        />
+    </div>
+    <div id="relicSection" class="collapse" ref="relicSection">
+      <div class="relic-header">
+        <div class="current-level">
+          Current Relic Level: <b>{{ relicLevel }}</b>
+        </div>
+        <div class="target-level">
+          Target Level:
+          <select v-model.number="relicTarget">
+            <option
+              v-for="num in relicOptions(unit.relic_tier)"
+              :value="num"
+              :key="num"
+            >
+              Relic {{ num }}
+            </option>
+          </select>
+        </div>
       </div>
-      <table class="table table-bordered table-dark table-sm table-striped">
-        <thead>
-          <tr class="text-center">
-            <th width="20%">
-              <div class="c-pointer" @click="sortBy('name')">
-                Mat Name
-                <i class="fas mx-1" :class="sortIcon('name')"></i>
-              </div>
-              <input
-                class="form-control form-control-sm mx-auto my-1 w-75"
-                placeholder="Search"
-                v-model="searchName"
-              />
-            </th>
-            <th width="20%" class="c-pointer" @click="sortBy('location')">
-              Locations
-              <i class="fas mx-1" :class="sortIcon('location')"></i>
-            </th>
-            <th width="20%" class="c-pointer" @click="sortBy('amount')">
-              Amount
-              <i class="fas mx-1" :class="sortIcon('amount')"></i>
-            </th>
-            <th width="10%" class="c-pointer" @click="sortBy('time')">
-              Est. Time
-              <i class="fas mx-1" :class="sortIcon('time')"></i>
-            </th>
-            <!-- <th width="15%">Actions</th> -->
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="mat in filteredRelics" :key="mat.id">
-            <td class="text-center">
-              <RelicIcon :item="mat" />
-            </td>
-            <td class="text-center align-middle">{{ mat.location.node }}</td>
-            <td>
-              <OwnedAmount
-                :item="mat"
-                :needed="
-                  amountNeeded(mat, this.currentRelicLevel, this.relicTarget)
-                "
-              />
-            </td>
-            <td class="text-center align-middle">
-              {{
-                timeEstimation(mat, this.currentRelicLevel, this.relicTarget)
-              }}
-              Days
-            </td>
-            <!-- <td>
-              <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-primary">Left</button>
-                <button type="button" class="btn btn-secondary">Middle</button>
-                <button type="button" class="btn btn-info">Right</button>
-              </div>
-            </td> -->
-          </tr>
-        </tbody>
-      </table>
-    </Loading>
+      <Timestamp
+        class="time-estimate"
+        label="Estimated completion:"
+        :title="$filters.daysFromNow(totalDays(unit))"
+        :displayText="$filters.pluralText(totalDays(unit), 'day')"
+        displayClasses="d-inline"
+      />
+      <EnergySpent showCantina />
+      <RelicTable
+        :relicList="relicList"
+        :targetLevels="[{ level: relicLevel, target: relicTarget }]"
+        showHeader
+      />
+    </div>
   </div>
 </template>
 
@@ -117,79 +44,32 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { Relic } from "../../types/relic";
-import OwnedAmount from "./owned.vue";
-import RelicIcon from "./relicIcon.vue";
-import Loading from "../loading.vue";
+import RelicTable from "./relicTable.vue";
+import Timestamp from "../timestamp.vue";
+import EnergySpent from "../energySpent.vue";
 import { UpdateItem } from "../../types/planner";
+import { loadingState } from "../../types/loading";
+import { Relic, maxRelicLevel } from "../../types/relic";
+import { setupEvents } from "../../utils";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
-  components: { OwnedAmount, RelicIcon, Loading },
+  components: { RelicTable, Timestamp, EnergySpent },
   data() {
     return {
-      sortMethod: "",
-      sortDir: "asc",
-      searchName: "",
+      maxRelicLevel,
     };
   },
   computed: {
+    ...mapState("relic", ["relicConfig"]),
     ...mapState("unit", ["unit"]),
-    ...mapState("relic", ["requestState", "ownedRelics", "relicConfig"]),
-    ...mapGetters("relic", [
-      "relicOptions",
-      "timeEstimation",
-      "amountNeeded",
-      "totalDays",
-    ]),
-    currentRelicLevel(): number {
-      return this.unit?.relic_tier < 0 ? 0 : this.unit.relic_tier;
+    ...mapGetters("relic", ["relicOptions", "totalDays", "currentRelicLevel"]),
+    ...mapGetters(["someLoading"]),
+    requestState(): loadingState {
+      return this.someLoading(["relic", "unit"]);
     },
-    filteredRelics(): Relic[] {
-      const list: Relic[] = Object.values(this.relicConfig);
-      return list
-        .sort((a: Relic, b: Relic) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "locations") {
-            const compareA = a.location.node.toLowerCase();
-            const compareB = b.location.node.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "amount") {
-            const compareA = this.amountNeeded(a);
-            const compareB = this.amountNeeded(b);
-            if (this.sortDir === "asc") {
-              return compareA - compareB;
-            } else {
-              return compareB - compareA;
-            }
-          } else if (this.sortMethod === "time") {
-            const compareA = this.timeEstimation(a);
-            const compareB = this.timeEstimation(b);
-            if (this.sortDir === "asc") {
-              return compareA - compareB;
-            } else {
-              return compareB - compareA;
-            }
-          }
-          return 0;
-        })
-        .filter((relic) => {
-          const name = relic.name.toLowerCase().replace(/\s/g, "");
-          const id = relic.id.toLowerCase().replace(/\s/g, "");
-          const compare = this.searchName.toLowerCase().replace(/\s/g, "");
-          return name.includes(compare) || id.includes(compare);
-        });
+    relicLevel(): number {
+      return this.currentRelicLevel(this.unit);
     },
     relicTarget: {
       get(): number {
@@ -204,56 +84,61 @@ export default defineComponent({
         this.$store.dispatch("planner/updatePlannerTarget", payload);
       },
     },
-    refreshes: {
-      get(): number {
-        return this.$store.state.relic.refreshes.cantina;
-      },
-      set(value: number) {
-        this.$store.dispatch("relic/updateRefreshes", value);
-      },
-    },
-    energy: {
-      get(): number {
-        return this.$store.state.relic.energy.cantina;
-      },
-      set(value: number) {
-        this.$store.dispatch("relic/updateEnergy", value);
-      },
+    relicList(): Relic[] {
+      return Object.values(this.relicConfig);
     },
   },
-  methods: {
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
+  mounted() {
+    if (!this.unit.is_ship && this.relicLevel < maxRelicLevel) {
+      setupEvents(this.$refs.relicSection as HTMLElement, "relicPlanner");
+    }
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.gear-header {
+@import "../../styles/variables.scss";
+
+.relic-header,
+.time-estimate {
+  font-size: 1.25rem;
+  margin: 0.25rem 0;
+}
+
+.relic-header {
   select {
     width: 115px;
-    font-size: 1.25rem;
+  }
+
+  @media only screen and (min-width: 600px) and (max-width: 1200px) {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  @media only screen and (min-width: 1200px) {
+    display: flex;
+    justify-content: center;
+
+    .target-level,
+    .current-level {
+      margin: 0 2rem;
+    }
+  }
+
+  @media only screen and (max-width: 600px) {
+    text-align: center;
+
+    .target-level {
+      margin-top: 0.25rem;
+    }
   }
 }
 
-table {
-  thead {
-    tr {
-      vertical-align: top;
-    }
+.time-estimate {
+  text-align: center;
+
+  ::v-deep(span) {
+    font-weight: bold;
   }
 }
 
@@ -266,10 +151,5 @@ table {
       text-decoration: underline;
     }
   }
-}
-
-.energy-text {
-  width: 130px;
-  display: block;
 }
 </style>

@@ -16,7 +16,7 @@
         <button type="button" class="btn btn-success" @click="save">
           <i class="fas fa-save"></i>
         </button>
-        <button type="button" class="btn btn-warning" @click="editing = false">
+        <button type="button" class="btn btn-warning" @click="cancel">
           <i class="fas fa-ban"></i>
         </button>
       </template>
@@ -26,21 +26,23 @@
     </div>
     <div class="input-group input-group-sm mt-2">
       <span class="input-group-text label-count">Needed:</span>
-      <span class="input-group-text needed-count">{{ salvage.amount }}</span>
+      <span class="input-group-text needed-count">{{ needed }}</span>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
-import { Gear } from "../../types/gear";
+import { mapActions, mapGetters, mapState } from "vuex";
+
+import { Unit } from "../../types/unit";
+import { unvue } from "../../utils";
 
 export default defineComponent({
-  name: "Salvage",
+  name: "ShardsOwned",
   props: {
-    salvage: {
-      type: Object as () => Gear,
+    unit: {
+      type: Object as () => Unit,
       required: true,
     },
   },
@@ -51,13 +53,17 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("gear", ["gearOwnedCount"]),
+    ...mapState("shards", ["ownedShards"]),
+    ...mapGetters("shards", ["remainingShards"]),
+    needed(): number {
+      return this.remainingShards(this.unit);
+    },
   },
   methods: {
-    ...mapActions("gear", ["saveOwnedCount"]),
+    ...mapActions("shards", ["saveShardsCount"]),
     save() {
       this.editing = false;
-      this.saveOwnedCount({ count: this.owned, id: this.salvage.id });
+      this.saveShardsCount({ count: this.owned, id: this.unit.id });
     },
     edit() {
       this.editing = true;
@@ -65,9 +71,13 @@ export default defineComponent({
         (this.$refs?.saveButton as any).focus();
       });
     },
+    cancel() {
+      this.editing = false;
+      this.owned = unvue(this.ownedShards[this.unit.id]?.owned) || 0;
+    },
   },
   created() {
-    this.owned = this.gearOwnedCount(this.salvage);
+    this.cancel();
   },
 });
 </script>

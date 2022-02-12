@@ -1,9 +1,10 @@
 import { ActionContext } from "vuex";
 
 import { loadingState } from "../types/loading";
-import { State as RootState } from "./store";
+import { maxGearLevel } from "../types/gear";
+import { maxRelicLevel } from "../types/relic";
 import { ConfigType, UpdateItem } from "../types/planner";
-import { maxGearLevel } from "./gear";
+import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
 
 interface State {
@@ -32,14 +33,18 @@ const store = {
         return state.targetConfig[unitId]?.relic.target;
       };
     },
-    unitList(state: State, _getters: any, rootState: RootState) {
+    fullUnitList(state: State, _getters: any, rootState: RootState) {
       return state.unitList.map((id: string) => {
-        const match = rootState.player.player?.units.find((x) => x.id === id);
+        const matchOwned = rootState.player.player?.units.find(
+          (x) => x.id === id
+        );
+        const matchUnowned = rootState.unit.unitList.find((x) => x.id === id);
         return {
           id,
           gearTarget: state.targetConfig[id]?.gear.target,
           relicTarget: state.targetConfig[id]?.relic.target,
-          ...match,
+          ...matchOwned,
+          ...matchUnowned,
         };
       });
     },
@@ -82,14 +87,10 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit, dispatch }: ActionCtx, payload: any) {
+    async initialize({ commit }: ActionCtx, payload: any) {
       commit("SET_REQUEST_STATE", loadingState.loading);
-      await Promise.all(
-        //might have to put a limiter on this if the list is really big
-        (payload?.unitList || []).map((id: string) => dispatch("unit/fetchUnit", id, { root: true }))
-      );
-      commit("UPDATE_PLANNER", payload.targetData);
-      commit("SET_UNIT_LIST", payload.unitList);
+      commit("UPDATE_PLANNER", payload?.targetData || {});
+      commit("SET_UNIT_LIST", payload?.unitList || []);
       (payload?.unitList || []).forEach((id: string) => {
         if (!(id in payload.targetData)) {
           commit("UPDATE_PLANNER_ITEM", {
@@ -101,23 +102,46 @@ const store = {
       });
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    addUnit({ commit, dispatch }: ActionCtx, id: string) {
+    addUnit({ commit, dispatch, state }: ActionCtx, id: string) {
       commit("UPSERT_UNIT", id);
+      if (!(id in state.targetConfig)) {
+        dispatch("initPlannerTarget", id);
+      }
       dispatch("save");
     },
     updatePlannerTarget({ commit, dispatch }: ActionCtx, payload: UpdateItem) {
       commit("UPDATE_PLANNER_ITEM", payload);
       dispatch("save");
     },
-    initPlannerTarget({ commit, dispatch, state }: ActionCtx, unitId: string) {
-      const exists = state.unitList.find(x => x === unitId)
+    initPlannerTarget(
+      { commit, dispatch, state, rootState }: ActionCtx,
+      unitId: string
+    ) {
+      const exists = unitId in state.targetConfig;
       if (!exists) {
+        const playerUnit = rootState.player.player?.units.find(
+          (x) => x.id === unitId
+        );
+        let gearValue = maxGearLevel;
+        let relicValue = 1;
+        if (playerUnit) {
+          gearValue = Math.min(playerUnit.gear_level + 1, maxGearLevel);
+          if (playerUnit.relic_tier === -1) {
+            relicValue = 1;
+          } else {
+            relicValue = Math.min(playerUnit.relic_tier + 1, maxRelicLevel);
+          }
+        }
         commit("UPDATE_PLANNER_ITEM", {
           unitId,
           type: "gear",
-          value: maxGearLevel,
+          value: gearValue,
         });
-        commit("UPDATE_PLANNER_ITEM", { unitId, type: "relic", value: 5 });
+        commit("UPDATE_PLANNER_ITEM", {
+          unitId,
+          type: "relic",
+          value: relicValue,
+        });
         dispatch("save");
       }
     },
@@ -127,9 +151,12 @@ const store = {
     },
     save({ rootState, state }: ActionCtx) {
       if (rootState.player.player) {
-        apiClient.savePlannerData(rootState.player.player.id, { targetData: state.targetConfig, unitList: state.unitList });
+        apiClient.savePlannerData(rootState.player.player.id, {
+          targetData: state.targetConfig,
+          unitList: state.unitList,
+        });
       }
-    }
+    },
   },
 };
 

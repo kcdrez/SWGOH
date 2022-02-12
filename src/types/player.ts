@@ -4,7 +4,8 @@ export interface Player {
   ally_code: number;
   name: string;
   units: Unit[];
-  id: string;
+  id?: string;
+  updated: number;
 }
 
 export interface PlayerResponse extends Player {
@@ -13,6 +14,7 @@ export interface PlayerResponse extends Player {
   planner?: any;
   energyData?: any;
   teams?: any[];
+  shards: any;
 }
 
 export interface EquippedGear {

@@ -1,10 +1,23 @@
 <template>
-  <div class="collapse">
-    <Loading :state="requestState" size="md" message="Loading Gear Data">
-      <template v-if="unit.gear_level < maxGearLevel">
-        <h3 class="gear-header">
-          Gear Needed to get {{ unit.name }} from Gear Level
-          {{ currentGearLevel(unit) }} to
+  <div v-if="!unit.is_ship && currentGearLevel(unit) < maxGearLevel">
+    <div class="collapse-header section-header">
+      <h3 class="w-100" data-bs-toggle="collapse" href="#gearSection">
+        <div class="d-inline">Gear Planner</div>
+      </h3>
+      <i
+        class="far fa-question-circle show-help"
+        title="Click to view the assumptions this calculator makes"
+        data-bs-toggle="modal"
+        data-bs-target="#gearAssumptionsModal"
+      ></i>
+    </div>
+    <div id="gearSection" class="collapse" ref="gearSection">
+      <div class="gear-header">
+        <div class="current-level">
+          Current Gear Level: <b>{{ currentGearLevel(unit) }}</b>
+        </div>
+        <div class="target-level">
+          Target Level:
           <select v-model.number="gearTarget">
             <option
               v-for="num in gearOptions(unit.gear_level)"
@@ -14,99 +27,104 @@
               Gear {{ num }}
             </option>
           </select>
-          :
-        </h3>
-        <h3>
-          It will take approximately {{ totalDays(unit) }} day{{
-            totalDays(unit) === 1 ? "" : "s"
-          }}
-          to get to Gear Level {{ gearTarget }}.
-        </h3>
-        <div class="input-group input-group-sm w-50">
-          <span
-            class="input-group-text c-help energy-text"
-            title="Energy used on Light and Dark side tables"
-            >Standard Energy:</span
-          >
-          <span
-            class="input-group-text c-help"
-            title="How many times you refresh the energy using crystals"
-            >Daily Refreshes:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="refreshesStandard"
-            min="0"
-          />
-          <span
-            class="input-group-text c-help"
-            title="How much of your daily energy used for farming other things (i.e. character shards)"
-            >Daily Energy Used:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="energySpentStandard"
-            min="0"
-            :max="145 + refreshesStandard * 120 + 135"
-          />
         </div>
-        <div class="input-group input-group-sm my-2 w-50">
-          <span
-            class="input-group-text c-help energy-text"
-            title="Energy used on fleet/ship nodes"
-            >Fleet Energy:</span
-          >
-          <span
-            class="input-group-text c-help"
-            title="How many times you refresh the energy using crystals"
-            >Daily Refreshes:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="refreshesFleet"
-            min="0"
-          />
-          <span
-            class="input-group-text c-help"
-            title="How much of your daily energy used for farming other things (e.g. character shards)"
-            >Daily Energy Used:</span
-          >
-          <input
-            class="form-control"
-            type="number"
-            v-model.number="energySpentFleet"
-            min="0"
-            :max="145 + refreshesFleet * 120 + 45"
-          />
+      </div>
+      <Timestamp
+        class="time-estimate"
+        label="Estimated completion:"
+        :title="$filters.daysFromNow(totalDays(unit))"
+        :displayText="$filters.pluralText(totalDays(unit), 'day')"
+        displayClasses="d-inline"
+      />
+      <EnergySpent showFleet showStandard />
+      <GearTable
+        :gearList="fullSalvageList(this.unit, this.gearTarget)"
+        showHeader
+      />
+    </div>
+    <div class="modal fade" id="gearAssumptionsModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Gear Calculator Assumptions</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <ul>
+              <li>
+                Assumes the cheapest (by energy) node is farmed (e.g. if salvage
+                is obtainable in both Normal and Hard nodes, the Normal node
+                will be used in calculation).
+              </li>
+              <li>
+                For gear obtained from Daily Challenges, it is assumed that an
+                average of 60 per week is obtained.
+              </li>
+              <li>
+                Gear drop rate is 20% per node. There a handful that are only
+                10%. This will be addressed in a future update.
+              </li>
+              <li>
+                The time estimation is based solely on getting gear from node
+                farming and does not account for gear obtained in any other
+                method (TW, TB, GAC, stores, etc.). A future version of this
+                tool may account for some of these things.
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
         </div>
-        <GearTable :gearList="fullSalvageList(this.unit, this.gearTarget)" />
-      </template>
-      <template v-else>
-        <h3>{{ unit.name }} is already at gear level {{ maxGearLevel }}.</h3>
-      </template>
-    </Loading>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapGetters } from "vuex";
+import { mapState, mapGetters, mapActions } from "vuex";
 
-import Loading from "../loading.vue";
 import { UpdateItem } from "../../types/planner";
+import { loadingState } from "../../types/loading";
+import { maxGearLevel } from "../../types/gear";
 import GearTable from "./gearTable.vue";
+import EnergySpent from "../energySpent.vue";
+import { setupEvents } from "../../utils";
+import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
   name: "GearPlannerComponent",
-  components: { Loading, GearTable },
+  components: { GearTable, Timestamp, EnergySpent },
+  data() {
+    return {
+      maxGearLevel,
+    };
+  },
   computed: {
-    ...mapState("gear", ["requestState", "maxGearLevel"]),
     ...mapState("unit", ["unit"]),
-    ...mapGetters("gear", ["gearOptions", "fullSalvageList", "totalDays"]),
-    ...mapGetters("unit", ["currentGearLevel"]),
+    ...mapGetters("gear", [
+      "gearOptions",
+      "fullSalvageList",
+      "totalDays",
+      "currentGearLevel",
+    ]),
+    ...mapGetters(["someLoading"]),
+    ...mapState(["collapseSections"]),
+    requestState(): loadingState {
+      return this.someLoading(["gear", "unit"]);
+    },
     gearTarget: {
       get(): number {
         return (
@@ -123,72 +141,71 @@ export default defineComponent({
         this.$store.dispatch("planner/updatePlannerTarget", payload);
       },
     },
-    refreshesStandard: {
-      get(): number {
-        return this.$store.state.gear.refreshes.standard;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateRefreshes", {
-          value,
-          type: "standard",
-        });
-      },
-    },
-    refreshesFleet: {
-      get(): number {
-        return this.$store.state.gear.refreshes.fleet;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateRefreshes", {
-          value,
-          type: "fleet",
-        });
-      },
-    },
-    energySpentStandard: {
-      get(): number {
-        return this.$store.state.gear.energy.standard;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateEnergy", {
-          value,
-          type: "standard",
-        });
-      },
-    },
-    energySpentFleet: {
-      get(): number {
-        return this.$store.state.gear.energy.fleet;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateEnergy", {
-          value,
-          type: "fleet",
-        });
-      },
-    },
+  },
+  methods: {
+    ...mapActions(["toggleCollapse"]),
+  },
+  mounted() {
+    if (
+      !this.unit.is_ship &&
+      this.currentGearLevel(this.unit) < this.maxGearLevel
+    ) {
+      setupEvents(this.$refs.gearSection as HTMLElement, "gearPlanner");
+    }
   },
 });
 </script>
 
 <style lang="scss" scoped>
+@import "../../styles/variables.scss";
+
+.gear-header,
+.time-estimate {
+  font-size: 1.25rem;
+  margin: 0.25rem 0;
+}
+
 .gear-header {
   select {
     width: 115px;
-    font-size: 1.25rem;
+  }
+
+  @media only screen and (min-width: 600px) and (max-width: 1200px) {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  @media only screen and (min-width: 1200px) {
+    display: flex;
+    justify-content: center;
+
+    .target-level,
+    .current-level {
+      margin: 0 2rem;
+    }
+  }
+
+  @media only screen and (max-width: 600px) {
+    text-align: center;
+
+    .target-level {
+      margin-top: 0.25rem;
+    }
   }
 }
 
-table {
-  thead {
-    tr {
-      vertical-align: top;
-    }
+.time-estimate {
+  text-align: center;
+
+  ::v-deep(span) {
+    font-weight: bold;
   }
 }
 
 .collapse-header {
   text-shadow: 2px 2px 2px black;
+  display: flex;
+  align-items: center;
 
   a {
     text-decoration: none;
@@ -198,8 +215,15 @@ table {
   }
 }
 
-.energy-text {
-  width: 130px;
-  display: block;
+.show-help {
+  cursor: pointer;
+  color: $primary-light-1;
+  font-size: 1.5rem;
+  position: relative;
+  left: calc(-50% + 100px);
+
+  &:hover {
+    color: $primary-light-2;
+  }
 }
 </style>

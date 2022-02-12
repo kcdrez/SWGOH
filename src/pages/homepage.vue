@@ -21,7 +21,7 @@
             class="form-control"
             type="text"
             v-model="allyCode"
-            @keypress="validateAllyCode($event)"
+            @keypress="$filters.numbersOnly($event)"
           />
           <button
             type="button"
@@ -36,7 +36,7 @@
           Please verify that the code is correct and try again.
         </div>
       </div>
-      <Player v-else :player="player" />
+      <Player v-else />
     </Loading>
   </div>
 </template>
@@ -47,11 +47,10 @@ import { mapState, mapActions } from "vuex";
 
 import Gear from "../components/gear/gear.vue";
 import Player from "../components/player.vue";
-import Loading from "../components/loading.vue";
 
 export default defineComponent({
   name: "HomePage",
-  components: { Gear, Player, Loading },
+  components: { Gear, Player },
   computed: {
     ...mapState("player", ["player", "requestState"]),
     allyCode: {
@@ -65,12 +64,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("player", ["fetchPlayer"]),
-    validateAllyCode(e: KeyboardEvent) {
-      const keyCode = e.keyCode ? e.keyCode : e.which;
-      if (keyCode < 48 || keyCode > 57) {
-        e.preventDefault();
-      }
-    },
   },
 });
 </script>

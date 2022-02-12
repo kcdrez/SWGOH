@@ -1,11 +1,12 @@
 <template>
-  <div class="position-relative">
+  <div class="position-relative search-input">
     <input
       class="form-control form-control-sm search-text"
       type="text"
       v-model="searchText"
       @focus="showList = true"
       @blur="blur"
+      @keypress.enter="enterPress"
     />
     <i class="fas fa-search magnifying-glass"></i>
     <ul class="list-container" v-if="showList">
@@ -13,6 +14,7 @@
         <div @click="selectItem(item)">{{ item[displayBy] }}</div>
       </li>
     </ul>
+    <i class="fas fa-times clear-contents" @click="clear"></i>
   </div>
 </template>
 
@@ -83,11 +85,39 @@ export default defineComponent({
         this.showList = false;
       }, 300);
     },
+    submit(val: any, clearSelection: boolean) {
+      const match = this.list.find((x: any) => {
+        return x[this.searchBy] === val;
+      });
+      if (match) {
+        this.$emit("select", match);
+      } else if (clearSelection) {
+        this.$emit("select", null);
+      }
+    },
+    enterPress() {
+      if (this.filteredList.length > 0) {
+        const selected = this.filteredList[0];
+        this.showList = false;
+        this.$emit("select", selected);
+        this.$emit("enterPress", selected);
+        this.searchText = "";
+      }
+    },
+    clear() {
+      this.showList = false;
+      this.searchText = "";
+    },
+  },
+  watch: {
+    searchText(newVal) {
+      this.submit(newVal, true);
+    },
   },
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import "../styles/variables.scss";
 
 .list-container {
@@ -109,11 +139,24 @@ export default defineComponent({
   }
 }
 
-.magnifying-glass {
+.magnifying-glass,
+.clear-contents {
   position: absolute;
   color: $dark;
-  left: 10px;
   top: 7px;
+}
+
+.magnifying-glass {
+  left: 10px;
+}
+
+.clear-contents {
+  right: 10px;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.25);
+  }
 }
 
 input {

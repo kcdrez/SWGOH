@@ -1,6 +1,12 @@
 import { ActionContext } from "vuex";
 
-import { Gear, Mission, ConfigType, OwnedCount } from "../types/gear";
+import {
+  Gear,
+  Mission,
+  ConfigType,
+  OwnedCount,
+  maxGearLevel,
+} from "../types/gear";
 import {
   difficultyIds,
   tableIds,
@@ -10,11 +16,9 @@ import {
 } from "../types/locationMapping";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
-import { Unit } from "../types/unit";
+import { isUnit, Unit, UnitBasic, UnitTier } from "../types/unit";
 import { apiClient } from "../api/api-client";
 import { PlayerResponse } from "../types/player";
-
-export const maxGearLevel = 13;
 
 type updateEnergy = {
   value: number;
@@ -28,7 +32,6 @@ interface State {
   gearConfig: ConfigType;
   refreshes: { standard: number; fleet: number };
   energy: { standard: number; fleet: number };
-  maxGearLevel: number;
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -42,9 +45,20 @@ const store = {
     gearConfig: {},
     refreshes: { standard: 0, fleet: 0 },
     energy: { standard: 0, fleet: 0 },
-    maxGearLevel,
   },
   getters: {
+    currentGearLevel(_state: State, _getters: any) {
+      return (unit: Unit | UnitBasic): number => {
+        if (isUnit(unit)) {
+          return (
+            unit.gear_level +
+            unit.gear.filter((x: any) => x.is_obtained).length / 10
+          );
+        } else {
+          return 0;
+        }
+      };
+    },
     gearLocation(_state: State) {
       return (missions: Mission[]): string[] => {
         const locations: string[] = [];
@@ -94,8 +108,12 @@ const store = {
     },
     timeEstimation(state: State, getters: any) {
       return (gear: Gear): number => {
+        const locations = getters.gearLocation(gear.lookupMissionList);
+
         if (state.gearConfig[gear.id]?.irrelevant) {
           return 0;
+        } else if (locations.length <= 0) {
+          return -1;
         }
         const owned: number = getters.gearOwnedCount(gear);
         const remaining = gear.amount - owned;
@@ -130,7 +148,7 @@ const store = {
               }
 
               if (missionEnergy < energy) {
-                const dropRate = 0.2;
+                const dropRate = 0.2; //todo
                 const refreshes = ["C01D", "C01L"].includes(campaignId)
                   ? state.refreshes.standard
                   : state.refreshes.fleet;
@@ -153,14 +171,14 @@ const store = {
               totalDays = remaining / (60 / 7);
             }
           });
-          return Math.round(totalDays);
+          return Math.ceil(totalDays);
         } else {
           return 0;
         }
       };
     },
     totalDays(state: State, getters: any, rootState: RootState) {
-      return (unit: Unit): any => {
+      return (unit: Unit | UnitBasic): any => {
         const { target } = rootState.planner.targetConfig[unit.id].gear;
         let totalStandard = 0;
         let totalFleet = 0;
@@ -172,36 +190,36 @@ const store = {
           const isFleet = gear.lookupMissionList.some(
             (x: Mission) => x.missionIdentifier.campaignId === "C01SP"
           );
-          if (state.gearConfig[gear.id]?.irrelevant) {
+          const timeToGet = getters.timeEstimation(gear);
+
+          if (state.gearConfig[gear.id]?.irrelevant || timeToGet < 0) {
             //do nothing
           } else if (isChallenge) {
-            totalChallenges = Math.max(
-              getters.timeEstimation(gear),
-              totalChallenges
-            );
+            totalChallenges = Math.max(timeToGet, totalChallenges);
           } else if (isFleet) {
-            totalFleet += getters.timeEstimation(gear);
+            totalFleet += timeToGet;
           } else {
-            totalStandard += getters.timeEstimation(gear);
+            totalStandard += timeToGet;
           }
         });
         return Math.max(totalStandard, totalFleet, totalChallenges);
       };
     },
-    fullGearListByLevel(state: State, getters: any) {
-      return (unit: Unit): any[] => {
+    fullGearListByLevel(_state: State, getters: any) {
+      return (unit: Unit | UnitBasic): UnitTier[] => {
         if (unit) {
-          const { gear_level } = unit;
-          const futureGear =
-            unit?.unitTierList.filter((x: any) => x.tier >= gear_level) || [];
+          const gear_level = isUnit(unit) ? unit.gear_level : 0;
+          const futureGear = (unit?.gear_levels || []).filter(
+            ({ tier }: UnitTier) => tier >= gear_level
+          );
 
-          return futureGear.map((gear: any) => {
+          return futureGear.map(({ gear, tier }: UnitTier) => {
             return {
-              tier: gear.tier,
-              gear: gear.equipmentSetList
+              tier,
+              gear: gear
                 .map((id: string, index: number) => {
                   let alreadyEquipped = false;
-                  if (gear.tier === unit?.gear_level) {
+                  if (tier === gear_level && isUnit(unit)) {
                     alreadyEquipped = unit?.gear[index].is_obtained || false;
                   }
 
@@ -211,7 +229,7 @@ const store = {
                     return getters.findGearData(id);
                   }
                 })
-                .filter((x: any) => !!x),
+                .filter((x: UnitTier | null) => !!x),
             };
           });
         } else {
@@ -219,8 +237,8 @@ const store = {
         }
       };
     },
-    fullSalvageList(state: State, getters: any) {
-      return (unit: Unit, gearTarget: number): Gear[] => {
+    fullSalvageList(_state: State, getters: any) {
+      return (unit: Unit | UnitBasic, gearTarget: number): Gear[] => {
         let list: Gear[] = [];
         getters.fullGearListByLevel(unit).forEach((tier: any) => {
           if (tier.tier + 1 <= gearTarget) {
@@ -257,7 +275,7 @@ const store = {
     UPSERT_OWNED_GEAR(state: State, payload: OwnedCount) {
       state.gearConfig[payload.id] = {
         owned: payload.count || 0,
-        irrelevant: payload.irrelevant,
+        irrelevant: !!payload.irrelevant,
       };
     },
     UPDATE_REFRESHES(state: State, payload: updateEnergy) {
@@ -269,6 +287,7 @@ const store = {
   },
   actions: {
     initialize({ commit }: ActionCtx, player: PlayerResponse) {
+      commit("SET_REQUEST_STATE", loadingState.loading);
       commit("SET_GEAR_OWNED", player.gear);
 
       const refreshStandard: updateEnergy = {
@@ -293,12 +312,12 @@ const store = {
       commit("UPDATE_REFRESHES", refreshFleet);
       commit("UPDATE_ENERGY", energyStandard);
       commit("UPDATE_ENERGY", energyFleet);
+      commit("SET_REQUEST_STATE", loadingState.ready);
     },
     async fetchGear({ commit }: ActionCtx) {
       commit("SET_REQUEST_STATE", loadingState.loading);
 
       let gearList = await apiClient.fetchGearList();
-      // commit("SET_GEAR_OWNED", gearOwned);
       commit("SET_GEAR", gearList);
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
