@@ -81,7 +81,8 @@ button:disabled {
   font-size: 0.75rem;
 }
 
-.text-normal {
+.text-normal,
+.text-medium {
   font-size: 1rem;
 }
 
@@ -100,6 +101,10 @@ button:disabled {
       border-bottom-right-radius: 0;
     }
   }
+}
+
+.border-black {
+  border: 1px solid black;
 }
 
 .swgoh-table {

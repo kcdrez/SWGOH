@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="input-group input-group-sm rename-team">
+  <div :class="[size === 'sm' ? 'team-table-sm' : 'team-table-lg']">
+    <div class="input-group input-group-sm rename-team" v-if="allowEdit">
       <input
         type="text"
         class="form-control"
@@ -41,13 +41,13 @@
       <button
         class="btn btn-danger"
         type="button"
-        @click="$emit('delete')"
+        @click="$emit('deleteTeam')"
         title="Delete team"
       >
         <i class="fas fa-trash"></i>
       </button>
     </div>
-    <div class="game-modes" :class="{ 'game-modes-sm': size === 'sm' }">
+    <div class="game-modes" v-if="showGameMode">
       <div>Select a game mode to apply Omicron abilities:</div>
       <div class="form-check">
         <input
@@ -73,7 +73,7 @@
           Territory Wars
         </label>
       </div>
-      <div class="form-check">
+      <div class="form-check" v-if="size !== 'sm'">
         <input
           class="form-check-input"
           type="radio"
@@ -107,7 +107,7 @@
         <tr>
           <th>
             <div class="text-center">Team List</div>
-            <div class="sort-methods">
+            <div class="sort-methods" v-if="allowEdit">
               <div class="input-group input-group-sm my-2">
                 <span class="input-group-text">Sort By:</span>
                 <select
@@ -148,7 +148,7 @@
             >
           </div>
           <div class="leader-container">
-            <div class="form-check">
+            <div class="form-check" v-if="allowEdit">
               <input
                 class="form-check-input"
                 type="checkbox"
@@ -161,6 +161,7 @@
                 >Is Leader?</label
               >
             </div>
+            <div v-else>Is Leader? {{ unit.isLeader ? "Yes" : "No" }}</div>
           </div>
           <div v-if="showMods">
             <div class="mods-list">
@@ -195,52 +196,55 @@
             </div>
             <div class="my-2 text-center">
               Speed Set:
-              {{ hasSpeedSet(unitData(unit.id)) ? "Yes" : "No" }}
+              <span class="text-success" v-if="hasSpeedSet(unitData(unit.id))">
+                Yes
+              </span>
+              <span class="text-white-50" v-else>No</span>
             </div>
           </div>
           <div
             class="text-center"
-            v-if="unitData(unit.id).stats['5'] !== grandTotal(unit)"
+            v-if="unitData(unit.id).stats['5'] !== grandTotal(unit, team)"
           >
             Sub Total: {{ unitData(unit.id).stats["5"] }}
           </div>
           <div
             class="text-center"
             v-if="
-              leaderSpeedBonus(team, unit) > 0 ||
-              uniqueSpeedBonus(team, unit) > 0 ||
-              speedBonusFromTeamMembers(team, unit) > 0
+              leaderSpeedBonus(team, unit, showGameMode) > 0 ||
+              uniqueSpeedBonus(team, unit, showGameMode) > 0 ||
+              speedBonusFromTeamMembers(team, unit, showGameMode) > 0
             "
           >
-            <div v-if="leaderSpeedBonus(team, unit) > 0">
-              Leader Bonus: {{ leaderSpeedBonus(team, unit) }}
+            <div v-if="leaderSpeedBonus(team, unit, showGameMode) > 0">
+              Leader Bonus: {{ leaderSpeedBonus(team, unit, showGameMode) }}
             </div>
-            <div v-if="uniqueSpeedBonus(team, unit) > 0">
-              Unique Bonus: {{ uniqueSpeedBonus(team, unit) }}
+            <div v-if="uniqueSpeedBonus(team, unit, showGameMode) > 0">
+              Unique Bonus: {{ uniqueSpeedBonus(team, unit, showGameMode) }}
             </div>
-            <div v-if="speedBonusFromTeamMembers(team, unit) > 0">
+            <div v-if="speedBonusFromTeamMembers(team, unit, showGameMode) > 0">
               Other Bonuses:
-              {{ speedBonusFromTeamMembers(team, unit) }}
+              {{ speedBonusFromTeamMembers(team, unit, showGameMode) }}
             </div>
           </div>
-          <div class="text-center">Total: {{ grandTotal(unit) }}</div>
+          <div class="text-center">Total: {{ grandTotal(unit, team) }}</div>
           <div class="text-center">
             <button
               type="button"
               class="btn btn-danger btn-sm"
               title="Remove from this team"
-              @click="removeUnit({ teamId: team.id, unit })"
+              @click="$emit('removeUnit', unit)"
             >
               <i class="fas fa-trash"></i>
             </button>
           </div>
         </tr>
-        <tr v-if="team.units.length < 5">
+        <tr v-if="team.units.length < 5 && allowEdit">
           <td class="text-center">
             <div class="add-unit-container">
               <div class="input-group input-group-sm">
                 <SearchInput
-                  :list="player.units"
+                  :list="unitList"
                   @select="selected = $event"
                   @enterPress="add($event)"
                 />
@@ -279,6 +283,7 @@
               v-model="team.searchName"
             />
           </td>
+          <td v-if="showOwner" width="10%">Owner</td>
           <td width="25%" v-if="showMods">Mods</td>
           <td width="10%">
             <div class="c-pointer" @click="sortBy('subtotal')">
@@ -297,9 +302,16 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="unit in sortTeamUnits" :key="unit.id" class="text-center">
+        <tr
+          v-for="unit in sortTeamUnits"
+          :key="unit.id"
+          class="text-center align-middle"
+        >
           <td class="text-left">
-            <div class="form-check d-flex justify-content-center">
+            <div
+              class="form-check d-flex justify-content-center"
+              v-if="allowEdit"
+            >
               <input
                 class="form-check-input"
                 type="checkbox"
@@ -307,6 +319,9 @@
                 :disabled="disableLeader(unit.id)"
                 @change="speedBonusChange()"
               />
+            </div>
+            <div v-else :class="{ 'text-success': unit.isLeader }">
+              {{ unit.isLeader ? "Yes" : "No" }}
             </div>
           </td>
           <td>
@@ -317,6 +332,9 @@
               }"
               >{{ unitData(unit.id).name }}</router-link
             >
+          </td>
+          <td v-if="showOwner">
+            {{ unit.owner }}
           </td>
           <td v-if="showMods">
             <div class="mods-list">
@@ -351,42 +369,45 @@
             </div>
             <div class="my-2">
               Speed Set:
-              {{ hasSpeedSet(unitData(unit.id)) ? "Yes" : "No" }}
+              <span class="text-success" v-if="hasSpeedSet(unitData(unit.id))"
+                >Yes</span
+              >
+              <span class="text-white-50" v-else>No</span>
             </div>
           </td>
           <td>{{ unitData(unit.id).stats["5"] }}</td>
           <td>
-            <div v-if="leaderSpeedBonus(team, unit) > 0">
-              Leader Bonus: {{ leaderSpeedBonus(team, unit) }}
+            <div v-if="leaderSpeedBonus(team, unit, showGameMode) > 0">
+              Leader Bonus: {{ leaderSpeedBonus(team, unit, showGameMode) }}
             </div>
-            <div v-if="uniqueSpeedBonus(team, unit) > 0">
-              Unique Bonus: {{ uniqueSpeedBonus(team, unit) }}
+            <div v-if="uniqueSpeedBonus(team, unit, showGameMode) > 0">
+              Unique Bonus: {{ uniqueSpeedBonus(team, unit, showGameMode) }}
             </div>
-            <div v-if="speedBonusFromTeamMembers(team, unit) > 0">
+            <div v-if="speedBonusFromTeamMembers(team, unit, showGameMode) > 0">
               Other Bonuses:
-              {{ speedBonusFromTeamMembers(team, unit) }}
+              {{ speedBonusFromTeamMembers(team, unit, showGameMode) }}
             </div>
           </td>
           <td>
-            {{ grandTotal(unit) }}
+            {{ grandTotal(unit, team, showGameMode) }}
           </td>
           <td>
             <button
               type="button"
               class="btn btn-danger btn-sm"
               title="Remove from this team"
-              @click="removeUnit({ teamId: team.id, unit })"
+              @click="$emit('removeUnit', unit)"
             >
               <i class="fas fa-trash"></i>
             </button>
           </td>
         </tr>
-        <tr v-if="team.units.length < 5">
+        <tr v-if="team.units.length < 5 && allowEdit">
           <td colspan="7" class="text-center">
             <div class="add-unit-container">
               <div class="input-group input-group-sm">
                 <SearchInput
-                  :list="player.units"
+                  :list="unitList"
                   @select="selected = $event"
                   @enterPress="add($event)"
                 />
@@ -407,7 +428,7 @@
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters } from "vuex";
+import { mapGetters } from "vuex";
 import { defineComponent, PropType } from "vue";
 import _ from "lodash";
 
@@ -427,7 +448,10 @@ export default defineComponent({
     team: {
       required: true,
       type: Object as PropType<Team>,
-      selected: null,
+    },
+    unitList: {
+      required: false,
+      type: Object as PropType<Unit[]>,
     },
     size: {
       type: String,
@@ -435,6 +459,18 @@ export default defineComponent({
       validator: (val: string) => {
         return ["sm", "lg"].includes(val);
       },
+    },
+    allowEdit: {
+      type: Boolean,
+      default: true,
+    },
+    showGameMode: {
+      type: Boolean,
+      default: true,
+    },
+    showOwner: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -452,6 +488,7 @@ export default defineComponent({
       "leaderSpeedBonus",
       "uniqueSpeedBonus",
       "speedBonusFromTeamMembers",
+      "grandTotal",
     ]),
     sortTeamUnits(): TeamMember[] {
       return this.team.units.sort((a, b) => {
@@ -482,8 +519,8 @@ export default defineComponent({
           this.team.sortMethod === "total" ||
           this.team.sortMethod === undefined
         ) {
-          const compareA: number = this.grandTotal(a);
-          const compareB: number = this.grandTotal(b);
+          const compareA: number = this.grandTotal(a, this.team);
+          const compareB: number = this.grandTotal(b, this.team);
           if (this.team.sortDir === "asc") {
             return compareA - compareB;
           } else {
@@ -498,16 +535,15 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions("teams", ["addTeam", "addUnit", "saveTeams", "removeUnit"]),
     saveTeamName() {
       if (this.isEditing) {
         const newTeam: Team = unvue(this.team);
         newTeam.name = this.editTeamName;
-        this.addTeam(newTeam);
+        this.$emit("addTeam", newTeam);
       }
     },
     saveTeam() {
-      this.addTeam(this.team);
+      this.$emit("addTeam", this.team);
     },
     editTeam() {
       this.$nextTick(() => {
@@ -549,16 +585,8 @@ export default defineComponent({
         return false;
       });
     },
-    grandTotal(unit: TeamMember) {
-      return (
-        this.unitData(unit.id).stats["5"] +
-        this.leaderSpeedBonus(this.team, unit) +
-        this.uniqueSpeedBonus(this.team, unit) +
-        this.speedBonusFromTeamMembers(this.team, unit)
-      );
-    },
     speedBonusChange: _.debounce(function fn(this: any) {
-      this.saveTeams();
+      this.$emit("saveTeams");
     }, 300),
     add(unit: Unit) {
       const exists = this.team.units.find((x) => x.id === unit.id);
@@ -568,7 +596,7 @@ export default defineComponent({
           class: "toast-warning",
         });
       } else {
-        this.addUnit({ teamId: this.team.id, unit });
+        this.$emit("addUnit", unit);
       }
     },
   },
@@ -588,51 +616,83 @@ export default defineComponent({
     list-style: none;
   }
 }
-.rename-team {
-  width: 50%;
-  margin: 1rem 0;
 
-  @media only screen and (max-width: 768px) {
-    width: 100%;
+@mixin columns2 {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+
+  *:not(.form-check) {
+    grid-column: 1 / 3;
+    text-align: center;
+  }
+
+  .form-check {
+    min-width: 141px;
+
+    &:nth-child(2n) {
+      justify-self: right;
+      margin-right: 1rem;
+    }
+
+    &:nth-child(2n + 1) {
+      justify-self: left;
+      margin-left: 1rem;
+    }
   }
 }
-.game-modes {
-  &:not(.game-modes-sm) {
-    display: flex;
-    margin-bottom: 0.5rem;
-    justify-content: space-evenly;
+
+.team-table-lg {
+  .rename-team {
+    width: 50%;
+    margin: 1rem 0;
+
+    @media only screen and (max-width: 768px) {
+      width: 100%;
+    }
   }
 
-  @mixin columns2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  .game-modes {
+    display: flex;
+    justify-content: space-evenly;
+  }
+}
+.team-table-sm {
+  .rename-team {
+    width: 100%;
+    margin: 1rem 0;
+  }
+  .game-modes {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-column-gap: 5px;
 
     *:not(.form-check) {
-      grid-column: 1 / 3;
+      grid-column: 1 / 4;
       text-align: center;
     }
 
     .form-check {
-      min-width: 141px;
-
-      &:nth-child(2n) {
+      //the first element is the text that spans all columns which is not .form-check
+      &:nth-child(2) {
         justify-self: right;
-        margin-right: 1rem;
+      }
+      &:nth-child(3) {
+        justify-self: center;
+      }
+      &:nth-child(4) {
+        justify-self: left;
       }
 
-      &:nth-child(2n + 1) {
+      &:last-of-type {
         justify-self: left;
-        margin-left: 1rem;
       }
     }
   }
-
-  &.game-modes-sm {
-    @include columns2();
-  }
-
+}
+.game-modes {
+  margin-bottom: 0.5rem;
   @media only screen and (max-width: 500px) {
-    display: block;
+    display: block !important;
   }
 
   @media only screen and (min-width: 501px) and (max-width: 991px) {
