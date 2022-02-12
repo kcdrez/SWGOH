@@ -25,8 +25,12 @@
       </button>
     </div>
     <div class="input-group input-group-sm mt-2">
-      <span class="input-group-text label-count">Needed:</span>
-      <span class="input-group-text needed-count">{{ needed }}</span>
+      <span
+        class="input-group-text label-count c-help"
+        title="The remaining shards needed to get this character to 7 stars"
+        >Remaining:</span
+      >
+      <span class="input-group-text remaining-count">{{ remaining }}</span>
     </div>
   </div>
 </template>
@@ -55,8 +59,11 @@ export default defineComponent({
   computed: {
     ...mapState("shards", ["ownedShards"]),
     ...mapGetters("shards", ["remainingShards"]),
-    needed(): number {
-      return this.remainingShards(this.unit);
+    remaining(): number {
+      return (
+        this.remainingShards(this.unit) -
+        (this.ownedShards[this.unit.id]?.owned || 0)
+      );
     },
   },
   methods: {
@@ -83,10 +90,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.needed-count {
+.remaining-count {
   flex: 1 1 auto;
 }
 .label-count {
-  width: 75px;
+  width: 90px;
 }
 </style>

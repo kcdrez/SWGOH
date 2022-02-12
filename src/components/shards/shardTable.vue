@@ -1,7 +1,12 @@
 <template>
   <div>
     <table
-      class="table table-bordered table-dark table-sm table-striped mb-0 show-on-mobile swgoh-table"
+      class="
+        table table-bordered table-dark table-sm table-striped
+        mb-0
+        show-on-mobile
+        swgoh-table
+      "
     >
       <thead>
         <tr class="text-center align-middle">
@@ -90,7 +95,10 @@
       </tbody>
     </table>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
+      class="
+        table table-bordered table-dark table-sm table-striped
+        show-on-desktop
+      "
     >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
@@ -294,7 +302,7 @@ export default defineComponent({
 @import "../../styles/variables.scss";
 
 .show-on-desktop {
-  @media only screen and (max-width: 1500px) {
+  @media only screen and (max-width: 1200px) {
     ::v-deep(.nodes-container) {
       flex-basis: 100%;
 
@@ -306,6 +314,7 @@ export default defineComponent({
 
           &:first-child {
             border-radius: 0.2rem 0.2rem 0 0 !important;
+            justify-content: center;
           }
 
           &:last-child {
