@@ -55,6 +55,7 @@ const store = {
         const amountNeeded: number = getters.amountNeeded(mat, arr);
         const remaining: number = amountNeeded - owned;
 
+
         if (remaining > 0) {
           const totalEnergy =
             120 + 45 + 120 * state.refreshes.cantina - state.energy.cantina;
@@ -62,7 +63,7 @@ const store = {
             ? totalEnergy / mat.location.energy
             : 0;
           const amountPerDay = mat.dropRate ? triesPerDay * mat.dropRate : 0;
-          return amountPerDay === 0 ? -1 : Math.round(remaining / amountPerDay);
+          return amountPerDay === 0 ? -1 : Math.ceil(remaining / amountPerDay);
         } else if (amountNeeded === 0 && remaining > 0) {
           return -1;
         } else {
