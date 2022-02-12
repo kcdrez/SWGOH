@@ -127,7 +127,7 @@ nav.navbar-light {
   }
 }
 
-button:not(.btn-close) {
+button:not(.btn-close), .btn:not(.btn-close) {
   border: 1px solid $dark !important;
 }
 
