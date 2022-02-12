@@ -4,7 +4,7 @@ export interface Player {
   ally_code: number;
   name: string;
   units: Unit[];
-  id: string;
+  id?: string;
   updated: number;
 }
 

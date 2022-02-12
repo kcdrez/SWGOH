@@ -38,24 +38,33 @@ class ApiClient {
     return response.data;
   }
 
-  async saveGearData(playerId: string, gearData: ConfigType) {
-    await axios.patch(`${this.baseUrl}/gear/${playerId}`, { gear: gearData });
+  async saveGearData(playerId: string | undefined, gearData: ConfigType) {
+    if (playerId) {
+      await axios.patch(`${this.baseUrl}/gear/${playerId}`, { gear: gearData });
+    }
   }
 
-  async saveRelicData(playerId: string, relicData: RelicConfigType) {
-    await axios.patch(`${this.baseUrl}/relic/${playerId}`, {
-      relic: relicData,
-    });
+  async saveRelicData(
+    playerId: string | undefined,
+    relicData: RelicConfigType
+  ) {
+    if (playerId) {
+      await axios.patch(`${this.baseUrl}/relic/${playerId}`, {
+        relic: relicData,
+      });
+    }
   }
 
-  async savePlannerData(playerId: string, plannerData: any) {
-    await axios.patch(`${this.baseUrl}/player/planner/${playerId}`, {
-      planner: plannerData,
-    });
+  async savePlannerData(playerId: string | undefined, plannerData: any) {
+    if (playerId) {
+      await axios.patch(`${this.baseUrl}/player/planner/${playerId}`, {
+        planner: plannerData,
+      });
+    }
   }
 
-  async saveEnergyData(playerId: string, energyData: any) {
-    if (!!playerId) {
+  async saveEnergyData(playerId: string | undefined, energyData: any) {
+    if (playerId) {
       await axios.patch(
         `${this.baseUrl}/player/energy/${playerId}`,
         energyData
@@ -63,8 +72,8 @@ class ApiClient {
     }
   }
 
-  async updateTeams(playerId: string, teams: any[]) {
-    if (!!playerId) {
+  async updateTeams(playerId: string | undefined, teams: any[]) {
+    if (playerId) {
       await axios.patch(`${this.baseUrl}/player/teams/${playerId}`, { teams });
     }
   }
@@ -79,10 +88,15 @@ class ApiClient {
     return response.data;
   }
 
-  async saveShardFarming(playerId: string, shardData: OwnedShardsMap) {
-    await axios.patch(`${this.baseUrl}/player/shards/${playerId}`, {
-      shards: shardData,
-    });
+  async saveShardFarming(
+    playerId: string | undefined,
+    shardData: OwnedShardsMap
+  ) {
+    if (playerId) {
+      await axios.patch(`${this.baseUrl}/player/shards/${playerId}`, {
+        shards: shardData,
+      });
+    }
   }
 }
 

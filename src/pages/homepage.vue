@@ -21,7 +21,7 @@
             class="form-control"
             type="text"
             v-model="allyCode"
-            @keypress="validateAllyCode($event)"
+            @keypress="$filters.numbersOnly($event)"
           />
           <button
             type="button"
@@ -64,12 +64,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("player", ["fetchPlayer"]),
-    validateAllyCode(e: KeyboardEvent) {
-      const keyCode = e.keyCode ? e.keyCode : e.which;
-      if (keyCode < 48 || keyCode > 57) {
-        e.preventDefault();
-      }
-    },
   },
 });
 </script>

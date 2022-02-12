@@ -85,7 +85,8 @@ const store = {
         await dispatch("planner/initialize", player.planner, { root: true });
         dispatch("relic/initialize", player, { root: true });
         dispatch("gear/initialize", player, { root: true });
-        dispatch("speed/initialize", player, { root: true });
+        dispatch("teams/initialize", player, { root: true });
+        dispatch("opponents/initialize", player, { root: true });
         dispatch("shards/initialize", player, { root: true });
         commit("SET_REQUEST_STATE", loadingState.ready);
       } catch (err) {
