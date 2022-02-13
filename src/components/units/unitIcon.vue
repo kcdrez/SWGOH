@@ -4,12 +4,14 @@
       v-if="isLink"
       :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
     >
-      <img :src="unit?.image" :class="{ 'hide-on-mobile': hideImgOnMobile }" />
-      <h5>{{ unit.name }}</h5></router-link
-    >
+      <UnitPortrait :unit="unit" :size="size" />
+    </router-link>
     <template v-else>
-      <img :src="unit?.image" :class="{ 'hide-on-mobile': hideImgOnMobile }" />
-      <h4>{{ unit.name }}</h4>
+      <UnitPortrait
+        :unit="unit"
+        :size="size"
+        :class="{ 'hide-on-mobile': hideImgOnMobile }"
+      />
       <slot />
     </template>
   </div>
@@ -19,9 +21,11 @@
 import { defineComponent, PropType } from "vue";
 
 import { Unit } from "../../types/unit";
+import UnitPortrait from "./unitPortrait.vue";
 
 export default defineComponent({
   name: "UnitIcon",
+  components: { UnitPortrait },
   props: {
     unit: {
       required: true,
@@ -35,16 +39,20 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    size: {
+      type: String,
+      default: "md",
+    },
   },
 });
 </script>
 
 <style lang="scss" scoped>
-img {
-  display: block;
-  margin: auto;
-  max-width: 120px;
-}
+// img {
+//   display: block;
+//   margin: auto;
+//   max-width: 120px;
+// }
 
 h5 {
   text-align: center;

@@ -2,7 +2,8 @@
   <div>
     <SearchInput :list="unitList" @select="selected = $event" />
     <div v-if="selected" class="text-center mb-3">
-      <img class="d-block mx-auto my-1" :src="selected?.image" />
+      <!-- <img class="d-block mx-auto my-1" :src="selected?.image" /> -->
+      <UnitIcon :unit="selected" size="lg" />
       <div class="btn-group btn-group-sm text-center" role="group">
         <button
           class="btn btn-primary text-dark"
@@ -28,6 +29,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapGetters, mapState } from "vuex";
 
 import { Unit } from "../types/unit";
+import UnitIcon from "./units/unitIcon.vue";
 
 interface dataModel {
   selected: null | Unit;
@@ -35,6 +37,7 @@ interface dataModel {
 
 export default defineComponent({
   name: "Player",
+  components: { UnitIcon },
   computed: {
     ...mapState("unit", ["unitList"]),
     ...mapState("planner", { generalPlannerUnitList: "unitList" }),
