@@ -101,7 +101,10 @@
       </div>
     </div>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-mobile"
+      class="
+        table table-bordered table-dark table-sm table-striped
+        show-on-mobile
+      "
     >
       <thead>
         <tr>
@@ -258,7 +261,10 @@
       </tbody>
     </table>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
+      class="
+        table table-bordered table-dark table-sm table-striped
+        show-on-desktop
+      "
     >
       <thead>
         <tr class="text-center align-middle">
@@ -407,7 +413,7 @@
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 import { defineComponent, PropType } from "vue";
 import _ from "lodash";
 
@@ -445,6 +451,7 @@ export default defineComponent({
     } as dataModel;
   },
   computed: {
+    ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapGetters("teams", [
       "speedValueFromMod",

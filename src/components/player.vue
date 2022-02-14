@@ -1,18 +1,9 @@
 <template>
   <div>
-    <SearchInput :list="unitList" @select="selected = $event" />
-    <div v-if="selected" class="text-center mb-3">
-      <!-- <img class="d-block mx-auto my-1" :src="selected?.image" /> -->
-      <UnitIcon :unit="selected" size="lg" />
-      <div class="btn-group btn-group-sm text-center" role="group">
-        <button
-          class="btn btn-primary text-dark"
-          @click="
-            $router.push({ name: 'UnitPage', params: { unitId: selected.id } })
-          "
-        >
-          View Details
-        </button>
+    <SearchInput :list="unitList" @select="selectUnit($event)" />
+    <div v-if="selected" class="text-center my-3">
+      <UnitIcon :unit="selected" size="lg" isLink />
+      <div class="btn-group btn-group-sm text-center mt-1" role="group">
         <button class="btn btn-success text-dark" @click="addToGeneralPlanner">
           Add to General Planner
         </button>
@@ -28,11 +19,11 @@
 import { defineComponent } from "vue";
 import { mapActions, mapGetters, mapState } from "vuex";
 
-import { Unit } from "../types/unit";
+import { Unit, UnitBasic } from "../types/unit";
 import UnitIcon from "./units/unitIcon.vue";
 
 interface dataModel {
-  selected: null | Unit;
+  selected: null | Unit | UnitBasic;
 }
 
 export default defineComponent({
@@ -40,8 +31,10 @@ export default defineComponent({
   components: { UnitIcon },
   computed: {
     ...mapState("unit", ["unitList"]),
+
     ...mapState("planner", { generalPlannerUnitList: "unitList" }),
     ...mapGetters("shards", { shardPlannerList: "plannerList" }),
+    ...mapGetters("player", ["unitData"]),
   },
   data() {
     return {
@@ -55,6 +48,17 @@ export default defineComponent({
     ...mapActions("shards", {
       addUnitToShardPlanner: "addUnit",
     }),
+    selectUnit(unit: UnitBasic | null) {
+      if (!unit) {
+        return;
+      }
+      const playerUnit = this.unitData(unit?.id || "");
+      if (playerUnit) {
+        this.selected = playerUnit;
+      } else {
+        this.selected = unit;
+      }
+    },
     addToGeneralPlanner(): void {
       if (
         this.generalPlannerUnitList.find((x: string) => x === this.selected?.id)

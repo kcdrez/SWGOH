@@ -9,15 +9,18 @@
     >
       <img :src="unit?.image" :alt="unit?.name" />
       <span class="gear-level" :class="`gear-level${unit.gear_level}`"></span>
+      <span v-for="index in 7" :key="index" :class="starClasses(index)"></span>
       <span
         v-for="index in unit.stars"
         :key="index"
-        class="star-level"
         :class="`star-level-${index}`"
       ></span>
-      <span class="relic-level" v-if="unit.relic_tier >= 0">{{
-        unit.relic_tier
-      }}</span>
+      <RelicIcon
+        v-if="unit.relic_tier"
+        :relicLevel="unit.relic_tier"
+        :size="size"
+        :forceSide="unit.alignment"
+      />
     </div>
     <div class="unit-name">{{ unit?.name }}</div>
   </div>
@@ -27,9 +30,11 @@
 import { defineComponent, PropType } from "vue";
 
 import { Unit } from "../../types/unit";
+import RelicIcon from "./relicIcon.vue";
 
 export default defineComponent({
   name: "UnitPortrait",
+  components: { RelicIcon },
   props: {
     unit: {
       required: true,
@@ -38,6 +43,17 @@ export default defineComponent({
     size: {
       type: String,
       default: "md",
+    },
+  },
+  methods: {
+    starClasses(index: number) {
+      const classes = ["star-level"];
+      if (index <= this.unit.stars) {
+        classes.push("star-level-full", `star-level-${index}`);
+      } else {
+        classes.push("star-level-empty", `star-level-${index}`);
+      }
+      return classes;
     },
   },
 });
@@ -60,11 +76,6 @@ export default defineComponent({
         .gear-level13 {
           background-position: 0 50%;
         }
-      }
-
-      .relic-level {
-        font-size: 1rem;
-        line-height: 4;
       }
 
       .gear-level {
@@ -154,15 +165,9 @@ export default defineComponent({
       .gear-level13 {
         background-position: 0 -100%;
       }
-      .relic-level {
-        background-position: 0 -100%;
-      }
     }
     &.light-side {
       .gear-level13 {
-        background-position: 0 0;
-      }
-      .relic-level {
         background-position: 0 0;
       }
     }
@@ -173,11 +178,17 @@ export default defineComponent({
       display: block;
       width: 20%;
       height: calc(66% + 1px);
-      background-image: url("../../images/star.png");
       background-repeat: no-repeat;
       transform-origin: center bottom;
       position: absolute;
       background-size: 100%;
+
+      // &.star-level-empty {
+      //   background-image: url("../../images/empty_star.png");
+      // }
+      &.star-level-full {
+        background-image: url("../../images/star.png");
+      }
 
       &.star-level-1 {
         transform: translateX(-50%) rotate(-60deg);
@@ -202,20 +213,10 @@ export default defineComponent({
       }
     }
 
-    .relic-level {
+    ::v-deep(.relic-level) {
       position: absolute;
-      background-image: url("../../images/relicAtlas.png");
-      background-size: 100%;
       bottom: -3%;
       right: -14%;
-      width: 50%;
-      height: 50%;
-      color: #fff;
-      font-size: 10px;
-      line-height: 3.5;
-      font-weight: 700;
-      font-family: "Open Sans", sans-serif;
-      text-align: center;
     }
   }
 }
