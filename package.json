@@ -1,6 +1,10 @@
 {
   "name": "swgoh",
+<<<<<<< HEAD
   "version": "0.4.25.beta",
+=======
+  "version": "0.3.22.beta",
+>>>>>>> 5b66ca5cb027754265c8a295c96029eec686f083
   "description": "A webapp of tools for the video game Star Wars: Galaxy of Heroes",
   "main": "main.ts",
   "private": true,
