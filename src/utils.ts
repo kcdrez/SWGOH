@@ -20,7 +20,10 @@ export function setupEvents(el: HTMLElement, name: string) {
       store.dispatch("toggleCollapse", { name, hidden: false });
     });
   } else {
-    console.warn("cannot set up collapse events; HTML element doesn't exists");
+    console.warn(
+      "cannot set up collapse events; HTML element doesn't exists",
+      name
+    );
   }
 }
 
