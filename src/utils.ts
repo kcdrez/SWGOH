@@ -6,18 +6,25 @@ export function unvue(data: any) {
 }
 
 export function setupEvents(el: HTMLElement, name: string) {
-  if (
-    name in store.state.collapseSections &&
-    !store.state.collapseSections[name]
-  ) {
-    el.classList.value += " show";
+  if (el) {
+    if (
+      name in store.state.collapseSections &&
+      !store.state.collapseSections[name]
+    ) {
+      el.classList.value += " show";
+    }
+    el.addEventListener("hidden.bs.collapse", () => {
+      store.dispatch("toggleCollapse", { name, hidden: true });
+    });
+    el.addEventListener("shown.bs.collapse", () => {
+      store.dispatch("toggleCollapse", { name, hidden: false });
+    });
+  } else {
+    console.warn(
+      "cannot set up collapse events; HTML element doesn't exists",
+      name
+    );
   }
-  el.addEventListener("hidden.bs.collapse", () => {
-    store.dispatch("toggleCollapse", { name, hidden: true });
-  });
-  el.addEventListener("shown.bs.collapse", () => {
-    store.dispatch("toggleCollapse", { name, hidden: false });
-  });
 }
 
 export function formatDate(date: any, format: string) {

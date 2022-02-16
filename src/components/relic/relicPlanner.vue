@@ -8,11 +8,12 @@
     <div id="relicSection" class="collapse" ref="relicSection">
       <div class="relic-header">
         <div class="current-level">
-          Current Relic Level: <b>{{ relicLevel }}</b>
+          <div>Current Relic Level:</div>
+          <RelicIcon :relicLevel="relicLevel" :forceSide="unit.alignment" />
         </div>
         <div class="target-level">
           Target Level:
-          <select v-model.number="relicTarget">
+          <select v-model.number="relicTarget" class="mx-2">
             <option
               v-for="num in relicOptions(unit.relic_tier)"
               :value="num"
@@ -47,6 +48,7 @@ import { mapGetters, mapState } from "vuex";
 import RelicTable from "./relicTable.vue";
 import Timestamp from "../timestamp.vue";
 import EnergySpent from "../energySpent.vue";
+import RelicIcon from "../units/relicIcon.vue";
 import { UpdateItem } from "../../types/planner";
 import { loadingState } from "../../types/loading";
 import { Relic, maxRelicLevel } from "../../types/relic";
@@ -54,7 +56,7 @@ import { setupEvents } from "../../utils";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
-  components: { RelicTable, Timestamp, EnergySpent },
+  components: { RelicTable, Timestamp, EnergySpent, RelicIcon },
   data() {
     return {
       maxRelicLevel,
@@ -122,6 +124,8 @@ export default defineComponent({
     .target-level,
     .current-level {
       margin: 0 2rem;
+      display: flex;
+      align-items: center;
     }
   }
 
