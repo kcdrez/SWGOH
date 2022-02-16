@@ -1,33 +1,17 @@
 <template>
   <div class="mb-3">
-    <template v-if="lightSide.length > 0">
+    <template v-if="standardHoloTable.length > 0">
       <div class="collapse-header section-header mt-3">
-        <h3 class="w-100" data-bs-toggle="collapse" href="#lightSideSection">
-          <div class="d-inline">Light Side Battles</div>
+        <h3 class="w-100" data-bs-toggle="collapse" href="#holoTableSection">
+          <div class="d-inline">Light & Dark Side Battles</div>
         </h3>
       </div>
       <ShardTable
-        id="lightSideSection"
+        id="holoTableSection"
         class="collapse"
-        ref="lightSideSection"
-        :units="lightSide"
-        :initialSort="{ sortDir: 'desc', sortMethod: 'priority' }"
-        showUnitName
-        showPriority
-      />
-    </template>
-    <template v-if="darkSide.length > 0">
-      <div class="collapse-header section-header mt-3">
-        <h3 class="w-100" data-bs-toggle="collapse" href="#darkSideSection">
-          <div class="d-inline">Dark Side Battles</div>
-        </h3>
-      </div>
-      <ShardTable
-        id="darkSideSection"
-        class="collapse"
-        ref="darkSideSection"
-        :units="darkSide"
-        :initialSort="{ sortDir: 'desc', sortMethod: 'priority' }"
+        ref="holoTableSection"
+        :units="standardHoloTable"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -43,7 +27,7 @@
         class="collapse"
         ref="fleetSection"
         :units="fleet"
-        :initialSort="{ sortDir: 'desc', sortMethod: 'priority' }"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -59,7 +43,7 @@
         class="collapse"
         ref="cantinaSection"
         :units="cantina"
-        :initialSort="{ sortDir: 'desc', sortMethod: 'priority' }"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -79,6 +63,7 @@
         class="collapse"
         ref="territoryBattlesSection"
         :units="territoryBattles"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -94,6 +79,7 @@
         class="collapse"
         ref="raidsSection"
         :units="raids"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -109,6 +95,7 @@
         class="collapse"
         ref="conquestSection"
         :units="conquest"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -124,6 +111,7 @@
         class="collapse"
         ref="cantinaStoreSection"
         :units="cantinaStore"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -139,6 +127,7 @@
         class="collapse"
         ref="guildStore"
         :units="guildStore"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -158,6 +147,7 @@
         class="collapse"
         ref="squadArenaStoreSection"
         :units="squadArenaStore"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -177,6 +167,7 @@
         class="collapse"
         ref="galacticWarStoreSection"
         :units="galacticWarStore"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -196,6 +187,7 @@
         class="collapse"
         ref="fleetArenaStoreSection"
         :units="fleetArenaStore"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -215,6 +207,7 @@
         class="collapse"
         ref="guildEventsStoreSection"
         :units="guildEventsStore"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -230,6 +223,7 @@
         class="collapse"
         ref="shardStoreSection"
         :units="shardStore"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -245,6 +239,7 @@
         class="collapse"
         ref="legendarySection"
         :units="legendary"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -264,6 +259,7 @@
         class="collapse"
         ref="galacticLegendsSection"
         :units="galacticLegends"
+        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         showUnitName
         showPriority
       />
@@ -285,16 +281,12 @@ export default defineComponent({
   components: { ShardTable },
   computed: {
     ...mapGetters("shards", ["unitFarmingList", "unitNodes"]),
-    lightSide(): (Unit | UnitBasic)[] {
+    standardHoloTable(): (Unit | UnitBasic)[] {
       return this.unitFarmingList.filter((unit: (Unit | UnitBasic)[]) => {
         const nodes: FarmingNode[] = this.unitNodes(unit);
-        return nodes.some((node) => node.table === "Light Side");
-      });
-    },
-    darkSide(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: (Unit | UnitBasic)[]) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit);
-        return nodes.some((node) => node.table === "Dark Side");
+        return nodes.some(
+          (node) => node.table === "Light Side" || node.table === "Dark Side"
+        );
       });
     },
     fleet(): (Unit | UnitBasic)[] {
@@ -389,12 +381,8 @@ export default defineComponent({
   mounted() {
     this.$nextTick(() => {
       setupEvents(
-        (this.$refs?.lightSideSection as any)?.$el as HTMLElement,
-        "lightSideSection"
-      );
-      setupEvents(
-        (this.$refs?.darkSideSection as any)?.$el as HTMLElement,
-        "darkSideSection"
+        (this.$refs?.holoTableSection as any)?.$el as HTMLElement,
+        "holoTableSection"
       );
       setupEvents(
         (this.$refs?.cantinaSection as any)?.$el as HTMLElement,

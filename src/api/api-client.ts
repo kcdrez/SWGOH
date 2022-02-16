@@ -8,9 +8,9 @@ import { RelicConfigType } from "../types/relic";
 import { Match, Team } from "../types/teams";
 
 class ApiClient {
-  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
   // baseUrl = "http://7739-184-96-186-220.ngrok.io";
-  baseUrl = "http://localhost:3000/dev";
+  // baseUrl = "http://localhost:3000/dev";
 
   constructor() {}
 
