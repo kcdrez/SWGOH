@@ -301,16 +301,16 @@ export default defineComponent({
           } else if (this.sortMethod === "priority") {
             const priorityA =
               this.ownedShards[a.id]?.priority ||
-              this.ownedShards[a.id]?.tracking
-                ? 1
-                : 0;
+              (this.ownedShards[a.id]?.tracking ? 1 : 0);
             const priorityB =
               this.ownedShards[b.id]?.priority ||
-              this.ownedShards[b.id]?.tracking
-                ? 1
-                : 0;
+              (this.ownedShards[b.id]?.tracking ? 1 : 0);
 
-            if (this.sortDir === "asc") {
+            if (priorityA <= 0) {
+              return this.sortDir === "asc" ? 1 : -1;
+            } else if (priorityB <= 0) {
+              return this.sortDir === "asc" ? -1 : 1;
+            } else if (this.sortDir === "asc") {
               return priorityA > priorityB ? 1 : -1;
             } else {
               return priorityA > priorityB ? -1 : 1;
