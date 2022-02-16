@@ -80,7 +80,9 @@ export default defineComponent({
     },
     cancel() {
       this.editing = false;
-      this.owned = unvue(this.ownedShards[this.unit.id]?.owned) || 0;
+      if (this.ownedShards[this.unit.id]?.owned) {
+        this.owned = unvue(this.ownedShards[this.unit.id]?.owned);
+      }
     },
   },
   created() {

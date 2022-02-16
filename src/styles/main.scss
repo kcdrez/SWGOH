@@ -19,10 +19,25 @@ body {
   }
 
   .collapse.show {
-    .sticky-header {
-      position: sticky;
-      z-index: 4;
-      top: 56px;
+    .table-bordered {
+      .sticky-header {
+        position: sticky;
+        z-index: 4;
+        top: 56px;
+
+        th {
+          position: relative;
+
+          &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            border-right: 1px solid #3c3c3c;
+          }
+        }
+      }
     }
   }
 

@@ -1,12 +1,7 @@
 <template>
   <div>
     <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        mb-0
-        show-on-mobile
-        swgoh-table
-      "
+      class="table table-bordered table-dark table-sm table-striped mb-0 show-on-mobile swgoh-table"
     >
       <thead>
         <tr class="text-center align-middle">
@@ -95,10 +90,7 @@
       </tbody>
     </table>
     <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        show-on-desktop
-      "
+      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
     >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
@@ -113,25 +105,18 @@
               v-model="searchText"
             />
           </th>
+          <th :width="showUnitName ? '15%' : '25%'">Locations</th>
           <th
-            :width="showUnitName ? '20%' : '33%'"
-            class="c-pointer"
-            @click="sortBy('location')"
-          >
-            Locations
-            <i class="fas mx-1" :class="sortIcon('location')"></i>
-          </th>
-          <th
-            :width="showUnitName ? '20%' : '33%'"
+            :width="showUnitName ? '20%' : '25%'"
             class="c-pointer"
             @click="sortBy('progress')"
           >
             Amount/Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th :width="showUnitName ? '20%' : '33%'">Node Attempts per Day</th>
+          <th :width="showUnitName ? '20%' : '25%'">Node Attempts per Day</th>
           <th
-            width="20%"
+            width="10%"
             class="c-pointer"
             @click="sortBy('time')"
             v-if="showUnitName"
@@ -139,15 +124,24 @@
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
           </th>
+          <th
+            :width="showUnitName ? '15%' : '25%'"
+            :class="{ 'c-pointer': showPriority }"
+            @click="sortBy('priority')"
+          >
+            {{ showPriority ? "Priority" : "Actions" }}
+            <i
+              class="fas mx-1"
+              :class="sortIcon('priority')"
+              v-if="showPriority"
+            ></i>
+          </th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="unit in filteredUnitList" :key="unit.id">
           <td class="text-center align-middle" v-if="showUnitName">
             <UnitIcon :unit="unit" isLink />
-            <div>
-              Current Star Level: <b>{{ unit.stars || 0 }}</b>
-            </div>
           </td>
           <td class="align-middle text-center">
             <div v-if="unitLocations(unit).length <= 0" class="text-center">
@@ -164,7 +158,7 @@
             <ShardProgressBar :unit="unit" class="mt-2" />
           </td>
           <td class="align-middle nodes-per-day">
-            <NodesPerDay :unit="unit" />
+            <NodesPerDay :unit="unit" v-if="showNodesPerDay(unit)" />
           </td>
           <td class="text-center align-middle" v-if="showUnitName">
             <Timestamp
@@ -175,6 +169,31 @@
               :title="$filters.daysFromNow(shardTimeEstimation(unit))"
               displayClasses="d-inline"
             />
+          </td>
+          <td class="text-center align-middle">
+            <ShardPriority :unit="unit" v-if="showPriority" />
+            <div
+              class="btn-group btn-group-sm d-block text-center"
+              role="group"
+              v-else
+            >
+              <button
+                type="button"
+                class="btn btn-success"
+                title="Add to active farming list"
+                @click="add(unit)"
+              >
+                <i class="fas fa-heart"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger"
+                title="Remove from active farming list"
+                @click="remove(unit)"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -190,6 +209,7 @@ import ShardsOwned from "./shardsOwned.vue";
 import UnitIcon from "../units/unitIcon.vue";
 import ShardProgressBar from "./shardProgressBar.vue";
 import NodesPerDay from "./nodesPerDay.vue";
+import ShardPriority from "./shardPriority.vue";
 import Timestamp from "../timestamp.vue";
 import { Unit } from "../../types/unit";
 import { FarmingNode } from "../../types/shards";
@@ -202,6 +222,7 @@ export default defineComponent({
     ShardProgressBar,
     NodesPerDay,
     Timestamp,
+    ShardPriority,
   },
   props: {
     units: {
@@ -216,16 +237,28 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    showPriority: {
+      type: Boolean,
+      default: false,
+    },
+    initialSort: {
+      type: Object,
+    },
   },
   data() {
     return {
-      sortDir: "asc",
-      sortMethod: "name",
+      sortDir: this.initialSort?.sortDir || "asc",
+      sortMethod: this.initialSort?.sortMethod || "name",
       searchText: "",
     };
   },
   computed: {
-    ...mapGetters("shards", ["unitNodes", "shardTimeEstimation", "nodeLabel"]),
+    ...mapGetters("shards", [
+      "unitNodes",
+      "shardTimeEstimation",
+      "nodeLabel",
+      "remainingShards",
+    ]),
     ...mapState("shards", ["ownedShards"]),
     filteredUnitList(): Unit[] {
       return this.units
@@ -243,30 +276,45 @@ export default defineComponent({
             } else {
               return compareA > compareB ? -1 : 1;
             }
-          } else if (this.sortMethod === "locations") {
-            // const locationsA = this.gearLocation(a.lookupMissionList);
-            // const locationsB = this.gearLocation(b.lookupMissionList);
-            // if (this.sortDir === "asc") {
-            //   return locationsA[0] > locationsB[0] ? 1 : -1;
-            // } else {
-            //   return locationsA[0] < locationsB[0] ? -1 : 1;
-            // }
           } else if (this.sortMethod === "progress") {
-            // const progressA = this.gearOwnedCount(a) / a.amount;
-            // const progressB = this.gearOwnedCount(b) / b.amount;
-            // if (this.sortDir === "asc") {
-            //   return progressA - progressB;
-            // } else {
-            //   return progressB - progressA;
-            // }
+            const remainingA = this.remainingShards(a);
+            const remainingB = this.remainingShards(b);
+            const owedA = this.ownedShards[a.id]?.owned || 0;
+            const owedB = this.ownedShards[b.id]?.owned || 0;
+            const progressA = (owedA / remainingA) * 100;
+            const progressB = (owedB / remainingB) * 100;
+
+            if (this.sortDir === "asc") {
+              return progressA > progressB ? 1 : -1;
+            } else {
+              return progressA > progressB ? -1 : 1;
+            }
           } else if (this.sortMethod === "time") {
-            // const compareA = this.timeEstimation(a);
-            // const compareB = this.timeEstimation(b);
-            // if (this.sortDir === "asc") {
-            //   return compareA - compareB;
-            // } else {
-            //   return compareB - compareA;
-            // }
+            const estimateA = this.shardTimeEstimation(a);
+            const estimateB = this.shardTimeEstimation(b);
+
+            if (this.sortDir === "asc") {
+              return estimateA > estimateB ? 1 : -1;
+            } else {
+              return estimateA > estimateB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "priority") {
+            const priorityA =
+              this.ownedShards[a.id]?.priority ||
+              this.ownedShards[a.id]?.tracking
+                ? 1
+                : 0;
+            const priorityB =
+              this.ownedShards[b.id]?.priority ||
+              this.ownedShards[b.id]?.tracking
+                ? 1
+                : 0;
+
+            if (this.sortDir === "asc") {
+              return priorityA > priorityB ? 1 : -1;
+            } else {
+              return priorityA > priorityB ? -1 : 1;
+            }
           }
           return 0;
         });
@@ -294,6 +342,19 @@ export default defineComponent({
         return this.nodeLabel(x.id);
       });
     },
+    showNodesPerDay(unit: Unit): boolean {
+      const nodes: FarmingNode[] = this.unitNodes(unit);
+      return nodes.every((node) => {
+        return (
+          node.table === "Light Side" ||
+          node.table === "Dark Side" ||
+          node.table === "Cantina" ||
+          node.table === "Fleet"
+        );
+      });
+    },
+    remove(unit: Unit) {},
+    add(unit: Unit) {},
   },
 });
 </script>
