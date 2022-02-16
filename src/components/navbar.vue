@@ -14,24 +14,22 @@
       </button>
       <div class="collapse navbar-collapse" id="navbar-toggler">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              title="Click to change player details"
-              href="#"
-              @click="resetPlayer"
-              >{{ player?.name }}</a
-            >
-          </li>
           <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
               role="button"
               data-bs-toggle="dropdown"
             >
-              Planning
+              Character Progression
             </a>
             <ul class="dropdown-menu">
+              <li>
+                <router-link
+                  class="dropdown-item"
+                  :to="{ name: 'StarProgressionPage' }"
+                  >Character Farming</router-link
+                >
+              </li>
               <li>
                 <router-link
                   class="dropdown-item"
@@ -39,22 +37,53 @@
                   >General Planner</router-link
                 >
               </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              role="button"
+              data-bs-toggle="dropdown"
+            >
+              Team Building
+            </a>
+            <ul class="dropdown-menu">
               <li>
                 <router-link class="dropdown-item" :to="{ name: 'TeamPage' }"
-                  >Teams</router-link
+                  >Team Management</router-link
                 >
               </li>
               <li>
                 <router-link class="dropdown-item" :to="{ name: 'MatchUpPage' }"
-                  >Match Up</router-link
+                  >Versus</router-link
                 >
               </li>
             </ul>
           </li>
         </ul>
-        <div class="navbar-text">
-          <small>Version: {{ version }}</small>
-        </div>
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown profile-dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              role="button"
+              data-bs-toggle="dropdown"
+            >
+              {{ player?.name || "Profile" }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li @click="resetPlayer" v-if="player">
+                <div class="dropdown-item">Logout</div>
+              </li>
+              <li>
+                <div class="dropdown-item versions">
+                  <div>Version</div>
+                  <div class="client">C: {{ version }}</div>
+                  <!-- <div>S: server version</div> -->
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
   </nav>
@@ -85,5 +114,21 @@ nav {
   position: sticky;
   top: 0;
   z-index: 5;
+}
+
+.profile-dropdown {
+  @media only screen and (min-width: 990px) {
+    display: flex;
+  }
+  .versions {
+    &:hover {
+      background: none !important;
+    }
+    .client,
+    .server {
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+    }
+  }
 }
 </style>

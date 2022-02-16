@@ -14,12 +14,24 @@ export const shardMapping: ShardsConfigType = {
 
 export interface FarmingNode {
   id: string;
-  table: "Light" | "Dark" | "Fleet" | "Cantina";
-  difficulty: "Hard" | "Normal" | "";
-  map: number;
-  mission: string;
-  characters: { id: string; dropRate: number }[];
-  gear: any[];
+  table: string;
+  difficulty?: "Hard" | "Normal" | "";
+  map?: number;
+  mission?: string;
+  characters: NodeCharacter[];
+  gear?: any[];
+}
+
+interface NodeCharacter {
+  id: string;
+  dropRate?: number;
+  shardCount?: number;
+  prerequisites?: {
+    id?: string;
+    requirement: string;
+    tags?: string[];
+    recommended: string;
+  }[];
 }
 
 export type OwnedShardsMap = {
@@ -33,6 +45,7 @@ interface ShardData extends UnitNodeData {
 type UnitNodeData = {
   nodes: Node[];
   tracking?: boolean;
+  priority?: number;
 };
 
 export type Node = {

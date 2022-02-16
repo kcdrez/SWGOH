@@ -78,7 +78,10 @@ const store = {
       return (nodeId: string): string => {
         const node = state.shardFarming.find((x) => x.id === nodeId);
         if (node) {
-          let str = `${node.table} ${node.map}-${node.mission}`;
+          let str = `${node.table}`;
+          if (node.map) {
+            str += ` ${node.map}-${node.mission}`;
+          }
           if (node.difficulty) {
             str += ` (${node.difficulty})`;
           }
@@ -115,6 +118,25 @@ const store = {
         []
       );
     },
+    unitFarmingList(
+      _state: State,
+      _getters: any,
+      rootState: RootState,
+      rootGetters: any
+    ): (Unit | UnitBasic)[] {
+      const list: (Unit | UnitBasic)[] = [];
+      rootState.unit.unitList.forEach((unit) => {
+        const playerOwned: Unit = rootGetters["player/unitData"](unit.id);
+        if (playerOwned) {
+          if (playerOwned.stars < 7) {
+            list.push(playerOwned);
+          }
+        } else {
+          list.push(unit);
+        }
+      });
+      return list;
+    },
   },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
@@ -128,16 +150,14 @@ const store = {
     },
     UPSERT_SHARD_COUNT(
       state: State,
-      { id, count, nodes, tracking }: NodePayload
+      { id, count, nodes, tracking, priority }: NodePayload
     ) {
-      const match = state.ownedShards[id];
-      if (match && (tracking === undefined || tracking === null)) {
-        tracking = match.tracking || false;
-      }
+      const match = state.ownedShards[id] || {};
       state.ownedShards[id] = {
-        owned: count || 0,
-        nodes: nodes || [],
-        tracking,
+        owned: count || match?.owned || 0,
+        nodes: nodes || match?.nodes || [],
+        tracking: tracking || match?.tracking || false,
+        priority: priority || match?.priority || 0,
       };
     },
     ADD_UNIT(state: State, unitId: string) {
@@ -161,9 +181,15 @@ const store = {
   },
   actions: {
     async initialize({ commit }: ActionCtx, player: PlayerResponse) {
-      const farmingData = await apiClient.fetchFarmingData();
-      commit("SET_SHARD_FARMING", farmingData);
-      commit("SET_OWNED_SHARDS", player.shards);
+      try {
+        commit("SET_REQUEST_STATE", loadingState.loading);
+        const farmingData = await apiClient.fetchFarmingData();
+        commit("SET_SHARD_FARMING", farmingData);
+        commit("SET_OWNED_SHARDS", player.shards);
+        commit("SET_REQUEST_STATE", loadingState.ready);
+      } catch (err) {
+        commit("SET_REQUEST_STATE", loadingState.error);
+      }
     },
     saveShardsCount({ commit, dispatch }: ActionCtx, data: NodePayload) {
       commit("UPSERT_SHARD_COUNT", data);

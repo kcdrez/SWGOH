@@ -1,8 +1,13 @@
 <template>
   <div>
-    <template v-if="filteredSalvageList.length > 0">
+    <template v-if="gearList.length > 0">
       <table
-        class="table table-bordered table-dark table-sm table-striped mb-0 show-on-mobile swgoh-table"
+        class="
+          table table-bordered table-dark table-sm table-striped
+          mb-0
+          show-on-mobile
+          swgoh-table
+        "
       >
         <thead>
           <tr class="text-center align-middle">
@@ -44,6 +49,11 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="filteredSalvageList.length === 0">
+            <div class="empty-search">
+              There are no gear pieces that meet that search criteria.
+            </div>
+          </tr>
           <tr v-for="salvage in filteredSalvageList" :key="salvage.id">
             <div class="swgoh-row">
               <GearIcon :gear="salvage" class="text-center" />
@@ -118,7 +128,12 @@
         </tbody>
       </table>
       <table
-        class="table table-bordered table-dark table-sm table-striped mb-0 show-on-desktop swgoh-table"
+        class="
+          table table-bordered table-dark table-sm table-striped
+          mb-0
+          show-on-desktop
+          swgoh-table
+        "
       >
         <thead class="sticky-header">
           <tr class="text-center align-middle">
@@ -158,6 +173,11 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="filteredSalvageList.length === 0">
+            <td :colspan="showRequiredByUnit ? '6' : '5'" class="empty-search">
+              There are no gear pieces that meet that search criteria.
+            </td>
+          </tr>
           <tr v-for="salvage in filteredSalvageList" :key="salvage.id">
             <td class="text-center">
               <GearIcon :gear="salvage" />
@@ -409,4 +429,9 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.empty-search {
+  font-size: 1.5rem;
+  text-align: center;
+}
+</style>

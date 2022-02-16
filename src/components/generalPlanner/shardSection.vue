@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mb-3">
     <div class="collapse-header section-header mt-3">
       <h3>
         <div data-bs-toggle="collapse" href="#shard-section-table">

@@ -6,7 +6,7 @@
     />
     <Loading :state="requestState" message="Loading Unit Data" size="lg">
       <LastUpdated />
-      <UnitIcon :unit="unit" class="text-center">
+      <UnitIcon :unit="unit" size="lg" class="text-center">
         <div
           class="btn-group btn-group-sm d-block text-center my-2"
           role="group"
