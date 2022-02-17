@@ -122,6 +122,10 @@ button:disabled {
   border: 1px solid black;
 }
 
+.swgoh-page.container {
+  max-width: 90%;
+}
+
 .swgoh-table {
   .completed {
     color: $success-light-1;

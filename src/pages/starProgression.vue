@@ -1,5 +1,5 @@
 <template>
-  <div class="container star-progression-page">
+  <div class="container swgoh-page">
     <Error
       :state="requestState"
       message="An error occurred retrieving the player data."
@@ -31,7 +31,4 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.star-progression-page {
-  max-width: 90%;
-}
 </style>

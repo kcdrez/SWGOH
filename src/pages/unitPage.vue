@@ -1,5 +1,5 @@
 <template>
-  <div class="container unit-page">
+  <div class="container swgoh-page">
     <Error
       :state="requestState"
       :message="`Unable to find a unit with the ID of ${$route.params.unitId}.`"
@@ -114,7 +114,4 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.unit-page {
-  max-width: 90%;
-}
 </style>
