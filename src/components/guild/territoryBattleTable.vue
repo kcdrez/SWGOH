@@ -1,10 +1,7 @@
 <template>
   <div>
     <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        show-on-desktop
-      "
+      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
     >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
@@ -78,14 +75,13 @@
   </div>
 </template>
 
-
 <script lang="ts">
 import moment from "moment";
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
 export default defineComponent({
-  name: "TerritoryWarTable",
+  name: "TerritoryBattleTable",
   data() {
     return {
       sortDir: "asc",
@@ -187,17 +183,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
-.average-row {
-  --bs-table-accent-bg: #bfbfbf !important; //cant use variable here? same as $gray-6
-  // background-color: $gray-6 !important;
-  color: $dark !important;
-}
-.average-row2 {
-  --bs-table-accent-bg: #f2f2f2 !important; //cant use variable here? same as $gray-8
-  // background-color: $gray-8 !important;
-  color: $dark !important;
-}
-</style>
+<style lang="scss" scoped></style>

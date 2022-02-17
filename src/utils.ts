@@ -30,3 +30,7 @@ export function setupEvents(el: HTMLElement, name: string) {
 export function formatDate(date: any, format: string = "MMM DD, YYYY") {
   return moment(date).format(format);
 }
+
+export function round2Decimals(num: number) {
+  return Math.round((num + Number.EPSILON) * 100) / 100;
+}

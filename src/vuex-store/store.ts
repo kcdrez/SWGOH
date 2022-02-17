@@ -7,6 +7,7 @@ import { store as plannerStore, State as PlannerState } from "./planner";
 import { store as teamsStore, State as TeamsState } from "./teams";
 import { store as opponentsStore, State as OpponentsState } from "./opponents";
 import { store as shardStore, State as ShardState } from "./shards";
+import { store as guildStore, State as GuildState } from "./guild";
 import { loadingState } from "../types/loading";
 
 type ModuleTypes =
@@ -31,6 +32,7 @@ export interface State {
   teams: TeamsState;
   shards: ShardState;
   opponents: OpponentsState;
+  guild: GuildState;
 }
 
 const store = createStore<State>({
@@ -43,6 +45,7 @@ const store = createStore<State>({
     teams: teamsStore,
     shards: shardStore,
     opponents: opponentsStore,
+    guild: guildStore,
   },
   state: {
     requestState: loadingState.initial,
@@ -55,6 +58,7 @@ const store = createStore<State>({
     teams: teamsStore.state,
     shards: shardStore.state,
     opponents: opponentsStore.state,
+    guild: guildStore.state,
   },
   getters: {
     someLoading(state: State) {

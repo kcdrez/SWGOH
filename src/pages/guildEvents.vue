@@ -10,8 +10,8 @@
           <div class="d-inline">Territory War History</div>
         </h3>
       </div>
-      <TerritorWarTable id="guildTerritoryWarSection" class="collapse" />
-      <div class="collapse-header section-header mt-3">
+      <TerritoryWarTable id="guildTerritoryWarSection" class="collapse show" />
+      <!-- <div class="collapse-header section-header mt-3">
         <h3
           class="w-100"
           data-bs-toggle="collapse"
@@ -20,22 +20,22 @@
           <div class="d-inline">Territory Battles History</div>
         </h3>
       </div>
-      <TerritoryBattleTable id="guildTerritoryBattleSection" class="collapse" />
+      <TerritoryBattleTable id="guildTerritoryBattleSection" class="collapse" /> -->
     </Loading>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapGetters } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 
 import { loadingState } from "../types/loading";
-import TerritorWarTable from "../components/guild/territoryWarTable.vue";
+import TerritoryWarTable from "../components/guild/territoryWarTable.vue";
 import TerritoryBattleTable from "../components/guild/territoryBattleTable.vue";
 
 export default defineComponent({
   name: "GuildEventsPage",
-  components: { TerritorWarTable, TerritoryBattleTable },
+  components: { TerritoryWarTable, TerritoryBattleTable },
   data() {
     return {
       sortDir: "asc",
@@ -44,13 +44,27 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters(["someLoading"]),
+    ...mapState("player", { playerRequestState: "requestState" }),
     requestState(): loadingState {
-      return this.someLoading(["player"]);
+      return this.someLoading(["player", "guild"]);
     },
   },
-  methods: {},
+  methods: {
+    ...mapActions("guild", ["initialize"]),
+  },
+  watch: {
+    playerRequestState(newVal) {
+      if (newVal === loadingState.ready) {
+        this.initialize();
+      }
+    },
+  },
+  async created() {
+    if (this.playerRequestState === loadingState.ready) {
+      this.initialize();
+    }
+  },
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
