@@ -60,6 +60,24 @@
               </li>
             </ul>
           </li>
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              role="button"
+              data-bs-toggle="dropdown"
+            >
+              Guild
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <router-link
+                  class="dropdown-item"
+                  :to="{ name: 'GuildEventsPage' }"
+                  >Guild Event History</router-link
+                >
+              </li>
+            </ul>
+          </li>
         </ul>
         <ul class="navbar-nav">
           <li class="nav-item dropdown profile-dropdown">

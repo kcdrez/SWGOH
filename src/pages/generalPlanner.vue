@@ -1,6 +1,6 @@
 <template>
   <Loading :state="requestState" message="Loading Planner Data" size="lg">
-    <div class="container general-planner-page">
+    <div class="container swgoh-page">
       <LastUpdated />
       <div v-if="fullUnitList.length === 0">
         You have no units in the General Planner.
@@ -100,9 +100,4 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../styles/variables.scss";
-
-.general-planner-page {
-  max-width: 90%;
-}
 </style>

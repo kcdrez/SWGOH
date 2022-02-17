@@ -7,6 +7,7 @@ export interface Player {
   units: Unit[];
   id?: string;
   updated: number;
+  guild_id: string;
 }
 
 export interface PlayerResponse extends Player {

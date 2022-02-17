@@ -5,6 +5,7 @@ import GeneralPlannerPage from "../pages/generalPlanner.vue";
 import TeamPage from "../pages/team.vue";
 import MatchUpPage from "../pages/matchUpPage.vue";
 import StarProgressionPage from "../pages/starProgression.vue";
+import GuildEventsPage from "../pages/guildEvents.vue";
 
 const routes = [
   {
@@ -36,6 +37,11 @@ const routes = [
     path: "/character-farming",
     name: "StarProgressionPage",
     component: StarProgressionPage,
+  },
+  {
+    path: "/guild",
+    name: "GuildEventsPage",
+    component: GuildEventsPage,
   },
 ];
 
