@@ -45,12 +45,13 @@ interface ShardData extends UnitNodeData {
 type UnitNodeData = {
   nodes: Node[];
   tracking?: boolean;
-  priority?: number;
+  // priority?: number;
 };
 
 export type Node = {
   id: string;
-  count: number;
+  count?: number;
+  priority?: number;
 };
 
 export interface NodePayload extends UnitNodeData {
