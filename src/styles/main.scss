@@ -48,6 +48,16 @@ body {
         color: white;
       }
     }
+    .average-row {
+      --bs-table-accent-bg: #bfbfbf !important; //cant use variable here? same as $gray-6
+      // background-color: $gray-6 !important;
+      color: $dark !important;
+    }
+    .average-row2 {
+      --bs-table-accent-bg: #f2f2f2 !important; //cant use variable here? same as $gray-8
+      // background-color: $gray-8 !important;
+      color: $dark !important;
+    }
   }
 
   .section-header {
@@ -120,6 +130,10 @@ button:disabled {
 
 .border-black {
   border: 1px solid black;
+}
+
+.swgoh-page.container {
+  max-width: 90%;
 }
 
 .swgoh-table {

@@ -12,6 +12,7 @@
         ref="holoTableSection"
         :units="standardHoloTable"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Light Side', 'Dark Side']"
         showUnitName
         showPriority
       />
@@ -28,6 +29,7 @@
         ref="fleetSection"
         :units="fleet"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Fleet']"
         showUnitName
         showPriority
       />
@@ -44,6 +46,7 @@
         ref="cantinaSection"
         :units="cantina"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Cantina']"
         showUnitName
         showPriority
       />
@@ -64,6 +67,7 @@
         ref="territoryBattlesSection"
         :units="territoryBattles"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Territory Battle']"
         showUnitName
         showPriority
       />
@@ -80,6 +84,7 @@
         ref="raidsSection"
         :units="raids"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Raids']"
         showUnitName
         showPriority
       />
@@ -96,6 +101,7 @@
         ref="conquestSection"
         :units="conquest"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Conquest']"
         showUnitName
         showPriority
       />
@@ -112,6 +118,7 @@
         ref="cantinaStoreSection"
         :units="cantinaStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Cantina Battles Store']"
         showUnitName
         showPriority
       />
@@ -128,6 +135,7 @@
         ref="guildStore"
         :units="guildStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Guild Store']"
         showUnitName
         showPriority
       />
@@ -148,6 +156,7 @@
         ref="squadArenaStoreSection"
         :units="squadArenaStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Squad Arena Store']"
         showUnitName
         showPriority
       />
@@ -168,6 +177,7 @@
         ref="galacticWarStoreSection"
         :units="galacticWarStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Galactic War Store']"
         showUnitName
         showPriority
       />
@@ -188,6 +198,7 @@
         ref="fleetArenaStoreSection"
         :units="fleetArenaStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Fleet Arena Store']"
         showUnitName
         showPriority
       />
@@ -208,6 +219,10 @@
         ref="guildEventsStoreSection"
         :units="guildEventsStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="[
+          'Guild Events Store (Mk 1)',
+          'Guild Events Store (Mk 2)',
+        ]"
         showUnitName
         showPriority
       />
@@ -224,6 +239,7 @@
         ref="shardStoreSection"
         :units="shardStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Shard Store']"
         showUnitName
         showPriority
       />
@@ -240,6 +256,7 @@
         ref="legendarySection"
         :units="legendary"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Legendary Events']"
         showUnitName
         showPriority
       />
@@ -260,6 +277,7 @@
         ref="galacticLegendsSection"
         :units="galacticLegends"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
+        :nodeTableNames="['Galactic Legend Events']"
         showUnitName
         showPriority
       />

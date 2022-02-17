@@ -171,7 +171,11 @@
             />
           </td>
           <td class="text-center align-middle">
-            <ShardPriority :unit="unit" v-if="showPriority" />
+            <ShardPriority
+              :unit="unit"
+              v-if="showPriority"
+              :nodeTableNames="nodeTableNames"
+            />
             <div
               class="btn-group btn-group-sm d-block text-center"
               role="group"
@@ -181,7 +185,7 @@
                 type="button"
                 class="btn btn-success"
                 title="Add to active farming list"
-                @click="add(unit)"
+                @click="addUnit(unit.id)"
               >
                 <i class="fas fa-heart"></i>
               </button>
@@ -189,7 +193,7 @@
                 type="button"
                 class="btn btn-danger"
                 title="Remove from active farming list"
-                @click="remove(unit)"
+                @click="removeUnit(unit.id)"
               >
                 <i class="fas fa-trash"></i>
               </button>
@@ -244,6 +248,9 @@ export default defineComponent({
     initialSort: {
       type: Object,
     },
+    nodeTableNames: {
+      type: Array,
+    },
   },
   data() {
     return {
@@ -258,6 +265,7 @@ export default defineComponent({
       "shardTimeEstimation",
       "nodeLabel",
       "remainingShards",
+      "unitPriority",
     ]),
     ...mapState("shards", ["ownedShards"]),
     filteredUnitList(): Unit[] {
@@ -299,12 +307,8 @@ export default defineComponent({
               return estimateA > estimateB ? -1 : 1;
             }
           } else if (this.sortMethod === "priority") {
-            const priorityA =
-              this.ownedShards[a.id]?.priority ||
-              (this.ownedShards[a.id]?.tracking ? 1 : 0);
-            const priorityB =
-              this.ownedShards[b.id]?.priority ||
-              (this.ownedShards[b.id]?.tracking ? 1 : 0);
+            const priorityA = this.unitPriority(a, this.nodeTableNames);
+            const priorityB = this.unitPriority(b, this.nodeTableNames);
 
             if (priorityA <= 0) {
               return this.sortDir === "asc" ? 1 : -1;
@@ -322,6 +326,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("gear", ["saveOwnedCount"]),
+    ...mapActions("shards", ["removeUnit", "addUnit"]),
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
@@ -353,8 +358,6 @@ export default defineComponent({
         );
       });
     },
-    remove(unit: Unit) {},
-    add(unit: Unit) {},
   },
 });
 </script>

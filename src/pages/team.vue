@@ -1,5 +1,5 @@
 <template>
-  <div class="container teams-page">
+  <div class="container swgoh-page">
     <Error :state="requestState" :message="`Unable to find player data.`" />
     <Loading :state="requestState" message="Loading Player Data" size="lg">
       <LastUpdated />
@@ -97,10 +97,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../styles/variables.scss";
-
-.teams-page {
-  max-width: 90%;
-}
 
 .show-on-desktop {
   .add-unit-container {
