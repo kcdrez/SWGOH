@@ -1,8 +1,8 @@
 <template>
   <div class="input-group input-group-sm">
-    <span class="input-group-text label-count">Priority:</span>
+    <span class="input-group-text label-priority">Priority:</span>
     <input
-      class="form-control owned-count"
+      class="form-control priority-level"
       type="number"
       v-model.number="priority"
       min="0"
@@ -29,8 +29,8 @@
 import { defineComponent, PropType } from "vue";
 import { mapActions, mapGetters, mapState } from "vuex";
 
-import { unvue } from "../../utils";
 import { Unit } from "../../types/unit";
+import { FarmingNode, Node } from "../../types/shards";
 
 export default defineComponent({
   name: "ShardPriority",
@@ -38,6 +38,10 @@ export default defineComponent({
     unit: {
       required: true,
       type: Object as PropType<Unit>,
+    },
+    nodeTableNames: {
+      type: Array,
+      required: true,
     },
   },
   data() {
@@ -48,16 +52,30 @@ export default defineComponent({
   },
   computed: {
     ...mapState("shards", ["ownedShards"]),
+    ...mapGetters("shards", ["unitNodes", "unitPriority"]),
+    nodeData(): Node[] {
+      const nodesList: FarmingNode[] = this.unitNodes(this.unit);
+      const nodesListByUnit: Node[] =
+        this.ownedShards[this.unit.id]?.nodes || [];
+
+      return nodesList.map((node) => {
+        const match = nodesListByUnit.find((n) => n.id === node.id);
+        return {
+          id: node.id,
+          priority: this.nodeTableNames.includes(node.table)
+            ? this.priority
+            : match?.priority,
+        };
+      });
+    },
   },
   methods: {
     ...mapActions("shards", ["saveShardsCount"]),
     save() {
       this.editing = false;
       const payload: any = { id: this.unit.id };
-      if (this.priority > 0) {
-        payload.tracking = true;
-        payload.priority = this.priority;
-      }
+
+      payload.nodes = this.nodeData;
       this.saveShardsCount(payload);
     },
     edit() {
@@ -68,11 +86,7 @@ export default defineComponent({
     },
     cancel() {
       this.editing = false;
-      if (this.ownedShards[this.unit.id]?.priority) {
-        this.priority = unvue(this.ownedShards[this.unit.id]?.priority);
-      } else if (this.ownedShards[this.unit.id]?.tracking) {
-        this.priority = 1;
-      }
+      this.priority = this.unitPriority(this.unit, this.nodeTableNames);
     },
   },
   created() {

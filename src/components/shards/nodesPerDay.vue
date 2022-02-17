@@ -71,7 +71,7 @@ export default defineComponent({
     unitNodeData(): NodePayload {
       return {
         id: this.unit.id,
-        count: this.ownedShards[this.unit.id]?.owned || 0,
+        count: this.ownedShards[this.unit.id]?.owned ?? 0,
         nodes: this.nodes,
       };
     },
@@ -114,10 +114,10 @@ export default defineComponent({
     const nodesListByUnit: Node[] = this.ownedShards[this.unit.id]?.nodes || [];
 
     const finalList: Node[] = nodesList.map((node) => {
-      const match = nodesListByUnit.find((n) => n.id === node.id);
+      const { count } = nodesListByUnit.find((n) => n.id === node.id) || {};
       return {
         id: node.id,
-        count: match?.count ?? 5,
+        count: count ?? 0,
       };
     });
     this.nodes = unvue(finalList);

@@ -10,6 +10,7 @@ import {
   NodePayload,
   OwnedShardsMap,
   shardMapping,
+  Node,
 } from "../types/shards";
 
 interface State {
@@ -62,7 +63,7 @@ const store = {
           nodes[0].characters.find((x) => x.id === unit.id)?.dropRate || 0;
         const nodesList = state.ownedShards[unit.id]?.nodes || [];
         const nodesPerDay = nodesList.reduce(
-          (total, node) => total + node.count,
+          (total, node) => total + (node?.count ?? 0),
           0
         );
 
@@ -89,6 +90,20 @@ const store = {
         } else {
           return nodeId;
         }
+      };
+    },
+    unitPriority(state: State, getters: any) {
+      return (unit: Unit, tableNames: string[]): number => {
+        const matchFarmingNode: FarmingNode | undefined = getters
+          .unitNodes(unit)
+          .find((node: FarmingNode) => {
+            return tableNames.includes(node.table);
+          });
+        const nodesListByUnit: Node[] = state.ownedShards[unit.id]?.nodes || [];
+        const match = nodesListByUnit.find(
+          (n) => n.id === matchFarmingNode?.id
+        );
+        return match?.priority ?? 0;
       };
     },
     plannerList(
@@ -150,14 +165,21 @@ const store = {
     },
     UPSERT_SHARD_COUNT(
       state: State,
-      { id, count, nodes, tracking, priority }: NodePayload
+      { id, count, nodes, tracking }: NodePayload
     ) {
       const match = state.ownedShards[id] || {};
+      const nodesData: Node[] = (nodes || []).map((node) => {
+        const matchNode = match.nodes.find((n) => n.id === node.id);
+        return {
+          id: node.id,
+          count: node?.count ?? matchNode?.count ?? 0,
+          priority: node.priority ?? matchNode?.priority ?? 0,
+        };
+      });
       state.ownedShards[id] = {
         owned: count || match?.owned || 0,
-        nodes: nodes || match?.nodes || [],
+        nodes: nodesData,
         tracking: tracking || match?.tracking || false,
-        priority: priority || match?.priority || 0,
       };
     },
     ADD_UNIT(state: State, unitId: string) {
