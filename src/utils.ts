@@ -27,6 +27,6 @@ export function setupEvents(el: HTMLElement, name: string) {
   }
 }
 
-export function formatDate(date: any, format: string) {
+export function formatDate(date: any, format: string = "MMM DD, YYYY") {
   return moment(date).format(format);
 }

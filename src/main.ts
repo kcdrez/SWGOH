@@ -15,6 +15,7 @@ import ProgressBar from "./components/progressBar.vue";
 import Loading from "./components/loading.vue";
 import Error from "./components/error.vue";
 import LastUpdated from "./components/lastUpdated.vue";
+import { formatDate } from "./utils";
 
 const app = createApp(App);
 
@@ -45,6 +46,7 @@ app.config.globalProperties.$filters = {
       e.preventDefault();
     }
   },
+  formatDate,
 };
 
 app
