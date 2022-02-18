@@ -48,15 +48,81 @@ body {
         color: white;
       }
     }
-    .average-row {
-      --bs-table-accent-bg: #bfbfbf !important; //cant use variable here? same as $gray-6
-      // background-color: $gray-6 !important;
-      color: $dark !important;
+
+    .row-label {
+      display: none;
     }
-    .average-row2 {
-      --bs-table-accent-bg: #f2f2f2 !important; //cant use variable here? same as $gray-8
-      // background-color: $gray-8 !important;
-      color: $dark !important;
+
+    @media only screen and (min-width: 769px) {
+      tfoot {
+        &,
+        tr {
+          --bs-table-accent-bg: #bfbfbf !important; //cant use variable here? same as $gray-6
+          color: $dark !important;
+
+          &:nth-of-type(2n + 1) {
+            --bs-table-accent-bg: #f2f2f2 !important; //cant use variable here? same as $gray-8
+          }
+        }
+      }
+    }
+
+    @media only screen and (max-width: 768px) {
+      thead {
+        display: none;
+      }
+      tbody,
+      tfoot {
+        tr {
+          display: grid;
+
+          &:not(:last-child) {
+            border-bottom: solid black 3px;
+          }
+          td.row-label {
+            font-size: 1.5rem;
+          }
+          .row-label {
+            display: unset;
+          }
+          .category-header {
+            display: none;
+          }
+        }
+        .flex-sm {
+          display: flex;
+          align-items: center;
+
+          .row-label {
+            width: 125px;
+            text-align: center;
+          }
+        }
+      }
+      tbody {
+        tr {
+          --bs-table-accent-bg: var(--bs-table-striped-bg) !important;
+
+          td {
+            &:nth-of-type(2n + 1) {
+              --bs-table-accent-bg: var(--bs-table-bg);
+            }
+          }
+        }
+      }
+      tfoot {
+        border-top: solid black 3px;
+        tr {
+          --bs-table-accent-bg: #bfbfbf !important;
+          color: $dark;
+
+          td {
+            &:nth-of-type(2n + 1) {
+              --bs-table-accent-bg: #f2f2f2 !important;
+            }
+          }
+        }
+      }
     }
   }
 

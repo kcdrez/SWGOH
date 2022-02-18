@@ -1,6 +1,9 @@
 <template>
   <div>
-    <table class="table table-bordered table-dark table-sm table-striped mb-0">
+    <table
+      class="table table-bordered table-dark table-sm table-striped"
+      :class="[accessLevel < 3 ? 'mb-3' : 'mb-0']"
+    >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
           <th width="20%">
@@ -33,34 +36,53 @@
           :key="event.id"
           class="text-center align-middle"
         >
-          <td>{{ $filters.formatDate(event.date) }}</td>
-          <td>{{ event.win ? "Win" : "Loss" }}</td>
-          <td>{{ event.get1 }}</td>
-          <td>{{ event.get2 }}</td>
-          <td>{{ event.zetas }}</td>
+          <td>
+            <span class="row-label">Date: </span>
+            {{ $filters.formatDate(event.date) }}
+          </td>
+          <td>
+            {{ event.win ? "Win" : "Loss" }}
+          </td>
+          <td>
+            <span class="row-label">GET1 Currency: </span>
+            {{ event.get1 }}
+          </td>
+          <td>
+            <span class="row-label">GET2 Currency: </span>
+            {{ event.get2 }}
+          </td>
+          <td>
+            <span class="row-label">Zetas: </span>
+            {{ event.zetas }}
+          </td>
         </tr>
+      </tbody>
+      <tfoot>
         <tr
-          class="text-center align-middle average-row"
+          class="text-center align-middle"
           v-if="territoryWarEvents.length > 0"
         >
-          <td>Average</td>
-          <td>{{ averageWinRate }}%</td>
-          <td>{{ averageGet1 }}</td>
-          <td>{{ averageGet1 }}</td>
-          <td>{{ averageZetas }}</td>
+          <td class="category-header">Average</td>
+          <td>
+            <span class="row-label">Win Rate: </span>
+            {{ averageWinRate }}%
+          </td>
+          <td>
+            <span class="row-label">Avg GET1: </span>
+            {{ averageGet1 }}
+          </td>
+          <td><span class="row-label">Avg GET2: </span> {{ averageGet1 }}</td>
+          <td><span class="row-label">Avg Zetas: </span> {{ averageZetas }}</td>
         </tr>
         <tr v-else>
           <td colspan="5" class="text-center">
             There are no events recorded for this guild.
           </td>
         </tr>
-      </tbody>
+      </tfoot>
     </table>
     <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        show-on-desktop
-      "
+      class="table table-bordered table-dark table-sm table-striped"
       v-if="accessLevel >= 3"
     >
       <thead class="text-center align-middle">
@@ -78,7 +100,9 @@
       </thead>
       <tbody>
         <tr>
-          <td>
+          <td class="row-label text-center">Add New Event</td>
+          <td class="flex-sm">
+            <span class="row-label">Date:</span>
             <input
               class="form-control form-control-sm"
               type="date"
@@ -86,7 +110,8 @@
               @keypress.enter="addNewEvent"
             />
           </td>
-          <td>
+          <td class="flex-sm">
+            <span class="row-label">Win/Loss:</span>
             <select
               class="form-control form-control-sm"
               v-model="newEvent.win"
@@ -97,7 +122,9 @@
               <option :value="false">Loss</option>
             </select>
           </td>
-          <td>
+          <td class="flex-sm">
+            <span class="row-label">GET1:</span>
+
             <input
               class="form-control form-control-sm"
               type="number"
@@ -107,7 +134,8 @@
               step="25"
             />
           </td>
-          <td>
+          <td class="flex-sm">
+            <span class="row-label">GET2:</span>
             <input
               class="form-control form-control-sm"
               type="number"
@@ -117,7 +145,8 @@
               step="25"
             />
           </td>
-          <td>
+          <td class="flex-sm">
+            <span class="row-label">Zetas:</span>
             <input
               class="form-control form-control-sm"
               type="number"
@@ -236,28 +265,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
-@media only screen and (max-width: 600px) {
-  table {
-    tbody {
-      tr {
-        display: grid;
-        width: 500%; //because 5 rows?
-        --bs-table-accent-bg: var(--bs-table-striped-bg) !important;
-
-        &:not(:last-child) {
-          border-bottom: solid black 3px;
-        }
-
-        td {
-          &:nth-of-type(2n + 1) {
-            --bs-table-accent-bg: var(--bs-table-striped-bg);
-          }
-        }
-      }
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>
