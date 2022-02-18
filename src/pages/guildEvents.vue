@@ -10,7 +10,11 @@
           <div class="d-inline">Territory War History</div>
         </h3>
       </div>
-      <TerritoryWarTable id="guildTerritoryWarSection" class="collapse show" />
+      <TerritoryWarTable
+        id="guildTerritoryWarSection"
+        ref="guildTerritoryWarSection"
+        class="collapse"
+      />
       <!-- <div class="collapse-header section-header mt-3">
         <h3
           class="w-100"
@@ -32,6 +36,7 @@ import { mapActions, mapGetters, mapState } from "vuex";
 import { loadingState } from "../types/loading";
 import TerritoryWarTable from "../components/guild/territoryWarTable.vue";
 import TerritoryBattleTable from "../components/guild/territoryBattleTable.vue";
+import { setupEvents } from "../utils";
 
 export default defineComponent({
   name: "GuildEventsPage",
@@ -51,6 +56,14 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("guild", ["initialize"]),
+    initEvents() {
+      this.$nextTick(() => {
+        setupEvents(
+          (this.$refs?.guildTerritoryWarSection as any)?.$el as HTMLElement,
+          "guildTerritoryWarSection"
+        );
+      });
+    },
   },
   watch: {
     playerRequestState(newVal) {
@@ -58,10 +71,18 @@ export default defineComponent({
         this.initialize();
       }
     },
+    requestState(newVal) {
+      if (newVal === loadingState.ready) {
+        this.initEvents();
+      }
+    },
   },
   async created() {
     if (this.playerRequestState === loadingState.ready) {
       this.initialize();
+    }
+    if (this.requestState === loadingState.ready) {
+      this.initEvents();
     }
   },
 });
