@@ -1,8 +1,6 @@
 <template>
   <div>
-    <table
-      class="table table-bordered table-dark table-sm table-striped mb-0 show-on-desktop"
-    >
+    <table class="table table-bordered table-dark table-sm table-striped mb-0">
       <thead class="sticky-header">
         <tr class="text-center align-middle">
           <th width="20%">
@@ -59,7 +57,10 @@
       </tbody>
     </table>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
+      class="
+        table table-bordered table-dark table-sm table-striped
+        show-on-desktop
+      "
       v-if="accessLevel >= 3"
     >
       <thead class="text-center align-middle">
@@ -234,3 +235,29 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+@import "../../styles/variables.scss";
+
+@media only screen and (max-width: 600px) {
+  table {
+    tbody {
+      tr {
+        display: grid;
+        width: 500%; //because 5 rows?
+        --bs-table-accent-bg: var(--bs-table-striped-bg) !important;
+
+        &:not(:last-child) {
+          border-bottom: solid black 3px;
+        }
+
+        td {
+          &:nth-of-type(2n + 1) {
+            --bs-table-accent-bg: var(--bs-table-striped-bg);
+          }
+        }
+      }
+    }
+  }
+}
+</style>
