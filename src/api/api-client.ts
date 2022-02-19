@@ -6,12 +6,15 @@ import { Unit, UnitBasic } from "../types/unit";
 import { OwnedShardsMap } from "../types/shards";
 import { RelicConfigType } from "../types/relic";
 import { Match, Team } from "../types/teams";
-import { GuildPayload, TerritoryWarEvent } from "../types/guild";
+import {
+  GuildPayload,
+  TerritoryBattleEvent,
+  TerritoryWarEvent,
+} from "../types/guild";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://7739-184-96-186-220.ngrok.io";
-  // baseUrl = "http://localhost:3000/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3000/dev";
 
   constructor() {}
 
@@ -172,6 +175,21 @@ class ApiClient {
       await axios.patch(`${this.baseUrl}/guild/${guildId}/territoryWar`, {
         territoryWarEvents,
       });
+    }
+  }
+
+  async updateTerritoryBattleEvents(
+    guildId: string,
+    territoryBattleEvents: TerritoryBattleEvent[]
+  ) {
+    if (guildId) {
+      const response = await axios.patch(
+        `${this.baseUrl}/guild/${guildId}/territoryBattle`,
+        {
+          territoryBattleEvents,
+        }
+      );
+      return response.data;
     }
   }
 }

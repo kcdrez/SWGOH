@@ -6,13 +6,18 @@ import { State as RootState } from "./store";
 import { SpeedAbility, Team, TeamMember } from "../types/teams";
 import { Unit } from "../types/unit";
 import { apiClient } from "../api/api-client";
-import { GuildPayload, TerritoryWarEvent } from "../types/guild";
+import {
+  GuildPayload,
+  TerritoryBattleEvent,
+  TerritoryWarEvent,
+} from "../types/guild";
+import { round2Decimals } from "../utils";
 
 interface State {
   requestState: loadingState;
   guildId: string;
   territoryWarEvents: TerritoryWarEvent[];
-  territoryBattleEvents: any[];
+  territoryBattleEvents: TerritoryBattleEvent[];
   accessLevel: number;
 }
 
@@ -27,7 +32,51 @@ const store = {
     territoryBattleEvents: [],
     accessLevel: 0,
   },
-  getters: {},
+  getters: {
+    tbEvents(state: State) {
+      return (type: "Light" | "Dark"): TerritoryBattleEvent[] => {
+        return state.territoryBattleEvents.filter((event) => {
+          return event.type === type;
+        });
+      };
+    },
+    tbAvgStars(state: State, getters: any) {
+      return (type: "Light" | "Dark"): number => {
+        const total = state.territoryBattleEvents.reduce(
+          (total: number, e: TerritoryBattleEvent) => {
+            return e.type === type ? total + e.stars : total;
+          },
+          0
+        );
+        return round2Decimals(total / getters.tbEvents(type).length);
+      };
+    },
+    tbAvgCurrency(state: State, getters: any) {
+      return (
+        type: "Light" | "Dark",
+        currencyType: "get1" | "get2"
+      ): number => {
+        const total = state.territoryBattleEvents.reduce(
+          (total: number, e: TerritoryBattleEvent) => {
+            return e.type === type ? total + e[currencyType] : total;
+          },
+          0
+        );
+        return round2Decimals(total / getters.tbEvents(type).length);
+      };
+    },
+    tbAvgShards(state: State, getters: any) {
+      return (type: "Light" | "Dark"): number => {
+        const total = state.territoryBattleEvents.reduce(
+          (total: number, e: TerritoryBattleEvent) => {
+            return e.type === type ? total + e.characterShards.count : total;
+          },
+          0
+        );
+        return round2Decimals(total / getters.tbEvents(type).length);
+      };
+    },
+  },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;
@@ -40,7 +89,7 @@ const store = {
     },
     SET_EVENTS(state: State, payload: GuildPayload) {
       state.territoryWarEvents = payload?.territoryWar || [];
-      // state.territoryBattleEvents = payload;
+      state.territoryBattleEvents = payload?.territoryBattle || [];
     },
     UPSERT_TERRITORY_WAR_EVENT(state: State, payload: TerritoryWarEvent) {
       const index = state.territoryWarEvents.findIndex(
@@ -56,6 +105,24 @@ const store = {
       const index = state.territoryWarEvents.findIndex((x) => x.id === eventId);
       if (index >= 0) {
         state.territoryWarEvents.splice(index, 1);
+      }
+    },
+    UPSERT_TERRITORY_BATTLE_EVENT(state: State, payload: TerritoryBattleEvent) {
+      const index = state.territoryBattleEvents.findIndex(
+        (x) => x.id === payload.id
+      );
+      if (index >= 0) {
+        state.territoryBattleEvents.splice(index, 1, payload);
+      } else {
+        state.territoryBattleEvents.push(payload);
+      }
+    },
+    REMOVE_TERRITORY_BATTLE_EVENT(state: State, eventId: string) {
+      const index = state.territoryBattleEvents.findIndex(
+        (x) => x.id === eventId
+      );
+      if (index >= 0) {
+        state.territoryBattleEvents.splice(index, 1);
       }
     },
   },
@@ -105,6 +172,32 @@ const store = {
         state.guildId,
         state.territoryWarEvents
       );
+    },
+    addTerritoryBattleEvent(
+      { dispatch, state }: ActionCtx,
+      event: TerritoryBattleEvent
+    ) {
+      dispatch("saveTerritoryBattleEvents", [
+        ...state.territoryBattleEvents,
+        event,
+      ]);
+    },
+    removeTerritoryBattleEvent(
+      { commit, dispatch, state }: ActionCtx,
+      eventId: string
+    ) {
+      commit("REMOVE_TERRITORY_BATTLE_EVENT", eventId);
+      dispatch("saveTerritoryBattleEvents", state.territoryBattleEvents);
+    },
+    async saveTerritoryBattleEvents(
+      { state, commit }: ActionCtx,
+      events: TerritoryBattleEvent[]
+    ) {
+      const response = await apiClient.updateTerritoryBattleEvents(
+        state.guildId,
+        events
+      );
+      commit("SET_EVENTS", response);
     },
   },
 };
