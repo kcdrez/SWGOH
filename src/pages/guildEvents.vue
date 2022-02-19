@@ -1,5 +1,5 @@
 <template>
-  <div class="container swgoh-page">
+  <div class="container swgoh-page mb-3">
     <Loading :state="requestState" message="Loading Guild Data" size="lg">
       <div class="collapse-header section-header mt-3">
         <h3

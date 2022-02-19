@@ -45,13 +45,19 @@
           :key="event.id"
           class="text-center align-middle"
         >
-          <td>{{ $filters.formatDate(event.date) }}</td>
-          <td>{{ event.type }}</td>
-          <td>{{ event.name }}</td>
-          <td>{{ event.stars }}</td>
-          <td>{{ event.get1 }}</td>
-          <td>{{ event.get2 }}</td>
           <td>
+            <span class="row-label">Date: </span>
+            {{ $filters.formatDate(event.date) }}
+          </td>
+          <td class="hidden-sm">{{ event.type }}</td>
+          <td>{{ event.name }}</td>
+          <td><span class="row-label">Stars: </span>{{ event.stars }}</td>
+          <td><span class="row-label">GET1: </span>{{ event.get1 }}</td>
+          <td><span class="row-label">GET2: </span>{{ event.get2 }}</td>
+          <td>
+            <span class="row-label character-shards-label"
+              >Character Shards:</span
+            >
             {{ event.characterShards.count }} ({{
               unitName(event.characterShards.id)
             }})
@@ -72,22 +78,55 @@
       </tbody>
       <tfoot>
         <tr class="text-center align-middle">
-          <td rowspan="2" v-if="territoryBattleEvents.length > 0">Average</td>
+          <td
+            rowspan="2"
+            v-if="territoryBattleEvents.length > 0"
+            class="category-header"
+          >
+            Average
+          </td>
           <template v-if="tbEvents('Light').length > 0">
-            <td colspan="2">Light</td>
+            <td colspan="2">
+              Light <span class="hide-lg">Side Averages</span>
+            </td>
             <td>{{ tbAvgStars("Light") }}</td>
-            <td>{{ tbAvgCurrency("Light", "get1") }}</td>
-            <td>{{ tbAvgCurrency("Light", "get2") }}</td>
-            <td>{{ tbAvgShards("Light") }}</td>
+            <td>
+              <span class="row-label">GET1: </span>
+              {{ tbAvgCurrency("Light", "get1") }}
+            </td>
+            <td>
+              <span class="row-label">GET2: </span>
+              {{ tbAvgCurrency("Light", "get2") }}
+            </td>
+            <td>
+              <span class="row-label character-shards-label">
+                Character Shards:
+              </span>
+              {{ tbAvgShards("Light") }}
+            </td>
             <td class="hidden-sm"></td>
           </template>
         </tr>
         <tr class="text-center align-middle" v-if="tbEvents('Dark').length > 0">
-          <td colspan="2">Dark</td>
-          <td>{{ tbAvgStars("Dark") }}</td>
-          <td>{{ tbAvgCurrency("Dark", "get1") }}</td>
-          <td>{{ tbAvgCurrency("Dark", "get2") }}</td>
-          <td>{{ tbAvgShards("Dark") }}</td>
+          <td colspan="2">Dark <span class="hide-lg">Side Averages</span></td>
+          <td>
+            <span class="row-label">Stars: </span>
+            {{ tbAvgStars("Dark") }}
+          </td>
+          <td>
+            <span class="row-label">GET1: </span>
+            {{ tbAvgCurrency("Dark", "get1") }}
+          </td>
+          <td>
+            <span class="row-label">GET2: </span>
+            {{ tbAvgCurrency("Dark", "get2") }}
+          </td>
+          <td>
+            <span class="row-label character-shards-label">
+              Character Shards:
+            </span>
+            {{ tbAvgShards("Dark") }}
+          </td>
           <td class="hidden-sm"></td>
         </tr>
         <tr v-if="territoryBattleEvents.length === 0">
@@ -334,4 +373,10 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.character-shards-label {
+  @media only screen and (max-width: 768px) {
+    display: block;
+  }
+}
+</style>
