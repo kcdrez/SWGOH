@@ -110,7 +110,16 @@ export default defineComponent({
     },
   },
   created(): void {
-    const nodesList: FarmingNode[] = this.unitNodes(this.unit);
+    const nodesList: FarmingNode[] = this.unitNodes(this.unit).filter(
+      (node: FarmingNode) => {
+        return (
+          node.table === "Light Side" ||
+          node.table === "Dark Side" ||
+          node.table === "Cantina" ||
+          node.table === "Fleet"
+        );
+      }
+    );
     const nodesListByUnit: Node[] = this.ownedShards[this.unit.id]?.nodes || [];
 
     const finalList: Node[] = nodesList.map((node) => {
@@ -120,6 +129,7 @@ export default defineComponent({
         count: count ?? 0,
       };
     });
+
     this.nodes = unvue(finalList);
     this.archived = unvue(finalList);
   },

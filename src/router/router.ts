@@ -56,7 +56,11 @@ router.beforeEach((to, _from, next) => {
   if (to.name === "home") {
     next();
   } else if (!store.state.player.player) {
-    next({ name: "home" });
+    store.watch((state) => {
+      return state.player.player
+    }, () => {
+      next()
+    })
   } else {
     next();
   }

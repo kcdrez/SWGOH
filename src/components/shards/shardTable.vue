@@ -1,7 +1,12 @@
 <template>
   <div>
     <table
-      class="table table-bordered table-dark table-sm table-striped mb-0 show-on-mobile swgoh-table"
+      class="
+        table table-bordered table-dark table-sm table-striped
+        mb-0
+        show-on-mobile
+        swgoh-table
+      "
     >
       <thead>
         <tr class="text-center align-middle">
@@ -90,7 +95,10 @@
       </tbody>
     </table>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-desktop"
+      class="
+        table table-bordered table-dark table-sm table-striped
+        show-on-desktop
+      "
     >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
@@ -349,7 +357,8 @@ export default defineComponent({
     },
     showNodesPerDay(unit: Unit): boolean {
       const nodes: FarmingNode[] = this.unitNodes(unit);
-      return nodes.every((node) => {
+
+      return nodes.some((node) => {
         return (
           node.table === "Light Side" ||
           node.table === "Dark Side" ||

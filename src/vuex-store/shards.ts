@@ -46,7 +46,7 @@ const store = {
       return (unit: Unit | UnitBasic): FarmingNode[] => {
         return state.shardFarming.filter((node) => {
           return node.characters.some((c) => c.id === unit.id);
-        });
+        })
       };
     },
     shardTimeEstimation(state: State, getters: any) {
