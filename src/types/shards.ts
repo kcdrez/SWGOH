@@ -43,7 +43,7 @@ interface ShardData extends UnitNodeData {
 }
 
 type UnitNodeData = {
-  nodes: Node[];
+  nodes?: Node[];
   tracking?: boolean;
   // priority?: number;
 };

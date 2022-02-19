@@ -69,9 +69,9 @@ const store = {
 
         return Math.ceil(
           remainingShards /
-            (dropRate *
-              characterAcceleration *
-              (nodesList.length === 0 ? 5 : nodesPerDay))
+          (dropRate *
+            characterAcceleration *
+            (nodesList.length === 0 ? 5 : nodesPerDay))
         );
       };
     },
@@ -168,12 +168,15 @@ const store = {
       { id, count, nodes, tracking }: NodePayload
     ) {
       const match = state.ownedShards[id] || {};
-      const nodesData: Node[] = (nodes || []).map((node) => {
-        const matchNode = match.nodes.find((n) => n.id === node.id);
+      const compare1Nodes = nodes ?? match.nodes ?? [];
+      const compare2Nodes = (match?.nodes?.length || 0) < (nodes?.length || 0) ? nodes : match.nodes;
+
+      const nodesData: Node[] = (compare1Nodes).map((node) => {
+        const matchNode = (compare2Nodes || []).find((n) => n.id === node.id);
         return {
           id: node.id,
-          count: node?.count ?? matchNode?.count ?? 0,
-          priority: node.priority ?? matchNode?.priority ?? 0,
+          count: matchNode?.count ?? node?.count ?? 0,
+          priority: matchNode?.priority ?? node?.priority ?? 0,
         };
       });
       state.ownedShards[id] = {
