@@ -1,4 +1,6 @@
 import { createRouter, createWebHashHistory } from "vue-router";
+
+import store from "../vuex-store/store";
 import HomePage from "../pages/homepage.vue";
 import UnitPage from "../pages/unitPage.vue";
 import GeneralPlannerPage from "../pages/generalPlanner.vue";
@@ -48,6 +50,16 @@ const routes = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
+});
+
+router.beforeEach((to, _from, next) => {
+  if (to.name === "home") {
+    next();
+  } else if (!store.state.player.player) {
+    next({ name: "home" });
+  } else {
+    next();
+  }
 });
 
 export default router;

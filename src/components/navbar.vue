@@ -13,7 +13,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbar-toggler">
-        <ul class="navbar-nav me-auto">
+        <ul class="navbar-nav me-auto" v-if="player">
           <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
