@@ -67,7 +67,7 @@ export default defineComponent({
     },
   },
   created() {
-    this.owned = this.gearOwnedCount(this.salvage);
+    this.owned = this.gearOwnedCount(this.salvage.id);
   },
 });
 </script>

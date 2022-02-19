@@ -110,7 +110,7 @@ export default defineComponent({
     },
   },
   created(): void {
-    const nodesList: FarmingNode[] = this.unitNodes(this.unit).filter(
+    const nodesList: FarmingNode[] = this.unitNodes(this.unit.id).filter(
       (node: FarmingNode) => {
         return (
           node.table === "Light Side" ||

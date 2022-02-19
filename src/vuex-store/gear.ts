@@ -88,8 +88,8 @@ const store = {
       };
     },
     gearOwnedCount(state: State) {
-      return (gear: Gear): number => {
-        return state.gearConfig[gear.id]?.owned || 0;
+      return (gearId: string): number => {
+        return state.gearConfig[gearId]?.owned || 0;
       };
     },
     findGearData(state: State) {
@@ -115,7 +115,7 @@ const store = {
         } else if (locations.length <= 0) {
           return -1;
         }
-        const owned: number = getters.gearOwnedCount(gear);
+        const owned: number = getters.gearOwnedCount(gear.id);
         const remaining = gear.amount - owned;
 
         if (remaining > 0) {

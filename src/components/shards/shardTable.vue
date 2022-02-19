@@ -315,8 +315,8 @@ export default defineComponent({
               return estimateA > estimateB ? -1 : 1;
             }
           } else if (this.sortMethod === "priority") {
-            const priorityA = this.unitPriority(a, this.nodeTableNames);
-            const priorityB = this.unitPriority(b, this.nodeTableNames);
+            const priorityA = this.unitPriority(a.id, this.nodeTableNames);
+            const priorityB = this.unitPriority(b.id, this.nodeTableNames);
 
             if (priorityA <= 0) {
               return this.sortDir === "asc" ? 1 : -1;
@@ -351,12 +351,12 @@ export default defineComponent({
       }
     },
     unitLocations(unit: Unit): string[] {
-      return (this.unitNodes(unit) as FarmingNode[]).map((x) => {
+      return (this.unitNodes(unit.id) as FarmingNode[]).map((x) => {
         return this.nodeLabel(x.id);
       });
     },
     showNodesPerDay(unit: Unit): boolean {
-      const nodes: FarmingNode[] = this.unitNodes(unit);
+      const nodes: FarmingNode[] = this.unitNodes(unit.id);
 
       return nodes.some((node) => {
         return (

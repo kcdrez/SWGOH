@@ -45,12 +45,11 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 
-import Gear from "../components/gear/gear.vue";
 import Player from "../components/player.vue";
 
 export default defineComponent({
   name: "HomePage",
-  components: { Gear, Player },
+  components: { Player },
   computed: {
     ...mapState("player", ["player", "requestState"]),
     allyCode: {

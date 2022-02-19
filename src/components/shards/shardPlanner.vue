@@ -6,7 +6,7 @@
       </h3>
     </div>
     <div id="shardSection" class="collapse" ref="shardSection">
-      <h5 v-if="unitNodes(unit).length === 0" class="my-1 text-center">
+      <h5 v-if="unitNodes(unit.id).length === 0" class="my-1 text-center">
         This unit is not currently farmable.
       </h5>
       <template v-else>

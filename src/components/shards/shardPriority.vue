@@ -54,7 +54,7 @@ export default defineComponent({
     ...mapState("shards", ["ownedShards"]),
     ...mapGetters("shards", ["unitNodes", "unitPriority"]),
     nodeData(): Node[] {
-      const nodesList: FarmingNode[] = this.unitNodes(this.unit);
+      const nodesList: FarmingNode[] = this.unitNodes(this.unit.id);
       const nodesListByUnit: Node[] =
         this.ownedShards[this.unit.id]?.nodes || [];
 
@@ -86,7 +86,7 @@ export default defineComponent({
     },
     cancel() {
       this.editing = false;
-      this.priority = this.unitPriority(this.unit, this.nodeTableNames);
+      this.priority = this.unitPriority(this.unit.id, this.nodeTableNames);
     },
   },
   created() {

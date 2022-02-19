@@ -43,15 +43,15 @@ const store = {
       };
     },
     unitNodes(state: State) {
-      return (unit: Unit | UnitBasic): FarmingNode[] => {
+      return (unitId: string): FarmingNode[] => {
         return state.shardFarming.filter((node) => {
-          return node.characters.some((c) => c.id === unit.id);
+          return node.characters.some((c) => c.id === unitId);
         })
       };
     },
     shardTimeEstimation(state: State, getters: any) {
       return (unit: Unit | UnitBasic): number => {
-        const nodes: FarmingNode[] = getters.unitNodes(unit);
+        const nodes: FarmingNode[] = getters.unitNodes(unit.id);
 
         if (nodes.length <= 0) {
           return 0;
@@ -93,13 +93,13 @@ const store = {
       };
     },
     unitPriority(state: State, getters: any) {
-      return (unit: Unit, tableNames: string[]): number => {
+      return (unitId: string, tableNames: string[]): number => {
         const matchFarmingNode: FarmingNode | undefined = getters
-          .unitNodes(unit)
+          .unitNodes(unitId)
           .find((node: FarmingNode) => {
             return tableNames.includes(node.table);
           });
-        const nodesListByUnit: Node[] = state.ownedShards[unit.id]?.nodes || [];
+        const nodesListByUnit: Node[] = state.ownedShards[unitId]?.nodes || [];
         const match = nodesListByUnit.find(
           (n) => n.id === matchFarmingNode?.id
         );

@@ -18,7 +18,7 @@ export default defineComponent({
   computed: {
     ...mapGetters("gear", ["gearOwnedCount"]),
     ownedAmount() {
-      return this.gearOwnedCount(this.gear);
+      return this.gearOwnedCount(this.gear.id);
     },
     totalAmount() {
       return this.gear.amount;

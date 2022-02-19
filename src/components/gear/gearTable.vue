@@ -371,8 +371,8 @@ export default defineComponent({
               return locationsA[0] < locationsB[0] ? -1 : 1;
             }
           } else if (this.sortMethod === "progress") {
-            const progressA = this.gearOwnedCount(a) / a.amount;
-            const progressB = this.gearOwnedCount(b) / b.amount;
+            const progressA = this.gearOwnedCount(a.id) / a.amount;
+            const progressB = this.gearOwnedCount(b.id) / b.amount;
             if (this.sortDir === "asc") {
               return progressA - progressB;
             } else {
