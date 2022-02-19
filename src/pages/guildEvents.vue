@@ -15,7 +15,7 @@
         ref="guildTerritoryWarSection"
         class="collapse"
       />
-      <!-- <div class="collapse-header section-header mt-3">
+      <div class="collapse-header section-header mt-3">
         <h3
           class="w-100"
           data-bs-toggle="collapse"
@@ -24,7 +24,11 @@
           <div class="d-inline">Territory Battles History</div>
         </h3>
       </div>
-      <TerritoryBattleTable id="guildTerritoryBattleSection" class="collapse" /> -->
+      <TerritoryBattleTable
+        id="guildTerritoryBattleSection"
+        ref="guildTerritoryBattleSection"
+        class="collapse show"
+      />
     </Loading>
   </div>
 </template>
@@ -61,6 +65,10 @@ export default defineComponent({
         setupEvents(
           (this.$refs?.guildTerritoryWarSection as any)?.$el as HTMLElement,
           "guildTerritoryWarSection"
+        );
+        setupEvents(
+          (this.$refs?.guildTerritoryBattleSection as any)?.$el as HTMLElement,
+          "guildTerritoryBattleSection"
         );
       });
     },

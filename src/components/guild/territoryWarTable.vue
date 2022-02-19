@@ -130,7 +130,6 @@
               class="form-control form-control-sm"
               v-model="newEvent.win"
               @keypress.enter="addNewEvent"
-              min="0"
             >
               <option :value="true">Win</option>
               <option :value="false">Loss</option>
@@ -138,7 +137,6 @@
           </td>
           <td class="flex-sm">
             <span class="row-label">GET1:</span>
-
             <input
               class="form-control form-control-sm"
               type="number"
@@ -190,7 +188,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 
 import { TerritoryWarEvent } from "../../types/guild";
-import { round2Decimals, unvue, setupEvents } from "../../utils";
+import { round2Decimals, unvue } from "../../utils";
 
 export default defineComponent({
   name: "TerritoryWarTable",
