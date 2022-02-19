@@ -9,7 +9,12 @@
     </div>
     <div id="unit-section-table" class="collapse" ref="unitSection">
       <table
-        class="table table-bordered table-dark table-sm table-striped m-0 show-on-desktop swgoh-table"
+        class="
+          table table-bordered table-dark table-sm table-striped
+          m-0
+          show-on-desktop
+          swgoh-table
+        "
       >
         <thead class="sticky-header">
           <tr class="text-center align-middle">
@@ -98,24 +103,36 @@
             </td>
             <td class="text-center">
               <Timestamp
-                :timeLength="relicTotalDays(unit)"
-                :displayText="$filters.pluralText(relicTotalDays(unit), 'day')"
-                :title="$filters.daysFromNow(relicTotalDays(unit))"
+                :timeLength="relicTotalDays(unit.id, unit.relic_tier)"
+                :displayText="
+                  $filters.pluralText(
+                    relicTotalDays(unit.id, unit.relic_tier),
+                    'day'
+                  )
+                "
+                :title="
+                  $filters.daysFromNow(relicTotalDays(unit.id, unit.relic_tier))
+                "
                 displayClasses="d-inline"
               />
             </td>
             <td class="text-center">
               <Timestamp
-                :timeLength="relicTotalDays(unit) + gearTotalDays(unit)"
+                :timeLength="
+                  relicTotalDays(unit.id, unit.relic_tier) +
+                  gearTotalDays(unit, unit.relicTier)
+                "
                 :displayText="
                   $filters.pluralText(
-                    relicTotalDays(unit) + gearTotalDays(unit),
+                    relicTotalDays(unit.id, unit.relic_tier) +
+                      gearTotalDays(unit),
                     'day'
                   )
                 "
                 :title="
                   $filters.daysFromNow(
-                    relicTotalDays(unit) + gearTotalDays(unit)
+                    relicTotalDays(unit.id, unit.relic_tier) +
+                      gearTotalDays(unit)
                   )
                 "
                 displayClasses="d-inline"
@@ -140,7 +157,12 @@
         </tbody>
       </table>
       <table
-        class="table table-bordered table-dark table-sm table-striped m-0 show-on-mobile swgoh-table"
+        class="
+          table table-bordered table-dark table-sm table-striped
+          m-0
+          show-on-mobile
+          swgoh-table
+        "
       >
         <thead>
           <tr class="text-center align-middle">
@@ -228,7 +250,7 @@
               <template
                 v-if="
                   gearTotalDays(unit) > 0 &&
-                  relicTotalDays(unit) > 0 &&
+                  relicTotalDays(unit.id, unit.relic_tier) > 0 &&
                   !unit.is_ship
                 "
               >
@@ -245,29 +267,41 @@
                 </div>
                 <div class="estimation">
                   <Timestamp
-                    :timeLength="relicTotalDays(unit)"
+                    :timeLength="relicTotalDays(unit.id, unit.relic_tier)"
                     :displayText="
-                      $filters.pluralText(relicTotalDays(unit), 'day')
+                      $filters.pluralText(
+                        relicTotalDays(unit.id, unit.relic_tier),
+                        'day'
+                      )
                     "
                     label="Estimated Relic Completion:"
-                    :title="$filters.daysFromNow(relicTotalDays(unit))"
+                    :title="
+                      $filters.daysFromNow(
+                        relicTotalDays(unit.id, unit.relic_tier)
+                      )
+                    "
                     displayClasses="d-inline"
                   />
                 </div>
               </template>
               <div class="estimation" v-if="!unit.is_ship">
                 <Timestamp
-                  :timeLength="relicTotalDays(unit) + gearTotalDays(unit)"
+                  :timeLength="
+                    relicTotalDays(unit.id, unit.relic_tier) +
+                    gearTotalDays(unit)
+                  "
                   :displayText="
                     $filters.pluralText(
-                      relicTotalDays(unit) + gearTotalDays(unit),
+                      relicTotalDays(unit.id, unit.relic_tier) +
+                        gearTotalDays(unit),
                       'day'
                     )
                   "
                   label="Estimated Total Completion:"
                   :title="
                     $filters.daysFromNow(
-                      relicTotalDays(unit) + gearTotalDays(unit)
+                      relicTotalDays(unit.id, unit.relic_tier) +
+                        gearTotalDays(unit)
                     )
                   "
                   displayClasses="d-inline"

@@ -27,8 +27,10 @@
       <Timestamp
         class="time-estimate"
         label="Estimated completion:"
-        :title="$filters.daysFromNow(totalDays(unit))"
-        :displayText="$filters.pluralText(totalDays(unit), 'day')"
+        :title="$filters.daysFromNow(totalDays(unit.id, unit.relic_tier))"
+        :displayText="
+          $filters.pluralText(totalDays(unit.id, unit.relic_tier), 'day')
+        "
         displayClasses="d-inline"
       />
       <EnergySpent showCantina />
@@ -71,7 +73,7 @@ export default defineComponent({
       return this.someLoading(["relic", "unit"]);
     },
     relicLevel(): number {
-      return this.currentRelicLevel(this.unit);
+      return this.currentRelicLevel(this.unit.relic_tier);
     },
     relicTarget: {
       get(): number {

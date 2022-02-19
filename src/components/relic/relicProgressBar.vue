@@ -5,13 +5,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
-import { Relic } from "../../types/relic";
 
 export default defineComponent({
   name: "RelicProgressBar",
   props: {
-    item: {
-      type: Object as () => Relic,
+    itemId: {
+      type: String,
       required: true,
     },
     amountNeeded: {
@@ -22,7 +21,7 @@ export default defineComponent({
   computed: {
     ...mapState("relic", ["ownedRelics"]),
     ownedAmount() {
-      return this.ownedRelics[this.item.id] || 0;
+      return this.ownedRelics[this.itemId] || 0;
     },
     percent() {
       if (this.amountNeeded <= 0) {

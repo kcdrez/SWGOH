@@ -29,11 +29,11 @@ const store = {
   },
   getters: {
     currentRelicLevel(_state: State) {
-      return (unit: Unit): number => {
-        if (!unit?.relic_tier) {
+      return (relic_tier: number | undefined): number => {
+        if (!relic_tier) {
           return 0;
         } else {
-          return unit.relic_tier < 0 ? 0 : unit.relic_tier;
+          return relic_tier < 0 ? 0 : relic_tier;
         }
       };
     },
@@ -52,7 +52,7 @@ const store = {
     timeEstimation(state: State, getters: any) {
       return (mat: Relic, arr: { level: number; target: number }[]): number => {
         const owned: number = state.ownedRelics[mat.id] || 0;
-        const amountNeeded: number = getters.amountNeeded(mat, arr);
+        const amountNeeded: number = getters.amountNeeded(mat.amount, arr);
         const remaining: number = amountNeeded - owned;
 
 
@@ -72,15 +72,14 @@ const store = {
       };
     },
     amountNeeded(_state: State) {
-      return (mat: Relic, arr: { level: number; target: number }[]): number => {
-        const amountMap = mat.amount;
+      return (relicAmountMap: any, arr: { level: number; target: number }[]): number => {
         let amount = 0;
 
         arr.forEach(({ level, target }) => {
           for (let i = level + 1; i <= target; i++) {
             const key = i.toString();
-            if (i in amountMap) {
-              amount += amountMap[key];
+            if (i in relicAmountMap) {
+              amount += relicAmountMap[key];
             }
           }
         });
@@ -88,13 +87,12 @@ const store = {
       };
     },
     totalDays(state: State, getters: any, rootState: RootState) {
-      return (unit: Unit | UnitBasic): number => {
-        const { target } = rootState.planner.targetConfig[unit.id].relic;
+      return (unitId: string, relicLevel: number | undefined): number => {
+        const { target } = rootState.planner.targetConfig[unitId].relic;
         return (Object.values(state.relicConfig) as Array<Relic>).reduce(
           (acc, el) => {
-            const relicLevel = isUnit(unit) ? unit.relic_tier : 0;
             const days = getters.timeEstimation(el, [
-              { level: relicLevel, target },
+              { level: relicLevel ?? 0, target },
             ]);
             return days > 0 ? acc + days : acc;
           },

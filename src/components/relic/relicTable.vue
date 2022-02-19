@@ -1,7 +1,11 @@
 <template>
   <div>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-mobile swgoh-table"
+      class="
+        table table-bordered table-dark table-sm table-striped
+        show-on-mobile
+        swgoh-table
+      "
     >
       <thead>
         <tr class="text-center align-middle">
@@ -54,11 +58,11 @@
               <OwnedAmount
                 class="owned-amount"
                 :item="mat"
-                :needed="amountNeeded(mat, targetLevels)"
+                :needed="amountNeeded(mat.amount, targetLevels)"
               />
               <RelicProgressBar
-                :item="mat"
-                :amountNeeded="amountNeeded(mat, targetLevels)"
+                :itemId="mat.id"
+                :amountNeeded="amountNeeded(mat.amount, targetLevels)"
                 class="mt-2"
               />
             </div>
@@ -89,7 +93,11 @@
       </tbody>
     </table>
     <table
-      class="table table-bordered table-dark table-sm table-striped show-on-desktop swgoh-table"
+      class="
+        table table-bordered table-dark table-sm table-striped
+        show-on-desktop
+        swgoh-table
+      "
     >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
@@ -136,11 +144,11 @@
           <td class="align-middle">
             <OwnedAmount
               :item="mat"
-              :needed="amountNeeded(mat, targetLevels)"
+              :needed="amountNeeded(mat.amount, targetLevels)"
             />
             <RelicProgressBar
-              :item="mat"
-              :amountNeeded="amountNeeded(mat, targetLevels)"
+              :itemId="mat.id"
+              :amountNeeded="amountNeeded(mat.amount, targetLevels)"
               class="mt-2"
             />
           </td>
@@ -236,8 +244,14 @@ export default defineComponent({
               return compareA > compareB ? -1 : 1;
             }
           } else if (this.sortMethod === "progress") {
-            const amountNeededA = this.amountNeeded(a, this.targetLevels);
-            const amountNeededB = this.amountNeeded(b, this.targetLevels);
+            const amountNeededA = this.amountNeeded(
+              a.amount,
+              this.targetLevels
+            );
+            const amountNeededB = this.amountNeeded(
+              b.amount,
+              this.targetLevels
+            );
 
             if (amountNeededA === 0 && amountNeededB === 0) {
               return 0;
@@ -251,8 +265,6 @@ export default defineComponent({
             const progressB = (this.ownedRelics[b.id] || 0) / amountNeededB;
 
             if (this.sortDir === "asc") {
-              if (this.amountNeeded(a, this.targetLevels) <= 0) {
-              }
               return progressA - progressB;
             } else {
               return progressB - progressA;

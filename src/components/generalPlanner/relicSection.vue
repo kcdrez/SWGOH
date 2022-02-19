@@ -36,7 +36,7 @@ export default defineComponent({
     fullRelicList(): Relic[] {
       const list: Relic[] = unvue(Object.values(this.relicConfig));
       this.fullUnitList.forEach((unit: Unit) => {
-        const level = this.currentRelicLevel(unit);
+        const level = this.currentRelicLevel(unit.relic_tier);
         const target = this.relicTarget(unit.id);
 
         if (level < target) {
@@ -56,7 +56,7 @@ export default defineComponent({
     relicTargetLevels(): any[] {
       const list: any[] = [];
       this.fullUnitList.forEach((unit: Unit) => {
-        const level = this.currentRelicLevel(unit);
+        const level = this.currentRelicLevel(unit.relic_tier);
         const target = this.relicTarget(unit.id);
         list.push({ level, target });
       });
