@@ -165,9 +165,9 @@ const store = {
         const unitData: Unit = rootGetters["player/unitData"](unit.id);
         return Math.floor(
           unitData.stats["5"] +
-            getters.leaderSpeedBonus(team, unit, checkGameMode) +
-            getters.uniqueSpeedBonus(team, unit, checkGameMode) +
-            getters.speedBonusFromTeamMembers(team, unit, checkGameMode)
+          getters.leaderSpeedBonus(team, unit, checkGameMode) +
+          getters.uniqueSpeedBonus(team, unit, checkGameMode) +
+          getters.speedBonusFromTeamMembers(team, unit, checkGameMode)
         );
       };
     },
@@ -223,7 +223,7 @@ const store = {
       commit("SET_SPEED_ABILITY_DATA", await apiClient.speedData());
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    addTeam({ commit, dispatch }: ActionCtx, team: Team) {
+    upsertTeam({ commit, dispatch }: ActionCtx, team: Team) {
       if (!team) {
         commit("UPSERT_TEAM", {
           id: uuid(),
@@ -269,7 +269,7 @@ const store = {
       );
       dispatch("saveTeams");
     },
-    saveTeams({ rootState, state, dispatch }: ActionCtx) {
+    saveTeams({ rootState, state }: ActionCtx) {
       apiClient.updateTeams(rootState.player.player?.id || "", state.teams);
     },
   },

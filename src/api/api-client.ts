@@ -13,10 +13,10 @@ import {
 } from "../types/guild";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3000/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3000/dev";
 
-  constructor() {}
+  constructor() { }
 
   async fetchPlayer(allyCode: string): Promise<PlayerResponse> {
     const response = await axios.get(`${this.baseUrl}/player/${allyCode}`);

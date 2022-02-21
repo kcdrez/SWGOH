@@ -24,7 +24,12 @@
         v-for="team in teams"
         :key="team.id"
         :team="team"
-        @delete="confirmDeleteTeam(team)"
+        :unitList="player.units"
+        @addUnit="addUnit({ teamId: team.id, unit: $event })"
+        @removeUnit="removeUnit({ teamId: team.id, unit: $event })"
+        @addTeam="upsertTeam($event)"
+        @saveTeams="saveTeams()"
+        @deleteTeam="confirmDeleteTeam(team)"
         size="lg"
       />
       <Confirm
@@ -68,16 +73,23 @@ export default defineComponent({
   },
   computed: {
     ...mapState("teams", ["teams"]),
+    ...mapState("player", ["player"]),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
       return this.someLoading(["player", "teams"]);
     },
   },
   methods: {
-    ...mapActions("teams", ["addTeam", "deleteTeam"]),
+    ...mapActions("teams", [
+      "upsertTeam",
+      "deleteTeam",
+      "saveTeams",
+      "addUnit",
+      "removeUnit",
+    ]),
     addNewTeam() {
       if (this.newTeamName.trim() !== "") {
-        this.addTeam({
+        this.upsertTeam({
           id: uuid(),
           name: this.newTeamName,
           units: [],

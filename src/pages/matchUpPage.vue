@@ -302,7 +302,7 @@ export default defineComponent({
     ...mapActions("teams", {
       deletePlayerTeam: "deleteTeam",
       removePlayerUnit: "removeUnit",
-      addPlayerTeam: "addTeam",
+      addPlayerTeam: "upsertTeam",
       addPlayerUnit: "addUnit",
       savePlayerTeams: "saveTeams",
     }),
@@ -310,7 +310,7 @@ export default defineComponent({
       fetchOpponent: "fetchPlayer",
       deleteOpponentTeam: "deleteTeam",
       removeOpponentUnit: "removeUnit",
-      addOpponentTeam: "addTeam",
+      addOpponentTeam: "upsertTeam",
       addOpponentUnit: "addUnit",
       saveOpponentTeams: "saveTeams",
       addMatch: "addMatch",

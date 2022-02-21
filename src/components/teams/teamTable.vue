@@ -100,170 +100,6 @@
         </label>
       </div>
     </div>
-    <!-- <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        show-on-mobile
-      "
-    >
-      <thead>
-        <tr>
-          <th>
-            <div class="text-center">Team List</div>
-            <div class="sort-methods" v-if="allowEdit">
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Sort By:</span>
-                <select
-                  class="form-control"
-                  :value="team.sortMethod"
-                  @input="sortBy($event.target.value)"
-                >
-                  <option value="leader">Leader</option>
-                  <option value="name">Name</option>
-                  <option value="subTotal">Sub Total</option>
-                  <option value="total">Total</option>
-                </select>
-              </div>
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Sort Direction:</span>
-                <select
-                  class="form-control"
-                  :value="team.sortDir"
-                  @input="sortDir($event.target.value)"
-                >
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </div>
-            </div>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="team-row" v-for="unit in sortTeamUnits" :key="unit.id">
-          <div class="text-center">
-            <router-link
-              :to="{
-                name: 'UnitPage',
-                params: { unitId: unit.id },
-              }"
-              >{{ unitData(unit.id).name }}</router-link
-            >
-          </div>
-          <div class="leader-container">
-            <div class="form-check" v-if="allowEdit">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                :id="`leader-${unit.id}`"
-                v-model="unit.isLeader"
-                :disabled="disableLeader(unit.id)"
-                @change="speedBonusChange()"
-              />
-              <label class="form-check-label" :for="`leader-${unit.id}`"
-                >Is Leader?</label
-              >
-            </div>
-            <div v-else>Is Leader? {{ unit.isLeader ? "Yes" : "No" }}</div>
-          </div>
-          <div v-if="showMods">
-            <div class="mods-list">
-              <ul>
-                <li>
-                  Square:
-                  {{ speedValueFromMod(unitData(unit.id).mods[0]) }}
-                </li>
-                <li>
-                  Diamond:
-                  {{ speedValueFromMod(unitData(unit.id).mods[2]) }}
-                </li>
-                <li>
-                  Circle:
-                  {{ speedValueFromMod(unitData(unit.id).mods[4]) }}
-                </li>
-              </ul>
-              <ul>
-                <li>
-                  Arrow:
-                  {{ speedValueFromMod(unitData(unit.id).mods[1]) }}
-                </li>
-                <li>
-                  Triangle:
-                  {{ speedValueFromMod(unitData(unit.id).mods[3]) }}
-                </li>
-                <li>
-                  Cross:
-                  {{ speedValueFromMod(unitData(unit.id).mods[5]) }}
-                </li>
-              </ul>
-            </div>
-            <div class="my-2 text-center">
-              Speed Set:
-              <span class="text-success" v-if="hasSpeedSet(unitData(unit.id))">
-                Yes
-              </span>
-              <span class="text-white-50" v-else>No</span>
-            </div>
-          </div>
-          <div
-            class="text-center"
-            v-if="unitData(unit.id).stats['5'] !== grandTotal(unit, team)"
-          >
-            Sub Total: {{ unitData(unit.id).stats["5"] }}
-          </div>
-          <div
-            class="text-center"
-            v-if="
-              leaderSpeedBonus(team, unit, showGameMode) > 0 ||
-              uniqueSpeedBonus(team, unit, showGameMode) > 0 ||
-              speedBonusFromTeamMembers(team, unit, showGameMode) > 0
-            "
-          >
-            <div v-if="leaderSpeedBonus(team, unit, showGameMode) > 0">
-              Leader Bonus: {{ leaderSpeedBonus(team, unit, showGameMode) }}
-            </div>
-            <div v-if="uniqueSpeedBonus(team, unit, showGameMode) > 0">
-              Unique Bonus: {{ uniqueSpeedBonus(team, unit, showGameMode) }}
-            </div>
-            <div v-if="speedBonusFromTeamMembers(team, unit, showGameMode) > 0">
-              Other Bonuses:
-              {{ speedBonusFromTeamMembers(team, unit, showGameMode) }}
-            </div>
-          </div>
-          <div class="text-center">Total: {{ grandTotal(unit, team) }}</div>
-          <div class="text-center">
-            <button
-              type="button"
-              class="btn btn-danger btn-sm"
-              title="Remove from this team"
-              @click="$emit('removeUnit', unit)"
-            >
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </tr>
-        <tr v-if="team.units.length < 5 && allowEdit">
-          <td class="text-center">
-            <div class="add-unit-container">
-              <div class="input-group input-group-sm">
-                <SearchInput
-                  :list="unitList"
-                  @select="selected = $event"
-                  @enterPress="add($event)"
-                />
-                <button
-                  class="btn btn-sm btn-primary"
-                  :disabled="!selected"
-                  @click="add(selected)"
-                >
-                  Add Unit
-                </button>
-              </div>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table> -->
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
@@ -549,12 +385,14 @@ export default defineComponent({
         const newTeam: Team = unvue(this.team);
         newTeam.name = this.editTeamName;
         this.$emit("addTeam", newTeam);
+        this.isEditing = false;
       }
     },
     saveTeam() {
       this.$emit("addTeam", this.team);
     },
     editTeam() {
+      this.isEditing = true;
       this.$nextTick(() => {
         if (this.$refs.teamName) {
           (this.$refs.teamName as HTMLElement).focus();

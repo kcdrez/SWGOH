@@ -185,7 +185,7 @@ const store = {
         }
       }
     },
-    addTeam({ commit, dispatch }: ActionCtx, team: Team) {
+    upsertTeam({ commit, dispatch }: ActionCtx, team: Team) {
       if (!team) {
         commit("UPSERT_TEAM", {
           id: uuid(),
