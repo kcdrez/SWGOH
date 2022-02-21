@@ -100,7 +100,7 @@
         </label>
       </div>
     </div>
-    <table
+    <!-- <table
       class="
         table table-bordered table-dark table-sm table-striped
         show-on-mobile
@@ -263,21 +263,12 @@
           </td>
         </tr>
       </tbody>
-    </table>
+    </table> -->
     <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        show-on-desktop
-      "
+      class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <thead>
         <tr class="text-center align-middle">
-          <td width="10%">
-            <div class="c-pointer" @click="sortBy('leader')">
-              Is Leader?
-              <i class="fas mx-1" :class="sortIcon('leader')"></i>
-            </div>
-          </td>
           <td width="20%">
             <div class="c-pointer" @click="sortBy('name')">
               Unit
@@ -288,6 +279,12 @@
               placeholder="Search"
               v-model="team.searchName"
             />
+          </td>
+          <td width="10%">
+            <div class="c-pointer" @click="sortBy('leader')">
+              Is Leader?
+              <i class="fas mx-1" :class="sortIcon('leader')"></i>
+            </div>
           </td>
           <td v-if="showOwner" width="10%">Owner</td>
           <td width="25%" v-if="showMods">Mods</td>
@@ -313,11 +310,18 @@
           :key="unit.id"
           class="text-center align-middle"
         >
-          <td class="text-left">
-            <div
-              class="form-check d-flex justify-content-center"
-              v-if="allowEdit"
+          <td>
+            <router-link
+              :to="{
+                name: 'UnitPage',
+                params: { unitId: unit.id },
+              }"
+              >{{ unitData(unit.id).name }}</router-link
             >
+          </td>
+          <td class="text-left">
+            <span class="row-label">Is Leader?</span>
+            <div class="form-check is-leader" v-if="allowEdit">
               <input
                 class="form-check-input"
                 type="checkbox"
@@ -330,19 +334,12 @@
               {{ unit.isLeader ? "Yes" : "No" }}
             </div>
           </td>
-          <td>
-            <router-link
-              :to="{
-                name: 'UnitPage',
-                params: { unitId: unit.id },
-              }"
-              >{{ unitData(unit.id).name }}</router-link
-            >
-          </td>
           <td v-if="showOwner">
+            <span class="row-label">Owner: </span>
             {{ unit.owner }}
           </td>
           <td v-if="showMods">
+            <span class="row-label">Mods: </span>
             <div class="mods-list">
               <ul>
                 <li>
@@ -374,15 +371,19 @@
               </ul>
             </div>
             <div class="my-2">
-              Speed Set:
+              Has Speed Set:
               <span class="text-success" v-if="hasSpeedSet(unitData(unit.id))"
                 >Yes</span
               >
               <span class="text-white-50" v-else>No</span>
             </div>
           </td>
-          <td>{{ unitData(unit.id).stats["5"] }}</td>
           <td>
+            <span class="row-label">Subtotal:</span>
+            {{ unitData(unit.id).stats["5"] }}
+          </td>
+          <td>
+            <span class="row-label">Bonuses:</span>
             <div v-if="leaderSpeedBonus(team, unit, showGameMode) > 0">
               Leader Bonus: {{ leaderSpeedBonus(team, unit, showGameMode) }}
             </div>
@@ -395,6 +396,7 @@
             </div>
           </td>
           <td>
+            <span class="row-label">Grand Total:</span>
             {{ grandTotal(unit, team, showGameMode) }}
           </td>
           <td>
@@ -711,6 +713,21 @@ export default defineComponent({
   @media only screen and (min-width: 768px) {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+.is-leader {
+  display: flex;
+  justify-content: center;
+
+  @media only screen and (max-width: 768px) {
+    display: inline;
+    padding-left: 0;
+
+    input {
+      float: none;
+      margin-left: 0.5rem;
+    }
   }
 }
 

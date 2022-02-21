@@ -37,7 +37,6 @@
       <RelicTable
         :relicList="relicList"
         :targetLevels="[{ level: relicLevel, target: relicTarget }]"
-        showHeader
       />
     </div>
   </div>
@@ -50,7 +49,7 @@ import { mapGetters, mapState } from "vuex";
 import RelicTable from "./relicTable.vue";
 import Timestamp from "../timestamp.vue";
 import EnergySpent from "../energySpent.vue";
-import RelicIcon from "../units/relicIcon.vue";
+import RelicIcon from "../units/relicLevelIcon.vue";
 import { UpdateItem } from "../../types/planner";
 import { loadingState } from "../../types/loading";
 import { Relic, maxRelicLevel } from "../../types/relic";
@@ -117,6 +116,12 @@ export default defineComponent({
   @media only screen and (min-width: 600px) and (max-width: 1200px) {
     display: flex;
     justify-content: space-around;
+
+    .current-level,
+    .target-level {
+      display: flex;
+      align-items: center;
+    }
   }
 
   @media only screen and (min-width: 1200px) {
@@ -134,6 +139,11 @@ export default defineComponent({
   @media only screen and (max-width: 600px) {
     text-align: center;
 
+    .current-level {
+      display: inline-flex;
+      align-items: center;
+      max-height: 40px;
+    }
     .target-level {
       margin-top: 0.25rem;
     }

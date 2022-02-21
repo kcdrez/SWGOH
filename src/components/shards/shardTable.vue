@@ -1,106 +1,43 @@
 <template>
   <div>
     <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        mb-0
-        show-on-mobile
-        swgoh-table
-      "
+      class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
-      <thead>
-        <tr class="text-center align-middle">
-          <th>
-            <div v-if="showHeader">Shard Info</div>
-            <div class="sort-methods">
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Sort By:</span>
-                <select
-                  class="form-control"
-                  @change="sortMethod = $event.target.value"
-                >
-                  <option value="name" v-if="showUnitName">Name</option>
-                  <option value="location">Location</option>
-                  <option value="progress">Progress</option>
-                  <option value="time">Time Remaining</option>
-                </select>
-              </div>
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Sort Direction:</span>
-                <select
-                  class="form-control"
-                  @change="sortDir = $event.target.value"
-                >
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </div>
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Search:</span>
-                <input
-                  class="form-control"
-                  v-model="searchText"
-                  placeholder="Search by name"
-                />
-              </div>
+      <thead class="sticky-header show-on-mobile">
+        <tr class="sort-methods" v-if="showUnitName">
+          <th class="show-on-mobile">
+            <div class="input-group input-group-sm my-2">
+              <span class="input-group-text">Sort By:</span>
+              <select
+                class="form-control"
+                @change="sortMethod = $event.target.value"
+              >
+                <option value="name" v-if="showUnitName">Name</option>
+                <option value="location">Location</option>
+                <option value="progress">Progress</option>
+                <option value="time">Time Remaining</option>
+              </select>
+            </div>
+            <div class="input-group input-group-sm my-2">
+              <span class="input-group-text">Sort Direction:</span>
+              <select
+                class="form-control"
+                @change="sortDir = $event.target.value"
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+            <div class="input-group input-group-sm my-2">
+              <span class="input-group-text">Search:</span>
+              <input
+                class="form-control"
+                v-model="searchText"
+                placeholder="Search by name"
+              />
             </div>
           </th>
         </tr>
-      </thead>
-      <tbody>
-        <tr v-for="unit in filteredUnitList" :key="unit.id">
-          <div class="swgoh-row">
-            <div>
-              <UnitIcon
-                :unit="unit"
-                class="text-center"
-                v-if="showUnitName"
-                isLink
-                hideImgOnMobile
-              />
-              <div class="text-center">
-                Current Star Level: <b>{{ unit.stars || 0 }}</b>
-              </div>
-            </div>
-            <div v-if="unitLocations(unit).length <= 0" class="text-center">
-              No known farmable locations.
-            </div>
-            <div v-else>
-              <ul class="m-0 p-0 text-center">
-                <li v-for="(l, index) in unitLocations(unit)" :key="index">
-                  {{ l }}
-                </li>
-              </ul>
-            </div>
-            <div class="py-3">
-              <ShardsOwned :unit="unit" class="owned-amount" />
-              <ShardProgressBar :unit="unit" class="mt-2" />
-            </div>
-            <div>
-              <NodesPerDay :unit="unit" />
-            </div>
-            <div class="estimation" v-if="showUnitName">
-              <Timestamp
-                :timeLength="shardTimeEstimation(unit)"
-                :displayText="
-                  $filters.pluralText(shardTimeEstimation(unit), 'day')
-                "
-                label="Estimated Completion:"
-                :title="$filters.daysFromNow(shardTimeEstimation(unit))"
-                displayClasses="d-inline"
-              />
-            </div>
-          </div>
-        </tr>
-      </tbody>
-    </table>
-    <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        show-on-desktop
-      "
-    >
-      <thead class="sticky-header">
         <tr class="text-center align-middle">
           <th width="20%" v-if="showUnitName">
             <div class="c-pointer" @click="sortBy('name')">
@@ -155,20 +92,26 @@
             <div v-if="unitLocations(unit).length <= 0" class="text-center">
               No known farmable locations.
             </div>
-            <ul v-else class="m-0">
-              <li v-for="(l, index) in unitLocations(unit)" :key="index">
-                {{ l }}
-              </li>
-            </ul>
+            <template v-else>
+              <span class="row-label">Farming Locations:</span>
+              <ul class="m-0">
+                <li v-for="(l, index) in unitLocations(unit)" :key="index">
+                  {{ l }}
+                </li>
+              </ul>
+            </template>
           </td>
           <td class="align-middle">
+            <span class="row-label">Amount/Progress:</span>
             <ShardsOwned :unit="unit" />
             <ShardProgressBar :unit="unit" class="mt-2" />
           </td>
           <td class="align-middle nodes-per-day">
+            <span class="row-label">Node Attempts per Day:</span>
             <NodesPerDay :unit="unit" v-if="showNodesPerDay(unit)" />
           </td>
           <td class="text-center align-middle" v-if="showUnitName">
+            <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="shardTimeEstimation(unit)"
               :displayText="

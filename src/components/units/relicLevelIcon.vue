@@ -48,7 +48,7 @@ export default defineComponent({
   font-family: "Open Sans", sans-serif;
   text-align: center;
   &.dark-side {
-    background-position: 0 -100%;
+    background-position: 0 -50px;
   }
   &.light-side {
     background-position: 0 0;

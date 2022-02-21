@@ -37,10 +37,7 @@
         displayClasses="d-inline"
       />
       <EnergySpent showFleet showStandard />
-      <GearTable
-        :gearList="fullSalvageList(this.unit, this.gearTarget)"
-        showHeader
-      />
+      <GearTable :gearList="fullSalvageList(this.unit, this.gearTarget)" />
     </div>
     <div class="modal fade" id="gearAssumptionsModal" tabindex="-1">
       <div class="modal-dialog">

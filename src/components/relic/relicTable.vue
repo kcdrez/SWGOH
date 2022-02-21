@@ -1,105 +1,43 @@
 <template>
   <div>
     <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        show-on-mobile
-        swgoh-table
-      "
+      class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
-      <thead>
-        <tr class="text-center align-middle">
-          <th>
-            <div v-if="showHeader">Relic Info</div>
-            <div class="sort-methods">
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Sort By:</span>
-                <select
-                  class="form-control"
-                  @change="sortMethod = $event.target.value"
-                >
-                  <option value="name">Name</option>
-                  <option value="location">Location</option>
-                  <option value="progress">Progress</option>
-                  <option value="time">Time Remaining</option>
-                </select>
-              </div>
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Sort Direction:</span>
-                <select
-                  class="form-control"
-                  @change="sortDir = $event.target.value"
-                >
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </div>
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Search:</span>
-                <input
-                  class="form-control"
-                  v-model="searchText"
-                  placeholder="Search by name"
-                />
-              </div>
+      <thead class="sticky-header show-on-mobile">
+        <tr class="sort-methods">
+          <th class="show-on-mobile">
+            <div class="input-group input-group-sm my-2">
+              <span class="input-group-text">Sort By:</span>
+              <select
+                class="form-control"
+                @change="sortMethod = $event.target.value"
+              >
+                <option value="name">Name</option>
+                <option value="location">Location</option>
+                <option value="progress">Progress</option>
+                <option value="time">Time Remaining</option>
+              </select>
+            </div>
+            <div class="input-group input-group-sm my-2">
+              <span class="input-group-text">Sort Direction:</span>
+              <select
+                class="form-control"
+                @change="sortDir = $event.target.value"
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+            <div class="input-group input-group-sm my-2">
+              <span class="input-group-text">Search:</span>
+              <input
+                class="form-control"
+                v-model="searchText"
+                placeholder="Search by name"
+              />
             </div>
           </th>
         </tr>
-      </thead>
-      <tbody>
-        <tr v-for="mat in filteredRelics" :key="mat.id">
-          <div class="swgoh-row">
-            <RelicIcon :item="mat" class="text-center" />
-            <div class="text-center">
-              Acquired at:
-              {{ mat.location.node || "No known farmable locations." }}
-            </div>
-            <div class="py-3">
-              <OwnedAmount
-                class="owned-amount"
-                :item="mat"
-                :needed="amountNeeded(mat.amount, targetLevels)"
-              />
-              <RelicProgressBar
-                :itemId="mat.id"
-                :amountNeeded="amountNeeded(mat.amount, targetLevels)"
-                class="mt-2"
-              />
-            </div>
-            <div v-if="showRequiredByUnit && mat?.neededBy">
-              <div class="text-center">Required By:</div>
-              <ul class="text-center p-0 mt-1 mb-2">
-                <li v-for="unit in mat.neededBy" :key="unit.id">
-                  <router-link
-                    :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-                    >{{ unit.name }}</router-link
-                  >
-                </li>
-              </ul>
-            </div>
-            <div class="estimation">
-              <Timestamp
-                :timeLength="timeEstimation(mat, targetLevels)"
-                :displayText="
-                  $filters.pluralText(timeEstimation(mat, targetLevels), 'day')
-                "
-                :title="$filters.daysFromNow(timeEstimation(mat, targetLevels))"
-                displayClasses="d-inline"
-                label="Estimated Completion:"
-              />
-            </div>
-          </div>
-        </tr>
-      </tbody>
-    </table>
-    <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        show-on-desktop
-        swgoh-table
-      "
-    >
-      <thead class="sticky-header">
         <tr class="text-center align-middle">
           <th :width="showRequiredByUnit ? '15%' : '20%'">
             <div class="c-pointer" @click="sortBy('name')">
@@ -140,7 +78,10 @@
           <td class="text-center align-middle">
             <RelicIcon :item="mat" />
           </td>
-          <td class="text-center align-middle">{{ mat.location.node }}</td>
+          <td class="text-center align-middle">
+            <span class="row-label">Location: </span>
+            {{ mat.location.node }}
+          </td>
           <td class="align-middle">
             <OwnedAmount
               :item="mat"
@@ -153,6 +94,7 @@
             />
           </td>
           <td v-if="showRequiredByUnit">
+            <span class="row-label">Required By: </span>
             <ul>
               <li v-for="unit in mat.neededBy" :key="unit.id">
                 <router-link
@@ -163,6 +105,7 @@
             </ul>
           </td>
           <td class="text-center align-middle">
+            <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="timeEstimation(mat, targetLevels)"
               :displayText="
@@ -206,10 +149,6 @@ export default defineComponent({
       },
     },
     showRequiredByUnit: {
-      type: Boolean,
-      default: false,
-    },
-    showHeader: {
       type: Boolean,
       default: false,
     },

@@ -12,7 +12,13 @@
       <template v-else>
         <div class="shard-header">
           <div class="current-level">
-            Current Star Level: <b>{{ unit.stars || 0 }}</b>
+            Current Star Level:
+            <img
+              v-for="index in unit.stars || 0"
+              :key="index"
+              src="images/star.png"
+            />
+            <!-- <b>{{ unit.stars || 0 }}</b> -->
           </div>
         </div>
         <Timestamp
@@ -221,6 +227,16 @@ export default defineComponent({
     &:hover {
       text-decoration: underline;
     }
+  }
+}
+
+.current-level {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img:first-child {
+    margin-left: 1rem;
   }
 }
 </style>

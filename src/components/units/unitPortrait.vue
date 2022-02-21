@@ -30,7 +30,7 @@
 import { defineComponent, PropType } from "vue";
 
 import { Unit } from "../../types/unit";
-import RelicIcon from "./relicIcon.vue";
+import RelicIcon from "./relicLevelIcon.vue";
 
 export default defineComponent({
   name: "UnitPortrait",
