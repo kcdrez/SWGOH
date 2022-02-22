@@ -46,7 +46,7 @@ const store = {
       return (unitId: string): FarmingNode[] => {
         return state.shardFarming.filter((node) => {
           return node.characters.some((c) => c.id === unitId);
-        })
+        });
       };
     },
     shardTimeEstimation(state: State, getters: any) {
@@ -69,9 +69,9 @@ const store = {
 
         return Math.ceil(
           remainingShards /
-          (dropRate *
-            characterAcceleration *
-            (nodesList.length === 0 ? 5 : nodesPerDay))
+            (dropRate *
+              characterAcceleration *
+              (nodesList.length === 0 ? 5 : nodesPerDay))
         );
       };
     },
@@ -168,17 +168,23 @@ const store = {
       { id, count, nodes, tracking }: NodePayload
     ) {
       const match = state.ownedShards[id] || {};
-      const compare1Nodes = nodes ?? match.nodes ?? [];
-      const compare2Nodes = (match?.nodes?.length || 0) < (nodes?.length || 0) ? nodes : match.nodes;
 
-      const nodesData: Node[] = (compare1Nodes).map((node) => {
-        const matchNode = (compare2Nodes || []).find((n) => n.id === node.id);
-        return {
-          id: node.id,
-          count: matchNode?.count ?? node?.count ?? 0,
-          priority: matchNode?.priority ?? node?.priority ?? 0,
-        };
-      });
+      let nodesData: Node[] = [];
+      if (nodes) {
+        nodesData = nodes.map((node) => {
+          const nodeMatch = (match?.nodes || []).find((n) => n.id === node.id);
+          const nodeCount = node?.count || nodeMatch?.count || 0;
+          const priority = node?.priority || nodeMatch?.priority || 0;
+          return {
+            id: node.id,
+            count: nodeCount,
+            priority,
+          };
+        });
+      } else {
+        nodesData = match?.nodes || [];
+      }
+
       state.ownedShards[id] = {
         owned: count || match?.owned || 0,
         nodes: nodesData,
@@ -217,6 +223,7 @@ const store = {
       }
     },
     saveShardsCount({ commit, dispatch }: ActionCtx, data: NodePayload) {
+      console.log(data);
       commit("UPSERT_SHARD_COUNT", data);
       dispatch("save");
     },
