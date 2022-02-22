@@ -223,7 +223,6 @@ const store = {
       }
     },
     saveShardsCount({ commit, dispatch }: ActionCtx, data: NodePayload) {
-      console.log(data);
       commit("UPSERT_SHARD_COUNT", data);
       dispatch("save");
     },
