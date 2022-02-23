@@ -55,7 +55,6 @@ const store = {
         const amountNeeded: number = getters.amountNeeded(mat.amount, arr);
         const remaining: number = amountNeeded - owned;
 
-
         if (remaining > 0) {
           const totalEnergy =
             120 + 45 + 120 * state.refreshes.cantina - state.energy.cantina;
@@ -72,7 +71,10 @@ const store = {
       };
     },
     amountNeeded(_state: State) {
-      return (relicAmountMap: any, arr: { level: number; target: number }[]): number => {
+      return (
+        relicAmountMap: any,
+        arr: { level: number; target: number }[]
+      ): number => {
         let amount = 0;
 
         arr.forEach(({ level, target }) => {
