@@ -28,27 +28,27 @@ const store = {
     energy: { cantina: 0 },
   },
   getters: {
-    currentRelicLevel(_state: State) {
-      return (relic_tier: number | undefined): number => {
-        if (!relic_tier) {
-          return 0;
-        } else {
-          return relic_tier < 0 ? 0 : relic_tier;
-        }
-      };
-    },
-    relicOptions(_state: State) {
-      return (relicLevel: number): number[] => {
-        const list = [];
-        if (relicLevel < 0) {
-          relicLevel = 0;
-        }
-        for (let i = (relicLevel || 0) + 1; i <= maxRelicLevel; i++) {
-          list.push(i);
-        }
-        return list;
-      };
-    },
+    // currentRelicLevel(_state: State) {
+    //   return (relic_tier: number | undefined): number => {
+    //     if (!relic_tier) {
+    //       return 0;
+    //     } else {
+    //       return relic_tier < 0 ? 0 : relic_tier;
+    //     }
+    //   };
+    // },
+    // relicOptions(_state: State) {
+    //   return (relicLevel: number): number[] => {
+    //     const list = [];
+    //     if (relicLevel < 0) {
+    //       relicLevel = 0;
+    //     }
+    //     for (let i = (relicLevel || 0) + 1; i <= maxRelicLevel; i++) {
+    //       list.push(i);
+    //     }
+    //     return list;
+    //   };
+    // },
     timeEstimation(state: State, getters: any) {
       return (mat: Relic, arr: { level: number; target: number }[]): number => {
         const owned: number = state.ownedRelics[mat.id] || 0;

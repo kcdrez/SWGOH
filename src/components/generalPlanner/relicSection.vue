@@ -32,14 +32,12 @@ export default defineComponent({
   computed: {
     ...mapGetters("planner", ["fullUnitList", "relicTarget"]),
     ...mapState("relic", ["relicConfig"]),
-    ...mapGetters("relic", ["currentRelicLevel"]),
     fullRelicList(): Relic[] {
       const list: Relic[] = unvue(Object.values(this.relicConfig));
       this.fullUnitList.forEach((unit: Unit) => {
-        const level = this.currentRelicLevel(unit.relic_tier);
         const target = this.relicTarget(unit.id);
 
-        if (level < target) {
+        if (unit.relicLevel < target) {
           list.forEach((relic: Relic) => {
             if (relic.amount[target] > 0) {
               if (relic.neededBy) {
@@ -56,9 +54,8 @@ export default defineComponent({
     relicTargetLevels(): any[] {
       const list: any[] = [];
       this.fullUnitList.forEach((unit: Unit) => {
-        const level = this.currentRelicLevel(unit.relic_tier);
         const target = this.relicTarget(unit.id);
-        list.push({ level, target });
+        list.push({ level: unit.relicLevel, target });
       });
       return list;
     },

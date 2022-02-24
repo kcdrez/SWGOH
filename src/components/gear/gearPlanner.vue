@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!unit.is_ship && currentGearLevel(unit) < maxGearLevel">
+  <div v-if="!unit.isShip && unit.gearLevel < maxGearLevel">
     <div class="collapse-header section-header">
       <h3 class="w-100" data-bs-toggle="collapse" href="#gearSection">
         <div class="d-inline">Gear Planner</div>
@@ -14,16 +14,12 @@
     <div id="gearSection" class="collapse" ref="gearSection">
       <div class="gear-header">
         <div class="current-level">
-          Current Gear Level: <b>{{ currentGearLevel(unit) }}</b>
+          Current Gear Level: <b>{{ unit.gearLevel }}</b>
         </div>
         <div class="target-level">
           Target Level:
           <select v-model.number="gearTarget">
-            <option
-              v-for="num in gearOptions(unit.gear_level)"
-              :value="num"
-              :key="num"
-            >
+            <option v-for="num in unit.gearOptions" :value="num" :key="num">
               Gear {{ num }}
             </option>
           </select>
@@ -111,12 +107,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState("unit", ["unit"]),
-    ...mapGetters("gear", [
-      "gearOptions",
-      "fullSalvageList",
-      "totalDays",
-      "currentGearLevel",
-    ]),
+    ...mapGetters("gear", ["fullSalvageList", "totalDays", "currentGearLevel"]),
     ...mapGetters(["someLoading"]),
     ...mapState(["collapseSections"]),
     requestState(): loadingState {
@@ -143,10 +134,7 @@ export default defineComponent({
     ...mapActions(["toggleCollapse"]),
   },
   mounted() {
-    if (
-      !this.unit.is_ship &&
-      this.currentGearLevel(this.unit) < this.maxGearLevel
-    ) {
+    if (!this.unit.isShip && this.unit.gearLevel < this.maxGearLevel) {
       setupEvents(this.$refs.gearSection as HTMLElement, "gearPlanner");
     }
   },

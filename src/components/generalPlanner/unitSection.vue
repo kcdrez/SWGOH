@@ -60,7 +60,7 @@
                 >{{ unit.name }}</router-link
               >
             </td>
-            <td class="text-center">{{ getCurLevel(unit) }}</td>
+            <td class="text-center">{{ unit.currentLevel }}</td>
             <td class="text-center">
               <div v-if="unit.is_ship">-</div>
               <template v-else>
@@ -215,7 +215,7 @@
               </div>
               <div class="text-center" v-if="!unit.is_ship">
                 <div>Current Level:</div>
-                <div>{{ getCurLevel(unit) }}</div>
+                <div>{{ unit.currentLevel }}</div>
               </div>
               <div class="target-container" v-if="!unit.is_ship">
                 <div class="target-level">Target Level:</div>
@@ -400,18 +400,6 @@ export default defineComponent({
         unitId: unit.id,
       };
       this.$store.dispatch("planner/updatePlannerTarget", payload);
-    },
-    getCurLevel(unit: UnitPlannerItem & Unit): string {
-      const gearLevel = this.currentGearLevel(unit);
-      if (unit.is_ship) {
-        return "-";
-      } else if (gearLevel < this.maxGearLevel) {
-        return `Gear ${gearLevel}`;
-      } else if (unit.relic_tier > 0) {
-        return `Relic ${unit.relic_tier}`;
-      } else {
-        return `Gear ${this.maxGearLevel}`;
-      }
     },
   },
   mounted() {

@@ -1,3 +1,7 @@
+import { maxRelicLevel } from "../types/relic";
+import { Gear, maxGearLevel } from "./gear";
+import store from '../vuex-store/store'
+
 export interface UnitBasic {
   id: string;
   name: string;
@@ -5,7 +9,7 @@ export interface UnitBasic {
   gear_levels: UnitTier[];
 }
 
-export interface Unit extends UnitBasic {
+export interface UnitInterface extends UnitBasic {
   gear_level: number;
   nameKey: string;
   tier: number;
@@ -27,8 +31,193 @@ export interface Unit extends UnitBasic {
   is_ship?: boolean;
 }
 
+export class Unit {
+  private _gear_level;
+  private _name: string;
+  private _current_level_gear: UnitGear[];
+  private _ability_data: Ability[];
+  private _relic_tier: number;
+  private _mods: Mod[];
+  private _stars: number;
+  private _categories: string[];
+  private _ability_classes: string[];
+  private _role: string;
+  private _alignment: string;
+  private _is_ship: boolean;
+  private _id: string;
+  private _image: string;
+  private _gear_list: UnitTier[];
+  private _stats: any;
+
+  constructor(payload: UnitInterface) {
+    this._id = payload.id
+    this._name = payload.name
+    this._gear_level = payload.gear_level
+    this._current_level_gear = payload.gear
+    this._ability_data = payload.ability_data
+    this._relic_tier = payload.relic_tier
+    this._mods = payload.mods
+    this._stars = payload.stars
+    this._categories = payload.categories
+    this._ability_classes = payload.ability_classes
+    this._role = payload.role
+    this._alignment = payload.alignment
+    this._is_ship = payload.is_ship || false
+    this._image = payload.image;
+    this._gear_list = payload.gear_levels;
+    this._stats = payload.stats
+  }
+
+  public get id() {
+    return this._id
+  }
+  public get gearLevel() {
+    return this._gear_level
+  }
+  public get name() {
+    return this._name
+  }
+  public get abilities() {
+    return this._ability_data
+  }
+  public get relicLevel() {
+    if (!this._relic_tier) {
+      return 0;
+    } else {
+      return this._relic_tier < 0 ? 0 : this._relic_tier;
+    }
+  }
+  public get image() {
+    return this._image
+  }
+  public get alignment() {
+    return this._alignment
+  }
+  public get isShip() {
+    return this._is_ship
+  }
+  public get stars() {
+    return this._stars
+  }
+  /*
+    * Gets a list of all gear for the current gear level
+  */
+  public get currentLevelGear() {
+    return this._current_level_gear
+  }
+  /*
+    * Gets a list of all gear (ids) for all gear levels
+  */
+  public get gearList() {
+    return this._gear_list
+  }
+  public get mods() {
+    return this._mods
+  }
+  public get role() {
+    return this._role
+  }
+  public get categories() {
+    return this._categories
+  }
+
+  public get hasSpeedSet() {
+    return this.mods.filter((x) => x.set === 4).length >= 4;
+  }
+
+  public get gearOptions() {
+    const list = [];
+    for (let i = (this.gearLevel || 0) + 1; i <= maxGearLevel; i++) {
+      list.push(i);
+    }
+    return list;
+  }
+
+  public get relicOptions() {
+    const list = [];
+    for (let i = this.relicLevel + 1; i <= maxRelicLevel; i++) {
+      list.push(i);
+    }
+    return list;
+  }
+
+  public get speed() {
+    return this._stats["5"]
+  }
+
+  public get currentLevel() {
+    if (this.isShip) {
+      return "-";
+    } else if (this.gearLevel < maxGearLevel) {
+      return `Gear ${this.gearLevel}`;
+    } else if (this.relicLevel > 0) {
+      return `Relic ${this.relicLevel}`;
+    } else {
+      return `Gear ${maxGearLevel}`;
+    }
+  }
+
+  public get gearTarget() {
+    return store.state.planner.targetConfig[this.id]?.gear.target || maxGearLevel;
+  }
+
+  public get fullGearListByLevel() {
+    const futureGear = (this.gearList).filter(
+      ({ tier }: UnitTier) => tier >= this.gearLevel
+    );
+
+    return futureGear.map(({ gear, tier }: UnitTier) => {
+      return {
+        tier,
+        gear: gear
+          .reduce((acc: Gear[], id: string, index: number) => {
+            let alreadyEquipped = false;
+            if (tier === this.gearLevel) {
+              alreadyEquipped = this.currentLevelGear[index].is_obtained || false;
+            }
+
+            if (!alreadyEquipped) {
+              const gearData = this.gearData(id)
+              if (gearData) {
+                acc.push(gearData);
+              }
+            }
+            return acc;
+          }, [])
+      };
+    });
+  }
+
+  public get fullSalvageList() {
+    let list: Gear[] = [];
+    this.fullGearListByLevel.forEach((tier: any) => {
+      if (tier.tier + 1 <= this.gearTarget) {
+        tier.gear.forEach((gear: any) => {
+          gear.ingredients.forEach(({ gear, amount }: any) => {
+            const matchGear = this.gearData(gear.id)
+            if (matchGear) {
+              const gearData = new Gear({ ...matchGear.sanitize, amount });
+              const exists = list.find((x: any) => x.id === gearData.id);
+              if (exists) {
+                exists.amount += amount;
+              } else {
+                list.push(gearData);
+              }
+            }
+          });
+        });
+      }
+    });
+    return list;
+  }
+
+  public gearData(id: string): Gear | undefined {
+    return (store.state.gear.gearList as Gear[]).find((el: Gear) => el.id === id)
+  }
+}
+
 export function isUnit(unit: Unit | UnitBasic): unit is Unit {
-  return unit ? (<Unit>unit).gear_level !== undefined : false;
+  return unit ? (<Unit>unit).gearLevel !== undefined : false;
 }
 
 export interface UnitGear {

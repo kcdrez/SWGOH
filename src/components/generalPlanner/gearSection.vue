@@ -41,10 +41,12 @@ export default defineComponent({
             match.amount += gear.amount;
             match.neededBy?.push({ name: unit.name, id: unit.id });
           } else {
-            list.push({
-              ...gear,
-              neededBy: [{ name: unit.name, id: unit.id }],
-            });
+            list.push(
+              new Gear({
+                ...gear.sanitize,
+                neededBy: [{ name: unit.name, id: unit.id }],
+              })
+            );
           }
         });
       });

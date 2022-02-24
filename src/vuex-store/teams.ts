@@ -39,11 +39,11 @@ const store = {
         return "-";
       };
     },
-    hasSpeedSet(_state: State) {
-      return (unit: Unit): boolean => {
-        return unit.mods.filter((x) => x.set === 4).length >= 4;
-      };
-    },
+    // hasSpeedSet(_state: State) {
+    //   return (unit: Unit): boolean => {
+    //     return unit.mods.filter((x) => x.set === 4).length >= 4;
+    //   };
+    // },
     leaderSpeedBonus(
       state: State,
       _getters: any,
@@ -164,7 +164,7 @@ const store = {
       return (unit: TeamMember, team: Team, checkGameMode: boolean): number => {
         const unitData: Unit = rootGetters["player/unitData"](unit.id);
         return Math.floor(
-          unitData.stats["5"] +
+          unitData.speed +
           getters.leaderSpeedBonus(team, unit, checkGameMode) +
           getters.uniqueSpeedBonus(team, unit, checkGameMode) +
           getters.speedBonusFromTeamMembers(team, unit, checkGameMode)
@@ -384,14 +384,14 @@ function getUniqueAbilitySpeed(
               const uniqueTotal = getUniqueTotal(team, member, checkGameMode);
               const speedAmount = getSpeedAmount(
                 ability.value,
-                uniqueTotal + teamMemberData.stats["5"]
+                uniqueTotal + teamMemberData.speed
               );
               total += speedAmount;
             } else {
-              total += getSpeedAmount(ability.value, teamMemberData.stats["5"]);
+              total += getSpeedAmount(ability.value, teamMemberData.speed);
             }
           } else {
-            total += getSpeedAmount(ability.value, unitData.stats["5"]);
+            total += getSpeedAmount(ability.value, unitData.speed);
           }
         }
         return total;
@@ -412,7 +412,7 @@ function getUniqueAbilitySpeed(
       getUniqueTotal
     );
   } else {
-    return getSpeedAmount(ability.value, unitData.stats["5"]);
+    return getSpeedAmount(ability.value, unitData.speed);
   }
   return 0;
 }
@@ -461,11 +461,11 @@ function getUniqueFromTeamMembers(
         );
         const speedAmount = getSpeedAmount(
           ability.value,
-          uniqueTotal + memberData.stats["5"]
+          uniqueTotal + memberData.speed
         );
         amount += speedAmount;
       } else {
-        amount += getSpeedAmount(ability.value, memberData.stats["5"]);
+        amount += getSpeedAmount(ability.value, memberData.speed);
       }
     } else {
       amount += getUniqueAbilitySpeed(

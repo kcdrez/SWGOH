@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!unit.is_ship && relicLevel < maxRelicLevel">
+  <div v-if="!unit.isShip && unit.relicLevel < maxRelicLevel">
     <div class="collapse-header section-header mt-3">
       <h3 class="w-100" data-bs-toggle="collapse" href="#relicSection">
         <div class="d-inline">Relic Planner</div>
@@ -9,16 +9,15 @@
       <div class="relic-header">
         <div class="current-level">
           <div>Current Relic Level:</div>
-          <RelicIcon :relicLevel="relicLevel" :forceSide="unit.alignment" />
+          <RelicIcon
+            :relicLevel="unit.relicLevel"
+            :forceSide="unit.alignment"
+          />
         </div>
         <div class="target-level">
           Target Level:
           <select v-model.number="relicTarget" class="mx-2">
-            <option
-              v-for="num in relicOptions(unit.relic_tier)"
-              :value="num"
-              :key="num"
-            >
+            <option v-for="num in unit.relicOptions" :value="num" :key="num">
               Relic {{ num }}
             </option>
           </select>
@@ -36,7 +35,7 @@
       <EnergySpent showCantina />
       <RelicTable
         :relicList="relicList"
-        :targetLevels="[{ level: relicLevel, target: relicTarget }]"
+        :targetLevels="[{ level: unit.relicLevel, target: relicTarget }]"
       />
     </div>
   </div>
@@ -66,13 +65,10 @@ export default defineComponent({
   computed: {
     ...mapState("relic", ["relicConfig"]),
     ...mapState("unit", ["unit"]),
-    ...mapGetters("relic", ["relicOptions", "totalDays", "currentRelicLevel"]),
+    ...mapGetters("relic", ["totalDays", "currentRelicLevel"]),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
       return this.someLoading(["relic", "unit"]);
-    },
-    relicLevel(): number {
-      return this.currentRelicLevel(this.unit.relic_tier);
     },
     relicTarget: {
       get(): number {
@@ -92,7 +88,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    if (!this.unit.is_ship && this.relicLevel < maxRelicLevel) {
+    if (!this.unit.isShip && this.unit.relicLevel < maxRelicLevel) {
       setupEvents(this.$refs.relicSection as HTMLElement, "relicPlanner");
     }
   },

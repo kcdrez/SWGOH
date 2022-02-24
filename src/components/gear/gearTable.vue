@@ -262,8 +262,8 @@ export default defineComponent({
               return compareA > compareB ? -1 : 1;
             }
           } else if (this.sortMethod === "locations") {
-            const locationsA = this.gearLocation(a.lookupMissionList);
-            const locationsB = this.gearLocation(b.lookupMissionList);
+            const locationsA = this.gearLocation(a.missionList);
+            const locationsB = this.gearLocation(b.missionList);
             if (this.sortDir === "asc") {
               return locationsA[0] > locationsB[0] ? 1 : -1;
             } else {

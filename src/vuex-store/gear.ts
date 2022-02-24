@@ -47,18 +47,6 @@ const store = {
     energy: { standard: 0, fleet: 0 },
   },
   getters: {
-    currentGearLevel(_state: State, _getters: any) {
-      return (unit: Unit | UnitBasic): number => {
-        if (isUnit(unit)) {
-          return (
-            unit.gear_level +
-            unit.gear.filter((x: any) => x.is_obtained).length / 10
-          );
-        } else {
-          return 0;
-        }
-      };
-    },
     gearLocation(_state: State) {
       return (missions: Mission[]): string[] => {
         const locations: string[] = [];
@@ -97,18 +85,9 @@ const store = {
         return state.gearList.find((el: Gear) => el.id === id);
       };
     },
-    gearOptions(_state: State) {
-      return (gearLevel: number): number[] => {
-        const list = [];
-        for (let i = (gearLevel || 0) + 1; i <= maxGearLevel; i++) {
-          list.push(i);
-        }
-        return list;
-      };
-    },
     timeEstimation(state: State, getters: any) {
       return (gear: Gear): number => {
-        const locations = getters.gearLocation(gear.lookupMissionList);
+        const locations = getters.gearLocation(gear.missionList);
 
         if (state.gearConfig[gear.id]?.irrelevant) {
           return 0;
@@ -122,7 +101,7 @@ const store = {
           let energy = 100;
           let totalDays = 0;
 
-          gear.lookupMissionList.forEach((mission) => {
+          gear.missionList.forEach((mission) => {
             const {
               campaignId,
               campaignNodeDifficulty,
@@ -184,10 +163,10 @@ const store = {
         let totalFleet = 0;
         let totalChallenges = 0;
         getters.fullSalvageList(unit, target).forEach((gear: Gear) => {
-          const isChallenge = gear.lookupMissionList.some(
+          const isChallenge = gear.missionList.some(
             (x: Mission) => x.missionIdentifier.campaignMapId === "CHALLENGES"
           );
-          const isFleet = gear.lookupMissionList.some(
+          const isFleet = gear.missionList.some(
             (x: Mission) => x.missionIdentifier.campaignId === "C01SP"
           );
           const timeToGet = getters.timeEstimation(gear);
@@ -203,59 +182,6 @@ const store = {
           }
         });
         return Math.max(totalStandard, totalFleet, totalChallenges);
-      };
-    },
-    fullGearListByLevel(_state: State, getters: any) {
-      return (unit: Unit | UnitBasic): UnitTier[] => {
-        if (unit) {
-          const gear_level = isUnit(unit) ? unit.gear_level : 0;
-          const futureGear = (unit?.gear_levels || []).filter(
-            ({ tier }: UnitTier) => tier >= gear_level
-          );
-
-          return futureGear.map(({ gear, tier }: UnitTier) => {
-            return {
-              tier,
-              gear: gear
-                .map((id: string, index: number) => {
-                  let alreadyEquipped = false;
-                  if (tier === gear_level && isUnit(unit)) {
-                    alreadyEquipped = unit?.gear[index].is_obtained || false;
-                  }
-
-                  if (alreadyEquipped) {
-                    return null;
-                  } else {
-                    return getters.findGearData(id);
-                  }
-                })
-                .filter((x: UnitTier | null) => !!x),
-            };
-          });
-        } else {
-          return [];
-        }
-      };
-    },
-    fullSalvageList(_state: State, getters: any) {
-      return (unit: Unit | UnitBasic, gearTarget: number): Gear[] => {
-        let list: Gear[] = [];
-        getters.fullGearListByLevel(unit).forEach((tier: any) => {
-          if (tier.tier + 1 <= gearTarget) {
-            tier.gear.forEach((gear: any) => {
-              gear.ingredients.forEach(({ gear, amount }: any) => {
-                const gearData = { ...getters.findGearData(gear), amount };
-                const exists = list.find((x: any) => x.id === gearData.id);
-                if (exists) {
-                  exists.amount += amount;
-                } else {
-                  list.push(gearData);
-                }
-              });
-            });
-          }
-        });
-        return list;
       };
     },
   },

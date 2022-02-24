@@ -1,6 +1,6 @@
 export const maxGearLevel = 13;
 
-export interface Gear {
+export interface IGear {
   id: string;
   image: string;
   name: string;
@@ -9,6 +9,69 @@ export interface Gear {
   lookupMissionList: Mission[];
   tier: number;
   neededBy?: { name: string; id: string }[];
+}
+
+export class Gear {
+  private _id: string;
+  private _image: string;
+  private _name: string;
+  private _owned: number;
+  private _amount: number;
+  private _lookupMissionList: Mission[];
+  private _tier: number;
+  private _neededBy?: { name: string; id: string }[];
+
+  constructor(data: IGear) {
+    this._id = data.id;
+    this._image = data.image
+    this._name = data.name
+    this._owned = data.owned
+    this._amount = data.amount
+    this._lookupMissionList = data.lookupMissionList
+    this._tier = data.tier
+    this._neededBy = data.neededBy
+  }
+
+  public get id() {
+    return this._id
+  }
+  public get image() {
+    return this._image
+  }
+  public get name() {
+    return this._name
+  }
+  public get owned() {
+    return this._owned
+  }
+  public get amount() {
+    return this._amount
+  }
+  public set amount(val) {
+    this._amount = val
+  }
+  public get missionList() {
+    return this._lookupMissionList
+  }
+  public get tier() {
+    return this._tier
+  }
+  public get neededBy() {
+    return this._neededBy
+  }
+
+  public get sanitize(): IGear {
+    return {
+      id: this.id,
+      image: this.image,
+      name: this.name,
+      owned: this.owned,
+      amount: this.amount,
+      lookupMissionList: this.missionList,
+      tier: this.tier,
+      neededBy: this.neededBy
+    }
+  }
 }
 
 export interface Mission {
