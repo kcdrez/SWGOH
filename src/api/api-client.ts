@@ -3,7 +3,7 @@ import axios from "axios";
 import { PlayerResponse } from "../types/player";
 import { ConfigType, Gear, IGear } from "../types/gear";
 import { IUnit, Unit } from "../types/unit";
-import { OwnedShardsMap } from "../types/shards";
+import { FarmingNode, IFarmingNode, OwnedShardsMap } from "../types/shards";
 import { OwnedRelicConfig } from "../types/relic";
 import { Match, Team } from "../types/teams";
 import {
@@ -127,7 +127,7 @@ class ApiClient {
 
   async fetchFarmingData() {
     const response = await axios.get(`${this.baseUrl}/unit/shardFarming`);
-    return response.data;
+    return response.data.map((x: IFarmingNode) => new FarmingNode(x));
   }
 
   async saveShardFarming(

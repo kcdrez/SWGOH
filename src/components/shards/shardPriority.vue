@@ -27,10 +27,10 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapState } from "vuex";
 
 import { Unit } from "../../types/unit";
-import { FarmingNode, Node } from "../../types/shards";
+import { Node } from "../../types/shards";
 
 export default defineComponent({
   name: "ShardPriority",
@@ -56,7 +56,7 @@ export default defineComponent({
       const nodesListByUnit: Node[] =
         this.ownedShards[this.unit.id]?.nodes || [];
 
-      return this.unit.nodes.map((node) => {
+      return this.unit.whereToFarm.map((node) => {
         const match = nodesListByUnit.find((n) => n.id === node.id);
         return {
           id: node.id,
@@ -68,13 +68,9 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions("shards", ["saveShardsCount"]),
     save() {
       this.editing = false;
-      const payload: any = { id: this.unit.id };
-
-      payload.nodes = this.nodeData;
-      this.saveShardsCount(payload);
+      this.unit.shardNodes = this.nodeData;
     },
     edit() {
       this.editing = true;

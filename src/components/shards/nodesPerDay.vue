@@ -5,7 +5,7 @@
       v-for="(node, index) in nodes"
       :key="node.id"
     >
-      <span class="input-group-text">{{ nodeLabel(node.id) }}</span>
+      <span class="input-group-text">{{ node.label }}</span>
       <input
         class="form-control"
         type="number"
@@ -67,7 +67,6 @@ export default defineComponent({
   },
   computed: {
     ...mapState("shards", ["ownedShards"]),
-    ...mapGetters("shards", ["nodeLabel"]),
     unitNodeData(): NodePayload {
       return {
         id: this.unit.id,
@@ -110,7 +109,7 @@ export default defineComponent({
     },
   },
   created(): void {
-    const nodesList: FarmingNode[] = this.unit.nodes.filter(
+    const nodesList: FarmingNode[] = this.unit.whereToFarm.filter(
       (node: FarmingNode) => {
         return (
           node.table === "Light Side" ||
@@ -120,13 +119,14 @@ export default defineComponent({
         );
       }
     );
-    const nodesListByUnit: Node[] = this.ownedShards[this.unit.id]?.nodes || [];
 
     const finalList: Node[] = nodesList.map((node) => {
-      const { count } = nodesListByUnit.find((n) => n.id === node.id) || {};
+      const { count } =
+        this.unit.shardNodes.find((n) => n.id === node.id) || {};
       return {
         id: node.id,
         count: count ?? 0,
+        label: node.label,
       };
     });
 

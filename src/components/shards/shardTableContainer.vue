@@ -291,7 +291,6 @@ import { mapGetters } from "vuex";
 
 import ShardTable from "./shardTable.vue";
 import { Unit } from "../../types/unit";
-import { FarmingNode } from "../../types/shards";
 import { setupEvents } from "../../utils";
 
 export default defineComponent({
@@ -301,78 +300,88 @@ export default defineComponent({
     ...mapGetters("shards", ["unitFarmingList"]),
     standardHoloTable(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some(
+        return unit.whereToFarm.some(
           (node) => node.table === "Light Side" || node.table === "Dark Side"
         );
       });
     },
     fleet(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Fleet");
+        return unit.whereToFarm.some((node) => node.table === "Fleet");
       });
     },
     cantina(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Cantina");
+        return unit.whereToFarm.some((node) => node.table === "Cantina");
       });
     },
     legendary(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Legendary Events");
+        return unit.whereToFarm.some(
+          (node) => node.table === "Legendary Events"
+        );
       });
     },
     galacticLegends(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some(
+        return unit.whereToFarm.some(
           (node) => node.table === "Galactic Legend Events"
         );
       });
     },
     territoryBattles(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Territory Battles");
+        return unit.whereToFarm.some(
+          (node) => node.table === "Territory Battles"
+        );
       });
     },
     raids(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Raids");
+        return unit.whereToFarm.some((node) => node.table === "Raids");
       });
     },
     conquest(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Conquest");
+        return unit.whereToFarm.some((node) => node.table === "Conquest");
       });
     },
     cantinaStore(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some(
+        return unit.whereToFarm.some(
           (node) => node.table === "Cantina Battles Store"
         );
       });
     },
     guildStore(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Guild Store");
+        return unit.whereToFarm.some((node) => node.table === "Guild Store");
       });
     },
     squadArenaStore(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Squad Arena Store");
+        return unit.whereToFarm.some(
+          (node) => node.table === "Squad Arena Store"
+        );
       });
     },
     galacticWarStore(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Galactic War Store");
+        return unit.whereToFarm.some(
+          (node) => node.table === "Galactic War Store"
+        );
       });
     },
     fleetArenaStore(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Fleet Arena Store");
+        return unit.whereToFarm.some(
+          (node) => node.table === "Fleet Arena Store"
+        );
       });
     },
     guildEventsStore(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some(
+        return unit.whereToFarm.some(
           (node) =>
             node.table === "Guild Events Store (Mk 1)" ||
             node.table === "Guild Events Store (Mk 2)"
@@ -381,7 +390,7 @@ export default defineComponent({
     },
     shardStore(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.nodes.some((node) => node.table === "Shard Store");
+        return unit.whereToFarm.some((node) => node.table === "Shard Store");
       });
     },
   },

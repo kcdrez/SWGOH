@@ -89,13 +89,13 @@
             <UnitIcon :unit="unit" isLink />
           </td>
           <td class="align-middle text-center">
-            <div v-if="unitLocations(unit).length <= 0" class="text-center">
+            <div v-if="unit.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
             <template v-else>
               <span class="row-label">Farming Locations:</span>
               <ul class="m-0">
-                <li v-for="(l, index) in unitLocations(unit)" :key="index">
+                <li v-for="(l, index) in unit.locations" :key="index">
                   {{ l }}
                 </li>
               </ul>
@@ -108,7 +108,7 @@
           </td>
           <td class="align-middle nodes-per-day">
             <span class="row-label">Node Attempts per Day:</span>
-            <NodesPerDay :unit="unit" v-if="showNodesPerDay(unit)" />
+            <NodesPerDay :unit="unit" v-if="unit.showNodesPerDay" />
           </td>
           <td class="text-center align-middle" v-if="showUnitName">
             <span class="row-label">Completion Date: </span>
@@ -212,8 +212,6 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("shards", ["nodeLabel"]),
-    ...mapState("shards", ["ownedShards"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -261,7 +259,6 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions("gear", ["saveOwnedCount"]),
     ...mapActions("shards", ["removeUnit", "addUnit"]),
     sortBy(type: string): void {
       if (this.sortMethod === type) {
@@ -277,21 +274,6 @@ export default defineComponent({
       } else {
         return "fa-sort";
       }
-    },
-    unitLocations(unit: Unit): string[] {
-      return unit.nodes.map((x) => {
-        return this.nodeLabel(x.id);
-      });
-    },
-    showNodesPerDay(unit: Unit): boolean {
-      return unit.nodes.some((node) => {
-        return (
-          node.table === "Light Side" ||
-          node.table === "Dark Side" ||
-          node.table === "Cantina" ||
-          node.table === "Fleet"
-        );
-      });
     },
   },
 });

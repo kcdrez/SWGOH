@@ -272,7 +272,7 @@ export class Unit {
     }, 0);
   }
 
-  public get totalRemaingingShards() {
+  private get totalRemainingShards() {
     let amount = 0;
     for (let i = this.stars + 1; i <= 7; i++) {
       amount += shardMapping[i];
@@ -286,13 +286,13 @@ export class Unit {
     store.dispatch("shards/saveShardsCount", { count: value, id: this.id });
   }
   public get remainingShards() {
-    return this.totalRemaingingShards - this.ownedShards;
+    return this.totalRemainingShards - this.ownedShards;
   }
   public get shardProgress() {
-    return this.ownedShards / this.totalRemaingingShards * 100;
+    return (this.ownedShards / this.totalRemainingShards) * 100;
   }
-  public get shardsPercent() {
-    const val = (this.ownedShards / this.totalRemaingingShards) * 100;
+  public get shardPercent() {
+    const val = (this.ownedShards / this.totalRemainingShards) * 100;
     if (val >= 100) {
       return 100;
     } else {
@@ -300,19 +300,42 @@ export class Unit {
     }
   }
 
-  public get nodes() {
+  public get whereToFarm() {
     return store.state.shards.shardFarming.filter((node) => {
       return node.characters.some((c) => c.id === this.id);
     });
   }
-  public get shardDropRate() {
-    return this.nodes[0].characters.find((x) => x.id === this.id)?.dropRate || 0;
+  public get locations() {
+    return this.whereToFarm.map((x) => x.label);
   }
-  private get shardNodes() {
+  public get showNodesPerDay() {
+    return this.whereToFarm.some((node) => {
+      return (
+        node.table === "Light Side" ||
+        node.table === "Dark Side" ||
+        node.table === "Cantina" ||
+        node.table === "Fleet"
+      );
+    });
+  }
+  public get shardDropRate() {
+    return (
+      this.whereToFarm[0].characters.find((x) => x.id === this.id)?.dropRate ||
+      0
+    );
+  }
+  public get shardNodes() {
     return store.state.shards.ownedShards[this.id]?.nodes || [];
   }
+  public set shardNodes(val) {
+    store.dispatch("shards/saveShardsCount", {
+      count: this.ownedShards,
+      id: this.id,
+      nodes: val,
+    });
+  }
   public get shardTimeEstimation() {
-    if (this.nodes.length <= 0) {
+    if (this.whereToFarm.length <= 0) {
       return 0;
     }
     const dropRate = 0.33;
@@ -323,9 +346,9 @@ export class Unit {
 
     return Math.ceil(
       this.remainingShards /
-      (dropRate *
-        this.shardDropRate *
-        (this.shardNodes.length === 0 ? 5 : nodesPerDay))
+        (dropRate *
+          this.shardDropRate *
+          (this.shardNodes.length === 0 ? 5 : nodesPerDay))
     );
   }
 
@@ -336,13 +359,10 @@ export class Unit {
   }
 
   public tablePriority(tableNames: string[]) {
-    const matchFarmingNode = this.nodes
-      .find((node) => {
-        return tableNames.includes(node.table);
-      });
-    const match = this.shardNodes.find(
-      (n) => n.id === matchFarmingNode?.id
-    );
+    const matchFarmingNode = this.whereToFarm.find((node) => {
+      return tableNames.includes(node.table);
+    });
+    const match = this.shardNodes.find((n) => n.id === matchFarmingNode?.id);
     return match?.priority ?? 0;
   }
 }

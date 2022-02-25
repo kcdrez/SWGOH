@@ -29,23 +29,6 @@ const store = {
     shardFarming: [],
   },
   getters: {
-    nodeLabel(state: State) {
-      return (nodeId: string): string => {
-        const node = state.shardFarming.find((x) => x.id === nodeId);
-        if (node) {
-          let str = `${node.table}`;
-          if (node.map) {
-            str += ` ${node.map}-${node.mission}`;
-          }
-          if (node.difficulty) {
-            str += ` (${node.difficulty})`;
-          }
-          return str;
-        } else {
-          return nodeId;
-        }
-      };
-    },
     plannerList(state: State, _getters: any, rootState: RootState): Unit[] {
       return Object.entries(state.ownedShards).reduce(
         (acc: Unit[], [id, value]) => {
