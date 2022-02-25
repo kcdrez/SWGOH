@@ -40,7 +40,7 @@ export default defineComponent({
       type: Object as PropType<Unit>,
     },
     nodeTableNames: {
-      type: Array,
+      type: Array as PropType<string[]>,
       required: true,
     },
   },
@@ -52,13 +52,11 @@ export default defineComponent({
   },
   computed: {
     ...mapState("shards", ["ownedShards"]),
-    ...mapGetters("shards", ["unitNodes", "unitPriority"]),
     nodeData(): Node[] {
-      const nodesList: FarmingNode[] = this.unitNodes(this.unit.id);
       const nodesListByUnit: Node[] =
         this.ownedShards[this.unit.id]?.nodes || [];
 
-      return nodesList.map((node) => {
+      return this.unit.nodes.map((node) => {
         const match = nodesListByUnit.find((n) => n.id === node.id);
         return {
           id: node.id,
@@ -86,7 +84,7 @@ export default defineComponent({
     },
     cancel() {
       this.editing = false;
-      this.priority = this.unitPriority(this.unit.id, this.nodeTableNames);
+      this.priority = this.unit.tablePriority(this.nodeTableNames);
     },
   },
   created() {

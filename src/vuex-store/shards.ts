@@ -29,48 +29,6 @@ const store = {
     shardFarming: [],
   },
   getters: {
-    remainingShards(_state: State) {
-      return (unit: Unit): number => {
-        let amount = 0;
-        for (let i = unit.stars + 1; i <= 7; i++) {
-          amount += shardMapping[i];
-        }
-        return amount;
-      };
-    },
-    unitNodes(state: State) {
-      return (unitId: string): FarmingNode[] => {
-        return state.shardFarming.filter((node) => {
-          return node.characters.some((c) => c.id === unitId);
-        });
-      };
-    },
-    shardTimeEstimation(state: State, getters: any) {
-      return (unit: Unit): number => {
-        const nodes: FarmingNode[] = getters.unitNodes(unit.id);
-
-        if (nodes.length <= 0) {
-          return 0;
-        }
-        const currentShards = state.ownedShards[unit.id]?.owned || 0;
-        const remainingShards = getters.remainingShards(unit) - currentShards;
-        const dropRate = 0.33;
-        const characterAcceleration =
-          nodes[0].characters.find((x) => x.id === unit.id)?.dropRate || 0;
-        const nodesList = state.ownedShards[unit.id]?.nodes || [];
-        const nodesPerDay = nodesList.reduce(
-          (total, node) => total + (node?.count ?? 0),
-          0
-        );
-
-        return Math.ceil(
-          remainingShards /
-            (dropRate *
-              characterAcceleration *
-              (nodesList.length === 0 ? 5 : nodesPerDay))
-        );
-      };
-    },
     nodeLabel(state: State) {
       return (nodeId: string): string => {
         const node = state.shardFarming.find((x) => x.id === nodeId);
@@ -86,20 +44,6 @@ const store = {
         } else {
           return nodeId;
         }
-      };
-    },
-    unitPriority(state: State, getters: any) {
-      return (unitId: string, tableNames: string[]): number => {
-        const matchFarmingNode: FarmingNode | undefined = getters
-          .unitNodes(unitId)
-          .find((node: FarmingNode) => {
-            return tableNames.includes(node.table);
-          });
-        const nodesListByUnit: Node[] = state.ownedShards[unitId]?.nodes || [];
-        const match = nodesListByUnit.find(
-          (n) => n.id === matchFarmingNode?.id
-        );
-        return match?.priority ?? 0;
       };
     },
     plannerList(state: State, _getters: any, rootState: RootState): Unit[] {

@@ -6,7 +6,7 @@
       </h3>
     </div>
     <div id="shardSection" class="collapse" ref="shardSection">
-      <h5 v-if="unitNodes(unit.id).length === 0" class="my-1 text-center">
+      <h5 v-if="unit.nodes.length === 0" class="my-1 text-center">
         This unit is not currently farmable.
       </h5>
       <template v-else>
@@ -24,8 +24,8 @@
         <Timestamp
           class="time-estimate"
           label="Estimated completion:"
-          :title="$filters.daysFromNow(shardTimeEstimation(unit))"
-          :displayText="$filters.pluralText(shardTimeEstimation(unit), 'day')"
+          :title="$filters.daysFromNow(unit.shardTimeEstimation)"
+          :displayText="$filters.pluralText(unit.shardTimeEstimation, 'day')"
           displayClasses="d-inline"
         />
         <EnergySpent showStandard showFleet showCantina />
@@ -50,7 +50,6 @@ export default defineComponent({
   components: { ShardTable, Timestamp, EnergySpent },
   computed: {
     ...mapState("unit", ["unit"]),
-    ...mapGetters("shards", ["shardTimeEstimation", "unitNodes"]),
     ...mapGetters(["someLoading"]),
     ...mapState(["collapseSections"]),
     requestState(): loadingState {

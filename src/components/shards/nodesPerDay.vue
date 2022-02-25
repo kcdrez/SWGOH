@@ -67,7 +67,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState("shards", ["ownedShards"]),
-    ...mapGetters("shards", ["remainingShards", "unitNodes", "nodeLabel"]),
+    ...mapGetters("shards", ["nodeLabel"]),
     unitNodeData(): NodePayload {
       return {
         id: this.unit.id,
@@ -110,7 +110,7 @@ export default defineComponent({
     },
   },
   created(): void {
-    const nodesList: FarmingNode[] = this.unitNodes(this.unit.id).filter(
+    const nodesList: FarmingNode[] = this.unit.nodes.filter(
       (node: FarmingNode) => {
         return (
           node.table === "Light Side" ||

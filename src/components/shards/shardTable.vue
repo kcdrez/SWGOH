@@ -104,7 +104,7 @@
           <td class="align-middle">
             <span class="row-label">Amount/Progress:</span>
             <ShardsOwned :unit="unit" />
-            <ShardProgressBar :unit="unit" class="mt-2" />
+            <ProgressBar :percent="unit.shardPercent" class="mt-2" />
           </td>
           <td class="align-middle nodes-per-day">
             <span class="row-label">Node Attempts per Day:</span>
@@ -113,11 +113,11 @@
           <td class="text-center align-middle" v-if="showUnitName">
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="shardTimeEstimation(unit)"
+              :timeLength="unit.shardTimeEstimation"
               :displayText="
-                $filters.pluralText(shardTimeEstimation(unit), 'day')
+                $filters.pluralText(unit.shardTimeEstimation, 'day')
               "
-              :title="$filters.daysFromNow(shardTimeEstimation(unit))"
+              :title="$filters.daysFromNow(unit.shardTimeEstimation)"
               displayClasses="d-inline"
             />
           </td>
@@ -162,7 +162,6 @@ import { mapActions, mapGetters, mapState } from "vuex";
 
 import ShardsOwned from "./shardsOwned.vue";
 import UnitIcon from "../units/unitIcon.vue";
-import ShardProgressBar from "./shardProgressBar.vue";
 import NodesPerDay from "./nodesPerDay.vue";
 import ShardPriority from "./shardPriority.vue";
 import Timestamp from "../timestamp.vue";
@@ -174,7 +173,6 @@ export default defineComponent({
   components: {
     ShardsOwned,
     UnitIcon,
-    ShardProgressBar,
     NodesPerDay,
     Timestamp,
     ShardPriority,
@@ -200,7 +198,10 @@ export default defineComponent({
       type: Object,
     },
     nodeTableNames: {
-      type: Array,
+      type: Array as PropType<string[]>,
+      default: () => {
+        return [];
+      },
     },
   },
   data() {
@@ -211,13 +212,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("shards", [
-      "unitNodes",
-      "shardTimeEstimation",
-      "nodeLabel",
-      "remainingShards",
-      "unitPriority",
-    ]),
+    ...mapGetters("shards", ["nodeLabel"]),
     ...mapState("shards", ["ownedShards"]),
     filteredUnitList(): Unit[] {
       return this.units
@@ -236,30 +231,20 @@ export default defineComponent({
               return compareA > compareB ? -1 : 1;
             }
           } else if (this.sortMethod === "progress") {
-            const remainingA = this.remainingShards(a);
-            const remainingB = this.remainingShards(b);
-            const owedA = this.ownedShards[a.id]?.owned || 0;
-            const owedB = this.ownedShards[b.id]?.owned || 0;
-            const progressA = (owedA / remainingA) * 100;
-            const progressB = (owedB / remainingB) * 100;
-
             if (this.sortDir === "asc") {
-              return progressA > progressB ? 1 : -1;
+              return a.shardProgress > b.shardProgress ? 1 : -1;
             } else {
-              return progressA > progressB ? -1 : 1;
+              return a.shardProgress > b.shardProgress ? -1 : 1;
             }
           } else if (this.sortMethod === "time") {
-            const estimateA = this.shardTimeEstimation(a);
-            const estimateB = this.shardTimeEstimation(b);
-
             if (this.sortDir === "asc") {
-              return estimateA > estimateB ? 1 : -1;
+              return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
             } else {
-              return estimateA > estimateB ? -1 : 1;
+              return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
             }
           } else if (this.sortMethod === "priority") {
-            const priorityA = this.unitPriority(a.id, this.nodeTableNames);
-            const priorityB = this.unitPriority(b.id, this.nodeTableNames);
+            const priorityA = a.tablePriority(this.nodeTableNames);
+            const priorityB = b.tablePriority(this.nodeTableNames);
 
             if (priorityA <= 0) {
               return this.sortDir === "asc" ? 1 : -1;
@@ -294,14 +279,12 @@ export default defineComponent({
       }
     },
     unitLocations(unit: Unit): string[] {
-      return (this.unitNodes(unit.id) as FarmingNode[]).map((x) => {
+      return unit.nodes.map((x) => {
         return this.nodeLabel(x.id);
       });
     },
     showNodesPerDay(unit: Unit): boolean {
-      const nodes: FarmingNode[] = this.unitNodes(unit.id);
-
-      return nodes.some((node) => {
+      return unit.nodes.some((node) => {
         return (
           node.table === "Light Side" ||
           node.table === "Dark Side" ||

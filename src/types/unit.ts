@@ -1,6 +1,8 @@
 import { maxRelicLevel } from "../types/relic";
 import { Gear, IIngredient, maxGearLevel } from "./gear";
 import store from "../vuex-store/store";
+import { shardMapping } from "./shards";
+import { round2Decimals } from "../utils";
 
 export interface IUnit {
   id: string;
@@ -270,10 +272,78 @@ export class Unit {
     }, 0);
   }
 
+  public get totalRemaingingShards() {
+    let amount = 0;
+    for (let i = this.stars + 1; i <= 7; i++) {
+      amount += shardMapping[i];
+    }
+    return amount - this.ownedShards;
+  }
+  public get ownedShards() {
+    return store.state.shards.ownedShards[this.id]?.owned || 0;
+  }
+  public set ownedShards(value) {
+    store.dispatch("shards/saveShardsCount", { count: value, id: this.id });
+  }
+  public get remainingShards() {
+    return this.totalRemaingingShards - this.ownedShards;
+  }
+  public get shardProgress() {
+    return this.ownedShards / this.totalRemaingingShards * 100;
+  }
+  public get shardsPercent() {
+    const val = (this.ownedShards / this.totalRemaingingShards) * 100;
+    if (val >= 100) {
+      return 100;
+    } else {
+      return round2Decimals(val);
+    }
+  }
+
+  public get nodes() {
+    return store.state.shards.shardFarming.filter((node) => {
+      return node.characters.some((c) => c.id === this.id);
+    });
+  }
+  public get shardDropRate() {
+    return this.nodes[0].characters.find((x) => x.id === this.id)?.dropRate || 0;
+  }
+  private get shardNodes() {
+    return store.state.shards.ownedShards[this.id]?.nodes || [];
+  }
+  public get shardTimeEstimation() {
+    if (this.nodes.length <= 0) {
+      return 0;
+    }
+    const dropRate = 0.33;
+    const nodesPerDay = this.shardNodes.reduce(
+      (total, node) => total + (node?.count ?? 0),
+      0
+    );
+
+    return Math.ceil(
+      this.remainingShards /
+      (dropRate *
+        this.shardDropRate *
+        (this.shardNodes.length === 0 ? 5 : nodesPerDay))
+    );
+  }
+
   public gearData(id: string): Gear | undefined {
     return (store.state.gear.gearList as Gear[]).find(
       (el: Gear) => el.id === id
     );
+  }
+
+  public tablePriority(tableNames: string[]) {
+    const matchFarmingNode = this.nodes
+      .find((node) => {
+        return tableNames.includes(node.table);
+      });
+    const match = this.shardNodes.find(
+      (n) => n.id === matchFarmingNode?.id
+    );
+    return match?.priority ?? 0;
   }
 }
 
