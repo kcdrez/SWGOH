@@ -87,20 +87,23 @@ const store = {
       { id, count, nodes, tracking }: NodePayload
     ) {
       const match = state.ownedShards[id] || {};
-      const compare1Nodes = nodes ?? match.nodes ?? [];
-      const compare2Nodes =
-        (match?.nodes?.length || 0) < (nodes?.length || 0)
-          ? nodes
-          : match.nodes;
 
-      const nodesData: Node[] = compare1Nodes.map((node) => {
-        const matchNode = (compare2Nodes || []).find((n) => n.id === node.id);
-        return {
-          id: node.id,
-          count: matchNode?.count ?? node?.count ?? 0,
-          priority: matchNode?.priority ?? node?.priority ?? 0,
-        };
-      });
+      let nodesData: Node[] = [];
+      if (nodes) {
+        nodesData = nodes.map((node) => {
+          const nodeMatch = (match?.nodes || []).find((n) => n.id === node.id);
+          const nodeCount = node?.count || nodeMatch?.count || 0;
+          const priority = node?.priority || nodeMatch?.priority || 0;
+          return {
+            id: node.id,
+            count: nodeCount,
+            priority,
+          };
+        });
+      } else {
+        nodesData = match?.nodes || [];
+      }
+
       state.ownedShards[id] = {
         owned: count || match?.owned || 0,
         nodes: nodesData,

@@ -9,9 +9,45 @@
     </div>
     <div id="unit-section-table" class="collapse" ref="unitSection">
       <table
-        class="table table-bordered table-dark table-sm table-striped m-0 show-on-desktop swgoh-table"
+        class="table table-bordered table-dark table-sm table-striped m-0 swgoh-table"
       >
-        <thead class="sticky-header">
+        <thead class="sticky-header show-on-mobile">
+          <tr class="sort-methods">
+            <th class="show-on-mobile">
+              <div class="input-group input-group-sm my-2">
+                <span class="input-group-text">Sort By:</span>
+                <select
+                  class="form-control"
+                  @change="sortMethod = $event.target.value"
+                >
+                  <option value="name">Name</option>
+                  <option value="curLevel">Current Level</option>
+                  <option value="targetLevel">Target Level</option>
+                  <option value="estGear">Estimated Gear Time</option>
+                  <option value="estRelic">Estimated Relic Time</option>
+                  <option value="completed">Estimated Completed</option>
+                </select>
+              </div>
+              <div class="input-group input-group-sm my-2">
+                <span class="input-group-text">Sort Direction:</span>
+                <select
+                  class="form-control"
+                  @change="sortDir = $event.target.value"
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </div>
+              <div class="input-group input-group-sm my-2">
+                <span class="input-group-text">Search:</span>
+                <input
+                  class="form-control"
+                  v-model="searchText"
+                  placeholder="Search by name"
+                />
+              </div>
+            </th>
+          </tr>
           <tr class="text-center align-middle">
             <th width="20%">
               <div class="c-pointer" @click="sortBy('name')">
@@ -55,8 +91,12 @@
                 >{{ unit.name }}</router-link
               >
             </td>
-            <td class="text-center">{{ unit.currentLevel }}</td>
             <td class="text-center">
+              <span class="row-label">Current Level:</span>
+              {{ unit.currentLevel }}
+            </td>
+            <td class="text-center">
+              <span class="row-label">Target Level:</span>
               <div v-if="unit.is_ship">-</div>
               <template v-else>
                 <select
@@ -86,7 +126,13 @@
                 </select>
               </template>
             </td>
-            <td class="text-center">
+            <td
+              class="text-center"
+              :class="{
+                'hidden-sm': gearTotalDays(unit) === 0 && !unit.is_ship,
+              }"
+            >
+              <span class="row-label">Est. Gear Level:</span>
               <Timestamp
                 :timeLength="unit.gearTotalDays"
                 :displayText="$filters.pluralText(unit.gearTotalDays, 'day')"
@@ -94,7 +140,13 @@
                 displayClasses="d-inline"
               />
             </td>
-            <td class="text-center">
+            <td
+              class="text-center"
+              :class="{
+                'hidden-sm': relicTotalDays(unit.id) === 0 && !unit.is_ship,
+              }"
+            >
+              <span class="row-label">Est. Relic Level:</span>
               <Timestamp
                 :timeLength="unit.relicTotalDays"
                 :displayText="$filters.pluralText(unit.relicTotalDays, 'day')"
@@ -103,6 +155,7 @@
               />
             </td>
             <td class="text-center">
+              <span class="row-label">Est. Total Level:</span>
               <Timestamp
                 :timeLength="unit.relicTotalDays + unit.gearTotalDays"
                 :displayText="

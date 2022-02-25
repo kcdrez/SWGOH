@@ -100,44 +100,66 @@
         </label>
       </div>
     </div>
+    <MultiSelect
+      class="select-columns"
+      :options="cols"
+      storageKey="teamsTable"
+      label="Show/Hide Columns"
+      @checked="selectedColumns = $event"
+    />
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <thead>
         <tr class="text-center align-middle">
-          <td width="20%">
+          <th v-if="showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
-              Unit
+              Name
               <i class="fas mx-1" :class="sortIcon('name')"></i>
             </div>
-            <input
-              class="form-control form-control-sm mx-auto my-1 w-75"
-              placeholder="Search"
-              v-model="team.searchName"
-            />
-          </td>
-          <td width="10%">
+          </th>
+          <th v-if="showCol('leader')">
             <div class="c-pointer" @click="sortBy('leader')">
               Is Leader?
               <i class="fas mx-1" :class="sortIcon('leader')"></i>
             </div>
-          </td>
-          <td v-if="showOwner" width="10%">Owner</td>
-          <td width="25%" v-if="showMods">Mods</td>
-          <td width="10%">
+          </th>
+          <th v-if="showOwner && showCol('owner')">Owner</th>
+          <template v-if="showMods">
+            <th class="mod-col">
+              <img src="/images/mod_square.png" />
+            </th>
+            <th class="mod-col">
+              <img src="/images/mod_diamond.png" />
+            </th>
+            <th class="mod-col">
+              <img src="/images/mod_circle.png" />
+            </th>
+            <th class="mod-col">
+              <img src="/images/mod_arrow.png" />
+            </th>
+            <th class="mod-col">
+              <img src="/images/mod_triangle.png" />
+            </th>
+            <th class="mod-col">
+              <img src="/images/mod_cross.png" />
+            </th>
+            <th>Speed Set?</th>
+          </template>
+          <th v-if="showCol('subTotal')">
             <div class="c-pointer" @click="sortBy('subtotal')">
               Sub Total
               <i class="fas mx-1" :class="sortIcon('subtotal')"></i>
             </div>
-          </td>
-          <td width="15%">Leader/Unique</td>
-          <td width="10%">
+          </th>
+          <th v-if="showCol('bonuses')">Bonuses</th>
+          <th v-if="showCol('total')">
             <div class="c-pointer" @click="sortBy('total')">
               Total
               <i class="fas mx-1" :class="sortIcon('total')"></i>
             </div>
-          </td>
-          <td width="10%">Actions</td>
+          </th>
+          <th v-if="showCol('actions')">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -146,7 +168,7 @@
           :key="unit.id"
           class="text-center align-middle"
         >
-          <td>
+          <td v-if="showCol('name')">
             <router-link
               :to="{
                 name: 'UnitPage',
@@ -155,7 +177,7 @@
               >{{ unitData(unit.id).name }}</router-link
             >
           </td>
-          <td class="text-left">
+          <td v-if="showCol('leader')" class="text-left">
             <span class="row-label">Is Leader?</span>
             <div class="form-check is-leader" v-if="allowEdit">
               <input
@@ -170,55 +192,41 @@
               {{ unit.isLeader ? "Yes" : "No" }}
             </div>
           </td>
-          <td v-if="showOwner">
+          <td v-if="showOwner && showCol('owner')">
             <span class="row-label">Owner: </span>
             {{ unit.owner }}
           </td>
-          <td v-if="showMods">
-            <span class="row-label">Mods: </span>
-            <div class="mods-list">
-              <ul>
-                <li>
-                  Square:
-                  {{ speedValueFromMod(unitData(unit.id).mods[0]) }}
-                </li>
-                <li>
-                  Diamond:
-                  {{ speedValueFromMod(unitData(unit.id).mods[2]) }}
-                </li>
-                <li>
-                  Circle:
-                  {{ speedValueFromMod(unitData(unit.id).mods[4]) }}
-                </li>
-              </ul>
-              <ul>
-                <li>
-                  Arrow:
-                  {{ speedValueFromMod(unitData(unit.id).mods[1]) }}
-                </li>
-                <li>
-                  Triangle:
-                  {{ speedValueFromMod(unitData(unit.id).mods[3]) }}
-                </li>
-                <li>
-                  Cross:
-                  {{ speedValueFromMod(unitData(unit.id).mods[5]) }}
-                </li>
-              </ul>
-            </div>
-            <div class="my-2">
-              Has Speed Set:
+          <template v-if="showMods">
+            <td>
+              <ModIcon :unitId="unit.id" shape="square" />
+            </td>
+            <td>
+              <ModIcon :unitId="unit.id" shape="diamond" />
+            </td>
+            <td>
+              <ModIcon :unitId="unit.id" shape="circle" />
+            </td>
+            <td>
+              <ModIcon :unitId="unit.id" shape="arrow" />
+            </td>
+            <td>
+              <ModIcon :unitId="unit.id" shape="triangle" />
+            </td>
+            <td>
+              <ModIcon :unitId="unit.id" shape="cross" />
+            </td>
+            <td>
               <span class="text-success" v-if="hasSpeedSet(unitData(unit.id))"
                 >Yes</span
               >
               <span class="text-white-50" v-else>No</span>
-            </div>
-          </td>
-          <td>
+            </td>
+          </template>
+          <td v-if="showCol('subTotal')">
             <span class="row-label">Subtotal:</span>
             {{ unitData(unit.id).stats["5"] }}
           </td>
-          <td>
+          <td v-if="showCol('bonuses')">
             <span class="row-label">Bonuses:</span>
             <div v-if="leaderSpeedBonus(team, unit, showGameMode) > 0">
               Leader Bonus: {{ leaderSpeedBonus(team, unit, showGameMode) }}
@@ -231,11 +239,11 @@
               {{ speedBonusFromTeamMembers(team, unit, showGameMode) }}
             </div>
           </td>
-          <td>
+          <td v-if="showCol('total')">
             <span class="row-label">Grand Total:</span>
             {{ grandTotal(unit, team, showGameMode) }}
           </td>
-          <td>
+          <td v-if="showCol('actions')" class="py-0">
             <button
               type="button"
               class="btn btn-danger btn-sm"
@@ -247,22 +255,20 @@
           </td>
         </tr>
         <tr v-if="team.units.length < 5 && allowEdit">
-          <td colspan="7" class="text-center">
-            <div class="add-unit-container">
-              <div class="input-group input-group-sm">
-                <SearchInput
-                  :list="unitList"
-                  @select="selected = $event"
-                  @enterPress="add($event)"
-                />
-                <button
-                  class="btn btn-sm btn-primary"
-                  :disabled="!selected"
-                  @click="add(selected)"
-                >
-                  Add Unit
-                </button>
-              </div>
+          <td colspan="100%" class="text-center">
+            <div class="input-group input-group-sm add-unit-container">
+              <SearchInput
+                :list="unitList"
+                @select="selected = $event"
+                @enterPress="add($event)"
+              />
+              <button
+                class="btn btn-sm btn-primary"
+                :disabled="!selected"
+                @click="add(selected)"
+              >
+                Add Unit
+              </button>
             </div>
           </td>
         </tr>
@@ -279,15 +285,19 @@ import _ from "lodash";
 import { unvue } from "../../utils";
 import { SortType, Team, TeamMember } from "../../types/teams";
 import { Unit } from "../../types/unit";
+import MultiSelect from "../multiSelect.vue";
+import ModIcon from "../units/modIcon.vue";
 
 type dataModel = {
   editTeamName: string;
   isEditing: boolean;
   selected: null | Unit;
+  selectedColumns: string[];
 };
 
 export default defineComponent({
   name: "TeamTable",
+  components: { MultiSelect, ModIcon },
   props: {
     team: {
       required: true,
@@ -322,13 +332,13 @@ export default defineComponent({
       editTeamName: unvue(this.team.name),
       isEditing: false,
       selected: null,
+      selectedColumns: [],
     } as dataModel;
   },
   computed: {
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapGetters("teams", [
-      "speedValueFromMod",
       "hasSpeedSet",
       "leaderSpeedBonus",
       "uniqueSpeedBonus",
@@ -376,7 +386,48 @@ export default defineComponent({
       });
     },
     showMods(): boolean {
-      return this.size === "lg";
+      return this.size === "lg" && this.showCol("mods");
+    },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Is Leader",
+          value: "leader",
+        },
+        {
+          text: "Sub Total",
+          value: "subTotal",
+        },
+        {
+          text: "Bonuses",
+          value: "bonuses",
+        },
+        {
+          text: "Total",
+          value: "total",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      if (this.size === "lg") {
+        list.splice(2, 0, {
+          text: "Mods",
+          value: "mods",
+        });
+      }
+      if (this.showOwner) {
+        list.splice(2, 0, {
+          text: "Owner",
+          value: "owner",
+        });
+      }
+      return list;
     },
   },
   methods: {
@@ -446,6 +497,9 @@ export default defineComponent({
         this.$emit("addUnit", unit);
       }
     },
+    showCol(key: string): boolean {
+      return this.selectedColumns.some((x) => x === key);
+    },
   },
 });
 </script>
@@ -453,14 +507,19 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
 
-.mods-list {
-  display: flex;
-  justify-content: center;
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
 
-  ul {
-    margin: 0 1rem;
-    padding: 0;
-    list-style: none;
+th {
+  &.mod-col {
+    padding: 0.15rem;
+
+    img {
+      max-width: 30px;
+    }
   }
 }
 
@@ -547,13 +606,6 @@ export default defineComponent({
   }
 }
 
-.sort-methods {
-  @media only screen and (min-width: 768px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
 .is-leader {
   display: flex;
   justify-content: center;
@@ -569,58 +621,8 @@ export default defineComponent({
   }
 }
 
-.team-row {
-  > * {
-    padding: 0.5rem 1rem;
-
-    &:not(:last-child) {
-      border-bottom: solid $gray-5 1px;
-    }
-  }
-
-  .leader-container {
-    display: flex;
-
-    .form-check {
-      margin: auto;
-    }
-  }
-}
-
-.show-on-desktop {
-  .add-unit-container {
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0.5rem 0;
-
-    .input-group {
-      width: 100%;
-      margin: auto;
-
-      ::v-deep(.search-input) {
-        width: calc(100% - 100px);
-      }
-      button {
-        width: 100px;
-      }
-    }
-  }
-}
-
-.show-on-mobile {
-  tr:not(:last-child) {
-    border-bottom: black solid 3px;
-  }
-
-  .add-unit-container {
-    margin: 0.5rem;
-
-    ::v-deep(.search-input) {
-      width: calc(100% - 75px);
-    }
-    button {
-      min-width: 75px;
-    }
-  }
+.add-unit-container {
+  width: fit-content;
+  margin: auto;
 }
 </style>

@@ -110,26 +110,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../styles/variables.scss";
 
-.show-on-desktop {
-  .add-unit-container {
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0.5rem 0;
-
-    .input-group {
-      width: 100%;
-      margin: auto;
-
-      ::v-deep(.search-input) {
-        width: calc(100% - 100px);
-      }
-      button {
-        width: 100px;
-      }
-    }
-  }
-}
-
 .mods-list {
   display: flex;
   justify-content: center;
@@ -206,23 +186,6 @@ export default defineComponent({
 
     .form-check {
       margin: auto;
-    }
-  }
-}
-
-.show-on-mobile {
-  tr:not(:last-child) {
-    border-bottom: black solid 3px;
-  }
-
-  .add-unit-container {
-    margin: 0.5rem;
-
-    ::v-deep(.search-input) {
-      width: calc(100% - 75px);
-    }
-    button {
-      min-width: 75px;
     }
   }
 }
