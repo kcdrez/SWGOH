@@ -4,13 +4,7 @@ import { v4 as uuid } from "uuid";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
 import { loadingState } from "../types/loading";
-import {
-  Match,
-  MatchPayload,
-  SpeedAbility,
-  Team,
-  TeamMember,
-} from "../types/teams";
+import { Match, MatchPayload, Team, TeamMember } from "../types/teams";
 import { Unit } from "../types/unit";
 import { OpponentResponse, Player, PlayerResponse } from "../types/player";
 

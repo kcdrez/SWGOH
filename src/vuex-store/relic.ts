@@ -4,14 +4,13 @@ import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { unvue } from "../utils";
 import relicConfig from "../types/relicMapping";
-import { Relic, RelicConfigType, maxRelicLevel } from "../types/relic";
-import { isUnit, Unit, UnitBasic } from "../types/unit";
+import { RelicConfigType, OwnedRelicConfig } from "../types/relic";
 import { apiClient } from "../api/api-client";
 import { PlayerResponse } from "@/types/player";
 interface State {
   requestState: loadingState;
   relicConfig: RelicConfigType;
-  ownedRelics: any;
+  ownedRelics: OwnedRelicConfig;
   refreshes: { cantina: number };
   energy: { cantina: number };
 }
@@ -22,85 +21,12 @@ const store = {
   namespaced: true,
   state: {
     requestState: loadingState.initial,
-    relicConfig: relicConfig,
+    relicConfig,
     ownedRelics: {},
     refreshes: { cantina: 0 },
     energy: { cantina: 0 },
   },
-  getters: {
-    // currentRelicLevel(_state: State) {
-    //   return (relic_tier: number | undefined): number => {
-    //     if (!relic_tier) {
-    //       return 0;
-    //     } else {
-    //       return relic_tier < 0 ? 0 : relic_tier;
-    //     }
-    //   };
-    // },
-    // relicOptions(_state: State) {
-    //   return (relicLevel: number): number[] => {
-    //     const list = [];
-    //     if (relicLevel < 0) {
-    //       relicLevel = 0;
-    //     }
-    //     for (let i = (relicLevel || 0) + 1; i <= maxRelicLevel; i++) {
-    //       list.push(i);
-    //     }
-    //     return list;
-    //   };
-    // },
-    timeEstimation(state: State, getters: any) {
-      return (mat: Relic, arr: { level: number; target: number }[]): number => {
-        const owned: number = state.ownedRelics[mat.id] || 0;
-        const amountNeeded: number = getters.amountNeeded(mat.amount, arr);
-        const remaining: number = amountNeeded - owned;
-
-
-        if (remaining > 0) {
-          const totalEnergy =
-            120 + 45 + 120 * state.refreshes.cantina - state.energy.cantina;
-          const triesPerDay = mat.location.energy
-            ? totalEnergy / mat.location.energy
-            : 0;
-          const amountPerDay = mat.dropRate ? triesPerDay * mat.dropRate : 0;
-          return amountPerDay === 0 ? -1 : Math.ceil(remaining / amountPerDay);
-        } else if (amountNeeded === 0 && remaining > 0) {
-          return -1;
-        } else {
-          return 0;
-        }
-      };
-    },
-    amountNeeded(_state: State) {
-      return (relicAmountMap: any, arr: { level: number; target: number }[]): number => {
-        let amount = 0;
-
-        arr.forEach(({ level, target }) => {
-          for (let i = level + 1; i <= target; i++) {
-            const key = i.toString();
-            if (i in relicAmountMap) {
-              amount += relicAmountMap[key];
-            }
-          }
-        });
-        return amount;
-      };
-    },
-    totalDays(state: State, getters: any, rootState: RootState) {
-      return (unitId: string, relicLevel: number | undefined): number => {
-        const { target } = rootState.planner.targetConfig[unitId].relic;
-        return (Object.values(state.relicConfig) as Array<Relic>).reduce(
-          (acc, el) => {
-            const days = getters.timeEstimation(el, [
-              { level: relicLevel ?? 0, target },
-            ]);
-            return days > 0 ? acc + days : acc;
-          },
-          0
-        );
-      };
-    },
-  },
+  getters: {},
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;

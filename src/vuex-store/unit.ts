@@ -1,6 +1,6 @@
 import { ActionContext } from "vuex";
 
-import { Unit, UnitBasic, isUnit } from "../types/unit";
+import { Unit } from "../types/unit";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
@@ -8,7 +8,7 @@ import { apiClient } from "../api/api-client";
 interface State {
   requestState: loadingState;
   unit: Unit | null;
-  unitList: UnitBasic[];
+  unitList: Unit[];
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -25,12 +25,12 @@ const store = {
       return (unitId: string): string => {
         const match = state.unitList.find((x) => x.id === unitId);
         if (match) {
-          return match.name
+          return match.name;
         } else {
-          return unitId
+          return unitId;
         }
       };
-    }
+    },
   },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
@@ -39,7 +39,7 @@ const store = {
     SET_UNIT(state: State, payload: Unit) {
       state.unit = payload;
     },
-    SET_ALL_UNITS(state: State, payload: UnitBasic[]) {
+    SET_ALL_UNITS(state: State, payload: Unit[]) {
       state.unitList = payload;
     },
   },

@@ -1,10 +1,10 @@
 import axios from "axios";
 
 import { PlayerResponse } from "../types/player";
-import { ConfigType, Gear } from "../types/gear";
-import { Unit, UnitBasic } from "../types/unit";
+import { ConfigType, Gear, IGear } from "../types/gear";
+import { IUnit, Unit } from "../types/unit";
 import { OwnedShardsMap } from "../types/shards";
-import { RelicConfigType } from "../types/relic";
+import { OwnedRelicConfig } from "../types/relic";
 import { Match, Team } from "../types/teams";
 import {
   GuildPayload,
@@ -16,7 +16,7 @@ class ApiClient {
   baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
   // baseUrl = "http://localhost:3000/dev";
 
-  constructor() { }
+  constructor() {}
 
   async fetchPlayer(allyCode: string): Promise<PlayerResponse> {
     const response = await axios.get(`${this.baseUrl}/player/${allyCode}`);
@@ -37,7 +37,7 @@ class ApiClient {
 
   async fetchGearList(): Promise<Gear[]> {
     const response = await axios.get(`${this.baseUrl}/gear`);
-    return response.data;
+    return response.data.map((x: IGear) => new Gear(x));
   }
 
   async fetchUnit(unitId: string): Promise<Unit> {
@@ -45,9 +45,9 @@ class ApiClient {
     return response.data;
   }
 
-  async fetchAllUnits(): Promise<UnitBasic[]> {
+  async fetchAllUnits(): Promise<Unit[]> {
     const response = await axios.get(`${this.baseUrl}/unit/unitList`);
-    return response.data;
+    return response.data.map((x: IUnit) => new Unit(x));
   }
 
   async saveGearData(playerId: string | undefined, gearData: ConfigType) {
@@ -58,7 +58,7 @@ class ApiClient {
 
   async saveRelicData(
     playerId: string | undefined,
-    relicData: RelicConfigType
+    relicData: OwnedRelicConfig
   ) {
     if (playerId) {
       await axios.patch(`${this.baseUrl}/relic/${playerId}`, {

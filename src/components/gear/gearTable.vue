@@ -1,11 +1,7 @@
 <template>
   <div>
     <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        mb-0
-        swgoh-table
-      "
+      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
       v-if="gearList.length > 0"
     >
       <thead class="sticky-header show-on-mobile">
@@ -90,10 +86,7 @@
             <GearIcon :gear="salvage" />
           </td>
           <td>
-            <div
-              v-if="gearLocation(salvage.lookupMissionList).length <= 0"
-              class="text-center"
-            >
+            <div v-if="salvage.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
             <template v-else>
@@ -105,10 +98,7 @@
                 Show/Hide Locations
               </button>
               <ul class="m-0 collapse" :id="`locations-${salvage.id}`">
-                <li
-                  v-for="(l, index) in gearLocation(salvage.lookupMissionList)"
-                  :key="index"
-                >
+                <li v-for="(l, index) in salvage.locations" :key="index">
                   {{ l }}
                 </li>
               </ul>
@@ -116,7 +106,7 @@
           </td>
           <td>
             <OwnedAmount :salvage="salvage" />
-            <GearProgressBar :gear="salvage" class="mt-2" />
+            <ProgressBar :percent="salvage.percent" class="mt-2" />
           </td>
           <td v-if="showRequiredByUnit">
             <ul>
@@ -131,9 +121,9 @@
           <td class="text-center">
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="timeEstimation(salvage)"
-              :displayText="$filters.pluralText(timeEstimation(salvage), 'day')"
-              :title="$filters.daysFromNow(timeEstimation(salvage))"
+              :timeLength="salvage.timeEstimation"
+              :displayText="$filters.pluralText(salvage.timeEstimation, 'day')"
+              :title="$filters.daysFromNow(salvage.timeEstimation)"
               displayClasses="d-inline"
             />
           </td>
@@ -146,7 +136,7 @@
                 type="button"
                 class="btn btn-warning text-dark"
                 title="Mark this salvage as irrelevant, removing it from the planner estimation"
-                @click="markRelevant(salvage, true)"
+                @click="salvage.irrelevant = true"
               >
                 <i class="fas fa-toilet"></i>
               </button>
@@ -190,7 +180,7 @@
                 type="button"
                 class="btn btn-success"
                 title="Mark this salvage as relevant, moving it back into the planner estimation"
-                @click="markRelevant(salvage, false)"
+                @click="salvage.irrelevant = false"
               >
                 <i class="fas fa-heart"></i>
               </button>
@@ -204,17 +194,16 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapActions } from "vuex";
 
 import { Gear } from "../../types/gear";
 import OwnedAmount from "./gearOwned.vue";
 import GearIcon from "./gearIcon.vue";
-import GearProgressBar from "./gearProgressBar.vue";
 import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
   name: "GearTable",
-  components: { OwnedAmount, GearIcon, GearProgressBar, Timestamp },
+  components: { OwnedAmount, GearIcon, Timestamp },
   props: {
     gearList: {
       required: true,
@@ -233,20 +222,11 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("gear", [
-      "gearLocation",
-      "timeEstimation",
-      "fullSalvageList",
-      "gearOwnedCount",
-    ]),
-    ...mapState("gear", ["gearConfig"]),
     filteredSalvageList(): Gear[] {
       return this.gearList
         .filter((gear: Gear) => {
-          if (gear.id in this.gearConfig) {
-            if (this.gearConfig[gear.id].irrelevant) {
-              return false;
-            }
+          if (gear.irrelevant) {
+            return false;
           }
           const name = gear.name.toLowerCase().replace(/\s/g, "");
           const compare = this.searchText.toLowerCase().replace(/\s/g, "");
@@ -262,28 +242,22 @@ export default defineComponent({
               return compareA > compareB ? -1 : 1;
             }
           } else if (this.sortMethod === "locations") {
-            const locationsA = this.gearLocation(a.missionList);
-            const locationsB = this.gearLocation(b.missionList);
             if (this.sortDir === "asc") {
-              return locationsA[0] > locationsB[0] ? 1 : -1;
+              return a.locations[0] > b.locations[0] ? 1 : -1;
             } else {
-              return locationsA[0] < locationsB[0] ? -1 : 1;
+              return a.locations[0] < b.locations[0] ? -1 : 1;
             }
           } else if (this.sortMethod === "progress") {
-            const progressA = this.gearOwnedCount(a.id) / a.amount;
-            const progressB = this.gearOwnedCount(b.id) / b.amount;
             if (this.sortDir === "asc") {
-              return progressA - progressB;
+              return a.progress - b.progress;
             } else {
-              return progressB - progressA;
+              return b.progress - a.progress;
             }
           } else if (this.sortMethod === "time") {
-            const compareA = this.timeEstimation(a);
-            const compareB = this.timeEstimation(b);
             if (this.sortDir === "asc") {
-              return compareA - compareB;
+              return a.timeEstimation - b.timeEstimation;
             } else {
-              return compareB - compareA;
+              return b.timeEstimation - a.timeEstimation;
             }
           }
           return 0;
@@ -291,12 +265,7 @@ export default defineComponent({
     },
     irrelevantGear(): Gear[] {
       return this.gearList.filter((gear: Gear) => {
-        if (gear.id in this.gearConfig) {
-          if (this.gearConfig[gear.id].irrelevant) {
-            return true;
-          }
-        }
-        return false;
+        return gear.irrelevant;
       });
     },
   },
@@ -316,13 +285,6 @@ export default defineComponent({
       } else {
         return "fa-sort";
       }
-    },
-    markRelevant(salvage: Gear, isRelevant: boolean) {
-      this.saveOwnedCount({
-        id: salvage.id,
-        count: salvage.owned,
-        irrelevant: isRelevant,
-      });
     },
   },
 });

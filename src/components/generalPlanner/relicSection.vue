@@ -22,7 +22,7 @@ import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
 import { Unit } from "../..//types/unit";
-import { setupEvents, unvue } from "../../utils";
+import { setupEvents } from "../../utils";
 import RelicTable from "../relic/relicTable.vue";
 import { Relic } from "../../types/relic";
 
@@ -30,21 +30,15 @@ export default defineComponent({
   name: "RelicSection",
   components: { RelicTable },
   computed: {
-    ...mapGetters("planner", ["fullUnitList", "relicTarget"]),
+    ...mapGetters("planner", ["fullUnitList"]),
     ...mapState("relic", ["relicConfig"]),
     fullRelicList(): Relic[] {
-      const list: Relic[] = unvue(Object.values(this.relicConfig));
+      const list: Relic[] = Object.values(this.relicConfig);
       this.fullUnitList.forEach((unit: Unit) => {
-        const target = this.relicTarget(unit.id);
-
-        if (unit.relicLevel < target) {
+        if (unit.relicLevel < unit.relicTarget) {
           list.forEach((relic: Relic) => {
-            if (relic.amount[target] > 0) {
-              if (relic.neededBy) {
-                relic.neededBy.push({ name: unit.name, id: unit.id });
-              } else {
-                relic.neededBy = [{ name: unit.name, id: unit.id }];
-              }
+            if (relic.amount[unit.relicTarget] > 0) {
+              relic.addNeededBy({ name: unit.name, id: unit.id });
             }
           });
         }
@@ -54,8 +48,7 @@ export default defineComponent({
     relicTargetLevels(): any[] {
       const list: any[] = [];
       this.fullUnitList.forEach((unit: Unit) => {
-        const target = this.relicTarget(unit.id);
-        list.push({ level: unit.relicLevel, target });
+        list.push({ level: unit.relicLevel, target: unit.relicTarget });
       });
       return list;
     },
@@ -63,5 +56,6 @@ export default defineComponent({
   mounted() {
     setupEvents(this.$refs.relicSection as HTMLElement, "relicSection");
   },
+  created() {},
 });
 </script>

@@ -3,8 +3,6 @@ import { v4 as uuid } from "uuid";
 
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
-import { SpeedAbility, Team, TeamMember } from "../types/teams";
-import { Unit } from "../types/unit";
 import { apiClient } from "../api/api-client";
 import {
   GuildPayload,

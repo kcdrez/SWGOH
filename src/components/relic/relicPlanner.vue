@@ -16,7 +16,7 @@
         </div>
         <div class="target-level">
           Target Level:
-          <select v-model.number="relicTarget" class="mx-2">
+          <select v-model.number="unit.relicTarget" class="mx-2">
             <option v-for="num in unit.relicOptions" :value="num" :key="num">
               Relic {{ num }}
             </option>
@@ -26,16 +26,14 @@
       <Timestamp
         class="time-estimate"
         label="Estimated completion:"
-        :title="$filters.daysFromNow(totalDays(unit.id, unit.relic_tier))"
-        :displayText="
-          $filters.pluralText(totalDays(unit.id, unit.relic_tier), 'day')
-        "
+        :title="$filters.daysFromNow(unit.relicTotalDays)"
+        :displayText="$filters.pluralText(unit.relicTotalDays, 'day')"
         displayClasses="d-inline"
       />
       <EnergySpent showCantina />
       <RelicTable
         :relicList="relicList"
-        :targetLevels="[{ level: unit.relicLevel, target: relicTarget }]"
+        :targetLevels="[{ level: unit.relicLevel, target: unit.relicTarget }]"
       />
     </div>
   </div>
@@ -49,7 +47,6 @@ import RelicTable from "./relicTable.vue";
 import Timestamp from "../timestamp.vue";
 import EnergySpent from "../energySpent.vue";
 import RelicIcon from "../units/relicLevelIcon.vue";
-import { UpdateItem } from "../../types/planner";
 import { loadingState } from "../../types/loading";
 import { Relic, maxRelicLevel } from "../../types/relic";
 import { setupEvents } from "../../utils";
@@ -65,23 +62,9 @@ export default defineComponent({
   computed: {
     ...mapState("relic", ["relicConfig"]),
     ...mapState("unit", ["unit"]),
-    ...mapGetters("relic", ["totalDays", "currentRelicLevel"]),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
       return this.someLoading(["relic", "unit"]);
-    },
-    relicTarget: {
-      get(): number {
-        return this.$store.getters["planner/relicTarget"](this.unit.id);
-      },
-      set(value: number) {
-        const payload: UpdateItem = {
-          type: "relic",
-          value,
-          unitId: this.unit.id,
-        };
-        this.$store.dispatch("planner/updatePlannerTarget", payload);
-      },
     },
     relicList(): Relic[] {
       return Object.values(this.relicConfig);

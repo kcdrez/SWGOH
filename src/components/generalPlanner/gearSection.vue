@@ -26,25 +26,20 @@ export default defineComponent({
   name: "GearSection",
   components: { GearTable },
   computed: {
-    ...mapGetters("planner", ["fullUnitList", "gearTarget"]),
-    ...mapGetters("gear", ["fullSalvageList"]),
+    ...mapGetters("planner", ["fullUnitList"]),
     fullGearList(): Gear[] {
       const list: Gear[] = [];
       this.fullUnitList.forEach((unit: Unit) => {
-        const unitGearList = this.fullSalvageList(
-          unit,
-          this.gearTarget(unit.id)
-        );
-        unitGearList.forEach((gear: Gear) => {
+        unit.fullSalvageList.forEach((gear: Gear) => {
           const match = list.find((el) => gear.id === el.id);
           if (match) {
             match.amount += gear.amount;
             match.neededBy?.push({ name: unit.name, id: unit.id });
           } else {
             list.push(
-              new Gear({
-                ...gear.sanitize,
+              gear.clone({
                 neededBy: [{ name: unit.name, id: unit.id }],
+                amount: gear.amount,
               })
             );
           }

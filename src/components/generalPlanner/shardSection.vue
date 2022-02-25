@@ -24,7 +24,7 @@ export default defineComponent({
   name: "ShardSection",
   components: { ShardTable },
   computed: {
-    ...mapGetters("planner", ["fullUnitList", "relicTarget"]),
+    ...mapGetters("planner", ["fullUnitList"]),
     ...mapState("relic", ["relicConfig"]),
     ...mapGetters("shards", ["plannerList"]),
   },

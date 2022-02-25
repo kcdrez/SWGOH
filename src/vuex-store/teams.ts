@@ -2,7 +2,7 @@ import { ActionContext } from "vuex";
 import { v4 as uuid } from "uuid";
 
 import { loadingState } from "../types/loading";
-import rootStore, { State as RootState } from "./store";
+import { State as RootState } from "./store";
 import { SpeedAbility, SpeedConfig, Team, TeamMember } from "../types/teams";
 import { Mod, Unit } from "../types/unit";
 import { apiClient } from "../api/api-client";
@@ -165,9 +165,9 @@ const store = {
         const unitData: Unit = rootGetters["player/unitData"](unit.id);
         return Math.floor(
           unitData.speed +
-          getters.leaderSpeedBonus(team, unit, checkGameMode) +
-          getters.uniqueSpeedBonus(team, unit, checkGameMode) +
-          getters.speedBonusFromTeamMembers(team, unit, checkGameMode)
+            getters.leaderSpeedBonus(team, unit, checkGameMode) +
+            getters.uniqueSpeedBonus(team, unit, checkGameMode) +
+            getters.speedBonusFromTeamMembers(team, unit, checkGameMode)
         );
       };
     },

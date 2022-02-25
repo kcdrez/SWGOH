@@ -16,7 +16,7 @@
         <button type="button" class="btn btn-success" @click="save">
           <i class="fas fa-save"></i>
         </button>
-        <button type="button" class="btn btn-warning" @click="editing = false">
+        <button type="button" class="btn btn-warning" @click="cancel">
           <i class="fas fa-ban"></i>
         </button>
       </template>
@@ -33,13 +33,15 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapState } from "vuex";
+
+import { unvue } from "../../utils";
+import { Relic } from "../../types/relic";
 
 export default defineComponent({
   name: "RelicOwned",
   props: {
     item: {
-      type: Object,
+      type: Object as () => Relic,
       required: true,
     },
     needed: {
@@ -50,16 +52,13 @@ export default defineComponent({
   data() {
     return {
       editing: false,
-      owned: 0,
+      owned: unvue(this.item.owned),
     };
-  },
-  computed: {
-    ...mapState("relic", ["ownedRelics"]),
   },
   methods: {
     save() {
       this.editing = false;
-      this.saveOwnedCount({ count: this.owned, id: this.item.id });
+      this.item.owned = this.owned;
     },
     edit() {
       this.editing = true;
@@ -67,10 +66,10 @@ export default defineComponent({
         (this.$refs?.saveButton as any).focus();
       });
     },
-    ...mapActions("relic", ["saveOwnedCount"]),
-  },
-  created() {
-    this.owned = this.ownedRelics[this.item.id] || 0;
+    cancel() {
+      this.editing = false;
+      this.owned = unvue(this.item.owned);
+    },
   },
 });
 </script>

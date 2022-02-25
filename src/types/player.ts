@@ -1,4 +1,4 @@
-import { MatchPayload, Team } from "./teams";
+import { Team } from "./teams";
 import { Unit } from "./unit";
 
 export interface Player {

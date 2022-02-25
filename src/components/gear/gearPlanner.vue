@@ -18,7 +18,7 @@
         </div>
         <div class="target-level">
           Target Level:
-          <select v-model.number="gearTarget">
+          <select v-model.number="unit.gearTarget">
             <option v-for="num in unit.gearOptions" :value="num" :key="num">
               Gear {{ num }}
             </option>
@@ -28,12 +28,12 @@
       <Timestamp
         class="time-estimate"
         label="Estimated completion:"
-        :title="$filters.daysFromNow(totalDays(unit))"
-        :displayText="$filters.pluralText(totalDays(unit), 'day')"
+        :title="$filters.daysFromNow(unit.gearTotalDays)"
+        :displayText="$filters.pluralText(unit.gearTotalDays, 'day')"
         displayClasses="d-inline"
       />
       <EnergySpent showFleet showStandard />
-      <GearTable :gearList="fullSalvageList(this.unit, this.gearTarget)" />
+      <GearTable :gearList="unit.fullSalvageList" />
     </div>
     <div class="modal fade" id="gearAssumptionsModal" tabindex="-1">
       <div class="modal-dialog">
@@ -89,7 +89,6 @@
 import { defineComponent } from "vue";
 import { mapState, mapGetters, mapActions } from "vuex";
 
-import { UpdateItem } from "../../types/planner";
 import { loadingState } from "../../types/loading";
 import { maxGearLevel } from "../../types/gear";
 import GearTable from "./gearTable.vue";
@@ -107,27 +106,10 @@ export default defineComponent({
   },
   computed: {
     ...mapState("unit", ["unit"]),
-    ...mapGetters("gear", ["fullSalvageList", "totalDays", "currentGearLevel"]),
     ...mapGetters(["someLoading"]),
     ...mapState(["collapseSections"]),
     requestState(): loadingState {
       return this.someLoading(["gear", "unit"]);
-    },
-    gearTarget: {
-      get(): number {
-        return (
-          this.$store.getters["planner/gearTarget"](this.unit.id) ||
-          this.maxGearLevel
-        );
-      },
-      set(value: number) {
-        const payload: UpdateItem = {
-          type: "gear",
-          value,
-          unitId: this.unit.id,
-        };
-        this.$store.dispatch("planner/updatePlannerTarget", payload);
-      },
     },
   },
   methods: {

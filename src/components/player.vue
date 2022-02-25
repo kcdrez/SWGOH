@@ -19,11 +19,11 @@
 import { defineComponent } from "vue";
 import { mapActions, mapGetters, mapState } from "vuex";
 
-import { Unit, UnitBasic } from "../types/unit";
+import { Unit } from "../types/unit";
 import UnitIcon from "./units/unitIcon.vue";
 
 interface dataModel {
-  selected: null | Unit | UnitBasic;
+  selected: null | Unit;
 }
 
 export default defineComponent({
@@ -48,7 +48,7 @@ export default defineComponent({
     ...mapActions("shards", {
       addUnitToShardPlanner: "addUnit",
     }),
-    selectUnit(unit: UnitBasic | null) {
+    selectUnit(unit: Unit | null) {
       if (!unit) {
         return;
       }

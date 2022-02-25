@@ -1,6 +1,6 @@
 import { ActionContext } from "vuex";
 
-import { Unit, UnitBasic, isUnit } from "../types/unit";
+import { Unit } from "../types/unit";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
@@ -30,27 +30,23 @@ const store = {
   },
   getters: {
     remainingShards(_state: State) {
-      return (unit: Unit | UnitBasic): number => {
-        if (isUnit(unit)) {
-          let amount = 0;
-          for (let i = unit.stars + 1; i <= 7; i++) {
-            amount += shardMapping[i];
-          }
-          return amount;
-        } else {
-          return 330;
+      return (unit: Unit): number => {
+        let amount = 0;
+        for (let i = unit.stars + 1; i <= 7; i++) {
+          amount += shardMapping[i];
         }
+        return amount;
       };
     },
     unitNodes(state: State) {
       return (unitId: string): FarmingNode[] => {
         return state.shardFarming.filter((node) => {
           return node.characters.some((c) => c.id === unitId);
-        })
+        });
       };
     },
     shardTimeEstimation(state: State, getters: any) {
-      return (unit: Unit | UnitBasic): number => {
+      return (unit: Unit): number => {
         const nodes: FarmingNode[] = getters.unitNodes(unit.id);
 
         if (nodes.length <= 0) {
@@ -69,9 +65,9 @@ const store = {
 
         return Math.ceil(
           remainingShards /
-          (dropRate *
-            characterAcceleration *
-            (nodesList.length === 0 ? 5 : nodesPerDay))
+            (dropRate *
+              characterAcceleration *
+              (nodesList.length === 0 ? 5 : nodesPerDay))
         );
       };
     },
@@ -106,13 +102,9 @@ const store = {
         return match?.priority ?? 0;
       };
     },
-    plannerList(
-      state: State,
-      _getters: any,
-      rootState: RootState
-    ): (Unit | UnitBasic)[] {
+    plannerList(state: State, _getters: any, rootState: RootState): Unit[] {
       return Object.entries(state.ownedShards).reduce(
-        (acc: (Unit | UnitBasic)[], [id, value]) => {
+        (acc: Unit[], [id, value]) => {
           if (value.tracking) {
             const match = rootState.player.player?.units.find(
               (unit) => unit.id === id
@@ -138,8 +130,8 @@ const store = {
       _getters: any,
       rootState: RootState,
       rootGetters: any
-    ): (Unit | UnitBasic)[] {
-      const list: (Unit | UnitBasic)[] = [];
+    ): Unit[] {
+      const list: Unit[] = [];
       rootState.unit.unitList.forEach((unit) => {
         const playerOwned: Unit = rootGetters["player/unitData"](unit.id);
         if (playerOwned) {
@@ -169,9 +161,12 @@ const store = {
     ) {
       const match = state.ownedShards[id] || {};
       const compare1Nodes = nodes ?? match.nodes ?? [];
-      const compare2Nodes = (match?.nodes?.length || 0) < (nodes?.length || 0) ? nodes : match.nodes;
+      const compare2Nodes =
+        (match?.nodes?.length || 0) < (nodes?.length || 0)
+          ? nodes
+          : match.nodes;
 
-      const nodesData: Node[] = (compare1Nodes).map((node) => {
+      const nodesData: Node[] = compare1Nodes.map((node) => {
         const matchNode = (compare2Nodes || []).find((n) => n.id === node.id);
         return {
           id: node.id,
