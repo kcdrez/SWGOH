@@ -351,6 +351,21 @@ export class Unit {
           (this.shardNodes.length === 0 ? 5 : nodesPerDay))
     );
   }
+  public get tracking() {
+    const match = store.state.shards.ownedShards[this.id];
+    if (match) {
+      return match.tracking;
+    } else {
+      return false;
+    }
+  }
+  public set tracking(val) {
+    if (val) {
+      store.dispatch("shards/addUnit", this.id);
+    } else {
+      store.dispatch("shards/removeUnit", this.id);
+    }
+  }
 
   public gearData(id: string): Gear | undefined {
     return (store.state.gear.gearList as Gear[]).find(

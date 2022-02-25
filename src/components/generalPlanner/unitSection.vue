@@ -97,7 +97,7 @@
             </td>
             <td class="text-center">
               <span class="row-label">Target Level:</span>
-              <div v-if="unit.is_ship">-</div>
+              <div v-if="unit.isShip">-</div>
               <template v-else>
                 <select
                   class="form-control form-control-sm mb-1"
@@ -129,7 +129,7 @@
             <td
               class="text-center"
               :class="{
-                'hidden-sm': gearTotalDays(unit) === 0 && !unit.is_ship,
+                'hidden-sm': unit.gearTotalDays === 0 && !unit.isShip,
               }"
             >
               <span class="row-label">Est. Gear Level:</span>
@@ -143,7 +143,7 @@
             <td
               class="text-center"
               :class="{
-                'hidden-sm': relicTotalDays(unit.id) === 0 && !unit.is_ship,
+                'hidden-sm': unit.relicTotalDays === 0 && !unit.isShip,
               }"
             >
               <span class="row-label">Est. Relic Level:</span>

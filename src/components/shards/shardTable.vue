@@ -136,7 +136,8 @@
                 type="button"
                 class="btn btn-success"
                 title="Add to active farming list"
-                @click="addUnit(unit.id)"
+                v-if="unit.tracking"
+                @click="unit.tracking = true"
               >
                 <i class="fas fa-heart"></i>
               </button>
@@ -144,7 +145,7 @@
                 type="button"
                 class="btn btn-danger"
                 title="Remove from active farming list"
-                @click="removeUnit(unit.id)"
+                @click="unit.tracking = false"
               >
                 <i class="fas fa-trash"></i>
               </button>
@@ -158,7 +159,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
 
 import ShardsOwned from "./shardsOwned.vue";
 import UnitIcon from "../units/unitIcon.vue";
@@ -166,7 +166,6 @@ import NodesPerDay from "./nodesPerDay.vue";
 import ShardPriority from "./shardPriority.vue";
 import Timestamp from "../timestamp.vue";
 import { Unit } from "../../types/unit";
-import { FarmingNode } from "../../types/shards";
 
 export default defineComponent({
   name: "ShardTable",
@@ -259,7 +258,6 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions("shards", ["removeUnit", "addUnit"]),
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
@@ -279,42 +277,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
-.show-on-desktop {
-  @media only screen and (max-width: 1200px) {
-    ::v-deep(.nodes-container) {
-      flex-basis: 100%;
-
-      .input-group {
-        display: block;
-
-        * {
-          width: 100%;
-
-          &:first-child {
-            border-radius: 0.2rem 0.2rem 0 0 !important;
-            justify-content: center;
-          }
-
-          &:last-child {
-            border-radius: 0 0 0.2rem 0.2rem !important;
-          }
-
-          &:not(:first-child) {
-            &:not(button) {
-              display: block;
-            }
-            border-top: none;
-            text-align: center;
-            //everything except the first element is off so the following is used to compensate :shrug:
-            position: relative;
-            left: 1px;
-          }
-        }
-      }
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

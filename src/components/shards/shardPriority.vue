@@ -27,7 +27,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapState } from "vuex";
 
 import { Unit } from "../../types/unit";
 import { Node } from "../../types/shards";
@@ -51,13 +50,9 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("shards", ["ownedShards"]),
     nodeData(): Node[] {
-      const nodesListByUnit: Node[] =
-        this.ownedShards[this.unit.id]?.nodes || [];
-
       return this.unit.whereToFarm.map((node) => {
-        const match = nodesListByUnit.find((n) => n.id === node.id);
+        const match = this.unit.shardNodes.find((n) => n.id === node.id);
         return {
           id: node.id,
           priority: this.nodeTableNames.includes(node.table)
