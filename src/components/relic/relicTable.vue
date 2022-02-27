@@ -1,5 +1,11 @@
 <template>
   <div>
+    <MultiSelect
+      class="select-columns"
+      :options="cols"
+      storageKey="relicTable"
+      @checked="selectedColumns = $event"
+    />
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
@@ -39,7 +45,7 @@
           </th>
         </tr>
         <tr class="text-center align-middle">
-          <th :width="showRequiredByUnit ? '15%' : '20%'">
+          <th v-if="showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
               Mat Name
               <i class="fas mx-1" :class="sortIcon('name')"></i>
@@ -51,7 +57,7 @@
             />
           </th>
           <th
-            :width="showRequiredByUnit ? '15%' : '20%'"
+            v-if="showCol('locations')"
             class="c-pointer"
             @click="sortBy('location')"
           >
@@ -59,15 +65,15 @@
             <i class="fas mx-1" :class="sortIcon('location')"></i>
           </th>
           <th
-            :width="showRequiredByUnit ? '15%' : '20%'"
+            v-if="showCol('progress')"
             class="c-pointer"
             @click="sortBy('progress')"
           >
             Amount/Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showRequiredByUnit" width="15%">Required By</th>
-          <th width="10%" class="c-pointer" @click="sortBy('time')">
+          <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
+          <th v-if="showCol('time')" class="c-pointer" @click="sortBy('time')">
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
           </th>
@@ -75,14 +81,14 @@
       </thead>
       <tbody>
         <tr v-for="mat in filteredRelics" :key="mat.id">
-          <td class="text-center align-middle">
+          <td class="text-center align-middle" v-if="showCol('name')">
             <RelicIcon :item="mat" />
           </td>
-          <td class="text-center align-middle">
+          <td class="text-center align-middle" v-if="showCol('locations')">
             <span class="row-label">Location: </span>
             {{ mat.location.node }}
           </td>
-          <td class="align-middle">
+          <td class="align-middle" v-if="showCol('progress')">
             <OwnedAmount
               :item="mat"
               :needed="amountNeeded(mat.amount, targetLevels)"
@@ -93,7 +99,7 @@
               class="mt-2"
             />
           </td>
-          <td v-if="showRequiredByUnit">
+          <td v-if="showRequiredByUnit && showCol('required')">
             <span class="row-label">Required By: </span>
             <ul>
               <li v-for="unit in mat.neededBy" :key="unit.id">
@@ -104,7 +110,7 @@
               </li>
             </ul>
           </td>
-          <td class="text-center align-middle">
+          <td class="text-center align-middle" v-if="showCol('time')">
             <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="timeEstimation(mat, targetLevels)"
@@ -158,6 +164,7 @@ export default defineComponent({
       sortMethod: "name",
       sortDir: "asc",
       searchText: "",
+      selectedColumns: [],
     };
   },
   computed: {
@@ -226,6 +233,34 @@ export default defineComponent({
           return name.includes(compare) || id.includes(compare);
         });
     },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+      ];
+
+      if (this.showRequiredByUnit) {
+        list.splice(3, 0, {
+          text: "Required By",
+          value: "required",
+        });
+      }
+      return list;
+    },
   },
   methods: {
     sortBy(type: string): void {
@@ -243,8 +278,17 @@ export default defineComponent({
         return "fa-sort";
       }
     },
+    showCol(key: string): boolean {
+      return this.selectedColumns.some((x) => x === key);
+    },
   },
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
+</style>

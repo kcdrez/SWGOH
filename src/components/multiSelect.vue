@@ -43,7 +43,7 @@ export default defineComponent({
     },
     label: {
       type: String,
-      default: "Select Options",
+      default: "Show/Hide Columns",
     },
     storageKey: {
       type: String,

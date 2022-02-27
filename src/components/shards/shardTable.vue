@@ -1,5 +1,11 @@
 <template>
   <div>
+    <MultiSelect
+      class="select-columns"
+      :options="cols"
+      storageKey="shardTable"
+      @checked="selectedColumns = $event"
+    />
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
@@ -39,7 +45,7 @@
           </th>
         </tr>
         <tr class="text-center align-middle">
-          <th width="20%" v-if="showUnitName">
+          <th v-if="showUnitName && showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
               Unit Name
               <i class="fas mx-1" :class="sortIcon('name')"></i>
@@ -50,27 +56,29 @@
               v-model="searchText"
             />
           </th>
-          <th :width="showUnitName ? '15%' : '25%'">Locations</th>
+          <th v-if="showCol('locations')">Locations</th>
           <th
-            :width="showUnitName ? '20%' : '25%'"
+            v-if="showCol('progress')"
             class="c-pointer"
             @click="sortBy('progress')"
           >
             Amount/Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th :width="showUnitName ? '20%' : '25%'">Node Attempts per Day</th>
+          <th v-if="showCol('attempts')">Node Attempts per Day</th>
           <th
-            width="10%"
             class="c-pointer"
             @click="sortBy('time')"
-            v-if="showUnitName"
+            v-if="showUnitName && showCol('time')"
           >
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
           </th>
           <th
-            :width="showUnitName ? '15%' : '25%'"
+            v-if="
+              (showCol('priority') && showPriority) ||
+              (showCol('actions') && !showPriority)
+            "
             :class="{ 'c-pointer': showPriority }"
             @click="sortBy('priority')"
           >
@@ -85,10 +93,13 @@
       </thead>
       <tbody>
         <tr v-for="unit in filteredUnitList" :key="unit.id">
-          <td class="text-center align-middle" v-if="showUnitName">
+          <td
+            class="text-center align-middle"
+            v-if="showUnitName && showCol('name')"
+          >
             <UnitIcon :unit="unit" isLink />
           </td>
-          <td class="align-middle text-center">
+          <td class="align-middle text-center" v-if="showCol('locations')">
             <div v-if="unitLocations(unit).length <= 0" class="text-center">
               No known farmable locations.
             </div>
@@ -101,16 +112,19 @@
               </ul>
             </template>
           </td>
-          <td class="align-middle">
+          <td class="align-middle" v-if="showCol('progress')">
             <span class="row-label">Amount/Progress:</span>
             <ShardsOwned :unit="unit" />
             <ShardProgressBar :unit="unit" class="mt-2" />
           </td>
-          <td class="align-middle nodes-per-day">
+          <td class="align-middle nodes-per-day" v-if="showCol('attempts')">
             <span class="row-label">Node Attempts per Day:</span>
             <NodesPerDay :unit="unit" v-if="showNodesPerDay(unit)" />
           </td>
-          <td class="text-center align-middle" v-if="showUnitName">
+          <td
+            class="text-center align-middle"
+            v-if="showUnitName && showCol('time')"
+          >
             <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="shardTimeEstimation(unit)"
@@ -121,7 +135,13 @@
               displayClasses="d-inline"
             />
           </td>
-          <td class="text-center align-middle">
+          <td
+            class="text-center align-middle"
+            v-if="
+              (showCol('priority') && showPriority) ||
+              (showCol('actions') && !showPriority)
+            "
+          >
             <ShardPriority
               :unit="unit"
               v-if="showPriority"
@@ -208,6 +228,7 @@ export default defineComponent({
       sortDir: this.initialSort?.sortDir || "asc",
       sortMethod: this.initialSort?.sortMethod || "name",
       searchText: "",
+      selectedColumns: [],
     };
   },
   computed: {
@@ -274,6 +295,45 @@ export default defineComponent({
           return 0;
         });
     },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Attempts",
+          value: "attempts",
+        },
+      ];
+
+      if (this.showUnitName) {
+        list.splice(0, 0, {
+          text: "Name",
+          value: "name",
+        });
+        list.splice(4, 0, {
+          text: "Estimated Time",
+          value: "time",
+        });
+      }
+      if (this.showPriority) {
+        list.push({
+          text: "Priority",
+          value: "priority",
+        });
+      } else {
+        list.push({
+          text: "Actions",
+          value: "actions",
+        });
+      }
+      return list;
+    },
   },
   methods: {
     ...mapActions("gear", ["saveOwnedCount"]),
@@ -310,12 +370,21 @@ export default defineComponent({
         );
       });
     },
+    showCol(key: string): boolean {
+      return this.selectedColumns.some((x) => x === key);
+    },
   },
 });
 </script>
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
+
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
 
 .show-on-desktop {
   @media only screen and (max-width: 1200px) {

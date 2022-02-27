@@ -104,7 +104,6 @@
       class="select-columns"
       :options="cols"
       storageKey="teamsTable"
-      label="Show/Hide Columns"
       @checked="selectedColumns = $event"
     />
     <table
@@ -285,7 +284,6 @@ import _ from "lodash";
 import { unvue } from "../../utils";
 import { SortType, Team, TeamMember } from "../../types/teams";
 import { Unit } from "../../types/unit";
-import MultiSelect from "../multiSelect.vue";
 import ModIcon from "../units/modIcon.vue";
 
 type dataModel = {
@@ -297,7 +295,7 @@ type dataModel = {
 
 export default defineComponent({
   name: "TeamTable",
-  components: { MultiSelect, ModIcon },
+  components: { ModIcon },
   props: {
     team: {
       required: true,
