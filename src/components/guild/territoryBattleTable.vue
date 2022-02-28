@@ -1,11 +1,5 @@
 <template>
   <div>
-    <MultiSelect
-      class="select-columns"
-      :options="cols"
-      storageKey="unitTable"
-      @checked="selectedColumns = $event"
-    />
     <table
       class="table table-bordered table-dark table-sm table-striped"
       :class="[accessLevel < 3 ? 'mb-3' : 'mb-0']"
@@ -249,6 +243,20 @@ import { TerritoryBattleEvent } from "../../types/guild";
 
 export default defineComponent({
   name: "TerritoryBattleTable",
+  props: {
+    selectedColumns: {
+      type: Array,
+      validator: (arr: any[]) => {
+        return arr.every((x) => {
+          return !!x.text && !!x.value;
+        });
+      },
+      required: false,
+      default: () => {
+        return [];
+      },
+    },
+  },
   data() {
     return {
       sortDir: "asc",
@@ -259,7 +267,6 @@ export default defineComponent({
         characterShards: 0,
         name: "",
       },
-      selectedColumns: [],
     };
   },
   computed: {
@@ -361,43 +368,6 @@ export default defineComponent({
         typeof this.newEvent.characterShards === "string" ||
         !this.newEvent.name
       );
-    },
-    cols(): { text: string; value: any }[] {
-      const list = [
-        {
-          text: "Date",
-          value: "date",
-        },
-        {
-          text: "Type",
-          value: "type",
-        },
-        {
-          text: "Name",
-          value: "name",
-        },
-        {
-          text: "Stars",
-          value: "stars",
-        },
-        {
-          text: "GET1 Currency",
-          value: "get1",
-        },
-        {
-          text: "GET2 Currency",
-          value: "get2",
-        },
-        {
-          text: "Character Shards",
-          value: "character",
-        },
-        {
-          text: "Actions",
-          value: "actions",
-        },
-      ];
-      return list;
     },
     avgColSpan(): number {
       const cols = ["date", "type", "name"];

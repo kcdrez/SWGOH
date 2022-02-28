@@ -9,11 +9,19 @@
         >
           <div class="d-inline">Territory War History</div>
         </h3>
+        <MultiSelect
+          class="select-columns"
+          :options="twCols"
+          storageKey="twTable"
+          @checked="twSelectedColumns = $event"
+          @click.stop=""
+        />
       </div>
       <TerritoryWarTable
         id="guildTerritoryWarSection"
         ref="guildTerritoryWarSection"
         class="collapse"
+        :selectedColumns="twSelectedColumns"
       />
       <div class="collapse-header section-header mt-3">
         <h3
@@ -23,11 +31,19 @@
         >
           <div class="d-inline">Territory Battles History</div>
         </h3>
+        <MultiSelect
+          class="select-columns"
+          :options="tbCols"
+          storageKey="tbTable"
+          @checked="tbSelectedColumns = $event"
+          @click.stop=""
+        />
       </div>
       <TerritoryBattleTable
         id="guildTerritoryBattleSection"
         ref="guildTerritoryBattleSection"
         class="collapse show"
+        :selectedColumns="tbSelectedColumns"
       />
     </Loading>
   </div>
@@ -49,6 +65,8 @@ export default defineComponent({
     return {
       sortDir: "asc",
       sortMethod: "date",
+      tbSelectedColumns: [],
+      twSelectedColumns: [],
     };
   },
   computed: {
@@ -56,6 +74,72 @@ export default defineComponent({
     ...mapState("player", { playerRequestState: "requestState" }),
     requestState(): loadingState {
       return this.someLoading(["player", "guild"]);
+    },
+    tbCols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Date",
+          value: "date",
+        },
+        {
+          text: "Type",
+          value: "type",
+        },
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Stars",
+          value: "stars",
+        },
+        {
+          text: "GET1 Currency",
+          value: "get1",
+        },
+        {
+          text: "GET2 Currency",
+          value: "get2",
+        },
+        {
+          text: "Character Shards",
+          value: "character",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
+    },
+    twCols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Date",
+          value: "date",
+        },
+        {
+          text: "Win/Loss",
+          value: "win_loss",
+        },
+        {
+          text: "GET1 Currency",
+          value: "get1",
+        },
+        {
+          text: "GET2 Currency",
+          value: "get2",
+        },
+        {
+          text: "Zetas",
+          value: "zetas",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
     },
   },
   methods: {
@@ -96,4 +180,17 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.section-header {
+  position: relative;
+}
+
+.select-columns {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  width: 250px;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+</style>
