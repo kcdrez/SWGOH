@@ -108,8 +108,9 @@
 </template>
 
 <script lang="ts">
-import config from "../../package.json";
 import { mapActions, mapState } from "vuex";
+
+import config from "../../package.json";
 
 export default {
   name: "NavBar",

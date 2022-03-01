@@ -3,14 +3,8 @@ import { v4 as uuid } from "uuid";
 
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
-import {
-  ITeam,
-  SpeedAbility,
-  SpeedConfig,
-  Team,
-  TeamMember,
-} from "../types/teams";
-import { Mod, Unit } from "../types/unit";
+import { ITeam, SpeedConfig, Team } from "../types/teams";
+import { Mod } from "../types/unit";
 import { apiClient } from "../api/api-client";
 import { PlayerResponse } from "../types/player";
 

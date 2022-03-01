@@ -1,4 +1,4 @@
-import { ITeam, Team } from "./teams";
+import { ITeam } from "./teams";
 import { IUnit, Unit } from "./unit";
 
 export interface Player {

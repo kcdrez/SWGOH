@@ -38,7 +38,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 import { FarmingNode, NodePayload, Node } from "../../types/shards";
 import { Unit } from "../../types/unit";

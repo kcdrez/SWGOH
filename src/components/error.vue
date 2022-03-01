@@ -10,8 +10,9 @@
 </template>
 
 <script lang="ts">
-import { loadingState } from "../types/loading";
 import { defineComponent, PropType } from "vue";
+
+import { loadingState } from "../types/loading";
 
 export default defineComponent({
   name: "Error",

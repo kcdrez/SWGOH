@@ -268,7 +268,6 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapState("opponents", {
       opponent: "player",
-      // opponentRequestState: "requestState",
       opponentTeams: "teams",
       matches: "matches",
     }),

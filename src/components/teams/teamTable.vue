@@ -392,9 +392,6 @@ export default defineComponent({
         return false;
       });
     },
-    // speedBonusChange: _.debounce(function fn(this: any) {
-    //   this.$emit("saveTeams");
-    // }, 300),
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
