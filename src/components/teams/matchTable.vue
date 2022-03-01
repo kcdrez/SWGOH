@@ -99,9 +99,9 @@
             <router-link
               :to="{
                 name: 'UnitPage',
-                params: { unitId: unit.unitData.id },
+                params: { unitId: unit.id },
               }"
-              >{{ unit.unitData.name }}</router-link
+              >{{ unit.name }}</router-link
             >
           </td>
           <td v-if="showCol('leader')" class="text-left">
@@ -116,7 +116,7 @@
           </td>
           <td v-if="showCol('subTotal')">
             <span class="row-label">Subtotal:</span>
-            {{ unit.unitData.speed }}
+            {{ unit.speed }}
           </td>
           <td v-if="showCol('bonuses')">
             <span class="row-label">Bonuses:</span>

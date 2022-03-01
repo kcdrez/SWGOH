@@ -167,9 +167,9 @@
             <router-link
               :to="{
                 name: 'UnitPage',
-                params: { unitId: unit.unitData.id },
+                params: { unitId: unit.id },
               }"
-              >{{ unit.unitData.name }}</router-link
+              >{{ unit.name }}</router-link
             >
           </td>
           <td v-if="showCol('leader')" class="text-left">
@@ -203,15 +203,13 @@
               <ModIcon :unitId="unit.id" shape="cross" />
             </td>
             <td>
-              <span class="text-success" v-if="unit.unitData.hasSpeedSet"
-                >Yes</span
-              >
+              <span class="text-success" v-if="unit.hasSpeedSet">Yes</span>
               <span class="text-white-50" v-else>No</span>
             </td>
           </template>
           <td v-if="showCol('subTotal')">
             <span class="row-label">Subtotal:</span>
-            {{ unit.unitData.speed }}
+            {{ unit.speed }}
           </td>
           <td v-if="showCol('bonuses')">
             <span class="row-label">Bonuses:</span>

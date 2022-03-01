@@ -1,10 +1,12 @@
+import _ from "lodash";
+
 import store from "../vuex-store/store";
 import { Unit } from "./unit";
 
 export class Team {
   private _id: string;
   private _name?: string;
-  private _units: TeamMember[] = [];
+  protected _units: TeamMember[] = [];
   private _gameMode?: string;
   private _sortDir?: "asc" | "desc";
   private _sortMethod?: SortType;
@@ -31,8 +33,10 @@ export class Team {
     return this._name;
   }
   public set name(val) {
-    this._name = val;
-    this.save();
+    if (val !== this._name) {
+      this._name = val;
+      this.save();
+    }
   }
   public get units() {
     return this._units;
@@ -41,41 +45,47 @@ export class Team {
     return this._gameMode;
   }
   public set gameMode(val) {
-    this._gameMode = val;
-    this.save();
+    if (val !== this._gameMode) {
+      this._gameMode = val;
+      this.save();
+    }
   }
   public get sortDir() {
     return this._sortDir;
   }
   public set sortDir(val) {
-    this._sortDir = val;
-    this.save();
+    console.log("sort dir", this.sortDir, val);
+    if (val !== this._sortDir) {
+      this._sortDir = val;
+      this.save();
+    }
   }
   public get sortMethod() {
     return this._sortMethod;
   }
   public set sortMethod(val) {
-    this._sortMethod = val;
-    this.save();
+    console.log("sort method", this._sortMethod, val);
+    if (val !== this._sortMethod) {
+      this._sortMethod = val;
+      this.save();
+    }
   }
   public get searchName() {
     return this._searchName;
   }
   public set searchName(val) {
-    this._searchName = val;
-    this.save();
+    if (val !== this._searchName) {
+      this._searchName = val;
+      this.save();
+    }
   }
   public get fullUnitList() {
     return this.units.sort((a, b) => {
       if (this.sortMethod === "name") {
         if (this.sortDir === "asc") {
-          return a.unitData.name.toLowerCase() > b.unitData.name.toLowerCase()
-            ? 1
-            : -1;
+          return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
         } else {
-          return a.unitData.name.toLowerCase() > b.unitData.name.toLowerCase()
-            ? -1
-            : 1;
+          return a.name.toLowerCase() > b.name.toLowerCase() ? -1 : 1;
         }
       } else if (this.sortMethod === "leader") {
         if (a.isLeader) {
@@ -86,9 +96,9 @@ export class Team {
         return 0;
       } else if (this.sortMethod === "subtotal") {
         if (this.sortDir === "asc") {
-          return a.unitData.speed - b.unitData.speed;
+          return a.speed - b.speed;
         } else {
-          return b.unitData.speed - a.unitData.speed;
+          return b.speed - a.speed;
         }
       } else if (this.sortMethod === "total" || this.sortMethod === undefined) {
         const compareA: number = this.grandTotal(a, true);
@@ -124,6 +134,7 @@ export class Team {
     }
   }
   protected save() {
+    //todo debounce
     if (this.isPlayer) {
       store.dispatch("teams/saveTeams");
     } else if (this.isOpponent) {
@@ -151,7 +162,7 @@ export class Team {
     const leaderAbility = leader?.leaderAbility;
     if (leader && leaderAbility) {
       if (leaderAbility.scalesBy) {
-        if (anyTagsMatch(unit.unitData, leader.id, leaderAbility.tags || [])) {
+        if (anyTagsMatch(unit, leader.id, leaderAbility.tags || [])) {
           return this.units.reduce((total: number, unit: any) => {
             if (
               anyTagsMatch(
@@ -169,7 +180,7 @@ export class Team {
         return Math.floor(
           unitMatchesLeader(
             leaderAbility,
-            unit.unitData,
+            unit,
             leader.id,
             this.gameMode,
             checkGameMode
@@ -184,12 +195,7 @@ export class Team {
     const uniqueAbilityList = unit?.uniqueAbility;
     let amount = 0;
     (uniqueAbilityList || []).forEach((ability) => {
-      amount += getUniqueAbilitySpeed(
-        ability,
-        unit.unitData,
-        this,
-        checkGameMode
-      );
+      amount += getUniqueAbilitySpeed(ability, unit, this, checkGameMode);
     });
     return Math.floor(amount); //todo why .floor?
   }
@@ -207,7 +213,7 @@ export class Team {
         (uniqueAbilityList || []).forEach((ability) => {
           amount += getUniqueFromTeamMembers(
             ability,
-            unit.unitData,
+            unit,
             this,
             member,
             checkGameMode
@@ -220,7 +226,7 @@ export class Team {
 
   public grandTotal(unit: TeamMember, checkGameMode: boolean): number {
     return Math.floor(
-      unit.unitData.speed +
+      unit.speed +
         this.leaderSpeedBonus(unit, checkGameMode) +
         this.uniqueSpeedBonus(unit, checkGameMode) +
         this.speedBonusFromTeamMembers(unit, checkGameMode)
@@ -248,11 +254,13 @@ export class TeamMember {
   private _id: string;
   private _isLeader?: boolean;
   private _owner?: string;
+  private _unitData: Unit;
 
   constructor(data: ITeamMember, owner: string) {
     this._id = data.id;
     this._isLeader = data.isLeader;
     this._owner = data.owner || owner;
+    this._unitData = this.getUnitData();
   }
 
   public get id() {
@@ -271,8 +279,23 @@ export class TeamMember {
   public get ownerName() {
     return this._owner; //todo
   }
+  public get name() {
+    return this._unitData.name;
+  }
+  public get speed() {
+    return this._unitData.speed;
+  }
+  public get hasSpeedSet() {
+    return this._unitData.hasSpeedSet;
+  }
+  public get alignment() {
+    return this._unitData.alignment;
+  }
+  public get categories() {
+    return this._unitData.categories;
+  }
 
-  public get unitData() {
+  private getUnitData() {
     if (this.isPlayer) {
       const unitData: Unit = store.getters["player/unitData"](this.id);
       return unitData;
@@ -362,6 +385,34 @@ export class Match extends Team {
     super(data);
     this._playerTeamId = data.playerTeamId;
     this._opponentTeamId = data.opponentTeamId;
+    this.updateUnitList();
+
+    store.watch(
+      (state) => {
+        return state.teams.teams;
+      },
+      (teamsList) => {
+        const match = teamsList.find((t) => t.id === this._playerTeamId);
+        const equal = _.isEqual(match, this);
+        if (!equal) {
+          this.updateUnitList();
+        }
+      },
+      { deep: true }
+    );
+    store.watch(
+      (state) => {
+        return state.opponents.teams;
+      },
+      (teamsList) => {
+        const match = teamsList.find((t) => t.id === this._opponentTeamId);
+        const equal = _.isEqual(match, this);
+        if (!equal) {
+          this.updateUnitList();
+        }
+      },
+      { deep: true }
+    );
   }
 
   public get playerTeamId() {
@@ -383,14 +434,16 @@ export class Match extends Team {
 
     return opponentTeam;
   }
-  public get units() {
-    return [
+
+  private updateUnitList() {
+    this._units = [
       ...(this.playerTeam?.units || []),
       ...(this.opponentTeam?.units || []),
     ];
   }
 
   protected save() {
+    //todo debounce
     store.dispatch("opponent/saveMatches");
   }
 
@@ -408,7 +461,7 @@ export class Match extends Team {
 
 function unitMatchesLeader(
   leader: SpeedAbility,
-  unit: Unit,
+  unit: TeamMember,
   leaderId: string,
   gameMode: string = "",
   checkGameMode: boolean = false
@@ -430,7 +483,7 @@ function unitMatchesLeader(
 }
 
 function allTagsMatch(
-  unit: Unit,
+  unit: TeamMember,
   leaderId: string,
   tagsList: string[]
 ): boolean {
@@ -454,7 +507,7 @@ function allTagsMatch(
 }
 
 function anyTagsMatch(
-  unit: Unit,
+  unit: TeamMember,
   leaderId: string,
   tagsList: string[]
 ): boolean {
@@ -489,18 +542,16 @@ function getSpeedAmount(value: number | undefined, baseSpeed: number): number {
 
 function getUniqueAbilitySpeed(
   ability: SpeedAbility,
-  unitData: Unit,
+  unit: TeamMember,
   team: Team,
   checkGameMode: boolean
 ): number {
   if (ability.scalesBy) {
-    if (anyTagsMatch(unitData, unitData.id, ability.tags || [])) {
+    if (anyTagsMatch(unit, unit.id, ability.tags || [])) {
       return team.units.reduce((total: number, member: TeamMember) => {
-        if (member.id === unitData.id && ability.scalesBy?.includes("!Self")) {
+        if (member.id === unit.id && ability.scalesBy?.includes("!Self")) {
           //do nothing
-        } else if (
-          anyTagsMatch(member.unitData, unitData.id, ability?.scalesBy || [])
-        ) {
+        } else if (anyTagsMatch(member, unit.id, ability?.scalesBy || [])) {
           if (ability.scalesBy?.includes("Self")) {
             if (ability.scaleSource === "total") {
               total += getSpeedAmount(
@@ -511,14 +562,14 @@ function getUniqueAbilitySpeed(
               const uniqueTotal = team.uniqueSpeedBonus(member, checkGameMode);
               const speedAmount = getSpeedAmount(
                 ability.value,
-                uniqueTotal + member.unitData.speed
+                uniqueTotal + member.speed
               );
               total += speedAmount;
             } else {
-              total += getSpeedAmount(ability.value, member.unitData.speed);
+              total += getSpeedAmount(ability.value, member.speed);
             }
           } else {
-            total += getSpeedAmount(ability.value, unitData.speed);
+            total += getSpeedAmount(ability.value, unit.speed);
           }
         }
         return total;
@@ -529,21 +580,16 @@ function getUniqueAbilitySpeed(
     team.gameMode === ability.omicron.mode &&
     checkGameMode
   ) {
-    return getUniqueAbilitySpeed(
-      ability.omicron,
-      unitData,
-      team,
-      checkGameMode
-    );
+    return getUniqueAbilitySpeed(ability.omicron, unit, team, checkGameMode);
   } else {
-    return getSpeedAmount(ability.value, unitData.speed);
+    return getSpeedAmount(ability.value, unit.speed);
   }
   return 0;
 }
 
 function getUniqueFromTeamMembers(
   ability: SpeedAbility,
-  unit: Unit,
+  unit: TeamMember,
   fullTeam: Team,
   sourceMember: TeamMember,
   checkGameMode: boolean
@@ -576,11 +622,11 @@ function getUniqueFromTeamMembers(
         );
         const speedAmount = getSpeedAmount(
           ability.value,
-          uniqueTotal + sourceMember.unitData.speed
+          uniqueTotal + sourceMember.speed
         );
         amount += speedAmount;
       } else {
-        amount += getSpeedAmount(ability.value, sourceMember.unitData.speed);
+        amount += getSpeedAmount(ability.value, sourceMember.speed);
       }
     } else {
       amount += getUniqueAbilitySpeed(ability, unit, fullTeam, checkGameMode);
