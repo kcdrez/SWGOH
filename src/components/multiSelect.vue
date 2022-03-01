@@ -43,7 +43,7 @@ export default defineComponent({
     },
     label: {
       type: String,
-      default: "Select Options",
+      default: "Show/Hide Columns",
     },
     storageKey: {
       type: String,
@@ -98,7 +98,7 @@ export default defineComponent({
 
 .multiselect {
   position: relative;
-  z-index: 100;
+  z-index: 50;
 
   ul {
     background-color: $light;

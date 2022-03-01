@@ -131,7 +131,7 @@ export default {
 nav {
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 1000;
 }
 
 .profile-dropdown {

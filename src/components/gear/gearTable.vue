@@ -1,5 +1,11 @@
 <template>
   <div>
+    <MultiSelect
+      class="select-columns"
+      :options="cols"
+      storageKey="gearTable"
+      @checked="selectedColumns = $event"
+    />
     <table
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
       v-if="gearList.length > 0"
@@ -40,7 +46,7 @@
           </th>
         </tr>
         <tr class="text-center align-middle">
-          <th width="20%">
+          <th v-if="showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
               Salvage Name
               <i class="fas mx-1" :class="sortIcon('name')"></i>
@@ -52,40 +58,40 @@
             />
           </th>
           <th
-            :width="showRequiredByUnit ? '15%' : '25%'"
             class="c-pointer"
             @click="sortBy('location')"
+            v-if="showCol('locations')"
           >
             Locations
             <i class="fas mx-1" :class="sortIcon('location')"></i>
           </th>
           <th
-            :width="showRequiredByUnit ? '15%' : '25%'"
             class="c-pointer"
             @click="sortBy('progress')"
+            v-if="showCol('progress')"
           >
             Amount/Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showRequiredByUnit" width="20%">Required By</th>
-          <th width="15%" class="c-pointer" @click="sortBy('time')">
+          <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
+          <th class="c-pointer" @click="sortBy('time')" v-if="showCol('time')">
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
           </th>
-          <th width="15%">Actions</th>
+          <th v-if="showCol('actions')">Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr v-if="filteredSalvageList.length === 0">
-          <td :colspan="showRequiredByUnit ? '6' : '5'" class="empty-search">
+          <td colspan="100%" class="empty-search">
             There are no gear pieces that meet that search criteria.
           </td>
         </tr>
         <tr v-for="salvage in filteredSalvageList" :key="salvage.id">
-          <td class="text-center">
+          <td class="text-center" v-if="showCol('name')">
             <GearIcon :gear="salvage" />
           </td>
-          <td>
+          <td v-if="showCol('locations')">
             <div v-if="salvage.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
@@ -104,11 +110,11 @@
               </ul>
             </template>
           </td>
-          <td>
+          <td v-if="showCol('progress')">
             <OwnedAmount :salvage="salvage" />
             <ProgressBar :percent="salvage.percent" class="mt-2" />
           </td>
-          <td v-if="showRequiredByUnit">
+          <td v-if="showRequiredByUnit && showCol('required')">
             <ul>
               <li v-for="unit in salvage.neededBy" :key="unit.id">
                 <router-link
@@ -118,7 +124,7 @@
               </li>
             </ul>
           </td>
-          <td class="text-center">
+          <td class="text-center" v-if="showCol('time')">
             <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="salvage.timeEstimation"
@@ -127,7 +133,7 @@
               displayClasses="d-inline"
             />
           </td>
-          <td>
+          <td v-if="showCol('actions')">
             <div
               class="btn-group btn-group-sm d-block text-center"
               role="group"
@@ -219,6 +225,7 @@ export default defineComponent({
       sortDir: "asc",
       sortMethod: "name",
       searchText: "",
+      selectedColumns: [],
     };
   },
   computed: {
@@ -268,6 +275,38 @@ export default defineComponent({
         return gear.irrelevant;
       });
     },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+
+      if (this.showRequiredByUnit) {
+        list.splice(3, 0, {
+          text: "Required By",
+          value: "required",
+        });
+      }
+      return list;
+    },
   },
   methods: {
     ...mapActions("gear", ["saveOwnedCount"]),
@@ -286,6 +325,9 @@ export default defineComponent({
         return "fa-sort";
       }
     },
+    showCol(key: string): boolean {
+      return this.selectedColumns.some((x) => x === key);
+    },
   },
 });
 </script>
@@ -294,5 +336,11 @@ export default defineComponent({
 .empty-search {
   font-size: 1.5rem;
   text-align: center;
+}
+
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
 }
 </style>

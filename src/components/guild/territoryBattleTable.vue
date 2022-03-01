@@ -6,37 +6,45 @@
     >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
-          <th width="14%">
+          <th v-if="showCol('date')">
             <div class="c-pointer" @click="sortBy('date')">
               Completion Date
               <i class="fas mx-1" :class="sortIcon('date')"></i>
             </div>
           </th>
-          <th width="10%" class="c-pointer" @click="sortBy('type')">
+          <th v-if="showCol('type')" class="c-pointer" @click="sortBy('type')">
             Battle Type
             <i class="fas mx-1" :class="sortIcon('type')"></i>
           </th>
-          <th width="15%" class="c-pointer" @click="sortBy('name')">
+          <th v-if="showCol('name')" class="c-pointer" @click="sortBy('name')">
             Name
             <i class="fas mx-1" :class="sortIcon('name')"></i>
           </th>
-          <th width="10%" class="c-pointer" @click="sortBy('stars')">
+          <th
+            v-if="showCol('stars')"
+            class="c-pointer"
+            @click="sortBy('stars')"
+          >
             Stars
             <i class="fas mx-1" :class="sortIcon('stars')"></i>
           </th>
-          <th width="12%" class="c-pointer" @click="sortBy('get1')">
+          <th v-if="showCol('get1')" class="c-pointer" @click="sortBy('get1')">
             GET1 Currency
             <i class="fas mx-1" :class="sortIcon('get1')"></i>
           </th>
-          <th width="12%" class="c-pointer" @click="sortBy('get2')">
+          <th v-if="showCol('get2')" class="c-pointer" @click="sortBy('get2')">
             GET2 Currency
             <i class="fas mx-1" :class="sortIcon('get2')"></i>
           </th>
-          <th width="17%" class="c-pointer" @click="sortBy('character')">
+          <th
+            v-if="showCol('character')"
+            class="c-pointer"
+            @click="sortBy('character')"
+          >
             Character Shards
             <i class="fas mx-1" :class="sortIcon('character')"></i>
           </th>
-          <th width="10%">Actions</th>
+          <th v-if="showCol('actions')">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -45,16 +53,24 @@
           :key="event.id"
           class="text-center align-middle"
         >
-          <td>
+          <td v-if="showCol('date')">
             <span class="row-label">Date: </span>
             {{ $filters.formatDate(event.date) }}
           </td>
-          <td class="hidden-sm">{{ event.type }}</td>
-          <td>{{ event.name }}</td>
-          <td><span class="row-label">Stars: </span>{{ event.stars }}</td>
-          <td><span class="row-label">GET1: </span>{{ event.get1 }}</td>
-          <td><span class="row-label">GET2: </span>{{ event.get2 }}</td>
-          <td>
+          <td class="hidden-sm" v-if="showCol('type')">
+            {{ event.type }} Side
+          </td>
+          <td v-if="showCol('name')">{{ event.name }}</td>
+          <td v-if="showCol('stars')">
+            <span class="row-label">Stars: </span>{{ event.stars }}
+          </td>
+          <td v-if="showCol('get1')">
+            <span class="row-label">GET1: </span>{{ event.get1 }}
+          </td>
+          <td v-if="showCol('get2')">
+            <span class="row-label">GET2: </span>{{ event.get2 }}
+          </td>
+          <td v-if="showCol('character')">
             <span class="row-label character-shards-label"
               >Character Shards:</span
             >
@@ -62,7 +78,7 @@
               unitName(event.characterShards.id)
             }})
           </td>
-          <td>
+          <td v-if="showCol('actions')">
             <div class="btn-group btn-group-sm">
               <button
                 type="button"
@@ -82,55 +98,58 @@
             rowspan="2"
             v-if="territoryBattleEvents.length > 0"
             class="category-header"
+            :class="{ 'd-none': avgColSpan <= -1 }"
           >
             Average
           </td>
           <template v-if="tbEvents('Light').length > 0">
-            <td colspan="2">
-              Light <span class="hide-lg">Side Averages</span>
+            <td :colspan="avgColSpan" :class="{ 'd-none': avgColSpan <= 0 }">
+              Light Side<span class="hide-lg"> Averages</span>
             </td>
-            <td>{{ tbAvgStars("Light") }}</td>
-            <td>
+            <td v-if="showCol('stars')">{{ tbAvgStars("Light") }}</td>
+            <td v-if="showCol('get1')">
               <span class="row-label">GET1: </span>
               {{ tbAvgCurrency("Light", "get1") }}
             </td>
-            <td>
+            <td v-if="showCol('get2')">
               <span class="row-label">GET2: </span>
               {{ tbAvgCurrency("Light", "get2") }}
             </td>
-            <td>
+            <td v-if="showCol('character')">
               <span class="row-label character-shards-label">
                 Character Shards:
               </span>
               {{ tbAvgShards("Light") }}
             </td>
-            <td class="hidden-sm"></td>
+            <td class="hidden-sm" v-if="showCol('actions')"></td>
           </template>
         </tr>
         <tr class="text-center align-middle" v-if="tbEvents('Dark').length > 0">
-          <td colspan="2">Dark <span class="hide-lg">Side Averages</span></td>
-          <td>
+          <td :colspan="avgColSpan" :class="{ 'd-none': avgColSpan <= 0 }">
+            Dark Side<span class="hide-lg"> Averages</span>
+          </td>
+          <td v-if="showCol('stars')">
             <span class="row-label">Stars: </span>
             {{ tbAvgStars("Dark") }}
           </td>
-          <td>
+          <td v-if="showCol('get1')">
             <span class="row-label">GET1: </span>
             {{ tbAvgCurrency("Dark", "get1") }}
           </td>
-          <td>
+          <td v-if="showCol('get2')">
             <span class="row-label">GET2: </span>
             {{ tbAvgCurrency("Dark", "get2") }}
           </td>
-          <td>
+          <td v-if="showCol('character')">
             <span class="row-label character-shards-label">
               Character Shards:
             </span>
             {{ tbAvgShards("Dark") }}
           </td>
-          <td class="hidden-sm"></td>
+          <td class="hidden-sm" v-if="showCol('actions')"></td>
         </tr>
         <tr v-if="territoryBattleEvents.length === 0">
-          <td colspan="8" class="text-center">
+          <td colspan="100%" class="text-center">
             There are no events recorded for this guild.
           </td>
         </tr>
@@ -224,6 +243,20 @@ import { TerritoryBattleEvent } from "../../types/guild";
 
 export default defineComponent({
   name: "TerritoryBattleTable",
+  props: {
+    selectedColumns: {
+      type: Array,
+      validator: (arr: any[]) => {
+        return arr.every((x) => {
+          return !!x.text && !!x.value;
+        });
+      },
+      required: false,
+      default: () => {
+        return [];
+      },
+    },
+  },
   data() {
     return {
       sortDir: "asc",
@@ -336,6 +369,18 @@ export default defineComponent({
         !this.newEvent.name
       );
     },
+    avgColSpan(): number {
+      const cols = ["date", "type", "name"];
+      if (cols.every((x) => this.showCol(x))) {
+        return 2;
+      } else if (cols.filter((x) => this.showCol(x)).length === 2) {
+        return 1;
+      } else if (cols.filter((x) => this.showCol(x)).length === 1) {
+        return 0;
+      } else {
+        return -1;
+      }
+    },
   },
   methods: {
     ...mapActions("guild", [
@@ -362,6 +407,9 @@ export default defineComponent({
         this.addTerritoryBattleEvent(unvue(this.newEvent));
       }
     },
+    showCol(key: string): boolean {
+      return this.selectedColumns.some((x) => x === key);
+    },
   },
   watch: {
     "newEvent.name"(_newVal) {
@@ -374,6 +422,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
+
 .character-shards-label {
   @media only screen and (max-width: 768px) {
     display: block;
