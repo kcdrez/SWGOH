@@ -118,8 +118,7 @@
               >
             </td>
             <td class="text-center" v-if="showCol('curLevel')">
-              <span class="row-label">Current Level:</span>
-              {{ unit.currentLevel }}
+              <GearText :level="unit.gearLevel" />
             </td>
             <td class="text-center" v-if="showCol('targetLevel')">
               <span class="row-label">Target Level:</span>
@@ -229,10 +228,11 @@ import { Unit } from "../../types/unit";
 import { maxGearLevel } from "../../types/gear";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
+import GearText from "../gear/gearText.vue";
 
 export default defineComponent({
   name: "UnitSection",
-  components: { Timestamp },
+  components: { Timestamp, GearText },
   data() {
     return {
       sortDir: "asc",

@@ -14,7 +14,7 @@
     <div id="gearSection" class="collapse" ref="gearSection">
       <div class="gear-header">
         <div class="current-level">
-          Current Gear Level: <b>{{ unit.gearLevel }}</b>
+          <GearText :level="unit.gearLevel" />
         </div>
         <div class="target-level">
           Target Level:
@@ -102,12 +102,13 @@ import { loadingState } from "../../types/loading";
 import { maxGearLevel } from "../../types/gear";
 import GearTable from "./gearTable.vue";
 import EnergySpent from "../energySpent.vue";
+import GearText from "./gearText.vue";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
   name: "GearPlannerComponent",
-  components: { GearTable, Timestamp, EnergySpent },
+  components: { GearTable, Timestamp, EnergySpent, GearText },
   data() {
     return {
       maxGearLevel,
