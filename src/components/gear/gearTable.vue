@@ -1,11 +1,5 @@
 <template>
   <div>
-    <MultiSelect
-      class="select-columns"
-      :options="cols"
-      storageKey="gearTable"
-      @checked="selectedColumns = $event"
-    />
     <table
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
       v-if="gearList.length > 0"
@@ -219,13 +213,21 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    selectedColumns: {
+      type: Array,
+      validator: (arr: string[]) => {
+        return arr.every((x) => {
+          return typeof x === "string";
+        });
+      },
+      required: true,
+    },
   },
   data() {
     return {
       sortDir: "asc",
       sortMethod: "name",
       searchText: "",
-      selectedColumns: [],
     };
   },
   computed: {
@@ -274,38 +276,6 @@ export default defineComponent({
       return this.gearList.filter((gear: Gear) => {
         return gear.irrelevant;
       });
-    },
-    cols(): { text: string; value: any }[] {
-      const list = [
-        {
-          text: "Name",
-          value: "name",
-        },
-        {
-          text: "Locations",
-          value: "locations",
-        },
-        {
-          text: "Progress",
-          value: "progress",
-        },
-        {
-          text: "Estimated Time",
-          value: "time",
-        },
-        {
-          text: "Actions",
-          value: "actions",
-        },
-      ];
-
-      if (this.showRequiredByUnit) {
-        list.splice(3, 0, {
-          text: "Required By",
-          value: "required",
-        });
-      }
-      return list;
     },
   },
   methods: {

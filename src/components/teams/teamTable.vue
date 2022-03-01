@@ -121,22 +121,22 @@
           </th>
           <template v-if="showMods">
             <th class="mod-col">
-              <img src="/images/mod_square.png" />
+              <img src="images/mod_square.png" />
             </th>
             <th class="mod-col">
-              <img src="/images/mod_diamond.png" />
+              <img src="images/mod_diamond.png" />
             </th>
             <th class="mod-col">
-              <img src="/images/mod_circle.png" />
+              <img src="images/mod_circle.png" />
             </th>
             <th class="mod-col">
-              <img src="/images/mod_arrow.png" />
+              <img src="images/mod_arrow.png" />
             </th>
             <th class="mod-col">
-              <img src="/images/mod_triangle.png" />
+              <img src="images/mod_triangle.png" />
             </th>
             <th class="mod-col">
-              <img src="/images/mod_cross.png" />
+              <img src="images/mod_cross.png" />
             </th>
             <th>Speed Set?</th>
           </template>

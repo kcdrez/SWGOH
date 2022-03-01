@@ -1,11 +1,5 @@
 <template>
   <div>
-    <MultiSelect
-      class="select-columns"
-      :options="cols"
-      storageKey="relicTable"
-      @checked="selectedColumns = $event"
-    />
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
@@ -150,13 +144,21 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    selectedColumns: {
+      type: Array,
+      validator: (arr: string[]) => {
+        return arr.every((x) => {
+          return typeof x === "string";
+        });
+      },
+      required: true,
+    },
   },
   data() {
     return {
       sortMethod: "name",
       sortDir: "asc",
       searchText: "",
-      selectedColumns: [],
     };
   },
   computed: {
@@ -222,34 +224,6 @@ export default defineComponent({
           const compare = this.searchText.toLowerCase().replace(/\s/g, "");
           return name.includes(compare) || id.includes(compare);
         });
-    },
-    cols(): { text: string; value: any }[] {
-      const list = [
-        {
-          text: "Name",
-          value: "name",
-        },
-        {
-          text: "Locations",
-          value: "locations",
-        },
-        {
-          text: "Progress",
-          value: "progress",
-        },
-        {
-          text: "Estimated Time",
-          value: "time",
-        },
-      ];
-
-      if (this.showRequiredByUnit) {
-        list.splice(3, 0, {
-          text: "Required By",
-          value: "required",
-        });
-      }
-      return list;
     },
   },
   methods: {

@@ -31,9 +31,16 @@
         displayClasses="d-inline"
       />
       <EnergySpent showCantina />
+      <MultiSelect
+        class="select-columns"
+        :options="cols"
+        storageKey="relicTable"
+        @checked="selectedColumns = $event"
+      />
       <RelicTable
         :relicList="relicList"
         :targetLevels="[{ level: unit.relicLevel, target: unit.relicTarget }]"
+        :selectedColumns="selectedColumns"
       />
     </div>
   </div>
@@ -57,6 +64,7 @@ export default defineComponent({
   data() {
     return {
       maxRelicLevel,
+      selectedColumns: [],
     };
   },
   computed: {
@@ -69,6 +77,31 @@ export default defineComponent({
     relicList(): Relic[] {
       return Object.values(this.relicConfig);
     },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
+    },
   },
   mounted() {
     if (!this.unit.isShip && this.unit.relicLevel < maxRelicLevel) {
@@ -80,6 +113,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
+
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
 
 .relic-header,
 .time-estimate {

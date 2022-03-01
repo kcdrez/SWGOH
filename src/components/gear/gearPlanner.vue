@@ -33,7 +33,16 @@
         displayClasses="d-inline"
       />
       <EnergySpent showFleet showStandard />
-      <GearTable :gearList="unit.fullSalvageList" />
+      <MultiSelect
+        class="select-columns"
+        :options="cols"
+        storageKey="gearTable"
+        @checked="selectedColumns = $event"
+      />
+      <GearTable
+        :gearList="unit.fullSalvageList"
+        :selectedColumns="selectedColumns"
+      />
     </div>
     <div class="modal fade" id="gearAssumptionsModal" tabindex="-1">
       <div class="modal-dialog">
@@ -102,6 +111,7 @@ export default defineComponent({
   data() {
     return {
       maxGearLevel,
+      selectedColumns: [],
     };
   },
   computed: {
@@ -110,6 +120,31 @@ export default defineComponent({
     ...mapState(["collapseSections"]),
     requestState(): loadingState {
       return this.someLoading(["gear", "unit"]);
+    },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
     },
   },
   methods: {
@@ -125,6 +160,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
+
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
 
 .gear-header,
 .time-estimate {

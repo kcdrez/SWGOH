@@ -1,14 +1,24 @@
 <template>
   <div>
-    <div class="collapse-header section-header mt-3">
+    <div class="collapse-header section-header mt-3 position-relative">
       <h3>
         <div data-bs-toggle="collapse" href="#gear-section-table">
           Gear Summary
         </div>
       </h3>
+      <MultiSelect
+        class="select-columns"
+        :options="cols"
+        storageKey="gearTable"
+        @checked="selectedColumns = $event"
+      />
     </div>
     <div id="gear-section-table" ref="gearSection" class="collapse">
-      <GearTable :gearList="fullGearList" showRequiredByUnit />
+      <GearTable
+        :gearList="fullGearList"
+        showRequiredByUnit
+        :selectedColumns="selectedColumns"
+      />
     </div>
   </div>
 </template>
@@ -17,14 +27,19 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { Unit } from "../..//types/unit";
-import { Gear } from "../..//types/gear";
+import { Unit } from "../../types/unit";
+import { Gear } from "../../types/gear";
 import { setupEvents } from "../../utils";
 import GearTable from "../gear/gearTable.vue";
 
 export default defineComponent({
   name: "GearSection",
   components: { GearTable },
+  data() {
+    return {
+      selectedColumns: [],
+    };
+  },
   computed: {
     ...mapGetters("planner", ["fullUnitList"]),
     fullGearList(): Gear[] {
@@ -47,9 +62,49 @@ export default defineComponent({
       });
       return list;
     },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+        {
+          text: "Required By",
+          value: "required",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
+    },
   },
   mounted() {
     setupEvents(this.$refs.gearSection as HTMLElement, "gearSection");
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.select-columns {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  width: 250px;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+</style>

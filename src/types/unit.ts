@@ -285,14 +285,18 @@ export class Unit {
   public set ownedShards(value) {
     store.dispatch("shards/saveShardsCount", { count: value, id: this.id });
   }
+  private get totalOwnedShards() {
+    let amount = 0;
+    for (let i = this.stars; i > 0; i--) {
+      amount += shardMapping[i];
+    }
+    return amount + this.ownedShards;
+  }
   public get remainingShards() {
     return this.totalRemainingShards - this.ownedShards;
   }
-  public get shardProgress() {
-    return (this.ownedShards / this.totalRemainingShards) * 100;
-  }
   public get shardPercent() {
-    const val = (this.ownedShards / this.totalRemainingShards) * 100;
+    const val = (this.totalOwnedShards / 330) * 100;
     if (val >= 100) {
       return 100;
     } else {

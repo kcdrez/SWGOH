@@ -6,7 +6,7 @@
       </h3>
     </div>
     <div id="shardSection" class="collapse" ref="shardSection">
-      <h5 v-if="unit.nodes.length === 0" class="my-1 text-center">
+      <h5 v-if="unit.whereToFarm.length === 0" class="my-1 text-center">
         This unit is not currently farmable.
       </h5>
       <template v-else>
@@ -18,7 +18,6 @@
               :key="index"
               src="images/star.png"
             />
-            <!-- <b>{{ unit.stars || 0 }}</b> -->
           </div>
         </div>
         <Timestamp
@@ -29,7 +28,13 @@
           displayClasses="d-inline"
         />
         <EnergySpent showStandard showFleet showCantina />
-        <ShardTable :units="[unit]" showHeader />
+        <MultiSelect
+          class="select-columns"
+          :options="cols"
+          storageKey="shardTable"
+          @checked="selectedColumns = $event"
+        />
+        <ShardTable :units="[unit]" :selectedColumns="selectedColumns" />
       </template>
     </div>
   </div>
@@ -48,6 +53,11 @@ import Timestamp from "../timestamp.vue";
 export default defineComponent({
   name: "ShardPlannerComponent",
   components: { ShardTable, Timestamp, EnergySpent },
+  data() {
+    return {
+      selectedColumns: [],
+    };
+  },
   computed: {
     ...mapState("unit", ["unit"]),
     ...mapGetters(["someLoading"]),
@@ -99,6 +109,31 @@ export default defineComponent({
         });
       },
     },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Attempts",
+          value: "attempts",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
+    },
   },
   methods: {
     ...mapActions(["toggleCollapse"]),
@@ -113,6 +148,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
+
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
 
 .shard-header,
 .time-estimate {

@@ -246,15 +246,12 @@ export default defineComponent({
   props: {
     selectedColumns: {
       type: Array,
-      validator: (arr: any[]) => {
+      validator: (arr: string[]) => {
         return arr.every((x) => {
-          return !!x.text && !!x.value;
+          return typeof x === "string";
         });
       },
-      required: false,
-      default: () => {
-        return [];
-      },
+      required: true,
     },
   },
   data() {

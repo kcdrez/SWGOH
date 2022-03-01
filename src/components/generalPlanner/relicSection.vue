@@ -1,16 +1,23 @@
 <template>
   <div>
-    <div class="collapse-header section-header mt-3">
+    <div class="collapse-header section-header mt-3 position-relative">
       <h3>
         <div data-bs-toggle="collapse" href="#relic-section-table">
           Relic Summary
         </div>
       </h3>
+      <MultiSelect
+        class="select-columns"
+        :options="cols"
+        storageKey="relicTable"
+        @checked="selectedColumns = $event"
+      />
     </div>
     <div id="relic-section-table" class="collapse" ref="relicSection">
       <RelicTable
         :relicList="fullRelicList"
         :targetLevels="relicTargetLevels"
+        :selectedColumns="selectedColumns"
         showRequiredByUnit
       />
     </div>
@@ -29,9 +36,39 @@ import { Relic } from "../../types/relic";
 export default defineComponent({
   name: "RelicSection",
   components: { RelicTable },
+  data() {
+    return {
+      selectedColumns: [],
+    };
+  },
   computed: {
     ...mapGetters("planner", ["fullUnitList"]),
     ...mapState("relic", ["relicConfig"]),
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Required By",
+          value: "required",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+      ];
+      return list;
+    },
     fullRelicList(): Relic[] {
       const list: Relic[] = Object.values(this.relicConfig);
       this.fullUnitList.forEach((unit: Unit) => {
@@ -59,3 +96,14 @@ export default defineComponent({
   created() {},
 });
 </script>
+
+<style lang="scss" scoped>
+.select-columns {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  width: 250px;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+</style>

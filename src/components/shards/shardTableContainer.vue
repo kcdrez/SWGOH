@@ -1,7 +1,13 @@
 <template>
   <div class="mb-3">
+    <MultiSelect
+      class="select-columns my-2"
+      :options="cols"
+      storageKey="shardTable"
+      @checked="selectedColumns = $event"
+    />
     <template v-if="standardHoloTable.length > 0">
-      <div class="collapse-header section-header mt-3">
+      <div class="collapse-header section-header">
         <h3 class="w-100" data-bs-toggle="collapse" href="#holoTableSection">
           <div class="d-inline">Light & Dark Side Battles</div>
         </h3>
@@ -13,6 +19,7 @@
         :units="standardHoloTable"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Light Side', 'Dark Side']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -30,6 +37,7 @@
         :units="fleet"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Fleet']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -47,6 +55,7 @@
         :units="cantina"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Cantina']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -68,6 +77,7 @@
         :units="territoryBattles"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Territory Battle']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -85,6 +95,7 @@
         :units="raids"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Raids']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -102,6 +113,7 @@
         :units="conquest"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Conquest']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -119,6 +131,7 @@
         :units="cantinaStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Cantina Battles Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -136,6 +149,7 @@
         :units="guildStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Guild Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -157,6 +171,7 @@
         :units="squadArenaStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Squad Arena Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -178,6 +193,7 @@
         :units="galacticWarStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Galactic War Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -199,6 +215,7 @@
         :units="fleetArenaStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Fleet Arena Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -223,6 +240,7 @@
           'Guild Events Store (Mk 1)',
           'Guild Events Store (Mk 2)',
         ]"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -240,6 +258,7 @@
         :units="shardStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Shard Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -257,6 +276,7 @@
         :units="legendary"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Legendary Events']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -278,6 +298,7 @@
         :units="galacticLegends"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Galactic Legend Events']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -296,8 +317,46 @@ import { setupEvents } from "../../utils";
 export default defineComponent({
   name: "ShardTableContainer",
   components: { ShardTable },
+  data() {
+    return {
+      selectedColumns: [],
+    };
+  },
   computed: {
     ...mapGetters("shards", ["unitFarmingList"]),
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Attempts",
+          value: "attempts",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+        {
+          text: "Priority",
+          value: "priority",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
+    },
     standardHoloTable(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
         return unit.whereToFarm.some(
@@ -452,3 +511,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
+</style>

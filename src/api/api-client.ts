@@ -50,7 +50,7 @@ class ApiClient {
 
   async fetchUnit(unitId: string): Promise<Unit> {
     const response = await axios.get(`${this.baseUrl}/unit/${unitId}`);
-    return response.data;
+    return new Unit(response.data);
   }
 
   async fetchAllUnits(): Promise<Unit[]> {

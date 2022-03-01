@@ -1,19 +1,19 @@
 <template>
   <div>
-    <div class="collapse-header section-header">
+    <div class="collapse-header section-header position-relative">
       <h3>
         <div data-bs-toggle="collapse" href="#unit-section-table">
           Unit Summary
         </div>
       </h3>
-    </div>
-    <div id="unit-section-table" class="collapse" ref="unitSection">
       <MultiSelect
         class="select-columns"
         :options="cols"
         storageKey="unitTable"
         @checked="selectedColumns = $event"
       />
+    </div>
+    <div id="unit-section-table" class="collapse" ref="unitSection">
       <table
         class="table table-bordered table-dark table-sm table-striped m-0 swgoh-table"
       >
@@ -256,7 +256,7 @@ export default defineComponent({
         },
         {
           text: "Target Level",
-          value: "target",
+          value: "targetLevel",
         },
         {
           text: "Est. Gear Date",
@@ -317,6 +317,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
+
+.select-columns {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  width: 250px;
+  margin-top: 0.5rem;
+  text-align: left;
+}
 
 .swgoh-row {
   .target-container {

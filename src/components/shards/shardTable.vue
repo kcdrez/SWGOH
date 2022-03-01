@@ -1,11 +1,5 @@
 <template>
   <div>
-    <MultiSelect
-      class="select-columns"
-      :options="cols"
-      storageKey="shardTable"
-      @checked="selectedColumns = $event"
-    />
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
@@ -205,10 +199,6 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    showHeader: {
-      type: Boolean,
-      default: false,
-    },
     showPriority: {
       type: Boolean,
       default: false,
@@ -222,13 +212,21 @@ export default defineComponent({
         return [];
       },
     },
+    selectedColumns: {
+      type: Array,
+      validator: (arr: string[]) => {
+        return arr.every((x) => {
+          return typeof x === "string";
+        });
+      },
+      required: true,
+    },
   },
   data() {
     return {
       sortDir: this.initialSort?.sortDir || "asc",
       sortMethod: this.initialSort?.sortMethod || "name",
       searchText: "",
-      selectedColumns: [],
     };
   },
   computed: {
@@ -250,9 +248,9 @@ export default defineComponent({
             }
           } else if (this.sortMethod === "progress") {
             if (this.sortDir === "asc") {
-              return a.shardProgress > b.shardProgress ? 1 : -1;
+              return a.shardPercent > b.shardPercent ? 1 : -1;
             } else {
-              return a.shardProgress > b.shardProgress ? -1 : 1;
+              return a.shardPercent > b.shardPercent ? -1 : 1;
             }
           } else if (this.sortMethod === "time") {
             if (this.sortDir === "asc") {
