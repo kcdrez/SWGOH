@@ -1,6 +1,6 @@
 <template>
   <div :class="[size === 'sm' ? 'team-table-sm' : 'team-table-lg']">
-    <div class="input-group input-group-sm rename-team" v-if="allowEdit">
+    <div class="input-group input-group-sm rename-team">
       <input
         type="text"
         class="form-control"
@@ -56,7 +56,6 @@
           :id="`any-${team.id}`"
           v-model="team.gameMode"
           value=""
-          @change="saveTeam"
         />
         <label class="form-check-label" :for="`any-${team.id}`"> Any </label>
       </div>
@@ -67,7 +66,6 @@
           :id="`tw-${team.id}`"
           v-model="team.gameMode"
           value="Territory Wars"
-          @change="saveTeam"
         />
         <label class="form-check-label" :for="`tw-${team.id}`">
           Territory Wars
@@ -80,7 +78,6 @@
           :id="`tb-${team.id}`"
           v-model="team.gameMode"
           value="Territory Battles"
-          @change="saveTeam"
         />
         <label class="form-check-label" :for="`tb-${team.id}`">
           Territory Battles
@@ -93,7 +90,6 @@
           :id="`gac-${team.id}`"
           v-model="team.gameMode"
           value="Grand Arena"
-          @change="saveTeam"
         />
         <label class="form-check-label" :for="`gac-${team.id}`">
           Grand Arena
@@ -124,7 +120,6 @@
               <i class="fas mx-1" :class="sortIcon('leader')"></i>
             </div>
           </th>
-          <th v-if="showOwner && showCol('owner')">Owner</th>
           <template v-if="showMods">
             <th class="mod-col">
               <img src="/images/mod_square.png" />
@@ -164,7 +159,7 @@
       </thead>
       <tbody>
         <tr
-          v-for="unit in sortTeamUnits"
+          v-for="unit in team.fullUnitList"
           :key="unit.id"
           class="text-center align-middle"
         >
@@ -172,29 +167,21 @@
             <router-link
               :to="{
                 name: 'UnitPage',
-                params: { unitId: unit.id },
+                params: { unitId: unit.unitData.id },
               }"
-              >{{ unitData(unit.id).name }}</router-link
+              >{{ unit.unitData.name }}</router-link
             >
           </td>
           <td v-if="showCol('leader')" class="text-left">
             <span class="row-label">Is Leader?</span>
-            <div class="form-check is-leader" v-if="allowEdit">
+            <div class="form-check is-leader">
               <input
                 class="form-check-input"
                 type="checkbox"
                 v-model="unit.isLeader"
                 :disabled="disableLeader(unit.id)"
-                @change="speedBonusChange()"
               />
             </div>
-            <div v-else :class="{ 'text-success': unit.isLeader }">
-              {{ unit.isLeader ? "Yes" : "No" }}
-            </div>
-          </td>
-          <td v-if="showOwner && showCol('owner')">
-            <span class="row-label">Owner: </span>
-            {{ unit.owner }}
           </td>
           <template v-if="showMods">
             <td>
@@ -216,7 +203,7 @@
               <ModIcon :unitId="unit.id" shape="cross" />
             </td>
             <td>
-              <span class="text-success" v-if="hasSpeedSet(unitData(unit.id))"
+              <span class="text-success" v-if="unit.unitData.hasSpeedSet"
                 >Yes</span
               >
               <span class="text-white-50" v-else>No</span>
@@ -224,48 +211,50 @@
           </template>
           <td v-if="showCol('subTotal')">
             <span class="row-label">Subtotal:</span>
-            {{ unitData(unit.id).stats["5"] }}
+            {{ unit.unitData.speed }}
           </td>
           <td v-if="showCol('bonuses')">
             <span class="row-label">Bonuses:</span>
-            <div v-if="leaderSpeedBonus(team, unit, showGameMode) > 0">
-              Leader Bonus: {{ leaderSpeedBonus(team, unit, showGameMode) }}
+            <div v-if="team.leaderSpeedBonus(unit, showGameMode) > 0">
+              Leader Bonus:
+              {{ team.leaderSpeedBonus(unit, showGameMode) }}
             </div>
-            <div v-if="uniqueSpeedBonus(team, unit, showGameMode) > 0">
-              Unique Bonus: {{ uniqueSpeedBonus(team, unit, showGameMode) }}
+            <div v-if="team.uniqueSpeedBonus(unit, showGameMode) > 0">
+              Unique Bonus:
+              {{ team.uniqueSpeedBonus(unit, showGameMode) }}
             </div>
-            <div v-if="speedBonusFromTeamMembers(team, unit, showGameMode) > 0">
+            <div v-if="team.speedBonusFromTeamMembers(unit, showGameMode) > 0">
               Other Bonuses:
-              {{ speedBonusFromTeamMembers(team, unit, showGameMode) }}
+              {{ team.speedBonusFromTeamMembers(unit, showGameMode) }}
             </div>
           </td>
           <td v-if="showCol('total')">
             <span class="row-label">Grand Total:</span>
-            {{ grandTotal(unit, team, showGameMode) }}
+            {{ team.grandTotal(unit, showGameMode) }}
           </td>
           <td v-if="showCol('actions')" class="py-0">
             <button
               type="button"
               class="btn btn-danger btn-sm"
               title="Remove from this team"
-              @click="$emit('removeUnit', unit)"
+              @click="team.removeUnit(unit)"
             >
               <i class="fas fa-trash"></i>
             </button>
           </td>
         </tr>
-        <tr v-if="team.units.length < 5 && allowEdit">
+        <tr v-if="team.units.length < 5">
           <td colspan="100%" class="text-center">
             <div class="input-group input-group-sm add-unit-container">
               <SearchInput
                 :list="unitList"
                 @select="selected = $event"
-                @enterPress="add($event)"
+                @enterPress="team.addUnit($event)"
               />
               <button
                 class="btn btn-sm btn-primary"
                 :disabled="!selected"
-                @click="add(selected)"
+                @click="team.addUnit(selected)"
               >
                 Add Unit
               </button>
@@ -278,12 +267,9 @@
 </template>
 
 <script lang="ts">
-import { mapGetters, mapState } from "vuex";
 import { defineComponent, PropType } from "vue";
-import _ from "lodash";
 
-import { unvue } from "../../utils";
-import { SortType, Team, TeamMember } from "../../types/teams";
+import { SortType, Team } from "../../types/teams";
 import { Unit } from "../../types/unit";
 import MultiSelect from "../multiSelect.vue";
 import ModIcon from "../units/modIcon.vue";
@@ -314,77 +300,20 @@ export default defineComponent({
         return ["sm", "lg"].includes(val);
       },
     },
-    allowEdit: {
-      type: Boolean,
-      default: true,
-    },
     showGameMode: {
       type: Boolean,
       default: true,
     },
-    showOwner: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
-      editTeamName: unvue(this.team.name),
+      editTeamName: this.team.name || "",
       isEditing: false,
       selected: null,
       selectedColumns: [],
     } as dataModel;
   },
   computed: {
-    ...mapState("player", ["player"]),
-    ...mapGetters("player", ["unitData"]),
-    ...mapGetters("teams", [
-      "hasSpeedSet",
-      "leaderSpeedBonus",
-      "uniqueSpeedBonus",
-      "speedBonusFromTeamMembers",
-      "grandTotal",
-    ]),
-    sortTeamUnits(): TeamMember[] {
-      return this.team.units.sort((a, b) => {
-        if (this.team.sortMethod === "name") {
-          const compareA: string = this.unitData(a.id).name.toLowerCase();
-          const compareB: string = this.unitData(b.id).name.toLowerCase();
-          if (this.team.sortDir === "asc") {
-            return compareA > compareB ? 1 : -1;
-          } else {
-            return compareA > compareB ? -1 : 1;
-          }
-        } else if (this.team.sortMethod === "leader") {
-          if (a.isLeader) {
-            return this.team.sortDir === "asc" ? -1 : 1;
-          } else if (b.isLeader) {
-            return this.team.sortDir === "asc" ? 1 : -1;
-          }
-          return 0;
-        } else if (this.team.sortMethod === "subtotal") {
-          const compareA: number = this.unitData(a.id).stats["5"];
-          const compareB: number = this.unitData(b.id).stats["5"];
-          if (this.team.sortDir === "asc") {
-            return compareA - compareB;
-          } else {
-            return compareB - compareA;
-          }
-        } else if (
-          this.team.sortMethod === "total" ||
-          this.team.sortMethod === undefined
-        ) {
-          const compareA: number = this.grandTotal(a, this.team);
-          const compareB: number = this.grandTotal(b, this.team);
-          if (this.team.sortDir === "asc") {
-            return compareA - compareB;
-          } else {
-            return compareB - compareA;
-          }
-        }
-        return 0;
-      });
-    },
     showMods(): boolean {
       return this.size === "lg" && this.showCol("mods");
     },
@@ -421,26 +350,15 @@ export default defineComponent({
           value: "mods",
         });
       }
-      if (this.showOwner) {
-        list.splice(2, 0, {
-          text: "Owner",
-          value: "owner",
-        });
-      }
       return list;
     },
   },
   methods: {
     saveTeamName() {
       if (this.isEditing) {
-        const newTeam: Team = unvue(this.team);
-        newTeam.name = this.editTeamName;
-        this.$emit("addTeam", newTeam);
+        this.team.name = this.editTeamName;
         this.isEditing = false;
       }
-    },
-    saveTeam() {
-      this.$emit("addTeam", this.team);
     },
     editTeam() {
       this.isEditing = true;
@@ -467,11 +385,6 @@ export default defineComponent({
         this.team.sortDir = "asc";
       }
       this.team.sortMethod = type;
-      this.saveTeam();
-    },
-    sortDir(direction: "asc" | "desc") {
-      this.team.sortDir = direction;
-      this.saveTeam();
     },
     disableLeader(unitId: string) {
       return this.team.units.some((unit) => {
@@ -483,20 +396,9 @@ export default defineComponent({
         return false;
       });
     },
-    speedBonusChange: _.debounce(function fn(this: any) {
-      this.$emit("saveTeams");
-    }, 300),
-    add(unit: Unit) {
-      const exists = this.team.units.find((x) => x.id === unit.id);
-      if (exists) {
-        this.$toast(`${unit.name} is already added to ${this.team.name}.`, {
-          positionY: "top",
-          class: "toast-warning",
-        });
-      } else {
-        this.$emit("addUnit", unit);
-      }
-    },
+    // speedBonusChange: _.debounce(function fn(this: any) {
+    //   this.$emit("saveTeams");
+    // }, 300),
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
@@ -579,6 +481,7 @@ th {
 
     .form-check {
       //the first element is the text that spans all columns which is not .form-check
+
       &:nth-child(2) {
         justify-self: right;
       }
@@ -609,6 +512,7 @@ th {
 .is-leader {
   display: flex;
   justify-content: center;
+  margin-bottom: 0;
 
   @media only screen and (max-width: 768px) {
     display: inline;

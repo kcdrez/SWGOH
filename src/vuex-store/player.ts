@@ -48,11 +48,8 @@ const store = {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;
     },
-    SET_PLAYER(state: State, payload: any) {
-      state.player = {
-        ...payload,
-        units: payload.units.map((u: any) => new Unit(u)),
-      };
+    SET_PLAYER(state: State, payload: Player) {
+      state.player = payload;
     },
     SET_ALLY_CODE(state: State, payload: string | null) {
       if (payload === "kcdrez") {

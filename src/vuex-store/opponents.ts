@@ -27,7 +27,13 @@ const store = {
     player: null,
     matches: [],
   },
-  getters: {},
+  getters: {
+    unitData(state: State) {
+      return (unitId: string): Unit | undefined => {
+        return state.player?.units.find((x) => x.id === unitId);
+      };
+    },
+  },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;
@@ -49,7 +55,7 @@ const store = {
     ADD_UNIT(state: State, payload: { teamId: string; unit: Unit }) {
       const match = state.teams.find((x) => x.id === payload.teamId);
       if (match) {
-        match.units.push({ id: payload.unit.id });
+        // match.units.push({ id: payload.unit.id });
       }
     },
     REMOVE_UNIT(state: State, payload: { teamId: string; unit: Unit }) {
@@ -80,9 +86,6 @@ const store = {
       }
     },
     UPSERT_MATCH(state: State, payload: Match) {
-      if (!payload.id) {
-        payload.id = uuid();
-      }
       const index = state.matches.findIndex((x) => x.id === payload.id);
       if (index >= 0) {
         state.matches.splice(index, 1, payload);
@@ -112,13 +115,16 @@ const store = {
       commit("SET_REQUEST_STATE", loadingState.loading);
 
       if (player.id) {
-        const playerResponse: OpponentResponse = await apiClient.fetchOpponent(
-          player.id
+        const opponentResponse: OpponentResponse =
+          await apiClient.fetchOpponent(player.id);
+        await dispatch("fetchPlayer", opponentResponse.opponentAllyCode);
+        commit(
+          "SET_TEAMS",
+          opponentResponse?.teams.map((t) => new Team(t, state.player?.id)) ||
+            []
         );
-        await dispatch("fetchPlayer", playerResponse.opponentAllyCode);
-        commit("SET_TEAMS", playerResponse?.teams || []);
 
-        const matches: Match[] = (playerResponse?.matches || []).reduce(
+        const matches: Match[] = (opponentResponse?.matches || []).reduce(
           (acc: Match[], { opponentTeamId, playerTeamId, gameMode }) => {
             const opponentTeam: Team | undefined = state.teams.find(
               (team) => team.id === opponentTeamId
@@ -127,21 +133,15 @@ const store = {
               (team) => team.id === playerTeamId
             );
             if (opponentTeam && playerTeam) {
-              acc.push({
-                opponentTeamId,
-                playerTeamId,
-                gameMode,
-                units: [
-                  ...opponentTeam.units.map((x) => {
-                    return { ...x, owner: state.player?.name || "" };
-                  }),
-                  ...playerTeam.units.map((x) => {
-                    return { ...x, owner: player.name };
-                  }),
-                ],
-                id: uuid(),
-                name: playerTeam.name + " Versus " + opponentTeam.name,
-              });
+              acc.push(
+                new Match({
+                  opponentTeamId,
+                  playerTeamId,
+                  gameMode,
+                  id: uuid(),
+                  name: playerTeam.name + " Versus " + opponentTeam.name,
+                })
+              );
             }
             if (!opponentTeam) {
               console.error(
@@ -227,27 +227,19 @@ const store = {
       matchData: MatchPayload & { ignoreSave: boolean }
     ) {
       if (matchData.playerTeam && matchData.opponentTeam) {
-        const units: TeamMember[] = [
-          ...(matchData.playerTeam?.units || []).map((x) => {
-            return { ...x, owner: rootState.player.player?.name };
-          }),
-          ...(matchData.opponentTeam?.units || []).map((x) => {
-            return { ...x, owner: state.player?.name };
-          }),
-        ];
-        const match: Match = {
-          id: matchData?.id ? matchData.id : uuid(),
-          playerTeamId: matchData.playerTeam.id,
-          opponentTeamId: matchData.opponentTeam.id,
-          units,
-          gameMode: "",
-          name: `${matchData.playerTeam.name} Versus ${matchData.opponentTeam.name}`,
-          // sortDir?: "asc" | "desc";
-          // sortMethod?: SortType;
-          // searchName?: string;
-        };
-
-        commit("UPSERT_MATCH", match);
+        commit(
+          "UPSERT_MATCH",
+          new Match({
+            id: matchData?.id ? matchData.id : uuid(),
+            playerTeamId: matchData.playerTeam.id,
+            opponentTeamId: matchData.opponentTeam.id,
+            gameMode: "",
+            name: `${matchData.playerTeam.name} Versus ${matchData.opponentTeam.name}`,
+            sortDir: "asc",
+            sortMethod: "total",
+            searchName: "",
+          })
+        );
 
         if (!matchData?.ignoreSave) {
           dispatch("saveMatches");

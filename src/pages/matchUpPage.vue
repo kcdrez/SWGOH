@@ -88,7 +88,6 @@
                   class="form-control"
                   placeholder="Team Name"
                   v-model="newPlayerTeamName"
-                  @keypress.enter="addTeam('player')"
                 />
                 <button
                   class="btn btn-primary"
@@ -106,12 +105,6 @@
                 :unitList="player.units"
                 :showGameMode="false"
                 @deleteTeam="confirmDeleteTeam(team, 'player')"
-                @addUnit="addPlayerUnit({ teamId: team.id, unit: $event })"
-                @addTeam="addPlayerTeam($event)"
-                @saveTeams="saveTeam('player', team)"
-                @removeUnit="
-                  removePlayerUnit({ teamId: team.id, unit: $event })
-                "
                 size="sm"
               />
             </div>
@@ -141,12 +134,6 @@
                 :unitList="opponent.units"
                 :showGameMode="false"
                 @deleteTeam="confirmDeleteTeam(team, 'opponent')"
-                @addUnit="addOpponentUnit({ teamId: team.id, unit: $event })"
-                @addTeam="addOpponentTeam($event)"
-                @saveTeams="saveTeam('opponent', team)"
-                @removeUnit="
-                  removeOpponentUnit({ teamId: team.id, unit: $event })
-                "
                 size="sm"
               />
             </div>
@@ -202,12 +189,7 @@
             </div>
             <div class="row">
               <div class="col">
-                <TeamTable
-                  :team="matchup"
-                  :allowEdit="false"
-                  showOwner
-                  size="sm"
-                />
+                <MatchTable :match="matchup" />
               </div>
             </div>
           </template>
@@ -253,6 +235,7 @@ import { v4 as uuid } from "uuid";
 import { Match, MatchPayload, Team, TeamMember } from "../types/teams";
 import { loadingState } from "../types/loading";
 import TeamTable from "../components/teams/teamTable.vue";
+import MatchTable from "../components/teams/matchTable.vue";
 
 type dataModel = {
   allyCode: string;
@@ -266,7 +249,7 @@ type dataModel = {
 
 export default defineComponent({
   name: "MatchUpPage",
-  components: { TeamTable },
+  components: { TeamTable, MatchTable },
   data() {
     return {
       allyCode: "",
@@ -285,7 +268,7 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapState("opponents", {
       opponent: "player",
-      opponentRequestState: "requestState",
+      // opponentRequestState: "requestState",
       opponentTeams: "teams",
       matches: "matches",
     }),
@@ -300,17 +283,13 @@ export default defineComponent({
   methods: {
     ...mapActions("teams", {
       deletePlayerTeam: "deleteTeam",
-      removePlayerUnit: "removeUnit",
       addPlayerTeam: "upsertTeam",
-      addPlayerUnit: "addUnit",
       savePlayerTeams: "saveTeams",
     }),
     ...mapActions("opponents", {
       fetchOpponent: "fetchPlayer",
       deleteOpponentTeam: "deleteTeam",
-      removeOpponentUnit: "removeUnit",
       addOpponentTeam: "upsertTeam",
-      addOpponentUnit: "addUnit",
       saveOpponentTeams: "saveTeams",
       addMatch: "addMatch",
       deleteOpponent: "deleteOpponent",
@@ -360,12 +339,11 @@ export default defineComponent({
         ...(match.playerTeam?.units || []),
         ...(match.opponentTeam?.units || []),
       ];
-      return {
+      return new Team({
         id: uuid(),
         name: "",
-        units,
-        gameMode: "",
-      };
+        // units,
+      });
     },
     removeOpponent() {
       this.deleteOpponent();

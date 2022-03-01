@@ -5,7 +5,7 @@ import { ConfigType, Gear, IGear } from "../types/gear";
 import { IUnit, Unit } from "../types/unit";
 import { FarmingNode, IFarmingNode, OwnedShardsMap } from "../types/shards";
 import { OwnedRelicConfig } from "../types/relic";
-import { Match, Team } from "../types/teams";
+import { ITeam, Match, Team } from "../types/teams";
 import {
   GuildPayload,
   TerritoryBattleEvent,
@@ -20,7 +20,11 @@ class ApiClient {
 
   async fetchPlayer(allyCode: string): Promise<PlayerResponse> {
     const response = await axios.get(`${this.baseUrl}/player/${allyCode}`);
-    return response.data;
+    const { data } = response;
+    return {
+      ...data,
+      units: data.units.map((u: IUnit) => new Unit(u)),
+    };
   }
 
   async fetchOpponent(playerId: string | undefined) {
@@ -32,7 +36,11 @@ class ApiClient {
 
   async createPlayer(allyCode: string): Promise<PlayerResponse> {
     const response = await axios.post(`${this.baseUrl}/player/${allyCode}`);
-    return response.data;
+    const { data } = response;
+    return {
+      ...data,
+      units: data.units.map((u: IUnit) => new Unit(u)),
+    };
   }
 
   async fetchGearList(): Promise<Gear[]> {
@@ -84,7 +92,7 @@ class ApiClient {
     }
   }
 
-  async updateTeams(playerId: string | undefined, teams: Team[]) {
+  async updateTeams(playerId: string | undefined, teams: ITeam[]) {
     if (playerId) {
       await axios.patch(`${this.baseUrl}/player/teams/${playerId}`, { teams });
     }
@@ -98,22 +106,14 @@ class ApiClient {
     if (playerId) {
       await axios.patch(`${this.baseUrl}/opponent/teams/${playerId}`, {
         opponentAllyCode,
-        teams,
+        teams: teams.map((x) => x.sanitize()),
       });
     }
   }
 
   async updateMatches(playerId: string | undefined, matches: Match[]) {
     if (playerId) {
-      const matchPayload = matches.map(
-        ({ opponentTeamId, playerTeamId, gameMode }) => {
-          return {
-            opponentTeamId,
-            playerTeamId,
-            gameMode,
-          };
-        }
-      );
+      const matchPayload = matches.map((x) => x.sanitize());
       await axios.patch(`${this.baseUrl}/opponent/matches/${playerId}`, {
         matches: matchPayload,
       });
