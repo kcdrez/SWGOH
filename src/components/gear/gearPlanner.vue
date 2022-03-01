@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!unit.is_ship && currentGearLevel(unit) < maxGearLevel">
+  <div v-if="!unit.isShip && unit.gearLevel < maxGearLevel">
     <div class="collapse-header section-header">
       <h3 class="w-100" data-bs-toggle="collapse" href="#gearSection">
         <div class="d-inline">Gear Planner</div>
@@ -14,16 +14,12 @@
     <div id="gearSection" class="collapse" ref="gearSection">
       <div class="gear-header">
         <div class="current-level">
-          Current Gear Level: <b>{{ currentGearLevel(unit) }}</b>
+          Current Gear Level: <b>{{ unit.gearLevel }}</b>
         </div>
         <div class="target-level">
           Target Level:
-          <select v-model.number="gearTarget">
-            <option
-              v-for="num in gearOptions(unit.gear_level)"
-              :value="num"
-              :key="num"
-            >
+          <select v-model.number="unit.gearTarget">
+            <option v-for="num in unit.gearOptions" :value="num" :key="num">
               Gear {{ num }}
             </option>
           </select>
@@ -32,12 +28,21 @@
       <Timestamp
         class="time-estimate"
         label="Estimated completion:"
-        :title="$filters.daysFromNow(totalDays(unit))"
-        :displayText="$filters.pluralText(totalDays(unit), 'day')"
+        :title="$filters.daysFromNow(unit.gearTotalDays)"
+        :displayText="$filters.pluralText(unit.gearTotalDays, 'day')"
         displayClasses="d-inline"
       />
       <EnergySpent showFleet showStandard />
-      <GearTable :gearList="fullSalvageList(this.unit, this.gearTarget)" />
+      <MultiSelect
+        class="select-columns"
+        :options="cols"
+        storageKey="gearTable"
+        @checked="selectedColumns = $event"
+      />
+      <GearTable
+        :gearList="unit.fullSalvageList"
+        :selectedColumns="selectedColumns"
+      />
     </div>
     <div class="modal fade" id="gearAssumptionsModal" tabindex="-1">
       <div class="modal-dialog">
@@ -93,7 +98,6 @@
 import { defineComponent } from "vue";
 import { mapState, mapGetters, mapActions } from "vuex";
 
-import { UpdateItem } from "../../types/planner";
 import { loadingState } from "../../types/loading";
 import { maxGearLevel } from "../../types/gear";
 import GearTable from "./gearTable.vue";
@@ -107,46 +111,47 @@ export default defineComponent({
   data() {
     return {
       maxGearLevel,
+      selectedColumns: [],
     };
   },
   computed: {
     ...mapState("unit", ["unit"]),
-    ...mapGetters("gear", [
-      "gearOptions",
-      "fullSalvageList",
-      "totalDays",
-      "currentGearLevel",
-    ]),
     ...mapGetters(["someLoading"]),
     ...mapState(["collapseSections"]),
     requestState(): loadingState {
       return this.someLoading(["gear", "unit"]);
     },
-    gearTarget: {
-      get(): number {
-        return (
-          this.$store.getters["planner/gearTarget"](this.unit.id) ||
-          this.maxGearLevel
-        );
-      },
-      set(value: number) {
-        const payload: UpdateItem = {
-          type: "gear",
-          value,
-          unitId: this.unit.id,
-        };
-        this.$store.dispatch("planner/updatePlannerTarget", payload);
-      },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
     },
   },
   methods: {
     ...mapActions(["toggleCollapse"]),
   },
   mounted() {
-    if (
-      !this.unit.is_ship &&
-      this.currentGearLevel(this.unit) < this.maxGearLevel
-    ) {
+    if (!this.unit.isShip && this.unit.gearLevel < this.maxGearLevel) {
       setupEvents(this.$refs.gearSection as HTMLElement, "gearPlanner");
     }
   },
@@ -155,6 +160,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
+
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
 
 .gear-header,
 .time-estimate {

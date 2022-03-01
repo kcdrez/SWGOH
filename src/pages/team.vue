@@ -25,10 +25,6 @@
         :key="team.id"
         :team="team"
         :unitList="player.units"
-        @addUnit="addUnit({ teamId: team.id, unit: $event })"
-        @removeUnit="removeUnit({ teamId: team.id, unit: $event })"
-        @addTeam="upsertTeam($event)"
-        @saveTeams="saveTeams()"
         @deleteTeam="confirmDeleteTeam(team)"
         size="lg"
       />

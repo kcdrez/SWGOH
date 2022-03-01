@@ -1,11 +1,7 @@
 <template>
   <div>
     <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        mb-0
-        swgoh-table
-      "
+      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
       v-if="gearList.length > 0"
     >
       <thead class="sticky-header show-on-mobile">
@@ -44,7 +40,7 @@
           </th>
         </tr>
         <tr class="text-center align-middle">
-          <th width="20%">
+          <th v-if="showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
               Salvage Name
               <i class="fas mx-1" :class="sortIcon('name')"></i>
@@ -56,44 +52,41 @@
             />
           </th>
           <th
-            :width="showRequiredByUnit ? '15%' : '25%'"
             class="c-pointer"
             @click="sortBy('location')"
+            v-if="showCol('locations')"
           >
             Locations
             <i class="fas mx-1" :class="sortIcon('location')"></i>
           </th>
           <th
-            :width="showRequiredByUnit ? '15%' : '25%'"
             class="c-pointer"
             @click="sortBy('progress')"
+            v-if="showCol('progress')"
           >
             Amount/Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showRequiredByUnit" width="20%">Required By</th>
-          <th width="15%" class="c-pointer" @click="sortBy('time')">
+          <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
+          <th class="c-pointer" @click="sortBy('time')" v-if="showCol('time')">
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
           </th>
-          <th width="15%">Actions</th>
+          <th v-if="showCol('actions')">Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr v-if="filteredSalvageList.length === 0">
-          <td :colspan="showRequiredByUnit ? '6' : '5'" class="empty-search">
+          <td colspan="100%" class="empty-search">
             There are no gear pieces that meet that search criteria.
           </td>
         </tr>
         <tr v-for="salvage in filteredSalvageList" :key="salvage.id">
-          <td class="text-center">
+          <td class="text-center" v-if="showCol('name')">
             <GearIcon :gear="salvage" />
           </td>
-          <td>
-            <div
-              v-if="gearLocation(salvage.lookupMissionList).length <= 0"
-              class="text-center"
-            >
+          <td v-if="showCol('locations')">
+            <div v-if="salvage.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
             <template v-else>
@@ -105,20 +98,17 @@
                 Show/Hide Locations
               </button>
               <ul class="m-0 collapse" :id="`locations-${salvage.id}`">
-                <li
-                  v-for="(l, index) in gearLocation(salvage.lookupMissionList)"
-                  :key="index"
-                >
+                <li v-for="(l, index) in salvage.locations" :key="index">
                   {{ l }}
                 </li>
               </ul>
             </template>
           </td>
-          <td>
+          <td v-if="showCol('progress')">
             <OwnedAmount :salvage="salvage" />
-            <GearProgressBar :gear="salvage" class="mt-2" />
+            <ProgressBar :percent="salvage.percent" class="mt-2" />
           </td>
-          <td v-if="showRequiredByUnit">
+          <td v-if="showRequiredByUnit && showCol('required')">
             <ul>
               <li v-for="unit in salvage.neededBy" :key="unit.id">
                 <router-link
@@ -128,16 +118,16 @@
               </li>
             </ul>
           </td>
-          <td class="text-center">
+          <td class="text-center" v-if="showCol('time')">
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="timeEstimation(salvage)"
-              :displayText="$filters.pluralText(timeEstimation(salvage), 'day')"
-              :title="$filters.daysFromNow(timeEstimation(salvage))"
+              :timeLength="salvage.timeEstimation"
+              :displayText="$filters.pluralText(salvage.timeEstimation, 'day')"
+              :title="$filters.daysFromNow(salvage.timeEstimation)"
               displayClasses="d-inline"
             />
           </td>
-          <td>
+          <td v-if="showCol('actions')">
             <div
               class="btn-group btn-group-sm d-block text-center"
               role="group"
@@ -146,7 +136,7 @@
                 type="button"
                 class="btn btn-warning text-dark"
                 title="Mark this salvage as irrelevant, removing it from the planner estimation"
-                @click="markRelevant(salvage, true)"
+                @click="salvage.irrelevant = true"
               >
                 <i class="fas fa-toilet"></i>
               </button>
@@ -190,7 +180,7 @@
                 type="button"
                 class="btn btn-success"
                 title="Mark this salvage as relevant, moving it back into the planner estimation"
-                @click="markRelevant(salvage, false)"
+                @click="salvage.irrelevant = false"
               >
                 <i class="fas fa-heart"></i>
               </button>
@@ -204,17 +194,16 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapActions } from "vuex";
 
 import { Gear } from "../../types/gear";
 import OwnedAmount from "./gearOwned.vue";
 import GearIcon from "./gearIcon.vue";
-import GearProgressBar from "./gearProgressBar.vue";
 import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
   name: "GearTable",
-  components: { OwnedAmount, GearIcon, GearProgressBar, Timestamp },
+  components: { OwnedAmount, GearIcon, Timestamp },
   props: {
     gearList: {
       required: true,
@@ -223,6 +212,15 @@ export default defineComponent({
     showRequiredByUnit: {
       type: Boolean,
       default: false,
+    },
+    selectedColumns: {
+      type: Array,
+      validator: (arr: string[]) => {
+        return arr.every((x) => {
+          return typeof x === "string";
+        });
+      },
+      required: true,
     },
   },
   data() {
@@ -233,20 +231,11 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("gear", [
-      "gearLocation",
-      "timeEstimation",
-      "fullSalvageList",
-      "gearOwnedCount",
-    ]),
-    ...mapState("gear", ["gearConfig"]),
     filteredSalvageList(): Gear[] {
       return this.gearList
         .filter((gear: Gear) => {
-          if (gear.id in this.gearConfig) {
-            if (this.gearConfig[gear.id].irrelevant) {
-              return false;
-            }
+          if (gear.irrelevant) {
+            return false;
           }
           const name = gear.name.toLowerCase().replace(/\s/g, "");
           const compare = this.searchText.toLowerCase().replace(/\s/g, "");
@@ -262,28 +251,22 @@ export default defineComponent({
               return compareA > compareB ? -1 : 1;
             }
           } else if (this.sortMethod === "locations") {
-            const locationsA = this.gearLocation(a.lookupMissionList);
-            const locationsB = this.gearLocation(b.lookupMissionList);
             if (this.sortDir === "asc") {
-              return locationsA[0] > locationsB[0] ? 1 : -1;
+              return a.locations[0] > b.locations[0] ? 1 : -1;
             } else {
-              return locationsA[0] < locationsB[0] ? -1 : 1;
+              return a.locations[0] < b.locations[0] ? -1 : 1;
             }
           } else if (this.sortMethod === "progress") {
-            const progressA = this.gearOwnedCount(a.id) / a.amount;
-            const progressB = this.gearOwnedCount(b.id) / b.amount;
             if (this.sortDir === "asc") {
-              return progressA - progressB;
+              return a.progress - b.progress;
             } else {
-              return progressB - progressA;
+              return b.progress - a.progress;
             }
           } else if (this.sortMethod === "time") {
-            const compareA = this.timeEstimation(a);
-            const compareB = this.timeEstimation(b);
             if (this.sortDir === "asc") {
-              return compareA - compareB;
+              return a.timeEstimation - b.timeEstimation;
             } else {
-              return compareB - compareA;
+              return b.timeEstimation - a.timeEstimation;
             }
           }
           return 0;
@@ -291,12 +274,7 @@ export default defineComponent({
     },
     irrelevantGear(): Gear[] {
       return this.gearList.filter((gear: Gear) => {
-        if (gear.id in this.gearConfig) {
-          if (this.gearConfig[gear.id].irrelevant) {
-            return true;
-          }
-        }
-        return false;
+        return gear.irrelevant;
       });
     },
   },
@@ -317,12 +295,8 @@ export default defineComponent({
         return "fa-sort";
       }
     },
-    markRelevant(salvage: Gear, isRelevant: boolean) {
-      this.saveOwnedCount({
-        id: salvage.id,
-        count: salvage.owned,
-        irrelevant: isRelevant,
-      });
+    showCol(key: string): boolean {
+      return this.selectedColumns.some((x) => x === key);
     },
   },
 });
@@ -332,5 +306,11 @@ export default defineComponent({
 .empty-search {
   font-size: 1.5rem;
   text-align: center;
+}
+
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
 }
 </style>

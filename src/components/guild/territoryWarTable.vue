@@ -6,29 +6,37 @@
     >
       <thead class="sticky-header">
         <tr class="text-center align-middle">
-          <th width="16.6%">
+          <th v-if="showCol('date')">
             <div class="c-pointer" @click="sortBy('date')">
               Completion Date
               <i class="fas mx-1" :class="sortIcon('date')"></i>
             </div>
           </th>
-          <th width="16.6%" class="c-pointer" @click="sortBy('wins')">
+          <th
+            v-if="showCol('win_loss')"
+            class="c-pointer"
+            @click="sortBy('wins')"
+          >
             Win/Loss
             <i class="fas mx-1" :class="sortIcon('wins')"></i>
           </th>
-          <th width="16.6%" class="c-pointer" @click="sortBy('get1')">
+          <th v-if="showCol('get1')" class="c-pointer" @click="sortBy('get1')">
             GET1 Currency
             <i class="fas mx-1" :class="sortIcon('get1')"></i>
           </th>
-          <th width="16.6%" class="c-pointer" @click="sortBy('get2')">
+          <th v-if="showCol('get2')" class="c-pointer" @click="sortBy('get2')">
             GET2 Currency
             <i class="fas mx-1" :class="sortIcon('get2')"></i>
           </th>
-          <th width="16.6%" class="c-pointer" @click="sortBy('zetas')">
+          <th
+            v-if="showCol('zetas')"
+            class="c-pointer"
+            @click="sortBy('zetas')"
+          >
             Zetas
             <i class="fas mx-1" :class="sortIcon('zetas')"></i>
           </th>
-          <th width="16.6%">Actions</th>
+          <th v-if="showCol('actions')">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -37,26 +45,26 @@
           :key="event.id"
           class="text-center align-middle"
         >
-          <td>
+          <td v-if="showCol('date')">
             <span class="row-label">Date: </span>
             {{ $filters.formatDate(event.date) }}
           </td>
-          <td>
+          <td v-if="showCol('win_loss')">
             {{ event.win ? "Win" : "Loss" }}
           </td>
-          <td>
+          <td v-if="showCol('get1')">
             <span class="row-label">GET1 Currency: </span>
             {{ event.get1 }}
           </td>
-          <td>
+          <td v-if="showCol('get2')">
             <span class="row-label">GET2 Currency: </span>
             {{ event.get2 }}
           </td>
-          <td>
+          <td v-if="showCol('zetas')">
             <span class="row-label">Zetas: </span>
             {{ event.zetas }}
           </td>
-          <td>
+          <td v-if="showCol('actions')">
             <div class="btn-group btn-group-sm">
               <button
                 type="button"
@@ -75,21 +83,27 @@
           class="text-center align-middle"
           v-if="territoryWarEvents.length > 0"
         >
-          <td class="category-header">Average</td>
-          <td>
+          <td class="category-header" v-if="showCol('date')">Average</td>
+          <td v-if="showCol('win_loss')">
             <span class="row-label">Win Rate: </span>
             {{ averageWinRate }}%
           </td>
-          <td>
+          <td v-if="showCol('get1')">
             <span class="row-label">Avg GET1: </span>
             {{ averageGet1 }}
           </td>
-          <td><span class="row-label">Avg GET2: </span> {{ averageGet1 }}</td>
-          <td><span class="row-label">Avg Zetas: </span> {{ averageZetas }}</td>
-          <td class="hidden-sm"></td>
+          <td v-if="showCol('get2')">
+            <span class="row-label">Avg GET2: </span>
+            {{ averageGet1 }}
+          </td>
+          <td v-if="showCol('zetas')">
+            <span class="row-label">Avg Zetas: </span>
+            {{ averageZetas }}
+          </td>
+          <td class="hidden-sm" v-if="showCol('actions')"></td>
         </tr>
         <tr v-else>
-          <td colspan="6" class="text-center">
+          <td colspan="100%" class="text-center">
             There are no events recorded for this guild.
           </td>
         </tr>
@@ -192,6 +206,17 @@ import { round2Decimals, unvue } from "../../utils";
 
 export default defineComponent({
   name: "TerritoryWarTable",
+  props: {
+    selectedColumns: {
+      type: Array,
+      validator: (arr: string[]) => {
+        return arr.every((x) => {
+          return typeof x === "string";
+        });
+      },
+      required: true,
+    },
+  },
   data() {
     return {
       sortDir: "asc",
@@ -318,6 +343,9 @@ export default defineComponent({
       if (!this.addNewDisabled) {
         this.addTerritoryWarEvent(unvue(this.newEvent));
       }
+    },
+    showCol(key: string): boolean {
+      return this.selectedColumns.some((x) => x === key);
     },
   },
 });

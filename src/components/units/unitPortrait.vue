@@ -8,7 +8,7 @@
       }"
     >
       <img :src="unit?.image" :alt="unit?.name" />
-      <span class="gear-level" :class="`gear-level${unit.gear_level}`"></span>
+      <span class="gear-level" :class="`gear-level${unit.gearLevel}`"></span>
       <span v-for="index in 7" :key="index" :class="starClasses(index)"></span>
       <span
         v-for="index in unit.stars"
@@ -16,8 +16,8 @@
         :class="`star-level-${index}`"
       ></span>
       <RelicIcon
-        v-if="unit.relic_tier"
-        :relicLevel="unit.relic_tier"
+        v-if="unit.relicLevel"
+        :relicLevel="unit.relicLevel"
         :size="size"
         :forceSide="unit.alignment"
       />
@@ -58,7 +58,7 @@ export default defineComponent({
   },
 });
 </script>
-  
+
 <style lang="scss" scoped>
 .unit-container {
   display: flex;

@@ -30,14 +30,15 @@
         title="The remaining shards needed to get this character to 7 stars"
         >Remaining:</span
       >
-      <span class="input-group-text remaining-count">{{ remaining }}</span>
+      <span class="input-group-text remaining-count">{{
+        unit.totalRemainingShards
+      }}</span>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
 
 import { Unit } from "../../types/unit";
 import { unvue } from "../../utils";
@@ -53,24 +54,13 @@ export default defineComponent({
   data() {
     return {
       editing: false,
-      owned: 0,
+      owned: unvue(this.unit.ownedShards),
     };
   },
-  computed: {
-    ...mapState("shards", ["ownedShards"]),
-    ...mapGetters("shards", ["remainingShards"]),
-    remaining(): number {
-      return (
-        this.remainingShards(this.unit) -
-        (this.ownedShards[this.unit.id]?.owned || 0)
-      );
-    },
-  },
   methods: {
-    ...mapActions("shards", ["saveShardsCount"]),
     save() {
       this.editing = false;
-      this.saveShardsCount({ count: this.owned, id: this.unit.id });
+      this.unit.ownedShards = this.owned;
     },
     edit() {
       this.editing = true;
@@ -80,9 +70,7 @@ export default defineComponent({
     },
     cancel() {
       this.editing = false;
-      if (this.ownedShards[this.unit.id]?.owned) {
-        this.owned = unvue(this.ownedShards[this.unit.id]?.owned);
-      }
+      this.owned = unvue(this.unit.ownedShards);
     },
   },
   created() {

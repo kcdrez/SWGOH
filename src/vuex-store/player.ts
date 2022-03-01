@@ -48,7 +48,7 @@ const store = {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;
     },
-    SET_PLAYER(state: State, payload: any) {
+    SET_PLAYER(state: State, payload: Player) {
       state.player = payload;
     },
     SET_ALLY_CODE(state: State, payload: string | null) {

@@ -1,16 +1,23 @@
 <template>
   <div>
-    <div class="collapse-header section-header mt-3">
+    <div class="collapse-header section-header mt-3 position-relative">
       <h3>
         <div data-bs-toggle="collapse" href="#relic-section-table">
           Relic Summary
         </div>
       </h3>
+      <MultiSelect
+        class="select-columns"
+        :options="cols"
+        storageKey="relicTable"
+        @checked="selectedColumns = $event"
+      />
     </div>
     <div id="relic-section-table" class="collapse" ref="relicSection">
       <RelicTable
         :relicList="fullRelicList"
         :targetLevels="relicTargetLevels"
+        :selectedColumns="selectedColumns"
         showRequiredByUnit
       />
     </div>
@@ -22,31 +29,53 @@ import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
 import { Unit } from "../..//types/unit";
-import { setupEvents, unvue } from "../../utils";
+import { setupEvents } from "../../utils";
 import RelicTable from "../relic/relicTable.vue";
 import { Relic } from "../../types/relic";
 
 export default defineComponent({
   name: "RelicSection",
   components: { RelicTable },
+  data() {
+    return {
+      selectedColumns: [],
+    };
+  },
   computed: {
-    ...mapGetters("planner", ["fullUnitList", "relicTarget"]),
+    ...mapGetters("planner", ["fullUnitList"]),
     ...mapState("relic", ["relicConfig"]),
-    ...mapGetters("relic", ["currentRelicLevel"]),
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Required By",
+          value: "required",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+      ];
+      return list;
+    },
     fullRelicList(): Relic[] {
-      const list: Relic[] = unvue(Object.values(this.relicConfig));
+      const list: Relic[] = Object.values(this.relicConfig);
       this.fullUnitList.forEach((unit: Unit) => {
-        const level = this.currentRelicLevel(unit.relic_tier);
-        const target = this.relicTarget(unit.id);
-
-        if (level < target) {
+        if (unit.relicLevel < unit.relicTarget) {
           list.forEach((relic: Relic) => {
-            if (relic.amount[target] > 0) {
-              if (relic.neededBy) {
-                relic.neededBy.push({ name: unit.name, id: unit.id });
-              } else {
-                relic.neededBy = [{ name: unit.name, id: unit.id }];
-              }
+            if (relic.amount[unit.relicTarget] > 0) {
+              relic.addNeededBy({ name: unit.name, id: unit.id });
             }
           });
         }
@@ -56,9 +85,7 @@ export default defineComponent({
     relicTargetLevels(): any[] {
       const list: any[] = [];
       this.fullUnitList.forEach((unit: Unit) => {
-        const level = this.currentRelicLevel(unit.relic_tier);
-        const target = this.relicTarget(unit.id);
-        list.push({ level, target });
+        list.push({ level: unit.relicLevel, target: unit.relicTarget });
       });
       return list;
     },
@@ -66,5 +93,17 @@ export default defineComponent({
   mounted() {
     setupEvents(this.$refs.relicSection as HTMLElement, "relicSection");
   },
+  created() {},
 });
 </script>
+
+<style lang="scss" scoped>
+.select-columns {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  width: 250px;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+</style>

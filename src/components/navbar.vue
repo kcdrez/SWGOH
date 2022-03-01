@@ -108,8 +108,9 @@
 </template>
 
 <script lang="ts">
-import config from "../../package.json";
 import { mapActions, mapState } from "vuex";
+
+import config from "../../package.json";
 
 export default {
   name: "NavBar",
@@ -131,7 +132,7 @@ export default {
 nav {
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 1000;
 }
 
 .profile-dropdown {

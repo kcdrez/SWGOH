@@ -1,11 +1,17 @@
 <template>
   <div>
-    <div class="collapse-header section-header">
+    <div class="collapse-header section-header position-relative">
       <h3>
         <div data-bs-toggle="collapse" href="#unit-section-table">
           Unit Summary
         </div>
       </h3>
+      <MultiSelect
+        class="select-columns"
+        :options="cols"
+        storageKey="unitTable"
+        @checked="selectedColumns = $event"
+      />
     </div>
     <div id="unit-section-table" class="collapse" ref="unitSection">
       <table
@@ -49,7 +55,7 @@
             </th>
           </tr>
           <tr class="text-center align-middle">
-            <th width="20%">
+            <th v-if="showCol('name')">
               <div class="c-pointer" @click="sortBy('name')">
                 Unit Name
                 <i class="fas mx-1" :class="sortIcon('name')"></i>
@@ -60,53 +66,72 @@
                 v-model="searchText"
               />
             </th>
-            <th width="10%" class="c-pointer" @click="sortBy('curLevel')">
+            <th
+              v-if="showCol('curLevel')"
+              class="c-pointer"
+              @click="sortBy('curLevel')"
+            >
               Current Level
               <i class="fas mx-1" :class="sortIcon('curLevel')"></i>
             </th>
-            <th width="10%" class="c-pointer" @click="sortBy('targetLevel')">
+            <th
+              v-if="showCol('targetLevel')"
+              class="c-pointer"
+              @click="sortBy('targetLevel')"
+            >
               Target Level
               <i class="fas mx-1" :class="sortIcon('targetLevel')"></i>
             </th>
-            <th width="15%" class="c-pointer" @click="sortBy('estGear')">
+            <th
+              v-if="showCol('gearDate')"
+              class="c-pointer"
+              @click="sortBy('estGear')"
+            >
               Est. Gear Level
               <i class="fas mx-1" :class="sortIcon('estGear')"></i>
             </th>
-            <th width="15%" class="c-pointer" @click="sortBy('estRelic')">
+            <th
+              v-if="showCol('relicDate')"
+              class="c-pointer"
+              @click="sortBy('estRelic')"
+            >
               Est. Relic Level
               <i class="fas mx-1" :class="sortIcon('estRelic')"></i>
             </th>
-            <th width="15%" class="c-pointer" @click="sortBy('completed')">
+            <th
+              v-if="showCol('totalDate')"
+              class="c-pointer"
+              @click="sortBy('completed')"
+            >
               Est. Completed Date
               <i class="fas mx-1" :class="sortIcon('completed')"></i>
             </th>
-            <th>Actions</th>
+            <th v-if="showCol('actions')">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="unit in fullUnitList" :key="unit.id">
-            <td class="text-center">
+            <td class="text-center" v-if="showCol('name')">
               <router-link
                 :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
                 >{{ unit.name }}</router-link
               >
             </td>
-            <td class="text-center">
+            <td class="text-center" v-if="showCol('curLevel')">
               <span class="row-label">Current Level:</span>
-              {{ getCurLevel(unit) }}
+              {{ unit.currentLevel }}
             </td>
-            <td class="text-center">
+            <td class="text-center" v-if="showCol('targetLevel')">
               <span class="row-label">Target Level:</span>
-              <div v-if="unit.is_ship">-</div>
+              <div v-if="unit.isShip">-</div>
               <template v-else>
                 <select
                   class="form-control form-control-sm mb-1"
-                  :value="unit.gearTarget"
-                  @input="changeTarget(unit, 'gear', $event)"
-                  v-if="(unit.gear_level || 0) < maxGearLevel"
+                  v-model="unit.gearTarget"
+                  v-if="unit.gearLevel < maxGearLevel"
                 >
                   <option
-                    v-for="num in gearOptions(unit.gear_level)"
+                    v-for="num in unit.gearOptions"
                     :value="num"
                     :key="num"
                   >
@@ -114,12 +139,11 @@
                   </option>
                 </select>
                 <select
-                  :value="unit.relicTarget"
-                  @input="changeTarget(unit, 'relic', $event)"
+                  v-model="unit.relicTarget"
                   class="form-control form-control-sm"
                 >
                   <option
-                    v-for="num in relicOptions(unit.relic_tier)"
+                    v-for="num in unit.relicOptions"
                     :value="num"
                     :key="num"
                   >
@@ -131,62 +155,50 @@
             <td
               class="text-center"
               :class="{
-                'hidden-sm': gearTotalDays(unit) === 0 && !unit.is_ship,
+                'hidden-sm': unit.gearTotalDays === 0 && !unit.isShip,
               }"
+              v-if="showCol('gearDate')"
             >
               <span class="row-label">Est. Gear Level:</span>
               <Timestamp
-                :timeLength="gearTotalDays(unit)"
-                :displayText="$filters.pluralText(gearTotalDays(unit), 'day')"
-                :title="$filters.daysFromNow(gearTotalDays(unit))"
+                :timeLength="unit.gearTotalDays"
+                :displayText="$filters.pluralText(unit.gearTotalDays, 'day')"
+                :title="$filters.daysFromNow(unit.gearTotalDays)"
                 displayClasses="d-inline"
               />
             </td>
             <td
               class="text-center"
               :class="{
-                'hidden-sm': relicTotalDays(unit.id) === 0 && !unit.is_ship,
+                'hidden-sm': unit.relicTotalDays === 0 && !unit.isShip,
               }"
+              v-if="showCol('relicDate')"
             >
               <span class="row-label">Est. Relic Level:</span>
               <Timestamp
-                :timeLength="relicTotalDays(unit.id, unit.relic_tier)"
-                :displayText="
-                  $filters.pluralText(
-                    relicTotalDays(unit.id, unit.relic_tier),
-                    'day'
-                  )
-                "
-                :title="
-                  $filters.daysFromNow(relicTotalDays(unit.id, unit.relic_tier))
-                "
+                :timeLength="unit.relicTotalDays"
+                :displayText="$filters.pluralText(unit.relicTotalDays, 'day')"
+                :title="$filters.daysFromNow(unit.relicTotalDays)"
                 displayClasses="d-inline"
               />
             </td>
-            <td class="text-center">
+            <td class="text-center" v-if="showCol('totalDate')">
               <span class="row-label">Est. Total Level:</span>
               <Timestamp
-                :timeLength="
-                  relicTotalDays(unit.id, unit.relic_tier) +
-                  gearTotalDays(unit, unit.relicTier)
-                "
+                :timeLength="unit.relicTotalDays + unit.gearTotalDays"
                 :displayText="
                   $filters.pluralText(
-                    relicTotalDays(unit.id, unit.relic_tier) +
-                      gearTotalDays(unit),
+                    unit.relicTotalDays + unit.gearTotalDays,
                     'day'
                   )
                 "
                 :title="
-                  $filters.daysFromNow(
-                    relicTotalDays(unit.id, unit.relic_tier) +
-                      gearTotalDays(unit)
-                  )
+                  $filters.daysFromNow(unit.relicTotalDays + unit.gearTotalDays)
                 "
                 displayClasses="d-inline"
               />
             </td>
-            <td>
+            <td v-if="showCol('actions')">
               <div
                 class="btn-group btn-group-sm d-block text-center"
                 role="group"
@@ -210,9 +222,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
-import { UnitPlannerItem, UpdateItem } from "../../types/planner";
+import { UnitPlannerItem } from "../../types/planner";
 import { Unit } from "../../types/unit";
 import { maxGearLevel } from "../../types/gear";
 import { setupEvents } from "../../utils";
@@ -227,19 +239,44 @@ export default defineComponent({
       sortMethod: "name",
       searchText: "",
       maxGearLevel,
+      selectedColumns: [],
     };
   },
   computed: {
     ...mapGetters("planner", ["fullUnitList"]),
-    ...mapGetters("gear", {
-      gearOptions: "gearOptions",
-      gearTotalDays: "totalDays",
-      currentGearLevel: "currentGearLevel",
-    }),
-    ...mapGetters("relic", {
-      relicOptions: "relicOptions",
-      relicTotalDays: "totalDays",
-    }),
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Current Level",
+          value: "curLevel",
+        },
+        {
+          text: "Target Level",
+          value: "targetLevel",
+        },
+        {
+          text: "Est. Gear Date",
+          value: "gearDate",
+        },
+        {
+          text: "Est. Relic Date",
+          value: "relicDate",
+        },
+        {
+          text: "Est. Total Date",
+          value: "totalDate",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
+    },
   },
   methods: {
     ...mapActions("planner", ["removeUnit"]),
@@ -268,30 +305,8 @@ export default defineComponent({
         }
       );
     },
-    changeTarget(
-      unit: UnitPlannerItem & Unit,
-      type: "gear" | "relic",
-      event: any
-    ) {
-      const { value } = event.target;
-      const payload: UpdateItem = {
-        type,
-        value: Number(value),
-        unitId: unit.id,
-      };
-      this.$store.dispatch("planner/updatePlannerTarget", payload);
-    },
-    getCurLevel(unit: UnitPlannerItem & Unit): string {
-      const gearLevel = this.currentGearLevel(unit);
-      if (unit.is_ship) {
-        return "-";
-      } else if (gearLevel < this.maxGearLevel) {
-        return `Gear ${gearLevel}`;
-      } else if (unit.relic_tier > 0) {
-        return `Relic ${unit.relic_tier}`;
-      } else {
-        return `Gear ${this.maxGearLevel}`;
-      }
+    showCol(key: string): boolean {
+      return this.selectedColumns.some((x) => x === key);
     },
   },
   mounted() {
@@ -302,6 +317,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
+
+.select-columns {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  width: 250px;
+  margin-top: 0.5rem;
+  text-align: left;
+}
 
 .swgoh-row {
   .target-container {

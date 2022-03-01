@@ -1,7 +1,13 @@
 <template>
   <div class="mb-3">
+    <MultiSelect
+      class="select-columns my-2"
+      :options="cols"
+      storageKey="shardTable"
+      @checked="selectedColumns = $event"
+    />
     <template v-if="standardHoloTable.length > 0">
-      <div class="collapse-header section-header mt-3">
+      <div class="collapse-header section-header">
         <h3 class="w-100" data-bs-toggle="collapse" href="#holoTableSection">
           <div class="d-inline">Light & Dark Side Battles</div>
         </h3>
@@ -13,6 +19,7 @@
         :units="standardHoloTable"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Light Side', 'Dark Side']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -30,6 +37,7 @@
         :units="fleet"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Fleet']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -47,6 +55,7 @@
         :units="cantina"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Cantina']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -68,6 +77,7 @@
         :units="territoryBattles"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Territory Battle']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -85,6 +95,7 @@
         :units="raids"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Raids']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -102,6 +113,7 @@
         :units="conquest"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Conquest']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -119,6 +131,7 @@
         :units="cantinaStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Cantina Battles Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -136,6 +149,7 @@
         :units="guildStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Guild Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -157,6 +171,7 @@
         :units="squadArenaStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Squad Arena Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -178,6 +193,7 @@
         :units="galacticWarStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Galactic War Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -199,6 +215,7 @@
         :units="fleetArenaStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Fleet Arena Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -223,6 +240,7 @@
           'Guild Events Store (Mk 1)',
           'Guild Events Store (Mk 2)',
         ]"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -240,6 +258,7 @@
         :units="shardStore"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Shard Store']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -257,6 +276,7 @@
         :units="legendary"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Legendary Events']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -278,6 +298,7 @@
         :units="galacticLegends"
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="['Galactic Legend Events']"
+        :selectedColumns="selectedColumns"
         showUnitName
         showPriority
       />
@@ -290,109 +311,145 @@ import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
 import ShardTable from "./shardTable.vue";
-import { Unit, UnitBasic } from "../../types/unit";
-import { FarmingNode } from "../../types/shards";
+import { Unit } from "../../types/unit";
 import { setupEvents } from "../../utils";
 
 export default defineComponent({
   name: "ShardTableContainer",
   components: { ShardTable },
+  data() {
+    return {
+      selectedColumns: [],
+    };
+  },
   computed: {
-    ...mapGetters("shards", ["unitFarmingList", "unitNodes"]),
-    standardHoloTable(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some(
+    ...mapGetters("shards", ["unitFarmingList"]),
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Attempts",
+          value: "attempts",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+        {
+          text: "Priority",
+          value: "priority",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
+    },
+    standardHoloTable(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some(
           (node) => node.table === "Light Side" || node.table === "Dark Side"
         );
       });
     },
-    fleet(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Fleet");
+    fleet(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some((node) => node.table === "Fleet");
       });
     },
-    cantina(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Cantina");
+    cantina(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some((node) => node.table === "Cantina");
       });
     },
-    legendary(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Legendary Events");
+    legendary(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some(
+          (node) => node.table === "Legendary Events"
+        );
       });
     },
-    galacticLegends(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Galactic Legend Events");
+    galacticLegends(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some(
+          (node) => node.table === "Galactic Legend Events"
+        );
       });
     },
-    territoryBattles(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Territory Battles");
+    territoryBattles(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some(
+          (node) => node.table === "Territory Battles"
+        );
       });
     },
-    raids(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Raids");
+    raids(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some((node) => node.table === "Raids");
       });
     },
-    conquest(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Conquest");
+    conquest(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some((node) => node.table === "Conquest");
       });
     },
-    cantinaStore(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Cantina Battles Store");
+    cantinaStore(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some(
+          (node) => node.table === "Cantina Battles Store"
+        );
       });
     },
-    guildStore(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Guild Store");
+    guildStore(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some((node) => node.table === "Guild Store");
       });
     },
-    squadArenaStore(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Squad Arena Store");
+    squadArenaStore(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some(
+          (node) => node.table === "Squad Arena Store"
+        );
       });
     },
-    galacticWarStore(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Galactic War Store");
+    galacticWarStore(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some(
+          (node) => node.table === "Galactic War Store"
+        );
       });
     },
-    fleetArenaStore(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Fleet Arena Store");
+    fleetArenaStore(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some(
+          (node) => node.table === "Fleet Arena Store"
+        );
       });
     },
-    guildEventsStore(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some(
+    guildEventsStore(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some(
           (node) =>
             node.table === "Guild Events Store (Mk 1)" ||
             node.table === "Guild Events Store (Mk 2)"
         );
       });
     },
-    shardStore(): (Unit | UnitBasic)[] {
-      return this.unitFarmingList.filter((unit: Unit | UnitBasic) => {
-        const nodes: FarmingNode[] = this.unitNodes(unit.id);
-        return nodes.some((node) => node.table === "Shard Store");
+    shardStore(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some((node) => node.table === "Shard Store");
       });
     },
   },
@@ -454,3 +511,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
+</style>

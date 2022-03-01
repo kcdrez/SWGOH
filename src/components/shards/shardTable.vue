@@ -39,7 +39,7 @@
           </th>
         </tr>
         <tr class="text-center align-middle">
-          <th width="20%" v-if="showUnitName">
+          <th v-if="showUnitName && showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
               Unit Name
               <i class="fas mx-1" :class="sortIcon('name')"></i>
@@ -50,27 +50,29 @@
               v-model="searchText"
             />
           </th>
-          <th :width="showUnitName ? '15%' : '25%'">Locations</th>
+          <th v-if="showCol('locations')">Locations</th>
           <th
-            :width="showUnitName ? '20%' : '25%'"
+            v-if="showCol('progress')"
             class="c-pointer"
             @click="sortBy('progress')"
           >
             Amount/Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th :width="showUnitName ? '20%' : '25%'">Node Attempts per Day</th>
+          <th v-if="showCol('attempts')">Node Attempts per Day</th>
           <th
-            width="10%"
             class="c-pointer"
             @click="sortBy('time')"
-            v-if="showUnitName"
+            v-if="showUnitName && showCol('time')"
           >
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
           </th>
           <th
-            :width="showUnitName ? '15%' : '25%'"
+            v-if="
+              (showCol('priority') && showPriority) ||
+              (showCol('actions') && !showPriority)
+            "
             :class="{ 'c-pointer': showPriority }"
             @click="sortBy('priority')"
           >
@@ -85,43 +87,55 @@
       </thead>
       <tbody>
         <tr v-for="unit in filteredUnitList" :key="unit.id">
-          <td class="text-center align-middle" v-if="showUnitName">
+          <td
+            class="text-center align-middle"
+            v-if="showUnitName && showCol('name')"
+          >
             <UnitIcon :unit="unit" isLink />
           </td>
-          <td class="align-middle text-center">
-            <div v-if="unitLocations(unit).length <= 0" class="text-center">
+          <td class="align-middle text-center" v-if="showCol('locations')">
+            <div v-if="unit.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
             <template v-else>
               <span class="row-label">Farming Locations:</span>
               <ul class="m-0">
-                <li v-for="(l, index) in unitLocations(unit)" :key="index">
+                <li v-for="(l, index) in unit.locations" :key="index">
                   {{ l }}
                 </li>
               </ul>
             </template>
           </td>
-          <td class="align-middle">
+          <td class="align-middle" v-if="showCol('progress')">
             <span class="row-label">Amount/Progress:</span>
             <ShardsOwned :unit="unit" />
-            <ShardProgressBar :unit="unit" class="mt-2" />
+            <ProgressBar :percent="unit.shardPercent" class="mt-2" />
           </td>
-          <td class="align-middle nodes-per-day">
+          <td class="align-middle nodes-per-day" v-if="showCol('attempts')">
             <span class="row-label">Node Attempts per Day:</span>
-            <NodesPerDay :unit="unit" v-if="showNodesPerDay(unit)" />
+            <NodesPerDay :unit="unit" v-if="unit.showNodesPerDay" />
           </td>
-          <td class="text-center align-middle" v-if="showUnitName">
+          <td
+            class="text-center align-middle"
+            v-if="showUnitName && showCol('time')"
+          >
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="shardTimeEstimation(unit)"
+              :timeLength="unit.shardTimeEstimation"
               :displayText="
-                $filters.pluralText(shardTimeEstimation(unit), 'day')
+                $filters.pluralText(unit.shardTimeEstimation, 'day')
               "
-              :title="$filters.daysFromNow(shardTimeEstimation(unit))"
+              :title="$filters.daysFromNow(unit.shardTimeEstimation)"
               displayClasses="d-inline"
             />
           </td>
-          <td class="text-center align-middle">
+          <td
+            class="text-center align-middle"
+            v-if="
+              (showCol('priority') && showPriority) ||
+              (showCol('actions') && !showPriority)
+            "
+          >
             <ShardPriority
               :unit="unit"
               v-if="showPriority"
@@ -136,7 +150,8 @@
                 type="button"
                 class="btn btn-success"
                 title="Add to active farming list"
-                @click="addUnit(unit.id)"
+                v-if="unit.tracking"
+                @click="unit.tracking = true"
               >
                 <i class="fas fa-heart"></i>
               </button>
@@ -144,7 +159,7 @@
                 type="button"
                 class="btn btn-danger"
                 title="Remove from active farming list"
-                @click="removeUnit(unit.id)"
+                @click="unit.tracking = false"
               >
                 <i class="fas fa-trash"></i>
               </button>
@@ -158,23 +173,19 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
 
 import ShardsOwned from "./shardsOwned.vue";
 import UnitIcon from "../units/unitIcon.vue";
-import ShardProgressBar from "./shardProgressBar.vue";
 import NodesPerDay from "./nodesPerDay.vue";
 import ShardPriority from "./shardPriority.vue";
 import Timestamp from "../timestamp.vue";
 import { Unit } from "../../types/unit";
-import { FarmingNode } from "../../types/shards";
 
 export default defineComponent({
   name: "ShardTable",
   components: {
     ShardsOwned,
     UnitIcon,
-    ShardProgressBar,
     NodesPerDay,
     Timestamp,
     ShardPriority,
@@ -188,10 +199,6 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    showHeader: {
-      type: Boolean,
-      default: false,
-    },
     showPriority: {
       type: Boolean,
       default: false,
@@ -200,7 +207,19 @@ export default defineComponent({
       type: Object,
     },
     nodeTableNames: {
+      type: Array as PropType<string[]>,
+      default: () => {
+        return [];
+      },
+    },
+    selectedColumns: {
       type: Array,
+      validator: (arr: string[]) => {
+        return arr.every((x) => {
+          return typeof x === "string";
+        });
+      },
+      required: true,
     },
   },
   data() {
@@ -211,14 +230,6 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("shards", [
-      "unitNodes",
-      "shardTimeEstimation",
-      "nodeLabel",
-      "remainingShards",
-      "unitPriority",
-    ]),
-    ...mapState("shards", ["ownedShards"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -236,30 +247,20 @@ export default defineComponent({
               return compareA > compareB ? -1 : 1;
             }
           } else if (this.sortMethod === "progress") {
-            const remainingA = this.remainingShards(a);
-            const remainingB = this.remainingShards(b);
-            const owedA = this.ownedShards[a.id]?.owned || 0;
-            const owedB = this.ownedShards[b.id]?.owned || 0;
-            const progressA = (owedA / remainingA) * 100;
-            const progressB = (owedB / remainingB) * 100;
-
             if (this.sortDir === "asc") {
-              return progressA > progressB ? 1 : -1;
+              return a.shardPercent > b.shardPercent ? 1 : -1;
             } else {
-              return progressA > progressB ? -1 : 1;
+              return a.shardPercent > b.shardPercent ? -1 : 1;
             }
           } else if (this.sortMethod === "time") {
-            const estimateA = this.shardTimeEstimation(a);
-            const estimateB = this.shardTimeEstimation(b);
-
             if (this.sortDir === "asc") {
-              return estimateA > estimateB ? 1 : -1;
+              return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
             } else {
-              return estimateA > estimateB ? -1 : 1;
+              return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
             }
           } else if (this.sortMethod === "priority") {
-            const priorityA = this.unitPriority(a.id, this.nodeTableNames);
-            const priorityB = this.unitPriority(b.id, this.nodeTableNames);
+            const priorityA = a.tablePriority(this.nodeTableNames);
+            const priorityB = b.tablePriority(this.nodeTableNames);
 
             if (priorityA <= 0) {
               return this.sortDir === "asc" ? 1 : -1;
@@ -274,10 +275,47 @@ export default defineComponent({
           return 0;
         });
     },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Attempts",
+          value: "attempts",
+        },
+      ];
+
+      if (this.showUnitName) {
+        list.splice(0, 0, {
+          text: "Name",
+          value: "name",
+        });
+        list.splice(4, 0, {
+          text: "Estimated Time",
+          value: "time",
+        });
+      }
+      if (this.showPriority) {
+        list.push({
+          text: "Priority",
+          value: "priority",
+        });
+      } else {
+        list.push({
+          text: "Actions",
+          value: "actions",
+        });
+      }
+      return list;
+    },
   },
   methods: {
-    ...mapActions("gear", ["saveOwnedCount"]),
-    ...mapActions("shards", ["removeUnit", "addUnit"]),
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
@@ -293,22 +331,8 @@ export default defineComponent({
         return "fa-sort";
       }
     },
-    unitLocations(unit: Unit): string[] {
-      return (this.unitNodes(unit.id) as FarmingNode[]).map((x) => {
-        return this.nodeLabel(x.id);
-      });
-    },
-    showNodesPerDay(unit: Unit): boolean {
-      const nodes: FarmingNode[] = this.unitNodes(unit.id);
-
-      return nodes.some((node) => {
-        return (
-          node.table === "Light Side" ||
-          node.table === "Dark Side" ||
-          node.table === "Cantina" ||
-          node.table === "Fleet"
-        );
-      });
+    showCol(key: string): boolean {
+      return this.selectedColumns.some((x) => x === key);
     },
   },
 });
@@ -316,6 +340,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
+
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
 
 .show-on-desktop {
   @media only screen and (max-width: 1200px) {
@@ -353,3 +383,4 @@ export default defineComponent({
   }
 }
 </style>
+>>>>>>> main

@@ -6,6 +6,7 @@ import { maxRelicLevel } from "../types/relic";
 import { ConfigType, UpdateItem } from "../types/planner";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
+import { Unit } from "../types/unit";
 
 interface State {
   requestState: loadingState;
@@ -23,30 +24,21 @@ const store = {
     unitList: [],
   },
   getters: {
-    gearTarget(state: State) {
-      return (unitId: string): number => {
-        return state.targetConfig[unitId]?.gear.target;
-      };
-    },
-    relicTarget(state: State) {
-      return (unitId: string): number => {
-        return state.targetConfig[unitId]?.relic.target;
-      };
-    },
-    fullUnitList(state: State, _getters: any, rootState: RootState) {
-      return state.unitList.map((id: string) => {
+    fullUnitList(state: State, _getters: any, rootState: RootState): Unit[] {
+      return state.unitList.reduce((unitList: Unit[], id: string) => {
         const matchOwned = rootState.player.player?.units.find(
           (x) => x.id === id
         );
-        const matchUnowned = rootState.unit.unitList.find((x) => x.id === id);
-        return {
-          id,
-          gearTarget: state.targetConfig[id]?.gear.target,
-          relicTarget: state.targetConfig[id]?.relic.target,
-          ...matchOwned,
-          ...matchUnowned,
-        };
-      });
+        if (matchOwned) {
+          unitList.push(matchOwned);
+        } else {
+          const matchUnowned = rootState.unit.unitList.find((x) => x.id === id);
+          if (matchUnowned) {
+            unitList.push(matchUnowned);
+          }
+        }
+        return unitList;
+      }, []);
     },
   },
   mutations: {
@@ -125,11 +117,11 @@ const store = {
         let gearValue = maxGearLevel;
         let relicValue = 1;
         if (playerUnit) {
-          gearValue = Math.min(playerUnit.gear_level + 1, maxGearLevel);
-          if (playerUnit.relic_tier === -1) {
+          gearValue = Math.min(playerUnit.gearLevel + 1, maxGearLevel);
+          if (playerUnit.relicLevel === -1) {
             relicValue = 1;
           } else {
-            relicValue = Math.min(playerUnit.relic_tier + 1, maxRelicLevel);
+            relicValue = Math.min(playerUnit.gearLevel + 1, maxRelicLevel);
           }
         }
         commit("UPDATE_PLANNER_ITEM", {

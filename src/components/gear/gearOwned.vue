@@ -16,7 +16,7 @@
         <button type="button" class="btn btn-success" @click="save">
           <i class="fas fa-save"></i>
         </button>
-        <button type="button" class="btn btn-warning" @click="editing = false">
+        <button type="button" class="btn btn-warning" @click="cancel">
           <i class="fas fa-ban"></i>
         </button>
       </template>
@@ -33,7 +33,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
+
+import { unvue } from "../../utils";
 import { Gear } from "../../types/gear";
 
 export default defineComponent({
@@ -47,17 +48,13 @@ export default defineComponent({
   data() {
     return {
       editing: false,
-      owned: 0,
+      owned: unvue(this.salvage.owned),
     };
   },
-  computed: {
-    ...mapGetters("gear", ["gearOwnedCount"]),
-  },
   methods: {
-    ...mapActions("gear", ["saveOwnedCount"]),
     save() {
       this.editing = false;
-      this.saveOwnedCount({ count: this.owned, id: this.salvage.id });
+      this.salvage.owned = this.owned;
     },
     edit() {
       this.editing = true;
@@ -65,9 +62,10 @@ export default defineComponent({
         (this.$refs?.saveButton as any).focus();
       });
     },
-  },
-  created() {
-    this.owned = this.gearOwnedCount(this.salvage.id);
+    cancel() {
+      this.editing = false;
+      this.owned = unvue(this.salvage.owned);
+    },
   },
 });
 </script>

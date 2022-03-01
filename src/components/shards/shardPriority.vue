@@ -27,10 +27,9 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
 
 import { Unit } from "../../types/unit";
-import { FarmingNode, Node } from "../../types/shards";
+import { Node } from "../../types/shards";
 
 export default defineComponent({
   name: "ShardPriority",
@@ -40,7 +39,7 @@ export default defineComponent({
       type: Object as PropType<Unit>,
     },
     nodeTableNames: {
-      type: Array,
+      type: Array as PropType<string[]>,
       required: true,
     },
   },
@@ -51,15 +50,9 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("shards", ["ownedShards"]),
-    ...mapGetters("shards", ["unitNodes", "unitPriority"]),
     nodeData(): Node[] {
-      const nodesList: FarmingNode[] = this.unitNodes(this.unit.id);
-      const nodesListByUnit: Node[] =
-        this.ownedShards[this.unit.id]?.nodes || [];
-
-      return nodesList.map((node) => {
-        const match = nodesListByUnit.find((n) => n.id === node.id);
+      return this.unit.whereToFarm.map((node) => {
+        const match = this.unit.shardNodes.find((n) => n.id === node.id);
         return {
           id: node.id,
           priority: this.nodeTableNames.includes(node.table)
@@ -70,13 +63,9 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions("shards", ["saveShardsCount"]),
     save() {
       this.editing = false;
-      const payload: any = { id: this.unit.id };
-
-      payload.nodes = this.nodeData;
-      this.saveShardsCount(payload);
+      this.unit.shardNodes = this.nodeData;
     },
     edit() {
       this.editing = true;
@@ -86,7 +75,7 @@ export default defineComponent({
     },
     cancel() {
       this.editing = false;
-      this.priority = this.unitPriority(this.unit.id, this.nodeTableNames);
+      this.priority = this.unit.tablePriority(this.nodeTableNames);
     },
   },
   created() {

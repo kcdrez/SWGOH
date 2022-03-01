@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!unit.is_ship && relicLevel < maxRelicLevel">
+  <div v-if="!unit.isShip && unit.relicLevel < maxRelicLevel">
     <div class="collapse-header section-header mt-3">
       <h3 class="w-100" data-bs-toggle="collapse" href="#relicSection">
         <div class="d-inline">Relic Planner</div>
@@ -9,16 +9,15 @@
       <div class="relic-header">
         <div class="current-level">
           <div>Current Relic Level:</div>
-          <RelicIcon :relicLevel="relicLevel" :forceSide="unit.alignment" />
+          <RelicIcon
+            :relicLevel="unit.relicLevel"
+            :forceSide="unit.alignment"
+          />
         </div>
         <div class="target-level">
           Target Level:
-          <select v-model.number="relicTarget" class="mx-2">
-            <option
-              v-for="num in relicOptions(unit.relic_tier)"
-              :value="num"
-              :key="num"
-            >
+          <select v-model.number="unit.relicTarget" class="mx-2">
+            <option v-for="num in unit.relicOptions" :value="num" :key="num">
               Relic {{ num }}
             </option>
           </select>
@@ -27,16 +26,21 @@
       <Timestamp
         class="time-estimate"
         label="Estimated completion:"
-        :title="$filters.daysFromNow(totalDays(unit.id, unit.relic_tier))"
-        :displayText="
-          $filters.pluralText(totalDays(unit.id, unit.relic_tier), 'day')
-        "
+        :title="$filters.daysFromNow(unit.relicTotalDays)"
+        :displayText="$filters.pluralText(unit.relicTotalDays, 'day')"
         displayClasses="d-inline"
       />
       <EnergySpent showCantina />
+      <MultiSelect
+        class="select-columns"
+        :options="cols"
+        storageKey="relicTable"
+        @checked="selectedColumns = $event"
+      />
       <RelicTable
         :relicList="relicList"
-        :targetLevels="[{ level: relicLevel, target: relicTarget }]"
+        :targetLevels="[{ level: unit.relicLevel, target: unit.relicTarget }]"
+        :selectedColumns="selectedColumns"
       />
     </div>
   </div>
@@ -50,7 +54,6 @@ import RelicTable from "./relicTable.vue";
 import Timestamp from "../timestamp.vue";
 import EnergySpent from "../energySpent.vue";
 import RelicIcon from "../units/relicLevelIcon.vue";
-import { UpdateItem } from "../../types/planner";
 import { loadingState } from "../../types/loading";
 import { Relic, maxRelicLevel } from "../../types/relic";
 import { setupEvents } from "../../utils";
@@ -61,38 +64,47 @@ export default defineComponent({
   data() {
     return {
       maxRelicLevel,
+      selectedColumns: [],
     };
   },
   computed: {
     ...mapState("relic", ["relicConfig"]),
     ...mapState("unit", ["unit"]),
-    ...mapGetters("relic", ["relicOptions", "totalDays", "currentRelicLevel"]),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
       return this.someLoading(["relic", "unit"]);
     },
-    relicLevel(): number {
-      return this.currentRelicLevel(this.unit.relic_tier);
-    },
-    relicTarget: {
-      get(): number {
-        return this.$store.getters["planner/relicTarget"](this.unit.id);
-      },
-      set(value: number) {
-        const payload: UpdateItem = {
-          type: "relic",
-          value,
-          unitId: this.unit.id,
-        };
-        this.$store.dispatch("planner/updatePlannerTarget", payload);
-      },
-    },
     relicList(): Relic[] {
       return Object.values(this.relicConfig);
     },
+    cols(): { text: string; value: any }[] {
+      const list = [
+        {
+          text: "Name",
+          value: "name",
+        },
+        {
+          text: "Locations",
+          value: "locations",
+        },
+        {
+          text: "Progress",
+          value: "progress",
+        },
+        {
+          text: "Estimated Time",
+          value: "time",
+        },
+        {
+          text: "Actions",
+          value: "actions",
+        },
+      ];
+      return list;
+    },
   },
   mounted() {
-    if (!this.unit.is_ship && this.relicLevel < maxRelicLevel) {
+    if (!this.unit.isShip && this.unit.relicLevel < maxRelicLevel) {
       setupEvents(this.$refs.relicSection as HTMLElement, "relicPlanner");
     }
   },
@@ -101,6 +113,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
+
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
 
 .relic-header,
 .time-estimate {

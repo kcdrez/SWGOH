@@ -39,7 +39,7 @@
           </th>
         </tr>
         <tr class="text-center align-middle">
-          <th :width="showRequiredByUnit ? '15%' : '20%'">
+          <th v-if="showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
               Mat Name
               <i class="fas mx-1" :class="sortIcon('name')"></i>
@@ -51,7 +51,7 @@
             />
           </th>
           <th
-            :width="showRequiredByUnit ? '15%' : '20%'"
+            v-if="showCol('locations')"
             class="c-pointer"
             @click="sortBy('location')"
           >
@@ -59,15 +59,15 @@
             <i class="fas mx-1" :class="sortIcon('location')"></i>
           </th>
           <th
-            :width="showRequiredByUnit ? '15%' : '20%'"
+            v-if="showCol('progress')"
             class="c-pointer"
             @click="sortBy('progress')"
           >
             Amount/Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showRequiredByUnit" width="15%">Required By</th>
-          <th width="10%" class="c-pointer" @click="sortBy('time')">
+          <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
+          <th v-if="showCol('time')" class="c-pointer" @click="sortBy('time')">
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
           </th>
@@ -75,25 +75,18 @@
       </thead>
       <tbody>
         <tr v-for="mat in filteredRelics" :key="mat.id">
-          <td class="text-center align-middle">
+          <td class="text-center align-middle" v-if="showCol('name')">
             <RelicIcon :item="mat" />
           </td>
-          <td class="text-center align-middle">
+          <td class="text-center align-middle" v-if="showCol('locations')">
             <span class="row-label">Location: </span>
             {{ mat.location.node }}
           </td>
-          <td class="align-middle">
-            <OwnedAmount
-              :item="mat"
-              :needed="amountNeeded(mat.amount, targetLevels)"
-            />
-            <RelicProgressBar
-              :itemId="mat.id"
-              :amountNeeded="amountNeeded(mat.amount, targetLevels)"
-              class="mt-2"
-            />
+          <td class="align-middle" v-if="showCol('progress')">
+            <OwnedAmount :item="mat" :needed="mat.amountNeeded(targetLevels)" />
+            <ProgressBar :percent="mat.percent(targetLevels)" class="mt-2" />
           </td>
-          <td v-if="showRequiredByUnit">
+          <td v-if="showRequiredByUnit && showCol('required')">
             <span class="row-label">Required By: </span>
             <ul>
               <li v-for="unit in mat.neededBy" :key="unit.id">
@@ -104,14 +97,14 @@
               </li>
             </ul>
           </td>
-          <td class="text-center align-middle">
+          <td class="text-center align-middle" v-if="showCol('time')">
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="timeEstimation(mat, targetLevels)"
+              :timeLength="mat.timeEstimation(targetLevels)"
               :displayText="
-                $filters.pluralText(timeEstimation(mat, targetLevels), 'day')
+                $filters.pluralText(mat.timeEstimation(targetLevels), 'day')
               "
-              :title="$filters.daysFromNow(timeEstimation(mat, targetLevels))"
+              :title="$filters.daysFromNow(mat.timeEstimation(targetLevels))"
               displayClasses="d-inline"
             />
           </td>
@@ -123,17 +116,16 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapGetters, mapState } from "vuex";
+import { mapState } from "vuex";
 
 import { Relic } from "../../types/relic";
 import OwnedAmount from "./relicOwned.vue";
 import RelicIcon from "./relicIcon.vue";
-import RelicProgressBar from "./relicProgressBar.vue";
 import Timestamp from "../timestamp.vue";
 
 export default defineComponent({
   name: "RelicTable",
-  components: { OwnedAmount, RelicIcon, RelicProgressBar, Timestamp },
+  components: { OwnedAmount, RelicIcon, Timestamp },
   props: {
     relicList: {
       required: true,
@@ -141,7 +133,7 @@ export default defineComponent({
     },
     targetLevels: {
       required: true,
-      type: Array,
+      type: Array as PropType<{ level: number; target: number }[]>,
       validator: (arr: any[]) => {
         return arr.every((x) => {
           return "level" in x && "target" in x;
@@ -152,6 +144,15 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    selectedColumns: {
+      type: Array,
+      validator: (arr: string[]) => {
+        return arr.every((x) => {
+          return typeof x === "string";
+        });
+      },
+      required: true,
+    },
   },
   data() {
     return {
@@ -161,7 +162,6 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("relic", ["timeEstimation", "amountNeeded"]),
     ...mapState("relic", ["ownedRelics"]),
     filteredRelics(): Relic[] {
       return (this.relicList as Relic[])
@@ -183,14 +183,8 @@ export default defineComponent({
               return compareA > compareB ? -1 : 1;
             }
           } else if (this.sortMethod === "progress") {
-            const amountNeededA = this.amountNeeded(
-              a.amount,
-              this.targetLevels
-            );
-            const amountNeededB = this.amountNeeded(
-              b.amount,
-              this.targetLevels
-            );
+            const amountNeededA = a.amountNeeded(this.targetLevels);
+            const amountNeededB = b.amountNeeded(this.targetLevels);
 
             if (amountNeededA === 0 && amountNeededB === 0) {
               return 0;
@@ -200,21 +194,26 @@ export default defineComponent({
               return this.sortDir === "asc" ? -1 : 1;
             }
 
-            const progressA = (this.ownedRelics[a.id] || 0) / amountNeededA;
-            const progressB = (this.ownedRelics[b.id] || 0) / amountNeededB;
-
             if (this.sortDir === "asc") {
-              return progressA - progressB;
+              return (
+                a.progress(this.targetLevels) - b.progress(this.targetLevels)
+              );
             } else {
-              return progressB - progressA;
+              return (
+                b.progress(this.targetLevels) - a.progress(this.targetLevels)
+              );
             }
           } else if (this.sortMethod === "time") {
-            const compareA = this.timeEstimation(a, this.targetLevels);
-            const compareB = this.timeEstimation(b, this.targetLevels);
             if (this.sortDir === "asc") {
-              return compareA - compareB;
+              return (
+                a.timeEstimation(this.targetLevels) -
+                b.timeEstimation(this.targetLevels)
+              );
             } else {
-              return compareB - compareA;
+              return (
+                b.timeEstimation(this.targetLevels) -
+                a.timeEstimation(this.targetLevels)
+              );
             }
           }
           return 0;
@@ -243,8 +242,17 @@ export default defineComponent({
         return "fa-sort";
       }
     },
+    showCol(key: string): boolean {
+      return this.selectedColumns.some((x) => x === key);
+    },
   },
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
+</style>

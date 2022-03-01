@@ -1,6 +1,8 @@
+import { Relic, RelicConfigType } from "./relic";
+
 //https://docs.google.com/spreadsheets/d/10ReT0Q_4yYGd_fU45Clv7XYs23a96xpWgIxLVrg9Eqg/edit#gid=769217271
 export default {
-  fragmented_white: {
+  fragmented_white: new Relic({
     id: "fragmented_white",
     location: {
       node: "Cantina 8-C",
@@ -21,8 +23,8 @@ export default {
     image:
       "https://wiki.swgoh.help/images/0/08/Gear-Fragmented_Signal_Data.png",
     name: "Fragmented Signal Data",
-  },
-  incomplete_green: {
+  }),
+  incomplete_green: new Relic({
     id: "incomplete_green",
     location: {
       node: "Cantina 8-F",
@@ -43,8 +45,8 @@ export default {
     image:
       "https://wiki.swgoh.help/images/2/26/Gear-Incomplete_Signal_Data.png",
     name: "Incomplete Signal Data",
-  },
-  flawed_blue: {
+  }),
+  flawed_blue: new Relic({
     id: "flawed_blue",
     location: {
       node: "Cantina 8-G",
@@ -64,8 +66,8 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/b/b7/Gear-Flawed_Signal_Data.png",
     name: "Flawed Signal Data",
-  },
-  carbonite_circuit_board: {
+  }),
+  carbonite_circuit_board: new Relic({
     id: "carbonite_circuit_board",
     location: {
       node: "Jawa Scavenger",
@@ -84,8 +86,8 @@ export default {
     image:
       "https://wiki.swgoh.help/images/6/6d/Gear-Carbonite_Circuit_Board.png",
     name: "Carbonite Circuit Board",
-  },
-  bronzium_wiring: {
+  }),
+  bronzium_wiring: new Relic({
     id: "bronzium_wiring",
     location: {
       node: "Jawa Scavenger",
@@ -103,8 +105,8 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/e/e0/Gear-Bronzium_Wiring.png",
     name: "Bronzium Wiring",
-  },
-  chromium_transistor: {
+  }),
+  chromium_transistor: new Relic({
     id: "chromium_transistor",
     location: {
       node: "Jawa Scavenger",
@@ -122,8 +124,8 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/2/23/Gear-Chromium_Transistor.png",
     name: "Chromium Transistor",
-  },
-  aurodium_heatsink: {
+  }),
+  aurodium_heatsink: new Relic({
     id: "aurodium_heatsink",
     location: {
       node: "Jawa Scavenger",
@@ -141,8 +143,8 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/5/52/Gear-Aurodium_Heatsink.png",
     name: "Aurodium Heatsink",
-  },
-  electrium_conductor: {
+  }),
+  electrium_conductor: new Relic({
     id: "electrium_conductor",
     location: {
       node: "Jawa Scavenger",
@@ -160,8 +162,8 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/7/7b/Gear-Electrium_Conductor.png",
     name: "Electrium Conductor",
-  },
-  zinbiddle_card: {
+  }),
+  zinbiddle_card: new Relic({
     id: "zinbiddle_card",
     location: {
       node: "Jawa Scavenger",
@@ -179,8 +181,8 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/2/2e/Game-Icon-Zinbiddle_Card.png",
     name: "Zinbiddle Card",
-  },
-  impulse_detector: {
+  }),
+  impulse_detector: new Relic({
     id: "impulse_detector",
     location: {
       node: "Jawa Scavenger",
@@ -198,8 +200,8 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/1/1a/Game-Icon-Impulse_Detector.png",
     name: "Impulse Detector",
-  },
-  aeromagnifier: {
+  }),
+  aeromagnifier: new Relic({
     id: "aeromagnifier",
     location: {
       node: "Jawa Scavenger",
@@ -217,8 +219,8 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/6/6a/Game-Icon-Aeromagnifier.png",
     name: "Aeromagnifier",
-  },
-  gyrda_keypad: {
+  }),
+  gyrda_keypad: new Relic({
     id: "gyrda_keypad",
     location: {
       node: "Jawa Scavenger",
@@ -236,8 +238,8 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/6/67/Game-Icon-Gyrda_Keypad.png",
     name: "Gyrda Keypad",
-  },
-  droid_brains: {
+  }),
+  droid_brains: new Relic({
     id: "droid_brains",
     location: {
       node: "Jawa Scavenger",
@@ -255,5 +257,5 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/0/0f/Game-Icon-Droid_Brain.png",
     name: "Droid Brains",
-  },
-};
+  }),
+} as RelicConfigType;
