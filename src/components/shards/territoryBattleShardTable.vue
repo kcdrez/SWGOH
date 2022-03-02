@@ -59,7 +59,6 @@
             Amount/Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showCol('attempts')">Node Attempts per Day</th>
           <th
             class="c-pointer"
             @click="sortBy('time')"
@@ -67,21 +66,6 @@
           >
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
-          </th>
-          <th
-            v-if="
-              (showCol('priority') && showPriority) ||
-              (showCol('actions') && !showPriority)
-            "
-            :class="{ 'c-pointer': showPriority }"
-            @click="sortBy('priority')"
-          >
-            {{ showPriority ? "Priority" : "Actions" }}
-            <i
-              class="fas mx-1"
-              :class="sortIcon('priority')"
-              v-if="showPriority"
-            ></i>
           </th>
         </tr>
       </thead>
@@ -111,10 +95,6 @@
             <ShardsOwned :unit="unit" />
             <ProgressBar :percent="unit.shardPercent" class="mt-2" />
           </td>
-          <td class="align-middle nodes-per-day" v-if="showCol('attempts')">
-            <span class="row-label">Node Attempts per Day:</span>
-            <NodesPerDay :unit="unit" v-if="unit.showNodesPerDay" />
-          </td>
           <td
             class="text-center align-middle"
             v-if="showUnitName && showCol('time')"
@@ -128,42 +108,6 @@
               :title="$filters.daysFromNow(unit.shardTimeEstimation)"
               displayClasses="d-inline"
             />
-          </td>
-          <td
-            class="text-center align-middle"
-            v-if="
-              (showCol('priority') && showPriority) ||
-              (showCol('actions') && !showPriority)
-            "
-          >
-            <ShardPriority
-              :unit="unit"
-              v-if="showPriority"
-              :nodeTableNames="nodeTableNames"
-            />
-            <div
-              class="btn-group btn-group-sm d-block text-center"
-              role="group"
-              v-else
-            >
-              <button
-                type="button"
-                class="btn btn-success"
-                title="Add to active farming list"
-                v-if="unit.tracking"
-                @click="unit.tracking = true"
-              >
-                <i class="fas fa-heart"></i>
-              </button>
-              <button
-                type="button"
-                class="btn btn-danger"
-                title="Remove from active farming list"
-                @click="unit.tracking = false"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
           </td>
         </tr>
       </tbody>
@@ -180,9 +124,10 @@ import NodesPerDay from "./nodesPerDay.vue";
 import ShardPriority from "./shardPriority.vue";
 import Timestamp from "../timestamp.vue";
 import { Unit } from "../../types/unit";
+import { mapActions } from "vuex";
 
 export default defineComponent({
-  name: "ShardTable",
+  name: "TerritoryBattleShardTable",
   components: {
     ShardsOwned,
     UnitIcon,
@@ -199,19 +144,6 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    showPriority: {
-      type: Boolean,
-      default: false,
-    },
-    initialSort: {
-      type: Object,
-    },
-    nodeTableNames: {
-      type: Array as PropType<string[]>,
-      default: () => {
-        return [];
-      },
-    },
     selectedColumns: {
       type: Array,
       validator: (arr: string[]) => {
@@ -224,8 +156,8 @@ export default defineComponent({
   },
   data() {
     return {
-      sortDir: this.initialSort?.sortDir || "asc",
-      sortMethod: this.initialSort?.sortMethod || "name",
+      sortDir: "asc",
+      sortMethod: "name",
       searchText: "",
     };
   },
@@ -258,25 +190,13 @@ export default defineComponent({
             } else {
               return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
             }
-          } else if (this.sortMethod === "priority") {
-            const priorityA = a.tablePriority(this.nodeTableNames);
-            const priorityB = b.tablePriority(this.nodeTableNames);
-
-            if (priorityA <= 0) {
-              return this.sortDir === "asc" ? 1 : -1;
-            } else if (priorityB <= 0) {
-              return this.sortDir === "asc" ? -1 : 1;
-            } else if (this.sortDir === "asc") {
-              return priorityA > priorityB ? 1 : -1;
-            } else {
-              return priorityA > priorityB ? -1 : 1;
-            }
           }
           return 0;
         });
-    }
+    },
   },
   methods: {
+    ...mapActions("guild", ["initialize"]),
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
@@ -295,6 +215,9 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+  },
+  async created() {
+    await this.initialize();
   },
 });
 </script>

@@ -64,10 +64,18 @@ const store = {
       };
     },
     tbAvgShards(state: State, getters: any) {
-      return (type: "Light" | "Dark"): number => {
+      return (type: "Light" | "Dark", unitId?: string): number => {
         const total = state.territoryBattleEvents.reduce(
           (total: number, e: TerritoryBattleEvent) => {
-            return e.type === type ? total + e.characterShards.count : total;
+            if (unitId) {
+              if (e.type === type && e.characterShards.id === unitId) {
+                return total + e.characterShards.count
+              } else {
+                return total
+              }
+            } else {
+              return e.type === type ? total + e.characterShards.count : total;
+            }
           },
           0
         );

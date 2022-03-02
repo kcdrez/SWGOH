@@ -70,16 +70,13 @@
           <div class="d-inline">Territory Battle Units</div>
         </h3>
       </div>
-      <ShardTable
+      <TerritoryBattleShardTable
         id="territoryBattlesSection"
         class="collapse"
         ref="territoryBattlesSection"
         :units="territoryBattles"
-        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
-        :nodeTableNames="['Territory Battle']"
         :selectedColumns="selectedColumns"
         showUnitName
-        showPriority
       />
     </template>
     <template v-if="raids.length > 0">
@@ -311,12 +308,13 @@ import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
 import ShardTable from "./shardTable.vue";
+import TerritoryBattleShardTable from "./territoryBattleShardTable.vue";
 import { Unit } from "../../types/unit";
 import { setupEvents } from "../../utils";
 
 export default defineComponent({
   name: "ShardTableContainer",
-  components: { ShardTable },
+  components: { ShardTable, TerritoryBattleShardTable },
   data() {
     return {
       selectedColumns: [],

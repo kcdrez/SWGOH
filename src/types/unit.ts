@@ -298,7 +298,7 @@ export class Unit {
     });
   }
   public get locations() {
-    return this.whereToFarm.map((x) => x.label);
+    return this.whereToFarm.map((x) => x.table);
   }
   public get showNodesPerDay() {
     return this.whereToFarm.some((node) => {
@@ -327,21 +327,28 @@ export class Unit {
     });
   }
   public get shardTimeEstimation() {
-    if (this.whereToFarm.length <= 0) {
-      return 0;
+    if (this.locations.includes('Territory Battles')) {
+      const type = this.id === "KIADIMUNDI" || this.id === "IMPERIALPROBEDROID" ? "Light" : "Dark";
+      const avgShardsPerEvent = store.getters['guild/tbAvgShards'](type, this.id);
+      const shardsPerDay = avgShardsPerEvent / 30;
+      return Math.ceil(this.remainingShards / shardsPerDay);
     }
-    const dropRate = 0.33;
-    const nodesPerDay = this.shardNodes.reduce(
-      (total, node) => total + (node?.count ?? 0),
-      0
-    );
+    else if (this.whereToFarm.length <= 0) {
+      return 0;
+    } else {
+      const dropRate = 0.33;
+      const nodesPerDay = this.shardNodes.reduce(
+        (total, node) => total + (node?.count ?? 0),
+        0
+      );
 
-    return Math.ceil(
-      this.remainingShards /
+      return Math.ceil(
+        this.remainingShards /
         (dropRate *
           this.shardDropRate *
           (this.shardNodes.length === 0 ? 5 : nodesPerDay))
-    );
+      );
+    }
   }
   public get tracking() {
     const match = store.state.shards.ownedShards[this.id];
