@@ -1,16 +1,17 @@
 import { ActionContext } from "vuex";
-import { v4 as uuid } from "uuid";
 
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
-import { apiClient } from "../api/api-client";
 import { round2Decimals } from "../utils";
+import { PlayerResponse } from "../types/player";
+import { IWallet, Wallet } from "../types/currency";
 
 export const tbFrequency = 2 / 30
 export const twFrequency = 4 / 30
 
 interface State {
   requestState: loadingState;
+  wallet: Wallet;
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -19,6 +20,7 @@ const store = {
   namespaced: true,
   state: {
     requestState: loadingState.initial,
+    wallet: new Wallet({})
   },
   getters: {
     dailyAvgGET1(_state: State, _getters: any, rootState: RootState) {
@@ -54,9 +56,13 @@ const store = {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;
     },
+    SET_WALLET(state: State, payload: IWallet) {
+      state.wallet = new Wallet(payload);
+    }
   },
   actions: {
-    async initialize({ commit, state, rootState }: ActionCtx) {
+    async initialize({ commit }: ActionCtx, player: PlayerResponse) {
+      commit("SET_WALLET", player.wallet);
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
   },

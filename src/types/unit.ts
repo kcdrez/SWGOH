@@ -351,7 +351,8 @@ export class Unit {
           costPerShard = match.cost / match?.shardCount
         }
       })
-      const totalCost = this.remainingShards * costPerShard //subtract wallet
+      const currentAmount = store.state.currency.wallet.get1
+      const totalCost = this.remainingShards * costPerShard - currentAmount;
       const avgDaily = store.getters['currency/dailyAvgGET1']
 
       return Math.ceil(totalCost / avgDaily)
@@ -364,10 +365,9 @@ export class Unit {
           costPerShard = match.cost / match.shardCount
         }
       })
-      const totalCost = this.remainingShards * costPerShard
+      const currentAmount = store.state.currency.wallet.get2
+      const totalCost = this.remainingShards * costPerShard - currentAmount
       const avgDaily = store.getters['currency/dailyAvgGET2']
-
-      console.log(costPerShard, totalCost, avgDaily)
 
       return Math.ceil(totalCost / avgDaily)
     }

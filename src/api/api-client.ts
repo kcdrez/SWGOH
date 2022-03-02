@@ -11,12 +11,13 @@ import {
   TerritoryBattleEvent,
   TerritoryWarEvent,
 } from "../types/guild";
+import { IWallet } from "../types/currency";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3000/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3000/dev";
 
-  constructor() {}
+  constructor() { }
 
   async fetchPlayer(allyCode: string): Promise<PlayerResponse> {
     const response = await axios.get(`${this.baseUrl}/player/${allyCode}`);
@@ -190,6 +191,14 @@ class ApiClient {
         }
       );
       return response.data;
+    }
+  }
+
+  async saveWallet(playerId: string | undefined, wallet: IWallet) {
+    if (playerId) {
+      await axios.patch(`${this.baseUrl}/player/wallet/${playerId}`, {
+        wallet,
+      });
     }
   }
 }

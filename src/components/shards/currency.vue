@@ -25,7 +25,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapGetters } from "vuex";
+import { mapGetters, mapState } from "vuex";
 
 import { Unit } from "../../types/unit";
 import { unvue } from "../../utils";
@@ -40,12 +40,12 @@ export default defineComponent({
   },
   data() {
     return {
-      wallet: 0,
       dailyAvg: 0,
     };
   },
   computed: {
     ...mapGetters("currency", ["dailyAvgGET1", "dailyAvgGET2"]),
+    ...mapState("currency", ["wallet"]),
   },
   methods: {
     save() {},

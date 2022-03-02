@@ -88,6 +88,7 @@ const store = {
         dispatch("teams/initialize", player, { root: true });
         dispatch("opponents/initialize", player, { root: true });
         dispatch("shards/initialize", player, { root: true });
+        dispatch("currency/initialize", player, { root: true });
         commit("SET_REQUEST_STATE", loadingState.ready);
       } catch (err) {
         console.error(err);
