@@ -1,24 +1,38 @@
 <template>
   <div>
     <div class="input-group input-group-sm">
-      <span class="input-group-text wallet-count">Wallet:</span>
+      <span
+        class="input-group-text wallet-count c-help"
+        :title="`The amount of ${currencyType} you currently own`"
+        >Wallet:</span
+      >
       <input
         class="form-control owned-count"
         type="number"
-        v-model.number="wallet"
+        v-model.number="walletValue"
         min="0"
-        @keydown.enter="save"
-        @blur="save"
-        ref="saveButton"
+        @keydown.enter="saveWallet"
+        @blur="saveWallet"
+        @change="saveWallet"
       />
     </div>
     <div class="input-group input-group-sm mt-2">
       <span
         class="input-group-text wallet-count c-help"
-        title="The remaining shards needed to get this character to 7 stars"
+        :title="`The average amount of ${currencyType} gained per day`"
         >Daily Avg:</span
       >
-      <span class="input-group-text daily-count">{{ dailyAvg }}</span>
+      <input
+        v-if="allowEditAvg"
+        class="form-control owned-count"
+        type="number"
+        v-model.number="dailyAvg"
+        min="0"
+        @keydown.enter="saveDailyAverage"
+        @blur="saveDailyAverage"
+        @change="saveDailyAverage"
+      />
+      <span class="input-group-text daily-count" v-else>{{ dailyAvg }}</span>
     </div>
   </div>
 </template>
@@ -27,9 +41,6 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { Unit } from "../../types/unit";
-import { unvue } from "../../utils";
-
 export default defineComponent({
   name: "Currency",
   props: {
@@ -37,30 +48,52 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    allowEditAvg: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       dailyAvg: 0,
+      walletValue: 0,
     };
   },
   computed: {
     ...mapGetters("currency", ["dailyAvgGET1", "dailyAvgGET2"]),
-    ...mapState("currency", ["wallet"]),
+    ...mapState("currency", ["wallet", "dailyCurrency"]),
   },
   methods: {
-    save() {},
-    edit() {
-      this.$nextTick(() => {
-        (this.$refs?.saveButton as any).focus();
-      });
+    saveWallet() {
+      this.wallet[this.currencyType] = this.walletValue;
+    },
+    saveDailyAverage() {
+      this.dailyCurrency[this.currencyType] = this.dailyAvg;
+    },
+    resetValue() {
+      this.walletValue = this.wallet[this.currencyType];
+    },
+    resetAvg() {
+      this.dailyAvg = this.dailyCurrency[this.currencyType];
+    },
+  },
+  watch: {
+    wallet: {
+      handler() {
+        this.resetValue();
+      },
+      deep: true,
+    },
+    dailyCurrency: {
+      handler() {
+        this.resetAvg();
+      },
+      deep: true,
     },
   },
   created() {
-    if (this.currencyType === "GET1") {
-      this.dailyAvg = this.dailyAvgGET1;
-    } else if (this.currencyType === "GET2") {
-      this.dailyAvg = this.dailyAvgGET2;
-    }
+    this.resetValue();
+    this.resetAvg();
   },
 });
 </script>

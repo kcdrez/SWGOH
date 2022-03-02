@@ -104,6 +104,7 @@
               v-for="c in unit.currencyTypes"
               :key="c"
               :currencyType="c"
+              :allowEditAvg="allowEditAvg"
             />
           </td>
           <td
@@ -136,10 +137,9 @@ import ShardPriority from "./shardPriority.vue";
 import Timestamp from "../timestamp.vue";
 import Currency from "./currency.vue";
 import { Unit } from "../../types/unit";
-import { mapActions } from "vuex";
 
 export default defineComponent({
-  name: "GuildEventsTable",
+  name: "StoreTable",
   components: {
     ShardsOwned,
     UnitIcon,
@@ -165,6 +165,10 @@ export default defineComponent({
         });
       },
       required: true,
+    },
+    allowEditAvg: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -209,7 +213,6 @@ export default defineComponent({
     },
   },
   methods: {
-    // ...mapActions("guild", ["initialize"]),
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
@@ -229,55 +232,13 @@ export default defineComponent({
       return this.selectedColumns.some((x) => x === key);
     },
   },
-  // async created() {
-  //   await this.initialize();
-  // },
 });
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
 .select-columns {
   width: 200px;
   margin-left: auto;
   margin-bottom: 0.25rem;
 }
-
-.show-on-desktop {
-  @media only screen and (max-width: 1200px) {
-    ::v-deep(.nodes-container) {
-      flex-basis: 100%;
-
-      .input-group {
-        display: block;
-
-        * {
-          width: 100%;
-
-          &:first-child {
-            border-radius: 0.2rem 0.2rem 0 0 !important;
-            justify-content: center;
-          }
-
-          &:last-child {
-            border-radius: 0 0 0.2rem 0.2rem !important;
-          }
-
-          &:not(:first-child) {
-            &:not(button) {
-              display: block;
-            }
-            border-top: none;
-            text-align: center;
-            //everything except the first element is off so the following is used to compensate :shrug:
-            position: relative;
-            left: 1px;
-          }
-        }
-      }
-    }
-  }
-}
 </style>
->>>>>>> main

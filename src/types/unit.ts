@@ -3,6 +3,7 @@ import { Gear, IIngredient, maxGearLevel } from "./gear";
 import store from "../vuex-store/store";
 import { shardMapping } from "./shards";
 import { round2Decimals } from "../utils";
+import { CurrencyTypeConfig, currencyTypeList } from "./currency";
 
 export interface IUnit {
   id: string;
@@ -301,15 +302,27 @@ export class Unit {
     return this.whereToFarm.map((x) => x.label);
   }
   public get currencyTypes() {
-    const arr: string[] = [];
-    this.whereToFarm.forEach(node => {
-      if (node.id === 'guild_events_store2') {
-        arr.push("GET2")
-      } else if (node.id === 'guild_events_store1') {
-        arr.push("GET1")
+    const arr: CurrencyTypeConfig[] = [];
+    this.whereToFarm.forEach((node) => {
+      if (node.id === "guild_events_store1") {
+        arr.push("get1");
+      } else if (node.id === "guild_events_store2") {
+        arr.push("get2");
+      } else if (node.id === "shard_store") {
+        arr.push("shardCurrency");
+      } else if (node.id === "cantina_battles_store") {
+        arr.push("cantinaBattleCurrency");
+      } else if (node.id === "guild_store") {
+        arr.push("guildStoreCurrency");
+      } else if (node.id === "squad_arena_store") {
+        arr.push("squadArenaCurrency");
+      } else if (node.id === "galactic_war_store") {
+        arr.push("galacticWarCurrency");
+      } else if (node.id === "fleet_arena_store") {
+        arr.push("fleetArenaCurrency");
       }
-    })
-    return arr
+    });
+    return arr;
   }
   public get showNodesPerDay() {
     return this.whereToFarm.some((node) => {
@@ -338,40 +351,38 @@ export class Unit {
     });
   }
   public get shardTimeEstimation() {
-    if (this.locations.includes('Territory Battles')) {
-      const type = this.id === "KIADIMUNDI" || this.id === "IMPERIALPROBEDROID" ? "Light" : "Dark";
-      const avgShardsPerEvent = store.getters['guild/tbAvgShards'](type, this.id);
+    if (this.locations.includes("Territory Battles")) {
+      const type =
+        this.id === "KIADIMUNDI" || this.id === "IMPERIALPROBEDROID"
+          ? "Light"
+          : "Dark";
+      const avgShardsPerEvent = store.getters["guild/tbAvgShards"](
+        type,
+        this.id
+      );
       const shardsPerDay = avgShardsPerEvent / 30;
       return Math.ceil(this.remainingShards / shardsPerDay);
-    } else if (this.currencyTypes.includes('GET1')) {
+    } else if (currencyTypeList.some((r) => this.currencyTypes.includes(r))) {
       let costPerShard = 0;
-      this.whereToFarm.forEach(node => {
-        const match = node.characters.find(c => c.id === this.id)
+      this.whereToFarm.forEach((node) => {
+        const match = node.characters.find((c) => c.id === this.id);
         if (match && match.shardCount && match.cost) {
-          costPerShard = match.cost / match?.shardCount
+          costPerShard = match.cost / match.shardCount;
         }
-      })
-      const currentAmount = store.state.currency.wallet.get1
-      const totalCost = this.remainingShards * costPerShard - currentAmount;
-      const avgDaily = store.getters['currency/dailyAvgGET1']
+      });
 
-      return Math.ceil(totalCost / avgDaily)
-    }
-    else if (this.currencyTypes.includes('GET2')) {
-      let costPerShard = 0;
-      this.whereToFarm.forEach(node => {
-        const match = node.characters.find(c => c.id === this.id)
-        if (match && match.shardCount && match.cost) {
-          costPerShard = match.cost / match.shardCount
-        }
-      })
-      const currentAmount = store.state.currency.wallet.get2
-      const totalCost = this.remainingShards * costPerShard - currentAmount
-      const avgDaily = store.getters['currency/dailyAvgGET2']
+      const currencyType: CurrencyTypeConfig | undefined =
+        this.currencyTypes.find((x) => currencyTypeList.includes(x));
+      if (currencyType) {
+        const currentAmount = store.state.currency.wallet[currencyType] || 0;
+        const totalCost = this.remainingShards * costPerShard - currentAmount;
+        const avgDaily = store.state.currency.dailyCurrency[currencyType];
 
-      return Math.ceil(totalCost / avgDaily)
-    }
-    else if (this.whereToFarm.length <= 0) {
+        return Math.ceil(totalCost / avgDaily);
+      } else {
+        return 0;
+      }
+    } else if (this.whereToFarm.length <= 0) {
       return 0;
     } else {
       const dropRate = 0.33;
@@ -382,9 +393,9 @@ export class Unit {
 
       return Math.ceil(
         this.remainingShards /
-        (dropRate *
-          this.shardDropRate *
-          (this.shardNodes.length === 0 ? 5 : nodesPerDay))
+          (dropRate *
+            this.shardDropRate *
+            (this.shardNodes.length === 0 ? 5 : nodesPerDay))
       );
     }
   }

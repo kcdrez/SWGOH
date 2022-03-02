@@ -1,4 +1,4 @@
-import { IWallet } from "./currency";
+import { IDailyCurrency, IWallet } from "./currency";
 import { ITeam } from "./teams";
 import { IUnit, Unit } from "./unit";
 
@@ -25,6 +25,7 @@ export interface PlayerResponse {
   teams?: ITeam[];
   shards: any;
   wallet: IWallet;
+  dailyCurrency: IDailyCurrency;
 }
 
 export interface OpponentResponse {
