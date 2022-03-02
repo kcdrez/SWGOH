@@ -227,11 +227,15 @@
           <div class="d-inline">Guild Events Store</div>
         </h3>
       </div>
-      <ShardTable
+      <GuildEventsTable
         id="guildEventsStoreSection"
         class="collapse"
         ref="guildEventsStoreSection"
         :units="guildEventsStore"
+        :selectedColumns="selectedColumns"
+        showUnitName
+      />
+      <!-- <ShardTable
         :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
         :nodeTableNames="[
           'Guild Events Store (Mk 1)',
@@ -240,7 +244,7 @@
         :selectedColumns="selectedColumns"
         showUnitName
         showPriority
-      />
+      /> -->
     </template>
     <template v-if="shardStore.length > 0">
       <div class="collapse-header section-header mt-3">
@@ -309,12 +313,13 @@ import { mapGetters } from "vuex";
 
 import ShardTable from "./shardTable.vue";
 import TerritoryBattleShardTable from "./territoryBattleShardTable.vue";
+import GuildEventsTable from "./guildEventsTable.vue";
 import { Unit } from "../../types/unit";
 import { setupEvents } from "../../utils";
 
 export default defineComponent({
   name: "ShardTableContainer",
-  components: { ShardTable, TerritoryBattleShardTable },
+  components: { ShardTable, TerritoryBattleShardTable, GuildEventsTable },
   data() {
     return {
       selectedColumns: [],

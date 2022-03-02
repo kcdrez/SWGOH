@@ -77,6 +77,7 @@ interface NodeCharacter {
   id: string;
   dropRate?: number;
   shardCount?: number;
+  cost?: number;
   prerequisites?: {
     id?: string;
     requirement: string;
