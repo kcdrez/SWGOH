@@ -9,7 +9,7 @@
       <div class="relic-header">
         <div class="current-level">
           <div>Current Relic Level:</div>
-          <RelicIcon
+          <RelicLevelIcon
             :relicLevel="unit.relicLevel"
             :forceSide="unit.alignment"
           />
@@ -53,14 +53,14 @@ import { mapGetters, mapState } from "vuex";
 import RelicTable from "./relicTable.vue";
 import Timestamp from "../timestamp.vue";
 import EnergySpent from "../energySpent.vue";
-import RelicIcon from "../units/relicLevelIcon.vue";
+import RelicLevelIcon from "../units/relicLevelIcon.vue";
 import { loadingState } from "../../types/loading";
 import { Relic, maxRelicLevel } from "../../types/relic";
 import { setupEvents } from "../../utils";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
-  components: { RelicTable, Timestamp, EnergySpent, RelicIcon },
+  components: { RelicTable, Timestamp, EnergySpent, RelicLevelIcon },
   data() {
     return {
       maxRelicLevel,

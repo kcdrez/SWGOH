@@ -118,7 +118,13 @@
               >
             </td>
             <td class="text-center" v-if="showCol('curLevel')">
-              <GearText :level="unit.gearLevel" />
+              <GearText :level="unit.gearLevel" v-if="unit.relicLevel <= 0" />
+              <RelicLevelIcon
+                class="d-inline-block"
+                :relicLevel="unit.relicLevel"
+                :forceSide="unit.alignment"
+                v-else
+              />
             </td>
             <td class="text-center" v-if="showCol('targetLevel')">
               <span class="row-label">Target Level:</span>
@@ -229,10 +235,11 @@ import { maxGearLevel } from "../../types/gear";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
 import GearText from "../gear/gearText.vue";
+import RelicLevelIcon from "../units/relicLevelIcon.vue";
 
 export default defineComponent({
   name: "UnitSection",
-  components: { Timestamp, GearText },
+  components: { Timestamp, GearText, RelicLevelIcon },
   data() {
     return {
       sortDir: "asc",

@@ -145,18 +145,6 @@ export class Unit {
     return this._stats["5"];
   }
 
-  public get currentLevel() {
-    if (this.isShip) {
-      return "-";
-    } else if (this.gearLevel < maxGearLevel) {
-      return `Gear ${this.gearLevel}`;
-    } else if (this.relicLevel > 0) {
-      return `Relic ${this.relicLevel}`;
-    } else {
-      return `Gear ${maxGearLevel}`;
-    }
-  }
-
   public get gearTarget() {
     return (
       store.state.planner.targetConfig[this.id]?.gear.target || maxGearLevel
