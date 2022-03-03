@@ -93,7 +93,10 @@
           >
             <UnitIcon :unit="unit" isLink />
           </td>
-          <td class="align-middle text-center" v-if="showCol('locations')">
+          <td
+            class="align-middle text-center farming-locations"
+            v-if="showCol('locations')"
+          >
             <div v-if="unit.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
@@ -274,7 +277,7 @@ export default defineComponent({
           }
           return 0;
         });
-    }
+    },
   },
   methods: {
     sortBy(type: string): void {
@@ -302,46 +305,12 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
 
-.select-columns {
-  width: 200px;
-  margin-left: auto;
-  margin-bottom: 0.25rem;
-}
-
-.show-on-desktop {
-  @media only screen and (max-width: 1200px) {
-    ::v-deep(.nodes-container) {
-      flex-basis: 100%;
-
-      .input-group {
-        display: block;
-
-        * {
-          width: 100%;
-
-          &:first-child {
-            border-radius: 0.2rem 0.2rem 0 0 !important;
-            justify-content: center;
-          }
-
-          &:last-child {
-            border-radius: 0 0 0.2rem 0.2rem !important;
-          }
-
-          &:not(:first-child) {
-            &:not(button) {
-              display: block;
-            }
-            border-top: none;
-            text-align: center;
-            //everything except the first element is off so the following is used to compensate :shrug:
-            position: relative;
-            left: 1px;
-          }
-        }
-      }
+@media only screen and (max-width: 768px) {
+  .farming-locations {
+    ul {
+      list-style: none;
+      padding: 0;
     }
   }
 }
 </style>
->>>>>>> main

@@ -307,10 +307,4 @@ export default defineComponent({
   font-size: 1.5rem;
   text-align: center;
 }
-
-.select-columns {
-  width: 200px;
-  margin-left: auto;
-  margin-bottom: 0.25rem;
-}
 </style>

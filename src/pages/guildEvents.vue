@@ -1,7 +1,7 @@
 <template>
   <div class="container swgoh-page mb-3">
     <Loading :state="requestState" message="Loading Guild Data" size="lg">
-      <div class="collapse-header section-header mt-3">
+      <div class="collapse-header section-header mt-3 position-relative">
         <h3
           class="w-100"
           data-bs-toggle="collapse"
@@ -181,16 +181,4 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.section-header {
-  position: relative;
-}
-
-.select-columns {
-  position: absolute;
-  top: 0;
-  right: 1rem;
-  width: 250px;
-  margin-top: 0.5rem;
-  text-align: left;
-}
 </style>

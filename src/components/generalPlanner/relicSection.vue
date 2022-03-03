@@ -98,12 +98,4 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.select-columns {
-  position: absolute;
-  top: 0;
-  right: 1rem;
-  width: 250px;
-  margin-top: 0.5rem;
-  text-align: left;
-}
 </style>

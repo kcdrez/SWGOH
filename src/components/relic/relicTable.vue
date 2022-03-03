@@ -250,9 +250,4 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.select-columns {
-  width: 200px;
-  margin-left: auto;
-  margin-bottom: 0.25rem;
-}
 </style>

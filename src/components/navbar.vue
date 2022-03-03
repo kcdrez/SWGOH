@@ -114,7 +114,7 @@
 
 <script lang="ts">
 import { mapActions, mapState } from "vuex";
-import LastUpdated from "./components/lastUpdated.vue";
+import LastUpdated from "./lastUpdated.vue";
 
 import config from "../../package.json";
 

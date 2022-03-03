@@ -15,7 +15,11 @@
     </div>
     <div id="unit-section-table" class="collapse" ref="unitSection">
       <table
-        class="table table-bordered table-dark table-sm table-striped m-0 swgoh-table"
+        class="
+          table table-bordered table-dark table-sm table-striped
+          m-0
+          swgoh-table
+        "
       >
         <thead class="sticky-header show-on-mobile">
           <tr class="sort-methods">
@@ -324,15 +328,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
-
-.select-columns {
-  position: absolute;
-  top: 0;
-  right: 1rem;
-  width: 250px;
-  margin-top: 0.5rem;
-  text-align: left;
-}
 
 .swgoh-row {
   .target-container {
