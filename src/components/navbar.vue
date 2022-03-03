@@ -80,6 +80,11 @@
           </li>
         </ul>
         <ul class="navbar-nav">
+          <li class="mr-1" v-if="player">
+            <div class="navbar-text">
+              <LastUpdated />
+            </div>
+          </li>
           <li class="nav-item dropdown profile-dropdown">
             <a
               class="nav-link dropdown-toggle"
@@ -109,11 +114,13 @@
 
 <script lang="ts">
 import { mapActions, mapState } from "vuex";
+import LastUpdated from "./components/lastUpdated.vue";
 
 import config from "../../package.json";
 
 export default {
   name: "NavBar",
+  components: { LastUpdated },
   data() {
     return {
       version: config.version,

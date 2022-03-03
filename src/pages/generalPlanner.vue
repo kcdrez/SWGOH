@@ -1,7 +1,6 @@
 <template>
   <Loading :state="requestState" message="Loading Planner Data" size="lg">
     <div class="container swgoh-page">
-      <LastUpdated />
       <div v-if="fullUnitList.length === 0">
         You have no units in the General Planner.
       </div>
