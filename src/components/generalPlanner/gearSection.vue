@@ -49,11 +49,17 @@ export default defineComponent({
           const match = list.find((el) => gear.id === el.id);
           if (match) {
             match.amount += gear.amount;
-            match.neededBy?.push({ name: unit.name, id: unit.id });
+            match.neededBy?.push({
+              name: unit.name,
+              id: unit.id,
+              amount: gear.amount,
+            });
           } else {
             list.push(
               gear.clone({
-                neededBy: [{ name: unit.name, id: unit.id }],
+                neededBy: [
+                  { name: unit.name, id: unit.id, amount: gear.amount },
+                ],
                 amount: gear.amount,
               })
             );

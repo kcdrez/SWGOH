@@ -1,7 +1,11 @@
 <template>
   <div>
     <table
-      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
+      class="
+        table table-bordered table-dark table-sm table-striped
+        mb-0
+        swgoh-table
+      "
       v-if="gearList.length > 0"
     >
       <thead class="sticky-header show-on-mobile">
@@ -115,6 +119,7 @@
                   :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
                   >{{ unit.name }}</router-link
                 >
+                ({{ unit.amount }})
               </li>
             </ul>
           </td>
