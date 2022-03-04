@@ -18,7 +18,7 @@ import { mapActions, mapGetters } from "vuex";
 import ShardContainer from "../components/shards/shardTableContainer.vue";
 import { loadingState } from "../types/loading";
 
-const dependencyModules = ["shards", "planner", "unit", "guild"];
+const dependencyModules = ["shards", "planner", "unit", "guild", "currency"];
 
 export default defineComponent({
   name: "StarProgressionPage",

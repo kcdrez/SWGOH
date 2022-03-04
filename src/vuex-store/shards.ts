@@ -137,9 +137,6 @@ const store = {
           const farmingData = await apiClient.fetchFarmingData();
           commit("SET_SHARD_FARMING", farmingData);
           commit("SET_OWNED_SHARDS", rootState.player.player?.shards || {});
-          getters.unitFarmingList.forEach((unit: Unit) => {
-            unit.calculateEstimation();
-          });
           commit("SET_REQUEST_STATE", loadingState.ready);
         }
       } catch (err) {

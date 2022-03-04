@@ -75,13 +75,15 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit, state }: ActionCtx, player: PlayerResponse) {
-      commit("SET_WALLET", player.wallet);
-      commit("SET_CURRENCY", player.dailyCurrency);
-      commit("SET_REQUEST_STATE", loadingState.ready);
-      currencyTypeList.forEach((currency) =>
-        state.dailyCurrency.updateUnits(currency)
-      );
+    async initialize({ commit, state, rootState }: ActionCtx) {
+      if (state.requestState === loadingState.initial) {
+        commit("SET_WALLET", rootState.player.player?.wallet);
+        commit("SET_CURRENCY", rootState.player.player?.dailyCurrency);
+        commit("SET_REQUEST_STATE", loadingState.ready);
+        // currencyTypeList.forEach((currency) => {
+        //   state.dailyCurrency.updateUnits(currency)
+        // });
+      }
     },
   },
 };

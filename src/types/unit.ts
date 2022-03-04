@@ -76,6 +76,30 @@ export class Unit {
     this._stats = payload.stats;
 
     this.calculateEstimation();
+
+    store.watch((state) => {
+      return state.currency.dailyCurrency
+    }, (newVal) => {
+      if (this.id === "CAPITALMALEVOLENCE") {
+        console.log('currency watcher trigger', newVal)
+      }
+      if (currencyTypeList.some(c => this.currencyTypes.includes(c))) {
+        this.calculateEstimation()
+      }
+    })
+    store.watch((state) => {
+      return state.shards.shardFarming
+    }, (newVal) => {
+      if (this.id === "CAPITALMALEVOLENCE") {
+        console.log('shard farming trigger', this.currencyTypes, currencyTypeList.some(c => this.currencyTypes.includes(c)))
+      }
+      if (currencyTypeList.some(c => this.currencyTypes.includes(c))) {
+        if (this.id === "CAPITALMALEVOLENCE") {
+          console.log('shard calculate estimate', this.currencyTypes)
+        }
+        this.calculateEstimation()
+      }
+    })
   }
 
   public get id() {
@@ -398,6 +422,10 @@ export class Unit {
     let shardsPerDay = 0;
 
     this.whereToFarm.forEach((location) => {
+      if (this.id === "CAPITALMALEVOLENCE") {
+        console.log('getting estimate', location.currencyType &&
+          currencyTypeList.includes(location.currencyType))
+      }
       if (location.table === "Territory Battles") {
         const type =
           this.id === "KIADIMUNDI" || this.id === "IMPERIALPROBEDROID"
@@ -433,35 +461,32 @@ export class Unit {
     let costPerShard = 0;
     let dropRate = 1;
     let shardCountPerPurchase = 0;
+    let costOfPack = 0;
     const match = location.characters.find((c) => c.id === this.id);
     if (match && match.shardCount && match.cost) {
       costPerShard = match.cost / match.shardCount;
       dropRate = match.dropRate || 1;
       shardCountPerPurchase = match.shardCount;
+      costOfPack = match.cost;
+    }
+
+    if (this.id === "CAPITALMALEVOLENCE") {
+      console.log(location.currencyType)
     }
 
     if (location.currencyType) {
-      const currentAmount =
+      const currentWallet =
         store.state.currency.wallet[location.currencyType] || 0;
-      const totalCost = this.remainingShards * costPerShard - currentAmount;
+      const totalCost = this.remainingShards * costPerShard - currentWallet;
       const avgDailyCurrency =
         store.state.currency.dailyCurrency[location.currencyType] || 1;
 
-      //3 comes from the daily shop refreshes
-      const shardsPerDay = 3 * dropRate * shardCountPerPurchase; //how many purchases per day
+      const daysToUnlock = totalCost / avgDailyCurrency
+
       if (this.id === "CAPITALMALEVOLENCE") {
-        console.log(totalCost, avgDailyCurrency, shardsPerDay);
+        console.log(totalCost, avgDailyCurrency, this.remainingShards)
       }
-
-      // 264 * 100 / 1250 = ~22
-      // dropRate = daily store refreshes * dropRate
-      //daily appearances =
-
-      // return Math.max(
-      //   totalCost / avgDailyCurrency,
-      //   shardsPerDay * this.remainingShards
-      // );
-      return Math.max(totalCost / avgDailyCurrency, shardsPerDay);
+      return this.remainingShards / daysToUnlock
     } else {
       return 0;
     }
