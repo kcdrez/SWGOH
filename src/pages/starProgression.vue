@@ -18,23 +18,26 @@ import { mapActions, mapGetters } from "vuex";
 import ShardContainer from "../components/shards/shardTableContainer.vue";
 import { loadingState } from "../types/loading";
 
+const dependencyModules = ["shards", "planner", "unit", "guild"];
+
 export default defineComponent({
   name: "StarProgressionPage",
   components: { ShardContainer },
   computed: {
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
-      return this.someLoading(["shards", "planner", "unit", "guild"]);
+      return this.someLoading(dependencyModules);
     },
   },
   methods: {
     ...mapActions("guild", ["initialize"]),
   },
   async created() {
-    this.initialize();
+    dependencyModules.forEach((moduleName) => {
+      this.$store.dispatch(`${moduleName}/initialize`);
+    });
   },
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

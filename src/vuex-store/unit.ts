@@ -44,11 +44,13 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit }: ActionCtx) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      const unitsList = await apiClient.fetchAllUnits();
-      commit("SET_ALL_UNITS", unitsList);
-      commit("SET_REQUEST_STATE", loadingState.ready);
+    async initialize({ state, commit }: ActionCtx) {
+      if (state.requestState === loadingState.initial) {
+        commit("SET_REQUEST_STATE", loadingState.loading);
+        const unitsList = await apiClient.fetchAllUnits();
+        commit("SET_ALL_UNITS", unitsList);
+        commit("SET_REQUEST_STATE", loadingState.ready);
+      }
     },
     async fetchUnit({ commit, rootState, dispatch }: ActionCtx, id: string) {
       commit("SET_REQUEST_STATE", loadingState.loading);

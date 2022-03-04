@@ -4,7 +4,12 @@ import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { round2Decimals } from "../utils";
 import { PlayerResponse } from "../types/player";
-import { DailyCurrency, IWallet, Wallet } from "../types/currency";
+import {
+  currencyTypeList,
+  DailyCurrency,
+  IWallet,
+  Wallet,
+} from "../types/currency";
 
 export const tbFrequency = 2 / 30;
 export const twFrequency = 4 / 30;
@@ -70,10 +75,13 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit }: ActionCtx, player: PlayerResponse) {
+    async initialize({ commit, state }: ActionCtx, player: PlayerResponse) {
       commit("SET_WALLET", player.wallet);
       commit("SET_CURRENCY", player.dailyCurrency);
       commit("SET_REQUEST_STATE", loadingState.ready);
+      currencyTypeList.forEach((currency) =>
+        state.dailyCurrency.updateUnits(currency)
+      );
     },
   },
 };

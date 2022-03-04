@@ -67,7 +67,7 @@ export default defineComponent({
     },
     energySpentStandard: {
       get(): number {
-        return this.$store.state.gear.energy.standard;
+        return this.$store.state.gear.energy.standard ?? 0;
       },
       set(value: number) {
         this.$store.dispatch("gear/updateEnergy", {
@@ -78,7 +78,7 @@ export default defineComponent({
     },
     energySpentFleet: {
       get(): number {
-        return this.$store.state.gear.energy.fleet;
+        return this.$store.state.gear.energy.fleet ?? 0;
       },
       set(value: number) {
         this.$store.dispatch("gear/updateEnergy", {
@@ -89,7 +89,7 @@ export default defineComponent({
     },
     refreshesStandard: {
       get(): number {
-        return this.$store.state.gear.refreshes.standard;
+        return this.$store.state.gear.refreshes.standard ?? 0;
       },
       set(value: number) {
         this.$store.dispatch("gear/updateRefreshes", {
@@ -100,7 +100,7 @@ export default defineComponent({
     },
     refreshesFleet: {
       get(): number {
-        return this.$store.state.gear.refreshes.fleet;
+        return this.$store.state.gear.refreshes.fleet ?? 0;
       },
       set(value: number) {
         this.$store.dispatch("gear/updateRefreshes", {

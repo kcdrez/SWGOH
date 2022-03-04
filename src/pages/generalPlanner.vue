@@ -43,6 +43,8 @@ import ShardSection from "../components/generalPlanner/shardSection.vue";
 import { loadingState } from "../types/loading";
 import { Unit } from "../types/unit";
 
+const dependencyModules = ["planner", "unit", "gear", "relic", "shards"];
+
 interface dataModel {
   selected: Unit | null;
 }
@@ -61,7 +63,7 @@ export default defineComponent({
     ...mapState("unit", ["unitList"]),
     ...mapGetters("shards", ["plannerList"]),
     requestState(): loadingState {
-      return this.someLoading(["planner", "unit", "gear", "relic"]);
+      return this.someLoading(dependencyModules);
     },
   },
   methods: {
@@ -96,8 +98,12 @@ export default defineComponent({
       }
     },
   },
+  created() {
+    dependencyModules.forEach((moduleName) => {
+      this.$store.dispatch(`${moduleName}/initialize`);
+    });
+  },
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

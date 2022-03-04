@@ -79,20 +79,26 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit }: ActionCtx, payload: any) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      commit("UPDATE_PLANNER", payload?.targetData || {});
-      commit("SET_UNIT_LIST", payload?.unitList || []);
-      (payload?.unitList || []).forEach((id: string) => {
-        if (!(id in payload.targetData)) {
-          commit("UPDATE_PLANNER_ITEM", {
-            id,
-            type: "relic",
-            value: 5,
-          });
-        }
-      });
-      commit("SET_REQUEST_STATE", loadingState.ready);
+    async initialize({ commit, state, rootState }: ActionCtx) {
+      if (state.requestState === loadingState.initial) {
+        commit("SET_REQUEST_STATE", loadingState.loading);
+        const planner = rootState.player.player?.planner;
+        const targetData = planner?.targetData ?? {};
+        const unitList = planner?.unitList ?? {};
+
+        commit("UPDATE_PLANNER", targetData);
+        commit("SET_UNIT_LIST", unitList);
+        state.unitList.forEach((id: string) => {
+          if (!(id in targetData)) {
+            commit("UPDATE_PLANNER_ITEM", {
+              id,
+              type: "relic",
+              value: 5,
+            });
+          }
+        });
+        commit("SET_REQUEST_STATE", loadingState.ready);
+      }
     },
     addUnit({ commit, dispatch, state }: ActionCtx, id: string) {
       commit("UPSERT_UNIT", id);

@@ -66,13 +66,18 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit }: ActionCtx, player: PlayerResponse) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      player.teams?.forEach((team) => {
-        commit("UPSERT_TEAM", new Team(team, player.id));
-      });
-      commit("SET_SPEED_ABILITY_DATA", await apiClient.speedData());
-      commit("SET_REQUEST_STATE", loadingState.ready);
+    async initialize({ commit, state, rootState }: ActionCtx) {
+      if (state.requestState === loadingState.initial) {
+        commit("SET_REQUEST_STATE", loadingState.loading);
+        (rootState.player.player?.teams ?? []).forEach((team) => {
+          commit(
+            "UPSERT_TEAM",
+            new Team(team, rootState.player.player?.id ?? "")
+          );
+        });
+        commit("SET_SPEED_ABILITY_DATA", await apiClient.speedData());
+        commit("SET_REQUEST_STATE", loadingState.ready);
+      }
     },
     upsertTeam({ commit, dispatch, rootState }: ActionCtx, team: ITeam) {
       if (!team) {

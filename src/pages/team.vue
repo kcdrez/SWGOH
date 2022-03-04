@@ -53,6 +53,8 @@ import { Team } from "../types/teams";
 import { loadingState } from "../types/loading";
 import TeamTable from "../components/teams/teamTable.vue";
 
+const dependencyModules = ["player", "teams"];
+
 type dataModel = {
   newTeamName: string;
   deleteTarget: null | Team;
@@ -72,7 +74,7 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
-      return this.someLoading(["player", "teams"]);
+      return this.someLoading(dependencyModules);
     },
   },
   methods: {
@@ -99,6 +101,11 @@ export default defineComponent({
     cancelDelete() {
       this.deleteTarget = null;
     },
+  },
+  created() {
+    dependencyModules.forEach((moduleName) => {
+      this.$store.dispatch(`${moduleName}/initialize`);
+    });
   },
 });
 </script>

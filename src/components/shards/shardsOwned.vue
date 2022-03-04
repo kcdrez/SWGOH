@@ -31,7 +31,7 @@
         >Remaining:</span
       >
       <span class="input-group-text remaining-count">{{
-        unit.totalRemainingShards
+        unit.remainingShards
       }}</span>
     </div>
   </div>

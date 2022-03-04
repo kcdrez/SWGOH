@@ -77,20 +77,20 @@ export default defineComponent({
       this.dailyAvg = this.dailyCurrency[this.currencyType];
     },
   },
-  watch: {
-    wallet: {
-      handler() {
-        this.resetValue();
-      },
-      deep: true,
-    },
-    dailyCurrency: {
-      handler() {
-        this.resetAvg();
-      },
-      deep: true,
-    },
-  },
+  // watch: {
+  //   wallet: {
+  //     handler(val) {
+  //       this.resetValue();
+  //     },
+  //     deep: true,
+  //   },
+  //   dailyCurrency: {
+  //     handler(val) {
+  //       this.resetAvg();
+  //     },
+  //     deep: true,
+  //   },
+  // },
   created() {
     this.resetValue();
     this.resetAvg();

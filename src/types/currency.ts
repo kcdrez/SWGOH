@@ -2,6 +2,7 @@ import _ from "lodash";
 
 import { apiClient } from "../api/api-client";
 import store from "../vuex-store/store";
+import { Unit } from "./unit";
 
 export const currencyTypeList: CurrencyTypeConfig[] = [
   "get1",
@@ -61,6 +62,7 @@ export class Wallet {
   public set get1(val) {
     this._get1 = val;
     this.save();
+    updateUnits("get1");
   }
   public get get2() {
     return this._get2 || 0;
@@ -68,6 +70,7 @@ export class Wallet {
   public set get2(val) {
     this._get2 = val;
     this.save();
+    updateUnits("get2");
   }
   public get shardCurrency() {
     return this._shardCurrency;
@@ -75,6 +78,7 @@ export class Wallet {
   public set shardCurrency(val) {
     this._shardCurrency = val;
     this.save();
+    updateUnits("get1");
   }
   public get cantinaBattleCurrency() {
     return this._cantinaBattleCurrency;
@@ -82,6 +86,7 @@ export class Wallet {
   public set cantinaBattleCurrency(val) {
     this._cantinaBattleCurrency = val;
     this.save();
+    updateUnits("cantinaBattleCurrency");
   }
   public get guildStoreCurrency() {
     return this._guildStoreCurrency;
@@ -89,6 +94,7 @@ export class Wallet {
   public set guildStoreCurrency(val) {
     this._guildStoreCurrency = val;
     this.save();
+    updateUnits("guildStoreCurrency");
   }
   public get squadArenaCurrency() {
     return this._squadArenaCurrency;
@@ -96,6 +102,7 @@ export class Wallet {
   public set squadArenaCurrency(val) {
     this._squadArenaCurrency = val;
     this.save();
+    updateUnits("squadArenaCurrency");
   }
   public get galacticWarCurrency() {
     return this._galacticWarCurrency;
@@ -103,6 +110,7 @@ export class Wallet {
   public set galacticWarCurrency(val) {
     this._galacticWarCurrency = val;
     this.save();
+    updateUnits("galacticWarCurrency");
   }
   public get fleetArenaCurrency() {
     return this._fleetArenaCurrency;
@@ -110,6 +118,7 @@ export class Wallet {
   public set fleetArenaCurrency(val) {
     this._fleetArenaCurrency = val;
     this.save();
+    updateUnits("fleetArenaCurrency");
   }
 
   private save = _.debounce(() => {
@@ -167,6 +176,7 @@ export class DailyCurrency {
   public set shardCurrency(val) {
     this._shardCurrency = val;
     this.save();
+    this.updateUnits("shardCurrency");
   }
   public get cantinaBattleCurrency() {
     return this._cantinaBattleCurrency || 0;
@@ -174,6 +184,7 @@ export class DailyCurrency {
   public set cantinaBattleCurrency(val) {
     this._cantinaBattleCurrency = val;
     this.save();
+    this.updateUnits("cantinaBattleCurrency");
   }
   public get guildStoreCurrency() {
     return this._guildStoreCurrency || 0;
@@ -181,6 +192,7 @@ export class DailyCurrency {
   public set guildStoreCurrency(val) {
     this._guildStoreCurrency = val;
     this.save();
+    this.updateUnits("guildStoreCurrency");
   }
   public get squadArenaCurrency() {
     return this._squadArenaCurrency || 0;
@@ -188,6 +200,7 @@ export class DailyCurrency {
   public set squadArenaCurrency(val) {
     this._squadArenaCurrency = val;
     this.save();
+    this.updateUnits("squadArenaCurrency");
   }
   public get galacticWarCurrency() {
     return this._galacticWarCurrency || 0;
@@ -195,6 +208,7 @@ export class DailyCurrency {
   public set galacticWarCurrency(val) {
     this._galacticWarCurrency = val;
     this.save();
+    this.updateUnits("galacticWarCurrency");
   }
   public get fleetArenaCurrency() {
     return this._fleetArenaCurrency || 0;
@@ -202,6 +216,7 @@ export class DailyCurrency {
   public set fleetArenaCurrency(val) {
     this._fleetArenaCurrency = val;
     this.save();
+    this.updateUnits("fleetArenaCurrency");
   }
 
   private save = _.debounce(() => {
@@ -218,4 +233,13 @@ export class DailyCurrency {
       fleetArenaCurrency: this.fleetArenaCurrency,
     };
   }
+  public updateUnits = updateUnits;
+}
+
+function updateUnits(currencyType: CurrencyTypeConfig) {
+  store.getters["shards/unitFarmingList"].forEach((unit: Unit) => {
+    if (unit.currencyTypes.includes(currencyType)) {
+      unit.calculateEstimation();
+    }
+  });
 }

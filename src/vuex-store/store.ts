@@ -49,7 +49,7 @@ const store = createStore<State>({
     shards: shardStore,
     opponents: opponentsStore,
     guild: guildStore,
-    currency: currencyStore
+    currency: currencyStore,
   },
   state: {
     requestState: loadingState.initial,
@@ -63,7 +63,7 @@ const store = createStore<State>({
     shards: shardStore.state,
     opponents: opponentsStore.state,
     guild: guildStore.state,
-    currency: currencyStore.state
+    currency: currencyStore.state,
   },
   getters: {
     someLoading(state: State) {
@@ -92,16 +92,16 @@ const store = createStore<State>({
     },
   },
   actions: {
-    async initialize({ commit, dispatch }) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      const collapseData = JSON.parse(
-        window.localStorage.getItem("collapseSections") || "{}"
-      );
-      commit("SET_COLLAPSE", collapseData);
-      await dispatch("player/initialize", { root: true });
-      await dispatch("unit/initialize", { root: true });
-      await dispatch("gear/fetchGear", { root: true });
-      commit("SET_REQUEST_STATE", loadingState.ready);
+    async initialize({ state, commit, dispatch }) {
+      if (state.requestState === loadingState.initial) {
+        commit("SET_REQUEST_STATE", loadingState.loading);
+        const collapseData = JSON.parse(
+          window.localStorage.getItem("collapseSections") || "{}"
+        );
+        commit("SET_COLLAPSE", collapseData);
+        await dispatch("player/initialize", { root: true });
+        commit("SET_REQUEST_STATE", loadingState.ready);
+      }
     },
     toggleCollapse({ commit, state }, payload) {
       commit("TOGGLE_COLLAPSE", payload);

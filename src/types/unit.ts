@@ -1,9 +1,14 @@
 import { maxRelicLevel } from "../types/relic";
 import { Gear, IIngredient, maxGearLevel } from "./gear";
 import store from "../vuex-store/store";
-import { shardMapping } from "./shards";
+import { FarmingNode, shardMapping } from "./shards";
 import { round2Decimals } from "../utils";
-import { CurrencyTypeConfig, currencyTypeList } from "./currency";
+import {
+  CurrencyTypeConfig,
+  currencyTypeList,
+  DailyCurrency,
+  Wallet,
+} from "./currency";
 
 export interface IUnit {
   id: string;
@@ -50,6 +55,8 @@ export class Unit {
   private _gear_list: UnitTier[];
   private _stats: any;
 
+  private _7StarUnlockEstimation: number = 0;
+
   constructor(payload: IUnit) {
     this._id = payload.id;
     this._name = payload.name;
@@ -67,6 +74,8 @@ export class Unit {
     this._image = payload.image;
     this._gear_list = payload.gear_levels;
     this._stats = payload.stats;
+
+    this.calculateEstimation();
   }
 
   public get id() {
@@ -273,16 +282,17 @@ export class Unit {
   }
   public set ownedShards(value) {
     store.dispatch("shards/saveShardsCount", { count: value, id: this.id });
+    this.calculateEstimation();
   }
   private get totalOwnedShards() {
     let amount = 0;
-    for (let i = this.stars; i > 0; i--) {
+    for (let i = 1; i <= this.stars; i++) {
       amount += shardMapping[i];
     }
     return amount + this.ownedShards;
   }
   public get remainingShards() {
-    return this.totalRemainingShards - this.ownedShards;
+    return 330 - this.totalOwnedShards;
   }
   public get shardPercent() {
     const val = (this.totalOwnedShards / 330) * 100;
@@ -349,55 +359,10 @@ export class Unit {
       id: this.id,
       nodes: val,
     });
+    this.calculateEstimation();
   }
   public get shardTimeEstimation() {
-    if (this.locations.includes("Territory Battles")) {
-      const type =
-        this.id === "KIADIMUNDI" || this.id === "IMPERIALPROBEDROID"
-          ? "Light"
-          : "Dark";
-      const avgShardsPerEvent = store.getters["guild/tbAvgShards"](
-        type,
-        this.id
-      );
-      const shardsPerDay = avgShardsPerEvent / 30;
-      return Math.ceil(this.remainingShards / shardsPerDay);
-    } else if (currencyTypeList.some((r) => this.currencyTypes.includes(r))) {
-      let costPerShard = 0;
-      this.whereToFarm.forEach((node) => {
-        const match = node.characters.find((c) => c.id === this.id);
-        if (match && match.shardCount && match.cost) {
-          costPerShard = match.cost / match.shardCount;
-        }
-      });
-
-      const currencyType: CurrencyTypeConfig | undefined =
-        this.currencyTypes.find((x) => currencyTypeList.includes(x));
-      if (currencyType) {
-        const currentAmount = store.state.currency.wallet[currencyType] || 0;
-        const totalCost = this.remainingShards * costPerShard - currentAmount;
-        const avgDaily = store.state.currency.dailyCurrency[currencyType];
-
-        return Math.ceil(totalCost / avgDaily);
-      } else {
-        return 0;
-      }
-    } else if (this.whereToFarm.length <= 0) {
-      return 0;
-    } else {
-      const dropRate = 0.33;
-      const nodesPerDay = this.shardNodes.reduce(
-        (total, node) => total + (node?.count ?? 0),
-        0
-      );
-
-      return Math.ceil(
-        this.remainingShards /
-          (dropRate *
-            this.shardDropRate *
-            (this.shardNodes.length === 0 ? 5 : nodesPerDay))
-      );
-    }
+    return this._7StarUnlockEstimation;
   }
   public get tracking() {
     const match = store.state.shards.ownedShards[this.id];
@@ -427,6 +392,79 @@ export class Unit {
     });
     const match = this.shardNodes.find((n) => n.id === matchFarmingNode?.id);
     return match?.priority ?? 0;
+  }
+
+  public calculateEstimation() {
+    let shardsPerDay = 0;
+
+    this.whereToFarm.forEach((location) => {
+      if (location.table === "Territory Battles") {
+        const type =
+          this.id === "KIADIMUNDI" || this.id === "IMPERIALPROBEDROID"
+            ? "Light"
+            : "Dark";
+        const avgShardsPerEvent = store.getters["guild/tbAvgShards"](
+          type,
+          this.id
+        );
+        shardsPerDay += avgShardsPerEvent / 30;
+      } else if (
+        location.currencyType &&
+        currencyTypeList.includes(location.currencyType)
+      ) {
+        shardsPerDay += this.calculateCurrencyEstimation(location);
+      } else {
+        const nodesPerDay =
+          this.shardNodes.find((n) => n.id === location.id)?.count ?? 0;
+
+        shardsPerDay += nodesPerDay * 0.33 * this.shardDropRate;
+      }
+    });
+
+    if (shardsPerDay === 0) {
+      this._7StarUnlockEstimation = -1;
+    } else {
+      this._7StarUnlockEstimation = Math.ceil(
+        this.remainingShards / shardsPerDay
+      );
+    }
+  }
+  private calculateCurrencyEstimation(location: FarmingNode) {
+    let costPerShard = 0;
+    let dropRate = 1;
+    let shardCountPerPurchase = 0;
+    const match = location.characters.find((c) => c.id === this.id);
+    if (match && match.shardCount && match.cost) {
+      costPerShard = match.cost / match.shardCount;
+      dropRate = match.dropRate || 1;
+      shardCountPerPurchase = match.shardCount;
+    }
+
+    if (location.currencyType) {
+      const currentAmount =
+        store.state.currency.wallet[location.currencyType] || 0;
+      const totalCost = this.remainingShards * costPerShard - currentAmount;
+      const avgDailyCurrency =
+        store.state.currency.dailyCurrency[location.currencyType] || 1;
+
+      //3 comes from the daily shop refreshes
+      const shardsPerDay = 3 * dropRate * shardCountPerPurchase; //how many purchases per day
+      if (this.id === "CAPITALMALEVOLENCE") {
+        console.log(totalCost, avgDailyCurrency, shardsPerDay);
+      }
+
+      // 264 * 100 / 1250 = ~22
+      // dropRate = daily store refreshes * dropRate
+      //daily appearances =
+
+      // return Math.max(
+      //   totalCost / avgDailyCurrency,
+      //   shardsPerDay * this.remainingShards
+      // );
+      return Math.max(totalCost / avgDailyCurrency, shardsPerDay);
+    } else {
+      return 0;
+    }
   }
 }
 

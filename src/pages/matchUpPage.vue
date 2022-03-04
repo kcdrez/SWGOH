@@ -237,6 +237,8 @@ import { loadingState } from "../types/loading";
 import TeamTable from "../components/teams/teamTable.vue";
 import MatchTable from "../components/teams/matchTable.vue";
 
+const dependencyModules = ["player", "teams", "opponents"];
+
 type dataModel = {
   allyCode: string;
   deleteTarget: { team: null | Team; type: "player" | "opponent" | "" };
@@ -276,7 +278,7 @@ export default defineComponent({
     }),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
-      return this.someLoading(["player", "teams", "opponents"]);
+      return this.someLoading(dependencyModules);
     },
   },
   methods: {
@@ -360,6 +362,11 @@ export default defineComponent({
         this.saveOpponentTeams();
       }
     },
+  },
+  created() {
+    dependencyModules.forEach((moduleName) => {
+      this.$store.dispatch(`${moduleName}/initialize`);
+    });
   },
 });
 </script>

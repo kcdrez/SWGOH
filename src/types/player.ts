@@ -1,5 +1,9 @@
 import { IDailyCurrency, IWallet } from "./currency";
-import { ITeam } from "./teams";
+import { ConfigType as GearConfigType, EnergyConfig } from "./gear";
+import { ConfigType as PlannerConfigType } from "./planner";
+import { OwnedRelicConfig } from "./relic";
+import { OwnedShardsMap } from "./shards";
+import { ITeam, Team } from "./teams";
 import { IUnit, Unit } from "./unit";
 
 export interface Player {
@@ -9,6 +13,14 @@ export interface Player {
   id?: string;
   updated: number;
   guild_id: string;
+  gear?: GearConfigType;
+  relic?: OwnedRelicConfig;
+  planner?: { targetData: PlannerConfigType; unitList: string[] };
+  energyData?: EnergyConfig;
+  teams?: Team[];
+  shards: OwnedShardsMap;
+  wallet: IWallet;
+  dailyCurrency: IDailyCurrency;
 }
 
 export interface PlayerResponse {
@@ -19,11 +31,11 @@ export interface PlayerResponse {
   updated: number;
   guild_id: string;
   gear?: any;
-  relic?: any;
-  planner?: any;
-  energyData?: any;
+  relic?: OwnedRelicConfig;
+  planner?: { targetData: PlannerConfigType; unitList: string[] };
+  energyData?: EnergyConfig;
   teams?: ITeam[];
-  shards: any;
+  shards: OwnedShardsMap;
   wallet: IWallet;
   dailyCurrency: IDailyCurrency;
 }
