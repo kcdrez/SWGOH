@@ -120,8 +120,7 @@ const store = {
         await dispatch("fetchPlayer", opponentResponse.opponentAllyCode);
         commit(
           "SET_TEAMS",
-          opponentResponse?.teams.map((t) => new Team(t, state.player?.id)) ||
-            []
+          (opponentResponse?.teams || []).map((t) => new Team(t, state.player?.id))
         );
 
         const matches: Match[] = (opponentResponse?.matches || []).reduce(
