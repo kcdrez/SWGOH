@@ -80,9 +80,6 @@ const store = {
         commit("SET_WALLET", rootState.player.player?.wallet);
         commit("SET_CURRENCY", rootState.player.player?.dailyCurrency);
         commit("SET_REQUEST_STATE", loadingState.ready);
-        // currencyTypeList.forEach((currency) => {
-        //   state.dailyCurrency.updateUnits(currency)
-        // });
       }
     },
   },

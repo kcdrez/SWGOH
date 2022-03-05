@@ -236,6 +236,7 @@ import { Match, MatchPayload, Team, TeamMember } from "../types/teams";
 import { loadingState } from "../types/loading";
 import TeamTable from "../components/teams/teamTable.vue";
 import MatchTable from "../components/teams/matchTable.vue";
+import { initializeModules } from "../utils";
 
 const dependencyModules = ["player", "teams", "opponents"];
 
@@ -363,10 +364,8 @@ export default defineComponent({
       }
     },
   },
-  created() {
-    dependencyModules.forEach((moduleName) => {
-      this.$store.dispatch(`${moduleName}/initialize`);
-    });
+  async created() {
+    await initializeModules(dependencyModules);
   },
 });
 </script>

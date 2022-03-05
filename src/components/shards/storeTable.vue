@@ -105,6 +105,7 @@
               :key="c"
               :currencyType="c"
               :allowEditAvg="allowEditAvg"
+              :remainingCurrency="unit.currencyAmountRemaining(c)"
             />
           </td>
           <td

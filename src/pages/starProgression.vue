@@ -17,6 +17,7 @@ import { mapActions, mapGetters } from "vuex";
 
 import ShardContainer from "../components/shards/shardTableContainer.vue";
 import { loadingState } from "../types/loading";
+import { initializeModules } from "../utils";
 
 const dependencyModules = ["shards", "planner", "unit", "guild", "currency"];
 
@@ -29,13 +30,8 @@ export default defineComponent({
       return this.someLoading(dependencyModules);
     },
   },
-  methods: {
-    ...mapActions("guild", ["initialize"]),
-  },
   async created() {
-    dependencyModules.forEach((moduleName) => {
-      this.$store.dispatch(`${moduleName}/initialize`);
-    });
+    await initializeModules(dependencyModules, true);
   },
 });
 </script>

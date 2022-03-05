@@ -34,6 +34,14 @@
       />
       <span class="input-group-text daily-count" v-else>{{ dailyAvg }}</span>
     </div>
+    <div class="input-group input-group-sm mt-2">
+      <span
+        class="input-group-text wallet-count c-help"
+        :title="`The amount of ${currencyType} needed to fully 7 star this unit`"
+        >Remaining:</span
+      >
+      <span class="input-group-text daily-count">{{ remainingCurrency }}</span>
+    </div>
   </div>
 </template>
 
@@ -51,6 +59,10 @@ export default defineComponent({
     allowEditAvg: {
       type: Boolean,
       default: false,
+    },
+    remainingCurrency: {
+      type: Number,
+      required: true,
     },
   },
   data() {
@@ -77,20 +89,20 @@ export default defineComponent({
       this.dailyAvg = this.dailyCurrency[this.currencyType];
     },
   },
-  // watch: {
-  //   wallet: {
-  //     handler(val) {
-  //       this.resetValue();
-  //     },
-  //     deep: true,
-  //   },
-  //   dailyCurrency: {
-  //     handler(val) {
-  //       this.resetAvg();
-  //     },
-  //     deep: true,
-  //   },
-  // },
+  watch: {
+    wallet: {
+      handler(val) {
+        this.resetValue();
+      },
+      deep: true,
+    },
+    dailyCurrency: {
+      handler(val) {
+        this.resetAvg();
+      },
+      deep: true,
+    },
+  },
   created() {
     this.resetValue();
     this.resetAvg();

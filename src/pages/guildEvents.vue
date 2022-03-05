@@ -56,7 +56,7 @@ import { mapActions, mapGetters, mapState } from "vuex";
 import { loadingState } from "../types/loading";
 import TerritoryWarTable from "../components/guild/territoryWarTable.vue";
 import TerritoryBattleTable from "../components/guild/territoryBattleTable.vue";
-import { setupEvents } from "../utils";
+import { initializeModules, setupEvents } from "../utils";
 
 const dependencyModules = ["player", "guild"];
 
@@ -166,9 +166,7 @@ export default defineComponent({
     },
   },
   async created() {
-    dependencyModules.forEach((moduleName) => {
-      this.$store.dispatch(`${moduleName}/initialize`);
-    });
+    await initializeModules(dependencyModules);
     if (this.requestState === loadingState.ready) {
       this.initEvents();
     }

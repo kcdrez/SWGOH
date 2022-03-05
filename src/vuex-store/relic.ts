@@ -44,7 +44,7 @@ const store = {
     },
   },
   actions: {
-    initialize({ commit, state, rootState }: ActionCtx) {
+    async initialize({ commit, state, rootState }: ActionCtx) {
       if (state.requestState === loadingState.initial) {
         commit("SET_REQUEST_STATE", loadingState.loading);
         commit("SET_OWNED_RELICS", rootState.player.player?.relic);

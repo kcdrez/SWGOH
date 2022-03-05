@@ -42,6 +42,7 @@ import RelicSection from "../components/generalPlanner/relicSection.vue";
 import ShardSection from "../components/generalPlanner/shardSection.vue";
 import { loadingState } from "../types/loading";
 import { Unit } from "../types/unit";
+import { initializeModules } from "../utils";
 
 const dependencyModules = ["planner", "unit", "gear", "relic", "shards"];
 
@@ -98,10 +99,8 @@ export default defineComponent({
       }
     },
   },
-  created() {
-    dependencyModules.forEach((moduleName) => {
-      this.$store.dispatch(`${moduleName}/initialize`);
-    });
+  async created() {
+    await initializeModules(dependencyModules);
   },
 });
 </script>

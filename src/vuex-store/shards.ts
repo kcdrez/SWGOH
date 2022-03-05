@@ -89,6 +89,7 @@ const store = {
       const match = state.ownedShards[id] || {};
 
       let nodesData: Node[] = [];
+      console.log(nodes);
       if (nodes) {
         nodesData = nodes.map((node) => {
           const nodeMatch = (match?.nodes || []).find((n) => n.id === node.id);
@@ -130,7 +131,7 @@ const store = {
     },
   },
   actions: {
-    async initialize({ state, getters, commit, rootState }: ActionCtx) {
+    async initialize({ state, commit, rootState }: ActionCtx) {
       try {
         if (state.requestState === loadingState.initial) {
           commit("SET_REQUEST_STATE", loadingState.loading);
