@@ -14,7 +14,6 @@ import SearchInput from "./components/search-input.vue";
 import ProgressBar from "./components/progressBar.vue";
 import Loading from "./components/loading.vue";
 import Error from "./components/error.vue";
-import LastUpdated from "./components/lastUpdated.vue";
 import MultiSelect from "./components/multiSelect.vue"
 import { formatDate } from "./utils";
 
@@ -59,6 +58,5 @@ app
   .component("ProgressBar", ProgressBar)
   .component("Loading", Loading)
   .component("Error", Error)
-  .component("LastUpdated", LastUpdated)
   .component("MultiSelect", MultiSelect)
   .mount("#app");

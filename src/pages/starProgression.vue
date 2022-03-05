@@ -5,7 +5,6 @@
       message="An error occurred retrieving the player data."
     />
     <Loading :state="requestState" message="Loading Unit Data" size="lg">
-      <LastUpdated />
       <ShardContainer />
     </Loading>
   </div>

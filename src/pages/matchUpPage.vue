@@ -2,7 +2,6 @@
   <div class="container teams-page swgoh-page">
     <Error :state="requestState" :message="`Unable to find player data.`" />
     <Loading :state="requestState" message="Loading Player Data" size="lg">
-      <LastUpdated />
       <div class="opponent-container">
         <div v-if="opponent">
           Your opponent is: {{ opponent.name }}

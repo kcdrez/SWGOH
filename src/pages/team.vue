@@ -2,7 +2,6 @@
   <div class="container swgoh-page">
     <Error :state="requestState" :message="`Unable to find player data.`" />
     <Loading :state="requestState" message="Loading Player Data" size="lg">
-      <LastUpdated />
       <div class="input-group input-group-sm new-team">
         <input
           type="text"

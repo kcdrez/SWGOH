@@ -93,7 +93,10 @@
           >
             <UnitIcon :unit="unit" isLink />
           </td>
-          <td class="align-middle text-center" v-if="showCol('locations')">
+          <td
+            class="align-middle text-center farming-locations"
+            v-if="showCol('locations')"
+          >
             <div v-if="unit.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
@@ -300,9 +303,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.select-columns {
-  width: 200px;
-  margin-left: auto;
-  margin-bottom: 0.25rem;
+@media only screen and (max-width: 768px) {
+  .farming-locations {
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+  }
 }
 </style>

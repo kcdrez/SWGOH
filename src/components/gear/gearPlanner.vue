@@ -162,11 +162,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
 
-.select-columns {
-  width: 200px;
-  margin-left: auto;
-  margin-bottom: 0.25rem;
-}
 
 .gear-header,
 .time-estimate {
