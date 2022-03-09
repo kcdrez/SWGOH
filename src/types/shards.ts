@@ -1,3 +1,5 @@
+import { CurrencyTypeConfig } from "./currency";
+
 export type ShardsConfigType = {
   [key: number]: number;
 };
@@ -62,6 +64,26 @@ export class FarmingNode {
     }
     return str;
   }
+  public get currencyType(): CurrencyTypeConfig | undefined {
+    switch (this.id) {
+      case "guild_events_store1":
+        return "get1";
+      case "guild_events_store2":
+        return "get2";
+      case "cantina_battles_store":
+        return "cantinaBattleCurrency";
+      case "guild_store":
+        return "guildStoreCurrency";
+      case "squad_arena_store":
+        return "squadArenaCurrency";
+      case "galactic_war_store":
+        return "galacticWarCurrency";
+      case "fleet_arena_store":
+        return "fleetArenaCurrency";
+      case "shard_store":
+        return "shardCurrency";
+    }
+  }
 }
 export interface IFarmingNode {
   id: string;
@@ -77,6 +99,7 @@ interface NodeCharacter {
   id: string;
   dropRate?: number;
   shardCount?: number;
+  cost?: number;
   prerequisites?: {
     id?: string;
     requirement: string;

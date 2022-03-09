@@ -121,16 +121,14 @@
           <div class="d-inline">Cantina Store</div>
         </h3>
       </div>
-      <ShardTable
+      <StoreTable
         id="cantinaStoreSection"
         class="collapse"
         ref="cantinaStoreSection"
         :units="cantinaStore"
-        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
-        :nodeTableNames="['Cantina Battles Store']"
         :selectedColumns="selectedColumns"
         showUnitName
-        showPriority
+        allowEditAvg
       />
     </template>
     <template v-if="guildStore.length > 0">
@@ -139,16 +137,14 @@
           <div class="d-inline">Guild Store</div>
         </h3>
       </div>
-      <ShardTable
-        id="guildStore"
+      <StoreTable
+        id="guildStoreSection"
         class="collapse"
-        ref="guildStore"
+        ref="guildStoreSection"
         :units="guildStore"
-        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
-        :nodeTableNames="['Guild Store']"
         :selectedColumns="selectedColumns"
         showUnitName
-        showPriority
+        allowEditAvg
       />
     </template>
     <template v-if="squadArenaStore.length > 0">
@@ -161,16 +157,14 @@
           <div class="d-inline">Squad Arena Store</div>
         </h3>
       </div>
-      <ShardTable
+      <StoreTable
         id="squadArenaStoreSection"
         class="collapse"
         ref="squadArenaStoreSection"
         :units="squadArenaStore"
-        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
-        :nodeTableNames="['Squad Arena Store']"
         :selectedColumns="selectedColumns"
         showUnitName
-        showPriority
+        allowEditAvg
       />
     </template>
     <template v-if="galacticWarStore.length > 0">
@@ -183,16 +177,14 @@
           <div class="d-inline">Galactic War Store</div>
         </h3>
       </div>
-      <ShardTable
+      <StoreTable
         id="galacticWarStoreSection"
         class="collapse"
         ref="galacticWarStoreSection"
         :units="galacticWarStore"
-        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
-        :nodeTableNames="['Galactic War Store']"
         :selectedColumns="selectedColumns"
         showUnitName
-        showPriority
+        allowEditAvg
       />
     </template>
     <template v-if="fleetArenaStore.length > 0">
@@ -205,16 +197,14 @@
           <div class="d-inline">Fleet Arena Store</div>
         </h3>
       </div>
-      <ShardTable
+      <StoreTable
         id="fleetArenaStoreSection"
         class="collapse"
         ref="fleetArenaStoreSection"
         :units="fleetArenaStore"
-        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
-        :nodeTableNames="['Fleet Arena Store']"
         :selectedColumns="selectedColumns"
         showUnitName
-        showPriority
+        allowEditAvg
       />
     </template>
     <template v-if="guildEventsStore.length > 0">
@@ -227,19 +217,13 @@
           <div class="d-inline">Guild Events Store</div>
         </h3>
       </div>
-      <ShardTable
+      <StoreTable
         id="guildEventsStoreSection"
         class="collapse"
         ref="guildEventsStoreSection"
         :units="guildEventsStore"
-        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
-        :nodeTableNames="[
-          'Guild Events Store (Mk 1)',
-          'Guild Events Store (Mk 2)',
-        ]"
         :selectedColumns="selectedColumns"
         showUnitName
-        showPriority
       />
     </template>
     <template v-if="shardStore.length > 0">
@@ -248,16 +232,14 @@
           <div class="d-inline">Shard Store</div>
         </h3>
       </div>
-      <ShardTable
+      <StoreTable
         id="shardStoreSection"
         class="collapse"
         ref="shardStoreSection"
         :units="shardStore"
-        :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
-        :nodeTableNames="['Shard Store']"
         :selectedColumns="selectedColumns"
         showUnitName
-        showPriority
+        allowEditAvg
       />
     </template>
     <template v-if="legendary.length > 0">
@@ -309,12 +291,13 @@ import { mapGetters } from "vuex";
 
 import ShardTable from "./shardTable.vue";
 import TerritoryBattleShardTable from "./territoryBattleShardTable.vue";
+import StoreTable from "./storeTable.vue";
 import { Unit } from "../../types/unit";
 import { setupEvents } from "../../utils";
 
 export default defineComponent({
   name: "ShardTableContainer",
-  components: { ShardTable, TerritoryBattleShardTable },
+  components: { ShardTable, TerritoryBattleShardTable, StoreTable },
   data() {
     return {
       selectedColumns: [],

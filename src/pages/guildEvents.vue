@@ -56,7 +56,9 @@ import { mapActions, mapGetters, mapState } from "vuex";
 import { loadingState } from "../types/loading";
 import TerritoryWarTable from "../components/guild/territoryWarTable.vue";
 import TerritoryBattleTable from "../components/guild/territoryBattleTable.vue";
-import { setupEvents } from "../utils";
+import { initializeModules, setupEvents } from "../utils";
+
+const dependencyModules = ["player", "guild"];
 
 export default defineComponent({
   name: "GuildEventsPage",
@@ -73,7 +75,7 @@ export default defineComponent({
     ...mapGetters(["someLoading"]),
     ...mapState("player", { playerRequestState: "requestState" }),
     requestState(): loadingState {
-      return this.someLoading(["player", "guild"]);
+      return this.someLoading(dependencyModules);
     },
     tbCols(): { text: string; value: any }[] {
       const list = [
@@ -143,7 +145,6 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions("guild", ["initialize"]),
     initEvents() {
       this.$nextTick(() => {
         setupEvents(
@@ -158,11 +159,6 @@ export default defineComponent({
     },
   },
   watch: {
-    playerRequestState(newVal) {
-      if (newVal === loadingState.ready) {
-        this.initialize();
-      }
-    },
     requestState(newVal) {
       if (newVal === loadingState.ready) {
         this.initEvents();
@@ -170,9 +166,7 @@ export default defineComponent({
     },
   },
   async created() {
-    if (this.playerRequestState === loadingState.ready) {
-      this.initialize();
-    }
+    await initializeModules(dependencyModules);
     if (this.requestState === loadingState.ready) {
       this.initEvents();
     }

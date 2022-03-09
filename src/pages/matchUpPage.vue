@@ -235,6 +235,9 @@ import { Match, MatchPayload, Team, TeamMember } from "../types/teams";
 import { loadingState } from "../types/loading";
 import TeamTable from "../components/teams/teamTable.vue";
 import MatchTable from "../components/teams/matchTable.vue";
+import { initializeModules } from "../utils";
+
+const dependencyModules = ["player", "teams", "opponents"];
 
 type dataModel = {
   allyCode: string;
@@ -275,7 +278,7 @@ export default defineComponent({
     }),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
-      return this.someLoading(["player", "teams", "opponents"]);
+      return this.someLoading(dependencyModules);
     },
   },
   methods: {
@@ -359,6 +362,9 @@ export default defineComponent({
         this.saveOpponentTeams();
       }
     },
+  },
+  async created() {
+    await initializeModules(dependencyModules);
   },
 });
 </script>

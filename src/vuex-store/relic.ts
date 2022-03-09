@@ -44,12 +44,20 @@ const store = {
     },
   },
   actions: {
-    initialize({ commit }: ActionCtx, player: PlayerResponse) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      commit("SET_OWNED_RELICS", player.relic);
-      commit("UPDATE_REFRESHES", player.energyData?.refreshes?.cantina || 0);
-      commit("UPDATE_ENERGY", player.energyData?.energy?.cantina || 0);
-      commit("SET_REQUEST_STATE", loadingState.ready);
+    async initialize({ commit, state, rootState }: ActionCtx) {
+      if (state.requestState === loadingState.initial) {
+        commit("SET_REQUEST_STATE", loadingState.loading);
+        commit("SET_OWNED_RELICS", rootState.player.player?.relic);
+        commit(
+          "UPDATE_REFRESHES",
+          rootState.player.player?.energyData?.refreshes?.cantina || 0
+        );
+        commit(
+          "UPDATE_ENERGY",
+          rootState.player.player?.energyData?.energy?.cantina || 0
+        );
+        commit("SET_REQUEST_STATE", loadingState.ready);
+      }
     },
     saveOwnedCount(
       { state, commit, rootState }: ActionCtx,

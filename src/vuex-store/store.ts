@@ -8,6 +8,7 @@ import { store as teamsStore, State as TeamsState } from "./teams";
 import { store as opponentsStore, State as OpponentsState } from "./opponents";
 import { store as shardStore, State as ShardState } from "./shards";
 import { store as guildStore, State as GuildState } from "./guild";
+import { store as currencyStore, State as CurrencyState } from "./currency";
 import { loadingState } from "../types/loading";
 
 type ModuleTypes =
@@ -18,7 +19,8 @@ type ModuleTypes =
   | "planner"
   | "teams"
   | "shards"
-  | "opponents";
+  | "opponents"
+  | "currency";
 
 export interface State {
   requestState: loadingState;
@@ -33,6 +35,7 @@ export interface State {
   shards: ShardState;
   opponents: OpponentsState;
   guild: GuildState;
+  currency: CurrencyState;
 }
 
 const store = createStore<State>({
@@ -46,6 +49,7 @@ const store = createStore<State>({
     shards: shardStore,
     opponents: opponentsStore,
     guild: guildStore,
+    currency: currencyStore,
   },
   state: {
     requestState: loadingState.initial,
@@ -59,6 +63,7 @@ const store = createStore<State>({
     shards: shardStore.state,
     opponents: opponentsStore.state,
     guild: guildStore.state,
+    currency: currencyStore.state,
   },
   getters: {
     someLoading(state: State) {
@@ -87,16 +92,16 @@ const store = createStore<State>({
     },
   },
   actions: {
-    async initialize({ commit, dispatch }) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      const collapseData = JSON.parse(
-        window.localStorage.getItem("collapseSections") || "{}"
-      );
-      commit("SET_COLLAPSE", collapseData);
-      await dispatch("player/initialize", { root: true });
-      await dispatch("unit/initialize", { root: true });
-      await dispatch("gear/fetchGear", { root: true });
-      commit("SET_REQUEST_STATE", loadingState.ready);
+    async initialize({ state, commit, dispatch }) {
+      if (state.requestState === loadingState.initial) {
+        commit("SET_REQUEST_STATE", loadingState.loading);
+        const collapseData = JSON.parse(
+          window.localStorage.getItem("collapseSections") || "{}"
+        );
+        commit("SET_COLLAPSE", collapseData);
+        await dispatch("player/initialize", { root: true });
+        commit("SET_REQUEST_STATE", loadingState.ready);
+      }
     },
     toggleCollapse({ commit, state }, payload) {
       commit("TOGGLE_COLLAPSE", payload);

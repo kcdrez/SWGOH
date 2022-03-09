@@ -51,6 +51,9 @@ import { v4 as uuid } from "uuid";
 import { Team } from "../types/teams";
 import { loadingState } from "../types/loading";
 import TeamTable from "../components/teams/teamTable.vue";
+import { initializeModules } from "../utils";
+
+const dependencyModules = ["player", "teams"];
 
 type dataModel = {
   newTeamName: string;
@@ -71,7 +74,7 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
-      return this.someLoading(["player", "teams"]);
+      return this.someLoading(dependencyModules);
     },
   },
   methods: {
@@ -98,6 +101,9 @@ export default defineComponent({
     cancelDelete() {
       this.deleteTarget = null;
     },
+  },
+  async created() {
+    await initializeModules(dependencyModules);
   },
 });
 </script>

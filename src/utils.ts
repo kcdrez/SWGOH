@@ -34,3 +34,21 @@ export function formatDate(date: any, format: string = "MMM DD, YYYY") {
 export function round2Decimals(num: number) {
   return Math.round((num + Number.EPSILON) * 100) / 100;
 }
+
+export async function initializeModules(
+  modulesList: string[],
+  synchronously: boolean = false
+) {
+  if (synchronously) {
+    for (let i = 0; i < modulesList.length; i++) {
+      const moduleName = modulesList[i];
+      await store.dispatch(`${moduleName}/initialize`);
+    }
+  } else {
+    await Promise.all(
+      modulesList.map((moduleName) =>
+        store.dispatch(`${moduleName}/initialize`)
+      )
+    );
+  }
+}

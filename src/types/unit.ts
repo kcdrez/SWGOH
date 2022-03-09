@@ -1,8 +1,9 @@
 import { maxRelicLevel } from "../types/relic";
 import { Gear, IIngredient, maxGearLevel } from "./gear";
 import store from "../vuex-store/store";
-import { shardMapping } from "./shards";
+import { FarmingNode, shardMapping } from "./shards";
 import { round2Decimals } from "../utils";
+import { CurrencyTypeConfig, currencyTypeList } from "./currency";
 
 export interface IUnit {
   id: string;
@@ -49,6 +50,8 @@ export class Unit {
   private _gear_list: UnitTier[];
   private _stats: any;
 
+  private _7StarUnlockEstimation: number = 0;
+
   constructor(payload: IUnit) {
     this._id = payload.id;
     this._name = payload.name;
@@ -66,6 +69,39 @@ export class Unit {
     this._image = payload.image;
     this._gear_list = payload.gear_levels;
     this._stats = payload.stats;
+
+    this.calculateEstimation();
+
+    store.watch(
+      (state) => {
+        return state.currency.dailyCurrency;
+      },
+      (newVal) => {
+        if (this.currencyTypes.length > 0) {
+          this.calculateEstimation();
+        }
+      }
+    );
+    store.watch(
+      (state) => {
+        return state.shards.shardFarming;
+      },
+      (newVal) => {
+        if (this.currencyTypes.length > 0) {
+          this.calculateEstimation();
+        }
+      }
+    );
+    store.watch(
+      (state) => {
+        return state.shards.ownedShards[this.id];
+      },
+      (newVal) => {
+        // if (this.currencyTypes.length > 0) {
+        this.calculateEstimation();
+        // }
+      }
+    );
   }
 
   public get id() {
@@ -265,23 +301,24 @@ export class Unit {
     for (let i = this.stars + 1; i <= 7; i++) {
       amount += shardMapping[i];
     }
-    return amount - this.ownedShards;
+    return amount;
   }
   public get ownedShards() {
     return store.state.shards.ownedShards[this.id]?.owned || 0;
   }
   public set ownedShards(value) {
     store.dispatch("shards/saveShardsCount", { count: value, id: this.id });
+    this.calculateEstimation();
   }
   private get totalOwnedShards() {
     let amount = 0;
-    for (let i = this.stars; i > 0; i--) {
+    for (let i = 1; i <= this.stars; i++) {
       amount += shardMapping[i];
     }
     return amount + this.ownedShards;
   }
   public get remainingShards() {
-    return this.totalRemainingShards - this.ownedShards;
+    return 330 - this.totalOwnedShards;
   }
   public get shardPercent() {
     const val = (this.totalOwnedShards / 330) * 100;
@@ -298,7 +335,30 @@ export class Unit {
     });
   }
   public get locations() {
-    return this.whereToFarm.map((x) => x.table);
+    return this.whereToFarm.map((x) => x.label);
+  }
+  public get currencyTypes() {
+    const arr: CurrencyTypeConfig[] = [];
+    this.whereToFarm.forEach((node) => {
+      if (node.id === "guild_events_store1") {
+        arr.push("get1");
+      } else if (node.id === "guild_events_store2") {
+        arr.push("get2");
+      } else if (node.id === "shard_store") {
+        arr.push("shardCurrency");
+      } else if (node.id === "cantina_battles_store") {
+        arr.push("cantinaBattleCurrency");
+      } else if (node.id === "guild_store") {
+        arr.push("guildStoreCurrency");
+      } else if (node.id === "squad_arena_store") {
+        arr.push("squadArenaCurrency");
+      } else if (node.id === "galactic_war_store") {
+        arr.push("galacticWarCurrency");
+      } else if (node.id === "fleet_arena_store") {
+        arr.push("fleetArenaCurrency");
+      }
+    });
+    return arr;
   }
   public get showNodesPerDay() {
     return this.whereToFarm.some((node) => {
@@ -325,30 +385,10 @@ export class Unit {
       id: this.id,
       nodes: val,
     });
+    this.calculateEstimation();
   }
   public get shardTimeEstimation() {
-    if (this.locations.includes('Territory Battles')) {
-      const type = this.id === "KIADIMUNDI" || this.id === "IMPERIALPROBEDROID" ? "Light" : "Dark";
-      const avgShardsPerEvent = store.getters['guild/tbAvgShards'](type, this.id);
-      const shardsPerDay = avgShardsPerEvent / 30;
-      return Math.ceil(this.remainingShards / shardsPerDay);
-    }
-    else if (this.whereToFarm.length <= 0) {
-      return 0;
-    } else {
-      const dropRate = 0.33;
-      const nodesPerDay = this.shardNodes.reduce(
-        (total, node) => total + (node?.count ?? 0),
-        0
-      );
-
-      return Math.ceil(
-        this.remainingShards /
-        (dropRate *
-          this.shardDropRate *
-          (this.shardNodes.length === 0 ? 5 : nodesPerDay))
-      );
-    }
+    return this._7StarUnlockEstimation;
   }
   public get tracking() {
     const match = store.state.shards.ownedShards[this.id];
@@ -378,6 +418,73 @@ export class Unit {
     });
     const match = this.shardNodes.find((n) => n.id === matchFarmingNode?.id);
     return match?.priority ?? 0;
+  }
+
+  public calculateEstimation() {
+    let shardsPerDay = 0;
+
+    this.whereToFarm.forEach((location) => {
+      if (location.table === "Territory Battles") {
+        const type =
+          this.id === "KIADIMUNDI" || this.id === "IMPERIALPROBEDROID"
+            ? "Light"
+            : "Dark";
+        const avgShardsPerEvent = store.getters["guild/tbAvgShards"](
+          type,
+          this.id
+        );
+        shardsPerDay += avgShardsPerEvent / 30;
+      } else if (
+        location.currencyType &&
+        currencyTypeList.includes(location.currencyType)
+      ) {
+        shardsPerDay += this.calculateCurrencyEstimation(location);
+      } else {
+        const nodesPerDay =
+          this.shardNodes.find((n) => n.id === location.id)?.count ?? 0;
+
+        shardsPerDay += nodesPerDay * 0.33 * this.shardDropRate;
+      }
+    });
+
+    if (shardsPerDay === 0) {
+      this._7StarUnlockEstimation = -1;
+    } else {
+      this._7StarUnlockEstimation = Math.ceil(
+        this.remainingShards / shardsPerDay
+      );
+    }
+  }
+  private calculateCurrencyEstimation(location: FarmingNode) {
+    if (location.currencyType) {
+      const totalCost = this.currencyAmountByLocation(location);
+      const avgDailyCurrency =
+        store.state.currency.dailyCurrency[location.currencyType] || 1;
+
+      const daysToUnlock = totalCost / avgDailyCurrency;
+
+      return this.remainingShards / daysToUnlock;
+    } else {
+      return 0;
+    }
+  }
+  public currencyAmountRemaining(currency: CurrencyTypeConfig) {
+    const location = this.whereToFarm.find((x) => x.currencyType === currency);
+    return this.currencyAmountByLocation(location);
+  }
+  private currencyAmountByLocation(location: FarmingNode | undefined) {
+    if (location && location.currencyType) {
+      let costPerShard = 0;
+      const currentWallet =
+        store.state.currency.wallet[location.currencyType] || 0;
+      const match = location.characters.find((c) => c.id === this.id);
+      if (match && match.shardCount && match.cost) {
+        costPerShard = match.cost / match.shardCount;
+      }
+      return Math.max(this.remainingShards * costPerShard - currentWallet, 0);
+    } else {
+      return 0;
+    }
   }
 }
 

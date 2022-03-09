@@ -215,14 +215,14 @@ export class Gear {
           if (missionEnergy < energy) {
             const dropRate = 0.2; //todo
             const refreshes = ["C01D", "C01L"].includes(campaignId)
-              ? store.state.gear.refreshes.standard
-              : store.state.gear.refreshes.fleet;
+              ? store.state.gear.refreshes?.standard ?? 0
+              : store.state.gear.refreshes?.fleet ?? 0;
             const extraEnergy = ["C01D", "C01L"].includes(campaignId)
               ? 135
               : 45;
             const otherEnergy = ["C01D", "C01L"].includes(campaignId)
-              ? store.state.gear.energy.standard
-              : store.state.gear.energy.fleet;
+              ? store.state.gear.energy?.standard ?? 0
+              : store.state.gear.energy?.fleet ?? 0;
             const totalEnergy =
               240 + extraEnergy + 120 * refreshes - otherEnergy;
 
@@ -324,4 +324,15 @@ export type OwnedCount = {
   count: number;
   id: string;
   irrelevant?: boolean;
+};
+
+export type EnergyType = {
+  standard?: number;
+  fleet?: number;
+  cantina?: number;
+};
+
+export type EnergyConfig = {
+  energy: EnergyType;
+  refreshes: EnergyType;
 };

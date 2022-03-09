@@ -107,62 +107,64 @@ const store = {
     },
   },
   actions: {
-    async initialize(
-      { commit, dispatch, state, rootState }: ActionCtx,
-      player: PlayerResponse
-    ) {
-      //todo: handle player.opponent
-      commit("SET_REQUEST_STATE", loadingState.loading);
+    async initialize({ commit, dispatch, state, rootState }: ActionCtx) {
+      if (state.requestState === loadingState.initial) {
+        //todo: handle player.opponent
+        commit("SET_REQUEST_STATE", loadingState.loading);
+        const player = rootState.player.player;
 
-      if (player.id) {
-        const opponentResponse: OpponentResponse =
-          await apiClient.fetchOpponent(player.id);
-        await dispatch("fetchPlayer", opponentResponse.opponentAllyCode);
-        commit(
-          "SET_TEAMS",
-          (opponentResponse?.teams || []).map((t) => new Team(t, state.player?.id))
-        );
+        if (player?.id) {
+          const opponentResponse: OpponentResponse =
+            await apiClient.fetchOpponent(player.id);
+          await dispatch("fetchPlayer", opponentResponse.opponentAllyCode);
+          commit(
+            "SET_TEAMS",
+            (opponentResponse?.teams || []).map(
+              (t) => new Team(t, state.player?.id)
+            )
+          );
 
-        const matches: Match[] = (opponentResponse?.matches || []).reduce(
-          (acc: Match[], { opponentTeamId, playerTeamId, gameMode }) => {
-            const opponentTeam: Team | undefined = state.teams.find(
-              (team) => team.id === opponentTeamId
-            );
-            const playerTeam: Team | undefined = rootState.teams.teams.find(
-              (team) => team.id === playerTeamId
-            );
-            if (opponentTeam && playerTeam) {
-              acc.push(
-                new Match({
-                  opponentTeamId,
-                  playerTeamId,
-                  gameMode,
-                  id: uuid(),
-                  name: playerTeam.name + " Versus " + opponentTeam.name,
-                })
+          const matches: Match[] = (opponentResponse?.matches || []).reduce(
+            (acc: Match[], { opponentTeamId, playerTeamId, gameMode }) => {
+              const opponentTeam: Team | undefined = state.teams.find(
+                (team) => team.id === opponentTeamId
               );
-            }
-            if (!opponentTeam) {
-              console.error(
-                "Could not find matching opponent team",
-                opponentTeamId
+              const playerTeam: Team | undefined = rootState.teams.teams.find(
+                (team) => team.id === playerTeamId
               );
-            }
-            if (!playerTeam) {
-              console.error(
-                "Could not find matching player team",
-                playerTeamId
-              );
-            }
-            return acc;
-          },
-          []
-        );
+              if (opponentTeam && playerTeam) {
+                acc.push(
+                  new Match({
+                    opponentTeamId,
+                    playerTeamId,
+                    gameMode,
+                    id: uuid(),
+                    name: playerTeam.name + " Versus " + opponentTeam.name,
+                  })
+                );
+              }
+              if (!opponentTeam) {
+                console.error(
+                  "Could not find matching opponent team",
+                  opponentTeamId
+                );
+              }
+              if (!playerTeam) {
+                console.error(
+                  "Could not find matching player team",
+                  playerTeamId
+                );
+              }
+              return acc;
+            },
+            []
+          );
 
-        commit("SET_MATCHES", matches);
+          commit("SET_MATCHES", matches);
+        }
+
+        commit("SET_REQUEST_STATE", loadingState.ready);
       }
-
-      commit("SET_REQUEST_STATE", loadingState.ready);
     },
     async fetchPlayer({ commit }: ActionCtx, allyCode: string) {
       if (allyCode) {

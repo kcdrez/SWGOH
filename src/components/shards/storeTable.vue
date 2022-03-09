@@ -59,7 +59,10 @@
             Amount/Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showCol('attempts')">Node Attempts per Day</th>
+          <th class="c-pointer" @click="sortBy('currency')">
+            Currency
+            <i class="fas mx-1" :class="sortIcon('currency')"></i>
+          </th>
           <th
             class="c-pointer"
             @click="sortBy('time')"
@@ -67,21 +70,6 @@
           >
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
-          </th>
-          <th
-            v-if="
-              (showCol('priority') && showPriority) ||
-              (showCol('actions') && !showPriority)
-            "
-            :class="{ 'c-pointer': showPriority }"
-            @click="sortBy('priority')"
-          >
-            {{ showPriority ? "Priority" : "Actions" }}
-            <i
-              class="fas mx-1"
-              :class="sortIcon('priority')"
-              v-if="showPriority"
-            ></i>
           </th>
         </tr>
       </thead>
@@ -93,10 +81,7 @@
           >
             <UnitIcon :unit="unit" isLink />
           </td>
-          <td
-            class="align-middle text-center farming-locations"
-            v-if="showCol('locations')"
-          >
+          <td class="align-middle text-center" v-if="showCol('locations')">
             <div v-if="unit.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
@@ -114,9 +99,14 @@
             <ShardsOwned :unit="unit" />
             <ProgressBar :percent="unit.shardPercent" class="mt-2" />
           </td>
-          <td class="align-middle nodes-per-day" v-if="showCol('attempts')">
-            <span class="row-label">Node Attempts per Day:</span>
-            <NodesPerDay :unit="unit" v-if="unit.showNodesPerDay" />
+          <td class="align-middle">
+            <Currency
+              v-for="c in unit.currencyTypes"
+              :key="c"
+              :currencyType="c"
+              :allowEditAvg="allowEditAvg"
+              :remainingCurrency="unit.currencyAmountRemaining(c)"
+            />
           </td>
           <td
             class="text-center align-middle"
@@ -132,42 +122,6 @@
               displayClasses="d-inline"
             />
           </td>
-          <td
-            class="text-center align-middle"
-            v-if="
-              (showCol('priority') && showPriority) ||
-              (showCol('actions') && !showPriority)
-            "
-          >
-            <ShardPriority
-              :unit="unit"
-              v-if="showPriority"
-              :nodeTableNames="nodeTableNames"
-            />
-            <div
-              class="btn-group btn-group-sm d-block text-center"
-              role="group"
-              v-else
-            >
-              <button
-                type="button"
-                class="btn btn-success"
-                title="Add to active farming list"
-                v-if="unit.tracking"
-                @click="unit.tracking = true"
-              >
-                <i class="fas fa-heart"></i>
-              </button>
-              <button
-                type="button"
-                class="btn btn-danger"
-                title="Remove from active farming list"
-                @click="unit.tracking = false"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </td>
         </tr>
       </tbody>
     </table>
@@ -182,16 +136,18 @@ import UnitIcon from "../units/unitIcon.vue";
 import NodesPerDay from "./nodesPerDay.vue";
 import ShardPriority from "./shardPriority.vue";
 import Timestamp from "../timestamp.vue";
+import Currency from "./currency.vue";
 import { Unit } from "../../types/unit";
 
 export default defineComponent({
-  name: "ShardTable",
+  name: "StoreTable",
   components: {
     ShardsOwned,
     UnitIcon,
     NodesPerDay,
     Timestamp,
     ShardPriority,
+    Currency,
   },
   props: {
     units: {
@@ -202,19 +158,6 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    showPriority: {
-      type: Boolean,
-      default: false,
-    },
-    initialSort: {
-      type: Object,
-    },
-    nodeTableNames: {
-      type: Array as PropType<string[]>,
-      default: () => {
-        return [];
-      },
-    },
     selectedColumns: {
       type: Array,
       validator: (arr: string[]) => {
@@ -224,11 +167,15 @@ export default defineComponent({
       },
       required: true,
     },
+    allowEditAvg: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
-      sortDir: this.initialSort?.sortDir || "asc",
-      sortMethod: this.initialSort?.sortMethod || "name",
+      sortDir: "desc",
+      sortMethod: "progress",
       searchText: "",
     };
   },
@@ -261,19 +208,6 @@ export default defineComponent({
             } else {
               return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
             }
-          } else if (this.sortMethod === "priority") {
-            const priorityA = a.tablePriority(this.nodeTableNames);
-            const priorityB = b.tablePriority(this.nodeTableNames);
-
-            if (priorityA <= 0) {
-              return this.sortDir === "asc" ? 1 : -1;
-            } else if (priorityB <= 0) {
-              return this.sortDir === "asc" ? -1 : 1;
-            } else if (this.sortDir === "asc") {
-              return priorityA > priorityB ? 1 : -1;
-            } else {
-              return priorityA > priorityB ? -1 : 1;
-            }
           }
           return 0;
         });
@@ -303,12 +237,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@media only screen and (max-width: 768px) {
-  .farming-locations {
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-  }
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
 }
 </style>
