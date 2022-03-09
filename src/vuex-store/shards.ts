@@ -89,7 +89,6 @@ const store = {
       const match = state.ownedShards[id] || {};
 
       let nodesData: Node[] = [];
-      console.log(nodes);
       if (nodes) {
         nodesData = nodes.map((node) => {
           const nodeMatch = (match?.nodes || []).find((n) => n.id === node.id);

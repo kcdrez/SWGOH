@@ -446,9 +446,6 @@ export class Unit {
         shardsPerDay += nodesPerDay * 0.33 * this.shardDropRate;
       }
     });
-    if (this.id === "CARADUNE") {
-      console.log(this.remainingShards, shardsPerDay);
-    }
 
     if (shardsPerDay === 0) {
       this._7StarUnlockEstimation = -1;
