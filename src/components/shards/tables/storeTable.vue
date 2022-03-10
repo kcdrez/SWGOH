@@ -50,16 +50,35 @@
               v-model="searchText"
             />
           </th>
-          <th v-if="showCol('locations')">Locations</th>
+          <!-- <th v-if="showCol('locations')">Locations</th> -->
+          <th v-if="showCol('owned')">
+            <span>Shards Owned</span>
+            <i class="fas mx-2" :class="sortIcon('owned')"></i>
+          </th>
+          <th v-if="showCol('remaining')">
+            <span>Shards Remaining</span>
+            <i class="fas mx-2" :class="sortIcon('remaining')"></i>
+          </th>
           <th
             v-if="showCol('progress')"
             class="c-pointer"
             @click="sortBy('progress')"
           >
-            Amount/Progress
+            Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showCol('attempts')">Node Attempts per Day</th>
+          <th v-if="showCol('wallet')">
+            <span>Currency Owned</span>
+            <i class="fas mx-2" :class="sortIcon('wallet')"></i>
+          </th>
+          <th v-if="showCol('dailyCurrency')">
+            <span>Daily Currency Obtained</span>
+            <i class="fas mx-2" :class="sortIcon('dailyCurrency')"></i>
+          </th>
+          <th class="c-pointer" @click="sortBy('remainingCurrency')">
+            Remaining Currency
+            <i class="fas mx-1" :class="sortIcon('remainingCurrency')"></i>
+          </th>
           <th
             class="c-pointer"
             @click="sortBy('time')"
@@ -67,21 +86,6 @@
           >
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
-          </th>
-          <th
-            v-if="
-              (showCol('priority') && showPriority) ||
-              (showCol('actions') && !showPriority)
-            "
-            :class="{ 'c-pointer': showPriority }"
-            @click="sortBy('priority')"
-          >
-            {{ showPriority ? "Priority" : "Actions" }}
-            <i
-              class="fas mx-1"
-              :class="sortIcon('priority')"
-              v-if="showPriority"
-            ></i>
           </th>
         </tr>
       </thead>
@@ -91,32 +95,51 @@
             class="text-center align-middle"
             v-if="showUnitName && showCol('name')"
           >
-            <UnitIcon :unit="unit" isLink />
+            <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
-          <td
-            class="align-middle text-center farming-locations"
-            v-if="showCol('locations')"
-          >
-            <div v-if="unit.locations.length <= 0" class="text-center">
-              No known farmable locations.
-            </div>
-            <template v-else>
-              <span class="row-label">Farming Locations:</span>
-              <ul class="m-0">
-                <li v-for="(l, index) in unit.locations" :key="index">
-                  {{ l }}
-                </li>
-              </ul>
-            </template>
+          <td class="align-middle" v-if="showCol('owned')">
+            <ShardsOwned :unit="unit" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('remaining')">
+            {{ unit.remainingShards }}
           </td>
           <td class="align-middle" v-if="showCol('progress')">
-            <span class="row-label">Amount/Progress:</span>
-            <ShardsOwned :unit="unit" />
-            <ProgressBar :percent="unit.shardPercent" class="mt-2" />
+            <span class="row-label">Progress:</span>
+            <ProgressBar :percent="unit.shardPercent" />
           </td>
-          <td class="align-middle nodes-per-day" v-if="showCol('attempts')">
-            <span class="row-label">Node Attempts per Day:</span>
-            <NodesPerDay :unit="unit" v-if="unit.showNodesPerDay" />
+          <td class="align-middle" v-if="showCol('wallet')">
+            <template v-for="currency in currencyTypes" :key="currency">
+              <Wallet
+                v-if="unit.currencyTypes.includes(currency)"
+                :currencyType="currency"
+              />
+            </template>
+          </td>
+          <td class="align-middle text-center" v-if="showCol('dailyCurrency')">
+            <template v-for="currency in currencyTypes" :key="currency">
+              <template v-if="unit.currencyTypes.includes(currency)">
+                <img
+                  class="currency-img"
+                  :src="`/images/${currency}.png`"
+                  v-if="!allowEditAvg"
+                />
+                <DailyCurrency
+                  class="d-inline"
+                  :currencyType="currency"
+                  :allowEdit="allowEditAvg"
+                />
+              </template>
+            </template>
+          </td>
+          <td
+            class="align-middle text-center"
+            v-if="showCol('remainingCurrency')"
+          >
+            <template
+              v-for="amount in unit.currencyAmountRemaining(currencyTypes)"
+            >
+              {{ amount }}
+            </template>
           </td>
           <td
             class="text-center align-middle"
@@ -132,42 +155,6 @@
               displayClasses="d-inline"
             />
           </td>
-          <td
-            class="text-center align-middle"
-            v-if="
-              (showCol('priority') && showPriority) ||
-              (showCol('actions') && !showPriority)
-            "
-          >
-            <ShardPriority
-              :unit="unit"
-              v-if="showPriority"
-              :nodeTableNames="nodeTableNames"
-            />
-            <div
-              class="btn-group btn-group-sm d-block text-center"
-              role="group"
-              v-else
-            >
-              <button
-                type="button"
-                class="btn btn-success"
-                title="Add to active farming list"
-                v-if="unit.tracking"
-                @click="unit.tracking = true"
-              >
-                <i class="fas fa-heart"></i>
-              </button>
-              <button
-                type="button"
-                class="btn btn-danger"
-                title="Remove from active farming list"
-                @click="unit.tracking = false"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </td>
         </tr>
       </tbody>
     </table>
@@ -177,21 +164,25 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import ShardsOwned from "./shardsOwned.vue";
-import UnitIcon from "../units/unitIcon.vue";
-import NodesPerDay from "./nodesPerDay.vue";
-import ShardPriority from "./shardPriority.vue";
-import Timestamp from "../timestamp.vue";
-import { Unit } from "../../types/unit";
+import ShardsOwned from "../shardsOwned.vue";
+import UnitIcon from "../../units/unitIcon.vue";
+import NodesPerDay from "../nodesPerDay.vue";
+import ShardPriority from "../shardPriority.vue";
+import Timestamp from "../../timestamp.vue";
+import Wallet from "../wallet.vue";
+import DailyCurrency from "../dailyCurrency.vue";
+import { Unit } from "../../../types/unit";
 
 export default defineComponent({
-  name: "ShardTable",
+  name: "StoreTable",
   components: {
     ShardsOwned,
     UnitIcon,
     NodesPerDay,
     Timestamp,
     ShardPriority,
+    Wallet,
+    DailyCurrency,
   },
   props: {
     units: {
@@ -202,33 +193,37 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    showPriority: {
-      type: Boolean,
-      default: false,
-    },
-    initialSort: {
-      type: Object,
-    },
-    nodeTableNames: {
-      type: Array as PropType<string[]>,
-      default: () => {
-        return [];
-      },
-    },
     selectedColumns: {
       type: Array,
-      validator: (arr: string[]) => {
+      validator: (arr: any[]) => {
         return arr.every((x) => {
           return typeof x === "string";
         });
       },
       required: true,
     },
+    allowEditAvg: {
+      type: Boolean,
+      default: false,
+    },
+    simpleView: {
+      type: Boolean,
+      default: false,
+    },
+    currencyTypes: {
+      type: Array,
+      required: true,
+      validator: (arr: any[]) => {
+        return arr.every((x) => {
+          return typeof x === "string";
+        });
+      },
+    },
   },
   data() {
     return {
-      sortDir: this.initialSort?.sortDir || "asc",
-      sortMethod: this.initialSort?.sortMethod || "name",
+      sortDir: "desc",
+      sortMethod: "progress",
       searchText: "",
     };
   },
@@ -261,19 +256,6 @@ export default defineComponent({
             } else {
               return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
             }
-          } else if (this.sortMethod === "priority") {
-            const priorityA = a.tablePriority(this.nodeTableNames);
-            const priorityB = b.tablePriority(this.nodeTableNames);
-
-            if (priorityA <= 0) {
-              return this.sortDir === "asc" ? 1 : -1;
-            } else if (priorityB <= 0) {
-              return this.sortDir === "asc" ? -1 : 1;
-            } else if (this.sortDir === "asc") {
-              return priorityA > priorityB ? 1 : -1;
-            } else {
-              return priorityA > priorityB ? -1 : 1;
-            }
           }
           return 0;
         });
@@ -303,12 +285,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@media only screen and (max-width: 768px) {
-  .farming-locations {
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-  }
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
+}
+.currency-img {
+  max-width: 30px;
 }
 </style>

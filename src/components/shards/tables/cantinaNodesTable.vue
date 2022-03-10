@@ -1,10 +1,8 @@
 <template>
-  <div class="mb-3">
-    <div class="collapse-header section-header mt-3">
-      <h3>
-        <div data-bs-toggle="collapse" href="#shard-section-table">
-          Shard Summary
-        </div>
+  <div v-if="unitList.length > 0">
+    <div class="collapse-header section-header">
+      <h3 class="w-100" data-bs-toggle="collapse" href="#cantinaNodesTable">
+        <div class="d-inline">Cantina Battles</div>
       </h3>
       <div class="simple-view-container">
         <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
@@ -16,30 +14,33 @@
         @checked="selectedColumns = $event"
       />
     </div>
-    <div id="shard-section-table" class="collapse" ref="shardSection">
-      <ShardTable
-        :units="plannerList"
-        showUnitName
-        showActions
-        :selectedColumns="selectedColumns"
-        :simpleView="simpleView"
-        :storageKey="storageKey + 'Table'"
-      />
-    </div>
+    <ShardTable
+      id="cantinaNodesTable"
+      class="collapse"
+      ref="cantinaNodesTable"
+      :units="unitList"
+      :nodeTableNames="['Cantina']"
+      :selectedColumns="selectedColumns"
+      showUnitName
+      showPriority
+      :simpleView="simpleView"
+      :storageKey="storageKey + 'Table'"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapGetters, mapState } from "vuex";
+import { mapGetters } from "vuex";
 
-import { setupEvents } from "../../utils";
-import ShardTable from "../shards/tables/shardTable.vue";
+import { setupEvents } from "../../../utils";
+import { Unit } from "../../../types/unit";
+import ShardTable from "./shardTable.vue";
 
-const storageKey = "shardSection";
+const storageKey = "cantinaNodes";
 
 export default defineComponent({
-  name: "ShardSection",
+  name: "CantinaNodesTable",
   components: { ShardTable },
   data() {
     return {
@@ -49,9 +50,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("planner", ["fullUnitList"]),
-    ...mapState("relic", ["relicConfig"]),
-    ...mapGetters("shards", ["plannerList"]),
+    ...mapGetters("shards", ["unitFarmingList"]),
     cols(): { text: string; value: any }[] {
       const list = [
         {
@@ -61,6 +60,14 @@ export default defineComponent({
         {
           text: "Locations",
           value: "locations",
+        },
+        {
+          text: "Owned Shards",
+          value: "owned",
+        },
+        {
+          text: "Shards Remaining",
+          value: "remaining",
         },
         {
           text: "Progress",
@@ -75,11 +82,16 @@ export default defineComponent({
           value: "time",
         },
         {
-          text: "Actions",
-          value: "actions",
+          text: "Priority",
+          value: "priority",
         },
       ];
       return list;
+    },
+    unitList(): Unit[] {
+      return this.unitFarmingList.filter((unit: Unit) => {
+        return unit.whereToFarm.some((node) => node.table === "Cantina");
+      });
     },
   },
   watch: {
@@ -89,11 +101,9 @@ export default defineComponent({
   },
   mounted() {
     setupEvents(
-      this.$refs.shardSection as HTMLElement,
+      (this.$refs?.cantinaNodesTable as any)?.$el as HTMLElement,
       storageKey + "Collapse"
     );
   },
 });
 </script>
-
-<style lang="scss" scoped></style>

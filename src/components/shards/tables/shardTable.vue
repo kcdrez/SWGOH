@@ -41,8 +41,8 @@
         <tr class="text-center align-middle">
           <th v-if="showUnitName && showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
-              Unit Name
-              <i class="fas mx-1" :class="sortIcon('name')"></i>
+              <span>Unit Name</span>
+              <i class="fas mx-2" :class="sortIcon('name')"></i>
             </div>
             <input
               class="form-control form-control-sm mx-auto my-1 w-75"
@@ -50,22 +50,43 @@
               v-model="searchText"
             />
           </th>
-          <th v-if="showCol('locations')">Locations</th>
+          <th v-if="showCol('locations')">
+            <span>Locations</span>
+          </th>
+          <th v-if="showCol('owned')">
+            <span>Shards Owned</span>
+            <i class="fas mx-2" :class="sortIcon('owned')"></i>
+          </th>
+          <th v-if="showCol('remaining')">
+            <span>Shards Remaining</span>
+            <i class="fas mx-2" :class="sortIcon('remaining')"></i>
+          </th>
           <th
-            v-if="showCol('progress')"
             class="c-pointer"
+            v-if="showCol('progress')"
             @click="sortBy('progress')"
           >
-            Amount/Progress
-            <i class="fas mx-1" :class="sortIcon('progress')"></i>
+            <span>Progress</span>
+            <i class="fas mx-2" :class="sortIcon('progress')"></i>
+          </th>
+          <th v-if="showCol('attempts')">
+            <span>Node Attempts per Day</span>
+            <i class="fas mx-2" :class="sortIcon('attempts')"></i>
           </th>
           <th
             class="c-pointer"
             @click="sortBy('time')"
             v-if="showUnitName && showCol('time')"
           >
-            Est. Time
-            <i class="fas mx-1" :class="sortIcon('time')"></i>
+            <span>Est. Time</span>
+            <i class="fas mx-2" :class="sortIcon('time')"></i>
+          </th>
+          <th v-if="showCol('priority') && showPriority" width="150px">
+            <span>Priority</span>
+            <i class="fas mx-2" :class="sortIcon('priority')"></i>
+          </th>
+          <th v-if="showCol('actions') && showActions" width="100px">
+            <span>Actions</span>
           </th>
         </tr>
       </thead>
@@ -75,9 +96,12 @@
             class="text-center align-middle"
             v-if="showUnitName && showCol('name')"
           >
-            <UnitIcon :unit="unit" isLink />
+            <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
-          <td class="align-middle text-center" v-if="showCol('locations')">
+          <td
+            class="align-middle text-center farming-locations"
+            v-if="showCol('locations')"
+          >
             <div v-if="unit.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
@@ -90,10 +114,18 @@
               </ul>
             </template>
           </td>
-          <td class="align-middle" v-if="showCol('progress')">
-            <span class="row-label">Amount/Progress:</span>
+          <td class="align-middle" v-if="showCol('owned')">
             <ShardsOwned :unit="unit" />
-            <ProgressBar :percent="unit.shardPercent" class="mt-2" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('remaining')">
+            {{ unit.remainingShards }}
+          </td>
+          <td class="align-middle progress-cell" v-if="showCol('progress')">
+            <ProgressBar :percent="unit.shardPercent" />
+          </td>
+          <td class="align-middle nodes-per-day" v-if="showCol('attempts')">
+            <span class="row-label">Node Attempts per Day:</span>
+            <NodesPerDay :unit="unit" v-if="unit.showNodesPerDay" />
           </td>
           <td
             class="text-center align-middle"
@@ -109,6 +141,33 @@
               displayClasses="d-inline"
             />
           </td>
+          <td class="align-middle" v-if="showCol('priority') && showPriority">
+            <ShardPriority :unit="unit" :nodeTableNames="nodeTableNames" />
+          </td>
+          <td class="align-middle" v-if="showCol('actions') && showActions">
+            <div
+              class="btn-group btn-group-sm d-block text-center"
+              role="group"
+            >
+              <button
+                type="button"
+                class="btn btn-success"
+                title="Add to active farming list"
+                v-if="unit.tracking"
+                @click="unit.tracking = true"
+              >
+                <i class="fas fa-heart"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger"
+                title="Remove from active farming list"
+                @click="unit.tracking = false"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -118,16 +177,15 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import ShardsOwned from "./shardsOwned.vue";
-import UnitIcon from "../units/unitIcon.vue";
-import NodesPerDay from "./nodesPerDay.vue";
-import ShardPriority from "./shardPriority.vue";
-import Timestamp from "../timestamp.vue";
-import { Unit } from "../../types/unit";
-import { mapActions } from "vuex";
+import ShardsOwned from "../shardsOwned.vue";
+import UnitIcon from "../../units/unitIcon.vue";
+import NodesPerDay from "../nodesPerDay.vue";
+import ShardPriority from "../shardPriority.vue";
+import Timestamp from "../../timestamp.vue";
+import { Unit } from "../../../types/unit";
 
 export default defineComponent({
-  name: "TerritoryBattleShardTable",
+  name: "ShardTable",
   components: {
     ShardsOwned,
     UnitIcon,
@@ -144,6 +202,20 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    showPriority: {
+      type: Boolean,
+      default: false,
+    },
+    showActions: {
+      type: Boolean,
+      default: false,
+    },
+    nodeTableNames: {
+      type: Array as PropType<string[]>,
+      default: () => {
+        return [];
+      },
+    },
     selectedColumns: {
       type: Array,
       validator: (arr: string[]) => {
@@ -151,6 +223,14 @@ export default defineComponent({
           return typeof x === "string";
         });
       },
+      required: true,
+    },
+    simpleView: {
+      type: Boolean,
+      default: false,
+    },
+    storageKey: {
+      type: String,
       required: true,
     },
   },
@@ -190,13 +270,33 @@ export default defineComponent({
             } else {
               return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
             }
+          } else if (this.sortMethod === "priority") {
+            const priorityA = a.tablePriority(this.nodeTableNames);
+            const priorityB = b.tablePriority(this.nodeTableNames);
+
+            if (priorityA <= 0) {
+              return this.sortDir === "asc" ? 1 : -1;
+            } else if (priorityB <= 0) {
+              return this.sortDir === "asc" ? -1 : 1;
+            } else if (this.sortDir === "asc") {
+              return priorityA > priorityB ? 1 : -1;
+            } else {
+              return priorityA > priorityB ? -1 : 1;
+            }
           }
           return 0;
         });
     },
   },
+  watch: {
+    sortDir() {
+      this.saveSortData();
+    },
+    sortMethod() {
+      this.saveSortData();
+    },
+  },
   methods: {
-    ...mapActions("guild", ["initialize"]),
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
@@ -215,50 +315,36 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
   },
-  async created() {
-    await this.initialize();
+  created() {
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
-.show-on-desktop {
-  @media only screen and (max-width: 1200px) {
-    ::v-deep(.nodes-container) {
-      flex-basis: 100%;
-
-      .input-group {
-        display: block;
-
-        * {
-          width: 100%;
-
-          &:first-child {
-            border-radius: 0.2rem 0.2rem 0 0 !important;
-            justify-content: center;
-          }
-
-          &:last-child {
-            border-radius: 0 0 0.2rem 0.2rem !important;
-          }
-
-          &:not(:first-child) {
-            &:not(button) {
-              display: block;
-            }
-            border-top: none;
-            text-align: center;
-            //everything except the first element is off so the following is used to compensate :shrug:
-            position: relative;
-            left: 1px;
-          }
-        }
-      }
+.progress-cell {
+  min-width: 125px;
+}
+@media only screen and (max-width: 768px) {
+  .farming-locations {
+    ul {
+      list-style: none;
+      padding: 0;
     }
   }
 }
 </style>
->>>>>>> main

@@ -1,11 +1,14 @@
 <template>
   <div>
-    <div class="collapse-header section-header position-relative">
+    <div class="collapse-header section-header">
       <h3>
         <div data-bs-toggle="collapse" href="#unit-section-table">
           Unit Summary
         </div>
       </h3>
+      <div class="simple-view-container">
+        <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
+      </div>
       <MultiSelect
         class="select-columns"
         :options="cols"
@@ -15,11 +18,7 @@
     </div>
     <div id="unit-section-table" class="collapse" ref="unitSection">
       <table
-        class="
-          table table-bordered table-dark table-sm table-striped
-          m-0
-          swgoh-table
-        "
+        class="table table-bordered table-dark table-sm table-striped m-0 swgoh-table"
       >
         <thead class="sticky-header show-on-mobile">
           <tr class="sort-methods">
@@ -115,13 +114,10 @@
         </thead>
         <tbody>
           <tr v-for="unit in fullUnitList" :key="unit.id">
-            <td class="text-center" v-if="showCol('name')">
-              <router-link
-                :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-                >{{ unit.name }}</router-link
-              >
+            <td class="align-middle text-center" v-if="showCol('name')">
+              <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
             </td>
-            <td class="text-center" v-if="showCol('curLevel')">
+            <td class="align-middle text-center" v-if="showCol('curLevel')">
               <GearText :level="unit.gearLevel" v-if="unit.relicLevel <= 0" />
               <RelicLevelIcon
                 class="d-inline-block"
@@ -130,12 +126,12 @@
                 v-else
               />
             </td>
-            <td class="text-center" v-if="showCol('targetLevel')">
+            <td class="align-middle text-center" v-if="showCol('targetLevel')">
               <span class="row-label">Target Level:</span>
               <div v-if="unit.isShip">-</div>
-              <template v-else>
+              <div class="d-flex" v-else>
                 <select
-                  class="form-control form-control-sm mb-1"
+                  class="form-control form-control-sm me-1"
                   v-model="unit.gearTarget"
                   v-if="unit.gearLevel < maxGearLevel"
                 >
@@ -159,10 +155,10 @@
                     Relic {{ num }}
                   </option>
                 </select>
-              </template>
+              </div>
             </td>
             <td
-              class="text-center"
+              class="align-middle text-center"
               :class="{
                 'hidden-sm': unit.gearTotalDays === 0 && !unit.isShip,
               }"
@@ -177,7 +173,7 @@
               />
             </td>
             <td
-              class="text-center"
+              class="align-middle text-center"
               :class="{
                 'hidden-sm': unit.relicTotalDays === 0 && !unit.isShip,
               }"
@@ -191,7 +187,7 @@
                 displayClasses="d-inline"
               />
             </td>
-            <td class="text-center" v-if="showCol('totalDate')">
+            <td class="align-middle text-center" v-if="showCol('totalDate')">
               <span class="row-label">Est. Total Level:</span>
               <Timestamp
                 :timeLength="unit.relicTotalDays + unit.gearTotalDays"
@@ -207,7 +203,7 @@
                 displayClasses="d-inline"
               />
             </td>
-            <td v-if="showCol('actions')">
+            <td class="align-middle" v-if="showCol('actions')">
               <div
                 class="btn-group btn-group-sm d-block text-center"
                 role="group"
@@ -240,10 +236,11 @@ import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
 import GearText from "../gear/gearText.vue";
 import RelicLevelIcon from "../units/relicLevelIcon.vue";
+import UnitIcon from "../units/unitIcon.vue";
 
 export default defineComponent({
   name: "UnitSection",
-  components: { Timestamp, GearText, RelicLevelIcon },
+  components: { Timestamp, GearText, RelicLevelIcon, UnitIcon },
   data() {
     return {
       sortDir: "asc",
@@ -251,6 +248,9 @@ export default defineComponent({
       searchText: "",
       maxGearLevel,
       selectedColumns: [],
+      simpleView: JSON.parse(
+        window.localStorage.getItem("unitSection") || "true"
+      ),
     };
   },
   computed: {
@@ -287,6 +287,11 @@ export default defineComponent({
         },
       ];
       return list;
+    },
+  },
+  watch: {
+    simpleView(newVal) {
+      window.localStorage.setItem("unitSection", newVal);
     },
   },
   methods: {

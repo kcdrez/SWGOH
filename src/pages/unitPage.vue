@@ -39,7 +39,14 @@ import ShardPlanner from "../components/shards/shardPlanner.vue";
 import UnitIcon from "../components/units/unitIcon.vue";
 import { loadingState } from "../types/loading";
 
-const dependencyModules = ["player", "unit", "gear", "relic", "shards"];
+const dependencyModules = [
+  "player",
+  "unit",
+  "gear",
+  "relic",
+  "shards",
+  "planner",
+];
 
 export default defineComponent({
   name: "UnitPage",
@@ -114,8 +121,6 @@ export default defineComponent({
   async created() {
     await initializeModules(dependencyModules);
     await this.fetchUnit(this.$route.params.unitId);
-    if (this.playerRequestState === loadingState.ready) {
-    }
   },
 });
 </script>

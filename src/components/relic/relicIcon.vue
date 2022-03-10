@@ -1,7 +1,6 @@
 <template>
   <div>
-    <img :src="item.image" />
-    <div>{{ item.name }}</div>
+    <img :src="item.image" v-if="!simpleView" />
   </div>
 </template>
 
@@ -15,12 +14,16 @@ export default defineComponent({
       type: Object,
       required: true,
     },
+    simpleView: {
+      type: Boolean,
+      default: false,
+    },
   },
 });
 </script>
 
 <style lang="scss" scoped>
 img {
-  max-width: 40px;
+  max-width: 35px;
 }
 </style>

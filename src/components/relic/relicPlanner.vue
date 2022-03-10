@@ -34,13 +34,14 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="relicTable"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
       <RelicTable
         :relicList="relicList"
         :targetLevels="[{ level: unit.relicLevel, target: unit.relicTarget }]"
         :selectedColumns="selectedColumns"
+        :storageKey="storageKey + 'Table'"
       />
     </div>
   </div>
@@ -58,6 +59,8 @@ import { loadingState } from "../../types/loading";
 import { Relic, maxRelicLevel } from "../../types/relic";
 import { setupEvents } from "../../utils";
 
+const storageKey = "relicPlanner";
+
 export default defineComponent({
   name: "RelicPlannerComponent",
   components: { RelicTable, Timestamp, EnergySpent, RelicLevelIcon },
@@ -65,6 +68,7 @@ export default defineComponent({
     return {
       maxRelicLevel,
       selectedColumns: [],
+      storageKey,
     };
   },
   computed: {
@@ -80,12 +84,24 @@ export default defineComponent({
     cols(): { text: string; value: any }[] {
       const list = [
         {
+          text: "Icon",
+          value: "icon",
+        },
+        {
           text: "Name",
           value: "name",
         },
         {
           text: "Locations",
           value: "locations",
+        },
+        {
+          text: "Amount Owned",
+          value: "owned",
+        },
+        {
+          text: "Amount Needed",
+          value: "needed",
         },
         {
           text: "Progress",
@@ -95,17 +111,13 @@ export default defineComponent({
           text: "Estimated Time",
           value: "time",
         },
-        {
-          text: "Actions",
-          value: "actions",
-        },
       ];
       return list;
     },
   },
   mounted() {
     if (!this.unit.isShip && this.unit.relicLevel < maxRelicLevel) {
-      setupEvents(this.$refs.relicSection as HTMLElement, "relicPlanner");
+      setupEvents(this.$refs.relicSection as HTMLElement, storageKey);
     }
   },
 });

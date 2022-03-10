@@ -31,10 +31,15 @@
         <MultiSelect
           class="select-columns"
           :options="cols"
-          storageKey="shardTable"
+          :storageKey="storageKey + 'Columns'"
           @checked="selectedColumns = $event"
         />
-        <ShardTable :units="[unit]" :selectedColumns="selectedColumns" />
+        <ShardTable
+          :units="[unit]"
+          :selectedColumns="selectedColumns"
+          showActions
+          :storageKey="storageKey + 'Table'"
+        />
       </template>
     </div>
   </div>
@@ -42,13 +47,15 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapGetters, mapActions } from "vuex";
+import { mapState, mapGetters } from "vuex";
 
-import ShardTable from "./shardTable.vue";
+import ShardTable from "./tables/shardTable.vue";
 import EnergySpent from "../energySpent.vue";
 import { loadingState } from "../../types/loading";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
+
+const storageKey = "shardPlanner";
 
 export default defineComponent({
   name: "ShardPlannerComponent",
@@ -56,6 +63,7 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
+      storageKey,
     };
   },
   computed: {
@@ -135,12 +143,12 @@ export default defineComponent({
       return list;
     },
   },
-  methods: {
-    ...mapActions(["toggleCollapse"]),
-  },
   mounted() {
     if (this.unit.stars < 7) {
-      setupEvents(this.$refs.shardSection as HTMLElement, "shardPlanner");
+      setupEvents(
+        this.$refs.shardSection as HTMLElement,
+        storageKey + "Collapse"
+      );
     }
   },
 });

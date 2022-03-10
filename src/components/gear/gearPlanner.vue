@@ -36,12 +36,13 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="gearTable"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
       <GearTable
         :gearList="unit.fullSalvageList"
         :selectedColumns="selectedColumns"
+        :storageKey="storageKey + 'Table'"
       />
     </div>
     <div class="modal fade" id="gearAssumptionsModal" tabindex="-1">
@@ -106,6 +107,8 @@ import GearText from "./gearText.vue";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
 
+const storageKey = "gearPlanner";
+
 export default defineComponent({
   name: "GearPlannerComponent",
   components: { GearTable, Timestamp, EnergySpent, GearText },
@@ -113,6 +116,7 @@ export default defineComponent({
     return {
       maxGearLevel,
       selectedColumns: [],
+      storageKey,
     };
   },
   computed: {
@@ -125,12 +129,24 @@ export default defineComponent({
     cols(): { text: string; value: any }[] {
       const list = [
         {
+          text: "Icon",
+          value: "icon",
+        },
+        {
           text: "Name",
           value: "name",
         },
         {
           text: "Locations",
           value: "locations",
+        },
+        {
+          text: "Amount Owned",
+          value: "owned",
+        },
+        {
+          text: "Amount Needed",
+          value: "needed",
         },
         {
           text: "Progress",
@@ -148,12 +164,9 @@ export default defineComponent({
       return list;
     },
   },
-  methods: {
-    ...mapActions(["toggleCollapse"]),
-  },
   mounted() {
     if (!this.unit.isShip && this.unit.gearLevel < this.maxGearLevel) {
-      setupEvents(this.$refs.gearSection as HTMLElement, "gearPlanner");
+      setupEvents(this.$refs.gearSection as HTMLElement, storageKey);
     }
   },
 });
@@ -161,7 +174,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
-
 
 .gear-header,
 .time-estimate {

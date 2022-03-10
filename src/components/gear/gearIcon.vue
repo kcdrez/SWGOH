@@ -3,7 +3,6 @@
     <div class="text-center gear-border" :class="`gear-tier-${gear.tier}`">
       <img :src="gear.image" />
     </div>
-    <div>{{ gear.name }}</div>
   </div>
 </template>
 
@@ -29,7 +28,7 @@ export default defineComponent({
   margin: auto;
 
   img {
-    max-width: 40px;
+    max-width: 35px;
   }
 }
 

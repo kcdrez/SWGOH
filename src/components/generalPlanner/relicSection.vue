@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="collapse-header section-header mt-3 position-relative">
+    <div class="collapse-header section-header mt-3">
       <h3>
         <div data-bs-toggle="collapse" href="#relic-section-table">
           Relic Summary
@@ -9,7 +9,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="relicTable"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -19,6 +19,7 @@
         :targetLevels="relicTargetLevels"
         :selectedColumns="selectedColumns"
         showRequiredByUnit
+        :storageKey="storageKey + 'Table'"
       />
     </div>
   </div>
@@ -33,12 +34,15 @@ import { setupEvents } from "../../utils";
 import RelicTable from "../relic/relicTable.vue";
 import { Relic } from "../../types/relic";
 
+const storageKey = "relicSection";
+
 export default defineComponent({
   name: "RelicSection",
   components: { RelicTable },
   data() {
     return {
       selectedColumns: [],
+      storageKey,
     };
   },
   computed: {
@@ -47,12 +51,24 @@ export default defineComponent({
     cols(): { text: string; value: any }[] {
       const list = [
         {
+          text: "Icon",
+          value: "icon",
+        },
+        {
           text: "Name",
           value: "name",
         },
         {
           text: "Locations",
           value: "locations",
+        },
+        {
+          text: "Amount Owned",
+          value: "owned",
+        },
+        {
+          text: "Amount Needed",
+          value: "needed",
         },
         {
           text: "Progress",
@@ -91,11 +107,10 @@ export default defineComponent({
     },
   },
   mounted() {
-    setupEvents(this.$refs.relicSection as HTMLElement, "relicSection");
+    setupEvents(this.$refs.relicSection as HTMLElement, storageKey);
   },
   created() {},
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

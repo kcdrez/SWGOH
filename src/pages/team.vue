@@ -82,7 +82,6 @@ export default defineComponent({
       "upsertTeam",
       "deleteTeam",
       "saveTeams",
-      "addUnit",
       "removeUnit",
     ]),
     addNewTeam() {
