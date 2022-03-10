@@ -8,6 +8,7 @@ import TeamPage from "../pages/team.vue";
 import MatchUpPage from "../pages/matchUpPage.vue";
 import StarProgressionPage from "../pages/starProgression.vue";
 import GuildEventsPage from "../pages/guildEvents.vue";
+import DamageCalculatorPage from "../pages/damageCalculator.vue";
 
 const routes = [
   {
@@ -45,6 +46,11 @@ const routes = [
     name: "GuildEventsPage",
     component: GuildEventsPage,
   },
+  {
+    path: "/damage-calculator",
+    name: "DamageCalculatorPage",
+    component: DamageCalculatorPage,
+  },
 ];
 
 const router = createRouter({
@@ -56,11 +62,14 @@ router.beforeEach((to, _from, next) => {
   if (to.name === "home") {
     next();
   } else if (!store.state.player.player) {
-    store.watch((state) => {
-      return state.player.player
-    }, () => {
-      next()
-    })
+    store.watch(
+      (state) => {
+        return state.player.player;
+      },
+      () => {
+        next();
+      }
+    );
   } else {
     next();
   }

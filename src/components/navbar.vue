@@ -78,6 +78,24 @@
               </li>
             </ul>
           </li>
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              role="button"
+              data-bs-toggle="dropdown"
+            >
+              Misc. Tools
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <router-link
+                  class="dropdown-item"
+                  :to="{ name: 'DamageCalculatorPage' }"
+                  >Damage Calculator</router-link
+                >
+              </li>
+            </ul>
+          </li>
         </ul>
         <ul class="navbar-nav">
           <li class="mr-1" v-if="player">
