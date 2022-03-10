@@ -4,6 +4,7 @@ import store from "../vuex-store/store";
 import { FarmingNode, shardMapping } from "./shards";
 import { round2Decimals } from "../utils";
 import { CurrencyTypeConfig, currencyTypeList } from "./currency";
+import _ from "lodash";
 
 export interface IUnit {
   id: string;

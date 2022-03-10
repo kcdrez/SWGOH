@@ -44,7 +44,7 @@
 import { defineComponent } from "vue";
 import { mapState, mapGetters, mapActions } from "vuex";
 
-import ShardTable from "./shardTable.vue";
+import ShardTable from "./tables/shardTable.vue";
 import EnergySpent from "../energySpent.vue";
 import { loadingState } from "../../types/loading";
 import { setupEvents } from "../../utils";

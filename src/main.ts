@@ -1,9 +1,11 @@
 import { createApp } from "vue";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "@vueform/toggle/themes/default.css";
 import "bootstrap";
 import "./styles/main.scss";
 import Toaster from "vue-dk-toast";
 import moment from "moment";
+import Toggle from "@vueform/toggle";
 
 import App from "./App.vue";
 import store from "./vuex-store/store";
@@ -14,7 +16,7 @@ import SearchInput from "./components/search-input.vue";
 import ProgressBar from "./components/progressBar.vue";
 import Loading from "./components/loading.vue";
 import Error from "./components/error.vue";
-import MultiSelect from "./components/multiSelect.vue"
+import MultiSelect from "./components/multiSelect.vue";
 import { formatDate } from "./utils";
 
 const app = createApp(App);
@@ -59,4 +61,5 @@ app
   .component("Loading", Loading)
   .component("Error", Error)
   .component("MultiSelect", MultiSelect)
+  .component("Toggle", Toggle)
   .mount("#app");

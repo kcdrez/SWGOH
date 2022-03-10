@@ -30,7 +30,7 @@ import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
 import { setupEvents } from "../../utils";
-import ShardTable from "../shards/shardTable.vue";
+import ShardTable from "../shards/tables/shardTable.vue";
 
 export default defineComponent({
   name: "ShardSection",
@@ -85,5 +85,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

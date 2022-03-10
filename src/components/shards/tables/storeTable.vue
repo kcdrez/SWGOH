@@ -50,14 +50,34 @@
               v-model="searchText"
             />
           </th>
-          <th v-if="showCol('locations')">Locations</th>
+          <!-- <th v-if="showCol('locations')">Locations</th> -->
+          <th v-if="showCol('owned')">
+            <span>Shards Owned</span>
+            <i class="fas mx-2" :class="sortIcon('owned')"></i>
+          </th>
+          <th v-if="showCol('remaining')">
+            <span>Shards Remaining</span>
+            <i class="fas mx-2" :class="sortIcon('remaining')"></i>
+          </th>
           <th
             v-if="showCol('progress')"
             class="c-pointer"
             @click="sortBy('progress')"
           >
-            Amount/Progress
+            Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
+          </th>
+          <th v-if="showCol('wallet')">
+            <span>Currency Owned</span>
+            <i class="fas mx-2" :class="sortIcon('wallet')"></i>
+          </th>
+          <th v-if="showCol('dailyCurrency')">
+            <span>Daily Currency Obtained</span>
+            <i class="fas mx-2" :class="sortIcon('dailyCurrency')"></i>
+          </th>
+          <th class="c-pointer" @click="sortBy('remainingCurrency')">
+            Remaining Currency
+            <i class="fas mx-1" :class="sortIcon('remainingCurrency')"></i>
           </th>
           <th
             class="c-pointer"
@@ -75,25 +95,32 @@
             class="text-center align-middle"
             v-if="showUnitName && showCol('name')"
           >
-            <UnitIcon :unit="unit" isLink />
+            <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
-          <td class="align-middle text-center" v-if="showCol('locations')">
-            <div v-if="unit.locations.length <= 0" class="text-center">
-              No known farmable locations.
-            </div>
-            <template v-else>
-              <span class="row-label">Farming Locations:</span>
-              <ul class="m-0">
-                <li v-for="(l, index) in unit.locations" :key="index">
-                  {{ l }}
-                </li>
-              </ul>
-            </template>
+          <td class="align-middle" v-if="showCol('owned')">
+            <ShardsOwned :unit="unit" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('remaining')">
+            {{ unit.remainingShards }}
           </td>
           <td class="align-middle" v-if="showCol('progress')">
-            <span class="row-label">Amount/Progress:</span>
-            <ShardsOwned :unit="unit" />
-            <ProgressBar :percent="unit.shardPercent" class="mt-2" />
+            <span class="row-label">Progress:</span>
+            <ProgressBar :percent="unit.shardPercent" />
+          </td>
+          <td class="align-middle" v-if="showCol('wallet')">
+            <Wallet :currencyType="currencyType" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('dailyCurrency')">
+            <DailyCurrency
+              :currencyType="currencyType"
+              :allowEdit="allowEditAvg"
+            />
+          </td>
+          <td
+            class="align-middle text-center"
+            v-if="showCol('remainingCurrency')"
+          >
+            {{ unit.currencyAmountRemaining(currencyType) }}
           </td>
           <td
             class="text-center align-middle"
@@ -118,22 +145,25 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import ShardsOwned from "./shardsOwned.vue";
-import UnitIcon from "../units/unitIcon.vue";
-import NodesPerDay from "./nodesPerDay.vue";
-import ShardPriority from "./shardPriority.vue";
-import Timestamp from "../timestamp.vue";
-import { Unit } from "../../types/unit";
-import { mapActions } from "vuex";
+import ShardsOwned from "../shardsOwned.vue";
+import UnitIcon from "../../units/unitIcon.vue";
+import NodesPerDay from "../nodesPerDay.vue";
+import ShardPriority from "../shardPriority.vue";
+import Timestamp from "../../timestamp.vue";
+import Wallet from "../wallet.vue";
+import DailyCurrency from "../dailyCurrency.vue";
+import { Unit } from "../../../types/unit";
 
 export default defineComponent({
-  name: "TerritoryBattleShardTable",
+  name: "StoreTable",
   components: {
     ShardsOwned,
     UnitIcon,
     NodesPerDay,
     Timestamp,
     ShardPriority,
+    Wallet,
+    DailyCurrency,
   },
   props: {
     units: {
@@ -153,11 +183,25 @@ export default defineComponent({
       },
       required: true,
     },
+    allowEditAvg: {
+      type: Boolean,
+      default: false,
+    },
+    simpleView: {
+      type: Boolean,
+      default: false,
+    },
+    currencyType: {
+      type: String,
+      //todo
+      default: "get1",
+      // required: true,
+    },
   },
   data() {
     return {
-      sortDir: "asc",
-      sortMethod: "name",
+      sortDir: "desc",
+      sortMethod: "progress",
       searchText: "",
     };
   },
@@ -196,7 +240,6 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions("guild", ["initialize"]),
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
@@ -216,49 +259,13 @@ export default defineComponent({
       return this.selectedColumns.some((x) => x === key);
     },
   },
-  async created() {
-    await this.initialize();
-  },
 });
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
-.show-on-desktop {
-  @media only screen and (max-width: 1200px) {
-    ::v-deep(.nodes-container) {
-      flex-basis: 100%;
-
-      .input-group {
-        display: block;
-
-        * {
-          width: 100%;
-
-          &:first-child {
-            border-radius: 0.2rem 0.2rem 0 0 !important;
-            justify-content: center;
-          }
-
-          &:last-child {
-            border-radius: 0 0 0.2rem 0.2rem !important;
-          }
-
-          &:not(:first-child) {
-            &:not(button) {
-              display: block;
-            }
-            border-top: none;
-            text-align: center;
-            //everything except the first element is off so the following is used to compensate :shrug:
-            position: relative;
-            left: 1px;
-          }
-        }
-      }
-    }
-  }
+.select-columns {
+  width: 200px;
+  margin-left: auto;
+  margin-bottom: 0.25rem;
 }
 </style>
->>>>>>> main

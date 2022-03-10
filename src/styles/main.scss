@@ -82,14 +82,15 @@ body {
         &:not(.show-on-mobile) {
           display: none;
         }
-        &.show-on-mobile { 
+        &.show-on-mobile {
           &.sticky-header {
             position: revert !important;
           }
           tr.sort-methods {
             display: grid;
 
-            &, th {
+            &,
+            th {
               border: none !important;
             }
           }
@@ -251,7 +252,18 @@ button:disabled {
     width: 250px;
     margin-top: 0.5rem;
     text-align: left;
-
+  }
+  .simple-view-container {
+    position: absolute;
+    right: 280px;
+    top: 12.5px;
+    .toggle {
+      width: 90px;
+      justify-content: unset;
+    }
+    .toggle-label {
+      margin-left: 1.5rem;
+    }
   }
   @media only screen and (max-width: 900px) {
     & {
@@ -260,8 +272,8 @@ button:disabled {
       .select-columns {
         position: unset;
         width: 100%;
-        padding: 0 .25rem;
-        margin: .5rem 0 0;
+        padding: 0 0.25rem;
+        margin: 0.5rem 0 0;
       }
     }
   }

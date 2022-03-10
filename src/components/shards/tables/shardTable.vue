@@ -41,8 +41,8 @@
         <tr class="text-center align-middle">
           <th v-if="showUnitName && showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
-              Unit Name
-              <i class="fas mx-1" :class="sortIcon('name')"></i>
+              <span>Unit Name</span>
+              <i class="fas mx-2" :class="sortIcon('name')"></i>
             </div>
             <input
               class="form-control form-control-sm mx-auto my-1 w-75"
@@ -50,38 +50,43 @@
               v-model="searchText"
             />
           </th>
-          <th v-if="showCol('locations')">Locations</th>
+          <th v-if="showCol('locations')">
+            <span>Locations</span>
+          </th>
+          <th v-if="showCol('owned')">
+            <span>Shards Owned</span>
+            <i class="fas mx-2" :class="sortIcon('owned')"></i>
+          </th>
+          <th v-if="showCol('remaining')">
+            <span>Shards Remaining</span>
+            <i class="fas mx-2" :class="sortIcon('remaining')"></i>
+          </th>
           <th
-            v-if="showCol('progress')"
             class="c-pointer"
+            v-if="showCol('progress')"
             @click="sortBy('progress')"
           >
-            Amount/Progress
-            <i class="fas mx-1" :class="sortIcon('progress')"></i>
+            <span>Progress</span>
+            <i class="fas mx-2" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showCol('attempts')">Node Attempts per Day</th>
+          <th v-if="showCol('attempts')">
+            <span>Node Attempts per Day</span>
+            <i class="fas mx-2" :class="sortIcon('attempts')"></i>
+          </th>
           <th
             class="c-pointer"
             @click="sortBy('time')"
             v-if="showUnitName && showCol('time')"
           >
-            Est. Time
-            <i class="fas mx-1" :class="sortIcon('time')"></i>
+            <span>Est. Time</span>
+            <i class="fas mx-2" :class="sortIcon('time')"></i>
           </th>
-          <th
-            v-if="
-              (showCol('priority') && showPriority) ||
-              (showCol('actions') && !showPriority)
-            "
-            :class="{ 'c-pointer': showPriority }"
-            @click="sortBy('priority')"
-          >
-            {{ showPriority ? "Priority" : "Actions" }}
-            <i
-              class="fas mx-1"
-              :class="sortIcon('priority')"
-              v-if="showPriority"
-            ></i>
+          <th v-if="showCol('priority') && showPriority">
+            <span>Priority</span>
+            <i class="fas mx-2" :class="sortIcon('priority')"></i>
+          </th>
+          <th v-else-if="showCol('actions') && !showPriority">
+            <span>Actions</span>
           </th>
         </tr>
       </thead>
@@ -91,7 +96,7 @@
             class="text-center align-middle"
             v-if="showUnitName && showCol('name')"
           >
-            <UnitIcon :unit="unit" isLink />
+            <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
           <td
             class="align-middle text-center farming-locations"
@@ -109,10 +114,14 @@
               </ul>
             </template>
           </td>
-          <td class="align-middle" v-if="showCol('progress')">
-            <span class="row-label">Amount/Progress:</span>
+          <td class="align-middle" v-if="showCol('owned')">
             <ShardsOwned :unit="unit" />
-            <ProgressBar :percent="unit.shardPercent" class="mt-2" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('remaining')">
+            {{ unit.remainingShards }}
+          </td>
+          <td class="align-middle progress-cell" v-if="showCol('progress')">
+            <ProgressBar :percent="unit.shardPercent" />
           </td>
           <td class="align-middle nodes-per-day" v-if="showCol('attempts')">
             <span class="row-label">Node Attempts per Day:</span>
@@ -132,22 +141,16 @@
               displayClasses="d-inline"
             />
           </td>
+          <td class="align-middle" v-if="showCol('priority') && showPriority">
+            <ShardPriority :unit="unit" :nodeTableNames="nodeTableNames" />
+          </td>
           <td
-            class="text-center align-middle"
-            v-if="
-              (showCol('priority') && showPriority) ||
-              (showCol('actions') && !showPriority)
-            "
+            class="align-middle"
+            v-else-if="showCol('actions') && !showPriority"
           >
-            <ShardPriority
-              :unit="unit"
-              v-if="showPriority"
-              :nodeTableNames="nodeTableNames"
-            />
             <div
               class="btn-group btn-group-sm d-block text-center"
               role="group"
-              v-else
             >
               <button
                 type="button"
@@ -177,12 +180,12 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import ShardsOwned from "./shardsOwned.vue";
-import UnitIcon from "../units/unitIcon.vue";
-import NodesPerDay from "./nodesPerDay.vue";
-import ShardPriority from "./shardPriority.vue";
-import Timestamp from "../timestamp.vue";
-import { Unit } from "../../types/unit";
+import ShardsOwned from "../shardsOwned.vue";
+import UnitIcon from "../../units/unitIcon.vue";
+import NodesPerDay from "../nodesPerDay.vue";
+import ShardPriority from "../shardPriority.vue";
+import Timestamp from "../../timestamp.vue";
+import { Unit } from "../../../types/unit";
 
 export default defineComponent({
   name: "ShardTable",
@@ -223,6 +226,10 @@ export default defineComponent({
         });
       },
       required: true,
+    },
+    simpleView: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -303,6 +310,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.progress-cell {
+  min-width: 125px;
+}
 @media only screen and (max-width: 768px) {
   .farming-locations {
     ul {

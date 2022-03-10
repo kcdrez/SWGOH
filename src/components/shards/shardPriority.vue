@@ -1,32 +1,17 @@
 <template>
-  <div class="input-group input-group-sm">
-    <span class="input-group-text label-priority">Priority:</span>
-    <input
-      class="form-control priority-level"
-      type="number"
-      v-model.number="priority"
-      min="0"
-      max="1000"
-      @keydown.enter="save"
-      ref="saveButton"
-      :disabled="!editing"
-    />
-    <template v-if="editing">
-      <button type="button" class="btn btn-success" @click="save">
-        <i class="fas fa-save"></i>
-      </button>
-      <button type="button" class="btn btn-warning" @click="cancel">
-        <i class="fas fa-ban"></i>
-      </button>
-    </template>
-    <button type="button" class="btn btn-primary" @click="edit" v-else>
-      <i class="fas fa-edit"></i>
-    </button>
-  </div>
+  <input
+    class="form-control form-control-sm"
+    type="number"
+    v-model.number="priority"
+    min="0"
+    max="1000"
+    @change="save"
+  />
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import _ from "lodash";
 
 import { Unit } from "../../types/unit";
 import { Node } from "../../types/shards";
@@ -45,8 +30,7 @@ export default defineComponent({
   },
   data() {
     return {
-      editing: false,
-      priority: 0,
+      priority: this.unit.tablePriority(this.nodeTableNames),
     };
   },
   computed: {
@@ -63,23 +47,9 @@ export default defineComponent({
     },
   },
   methods: {
-    save() {
-      this.editing = false;
+    save: _.debounce(function (this: any) {
       this.unit.shardNodes = this.nodeData;
-    },
-    edit() {
-      this.editing = true;
-      this.$nextTick(() => {
-        (this.$refs?.saveButton as any).focus();
-      });
-    },
-    cancel() {
-      this.editing = false;
-      this.priority = this.unit.tablePriority(this.nodeTableNames);
-    },
-  },
-  created() {
-    this.cancel();
+    }, 1000),
   },
 });
 </script>
