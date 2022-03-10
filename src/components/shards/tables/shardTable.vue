@@ -81,11 +81,11 @@
             <span>Est. Time</span>
             <i class="fas mx-2" :class="sortIcon('time')"></i>
           </th>
-          <th v-if="showCol('priority') && showPriority">
+          <th v-if="showCol('priority') && showPriority" width="150px">
             <span>Priority</span>
             <i class="fas mx-2" :class="sortIcon('priority')"></i>
           </th>
-          <th v-else-if="showCol('actions') && !showPriority">
+          <th v-if="showCol('actions') && showActions" width="100px">
             <span>Actions</span>
           </th>
         </tr>
@@ -144,10 +144,7 @@
           <td class="align-middle" v-if="showCol('priority') && showPriority">
             <ShardPriority :unit="unit" :nodeTableNames="nodeTableNames" />
           </td>
-          <td
-            class="align-middle"
-            v-else-if="showCol('actions') && !showPriority"
-          >
+          <td class="align-middle" v-if="showCol('actions') && showActions">
             <div
               class="btn-group btn-group-sm d-block text-center"
               role="group"
@@ -209,8 +206,9 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    initialSort: {
-      type: Object,
+    showActions: {
+      type: Boolean,
+      default: false,
     },
     nodeTableNames: {
       type: Array as PropType<string[]>,
@@ -231,11 +229,15 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    storageKey: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
-      sortDir: this.initialSort?.sortDir || "asc",
-      sortMethod: this.initialSort?.sortMethod || "name",
+      sortDir: "asc",
+      sortMethod: "name",
       searchText: "",
     };
   },
@@ -286,6 +288,14 @@ export default defineComponent({
         });
     },
   },
+  watch: {
+    sortDir() {
+      this.saveSortData();
+    },
+    sortMethod() {
+      this.saveSortData();
+    },
+  },
   methods: {
     sortBy(type: string): void {
       if (this.sortMethod === type) {
@@ -305,6 +315,22 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
+  },
+  created() {
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>

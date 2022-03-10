@@ -1,19 +1,19 @@
 <template>
-  <div class="mb-3">
-    <StandardNodesTable class="my-2 meow" />
-    <FleetNodesTable class="my-2" />
-    <CantinaNodesTable class="my-2" />
-    <TbTableContainer class="my-2" />
-    <RaidsTable class="my-2" />
-    <CantinaStoreTable class="my-2" />
-    <GuildStoreTable class="my-2" />
-    <SquadArenaTable class="my-2" />
-    <GalacticWarTable class="my-2" />
-    <FleetArenaTable class="my-2" />
-    <GuildEventsTable class="my-2" />
-    <ShardStoreTable class="my-2" />
-    <LegendaryTable class="my-2" />
-    <GLTable class="my-2" />
+  <div class="mb-3 shard-table-container">
+    <StandardNodesTable class="my-2 standard-nodes" />
+    <FleetNodesTable class="my-2 fleet-nodes" />
+    <CantinaNodesTable class="my-2 cantina-nodes" />
+    <TbTableContainer class="my-2 tb-table" />
+    <RaidsTable class="my-2 raids-table" />
+    <CantinaStoreTable class="my-2 cantina-store" />
+    <GuildStoreTable class="my-2 guild-store" />
+    <GuildEventsTable class="my-2 guild-events" />
+    <SquadArenaTable class="my-2 squad-arena" />
+    <GalacticWarTable class="my-2 galactic-war" />
+    <FleetArenaTable class="my-2 fleet-arena" />
+    <ShardStoreTable class="my-2 shard-store" />
+    <LegendaryTable class="my-2 legendary-table" />
+    <GLTable class="my-2 gl-table" />
   </div>
 </template>
 
@@ -61,16 +61,58 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../styles/variables.scss";
 
-::v-deep {
-  .section-header {
-    border-bottom: 1px solid $light;
-    position: sticky;
-    top: 56px;
-    height: 50px;
+.shard-table-container {
+  ::v-deep(.standard-nodes .section-header) {
+    z-index: 18;
+  }
+  ::v-deep(.fleet-nodes .section-header) {
+    z-index: 17;
+  }
+  ::v-deep(.cantina-nodes .section-header) {
+    z-index: 16;
+  }
+  ::v-deep(.tb-table .section-header) {
+    z-index: 15;
+  }
+  ::v-deep(.raids-table .section-header) {
+    z-index: 14;
+  }
+  ::v-deep(.cantina-store .section-header) {
+    z-index: 13;
+  }
+  ::v-deep(.guild-store .section-header) {
+    z-index: 12;
+  }
+  ::v-deep(.squad-arena .section-header) {
+    z-index: 11;
+  }
+  ::v-deep(.galactic-war .section-header) {
+    z-index: 10;
+  }
+  ::v-deep(.fleet-arena .section-header) {
+    z-index: 9;
+  }
+  ::v-deep(.guild-events .section-header) {
+    z-index: 8;
+  }
+  ::v-deep(.shard-store .section-header) {
+    z-index: 7;
+  }
+  ::v-deep(.legendary-table .section-header) {
+    z-index: 6;
+  }
+  ::v-deep(.gl-table .section-header) {
     z-index: 5;
   }
-  thead.sticky-header {
-    top: 106px !important;
-  }
+}
+
+::v-deep(.section-header) {
+  border-bottom: 1px solid $light;
+  position: sticky;
+  top: 56px;
+  height: 50px;
+}
+::v-deep(thead.sticky-header) {
+  top: 106px !important;
 }
 </style>

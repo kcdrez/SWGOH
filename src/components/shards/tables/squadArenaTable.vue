@@ -27,7 +27,7 @@
       showUnitName
       allowEditAvg
       :simpleView="simpleView"
-      currencyType="squadArenaCurrency"
+      :currencyTypes="['squadArenaCurrency']"
     />
   </div>
 </template>

@@ -10,7 +10,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="legendarySection"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -19,12 +19,12 @@
       class="collapse"
       ref="legendarySection"
       :units="unitList"
-      :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
       :nodeTableNames="['Legendary Events']"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
       :simpleView="simpleView"
+      :storageKey="storageKey + 'Table'"
     />
   </div>
 </template>
@@ -37,15 +37,16 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import ShardTable from "./shardTable.vue";
 
+const storageKey = "legendaryUnits";
+
 export default defineComponent({
   name: "LegendaryTable",
   components: { ShardTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("legendaryTableSimpleView") || "true"
-      ),
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -97,13 +98,13 @@ export default defineComponent({
   },
   watch: {
     simpleView(newVal) {
-      window.localStorage.setItem("legendaryTableSimpleView", newVal);
+      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {
     setupEvents(
       (this.$refs?.legendarySection as any)?.$el as HTMLElement,
-      "legendarySection"
+      storageKey + "Collapse"
     );
   },
 });

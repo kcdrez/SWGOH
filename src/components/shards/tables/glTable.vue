@@ -14,7 +14,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="galacticLegendsSection"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -23,12 +23,12 @@
       class="collapse"
       ref="galacticLegendsSection"
       :units="unitList"
-      :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
       :nodeTableNames="['Galactic Legend Events']"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
       :simpleView="simpleView"
+      :storageKey="storageKey + 'Table'"
     />
   </div>
 </template>
@@ -41,15 +41,16 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import ShardTable from "./shardTable.vue";
 
+const storageKey = "glUnits";
+
 export default defineComponent({
   name: "GLTable",
   components: { ShardTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("glTableSimpleView") || "true"
-      ),
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -101,13 +102,13 @@ export default defineComponent({
   },
   watch: {
     simpleView(newVal) {
-      window.localStorage.setItem("glTableSimpleView", newVal);
+      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {
     setupEvents(
       (this.$refs?.galacticLegendsSection as any)?.$el as HTMLElement,
-      "galacticLegendsSection"
+      storageKey + "Collapse"
     );
   },
 });

@@ -10,7 +10,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="raidsSection"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -19,12 +19,12 @@
       class="collapse"
       ref="raidsSection"
       :units="unitList"
-      :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
       :nodeTableNames="['Raids']"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
       :simpleView="simpleView"
+      :storageKey="storageKey + 'Table'"
     />
   </div>
 </template>
@@ -37,15 +37,16 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import ShardTable from "./shardTable.vue";
 
+const storageKey = "raidUnits";
+
 export default defineComponent({
   name: "RaidsTable",
   components: { ShardTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("raidsTableSimpleView") || "true"
-      ),
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -95,13 +96,13 @@ export default defineComponent({
   },
   watch: {
     simpleView(newVal) {
-      window.localStorage.setItem("raidsTableSimpleView", newVal);
+      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {
     setupEvents(
       (this.$refs?.raidsSection as any)?.$el as HTMLElement,
-      "raidsSection"
+      storageKey + "Collapse"
     );
   },
 });

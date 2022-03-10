@@ -23,7 +23,7 @@
       showUnitName
       allowEditAvg
       :simpleView="simpleView"
-      currencyType="cantinaBattleCurrency"
+      :currencyTypes="['cantinaBattleCurrency']"
     />
   </div>
 </template>

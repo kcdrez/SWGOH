@@ -23,7 +23,7 @@
       showUnitName
       allowEditAvg
       :simpleView="simpleView"
-      currencyType="shardCurrency"
+      :currencyTypes="['shardCurrency']"
     />
   </div>
 </template>

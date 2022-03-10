@@ -23,7 +23,7 @@
       showUnitName
       allowEditAvg
       :simpleView="simpleView"
-      currencyType="guildStoreCurrency"
+      :currencyTypes="['guildStoreCurrency']"
     />
   </div>
 </template>

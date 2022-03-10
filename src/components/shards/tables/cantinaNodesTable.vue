@@ -10,7 +10,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="cantinaNodesTable"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -19,12 +19,12 @@
       class="collapse"
       ref="cantinaNodesTable"
       :units="unitList"
-      :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
       :nodeTableNames="['Cantina']"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
       :simpleView="simpleView"
+      :storageKey="storageKey + 'Table'"
     />
   </div>
 </template>
@@ -37,15 +37,16 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import ShardTable from "./shardTable.vue";
 
+const storageKey = "cantinaNodes";
+
 export default defineComponent({
   name: "CantinaNodesTable",
   components: { ShardTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("cantinaTableSimpleView") || "true"
-      ),
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -95,13 +96,13 @@ export default defineComponent({
   },
   watch: {
     simpleView(newVal) {
-      window.localStorage.setItem("cantinaTableSimpleView", newVal);
+      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {
     setupEvents(
       (this.$refs?.cantinaNodesTable as any)?.$el as HTMLElement,
-      "cantinaNodesTable"
+      storageKey + "Collapse"
     );
   },
 });

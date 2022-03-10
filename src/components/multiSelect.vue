@@ -7,8 +7,16 @@
     >
       <div class="overselect"></div>
       <select class="form-control form-control-sm">
+        <!-- :class="{
+          'border-2 border-danger': options.length !== selected.length,
+        }" -->
         <option value="">{{ label }}</option>
       </select>
+      <i
+        v-if="options.length > selected.length"
+        class="fas fa-exclamation-circle text-warning missing-column-warning"
+        title="Some columns are currently hidden"
+      ></i>
     </div>
     <div class="multiselect" v-if="show">
       <ul>
@@ -56,11 +64,11 @@ export default defineComponent({
       selected: [],
     };
   },
-  created() {
-    const fullList = this.options.map((x: any) => x.value);
-    this.selected = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || JSON.stringify(fullList)
-    );
+  watch: {
+    selected(val): void {
+      this.$emit("checked", val);
+      window.localStorage.setItem(this.storageKey, JSON.stringify(val));
+    },
   },
   methods: {
     showDropdown() {
@@ -72,11 +80,11 @@ export default defineComponent({
       }
     },
   },
-  watch: {
-    selected(val): void {
-      this.$emit("checked", val);
-      window.localStorage.setItem(this.storageKey, JSON.stringify(val));
-    },
+  created() {
+    const fullList = this.options.map((x: any) => x.value);
+    this.selected = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || JSON.stringify(fullList)
+    );
   },
 });
 </script>
@@ -124,5 +132,11 @@ export default defineComponent({
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+.missing-column-warning {
+  position: absolute;
+  right: 10px;
+  top: 25%;
 }
 </style>

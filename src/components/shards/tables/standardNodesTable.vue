@@ -10,7 +10,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="standardNodesTable"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -19,12 +19,12 @@
       class="collapse"
       ref="standardNodesTable"
       :units="unitList"
-      :initialSort="{ sortDir: 'asc', sortMethod: 'priority' }"
       :nodeTableNames="['Light Side', 'Dark Side']"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
       :simpleView="simpleView"
+      :storageKey="storageKey + 'Table'"
     />
   </div>
 </template>
@@ -37,15 +37,16 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import ShardTable from "./shardTable.vue";
 
+const storageKey = "standardNodes";
+
 export default defineComponent({
   name: "StandardNodesTable",
   components: { ShardTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("standardNodesTableSimpleView") || "true"
-      ),
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -97,13 +98,13 @@ export default defineComponent({
   },
   watch: {
     simpleView(newVal) {
-      window.localStorage.setItem("standardNodesTableSimpleView", newVal);
+      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {
     setupEvents(
       (this.$refs?.standardNodesTable as any)?.$el as HTMLElement,
-      "standardNodesTable"
+      storageKey + "Collapse"
     );
   },
 });

@@ -22,11 +22,11 @@
         </button>
       </div>
       <template v-if="fullUnitList.length > 0">
-        <UnitSection />
-        <GearSection />
-        <RelicSection />
-        <ShardSection />
+        <UnitSection class="unit-section" />
+        <GearSection class="gear-section" />
+        <RelicSection class="relic-section" />
       </template>
+      <ShardSection class="shard-section" />
     </div>
   </Loading>
 </template>
@@ -104,4 +104,31 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+@import "../styles/variables.scss";
+
+.swgoh-page {
+  ::v-deep(.unit-section .section-header) {
+    z-index: 9;
+  }
+  ::v-deep(.gear-section .section-header) {
+    z-index: 8;
+  }
+  ::v-deep(.relic-section .section-header) {
+    z-index: 7;
+  }
+  ::v-deep(.shard-section .section-header) {
+    z-index: 6;
+  }
+}
+
+::v-deep(.section-header) {
+  border-bottom: 1px solid $light;
+  position: sticky;
+  top: 56px;
+  height: 50px;
+}
+::v-deep(thead.sticky-header) {
+  top: 106px !important;
+}
+</style>

@@ -27,7 +27,7 @@
       showUnitName
       allowEditAvg
       :simpleView="simpleView"
-      currencyType="galacticWarCurrency"
+      :currencyTypes="['galacticWarCurrency']"
     />
   </div>
 </template>

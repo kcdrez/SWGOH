@@ -172,7 +172,7 @@ export class Unit {
 
   public get relicOptions() {
     const list = [];
-    for (let i = this.relicLevel + 1; i <= maxRelicLevel; i++) {
+    for (let i = this.relicLevel; i <= maxRelicLevel; i++) {
       list.push(i);
     }
     return list;
@@ -469,9 +469,15 @@ export class Unit {
       return 0;
     }
   }
-  public currencyAmountRemaining(currency: CurrencyTypeConfig) {
-    const location = this.whereToFarm.find((x) => x.currencyType === currency);
-    return this.currencyAmountByLocation(location);
+  public currencyAmountRemaining(currencies: CurrencyTypeConfig[]) {
+    const locations = this.whereToFarm.filter((x) => {
+      if (x.currencyType) {
+        return currencies.includes(x.currencyType);
+      } else {
+        return false;
+      }
+    });
+    return locations.map((location) => this.currencyAmountByLocation(location));
   }
   private currencyAmountByLocation(location: FarmingNode | undefined) {
     if (location && location.currencyType) {

@@ -40,9 +40,10 @@
           </th>
         </tr>
         <tr class="text-center align-middle">
+          <th v-if="showCol('icon')">Icon</th>
           <th v-if="showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
-              Salvage Name
+              Name
               <i class="fas mx-1" :class="sortIcon('name')"></i>
             </div>
             <input
@@ -60,11 +61,29 @@
             <i class="fas mx-1" :class="sortIcon('location')"></i>
           </th>
           <th
+            v-if="showCol('owned')"
+            class="c-pointer"
+            @click="sortBy('owned')"
+            width="145px"
+          >
+            Amount Owned
+            <i class="fas mx-1" :class="sortIcon('owned')"></i>
+          </th>
+          <th
+            v-if="showCol('needed')"
+            class="c-pointer"
+            @click="sortBy('needed')"
+          >
+            Amount Needed
+            <i class="fas mx-1" :class="sortIcon('needed')"></i>
+          </th>
+          <th
             class="c-pointer"
             @click="sortBy('progress')"
             v-if="showCol('progress')"
+            width="145px"
           >
-            Amount/Progress
+            Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
           <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
@@ -82,8 +101,11 @@
           </td>
         </tr>
         <tr v-for="salvage in filteredSalvageList" :key="salvage.id">
-          <td class="text-center" v-if="showCol('name')">
+          <td v-if="showCol('icon')">
             <GearIcon :gear="salvage" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('name')">
+            {{ salvage.name }}
           </td>
           <td v-if="showCol('locations')">
             <div v-if="salvage.locations.length <= 0" class="text-center">
@@ -104,9 +126,14 @@
               </ul>
             </template>
           </td>
-          <td v-if="showCol('progress')">
+          <td class="align-middle" v-if="showCol('owned')">
             <OwnedAmount :salvage="salvage" />
-            <ProgressBar :percent="salvage.percent" class="mt-2" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('needed')">
+            {{ salvage.amount }}
+          </td>
+          <td class="align-middle" v-if="showCol('progress')">
+            <ProgressBar :percent="salvage.percent" />
           </td>
           <td v-if="showRequiredByUnit && showCol('required')">
             <ul>
@@ -118,7 +145,7 @@
               </li>
             </ul>
           </td>
-          <td class="text-center" v-if="showCol('time')">
+          <td class="align-middle text-center" v-if="showCol('time')">
             <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="salvage.timeEstimation"
@@ -127,7 +154,7 @@
               displayClasses="d-inline"
             />
           </td>
-          <td v-if="showCol('actions')">
+          <td class="align-middle" v-if="showCol('actions')">
             <div
               class="btn-group btn-group-sm d-block text-center"
               role="group"
@@ -170,6 +197,7 @@
         <tr v-for="salvage in irrelevantGear" :key="salvage.id">
           <td :colspan="showRequiredByUnit ? '5' : '4'" class="text-center">
             <GearIcon :gear="salvage" />
+            {{ salvage.name }}
           </td>
           <td class="align-middle">
             <div
@@ -220,6 +248,10 @@ export default defineComponent({
           return typeof x === "string";
         });
       },
+      required: true,
+    },
+    storageKey: {
+      type: String,
       required: true,
     },
   },
@@ -278,6 +310,14 @@ export default defineComponent({
       });
     },
   },
+  watch: {
+    sortDir() {
+      this.saveSortData();
+    },
+    sortMethod() {
+      this.saveSortData();
+    },
+  },
   methods: {
     ...mapActions("gear", ["saveOwnedCount"]),
     sortBy(type: string): void {
@@ -298,6 +338,22 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
+  },
+  created() {
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>

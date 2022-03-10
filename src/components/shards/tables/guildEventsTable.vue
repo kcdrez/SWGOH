@@ -26,6 +26,7 @@
       :selectedColumns="selectedColumns"
       showUnitName
       :simpleView="simpleView"
+      :currencyTypes="['get1', 'get2']"
     />
   </div>
 </template>

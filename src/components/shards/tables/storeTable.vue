@@ -108,19 +108,38 @@
             <ProgressBar :percent="unit.shardPercent" />
           </td>
           <td class="align-middle" v-if="showCol('wallet')">
-            <Wallet :currencyType="currencyType" />
+            <template v-for="currency in currencyTypes" :key="currency">
+              <Wallet
+                v-if="unit.currencyTypes.includes(currency)"
+                :currencyType="currency"
+              />
+            </template>
           </td>
           <td class="align-middle text-center" v-if="showCol('dailyCurrency')">
-            <DailyCurrency
-              :currencyType="currencyType"
-              :allowEdit="allowEditAvg"
-            />
+            <template v-for="currency in currencyTypes" :key="currency">
+              <template v-if="unit.currencyTypes.includes(currency)">
+                <img
+                  class="currency-img"
+                  :src="`/images/${currency}.png`"
+                  v-if="!allowEditAvg"
+                />
+                <DailyCurrency
+                  class="d-inline"
+                  :currencyType="currency"
+                  :allowEdit="allowEditAvg"
+                />
+              </template>
+            </template>
           </td>
           <td
             class="align-middle text-center"
             v-if="showCol('remainingCurrency')"
           >
-            {{ unit.currencyAmountRemaining(currencyType) }}
+            <template
+              v-for="amount in unit.currencyAmountRemaining(currencyTypes)"
+            >
+              {{ amount }}
+            </template>
           </td>
           <td
             class="text-center align-middle"
@@ -176,7 +195,7 @@ export default defineComponent({
     },
     selectedColumns: {
       type: Array,
-      validator: (arr: string[]) => {
+      validator: (arr: any[]) => {
         return arr.every((x) => {
           return typeof x === "string";
         });
@@ -191,11 +210,14 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    currencyType: {
-      type: String,
-      //todo
-      default: "get1",
-      // required: true,
+    currencyTypes: {
+      type: Array,
+      required: true,
+      validator: (arr: any[]) => {
+        return arr.every((x) => {
+          return typeof x === "string";
+        });
+      },
     },
   },
   data() {
@@ -267,5 +289,8 @@ export default defineComponent({
   width: 200px;
   margin-left: auto;
   margin-bottom: 0.25rem;
+}
+.currency-img {
+  max-width: 30px;
 }
 </style>

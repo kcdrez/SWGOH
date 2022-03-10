@@ -4,6 +4,7 @@
     type="number"
     v-model.number="walletValue"
     min="0"
+    @keydown="save"
     @change="save"
   />
 </template>
