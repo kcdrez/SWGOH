@@ -182,6 +182,118 @@ export class Unit {
     return this._stats["5"];
   }
 
+  public get offense() {
+    return {
+      physical: this._stats["6"],
+      special: this._stats["7"],
+    };
+  }
+  public get modOffense() {
+    let amount = 0;
+    let percent = 0;
+    const modSet = this._mods.filter((mod) => mod.set === 2); //2 is offense, 5 is crit chance
+    if (modSet.length >= 4) {
+      percent += modSet.every((mod) => mod.level === 15) ? 15 : 7.5;
+    }
+
+    this._mods.forEach((mod) => {
+      if (mod.primaryStat.unitStat === 48) {
+        percent += mod.primaryStat.value;
+      }
+
+      mod.secondaryStat.forEach((stat) => {
+        if (stat.unitStat === 41) {
+          //41 = flat offense, 53 = crit chance, 48 offense percent
+          amount += stat.value;
+        } else if (stat.unitStat === 48) {
+          percent += stat.value;
+        }
+      });
+    });
+    return {
+      amount: round2Decimals(amount),
+      percent: round2Decimals(percent / 100),
+    };
+  }
+  public get baseOffense() {
+    return {
+      physical: round2Decimals(
+        (this.offense.physical - this.modOffense.amount) /
+          (1 + this.modOffense.percent)
+      ),
+      special: round2Decimals(
+        (this.offense.special - this.modOffense.amount) /
+          (1 + this.modOffense.percent)
+      ),
+    };
+  }
+
+  public get critChance() {
+    return {
+      physical: round2Decimals(this._stats["14"]),
+      special: round2Decimals(this._stats["15"]),
+    };
+  }
+  public get modCritChance() {
+    let amount = 0;
+    let maxed = 0;
+    let notMaxed = 0;
+    this._mods.forEach((mod) => {
+      if (mod.set === 5) {
+        if (mod.level === 15) {
+          maxed++;
+        } else {
+          notMaxed++;
+        }
+
+        if (maxed === 2) {
+          amount += 8;
+          maxed = 0;
+        } else if (notMaxed === 2) {
+          amount += 4;
+          notMaxed = 0;
+        }
+      }
+    });
+
+    this._mods.forEach((mod) => {
+      mod.secondaryStat.forEach((stat) => {
+        if (stat.unitStat === 53) {
+          //41 = flat offense, 53 = crit chance, 48 offense percent
+          amount += stat.value;
+        }
+      });
+    });
+    return round2Decimals(amount);
+  }
+  public get baseCritChance() {
+    return {
+      physical: round2Decimals(this.critChance.physical - this.modCritChance),
+      special: round2Decimals(this.critChance.special - this.modCritChance),
+    };
+  }
+
+  public get critDamage() {
+    return round2Decimals(this._stats["16"] * 100);
+  }
+  public get modCritDamage() {
+    let amount = 0;
+    const modSet = this._mods.filter((mod) => mod.set === 6); //2 is offense, 5 is crit chance, 6 crit damage
+    if (modSet.length >= 4) {
+      amount += modSet.every((mod) => mod.level === 15) ? 30 : 15;
+    }
+
+    this._mods.forEach((mod) => {
+      if (mod.primaryStat.unitStat === 56) {
+        amount += mod.primaryStat.value;
+      }
+    });
+    return round2Decimals(amount);
+  }
+  public get baseCritDamage() {
+    return this.critDamage - this.modCritDamage;
+  }
+
   public get gearTarget() {
     return (
       store.state.planner.targetConfig[this.id]?.gear.target || maxGearLevel
