@@ -1,8 +1,9 @@
 <template>
   <div class="position-relative search-input">
     <input
-      class="form-control form-control-sm search-text"
+      class="form-control form-control-sm search-text border border-dark"
       type="text"
+      :placeholder="placeholder"
       v-model="searchText"
       @focus="showList = true"
       @blur="blur"
@@ -46,6 +47,10 @@ export default defineComponent({
     displayBy: {
       type: String,
       default: "name",
+    },
+    placeholder: {
+      type: String,
+      default: "",
     },
   },
   data() {
