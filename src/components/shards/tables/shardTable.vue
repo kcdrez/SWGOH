@@ -81,7 +81,12 @@
             <span>Est. Time</span>
             <i class="fas mx-2" :class="sortIcon('time')"></i>
           </th>
-          <th v-if="showCol('priority') && showPriority" width="150px">
+          <th
+            v-if="showCol('priority') && showPriority"
+            width="150px"
+            class="c-pointer"
+            @click="sortBy('priority')"
+          >
             <span>Priority</span>
             <i class="fas mx-2" :class="sortIcon('priority')"></i>
           </th>
@@ -132,12 +137,9 @@
             v-if="showUnitName && showCol('time')"
           >
             <span class="row-label">Completion Date: </span>
+            <!-- :timeLength="unit.shardTimeEstimation" -->
             <Timestamp
-              :timeLength="unit.shardTimeEstimation"
-              :displayText="
-                $filters.pluralText(unit.shardTimeEstimation, 'day')
-              "
-              :title="$filters.daysFromNow(unit.shardTimeEstimation)"
+              :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
             />
           </td>
@@ -287,6 +289,20 @@ export default defineComponent({
           return 0;
         });
     },
+    unitsByPriority(): Unit[] {
+      return this.units.sort((a: Unit, b: Unit) => {
+        const priorityA = a.tablePriority(this.nodeTableNames);
+        const priorityB = b.tablePriority(this.nodeTableNames);
+
+        if (priorityA <= 0) {
+          return 1;
+        } else if (priorityB <= 0) {
+          return -1;
+        } else {
+          return priorityA > priorityB ? 1 : -1;
+        }
+      });
+    },
   },
   watch: {
     sortDir() {
@@ -323,6 +339,44 @@ export default defineComponent({
           sortMethod: this.sortMethod,
         })
       );
+    },
+    estimatedTime(unit: Unit): number {
+      const index = this.unitsByPriority.findIndex((u) => u.id === unit.id);
+
+      const priority = unit.tablePriority(this.nodeTableNames);
+      let days = this.unitEstimated(unit);
+      const alreadyCheckedPriorities: number[] = [];
+      for (let i = index - 1; i >= 0; i--) {
+        const el = this.unitsByPriority[i];
+        const prevPriority = el.tablePriority(this.nodeTableNames);
+        if (
+          priority > prevPriority &&
+          !alreadyCheckedPriorities.includes(prevPriority)
+        ) {
+          days += this.unitEstimated(el);
+          alreadyCheckedPriorities.push(prevPriority);
+        }
+      }
+
+      return days;
+    },
+    unitEstimated(unit: Unit) {
+      let shardsPerDay = 0;
+
+      unit.whereToFarm.forEach((location) => {
+        const defaultNodesPerDay = this.nodeTableNames.includes(location.table)
+          ? 5
+          : 0;
+        const nodesPerDay =
+          unit.shardNodes.find((n) => n.id === location.id)?.count ||
+          defaultNodesPerDay;
+
+        shardsPerDay += nodesPerDay * 0.33 * unit.shardDropRate;
+      });
+
+      return shardsPerDay === 0
+        ? 0
+        : Math.ceil(unit.remainingShards / shardsPerDay);
     },
   },
   created() {

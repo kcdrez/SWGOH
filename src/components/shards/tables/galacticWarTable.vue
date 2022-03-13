@@ -14,7 +14,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="galacticWarStoreSection"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -28,6 +28,7 @@
       allowEditAvg
       :simpleView="simpleView"
       :currencyTypes="['galacticWarCurrency']"
+      :storageKey="storageKey + 'Table'"
     />
   </div>
 </template>
@@ -40,15 +41,16 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import StoreTable from "./storeTable.vue";
 
+const storageKey = "galacticWar";
+
 export default defineComponent({
   name: "GalacticWarTable",
   components: { StoreTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("galacticWarTableSimpleView") || "true"
-      ),
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -108,13 +110,13 @@ export default defineComponent({
   },
   watch: {
     simpleView(newVal) {
-      window.localStorage.setItem("galacticWarTableSimpleView", newVal);
+      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {
     setupEvents(
       (this.$refs?.galacticWarStoreSection as any)?.$el as HTMLElement,
-      "galacticWarStoreSection"
+      storageKey + "Collapse"
     );
   },
 });

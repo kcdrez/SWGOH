@@ -50,7 +50,6 @@
               v-model="searchText"
             />
           </th>
-          <!-- <th v-if="showCol('locations')">Locations</th> -->
           <th v-if="showCol('owned')">
             <span>Shards Owned</span>
             <i class="fas mx-2" :class="sortIcon('owned')"></i>
@@ -87,6 +86,15 @@
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
           </th>
+          <th
+            v-if="showCol('priority')"
+            width="150px"
+            class="c-pointer"
+            @click="sortBy('priority')"
+          >
+            <span>Priority</span>
+            <i class="fas mx-2" :class="sortIcon('priority')"></i>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -120,7 +128,7 @@
               <template v-if="unit.currencyTypes.includes(currency)">
                 <img
                   class="currency-img"
-                  :src="`/images/${currency}.png`"
+                  :src="`./images/${currency}.png`"
                   v-if="!allowEditAvg"
                 />
                 <DailyCurrency
@@ -147,13 +155,12 @@
           >
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="unit.shardTimeEstimation"
-              :displayText="
-                $filters.pluralText(unit.shardTimeEstimation, 'day')
-              "
-              :title="$filters.daysFromNow(unit.shardTimeEstimation)"
+              :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
             />
+          </td>
+          <td class="align-middle" v-if="showCol('priority')">
+            <ShardPriority :unit="unit" :nodeTableNames="nodeTableNames" />
           </td>
         </tr>
       </tbody>
@@ -172,6 +179,9 @@ import Timestamp from "../../timestamp.vue";
 import Wallet from "../wallet.vue";
 import DailyCurrency from "../dailyCurrency.vue";
 import { Unit } from "../../../types/unit";
+import { mapState } from "vuex";
+import { CurrencyTypeConfig } from "../../../types/currency";
+import { unvue } from "../../../utils";
 
 export default defineComponent({
   name: "StoreTable",
@@ -219,6 +229,16 @@ export default defineComponent({
         });
       },
     },
+    nodeTableNames: {
+      type: Array as PropType<string[]>,
+      default: () => {
+        return [];
+      },
+    },
+    storageKey: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -228,6 +248,7 @@ export default defineComponent({
     };
   },
   computed: {
+    ...mapState("currency", ["dailyCurrency", "wallet"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -256,9 +277,44 @@ export default defineComponent({
             } else {
               return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
             }
+          } else if (this.sortMethod === "priority") {
+            const priorityA = a.tablePriority(this.nodeTableNames);
+            const priorityB = b.tablePriority(this.nodeTableNames);
+
+            if (priorityA <= 0) {
+              return this.sortDir === "asc" ? 1 : -1;
+            } else if (priorityB <= 0) {
+              return this.sortDir === "asc" ? -1 : 1;
+            } else if (this.sortDir === "asc") {
+              return priorityA > priorityB ? 1 : -1;
+            } else {
+              return priorityA > priorityB ? -1 : 1;
+            }
           }
           return 0;
         });
+    },
+    unitsByPriority(): Unit[] {
+      return this.units.sort((a: Unit, b: Unit) => {
+        const priorityA = a.tablePriority(this.nodeTableNames);
+        const priorityB = b.tablePriority(this.nodeTableNames);
+
+        if (priorityA <= 0) {
+          return 1;
+        } else if (priorityB <= 0) {
+          return -1;
+        } else {
+          return priorityA > priorityB ? 1 : -1;
+        }
+      });
+    },
+  },
+  watch: {
+    sortDir() {
+      this.saveSortData();
+    },
+    sortMethod() {
+      this.saveSortData();
     },
   },
   methods: {
@@ -280,6 +336,92 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
+    estimatedTime(unit: Unit): number {
+      let totalDays = 0;
+      (this.currencyTypes as CurrencyTypeConfig[]).forEach((currency) => {
+        if (unit.currencyTypes.includes(currency)) {
+          const index = this.unitsByPriority.findIndex((u) => u.id === unit.id);
+          const priority = unit.tablePriority(this.nodeTableNames);
+          let currentWallet = this.wallet[currency] ?? 0;
+
+          const alreadyCheckedPriorities: number[] = [];
+
+          for (let i = index - 1; i >= 0; i--) {
+            const el = this.unitsByPriority[i];
+            const prevPriority = el.tablePriority(this.nodeTableNames);
+            if (
+              priority > prevPriority &&
+              !alreadyCheckedPriorities.includes(prevPriority) &&
+              el.currencyTypes.includes(currency)
+            ) {
+              const { days, totalCost } = this.unitEstimated(
+                el,
+                currentWallet,
+                currency
+              );
+              totalDays += days;
+              currentWallet = Math.max(currentWallet - totalCost, 0);
+              alreadyCheckedPriorities.push(prevPriority);
+            }
+          }
+
+          const { days } = this.unitEstimated(unit, currentWallet, currency);
+          totalDays += days;
+        }
+      });
+
+      return totalDays;
+    },
+    unitEstimated(
+      unit: Unit,
+      wallet: number,
+      currencyType: CurrencyTypeConfig
+    ) {
+      let shardsPerDay = 0;
+      let costPerShard = 0;
+      let totalCost = 0;
+      const location = unit.whereToFarm.find(
+        (l) => l.currencyType === currencyType
+      );
+      if (location) {
+        const character = location.characters.find((c) => c.id === unit.id);
+        if (character && character.shardCount && character.cost) {
+          costPerShard = character.cost / character.shardCount;
+        }
+        totalCost = unit.remainingShards * costPerShard;
+
+        const totalRemainingCost = Math.max(totalCost - wallet, 0);
+        const daysToUnlock =
+          totalRemainingCost / (this.dailyCurrency[currencyType] || 1);
+
+        wallet = Math.max(wallet - totalCost, 0);
+        shardsPerDay += unit.remainingShards / daysToUnlock;
+      }
+
+      return {
+        days:
+          shardsPerDay === 0
+            ? 0
+            : Math.ceil(unit.remainingShards / shardsPerDay),
+        totalCost,
+      };
+    },
+  },
+  created() {
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>

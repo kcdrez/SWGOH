@@ -115,11 +115,7 @@
           >
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="unit.shardTimeEstimation"
-              :displayText="
-                $filters.pluralText(unit.shardTimeEstimation, 'day')
-              "
-              :title="$filters.daysFromNow(unit.shardTimeEstimation)"
+              :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
             />
           </td>
@@ -131,7 +127,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 import ShardsOwned from "../shardsOwned.vue";
 import UnitIcon from "../../units/unitIcon.vue";
@@ -171,6 +167,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    storageKey: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -180,6 +180,7 @@ export default defineComponent({
     };
   },
   computed: {
+    ...mapGetters("guild", ["tbAvgShards"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -233,9 +234,31 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
+    estimatedTime(unit: Unit): number {
+      const type =
+        unit.id === "KIADIMUNDI" || unit.id === "IMPERIALPROBEDROID"
+          ? "Light"
+          : "Dark";
+      const avgShardsPerEvent = this.tbAvgShards(type, unit.id);
+      return Math.ceil(unit.remainingShards / (avgShardsPerEvent / 30));
+    },
   },
   async created() {
     await this.initialize();
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>

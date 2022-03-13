@@ -56,3 +56,20 @@ export async function initializeModules(
 export function randomNumber(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
+
+export function pluralText(days: number, single: string, plural: string = "") {
+  let text = days.toString();
+  if (days === 1) {
+    text += ` ${single}`;
+  } else {
+    text += plural === "" ? ` ${single}s` : ` ${plural}`;
+  }
+  return text;
+}
+
+export function daysFromNow(
+  days: number,
+  format: string = "MMM D, YYYY"
+): string {
+  return moment().add(days, "days").format(format);
+}

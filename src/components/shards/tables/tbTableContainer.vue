@@ -14,7 +14,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="territoryBattlesSection"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -26,6 +26,7 @@
       :selectedColumns="selectedColumns"
       showUnitName
       :simpleView="simpleView"
+      :storageKey="storageKey + 'Table'"
     />
   </div>
 </template>
@@ -38,15 +39,16 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import TerritoryBattleShardTable from "./territoryBattleShardTable.vue";
 
+const storageKey = "territoryBattles";
+
 export default defineComponent({
   name: "TbTableContainer",
   components: { TerritoryBattleShardTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("tbTableSimpleView") || "true"
-      ),
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -90,13 +92,13 @@ export default defineComponent({
   },
   watch: {
     simpleView(newVal) {
-      window.localStorage.setItem("tbTableSimpleView", newVal);
+      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {
     setupEvents(
       (this.$refs?.territoryBattlesSection as any)?.$el as HTMLElement,
-      "territoryBattlesSection"
+      storageKey + "Collapse"
     );
   },
 });

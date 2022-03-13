@@ -568,9 +568,9 @@ export class Unit {
       );
     }
   }
-  private calculateCurrencyEstimation(location: FarmingNode) {
+  public calculateCurrencyEstimation(location: FarmingNode, wallet?: number) {
     if (location.currencyType) {
-      const totalCost = this.currencyAmountByLocation(location);
+      const totalCost = this.currencyAmountByLocation(location, wallet);
       const avgDailyCurrency =
         store.state.currency.dailyCurrency[location.currencyType] || 1;
 
@@ -591,11 +591,14 @@ export class Unit {
     });
     return locations.map((location) => this.currencyAmountByLocation(location));
   }
-  private currencyAmountByLocation(location: FarmingNode | undefined) {
+  public currencyAmountByLocation(
+    location: FarmingNode | undefined,
+    wallet?: number
+  ) {
     if (location && location.currencyType) {
       let costPerShard = 0;
       const currentWallet =
-        store.state.currency.wallet[location.currencyType] || 0;
+        wallet ?? store.state.currency.wallet[location.currencyType] ?? 0;
       const match = location.characters.find((c) => c.id === this.id);
       if (match && match.shardCount && match.cost) {
         costPerShard = match.cost / match.shardCount;
