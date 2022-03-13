@@ -148,12 +148,6 @@ const store = {
       data: NodePayload
     ) {
       commit("UPSERT_SHARD_COUNT", data);
-      const match: Unit | undefined = getters.unitFarmingList.find(
-        (unit: Unit) => unit.id === data.id
-      );
-      if (match) {
-        match.calculateEstimation();
-      }
       dispatch("save");
     },
     addUnit({ commit, dispatch }: ActionCtx, unitId: string) {

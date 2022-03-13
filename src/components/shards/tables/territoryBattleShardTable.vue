@@ -203,13 +203,14 @@ export default defineComponent({
             } else {
               return a.shardPercent > b.shardPercent ? -1 : 1;
             }
-          } else if (this.sortMethod === "time") {
-            if (this.sortDir === "asc") {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
-            } else {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
-            }
           }
+          // else if (this.sortMethod === "time") {
+          //   if (this.sortDir === "asc") {
+          //     return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
+          //   } else {
+          //     return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
+          //   }
+          // }
           return 0;
         });
     },

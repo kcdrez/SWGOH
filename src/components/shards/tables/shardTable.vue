@@ -137,7 +137,6 @@
             v-if="showUnitName && showCol('time')"
           >
             <span class="row-label">Completion Date: </span>
-            <!-- :timeLength="unit.shardTimeEstimation" -->
             <Timestamp
               :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
@@ -266,13 +265,15 @@ export default defineComponent({
             } else {
               return a.shardPercent > b.shardPercent ? -1 : 1;
             }
-          } else if (this.sortMethod === "time") {
-            if (this.sortDir === "asc") {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
-            } else {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
-            }
-          } else if (this.sortMethod === "priority") {
+          }
+          // else if (this.sortMethod === "time") {
+          //   if (this.sortDir === "asc") {
+          //     return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
+          //   } else {
+          //     return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
+          //   }
+          // }
+          else if (this.sortMethod === "priority") {
             const priorityA = a.tablePriority(this.nodeTableNames);
             const priorityB = b.tablePriority(this.nodeTableNames);
 

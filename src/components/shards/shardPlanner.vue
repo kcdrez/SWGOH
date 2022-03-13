@@ -20,13 +20,13 @@
             />
           </div>
         </div>
-        <Timestamp
+        <!-- <Timestamp
           class="time-estimate"
           label="Estimated completion:"
           :title="$filters.daysFromNow(unit.shardTimeEstimation)"
           :displayText="$filters.pluralText(unit.shardTimeEstimation, 'day')"
           displayClasses="d-inline"
-        />
+        /> -->
         <EnergySpent showStandard showFleet showCantina />
         <MultiSelect
           class="select-columns"

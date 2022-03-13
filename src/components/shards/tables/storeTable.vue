@@ -143,11 +143,11 @@
             class="align-middle text-center"
             v-if="showCol('remainingCurrency')"
           >
-            <template
+            <!-- <template
               v-for="amount in unit.currencyAmountRemaining(currencyTypes)"
             >
               {{ amount }}
-            </template>
+            </template> -->
           </td>
           <td
             class="text-center align-middle"
@@ -271,13 +271,15 @@ export default defineComponent({
             } else {
               return a.shardPercent > b.shardPercent ? -1 : 1;
             }
-          } else if (this.sortMethod === "time") {
-            if (this.sortDir === "asc") {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
-            } else {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
-            }
-          } else if (this.sortMethod === "priority") {
+          }
+          // else if (this.sortMethod === "time") {
+          //   if (this.sortDir === "asc") {
+          //     return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
+          //   } else {
+          //     return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
+          //   }
+          // }
+          else if (this.sortMethod === "priority") {
             const priorityA = a.tablePriority(this.nodeTableNames);
             const priorityB = b.tablePriority(this.nodeTableNames);
 
