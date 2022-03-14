@@ -233,13 +233,11 @@ button:disabled {
   max-width: 90%;
 }
 
-.swgoh-table {
-  .completed {
-    color: $success-light-1;
-  }
-  .unknown {
-    color: $warning;
-  }
+.completed {
+  color: $success-light-1;
+}
+.unknown {
+  color: $warning;
 }
 
 .section-header {

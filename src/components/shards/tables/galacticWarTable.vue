@@ -25,7 +25,6 @@
       :units="unitList"
       :selectedColumns="selectedColumns"
       showUnitName
-      allowEditAvg
       :simpleView="simpleView"
       :currencyTypes="['galacticWarCurrency']"
       :storageKey="storageKey + 'Table'"

@@ -21,7 +21,6 @@
       :units="unitList"
       :selectedColumns="selectedColumns"
       showUnitName
-      allowEditAvg
       :simpleView="simpleView"
       :currencyTypes="['shardCurrency']"
       :storageKey="storageKey + 'Table'"

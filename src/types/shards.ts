@@ -1,4 +1,5 @@
 import { CurrencyTypeConfig } from "./currency";
+import { Unit, unitsByPriority } from "./unit";
 
 export type ShardsConfigType = {
   [key: number]: number;
@@ -131,4 +132,47 @@ export type Node = {
 export interface NodePayload extends UnitNodeData {
   id: string;
   count?: number;
+}
+
+export function estimatedTime(
+  unitList: Unit[],
+  tableNames: string[],
+  unit: Unit
+): number {
+  const unitListByPriority = unitsByPriority(unitList, tableNames);
+  const index = unitListByPriority.findIndex((u) => u.id === unit.id);
+
+  const priority = unit.tablePriority(tableNames);
+  let days = unitEstimated(unit, tableNames);
+  const alreadyCheckedPriorities: number[] = [];
+  for (let i = index - 1; i >= 0; i--) {
+    const el = unitListByPriority[i];
+    const prevPriority = el.tablePriority(tableNames);
+    if (
+      priority > prevPriority &&
+      !alreadyCheckedPriorities.includes(prevPriority)
+    ) {
+      days += unitEstimated(el, tableNames);
+      alreadyCheckedPriorities.push(prevPriority);
+    }
+  }
+
+  return days;
+}
+
+function unitEstimated(unit: Unit, tableNames: string[]) {
+  let shardsPerDay = 0;
+
+  unit.whereToFarm.forEach((location) => {
+    const defaultNodesPerDay = tableNames.includes(location.table) ? 5 : 0;
+    const nodesPerDay =
+      unit.shardNodes.find((n) => n.id === location.id)?.count ||
+      defaultNodesPerDay;
+
+    shardsPerDay += nodesPerDay * 0.33 * unit.shardDropRate;
+  });
+
+  return shardsPerDay === 0
+    ? 0
+    : Math.ceil(unit.remainingShards / shardsPerDay);
 }

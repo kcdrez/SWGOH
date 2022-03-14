@@ -13,6 +13,7 @@
         <div class="shard-header">
           <div class="current-level">
             Current Star Level:
+            <span v-if="unit.stars <= 0" class="ms-1">0</span>
             <img
               v-for="index in unit.stars || 0"
               :key="index"
@@ -20,13 +21,12 @@
             />
           </div>
         </div>
-        <!-- <Timestamp
+        <Timestamp
           class="time-estimate"
           label="Estimated completion:"
-          :title="$filters.daysFromNow(unit.shardTimeEstimation)"
-          :displayText="$filters.pluralText(unit.shardTimeEstimation, 'day')"
+          :timeLength="shardTimeUnlock"
           displayClasses="d-inline"
-        /> -->
+        />
         <EnergySpent showStandard showFleet showCantina />
         <MultiSelect
           class="select-columns"
@@ -35,10 +35,24 @@
           @checked="selectedColumns = $event"
         />
         <ShardTable
+          v-if="showNodeTable"
           :units="[unit]"
           :selectedColumns="selectedColumns"
           showActions
-          :storageKey="storageKey + 'Table'"
+          :storageKey="storageKey + 'ShardTable'"
+        />
+        <StoreTable
+          v-if="showShopTable"
+          :units="[unit]"
+          :selectedColumns="selectedColumns"
+          :currencyTypes="unit.currencyTypes"
+          :storageKey="storageKey + 'StoreTable'"
+        />
+        <TerritoryBattleShardTable
+          v-if="showTBTable"
+          :units="[unit]"
+          :selectedColumns="selectedColumns"
+          :storageKey="storageKey + 'TBTable'"
         />
       </template>
     </div>
@@ -50,16 +64,31 @@ import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 
 import ShardTable from "./tables/shardTable.vue";
+import StoreTable from "./tables/storeTable.vue";
+import TerritoryBattleShardTable from "./tables/territoryBattleShardTable.vue";
 import EnergySpent from "../energySpent.vue";
 import { loadingState } from "../../types/loading";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
+import {
+  FarmingNode,
+  estimatedTime as nodeEstimatedTime,
+} from "../../types/shards";
+import { estimatedTime as shopEstimatedTime } from "../../types/currency";
+import { Unit } from "../../types/unit";
+import { estimatedTime as tbEstimatedTime } from "../../types/guild";
 
 const storageKey = "shardPlanner";
 
 export default defineComponent({
   name: "ShardPlannerComponent",
-  components: { ShardTable, Timestamp, EnergySpent },
+  components: {
+    ShardTable,
+    StoreTable,
+    TerritoryBattleShardTable,
+    Timestamp,
+    EnergySpent,
+  },
   data() {
     return {
       selectedColumns: [],
@@ -70,6 +99,7 @@ export default defineComponent({
     ...mapState("unit", ["unit"]),
     ...mapGetters(["someLoading"]),
     ...mapState(["collapseSections"]),
+    ...mapGetters("shards", ["unitFarmingList"]),
     requestState(): loadingState {
       return this.someLoading(["unit"]);
     },
@@ -120,27 +150,103 @@ export default defineComponent({
     cols(): { text: string; value: any }[] {
       const list = [
         {
-          text: "Locations",
-          value: "locations",
+          text: "Owned Shards",
+          value: "owned",
+        },
+        {
+          text: "Shards Remaining",
+          value: "remaining",
         },
         {
           text: "Progress",
           value: "progress",
         },
-        {
+      ];
+
+      if (this.showNodeTable || this.showTBTable) {
+        list.splice(0, 0, {
+          text: "Locations",
+          value: "locations",
+        });
+      }
+
+      if (this.showShopTable) {
+        list.splice(3, 0, {
+          text: "Currency Owned",
+          value: "wallet",
+        });
+        list.splice(4, 0, {
+          text: "Daily Currency",
+          value: "dailyCurrency",
+        });
+        list.splice(5, 0, {
+          text: "Remaining Currency",
+          value: "remainingCurrency",
+        });
+      }
+
+      if (this.showNodeTable) {
+        list.splice(list.length, 0, {
           text: "Attempts",
           value: "attempts",
-        },
-        {
-          text: "Estimated Time",
-          value: "time",
-        },
-        {
+        });
+        list.splice(list.length, 0, {
           text: "Actions",
           value: "actions",
-        },
-      ];
+        });
+      }
       return list;
+    },
+    tables(): string[] {
+      return this.unit.whereToFarm.map((x: FarmingNode) => x.table);
+    },
+    showNodeTable(): boolean {
+      return this.tables.some((x) =>
+        ["Light Side", "Dark Side", "Fleet", "Cantina"].includes(x)
+      );
+    },
+    showTBTable(): boolean {
+      return this.tables.includes("Territory Battles");
+    },
+    showShopTable(): boolean {
+      return this.tables.some((x) =>
+        [
+          "Cantina Battles Store",
+          "Fleet Arena Store",
+          "Galactic War Store",
+          "Guild Events Store (Mk 1)",
+          "Guild Events Store (Mk 2)",
+          "Guild Store",
+          "Shard Store",
+          "Squad Arena Store",
+        ].includes(x)
+      );
+    },
+    shardTimeUnlock(): number {
+      const unitList = this.unitFarmingList.filter((el: Unit) => {
+        const elTables: string[] = el.whereToFarm.map((x) => x.table);
+        return this.tables.some((tableName) => elTables.includes(tableName));
+      });
+
+      let days = [];
+      if (this.showNodeTable) {
+        days.push(nodeEstimatedTime(unitList, this.tables, this.unit));
+      }
+      if (this.showTBTable) {
+        days.push(tbEstimatedTime(this.unit));
+      }
+      if (this.showShopTable) {
+        days.push(
+          shopEstimatedTime(
+            this.unit,
+            this.unit.currencyTypes,
+            this.tables,
+            unitList
+          )
+        );
+      }
+
+      return Math.min(...days);
     },
   },
   mounted() {

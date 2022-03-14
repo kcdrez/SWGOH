@@ -74,7 +74,11 @@
             <span>Daily Currency Obtained</span>
             <i class="fas mx-2" :class="sortIcon('dailyCurrency')"></i>
           </th>
-          <th class="c-pointer" @click="sortBy('remainingCurrency')">
+          <th
+            v-if="showCol('remainingCurrency')"
+            class="c-pointer"
+            @click="sortBy('remainingCurrency')"
+          >
             Remaining Currency
             <i class="fas mx-1" :class="sortIcon('remainingCurrency')"></i>
           </th>
@@ -129,12 +133,12 @@
                 <img
                   class="currency-img"
                   :src="`./images/${currency}.png`"
-                  v-if="!allowEditAvg"
+                  v-if="['get1', 'get2'].includes(currency)"
                 />
                 <DailyCurrency
                   class="d-inline"
                   :currencyType="currency"
-                  :allowEdit="allowEditAvg"
+                  :allowEdit="!['get1', 'get2'].includes(currency)"
                 />
               </template>
             </template>
@@ -143,11 +147,10 @@
             class="align-middle text-center"
             v-if="showCol('remainingCurrency')"
           >
-            <!-- <template
-              v-for="amount in unit.currencyAmountRemaining(currencyTypes)"
-            >
-              {{ amount }}
-            </template> -->
+            <template v-for="currency in currencyTypes" :key="currency">
+              <img class="currency-img" :src="`./images/${currency}.png`" />
+              {{ remainingCurrency(unit, currency) }}
+            </template>
           </td>
           <td
             class="text-center align-middle"
@@ -180,8 +183,7 @@ import Wallet from "../wallet.vue";
 import DailyCurrency from "../dailyCurrency.vue";
 import { Unit } from "../../../types/unit";
 import { mapState } from "vuex";
-import { CurrencyTypeConfig } from "../../../types/currency";
-import { unvue } from "../../../utils";
+import { CurrencyTypeConfig, estimatedTime } from "../../../types/currency";
 
 export default defineComponent({
   name: "StoreTable",
@@ -211,10 +213,6 @@ export default defineComponent({
         });
       },
       required: true,
-    },
-    allowEditAvg: {
-      type: Boolean,
-      default: false,
     },
     simpleView: {
       type: Boolean,
@@ -248,7 +246,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("currency", ["dailyCurrency", "wallet"]),
+    ...mapState("currency", ["wallet"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -296,20 +294,6 @@ export default defineComponent({
           return 0;
         });
     },
-    unitsByPriority(): Unit[] {
-      return this.units.sort((a: Unit, b: Unit) => {
-        const priorityA = a.tablePriority(this.nodeTableNames);
-        const priorityB = b.tablePriority(this.nodeTableNames);
-
-        if (priorityA <= 0) {
-          return 1;
-        } else if (priorityB <= 0) {
-          return -1;
-        } else {
-          return priorityA > priorityB ? 1 : -1;
-        }
-      });
-    },
   },
   watch: {
     sortDir() {
@@ -347,75 +331,30 @@ export default defineComponent({
         })
       );
     },
-    estimatedTime(unit: Unit): number {
-      let totalDays = 0;
-      (this.currencyTypes as CurrencyTypeConfig[]).forEach((currency) => {
-        if (unit.currencyTypes.includes(currency)) {
-          const index = this.unitsByPriority.findIndex((u) => u.id === unit.id);
-          const priority = unit.tablePriority(this.nodeTableNames);
-          let currentWallet = this.wallet[currency] ?? 0;
-
-          const alreadyCheckedPriorities: number[] = [];
-
-          for (let i = index - 1; i >= 0; i--) {
-            const el = this.unitsByPriority[i];
-            const prevPriority = el.tablePriority(this.nodeTableNames);
-            if (
-              priority > prevPriority &&
-              !alreadyCheckedPriorities.includes(prevPriority) &&
-              el.currencyTypes.includes(currency)
-            ) {
-              const { days, totalCost } = this.unitEstimated(
-                el,
-                currentWallet,
-                currency
-              );
-              totalDays += days;
-              currentWallet = Math.max(currentWallet - totalCost, 0);
-              alreadyCheckedPriorities.push(prevPriority);
-            }
-          }
-
-          const { days } = this.unitEstimated(unit, currentWallet, currency);
-          totalDays += days;
-        }
-      });
-
-      return totalDays;
+    estimatedTime(unit: Unit) {
+      return estimatedTime(
+        unit,
+        this.currencyTypes as CurrencyTypeConfig[],
+        this.nodeTableNames,
+        this.units
+      );
     },
-    unitEstimated(
-      unit: Unit,
-      wallet: number,
-      currencyType: CurrencyTypeConfig
-    ) {
-      let shardsPerDay = 0;
-      let costPerShard = 0;
-      let totalCost = 0;
+    remainingCurrency(unit: Unit, currencyType: CurrencyTypeConfig) {
       const location = unit.whereToFarm.find(
         (l) => l.currencyType === currencyType
       );
       if (location) {
+        const currentWallet = this.wallet[currencyType] ?? 0;
         const character = location.characters.find((c) => c.id === unit.id);
+        let costPerShard = 0;
         if (character && character.shardCount && character.cost) {
           costPerShard = character.cost / character.shardCount;
         }
-        totalCost = unit.remainingShards * costPerShard;
-
-        const totalRemainingCost = Math.max(totalCost - wallet, 0);
-        const daysToUnlock =
-          totalRemainingCost / (this.dailyCurrency[currencyType] || 1);
-
-        wallet = Math.max(wallet - totalCost, 0);
-        shardsPerDay += unit.remainingShards / daysToUnlock;
+        const totalCost = unit.remainingShards * costPerShard;
+        return Math.max(currentWallet - totalCost, 0);
+      } else {
+        return 0;
       }
-
-      return {
-        days:
-          shardsPerDay === 0
-            ? 0
-            : Math.ceil(unit.remainingShards / shardsPerDay),
-        totalCost,
-      };
     },
   },
   created() {

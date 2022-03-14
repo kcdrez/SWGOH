@@ -2,7 +2,7 @@ import _ from "lodash";
 
 import { apiClient } from "../api/api-client";
 import store from "../vuex-store/store";
-import { Unit } from "./unit";
+import { Unit, unitsByPriority } from "./unit";
 
 export const currencyTypeList: CurrencyTypeConfig[] = [
   "get1",
@@ -219,4 +219,83 @@ export class DailyCurrency {
       fleetArenaCurrency: this.fleetArenaCurrency,
     };
   }
+}
+
+export function estimatedTime(
+  unit: Unit,
+  currencyTypes: CurrencyTypeConfig[],
+  tableNames: string[],
+  unitList: Unit[]
+): number {
+  let totalDays = 0;
+  const unitListByPriority = unitsByPriority(unitList, tableNames);
+  (currencyTypes as CurrencyTypeConfig[]).forEach((currency) => {
+    if (unit.currencyTypes.includes(currency)) {
+      const index = unitListByPriority.findIndex((u) => u.id === unit.id);
+      const priority = unit.tablePriority(tableNames);
+
+      let currentWallet = store.state.currency.wallet[currency] ?? 0;
+
+      const alreadyCheckedPriorities: number[] = [];
+
+      for (let i = index - 1; i >= 0; i--) {
+        const el = unitListByPriority[i];
+        const prevPriority = el.tablePriority(tableNames);
+        if (
+          priority > prevPriority &&
+          !alreadyCheckedPriorities.includes(prevPriority) &&
+          el.currencyTypes.includes(currency)
+        ) {
+          const { days, totalCost } = unitEstimated(
+            el,
+            currentWallet,
+            currency
+          );
+          totalDays += days;
+          currentWallet = Math.max(currentWallet - totalCost, 0);
+          alreadyCheckedPriorities.push(prevPriority);
+        }
+      }
+
+      const { days } = unitEstimated(unit, currentWallet, currency);
+      totalDays += days;
+    }
+  });
+
+  return totalDays;
+}
+
+function unitEstimated(
+  unit: Unit,
+  wallet: number,
+  currencyType: CurrencyTypeConfig
+) {
+  let shardsPerDay = 0;
+  let costPerShard = 0;
+  let totalCost = 0;
+  const location = unit.whereToFarm.find(
+    (l) => l.currencyType === currencyType
+  );
+  if (location) {
+    const character = location.characters.find((c) => c.id === unit.id);
+    if (character && character.shardCount && character.cost) {
+      costPerShard = character.cost / character.shardCount;
+    }
+    totalCost = unit.remainingShards * costPerShard;
+
+    const totalRemainingCost = Math.max(totalCost - wallet, 0);
+
+    const daysToUnlock =
+      totalRemainingCost /
+      (store.state.currency.dailyCurrency[currencyType] || 1);
+
+    wallet = Math.max(wallet - totalCost, 0);
+    shardsPerDay += unit.remainingShards / daysToUnlock;
+  }
+
+  return {
+    days:
+      shardsPerDay === 0 ? 0 : Math.ceil(unit.remainingShards / shardsPerDay),
+    totalCost,
+  };
 }

@@ -1,9 +1,9 @@
 import { maxRelicLevel } from "../types/relic";
 import { Gear, IIngredient, maxGearLevel } from "./gear";
 import store from "../vuex-store/store";
-import { FarmingNode, shardMapping } from "./shards";
+import { shardMapping } from "./shards";
 import { round2Decimals } from "../utils";
-import { CurrencyTypeConfig, currencyTypeList } from "./currency";
+import { CurrencyTypeConfig } from "./currency";
 import _ from "lodash";
 
 export interface IUnit {
@@ -552,4 +552,22 @@ interface CrewSkill {
   requiredTier: number;
   requiredRarity: number;
   requiredRelicTier: number;
+}
+
+export function unitsByPriority(
+  unitsList: Unit[],
+  tableNames: string[]
+): Unit[] {
+  return unitsList.sort((a: Unit, b: Unit) => {
+    const priorityA = a.tablePriority(tableNames);
+    const priorityB = b.tablePriority(tableNames);
+
+    if (priorityA <= 0) {
+      return 1;
+    } else if (priorityB <= 0) {
+      return -1;
+    } else {
+      return priorityA > priorityB ? 1 : -1;
+    }
+  });
 }

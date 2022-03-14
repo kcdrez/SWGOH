@@ -184,6 +184,7 @@ import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
 import Timestamp from "../../timestamp.vue";
 import { Unit } from "../../../types/unit";
+import { estimatedTime } from "../../../types/shards";
 
 export default defineComponent({
   name: "ShardTable",
@@ -290,20 +291,6 @@ export default defineComponent({
           return 0;
         });
     },
-    unitsByPriority(): Unit[] {
-      return this.units.sort((a: Unit, b: Unit) => {
-        const priorityA = a.tablePriority(this.nodeTableNames);
-        const priorityB = b.tablePriority(this.nodeTableNames);
-
-        if (priorityA <= 0) {
-          return 1;
-        } else if (priorityB <= 0) {
-          return -1;
-        } else {
-          return priorityA > priorityB ? 1 : -1;
-        }
-      });
-    },
   },
   watch: {
     sortDir() {
@@ -341,43 +328,8 @@ export default defineComponent({
         })
       );
     },
-    estimatedTime(unit: Unit): number {
-      const index = this.unitsByPriority.findIndex((u) => u.id === unit.id);
-
-      const priority = unit.tablePriority(this.nodeTableNames);
-      let days = this.unitEstimated(unit);
-      const alreadyCheckedPriorities: number[] = [];
-      for (let i = index - 1; i >= 0; i--) {
-        const el = this.unitsByPriority[i];
-        const prevPriority = el.tablePriority(this.nodeTableNames);
-        if (
-          priority > prevPriority &&
-          !alreadyCheckedPriorities.includes(prevPriority)
-        ) {
-          days += this.unitEstimated(el);
-          alreadyCheckedPriorities.push(prevPriority);
-        }
-      }
-
-      return days;
-    },
-    unitEstimated(unit: Unit) {
-      let shardsPerDay = 0;
-
-      unit.whereToFarm.forEach((location) => {
-        const defaultNodesPerDay = this.nodeTableNames.includes(location.table)
-          ? 5
-          : 0;
-        const nodesPerDay =
-          unit.shardNodes.find((n) => n.id === location.id)?.count ||
-          defaultNodesPerDay;
-
-        shardsPerDay += nodesPerDay * 0.33 * unit.shardDropRate;
-      });
-
-      return shardsPerDay === 0
-        ? 0
-        : Math.ceil(unit.remainingShards / shardsPerDay);
+    estimatedTime(unit: Unit) {
+      return estimatedTime(this.units, this.nodeTableNames, unit);
     },
   },
   created() {

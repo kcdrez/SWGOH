@@ -127,7 +127,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions } from "vuex";
 
 import ShardsOwned from "../shardsOwned.vue";
 import UnitIcon from "../../units/unitIcon.vue";
@@ -135,6 +135,7 @@ import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
 import Timestamp from "../../timestamp.vue";
 import { Unit } from "../../../types/unit";
+import { estimatedTime } from "../../../types/guild";
 
 export default defineComponent({
   name: "TerritoryBattleShardTable",
@@ -180,7 +181,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("guild", ["tbAvgShards"]),
+    // ...mapGetters("guild", ["tbAvgShards"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -244,14 +245,15 @@ export default defineComponent({
         })
       );
     },
-    estimatedTime(unit: Unit): number {
-      const type =
-        unit.id === "KIADIMUNDI" || unit.id === "IMPERIALPROBEDROID"
-          ? "Light"
-          : "Dark";
-      const avgShardsPerEvent = this.tbAvgShards(type, unit.id);
-      return Math.ceil(unit.remainingShards / (avgShardsPerEvent / 30));
-    },
+    estimatedTime,
+    // estimatedTime(unit: Unit): number {
+    //   const type =
+    //     unit.id === "KIADIMUNDI" || unit.id === "IMPERIALPROBEDROID"
+    //       ? "Light"
+    //       : "Dark";
+    //   const avgShardsPerEvent = this.tbAvgShards(type, unit.id);
+    //   return Math.ceil(unit.remainingShards / (avgShardsPerEvent / 30));
+    // },
   },
   async created() {
     await this.initialize();

@@ -21,8 +21,6 @@
       :units="unitList"
       :selectedColumns="selectedColumns"
       showUnitName
-      allowEditAvg
-      :simpleView="simpleView"
       :currencyTypes="['cantinaBattleCurrency']"
       :storageKey="storageKey + 'Table'"
     />
