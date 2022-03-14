@@ -91,9 +91,9 @@ const store = {
       let nodesData: Node[] = [];
       if (nodes) {
         nodesData = nodes.map((node) => {
-          const nodeMatch = (match?.nodes || []).find((n) => n.id === node.id);
-          const nodeCount = node?.count || nodeMatch?.count || 0;
-          const priority = node?.priority || nodeMatch?.priority || 0;
+          const nodeMatch = (match?.nodes ?? []).find((n) => n.id === node.id);
+          const nodeCount = node?.count ?? nodeMatch?.count ?? 0;
+          const priority = node?.priority ?? nodeMatch?.priority ?? 0;
           return {
             id: node.id,
             count: nodeCount,
@@ -105,9 +105,9 @@ const store = {
       }
 
       state.ownedShards[id] = {
-        owned: count || match?.owned || 0,
+        owned: count ?? match?.owned ?? 0,
         nodes: nodesData,
-        tracking: tracking || match?.tracking || false,
+        tracking: tracking ?? match?.tracking ?? false,
       };
     },
     ADD_UNIT(state: State, unitId: string) {
@@ -148,12 +148,6 @@ const store = {
       data: NodePayload
     ) {
       commit("UPSERT_SHARD_COUNT", data);
-      const match: Unit | undefined = getters.unitFarmingList.find(
-        (unit: Unit) => unit.id === data.id
-      );
-      if (match) {
-        match.calculateEstimation();
-      }
       dispatch("save");
     },
     addUnit({ commit, dispatch }: ActionCtx, unitId: string) {

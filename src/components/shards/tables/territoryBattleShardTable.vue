@@ -51,11 +51,19 @@
             />
           </th>
           <th v-if="showCol('locations')"><span>Locations</span></th>
-          <th v-if="showCol('owned')">
+          <th
+            v-if="showCol('owned')"
+            class="c-pointer"
+            @click="sortBy('owned')"
+          >
             <span>Shards Owned</span>
             <i class="fas mx-1" :class="sortIcon('owned')"></i>
           </th>
-          <th v-if="showCol('remaining')">
+          <th
+            v-if="showCol('remaining')"
+            class="c-pointer"
+            @click="sortBy('remaining')"
+          >
             <span>Shards Remaining</span>
             <i class="fas mx-2" :class="sortIcon('remaining')"></i>
           </th>
@@ -115,11 +123,7 @@
           >
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="unit.shardTimeEstimation"
-              :displayText="
-                $filters.pluralText(unit.shardTimeEstimation, 'day')
-              "
-              :title="$filters.daysFromNow(unit.shardTimeEstimation)"
+              :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
             />
           </td>
@@ -139,6 +143,7 @@ import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
 import Timestamp from "../../timestamp.vue";
 import { Unit } from "../../../types/unit";
+import { estimatedTime } from "../../../types/guild";
 
 export default defineComponent({
   name: "TerritoryBattleShardTable",
@@ -171,6 +176,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    storageKey: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -180,6 +189,7 @@ export default defineComponent({
     };
   },
   computed: {
+    // ...mapGetters("guild", ["tbAvgShards"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -202,11 +212,23 @@ export default defineComponent({
             } else {
               return a.shardPercent > b.shardPercent ? -1 : 1;
             }
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.ownedShards > b.ownedShards ? 1 : -1;
+            } else {
+              return a.ownedShards > b.ownedShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "remaining") {
+            if (this.sortDir === "asc") {
+              return a.remainingShards > b.remainingShards ? 1 : -1;
+            } else {
+              return a.remainingShards > b.remainingShards ? -1 : 1;
+            }
           } else if (this.sortMethod === "time") {
             if (this.sortDir === "asc") {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
+              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
             } else {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
+              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
             }
           }
           return 0;
@@ -233,9 +255,24 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
+    estimatedTime,
   },
   async created() {
     await this.initialize();
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>

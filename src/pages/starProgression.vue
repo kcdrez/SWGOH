@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
+import { mapGetters } from "vuex";
 
 import ShardContainer from "../components/shards/shardTableContainer.vue";
 import { loadingState } from "../types/loading";

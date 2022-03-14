@@ -154,16 +154,6 @@ const store = {
       ]);
       if (guildData) {
         commit("SET_EVENTS", guildData);
-        ["IMPERIALPROBEDROID", "KIADIMUNI", "HOTHLEIA", "WATTAMBOR"].forEach(
-          (id) => {
-            const match = rootGetters["shards/unitFarmingList"].find(
-              (u: Unit) => u.id === id
-            );
-            if (match) {
-              match.calculateEstimation();
-            }
-          }
-        );
       } else {
         await apiClient.createGuild(guildId);
       }

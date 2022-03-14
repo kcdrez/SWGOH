@@ -14,7 +14,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="squadArenaStoreSection"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -25,9 +25,9 @@
       :units="unitList"
       :selectedColumns="selectedColumns"
       showUnitName
-      allowEditAvg
       :simpleView="simpleView"
       :currencyTypes="['squadArenaCurrency']"
+      :storageKey="storageKey + 'Table'"
     />
   </div>
 </template>
@@ -40,15 +40,16 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import StoreTable from "./storeTable.vue";
 
+const storageKey = "squadArena";
+
 export default defineComponent({
   name: "SquadArenaStoreTable",
   components: { StoreTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("squadArenaTableSimpleView") || "true"
-      ),
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -108,13 +109,13 @@ export default defineComponent({
   },
   watch: {
     simpleView(newVal) {
-      window.localStorage.setItem("squadArenaTableSimpleView", newVal);
+      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {
     setupEvents(
       (this.$refs?.squadArenaStoreSection as any)?.$el as HTMLElement,
-      "squadArenaStoreSection"
+      storageKey + "Collapse"
     );
   },
 });

@@ -53,11 +53,19 @@
           <th v-if="showCol('locations')">
             <span>Locations</span>
           </th>
-          <th v-if="showCol('owned')">
+          <th
+            v-if="showCol('owned')"
+            @click="sortBy('owned')"
+            class="c-pointer"
+          >
             <span>Shards Owned</span>
             <i class="fas mx-2" :class="sortIcon('owned')"></i>
           </th>
-          <th v-if="showCol('remaining')">
+          <th
+            v-if="showCol('remaining')"
+            @click="sortBy('remaining')"
+            class="c-pointer"
+          >
             <span>Shards Remaining</span>
             <i class="fas mx-2" :class="sortIcon('remaining')"></i>
           </th>
@@ -71,7 +79,7 @@
           </th>
           <th v-if="showCol('attempts')">
             <span>Node Attempts per Day</span>
-            <i class="fas mx-2" :class="sortIcon('attempts')"></i>
+            <!-- <i class="fas mx-2" :class="sortIcon('attempts')"></i> -->
           </th>
           <th
             class="c-pointer"
@@ -81,7 +89,12 @@
             <span>Est. Time</span>
             <i class="fas mx-2" :class="sortIcon('time')"></i>
           </th>
-          <th v-if="showCol('priority') && showPriority" width="150px">
+          <th
+            v-if="showCol('priority') && showPriority"
+            width="150px"
+            class="c-pointer"
+            @click="sortBy('priority')"
+          >
             <span>Priority</span>
             <i class="fas mx-2" :class="sortIcon('priority')"></i>
           </th>
@@ -133,11 +146,7 @@
           >
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="unit.shardTimeEstimation"
-              :displayText="
-                $filters.pluralText(unit.shardTimeEstimation, 'day')
-              "
-              :title="$filters.daysFromNow(unit.shardTimeEstimation)"
+              :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
             />
           </td>
@@ -183,6 +192,7 @@ import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
 import Timestamp from "../../timestamp.vue";
 import { Unit } from "../../../types/unit";
+import { estimatedTime } from "../../../types/shards";
 
 export default defineComponent({
   name: "ShardTable",
@@ -264,11 +274,23 @@ export default defineComponent({
             } else {
               return a.shardPercent > b.shardPercent ? -1 : 1;
             }
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.ownedShards > b.ownedShards ? 1 : -1;
+            } else {
+              return a.ownedShards > b.ownedShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "remaining") {
+            if (this.sortDir === "asc") {
+              return a.remainingShards > b.remainingShards ? 1 : -1;
+            } else {
+              return a.remainingShards > b.remainingShards ? -1 : 1;
+            }
           } else if (this.sortMethod === "time") {
             if (this.sortDir === "asc") {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
+              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
             } else {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
+              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
             }
           } else if (this.sortMethod === "priority") {
             const priorityA = a.tablePriority(this.nodeTableNames);
@@ -323,6 +345,9 @@ export default defineComponent({
           sortMethod: this.sortMethod,
         })
       );
+    },
+    estimatedTime(unit: Unit) {
+      return estimatedTime(this.units, this.nodeTableNames, unit);
     },
   },
   created() {

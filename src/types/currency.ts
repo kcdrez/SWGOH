@@ -2,7 +2,7 @@ import _ from "lodash";
 
 import { apiClient } from "../api/api-client";
 import store from "../vuex-store/store";
-import { Unit } from "./unit";
+import { Unit, unitsByPriority } from "./unit";
 
 export const currencyTypeList: CurrencyTypeConfig[] = [
   "get1",
@@ -62,7 +62,6 @@ export class Wallet {
   public set get1(val) {
     this._get1 = val;
     this.save();
-    updateUnits("get1");
   }
   public get get2() {
     return this._get2 || 0;
@@ -70,7 +69,6 @@ export class Wallet {
   public set get2(val) {
     this._get2 = val;
     this.save();
-    updateUnits("get2");
   }
   public get shardCurrency() {
     return this._shardCurrency;
@@ -78,7 +76,6 @@ export class Wallet {
   public set shardCurrency(val) {
     this._shardCurrency = val;
     this.save();
-    updateUnits("get1");
   }
   public get cantinaBattleCurrency() {
     return this._cantinaBattleCurrency;
@@ -86,7 +83,6 @@ export class Wallet {
   public set cantinaBattleCurrency(val) {
     this._cantinaBattleCurrency = val;
     this.save();
-    updateUnits("cantinaBattleCurrency");
   }
   public get guildStoreCurrency() {
     return this._guildStoreCurrency;
@@ -94,7 +90,6 @@ export class Wallet {
   public set guildStoreCurrency(val) {
     this._guildStoreCurrency = val;
     this.save();
-    updateUnits("guildStoreCurrency");
   }
   public get squadArenaCurrency() {
     return this._squadArenaCurrency;
@@ -102,7 +97,6 @@ export class Wallet {
   public set squadArenaCurrency(val) {
     this._squadArenaCurrency = val;
     this.save();
-    updateUnits("squadArenaCurrency");
   }
   public get galacticWarCurrency() {
     return this._galacticWarCurrency;
@@ -110,7 +104,6 @@ export class Wallet {
   public set galacticWarCurrency(val) {
     this._galacticWarCurrency = val;
     this.save();
-    updateUnits("galacticWarCurrency");
   }
   public get fleetArenaCurrency() {
     return this._fleetArenaCurrency;
@@ -118,7 +111,6 @@ export class Wallet {
   public set fleetArenaCurrency(val) {
     this._fleetArenaCurrency = val;
     this.save();
-    updateUnits("fleetArenaCurrency");
   }
 
   private save = _.debounce(() => {
@@ -176,7 +168,6 @@ export class DailyCurrency {
   public set shardCurrency(val) {
     this._shardCurrency = val;
     this.save();
-    this.updateUnits("shardCurrency");
   }
   public get cantinaBattleCurrency() {
     return this._cantinaBattleCurrency || 0;
@@ -184,7 +175,6 @@ export class DailyCurrency {
   public set cantinaBattleCurrency(val) {
     this._cantinaBattleCurrency = val;
     this.save();
-    this.updateUnits("cantinaBattleCurrency");
   }
   public get guildStoreCurrency() {
     return this._guildStoreCurrency || 0;
@@ -192,7 +182,6 @@ export class DailyCurrency {
   public set guildStoreCurrency(val) {
     this._guildStoreCurrency = val;
     this.save();
-    this.updateUnits("guildStoreCurrency");
   }
   public get squadArenaCurrency() {
     return this._squadArenaCurrency || 0;
@@ -200,7 +189,6 @@ export class DailyCurrency {
   public set squadArenaCurrency(val) {
     this._squadArenaCurrency = val;
     this.save();
-    this.updateUnits("squadArenaCurrency");
   }
   public get galacticWarCurrency() {
     return this._galacticWarCurrency || 0;
@@ -208,7 +196,6 @@ export class DailyCurrency {
   public set galacticWarCurrency(val) {
     this._galacticWarCurrency = val;
     this.save();
-    this.updateUnits("galacticWarCurrency");
   }
   public get fleetArenaCurrency() {
     return this._fleetArenaCurrency || 0;
@@ -216,7 +203,6 @@ export class DailyCurrency {
   public set fleetArenaCurrency(val) {
     this._fleetArenaCurrency = val;
     this.save();
-    this.updateUnits("fleetArenaCurrency");
   }
 
   private save = _.debounce(() => {
@@ -233,13 +219,83 @@ export class DailyCurrency {
       fleetArenaCurrency: this.fleetArenaCurrency,
     };
   }
-  public updateUnits = updateUnits;
 }
 
-function updateUnits(currencyType: CurrencyTypeConfig) {
-  store.getters["shards/unitFarmingList"].forEach((unit: Unit) => {
-    if (unit.currencyTypes.includes(currencyType)) {
-      unit.calculateEstimation();
+export function estimatedTime(
+  unit: Unit,
+  currencyTypes: CurrencyTypeConfig[],
+  tableNames: string[],
+  unitList: Unit[]
+): number {
+  let totalDays = 0;
+  const unitListByPriority = unitsByPriority(unitList, tableNames);
+  (currencyTypes as CurrencyTypeConfig[]).forEach((currency) => {
+    if (unit.currencyTypes.includes(currency)) {
+      const index = unitListByPriority.findIndex((u) => u.id === unit.id);
+      const priority = unit.tablePriority(tableNames);
+
+      let currentWallet = store.state.currency.wallet[currency] ?? 0;
+
+      const alreadyCheckedPriorities: number[] = [];
+
+      for (let i = index - 1; i >= 0; i--) {
+        const el = unitListByPriority[i];
+        const prevPriority = el.tablePriority(tableNames);
+        if (
+          priority > prevPriority &&
+          !alreadyCheckedPriorities.includes(prevPriority) &&
+          el.currencyTypes.includes(currency)
+        ) {
+          const { days, totalCost } = unitEstimated(
+            el,
+            currentWallet,
+            currency
+          );
+          totalDays += days;
+          currentWallet = Math.max(currentWallet - totalCost, 0);
+          alreadyCheckedPriorities.push(prevPriority);
+        }
+      }
+
+      const { days } = unitEstimated(unit, currentWallet, currency);
+      totalDays += days;
     }
   });
+
+  return totalDays;
+}
+
+function unitEstimated(
+  unit: Unit,
+  wallet: number,
+  currencyType: CurrencyTypeConfig
+) {
+  let shardsPerDay = 0;
+  let costPerShard = 0;
+  let totalCost = 0;
+  const location = unit.whereToFarm.find(
+    (l) => l.currencyType === currencyType
+  );
+  if (location) {
+    const character = location.characters.find((c) => c.id === unit.id);
+    if (character && character.shardCount && character.cost) {
+      costPerShard = character.cost / character.shardCount;
+    }
+    totalCost = unit.remainingShards * costPerShard;
+
+    const totalRemainingCost = Math.max(totalCost - wallet, 0);
+
+    const daysToUnlock =
+      totalRemainingCost /
+      (store.state.currency.dailyCurrency[currencyType] || 1);
+
+    wallet = Math.max(wallet - totalCost, 0);
+    shardsPerDay += unit.remainingShards / daysToUnlock;
+  }
+
+  return {
+    days:
+      shardsPerDay === 0 ? 0 : Math.ceil(unit.remainingShards / shardsPerDay),
+    totalCost,
+  };
 }

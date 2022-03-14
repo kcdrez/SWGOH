@@ -10,7 +10,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="guildStoreSection"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -21,9 +21,9 @@
       :units="unitList"
       :selectedColumns="selectedColumns"
       showUnitName
-      allowEditAvg
       :simpleView="simpleView"
       :currencyTypes="['guildStoreCurrency']"
+      :storageKey="storageKey + 'Table'"
     />
   </div>
 </template>
@@ -36,15 +36,16 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import StoreTable from "./storeTable.vue";
 
+const storageKey = "guildStore";
+
 export default defineComponent({
   name: "GuildStoreTable",
   components: { StoreTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("guildStoreTableSimpleView") || "true"
-      ),
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -102,13 +103,13 @@ export default defineComponent({
   },
   watch: {
     simpleView(newVal) {
-      window.localStorage.setItem("guildStoreTableSimpleView", newVal);
+      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {
     setupEvents(
       (this.$refs?.guildStoreSection as any)?.$el as HTMLElement,
-      "guildStoreSection"
+      storageKey + "Collapse"
     );
   },
 });

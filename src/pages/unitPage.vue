@@ -46,6 +46,8 @@ const dependencyModules = [
   "relic",
   "shards",
   "planner",
+  "guild",
+  "currency",
 ];
 
 export default defineComponent({

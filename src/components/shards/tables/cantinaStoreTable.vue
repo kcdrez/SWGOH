@@ -10,7 +10,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="cantinaStoreSection"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -21,9 +21,8 @@
       :units="unitList"
       :selectedColumns="selectedColumns"
       showUnitName
-      allowEditAvg
-      :simpleView="simpleView"
       :currencyTypes="['cantinaBattleCurrency']"
+      :storageKey="storageKey + 'Table'"
     />
   </div>
 </template>
@@ -36,15 +35,16 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import StoreTable from "./storeTable.vue";
 
+const storageKey = "cantinaStore";
+
 export default defineComponent({
   name: "CantinaStoreTable",
   components: { StoreTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("cantinaStoreSimpleView") || "true"
-      ),
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -104,13 +104,13 @@ export default defineComponent({
   },
   watch: {
     simpleView(newVal) {
-      window.localStorage.setItem("cantinaStoreSimpleView", newVal);
+      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {
     setupEvents(
       (this.$refs?.cantinaStoreSection as any)?.$el as HTMLElement,
-      "cantinaStoreSection"
+      storageKey + "Collapse"
     );
   },
 });

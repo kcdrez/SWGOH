@@ -50,12 +50,19 @@
               v-model="searchText"
             />
           </th>
-          <!-- <th v-if="showCol('locations')">Locations</th> -->
-          <th v-if="showCol('owned')">
+          <th
+            class="c-pointer"
+            v-if="showCol('owned')"
+            @click="sortBy('owned')"
+          >
             <span>Shards Owned</span>
             <i class="fas mx-2" :class="sortIcon('owned')"></i>
           </th>
-          <th v-if="showCol('remaining')">
+          <th
+            class="c-pointer"
+            v-if="showCol('remaining')"
+            @click="sortBy('remaining')"
+          >
             <span>Shards Remaining</span>
             <i class="fas mx-2" :class="sortIcon('remaining')"></i>
           </th>
@@ -67,15 +74,27 @@
             Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showCol('wallet')">
+          <th
+            v-if="showCol('wallet')"
+            class="c-pointer"
+            @click="sortBy('wallet')"
+          >
             <span>Currency Owned</span>
             <i class="fas mx-2" :class="sortIcon('wallet')"></i>
           </th>
-          <th v-if="showCol('dailyCurrency')">
+          <th
+            v-if="showCol('dailyCurrency')"
+            @click="sortBy('dailyCurrency')"
+            class="c-pointer"
+          >
             <span>Daily Currency Obtained</span>
             <i class="fas mx-2" :class="sortIcon('dailyCurrency')"></i>
           </th>
-          <th class="c-pointer" @click="sortBy('remainingCurrency')">
+          <th
+            v-if="showCol('remainingCurrency')"
+            class="c-pointer"
+            @click="sortBy('remainingCurrency')"
+          >
             Remaining Currency
             <i class="fas mx-1" :class="sortIcon('remainingCurrency')"></i>
           </th>
@@ -86,6 +105,15 @@
           >
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
+          </th>
+          <th
+            v-if="showCol('priority')"
+            width="150px"
+            class="c-pointer"
+            @click="sortBy('priority')"
+          >
+            <span>Priority</span>
+            <i class="fas mx-2" :class="sortIcon('priority')"></i>
           </th>
         </tr>
       </thead>
@@ -120,13 +148,13 @@
               <template v-if="unit.currencyTypes.includes(currency)">
                 <img
                   class="currency-img"
-                  :src="`/images/${currency}.png`"
-                  v-if="!allowEditAvg"
+                  :src="`./images/${currency}.png`"
+                  v-if="['get1', 'get2'].includes(currency)"
                 />
                 <DailyCurrency
                   class="d-inline"
                   :currencyType="currency"
-                  :allowEdit="allowEditAvg"
+                  :allowEdit="!['get1', 'get2'].includes(currency)"
                 />
               </template>
             </template>
@@ -135,10 +163,11 @@
             class="align-middle text-center"
             v-if="showCol('remainingCurrency')"
           >
-            <template
-              v-for="amount in unit.currencyAmountRemaining(currencyTypes)"
-            >
-              {{ amount }}
+            <template v-for="currency in currencyTypes" :key="currency">
+              <template v-if="unit.currencyTypes.includes(currency)">
+                <img class="currency-img" :src="`./images/${currency}.png`" />
+                {{ remainingCurrency(unit, currency) }}
+              </template>
             </template>
           </td>
           <td
@@ -147,13 +176,12 @@
           >
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="unit.shardTimeEstimation"
-              :displayText="
-                $filters.pluralText(unit.shardTimeEstimation, 'day')
-              "
-              :title="$filters.daysFromNow(unit.shardTimeEstimation)"
+              :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
             />
+          </td>
+          <td class="align-middle" v-if="showCol('priority')">
+            <ShardPriority :unit="unit" :nodeTableNames="nodeTableNames" />
           </td>
         </tr>
       </tbody>
@@ -172,6 +200,8 @@ import Timestamp from "../../timestamp.vue";
 import Wallet from "../wallet.vue";
 import DailyCurrency from "../dailyCurrency.vue";
 import { Unit } from "../../../types/unit";
+import { mapState } from "vuex";
+import { CurrencyTypeConfig, estimatedTime } from "../../../types/currency";
 
 export default defineComponent({
   name: "StoreTable",
@@ -202,10 +232,6 @@ export default defineComponent({
       },
       required: true,
     },
-    allowEditAvg: {
-      type: Boolean,
-      default: false,
-    },
     simpleView: {
       type: Boolean,
       default: false,
@@ -219,6 +245,16 @@ export default defineComponent({
         });
       },
     },
+    nodeTableNames: {
+      type: Array as PropType<string[]>,
+      default: () => {
+        return [];
+      },
+    },
+    storageKey: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -228,6 +264,7 @@ export default defineComponent({
     };
   },
   computed: {
+    ...mapState("currency", ["wallet", "dailyCurrency"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -252,13 +289,96 @@ export default defineComponent({
             }
           } else if (this.sortMethod === "time") {
             if (this.sortDir === "asc") {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
+              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
             } else {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
+              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
+            }
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.ownedShards > b.ownedShards ? 1 : -1;
+            } else {
+              return a.ownedShards > b.ownedShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "remaining") {
+            if (this.sortDir === "asc") {
+              return a.remainingShards > b.remainingShards ? 1 : -1;
+            } else {
+              return a.remainingShards > b.remainingShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "wallet") {
+            for (let i = 0; i <= this.currencyTypes.length; i++) {
+              const currency = (this.currencyTypes as CurrencyTypeConfig[])[i];
+              const includesA = a.currencyTypes.includes(currency);
+              const includesB = a.currencyTypes.includes(currency);
+
+              if (includesA && includesB) {
+                return 0;
+              } else if (includesA) {
+                return this.sortDir === "asc" ? 1 : -1;
+              } else if (includesB) {
+                return this.sortDir === "asc" ? -1 : 1;
+              }
+            }
+          } else if (this.sortMethod === "dailyCurrency") {
+            let amountA = 0;
+            let amountB = 0;
+            for (let i = 0; i <= this.currencyTypes.length; i++) {
+              const currency = (this.currencyTypes as CurrencyTypeConfig[])[i];
+              const includesA = a.currencyTypes.includes(currency);
+              const includesB = b.currencyTypes.includes(currency);
+              // const amount = this.dailyCurrency[currency];
+
+              if (includesA && includesB) {
+                amountA = this.dailyCurrency[currency];
+                amountB = this.dailyCurrency[currency];
+              } else if (includesA) {
+                amountA = this.dailyCurrency[currency];
+              } else if (includesB) {
+                amountB = this.dailyCurrency[currency];
+              }
+            }
+
+            if (amountA > amountB) {
+              return this.sortDir === "asc" ? 1 : -1;
+            } else if (amountB > amountA) {
+              return this.sortDir === "asc" ? -1 : 1;
+            }
+          } else if (this.sortMethod === "remainingCurrency") {
+            for (let i = 0; i <= this.currencyTypes.length; i++) {
+              const currency = (this.currencyTypes as CurrencyTypeConfig[])[i];
+              const remainingA = this.remainingCurrency(a, currency);
+              const remainingB = this.remainingCurrency(b, currency);
+
+              if (remainingA > remainingB) {
+                return this.sortDir === "asc" ? 1 : -1;
+              } else if (remainingB > remainingA) {
+                return this.sortDir === "asc" ? -1 : 1;
+              }
+            }
+          } else if (this.sortMethod === "priority") {
+            const priorityA = a.tablePriority(this.nodeTableNames);
+            const priorityB = b.tablePriority(this.nodeTableNames);
+
+            if (priorityA <= 0) {
+              return this.sortDir === "asc" ? 1 : -1;
+            } else if (priorityB <= 0) {
+              return this.sortDir === "asc" ? -1 : 1;
+            } else if (this.sortDir === "asc") {
+              return priorityA > priorityB ? 1 : -1;
+            } else {
+              return priorityA > priorityB ? -1 : 1;
             }
           }
           return 0;
         });
+    },
+  },
+  watch: {
+    sortDir() {
+      this.saveSortData();
+    },
+    sortMethod() {
+      this.saveSortData();
     },
   },
   methods: {
@@ -280,6 +400,47 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
+    estimatedTime(unit: Unit) {
+      return estimatedTime(
+        unit,
+        this.currencyTypes as CurrencyTypeConfig[],
+        this.nodeTableNames,
+        this.units
+      );
+    },
+    remainingCurrency(unit: Unit, currencyType: CurrencyTypeConfig) {
+      const location = unit.whereToFarm.find(
+        (l) => l.currencyType === currencyType
+      );
+      if (location) {
+        const currentWallet = this.wallet[currencyType] ?? 0;
+        const character = location.characters.find((c) => c.id === unit.id);
+        let costPerShard = 0;
+        if (character && character.shardCount && character.cost) {
+          costPerShard = character.cost / character.shardCount;
+        }
+        const totalCost = unit.remainingShards * costPerShard;
+        return Math.max(currentWallet - totalCost, 0);
+      } else {
+        return 0;
+      }
+    },
+  },
+  created() {
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>
