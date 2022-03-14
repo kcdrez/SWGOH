@@ -261,7 +261,7 @@ export class Unit {
 
   public get gearTarget() {
     return (
-      store.state.planner.targetConfig[this.id]?.gear.target || maxGearLevel
+      store.state.planner.targetConfig[this.id]?.gear.target ?? maxGearLevel
     );
   }
   public set gearTarget(value) {
@@ -275,7 +275,7 @@ export class Unit {
 
   public get relicTarget() {
     return (
-      store.state.planner.targetConfig[this.id]?.relic.target || maxRelicLevel
+      store.state.planner.targetConfig[this.id]?.relic.target ?? maxRelicLevel
     );
   }
   public set relicTarget(value) {
