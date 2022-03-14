@@ -51,11 +51,19 @@
             />
           </th>
           <th v-if="showCol('locations')"><span>Locations</span></th>
-          <th v-if="showCol('owned')">
+          <th
+            v-if="showCol('owned')"
+            class="c-pointer"
+            @click="sortBy('owned')"
+          >
             <span>Shards Owned</span>
             <i class="fas mx-1" :class="sortIcon('owned')"></i>
           </th>
-          <th v-if="showCol('remaining')">
+          <th
+            v-if="showCol('remaining')"
+            class="c-pointer"
+            @click="sortBy('remaining')"
+          >
             <span>Shards Remaining</span>
             <i class="fas mx-2" :class="sortIcon('remaining')"></i>
           </th>
@@ -204,14 +212,25 @@ export default defineComponent({
             } else {
               return a.shardPercent > b.shardPercent ? -1 : 1;
             }
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.ownedShards > b.ownedShards ? 1 : -1;
+            } else {
+              return a.ownedShards > b.ownedShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "remaining") {
+            if (this.sortDir === "asc") {
+              return a.remainingShards > b.remainingShards ? 1 : -1;
+            } else {
+              return a.remainingShards > b.remainingShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "time") {
+            if (this.sortDir === "asc") {
+              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
+            } else {
+              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
+            }
           }
-          // else if (this.sortMethod === "time") {
-          //   if (this.sortDir === "asc") {
-          //     return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
-          //   } else {
-          //     return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
-          //   }
-          // }
           return 0;
         });
     },
@@ -246,14 +265,6 @@ export default defineComponent({
       );
     },
     estimatedTime,
-    // estimatedTime(unit: Unit): number {
-    //   const type =
-    //     unit.id === "KIADIMUNDI" || unit.id === "IMPERIALPROBEDROID"
-    //       ? "Light"
-    //       : "Dark";
-    //   const avgShardsPerEvent = this.tbAvgShards(type, unit.id);
-    //   return Math.ceil(unit.remainingShards / (avgShardsPerEvent / 30));
-    // },
   },
   async created() {
     await this.initialize();

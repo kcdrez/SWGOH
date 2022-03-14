@@ -53,11 +53,19 @@
           <th v-if="showCol('locations')">
             <span>Locations</span>
           </th>
-          <th v-if="showCol('owned')">
+          <th
+            v-if="showCol('owned')"
+            @click="sortBy('owned')"
+            class="c-pointer"
+          >
             <span>Shards Owned</span>
             <i class="fas mx-2" :class="sortIcon('owned')"></i>
           </th>
-          <th v-if="showCol('remaining')">
+          <th
+            v-if="showCol('remaining')"
+            @click="sortBy('remaining')"
+            class="c-pointer"
+          >
             <span>Shards Remaining</span>
             <i class="fas mx-2" :class="sortIcon('remaining')"></i>
           </th>
@@ -71,7 +79,7 @@
           </th>
           <th v-if="showCol('attempts')">
             <span>Node Attempts per Day</span>
-            <i class="fas mx-2" :class="sortIcon('attempts')"></i>
+            <!-- <i class="fas mx-2" :class="sortIcon('attempts')"></i> -->
           </th>
           <th
             class="c-pointer"
@@ -266,15 +274,25 @@ export default defineComponent({
             } else {
               return a.shardPercent > b.shardPercent ? -1 : 1;
             }
-          }
-          // else if (this.sortMethod === "time") {
-          //   if (this.sortDir === "asc") {
-          //     return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
-          //   } else {
-          //     return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
-          //   }
-          // }
-          else if (this.sortMethod === "priority") {
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.ownedShards > b.ownedShards ? 1 : -1;
+            } else {
+              return a.ownedShards > b.ownedShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "remaining") {
+            if (this.sortDir === "asc") {
+              return a.remainingShards > b.remainingShards ? 1 : -1;
+            } else {
+              return a.remainingShards > b.remainingShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "time") {
+            if (this.sortDir === "asc") {
+              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
+            } else {
+              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
+            }
+          } else if (this.sortMethod === "priority") {
             const priorityA = a.tablePriority(this.nodeTableNames);
             const priorityB = b.tablePriority(this.nodeTableNames);
 

@@ -50,11 +50,19 @@
               v-model="searchText"
             />
           </th>
-          <th v-if="showCol('owned')">
+          <th
+            class="c-pointer"
+            v-if="showCol('owned')"
+            @click="sortBy('owned')"
+          >
             <span>Shards Owned</span>
             <i class="fas mx-2" :class="sortIcon('owned')"></i>
           </th>
-          <th v-if="showCol('remaining')">
+          <th
+            class="c-pointer"
+            v-if="showCol('remaining')"
+            @click="sortBy('remaining')"
+          >
             <span>Shards Remaining</span>
             <i class="fas mx-2" :class="sortIcon('remaining')"></i>
           </th>
@@ -66,11 +74,19 @@
             Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showCol('wallet')">
+          <th
+            v-if="showCol('wallet')"
+            class="c-pointer"
+            @click="sortBy('wallet')"
+          >
             <span>Currency Owned</span>
             <i class="fas mx-2" :class="sortIcon('wallet')"></i>
           </th>
-          <th v-if="showCol('dailyCurrency')">
+          <th
+            v-if="showCol('dailyCurrency')"
+            @click="sortBy('dailyCurrency')"
+            class="c-pointer"
+          >
             <span>Daily Currency Obtained</span>
             <i class="fas mx-2" :class="sortIcon('dailyCurrency')"></i>
           </th>
@@ -148,8 +164,10 @@
             v-if="showCol('remainingCurrency')"
           >
             <template v-for="currency in currencyTypes" :key="currency">
-              <img class="currency-img" :src="`./images/${currency}.png`" />
-              {{ remainingCurrency(unit, currency) }}
+              <template v-if="unit.currencyTypes.includes(currency)">
+                <img class="currency-img" :src="`./images/${currency}.png`" />
+                {{ remainingCurrency(unit, currency) }}
+              </template>
             </template>
           </td>
           <td
@@ -246,7 +264,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("currency", ["wallet"]),
+    ...mapState("currency", ["wallet", "dailyCurrency"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -269,15 +287,75 @@ export default defineComponent({
             } else {
               return a.shardPercent > b.shardPercent ? -1 : 1;
             }
-          }
-          // else if (this.sortMethod === "time") {
-          //   if (this.sortDir === "asc") {
-          //     return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
-          //   } else {
-          //     return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
-          //   }
-          // }
-          else if (this.sortMethod === "priority") {
+          } else if (this.sortMethod === "time") {
+            if (this.sortDir === "asc") {
+              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
+            } else {
+              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
+            }
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.ownedShards > b.ownedShards ? 1 : -1;
+            } else {
+              return a.ownedShards > b.ownedShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "remaining") {
+            if (this.sortDir === "asc") {
+              return a.remainingShards > b.remainingShards ? 1 : -1;
+            } else {
+              return a.remainingShards > b.remainingShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "wallet") {
+            for (let i = 0; i <= this.currencyTypes.length; i++) {
+              const currency = (this.currencyTypes as CurrencyTypeConfig[])[i];
+              const includesA = a.currencyTypes.includes(currency);
+              const includesB = a.currencyTypes.includes(currency);
+
+              if (includesA && includesB) {
+                return 0;
+              } else if (includesA) {
+                return this.sortDir === "asc" ? 1 : -1;
+              } else if (includesB) {
+                return this.sortDir === "asc" ? -1 : 1;
+              }
+            }
+          } else if (this.sortMethod === "dailyCurrency") {
+            let amountA = 0;
+            let amountB = 0;
+            for (let i = 0; i <= this.currencyTypes.length; i++) {
+              const currency = (this.currencyTypes as CurrencyTypeConfig[])[i];
+              const includesA = a.currencyTypes.includes(currency);
+              const includesB = b.currencyTypes.includes(currency);
+              // const amount = this.dailyCurrency[currency];
+
+              if (includesA && includesB) {
+                amountA = this.dailyCurrency[currency];
+                amountB = this.dailyCurrency[currency];
+              } else if (includesA) {
+                amountA = this.dailyCurrency[currency];
+              } else if (includesB) {
+                amountB = this.dailyCurrency[currency];
+              }
+            }
+
+            if (amountA > amountB) {
+              return this.sortDir === "asc" ? 1 : -1;
+            } else if (amountB > amountA) {
+              return this.sortDir === "asc" ? -1 : 1;
+            }
+          } else if (this.sortMethod === "remainingCurrency") {
+            for (let i = 0; i <= this.currencyTypes.length; i++) {
+              const currency = (this.currencyTypes as CurrencyTypeConfig[])[i];
+              const remainingA = this.remainingCurrency(a, currency);
+              const remainingB = this.remainingCurrency(b, currency);
+
+              if (remainingA > remainingB) {
+                return this.sortDir === "asc" ? 1 : -1;
+              } else if (remainingB > remainingA) {
+                return this.sortDir === "asc" ? -1 : 1;
+              }
+            }
+          } else if (this.sortMethod === "priority") {
             const priorityA = a.tablePriority(this.nodeTableNames);
             const priorityB = b.tablePriority(this.nodeTableNames);
 
