@@ -1,25 +1,29 @@
 <template>
   <div class="mb-3">
-    <div class="collapse-header section-header mt-3 position-relative">
+    <div class="collapse-header section-header mt-3">
       <h3>
         <div data-bs-toggle="collapse" href="#shard-section-table">
           Shard Summary
         </div>
       </h3>
+      <div class="simple-view-container">
+        <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
+      </div>
       <MultiSelect
         class="select-columns"
         :options="cols"
-        storageKey="shardTable"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
-        @click.stop=""
       />
     </div>
     <div id="shard-section-table" class="collapse" ref="shardSection">
       <ShardTable
         :units="plannerList"
         showUnitName
-        showPriority
+        showActions
         :selectedColumns="selectedColumns"
+        :simpleView="simpleView"
+        :storageKey="storageKey + 'Table'"
       />
     </div>
   </div>
@@ -30,7 +34,9 @@ import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
 import { setupEvents } from "../../utils";
-import ShardTable from "../shards/shardTable.vue";
+import ShardTable from "../shards/tables/shardTable.vue";
+
+const storageKey = "shardSection";
 
 export default defineComponent({
   name: "ShardSection",
@@ -38,6 +44,8 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
+      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
+      storageKey,
     };
   },
   computed: {
@@ -67,10 +75,6 @@ export default defineComponent({
           value: "time",
         },
         {
-          text: "Priority",
-          value: "priority",
-        },
-        {
           text: "Actions",
           value: "actions",
         },
@@ -78,12 +82,18 @@ export default defineComponent({
       return list;
     },
   },
-
+  watch: {
+    simpleView(newVal) {
+      window.localStorage.setItem(storageKey, newVal);
+    },
+  },
   mounted() {
-    setupEvents(this.$refs.shardSection as HTMLElement, "shardSection");
+    setupEvents(
+      this.$refs.shardSection as HTMLElement,
+      storageKey + "Collapse"
+    );
   },
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

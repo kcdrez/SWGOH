@@ -4,10 +4,18 @@
       v-if="isLink"
       :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
     >
-      <UnitPortrait :unit="unit" :size="size" />
+      <span v-if="hideImage">{{ unit.name }}</span>
+      <UnitPortrait
+        v-else
+        :unit="unit"
+        :size="size"
+        :class="{ 'hide-on-mobile': hideImgOnMobile }"
+      />
     </router-link>
     <template v-else>
+      <span v-if="hideImage">{{ unit.name }}</span>
       <UnitPortrait
+        v-else
         :unit="unit"
         :size="size"
         :class="{ 'hide-on-mobile': hideImgOnMobile }"
@@ -36,6 +44,10 @@ export default defineComponent({
       default: false,
     },
     hideImgOnMobile: {
+      type: Boolean,
+      default: false,
+    },
+    hideImage: {
       type: Boolean,
       default: false,
     },

@@ -10,6 +10,7 @@ import {
   TerritoryWarEvent,
 } from "../types/guild";
 import { round2Decimals } from "../utils";
+import { Unit } from "../types/unit";
 
 interface State {
   requestState: loadingState;
@@ -69,9 +70,9 @@ const store = {
           (total: number, e: TerritoryBattleEvent) => {
             if (unitId) {
               if (e.type === type && e.characterShards.id === unitId) {
-                return total + e.characterShards.count
+                return total + e.characterShards.count;
               } else {
-                return total
+                return total;
               }
             } else {
               return e.type === type ? total + e.characterShards.count : total;
@@ -133,7 +134,7 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit, state, rootState }: ActionCtx) {
+    async initialize({ commit, state, rootState, rootGetters }: ActionCtx) {
       const guildId = rootState.player.player?.guild_id || "";
       const allyCode = rootState.player.allyCode;
 

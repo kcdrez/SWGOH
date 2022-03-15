@@ -31,7 +31,6 @@ export default defineComponent({
   components: { UnitIcon },
   computed: {
     ...mapState("unit", ["unitList"]),
-
     ...mapState("planner", { generalPlannerUnitList: "unitList" }),
     ...mapGetters("shards", { shardPlannerList: "plannerList" }),
     ...mapGetters("player", ["unitData"]),

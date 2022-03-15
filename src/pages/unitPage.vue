@@ -32,11 +32,23 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
+import { initializeModules } from "../utils";
 import GearPlanner from "../components/gear/gearPlanner.vue";
 import RelicPlanner from "../components/relic/relicPlanner.vue";
 import ShardPlanner from "../components/shards/shardPlanner.vue";
 import UnitIcon from "../components/units/unitIcon.vue";
 import { loadingState } from "../types/loading";
+
+const dependencyModules = [
+  "player",
+  "unit",
+  "gear",
+  "relic",
+  "shards",
+  "planner",
+  "guild",
+  "currency",
+];
 
 export default defineComponent({
   name: "UnitPage",
@@ -48,7 +60,11 @@ export default defineComponent({
     ...mapGetters("shards", { shardPlannerList: "plannerList" }),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
-      return this.someLoading(["unit", "planner"]);
+      if (!this.unit) {
+        return loadingState.loading;
+      } else {
+        return this.someLoading(dependencyModules);
+      }
     },
   },
   methods: {
@@ -105,9 +121,8 @@ export default defineComponent({
     },
   },
   async created() {
-    if (this.playerRequestState === loadingState.ready) {
-      await this.fetchUnit(this.$route.params.unitId);
-    }
+    await initializeModules(dependencyModules);
+    await this.fetchUnit(this.$route.params.unitId);
   },
 });
 </script>

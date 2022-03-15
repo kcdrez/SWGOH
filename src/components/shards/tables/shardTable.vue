@@ -41,8 +41,8 @@
         <tr class="text-center align-middle">
           <th v-if="showUnitName && showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
-              Unit Name
-              <i class="fas mx-1" :class="sortIcon('name')"></i>
+              <span>Unit Name</span>
+              <i class="fas mx-2" :class="sortIcon('name')"></i>
             </div>
             <input
               class="form-control form-control-sm mx-auto my-1 w-75"
@@ -50,38 +50,56 @@
               v-model="searchText"
             />
           </th>
-          <th v-if="showCol('locations')">Locations</th>
+          <th v-if="showCol('locations')">
+            <span>Locations</span>
+          </th>
           <th
-            v-if="showCol('progress')"
+            v-if="showCol('owned')"
+            @click="sortBy('owned')"
             class="c-pointer"
+          >
+            <span>Shards Owned</span>
+            <i class="fas mx-2" :class="sortIcon('owned')"></i>
+          </th>
+          <th
+            v-if="showCol('remaining')"
+            @click="sortBy('remaining')"
+            class="c-pointer"
+          >
+            <span>Shards Remaining</span>
+            <i class="fas mx-2" :class="sortIcon('remaining')"></i>
+          </th>
+          <th
+            class="c-pointer"
+            v-if="showCol('progress')"
             @click="sortBy('progress')"
           >
-            Amount/Progress
-            <i class="fas mx-1" :class="sortIcon('progress')"></i>
+            <span>Progress</span>
+            <i class="fas mx-2" :class="sortIcon('progress')"></i>
           </th>
-          <th v-if="showCol('attempts')">Node Attempts per Day</th>
+          <th v-if="showCol('attempts')">
+            <span>Node Attempts per Day</span>
+            <!-- <i class="fas mx-2" :class="sortIcon('attempts')"></i> -->
+          </th>
           <th
             class="c-pointer"
             @click="sortBy('time')"
             v-if="showUnitName && showCol('time')"
           >
-            Est. Time
-            <i class="fas mx-1" :class="sortIcon('time')"></i>
+            <span>Est. Time</span>
+            <i class="fas mx-2" :class="sortIcon('time')"></i>
           </th>
           <th
-            v-if="
-              (showCol('priority') && showPriority) ||
-              (showCol('actions') && !showPriority)
-            "
-            :class="{ 'c-pointer': showPriority }"
+            v-if="showCol('priority') && showPriority"
+            width="150px"
+            class="c-pointer"
             @click="sortBy('priority')"
           >
-            {{ showPriority ? "Priority" : "Actions" }}
-            <i
-              class="fas mx-1"
-              :class="sortIcon('priority')"
-              v-if="showPriority"
-            ></i>
+            <span>Priority</span>
+            <i class="fas mx-2" :class="sortIcon('priority')"></i>
+          </th>
+          <th v-if="showCol('actions') && showActions" width="100px">
+            <span>Actions</span>
           </th>
         </tr>
       </thead>
@@ -91,7 +109,7 @@
             class="text-center align-middle"
             v-if="showUnitName && showCol('name')"
           >
-            <UnitIcon :unit="unit" isLink />
+            <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
           <td
             class="align-middle text-center farming-locations"
@@ -109,10 +127,14 @@
               </ul>
             </template>
           </td>
-          <td class="align-middle" v-if="showCol('progress')">
-            <span class="row-label">Amount/Progress:</span>
+          <td class="align-middle" v-if="showCol('owned')">
             <ShardsOwned :unit="unit" />
-            <ProgressBar :percent="unit.shardPercent" class="mt-2" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('remaining')">
+            {{ unit.remainingShards }}
+          </td>
+          <td class="align-middle progress-cell" v-if="showCol('progress')">
+            <ProgressBar :percent="unit.shardPercent" />
           </td>
           <td class="align-middle nodes-per-day" v-if="showCol('attempts')">
             <span class="row-label">Node Attempts per Day:</span>
@@ -124,30 +146,17 @@
           >
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="unit.shardTimeEstimation"
-              :displayText="
-                $filters.pluralText(unit.shardTimeEstimation, 'day')
-              "
-              :title="$filters.daysFromNow(unit.shardTimeEstimation)"
+              :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
             />
           </td>
-          <td
-            class="text-center align-middle"
-            v-if="
-              (showCol('priority') && showPriority) ||
-              (showCol('actions') && !showPriority)
-            "
-          >
-            <ShardPriority
-              :unit="unit"
-              v-if="showPriority"
-              :nodeTableNames="nodeTableNames"
-            />
+          <td class="align-middle" v-if="showCol('priority') && showPriority">
+            <ShardPriority :unit="unit" :nodeTableNames="nodeTableNames" />
+          </td>
+          <td class="align-middle" v-if="showCol('actions') && showActions">
             <div
               class="btn-group btn-group-sm d-block text-center"
               role="group"
-              v-else
             >
               <button
                 type="button"
@@ -177,12 +186,13 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import ShardsOwned from "./shardsOwned.vue";
-import UnitIcon from "../units/unitIcon.vue";
-import NodesPerDay from "./nodesPerDay.vue";
-import ShardPriority from "./shardPriority.vue";
-import Timestamp from "../timestamp.vue";
-import { Unit } from "../../types/unit";
+import ShardsOwned from "../shardsOwned.vue";
+import UnitIcon from "../../units/unitIcon.vue";
+import NodesPerDay from "../nodesPerDay.vue";
+import ShardPriority from "../shardPriority.vue";
+import Timestamp from "../../timestamp.vue";
+import { Unit } from "../../../types/unit";
+import { estimatedTime } from "../../../types/shards";
 
 export default defineComponent({
   name: "ShardTable",
@@ -206,8 +216,9 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    initialSort: {
-      type: Object,
+    showActions: {
+      type: Boolean,
+      default: false,
     },
     nodeTableNames: {
       type: Array as PropType<string[]>,
@@ -224,11 +235,19 @@ export default defineComponent({
       },
       required: true,
     },
+    simpleView: {
+      type: Boolean,
+      default: false,
+    },
+    storageKey: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
-      sortDir: this.initialSort?.sortDir || "asc",
-      sortMethod: this.initialSort?.sortMethod || "name",
+      sortDir: "asc",
+      sortMethod: "name",
       searchText: "",
     };
   },
@@ -255,11 +274,23 @@ export default defineComponent({
             } else {
               return a.shardPercent > b.shardPercent ? -1 : 1;
             }
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.ownedShards > b.ownedShards ? 1 : -1;
+            } else {
+              return a.ownedShards > b.ownedShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "remaining") {
+            if (this.sortDir === "asc") {
+              return a.remainingShards > b.remainingShards ? 1 : -1;
+            } else {
+              return a.remainingShards > b.remainingShards ? -1 : 1;
+            }
           } else if (this.sortMethod === "time") {
             if (this.sortDir === "asc") {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
+              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
             } else {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
+              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
             }
           } else if (this.sortMethod === "priority") {
             const priorityA = a.tablePriority(this.nodeTableNames);
@@ -277,6 +308,14 @@ export default defineComponent({
           }
           return 0;
         });
+    },
+  },
+  watch: {
+    sortDir() {
+      this.saveSortData();
+    },
+    sortMethod() {
+      this.saveSortData();
     },
   },
   methods: {
@@ -298,13 +337,33 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
+    estimatedTime(unit: Unit) {
+      return estimatedTime(this.units, this.nodeTableNames, unit);
+    },
+  },
+  created() {
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
+.progress-cell {
+  min-width: 125px;
+}
 @media only screen and (max-width: 768px) {
   .farming-locations {
     ul {

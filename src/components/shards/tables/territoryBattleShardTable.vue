@@ -41,7 +41,7 @@
         <tr class="text-center align-middle">
           <th v-if="showUnitName && showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
-              Unit Name
+              <span>Unit Name</span>
               <i class="fas mx-1" :class="sortIcon('name')"></i>
             </div>
             <input
@@ -50,13 +50,29 @@
               v-model="searchText"
             />
           </th>
-          <th v-if="showCol('locations')">Locations</th>
+          <th v-if="showCol('locations')"><span>Locations</span></th>
+          <th
+            v-if="showCol('owned')"
+            class="c-pointer"
+            @click="sortBy('owned')"
+          >
+            <span>Shards Owned</span>
+            <i class="fas mx-1" :class="sortIcon('owned')"></i>
+          </th>
+          <th
+            v-if="showCol('remaining')"
+            class="c-pointer"
+            @click="sortBy('remaining')"
+          >
+            <span>Shards Remaining</span>
+            <i class="fas mx-2" :class="sortIcon('remaining')"></i>
+          </th>
           <th
             v-if="showCol('progress')"
             class="c-pointer"
             @click="sortBy('progress')"
           >
-            Amount/Progress
+            <span>Progress</span>
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
           <th
@@ -64,7 +80,7 @@
             @click="sortBy('time')"
             v-if="showUnitName && showCol('time')"
           >
-            Est. Time
+            <span>Est. Time</span>
             <i class="fas mx-1" :class="sortIcon('time')"></i>
           </th>
         </tr>
@@ -75,7 +91,7 @@
             class="text-center align-middle"
             v-if="showUnitName && showCol('name')"
           >
-            <UnitIcon :unit="unit" isLink />
+            <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
           <td class="align-middle text-center" v-if="showCol('locations')">
             <div v-if="unit.locations.length <= 0" class="text-center">
@@ -90,10 +106,16 @@
               </ul>
             </template>
           </td>
-          <td class="align-middle" v-if="showCol('progress')">
-            <span class="row-label">Amount/Progress:</span>
+          <td class="align-middle" v-if="showCol('owned')">
+            <span class="row-label">Owned Amount:</span>
             <ShardsOwned :unit="unit" />
-            <ProgressBar :percent="unit.shardPercent" class="mt-2" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('remaining')">
+            {{ unit.remainingShards }}
+          </td>
+          <td class="align-middle" v-if="showCol('progress')">
+            <span class="row-label">Progress:</span>
+            <ProgressBar :percent="unit.shardPercent" />
           </td>
           <td
             class="text-center align-middle"
@@ -101,11 +123,7 @@
           >
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="unit.shardTimeEstimation"
-              :displayText="
-                $filters.pluralText(unit.shardTimeEstimation, 'day')
-              "
-              :title="$filters.daysFromNow(unit.shardTimeEstimation)"
+              :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
             />
           </td>
@@ -117,14 +135,15 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-
-import ShardsOwned from "./shardsOwned.vue";
-import UnitIcon from "../units/unitIcon.vue";
-import NodesPerDay from "./nodesPerDay.vue";
-import ShardPriority from "./shardPriority.vue";
-import Timestamp from "../timestamp.vue";
-import { Unit } from "../../types/unit";
 import { mapActions } from "vuex";
+
+import ShardsOwned from "../shardsOwned.vue";
+import UnitIcon from "../../units/unitIcon.vue";
+import NodesPerDay from "../nodesPerDay.vue";
+import ShardPriority from "../shardPriority.vue";
+import Timestamp from "../../timestamp.vue";
+import { Unit } from "../../../types/unit";
+import { estimatedTime } from "../../../types/guild";
 
 export default defineComponent({
   name: "TerritoryBattleShardTable",
@@ -153,6 +172,14 @@ export default defineComponent({
       },
       required: true,
     },
+    simpleView: {
+      type: Boolean,
+      default: false,
+    },
+    storageKey: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -162,6 +189,7 @@ export default defineComponent({
     };
   },
   computed: {
+    // ...mapGetters("guild", ["tbAvgShards"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -184,11 +212,23 @@ export default defineComponent({
             } else {
               return a.shardPercent > b.shardPercent ? -1 : 1;
             }
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.ownedShards > b.ownedShards ? 1 : -1;
+            } else {
+              return a.ownedShards > b.ownedShards ? -1 : 1;
+            }
+          } else if (this.sortMethod === "remaining") {
+            if (this.sortDir === "asc") {
+              return a.remainingShards > b.remainingShards ? 1 : -1;
+            } else {
+              return a.remainingShards > b.remainingShards ? -1 : 1;
+            }
           } else if (this.sortMethod === "time") {
             if (this.sortDir === "asc") {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? 1 : -1;
+              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
             } else {
-              return a.shardTimeEstimation > b.shardTimeEstimation ? -1 : 1;
+              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
             }
           }
           return 0;
@@ -215,15 +255,30 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
+    estimatedTime,
   },
   async created() {
     await this.initialize();
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
+@import "../../../styles/variables.scss";
 
 .show-on-desktop {
   @media only screen and (max-width: 1200px) {
@@ -261,4 +316,3 @@ export default defineComponent({
   }
 }
 </style>
->>>>>>> main

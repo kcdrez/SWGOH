@@ -14,10 +14,12 @@
         class="display-container"
         data-bs-toggle="tooltip"
         data-bs-placement="bottom"
-        :title="title"
+        :title="tooltip"
       >
-        {{ displayText }}
-        <span class="display-text" :class="displayClasses">({{ title }})</span>
+        {{ display }}
+        <span class="display-text" :class="displayClasses"
+          >({{ tooltip }})</span
+        >
       </span>
     </div>
   </div>
@@ -26,16 +28,18 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
+import { pluralText, daysFromNow } from "../utils";
+
 export default defineComponent({
   name: "Timestamp",
   props: {
     title: {
       type: String,
-      required: true,
+      default: "",
     },
     displayText: {
       type: String,
-      required: true,
+      default: "",
     },
     label: {
       type: String,
@@ -56,6 +60,14 @@ export default defineComponent({
     unknownText: {
       type: String,
       default: "Unknown",
+    },
+  },
+  computed: {
+    display(): string {
+      return this.displayText || pluralText(this.timeLength, "day");
+    },
+    tooltip(): string {
+      return this.title || daysFromNow(this.timeLength);
     },
   },
 });

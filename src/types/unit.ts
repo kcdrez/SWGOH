@@ -3,6 +3,8 @@ import { Gear, IIngredient, maxGearLevel } from "./gear";
 import store from "../vuex-store/store";
 import { shardMapping } from "./shards";
 import { round2Decimals } from "../utils";
+import { CurrencyTypeConfig } from "./currency";
+import _ from "lodash";
 
 export interface IUnit {
   id: string;
@@ -135,7 +137,7 @@ export class Unit {
 
   public get relicOptions() {
     const list = [];
-    for (let i = this.relicLevel + 1; i <= maxRelicLevel; i++) {
+    for (let i = this.relicLevel; i <= maxRelicLevel; i++) {
       list.push(i);
     }
     return list;
@@ -145,9 +147,121 @@ export class Unit {
     return this._stats["5"];
   }
 
+  public get offense() {
+    return {
+      physical: this._stats["6"],
+      special: this._stats["7"],
+    };
+  }
+  public get modOffense() {
+    let amount = 0;
+    let percent = 0;
+    const modSet = this._mods.filter((mod) => mod.set === 2); //2 is offense, 5 is crit chance
+    if (modSet.length >= 4) {
+      percent += modSet.every((mod) => mod.level === 15) ? 15 : 7.5;
+    }
+
+    this._mods.forEach((mod) => {
+      if (mod.primaryStat.unitStat === 48) {
+        percent += mod.primaryStat.value;
+      }
+
+      mod.secondaryStat.forEach((stat) => {
+        if (stat.unitStat === 41) {
+          //41 = flat offense, 53 = crit chance, 48 offense percent
+          amount += stat.value;
+        } else if (stat.unitStat === 48) {
+          percent += stat.value;
+        }
+      });
+    });
+    return {
+      amount: round2Decimals(amount),
+      percent: round2Decimals(percent / 100),
+    };
+  }
+  public get baseOffense() {
+    return {
+      physical: round2Decimals(
+        (this.offense.physical - this.modOffense.amount) /
+          (1 + this.modOffense.percent)
+      ),
+      special: round2Decimals(
+        (this.offense.special - this.modOffense.amount) /
+          (1 + this.modOffense.percent)
+      ),
+    };
+  }
+
+  public get critChance() {
+    return {
+      physical: round2Decimals(this._stats["14"]),
+      special: round2Decimals(this._stats["15"]),
+    };
+  }
+  public get modCritChance() {
+    let amount = 0;
+    let maxed = 0;
+    let notMaxed = 0;
+    this._mods.forEach((mod) => {
+      if (mod.set === 5) {
+        if (mod.level === 15) {
+          maxed++;
+        } else {
+          notMaxed++;
+        }
+
+        if (maxed === 2) {
+          amount += 8;
+          maxed = 0;
+        } else if (notMaxed === 2) {
+          amount += 4;
+          notMaxed = 0;
+        }
+      }
+    });
+
+    this._mods.forEach((mod) => {
+      mod.secondaryStat.forEach((stat) => {
+        if (stat.unitStat === 53) {
+          //41 = flat offense, 53 = crit chance, 48 offense percent
+          amount += stat.value;
+        }
+      });
+    });
+    return round2Decimals(amount);
+  }
+  public get baseCritChance() {
+    return {
+      physical: round2Decimals(this.critChance.physical - this.modCritChance),
+      special: round2Decimals(this.critChance.special - this.modCritChance),
+    };
+  }
+
+  public get critDamage() {
+    return round2Decimals(this._stats["16"] * 100);
+  }
+  public get modCritDamage() {
+    let amount = 0;
+    const modSet = this._mods.filter((mod) => mod.set === 6); //2 is offense, 5 is crit chance, 6 crit damage
+    if (modSet.length >= 4) {
+      amount += modSet.every((mod) => mod.level === 15) ? 30 : 15;
+    }
+
+    this._mods.forEach((mod) => {
+      if (mod.primaryStat.unitStat === 56) {
+        amount += mod.primaryStat.value;
+      }
+    });
+    return round2Decimals(amount);
+  }
+  public get baseCritDamage() {
+    return this.critDamage - this.modCritDamage;
+  }
+
   public get gearTarget() {
     return (
-      store.state.planner.targetConfig[this.id]?.gear.target || maxGearLevel
+      store.state.planner.targetConfig[this.id]?.gear.target ?? maxGearLevel
     );
   }
   public set gearTarget(value) {
@@ -161,7 +275,7 @@ export class Unit {
 
   public get relicTarget() {
     return (
-      store.state.planner.targetConfig[this.id]?.relic.target || maxRelicLevel
+      store.state.planner.targetConfig[this.id]?.relic.target ?? maxRelicLevel
     );
   }
   public set relicTarget(value) {
@@ -265,7 +379,7 @@ export class Unit {
     for (let i = this.stars + 1; i <= 7; i++) {
       amount += shardMapping[i];
     }
-    return amount - this.ownedShards;
+    return amount;
   }
   public get ownedShards() {
     return store.state.shards.ownedShards[this.id]?.owned || 0;
@@ -275,13 +389,13 @@ export class Unit {
   }
   private get totalOwnedShards() {
     let amount = 0;
-    for (let i = this.stars; i > 0; i--) {
+    for (let i = 1; i <= this.stars; i++) {
       amount += shardMapping[i];
     }
     return amount + this.ownedShards;
   }
   public get remainingShards() {
-    return this.totalRemainingShards - this.ownedShards;
+    return 330 - this.totalOwnedShards;
   }
   public get shardPercent() {
     const val = (this.totalOwnedShards / 330) * 100;
@@ -298,7 +412,30 @@ export class Unit {
     });
   }
   public get locations() {
-    return this.whereToFarm.map((x) => x.table);
+    return this.whereToFarm.map((x) => x.label);
+  }
+  public get currencyTypes() {
+    const arr: CurrencyTypeConfig[] = [];
+    this.whereToFarm.forEach((node) => {
+      if (node.id === "guild_events_store1") {
+        arr.push("get1");
+      } else if (node.id === "guild_events_store2") {
+        arr.push("get2");
+      } else if (node.id === "shard_store") {
+        arr.push("shardCurrency");
+      } else if (node.id === "cantina_battles_store") {
+        arr.push("cantinaBattleCurrency");
+      } else if (node.id === "guild_store") {
+        arr.push("guildStoreCurrency");
+      } else if (node.id === "squad_arena_store") {
+        arr.push("squadArenaCurrency");
+      } else if (node.id === "galactic_war_store") {
+        arr.push("galacticWarCurrency");
+      } else if (node.id === "fleet_arena_store") {
+        arr.push("fleetArenaCurrency");
+      }
+    });
+    return arr;
   }
   public get showNodesPerDay() {
     return this.whereToFarm.some((node) => {
@@ -325,30 +462,6 @@ export class Unit {
       id: this.id,
       nodes: val,
     });
-  }
-  public get shardTimeEstimation() {
-    if (this.locations.includes('Territory Battles')) {
-      const type = this.id === "KIADIMUNDI" || this.id === "IMPERIALPROBEDROID" ? "Light" : "Dark";
-      const avgShardsPerEvent = store.getters['guild/tbAvgShards'](type, this.id);
-      const shardsPerDay = avgShardsPerEvent / 30;
-      return Math.ceil(this.remainingShards / shardsPerDay);
-    }
-    else if (this.whereToFarm.length <= 0) {
-      return 0;
-    } else {
-      const dropRate = 0.33;
-      const nodesPerDay = this.shardNodes.reduce(
-        (total, node) => total + (node?.count ?? 0),
-        0
-      );
-
-      return Math.ceil(
-        this.remainingShards /
-        (dropRate *
-          this.shardDropRate *
-          (this.shardNodes.length === 0 ? 5 : nodesPerDay))
-      );
-    }
   }
   public get tracking() {
     const match = store.state.shards.ownedShards[this.id];
@@ -379,6 +492,16 @@ export class Unit {
     const match = this.shardNodes.find((n) => n.id === matchFarmingNode?.id);
     return match?.priority ?? 0;
   }
+  // public currencyAmountRemaining(currencies: CurrencyTypeConfig[]) {
+  //   const locations = this.whereToFarm.filter((x) => {
+  //     if (x.currencyType) {
+  //       return currencies.includes(x.currencyType);
+  //     } else {
+  //       return false;
+  //     }
+  //   });
+  //   return locations.map((location) => this.currencyAmountByLocation(location));
+  // }
 }
 
 export interface UnitGear {
@@ -429,4 +552,22 @@ interface CrewSkill {
   requiredTier: number;
   requiredRarity: number;
   requiredRelicTier: number;
+}
+
+export function unitsByPriority(
+  unitsList: Unit[],
+  tableNames: string[]
+): Unit[] {
+  return unitsList.sort((a: Unit, b: Unit) => {
+    const priorityA = a.tablePriority(tableNames);
+    const priorityB = b.tablePriority(tableNames);
+
+    if (priorityA <= 0) {
+      return 1;
+    } else if (priorityB <= 0) {
+      return -1;
+    } else {
+      return priorityA > priorityB ? 1 : -1;
+    }
+  });
 }

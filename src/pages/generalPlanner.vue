@@ -22,11 +22,11 @@
         </button>
       </div>
       <template v-if="fullUnitList.length > 0">
-        <UnitSection />
-        <GearSection />
-        <RelicSection />
-        <ShardSection />
+        <UnitSection class="unit-section" />
+        <GearSection class="gear-section" />
+        <RelicSection class="relic-section" />
       </template>
+      <ShardSection class="shard-section" />
     </div>
   </Loading>
 </template>
@@ -41,6 +41,9 @@ import RelicSection from "../components/generalPlanner/relicSection.vue";
 import ShardSection from "../components/generalPlanner/shardSection.vue";
 import { loadingState } from "../types/loading";
 import { Unit } from "../types/unit";
+import { initializeModules } from "../utils";
+
+const dependencyModules = ["planner", "unit", "gear", "relic", "shards"];
 
 interface dataModel {
   selected: Unit | null;
@@ -60,7 +63,7 @@ export default defineComponent({
     ...mapState("unit", ["unitList"]),
     ...mapGetters("shards", ["plannerList"]),
     requestState(): loadingState {
-      return this.someLoading(["planner", "unit", "gear", "relic"]);
+      return this.someLoading(dependencyModules);
     },
   },
   methods: {
@@ -95,8 +98,37 @@ export default defineComponent({
       }
     },
   },
+  async created() {
+    await initializeModules(dependencyModules);
+  },
 });
 </script>
 
 <style lang="scss" scoped>
+@import "../styles/variables.scss";
+
+.swgoh-page {
+  ::v-deep(.unit-section .section-header) {
+    z-index: 9;
+  }
+  ::v-deep(.gear-section .section-header) {
+    z-index: 8;
+  }
+  ::v-deep(.relic-section .section-header) {
+    z-index: 7;
+  }
+  ::v-deep(.shard-section .section-header) {
+    z-index: 6;
+  }
+}
+
+::v-deep(.section-header) {
+  border-bottom: 1px solid $light;
+  position: sticky;
+  top: 56px;
+  height: 50px;
+}
+::v-deep(thead.sticky-header) {
+  top: 106px !important;
+}
 </style>

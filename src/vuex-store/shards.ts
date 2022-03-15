@@ -91,9 +91,9 @@ const store = {
       let nodesData: Node[] = [];
       if (nodes) {
         nodesData = nodes.map((node) => {
-          const nodeMatch = (match?.nodes || []).find((n) => n.id === node.id);
-          const nodeCount = node?.count || nodeMatch?.count || 0;
-          const priority = node?.priority || nodeMatch?.priority || 0;
+          const nodeMatch = (match?.nodes ?? []).find((n) => n.id === node.id);
+          const nodeCount = node?.count ?? nodeMatch?.count ?? 0;
+          const priority = node?.priority ?? nodeMatch?.priority ?? 0;
           return {
             id: node.id,
             count: nodeCount,
@@ -105,9 +105,9 @@ const store = {
       }
 
       state.ownedShards[id] = {
-        owned: count || match?.owned || 0,
+        owned: count ?? match?.owned ?? 0,
         nodes: nodesData,
-        tracking: tracking || match?.tracking || false,
+        tracking: tracking ?? match?.tracking ?? false,
       };
     },
     ADD_UNIT(state: State, unitId: string) {
@@ -130,18 +130,23 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit }: ActionCtx, player: PlayerResponse) {
+    async initialize({ state, commit, rootState }: ActionCtx) {
       try {
-        commit("SET_REQUEST_STATE", loadingState.loading);
-        const farmingData = await apiClient.fetchFarmingData();
-        commit("SET_SHARD_FARMING", farmingData);
-        commit("SET_OWNED_SHARDS", player.shards);
-        commit("SET_REQUEST_STATE", loadingState.ready);
+        if (state.requestState === loadingState.initial) {
+          commit("SET_REQUEST_STATE", loadingState.loading);
+          const farmingData = await apiClient.fetchFarmingData();
+          commit("SET_SHARD_FARMING", farmingData);
+          commit("SET_OWNED_SHARDS", rootState.player.player?.shards || {});
+          commit("SET_REQUEST_STATE", loadingState.ready);
+        }
       } catch (err) {
         commit("SET_REQUEST_STATE", loadingState.error);
       }
     },
-    saveShardsCount({ commit, dispatch }: ActionCtx, data: NodePayload) {
+    saveShardsCount(
+      { commit, dispatch, getters }: ActionCtx,
+      data: NodePayload
+    ) {
       commit("UPSERT_SHARD_COUNT", data);
       dispatch("save");
     },

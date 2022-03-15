@@ -54,7 +54,6 @@ export class Team {
     return this._sortDir;
   }
   public set sortDir(val) {
-    console.log("sort dir", this.sortDir, val);
     if (val !== this._sortDir) {
       this._sortDir = val;
       this.save();
@@ -64,7 +63,6 @@ export class Team {
     return this._sortMethod;
   }
   public set sortMethod(val) {
-    console.log("sort method", this._sortMethod, val);
     if (val !== this._sortMethod) {
       this._sortMethod = val;
       this.save();

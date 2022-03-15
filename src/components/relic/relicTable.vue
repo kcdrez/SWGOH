@@ -39,6 +39,7 @@
           </th>
         </tr>
         <tr class="text-center align-middle">
+          <th v-if="showCol('icon')">Icon</th>
           <th v-if="showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
               Mat Name
@@ -59,11 +60,29 @@
             <i class="fas mx-1" :class="sortIcon('location')"></i>
           </th>
           <th
+            v-if="showCol('owned')"
+            class="c-pointer"
+            @click="sortBy('owned')"
+            width="160px"
+          >
+            Amount Owned
+            <i class="fas mx-1" :class="sortIcon('owned')"></i>
+          </th>
+          <th
+            v-if="showCol('needed')"
+            class="c-pointer"
+            @click="sortBy('needed')"
+          >
+            Amount Needed
+            <i class="fas mx-1" :class="sortIcon('needed')"></i>
+          </th>
+          <th
             v-if="showCol('progress')"
             class="c-pointer"
             @click="sortBy('progress')"
+            width="145px"
           >
-            Amount/Progress
+            Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
           <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
@@ -75,15 +94,23 @@
       </thead>
       <tbody>
         <tr v-for="mat in filteredRelics" :key="mat.id">
-          <td class="text-center align-middle" v-if="showCol('name')">
+          <td class="text-center align-middle" v-if="showCol('icon')">
             <RelicIcon :item="mat" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('name')">
+            {{ mat.name }}
           </td>
           <td class="text-center align-middle" v-if="showCol('locations')">
             <span class="row-label">Location: </span>
             {{ mat.location.node }}
           </td>
-          <td class="align-middle" v-if="showCol('progress')">
+          <td class="text-center align-middle" v-if="showCol('owned')">
             <OwnedAmount :item="mat" :needed="mat.amountNeeded(targetLevels)" />
+          </td>
+          <td class="align-middle text-center" v-if="showCol('needed')">
+            {{ mat.amountNeeded(targetLevels) }}
+          </td>
+          <td class="align-middle" v-if="showCol('progress')">
             <ProgressBar :percent="mat.percent(targetLevels)" class="mt-2" />
           </td>
           <td v-if="showRequiredByUnit && showCol('required')">
@@ -151,6 +178,10 @@ export default defineComponent({
           return typeof x === "string";
         });
       },
+      required: true,
+    },
+    storageKey: {
+      type: String,
       required: true,
     },
   },
@@ -226,6 +257,14 @@ export default defineComponent({
         });
     },
   },
+  watch: {
+    sortDir() {
+      this.saveSortData();
+    },
+    sortMethod() {
+      this.saveSortData();
+    },
+  },
   methods: {
     sortBy(type: string): void {
       if (this.sortMethod === type) {
@@ -245,9 +284,24 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
+  },
+  created() {
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

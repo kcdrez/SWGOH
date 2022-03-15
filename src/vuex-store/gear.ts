@@ -1,6 +1,6 @@
 import { ActionContext } from "vuex";
 
-import { Gear, ConfigType, OwnedCount } from "../types/gear";
+import { Gear, ConfigType, OwnedCount, EnergyType } from "../types/gear";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
@@ -16,8 +16,8 @@ interface State {
   gearList: Gear[];
   gearLocations: any[];
   gearConfig: ConfigType;
-  refreshes: { standard: number; fleet: number };
-  energy: { standard: number; fleet: number };
+  refreshes: EnergyType;
+  energy: EnergyType;
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -60,40 +60,39 @@ const store = {
     },
   },
   actions: {
-    initialize({ commit }: ActionCtx, player: PlayerResponse) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      commit("SET_GEAR_OWNED", player.gear);
+    async initialize({ commit, state, rootState }: ActionCtx) {
+      if (state.requestState === loadingState.initial) {
+        commit("SET_REQUEST_STATE", loadingState.loading);
+        commit("SET_GEAR_OWNED", rootState.player.player?.gear);
 
-      const refreshStandard: updateEnergy = {
-        type: "standard",
-        value: player.energyData?.refreshes?.standard || 0,
-      };
-      const refreshFleet: updateEnergy = {
-        type: "fleet",
-        value: player.energyData?.refreshes?.fleet || 0,
-      };
+        const refreshStandard: updateEnergy = {
+          type: "standard",
+          value: rootState.player.player?.energyData?.refreshes?.standard || 0,
+        };
+        const refreshFleet: updateEnergy = {
+          type: "fleet",
+          value: rootState.player.player?.energyData?.refreshes?.fleet || 0,
+        };
 
-      const energyStandard: updateEnergy = {
-        type: "standard",
-        value: player.energyData?.energy?.standard || 0,
-      };
-      const energyFleet: updateEnergy = {
-        type: "fleet",
-        value: player.energyData?.energy?.fleet || 0,
-      };
+        const energyStandard: updateEnergy = {
+          type: "standard",
+          value: rootState.player.player?.energyData?.energy?.standard || 0,
+        };
+        const energyFleet: updateEnergy = {
+          type: "fleet",
+          value: rootState.player.player?.energyData?.energy?.fleet || 0,
+        };
 
-      commit("UPDATE_REFRESHES", refreshStandard);
-      commit("UPDATE_REFRESHES", refreshFleet);
-      commit("UPDATE_ENERGY", energyStandard);
-      commit("UPDATE_ENERGY", energyFleet);
-      commit("SET_REQUEST_STATE", loadingState.ready);
-    },
-    async fetchGear({ commit }: ActionCtx) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
+        commit("UPDATE_REFRESHES", refreshStandard);
+        commit("UPDATE_REFRESHES", refreshFleet);
+        commit("UPDATE_ENERGY", energyStandard);
+        commit("UPDATE_ENERGY", energyFleet);
 
-      const gearList = await apiClient.fetchGearList();
-      commit("SET_GEAR", gearList);
-      commit("SET_REQUEST_STATE", loadingState.ready);
+        const gearList = await apiClient.fetchGearList();
+        commit("SET_GEAR", gearList);
+
+        commit("SET_REQUEST_STATE", loadingState.ready);
+      }
     },
     saveOwnedCount({ commit, state, rootState }: ActionCtx, data: OwnedCount) {
       commit("UPSERT_OWNED_GEAR", data);

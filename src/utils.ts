@@ -34,3 +34,42 @@ export function formatDate(date: any, format: string = "MMM DD, YYYY") {
 export function round2Decimals(num: number) {
   return Math.round((num + Number.EPSILON) * 100) / 100;
 }
+
+export async function initializeModules(
+  modulesList: string[],
+  synchronously: boolean = false
+) {
+  if (synchronously) {
+    for (let i = 0; i < modulesList.length; i++) {
+      const moduleName = modulesList[i];
+      await store.dispatch(`${moduleName}/initialize`);
+    }
+  } else {
+    await Promise.all(
+      modulesList.map((moduleName) =>
+        store.dispatch(`${moduleName}/initialize`)
+      )
+    );
+  }
+}
+
+export function randomNumber(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+export function pluralText(days: number, single: string, plural: string = "") {
+  let text = days.toString();
+  if (days === 1) {
+    text += ` ${single}`;
+  } else {
+    text += plural === "" ? ` ${single}s` : ` ${plural}`;
+  }
+  return text;
+}
+
+export function daysFromNow(
+  days: number,
+  format: string = "MMM D, YYYY"
+): string {
+  return moment().add(days, "days").format(format);
+}
