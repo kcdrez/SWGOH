@@ -6,6 +6,7 @@ import "./styles/main.scss";
 import Toaster from "vue-dk-toast";
 import moment from "moment";
 import Toggle from "@vueform/toggle";
+import Popper from "vue3-popper";
 
 import App from "./App.vue";
 import store from "./vuex-store/store";
@@ -52,4 +53,5 @@ app
   .component("Error", Error)
   .component("MultiSelect", MultiSelect)
   .component("Toggle", Toggle)
+  .component("Popper", Popper)
   .mount("#app");

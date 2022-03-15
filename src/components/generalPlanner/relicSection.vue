@@ -91,7 +91,13 @@ export default defineComponent({
         if (unit.relicLevel < unit.relicTarget) {
           list.forEach((relic: Relic) => {
             if (relic.amount[unit.relicTarget] > 0) {
-              relic.addNeededBy({ name: unit.name, id: unit.id });
+              relic.addNeededBy({
+                name: unit.name,
+                id: unit.id,
+                amount: relic.amountNeeded([
+                  { target: unit.relicTarget, level: unit.relicLevel },
+                ]),
+              });
             }
           });
         }

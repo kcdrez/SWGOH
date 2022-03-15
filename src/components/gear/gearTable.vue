@@ -1,11 +1,7 @@
 <template>
   <div>
     <table
-      class="
-        table table-bordered table-dark table-sm table-striped
-        mb-0
-        swgoh-table
-      "
+      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
       v-if="gearList.length > 0"
     >
       <thead class="sticky-header show-on-mobile">
@@ -134,19 +130,36 @@
             <OwnedAmount :salvage="salvage" />
           </td>
           <td class="align-middle text-center" v-if="showCol('needed')">
-            {{ salvage.amount }}
+            {{ salvage.totalAmount }}
           </td>
           <td class="align-middle" v-if="showCol('progress')">
             <ProgressBar :percent="salvage.percent" />
           </td>
-          <td v-if="showRequiredByUnit && showCol('required')">
-            <ul>
+          <td
+            class="align-middle"
+            v-if="showRequiredByUnit && showCol('required')"
+          >
+            <ul class="mb-0">
               <li v-for="unit in salvage.neededBy" :key="unit.id">
-                <router-link
-                  :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-                  >{{ unit.name }}</router-link
-                >
-                ({{ unit.amount }})
+                <Popper hover arrow placement="left">
+                  <router-link
+                    :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+                    >{{ unit.name }}</router-link
+                  >
+                  <template #content>
+                    <div class="border-bottom mb-1">{{ unit.name }}</div>
+                    <div v-for="tier in unit.gearLevels" :key="tier.level">
+                      <GearText :level="tier.level" />:
+                      <span class="ml-1">{{ tier.amount }}</span>
+                    </div>
+                    <div
+                      class="border-top mt-1"
+                      v-if="unit.gearLevels.length > 1"
+                    >
+                      Total: {{ unit.totalAmount }}
+                    </div>
+                  </template>
+                </Popper>
               </li>
             </ul>
           </td>
@@ -154,8 +167,6 @@
             <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="salvage.timeEstimation"
-              :displayText="$filters.pluralText(salvage.timeEstimation, 'day')"
-              :title="$filters.daysFromNow(salvage.timeEstimation)"
               displayClasses="d-inline"
             />
           </td>
@@ -233,10 +244,11 @@ import { Gear } from "../../types/gear";
 import OwnedAmount from "./gearOwned.vue";
 import GearIcon from "./gearIcon.vue";
 import Timestamp from "../timestamp.vue";
+import GearText from "../gear/gearText.vue";
 
 export default defineComponent({
   name: "GearTable",
-  components: { OwnedAmount, GearIcon, Timestamp },
+  components: { OwnedAmount, GearIcon, GearText, Timestamp },
   props: {
     gearList: {
       required: true,

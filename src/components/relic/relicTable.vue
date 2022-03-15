@@ -113,14 +113,25 @@
           <td class="align-middle" v-if="showCol('progress')">
             <ProgressBar :percent="mat.percent(targetLevels)" class="mt-2" />
           </td>
-          <td v-if="showRequiredByUnit && showCol('required')">
+          <td
+            class="align-middle"
+            v-if="showRequiredByUnit && showCol('required')"
+          >
             <span class="row-label">Required By: </span>
-            <ul>
+            <ul class="mb-0">
               <li v-for="unit in mat.neededBy" :key="unit.id">
-                <router-link
-                  :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-                  >{{ unit.name }}</router-link
-                >
+                <Popper hover arrow placement="left">
+                  <router-link
+                    :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+                    >{{ unit.name }}</router-link
+                  >
+                  <template #content>
+                    <div class="border-bottom mb-1">{{ unit.name }}</div>
+                    <div>
+                      {{ unit.amount }}
+                    </div>
+                  </template>
+                </Popper>
               </li>
             </ul>
           </td>

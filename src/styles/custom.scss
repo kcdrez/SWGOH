@@ -127,7 +127,8 @@ nav.navbar-light {
   }
 }
 
-button:not(.btn-close), .btn:not(.btn-close) {
+button:not(.btn-close),
+.btn:not(.btn-close) {
   border: 1px solid $dark !important;
 }
 
@@ -139,4 +140,16 @@ button:not(.btn-close), .btn:not(.btn-close) {
 .toast-warning {
   background-color: $warning !important;
   color: $dark !important;
+}
+
+:root {
+  --popper-theme-background-color: #333333;
+  --popper-theme-background-color-hover: #333333;
+  --popper-theme-text-color: #ffffff;
+  --popper-theme-border-width: 1px;
+  --popper-theme-border-style: solid;
+  --popper-theme-border-color: #eeeeee;
+  --popper-theme-border-radius: 6px;
+  --popper-theme-padding: 1rem;
+  --popper-theme-box-shadow: 0 6px 30px -6px rgba(0, 0, 0, 0.25);
 }

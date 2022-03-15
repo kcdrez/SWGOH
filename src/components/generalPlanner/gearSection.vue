@@ -50,23 +50,12 @@ export default defineComponent({
       const list: Gear[] = [];
       this.fullUnitList.forEach((unit: Unit) => {
         unit.fullSalvageList.forEach((gear: Gear) => {
-          const match = list.find((el) => gear.id === el.id);
+          const match = list.find((x) => x.id === gear.id);
           if (match) {
-            match.amount += gear.amount;
-            match.neededBy?.push({
-              name: unit.name,
-              id: unit.id,
-              amount: gear.amount,
-            });
+            match.neededBy.push(...gear.neededBy);
+            match.totalAmount += gear.totalAmount;
           } else {
-            list.push(
-              gear.clone({
-                neededBy: [
-                  { name: unit.name, id: unit.id, amount: gear.amount },
-                ],
-                amount: gear.amount,
-              })
-            );
+            list.push(gear);
           }
         });
       });

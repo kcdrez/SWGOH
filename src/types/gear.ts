@@ -33,9 +33,10 @@ export interface IIngredient {
 }
 
 export interface INeededBy {
-  id: string;
-  name: string;
-  amount: number;
+  id: string; //unit id
+  name: string; //unit name
+  totalAmount: number;
+  gearLevels: { amount: number; level: number }[];
 }
 
 export class Gear {
@@ -43,7 +44,7 @@ export class Gear {
   private _image: string;
   private _name: string;
   private _mark: string;
-  private _amount: number = 0;
+  private _totalAmount: number = 0;
   private _lookupMissionList: Mission[];
   private _tier: number;
   private _neededBy: INeededBy[] = [];
@@ -80,14 +81,14 @@ export class Gear {
       irrelevant: this.irrelevant,
     });
   }
-  public get amount() {
-    return this._amount;
+  public get totalAmount() {
+    return this._totalAmount;
   }
-  public set amount(val) {
-    this._amount = val;
+  public set totalAmount(val) {
+    this._totalAmount = val;
   }
   public get progress() {
-    return this.owned / this.amount;
+    return this.owned / this.totalAmount;
   }
   public get percent() {
     const val = this.progress * 100;
@@ -98,7 +99,7 @@ export class Gear {
     }
   }
   public get remaining() {
-    return this.amount - this.owned;
+    return this.totalAmount - this.owned;
   }
   public get missionList() {
     return this._lookupMissionList;
@@ -243,9 +244,9 @@ export class Gear {
     }
   }
 
-  public clone(data: { amount?: number; neededBy?: INeededBy[] }): Gear {
+  public clone(data: { totalAmount?: number; neededBy?: INeededBy[] }): Gear {
     const clone = new Gear(this.sanitize);
-    clone.amount = data.amount || 0;
+    clone.totalAmount = data.totalAmount || 0;
     clone.neededBy = data?.neededBy || [];
     return clone;
   }

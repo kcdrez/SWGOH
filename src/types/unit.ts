@@ -324,9 +324,30 @@ export class Unit {
               if (matchGear) {
                 const exists = list.find((x: any) => x.id === matchGear.id);
                 if (exists) {
-                  exists.amount += amount;
+                  exists.totalAmount += amount;
+                  exists.neededBy[0].totalAmount += amount;
+                  const levelElement = exists.neededBy[0].gearLevels.find(
+                    (x) => x.level === tier
+                  );
+                  if (levelElement) {
+                    levelElement.amount += amount;
+                  } else {
+                    exists.neededBy[0].gearLevels.push({ amount, level: tier });
+                  }
                 } else {
-                  list.push(matchGear.clone({ amount }));
+                  list.push(
+                    matchGear.clone({
+                      totalAmount: amount,
+                      neededBy: [
+                        {
+                          id: this.id,
+                          name: this.name,
+                          totalAmount: amount,
+                          gearLevels: [{ amount, level: tier }],
+                        },
+                      ],
+                    })
+                  );
                 }
               }
             }
