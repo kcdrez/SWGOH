@@ -35,6 +35,7 @@ export interface IIngredient {
 export interface INeededBy {
   id: string;
   name: string;
+  amount: number;
 }
 
 export class Gear {

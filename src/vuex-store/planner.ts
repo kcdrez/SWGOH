@@ -84,7 +84,7 @@ const store = {
         commit("SET_REQUEST_STATE", loadingState.loading);
         const planner = rootState.player.player?.planner;
         const targetData = planner?.targetData ?? {};
-        const unitList = planner?.unitList ?? {};
+        const unitList = planner?.unitList ?? [];
 
         commit("UPDATE_PLANNER", targetData);
         commit("SET_UNIT_LIST", unitList);
