@@ -10,7 +10,7 @@ export interface IRelic {
   amount: AmountConfigType;
   image: string;
   name: string;
-  neededBy?: { name: string; id: string }[];
+  neededBy?: { name: string; id: string; amount: number }[];
 }
 
 export class Relic {
@@ -20,7 +20,7 @@ export class Relic {
   private _amount: AmountConfigType;
   private _image: string;
   private _name: string;
-  private _neededBy?: { name: string; id: string }[];
+  private _neededBy?: { name: string; id: string; amount: number }[];
 
   constructor(data: IRelic) {
     this._id = data.id;
@@ -29,7 +29,7 @@ export class Relic {
     this._amount = data.amount;
     this._image = data.image;
     this._name = data.name;
-    this._neededBy = data.neededBy;
+    this._neededBy = data.neededBy || [];
   }
 
   public get id() {
@@ -66,8 +66,8 @@ export class Relic {
     });
   }
 
-  public addNeededBy(unit: { id: string; name: string }) {
-    const match = this.neededBy?.find((x) => x.id === unit.id);
+  public addNeededBy(unit: { id: string; name: string; amount: number }) {
+    const match = this._neededBy?.find((x) => x.id === unit.id);
     if (!match) {
       this._neededBy?.push(unit);
     }

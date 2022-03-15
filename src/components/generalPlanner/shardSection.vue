@@ -63,6 +63,14 @@ export default defineComponent({
           value: "locations",
         },
         {
+          text: "Owned Shards",
+          value: "owned",
+        },
+        {
+          text: "Shards Remaining",
+          value: "remaining",
+        },
+        {
           text: "Progress",
           value: "progress",
         },

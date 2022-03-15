@@ -1,5 +1,7 @@
-declare module '@meforma/vue-toaster'
+declare module "@meforma/vue-toaster";
 
-declare module 'uuid';
+declare module "uuid";
 
-declare module 'bootstrap';
+declare module "bootstrap";
+
+declare module "vue3-popper";
