@@ -97,7 +97,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapGetters, mapActions } from "vuex";
+import { mapState, mapGetters } from "vuex";
 
 import { loadingState } from "../../types/loading";
 import { maxGearLevel } from "../../types/gear";

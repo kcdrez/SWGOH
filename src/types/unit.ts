@@ -50,6 +50,7 @@ export class Unit {
   private _image: string;
   private _gear_list: UnitTier[];
   private _stats: any;
+  private _power?: number;
 
   constructor(payload: IUnit) {
     this._id = payload.id;
@@ -68,6 +69,7 @@ export class Unit {
     this._image = payload.image;
     this._gear_list = payload.gear_levels;
     this._stats = payload.stats;
+    this._power = payload.power;
   }
 
   public get id() {
@@ -78,6 +80,9 @@ export class Unit {
   }
   public get name() {
     return this._name;
+  }
+  public get power() {
+    return this._power ?? 0;
   }
   public get abilities() {
     return this._ability_data;
