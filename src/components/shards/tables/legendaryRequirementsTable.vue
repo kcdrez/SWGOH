@@ -150,6 +150,10 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    nodeKey: {
+      type: String,
+      default: "legendary",
+    },
   },
   data() {
     return {
@@ -164,7 +168,7 @@ export default defineComponent({
     ...mapState("unit", ["unitList"]),
     prerequisites() {
       const legendaryUnits: FarmingNode = this.shardFarming.find(
-        (x: FarmingNode) => x.id === "legendary"
+        (x: FarmingNode) => x.id === this.nodeKey
       );
       return (
         legendaryUnits?.characters.find((x) => x.id === this.unit.id)

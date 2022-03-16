@@ -90,6 +90,31 @@
             :selectedColumns="selectedColumns.legendary"
             :storageKey="storageKey + 'Legendary'"
             :simpleView="simpleView.legendary"
+            nodeKey="legendary"
+          />
+        </template>
+        <template v-if="showGLTable">
+          <div class="position-relative">
+            <div class="simple-view-container">
+              <Toggle
+                v-model="simpleView.gl"
+                onLabel="Simple"
+                offLabel="Advanced"
+              />
+            </div>
+            <MultiSelect
+              class="select-columns"
+              :options="cols.gl"
+              :storageKey="storageKey + 'GLColumns'"
+              @checked="selectedColumns.gl = $event"
+            />
+          </div>
+          <LegendaryRequirementsTable
+            :unit="unit"
+            :selectedColumns="selectedColumns.gl"
+            :storageKey="storageKey + 'GL'"
+            :simpleView="simpleView.gl"
+            nodeKey="galactic_legends"
           />
         </template>
       </template>
@@ -136,10 +161,12 @@ export default defineComponent({
         store: [],
         tb: [],
         legendary: [],
+        gl: [],
       },
       storageKey,
       simpleView: JSON.parse(
-        window.localStorage.getItem(storageKey) || '{ "legendary": false }'
+        window.localStorage.getItem(storageKey) ||
+          '{ "legendary": true, "gl": true }'
       ),
     };
   },
@@ -281,6 +308,20 @@ export default defineComponent({
             value: "recommended",
           },
         ],
+        gl: [
+          {
+            text: "Name",
+            value: "name",
+          },
+          {
+            text: "Requirements",
+            value: "requirements",
+          },
+          {
+            text: "Recommended",
+            value: "recommended",
+          },
+        ],
       };
     },
     tables(): string[] {
@@ -310,6 +351,9 @@ export default defineComponent({
     },
     showLegendaryTable(): boolean {
       return this.tables.includes("Legendary Events");
+    },
+    showGLTable(): boolean {
+      return this.tables.includes("Galactic Legends");
     },
     shardTimeUnlock(): number {
       const unitList = this.unitFarmingList.filter((el: Unit) => {
