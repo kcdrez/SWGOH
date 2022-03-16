@@ -5,7 +5,7 @@
       :message="`Unable to find a unit with the ID of ${$route.params.unitId}.`"
     />
     <Loading :state="requestState" message="Loading Unit Data" size="lg">
-      <UnitIcon :unit="unit" size="lg" class="text-center">
+      <UnitIcon :unit="unit" size="lg" class="text-center mt-3">
         <div
           class="btn-group btn-group-sm d-block text-center my-2"
           role="group"
@@ -118,6 +118,12 @@ export default defineComponent({
       if (newVal === loadingState.ready) {
         await this.fetchUnit(this.$route.params.unitId);
       }
+    },
+    "$route.params.unitId": {
+      async handler(unitId) {
+        await this.fetchUnit(unitId);
+      },
+      deep: true,
     },
   },
   async created() {

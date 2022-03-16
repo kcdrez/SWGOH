@@ -28,32 +28,70 @@
           displayClasses="d-inline"
         />
         <EnergySpent showStandard showFleet showCantina />
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          :storageKey="storageKey + 'Columns'"
-          @checked="selectedColumns = $event"
-        />
-        <ShardTable
-          v-if="showNodeTable"
-          :units="[unit]"
-          :selectedColumns="selectedColumns"
-          showActions
-          :storageKey="storageKey + 'ShardTable'"
-        />
-        <StoreTable
-          v-if="showShopTable"
-          :units="[unit]"
-          :selectedColumns="selectedColumns"
-          :currencyTypes="unit.currencyTypes"
-          :storageKey="storageKey + 'StoreTable'"
-        />
-        <TerritoryBattleShardTable
-          v-if="showTBTable"
-          :units="[unit]"
-          :selectedColumns="selectedColumns"
-          :storageKey="storageKey + 'TBTable'"
-        />
+        <template v-if="showNodeTable">
+          <MultiSelect
+            class="select-columns"
+            :options="cols.shards"
+            :storageKey="storageKey + 'ShardColumns'"
+            @checked="selectedColumns.shards = $event"
+          />
+          <ShardTable
+            :units="[unit]"
+            :selectedColumns="selectedColumns.shards"
+            showActions
+            :storageKey="storageKey + 'ShardTable'"
+          />
+        </template>
+        <template v-if="showShopTable">
+          <MultiSelect
+            class="select-columns"
+            :options="cols.store"
+            :storageKey="storageKey + 'StoreColumns'"
+            @checked="selectedColumns.store = $event"
+          />
+          <StoreTable
+            :units="[unit]"
+            :selectedColumns="selectedColumns.store"
+            :currencyTypes="unit.currencyTypes"
+            :storageKey="storageKey + 'StoreTable'"
+          />
+        </template>
+        <template v-if="showTBTable">
+          <MultiSelect
+            class="select-columns"
+            :options="cols.tb"
+            :storageKey="storageKey + 'TBColumns'"
+            @checked="selectedColumns.tb = $event"
+          />
+          <TerritoryBattleShardTable
+            :units="[unit]"
+            :selectedColumns="selectedColumns.tb"
+            :storageKey="storageKey + 'TBTable'"
+          />
+        </template>
+        <template v-if="showLegendaryTable">
+          <div class="position-relative">
+            <div class="simple-view-container">
+              <Toggle
+                v-model="simpleView.legendary"
+                onLabel="Simple"
+                offLabel="Advanced"
+              />
+            </div>
+            <MultiSelect
+              class="select-columns"
+              :options="cols.legendary"
+              :storageKey="storageKey + 'LegendaryColumns'"
+              @checked="selectedColumns.legendary = $event"
+            />
+          </div>
+          <LegendaryRequirementsTable
+            :unit="unit"
+            :selectedColumns="selectedColumns.legendary"
+            :storageKey="storageKey + 'Legendary'"
+            :simpleView="simpleView.legendary"
+          />
+        </template>
       </template>
     </div>
   </div>
@@ -66,6 +104,7 @@ import { mapState, mapGetters } from "vuex";
 import ShardTable from "./tables/shardTable.vue";
 import StoreTable from "./tables/storeTable.vue";
 import TerritoryBattleShardTable from "./tables/territoryBattleShardTable.vue";
+import LegendaryRequirementsTable from "./tables/legendaryRequirementsTable.vue";
 import EnergySpent from "../energySpent.vue";
 import { loadingState } from "../../types/loading";
 import { setupEvents } from "../../utils";
@@ -86,13 +125,22 @@ export default defineComponent({
     ShardTable,
     StoreTable,
     TerritoryBattleShardTable,
+    LegendaryRequirementsTable,
     Timestamp,
     EnergySpent,
   },
   data() {
     return {
-      selectedColumns: [],
+      selectedColumns: {
+        shards: [],
+        store: [],
+        tb: [],
+        legendary: [],
+      },
       storageKey,
+      simpleView: JSON.parse(
+        window.localStorage.getItem(storageKey) || '{ "legendary": false }'
+      ),
     };
   },
   computed: {
@@ -147,55 +195,93 @@ export default defineComponent({
         });
       },
     },
-    cols(): { text: string; value: any }[] {
-      const list = [
-        {
-          text: "Owned Shards",
-          value: "owned",
-        },
-        {
-          text: "Shards Remaining",
-          value: "remaining",
-        },
-        {
-          text: "Progress",
-          value: "progress",
-        },
-      ];
-
-      if (this.showNodeTable || this.showTBTable) {
-        list.splice(0, 0, {
-          text: "Locations",
-          value: "locations",
-        });
-      }
-
-      if (this.showShopTable) {
-        list.splice(3, 0, {
-          text: "Currency Owned",
-          value: "wallet",
-        });
-        list.splice(4, 0, {
-          text: "Daily Currency",
-          value: "dailyCurrency",
-        });
-        list.splice(5, 0, {
-          text: "Remaining Currency",
-          value: "remainingCurrency",
-        });
-      }
-
-      if (this.showNodeTable) {
-        list.splice(list.length, 0, {
-          text: "Attempts",
-          value: "attempts",
-        });
-        list.splice(list.length, 0, {
-          text: "Actions",
-          value: "actions",
-        });
-      }
-      return list;
+    cols(): any {
+      return {
+        shards: [
+          {
+            text: "Locations",
+            value: "locations",
+          },
+          {
+            text: "Owned Shards",
+            value: "owned",
+          },
+          {
+            text: "Shards Remaining",
+            value: "remaining",
+          },
+          {
+            text: "Progress",
+            value: "progress",
+          },
+          {
+            text: "Attempts",
+            value: "attempts",
+          },
+          {
+            text: "Actions",
+            value: "actions",
+          },
+        ],
+        store: [
+          {
+            text: "Owned Shards",
+            value: "owned",
+          },
+          {
+            text: "Shards Remaining",
+            value: "remaining",
+          },
+          {
+            text: "Progress",
+            value: "progress",
+          },
+          {
+            text: "Currency Owned",
+            value: "wallet",
+          },
+          {
+            text: "Daily Currency",
+            value: "dailyCurrency",
+          },
+          {
+            text: "Remaining Currency",
+            value: "remainingCurrency",
+          },
+        ],
+        tb: [
+          {
+            text: "Locations",
+            value: "locations",
+          },
+          {
+            text: "Owned Shards",
+            value: "owned",
+          },
+          {
+            text: "Shards Remaining",
+            value: "remaining",
+          },
+          {
+            text: "Progress",
+            value: "progress",
+          },
+        ],
+        legendary: [
+          {
+            text: "Name",
+            value: "name",
+          },
+          {
+            text: "Requirements",
+            value: "requirements",
+          },
+          {
+            text: "Recommended",
+            value: "recommended",
+          },
+        ],
+      };
     },
     tables(): string[] {
       return this.unit.whereToFarm.map((x: FarmingNode) => x.table);
@@ -222,6 +308,9 @@ export default defineComponent({
         ].includes(x)
       );
     },
+    showLegendaryTable(): boolean {
+      return this.tables.includes("Legendary Events");
+    },
     shardTimeUnlock(): number {
       const unitList = this.unitFarmingList.filter((el: Unit) => {
         const elTables: string[] = el.whereToFarm.map((x) => x.table);
@@ -247,6 +336,14 @@ export default defineComponent({
       }
 
       return Math.min(...days);
+    },
+  },
+  watch: {
+    simpleView: {
+      handler(newVal) {
+        window.localStorage.setItem(storageKey, JSON.stringify(newVal));
+      },
+      deep: true,
     },
   },
   mounted() {

@@ -103,10 +103,16 @@ interface NodeCharacter {
   cost?: number;
   prerequisites?: {
     id?: string;
-    requirement: string;
+    requirement?: IPrerequisite;
     tags?: string[];
-    recommended: string;
+    count?: number;
+    recommended?: IPrerequisite;
   }[];
+}
+
+interface IPrerequisite {
+  value: number;
+  type: "Relic" | "Power" | "Gear" | "Stars";
 }
 
 export type OwnedShardsMap = {

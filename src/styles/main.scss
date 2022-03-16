@@ -240,6 +240,19 @@ button:disabled {
   color: $warning;
 }
 
+.simple-view-container {
+  position: absolute;
+  right: 215px;
+
+  .toggle {
+    width: 90px;
+    justify-content: unset;
+  }
+  .toggle-label {
+    margin-left: 1.5rem;
+  }
+}
+
 .section-header {
   position: relative;
 
@@ -252,16 +265,8 @@ button:disabled {
     text-align: left;
   }
   .simple-view-container {
-    position: absolute;
-    right: 280px;
     top: 12.5px;
-    .toggle {
-      width: 90px;
-      justify-content: unset;
-    }
-    .toggle-label {
-      margin-left: 1.5rem;
-    }
+    right: 280px;
   }
   @media only screen and (max-width: 900px) {
     & {
