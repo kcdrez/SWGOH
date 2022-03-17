@@ -9,6 +9,7 @@ import MatchUpPage from "../pages/matchUpPage.vue";
 import StarProgressionPage from "../pages/starProgression.vue";
 import GuildEventsPage from "../pages/guildEvents.vue";
 import DamageCalculatorPage from "../pages/damageCalculator.vue";
+import GLChecklist from "../pages/glChecklist.vue";
 
 const routes = [
   {
@@ -50,6 +51,11 @@ const routes = [
     path: "/damage-calculator",
     name: "DamageCalculatorPage",
     component: DamageCalculatorPage,
+  },
+  {
+    path: "/gl-checklist",
+    name: "GLChecklist",
+    component: GLChecklist,
   },
 ];
 
