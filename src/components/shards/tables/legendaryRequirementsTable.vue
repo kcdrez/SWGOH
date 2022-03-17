@@ -1,5 +1,11 @@
 <template>
   <div v-if="prerequisites">
+    <div class="mb-2 d-flex justify-content-center">
+      <h5 class="text-center mb-0">Total Progress:</h5>
+      <div class="total-progress-bar">
+        <ProgressBar :percent="totalProgress('requirement')" />
+      </div>
+    </div>
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
@@ -108,7 +114,7 @@
             <div v-else>-</div>
           </td>
         </tr>
-        <tr>
+        <!-- <tr>
           <td class="align-middle text-center">Total:</td>
           <td class="align-middle text-center">
             <ProgressBar :percent="totalProgress('requirement')" />
@@ -116,7 +122,7 @@
           <td class="align-middle text-center">
             <ProgressBar :percent="totalProgress('recommended')" />
           </td>
-        </tr>
+        </tr> -->
       </tbody>
     </table>
   </div>
@@ -129,8 +135,14 @@ import { mapState } from "vuex";
 import RelicLevelIcon from "../../units/relicLevelIcon.vue";
 import UnitIcon from "../../units/unitIcon.vue";
 import GearText from "../../gear/gearText.vue";
-import { Unit } from "../../../types/unit";
-import { FarmingNode } from "../../../types/shards";
+import {
+  Unit,
+  getPercent,
+  getUnitsByTag,
+  getUnit,
+  totalProgress,
+} from "../../../types/unit";
+import { FarmingNode, shardMapping } from "../../../types/shards";
 import { maxGearLevel } from "../../../types/gear";
 import { round2Decimals } from "../../../utils";
 
@@ -181,7 +193,7 @@ export default defineComponent({
       );
       return (
         legendaryUnits?.characters.find((x) => x.id === this.unit.id)
-          ?.prerequisites ?? null
+          ?.prerequisites ?? []
       );
     },
     cols(): { text: string; value: any }[] {
@@ -236,92 +248,11 @@ export default defineComponent({
         return "";
       }
     },
-    getPercent(
-      item: any,
-      prerequisiteType: "requirement" | "recommended"
-    ): number {
-      let percentage = 0;
-      const type = item[prerequisiteType]?.type ?? item.requirement.type;
-      const value = item[prerequisiteType]?.value ?? item.requirement.value;
-      if (item.id) {
-        const unit: Unit = this.getUnit(item.id);
-        percentage = this.getUnitPercent(unit, type, value);
-      } else if (item.tags) {
-        const list = this.getUnitsByTag(item.tags).map((u) => {
-          return this.getUnitPercent(u, type, value);
-        });
-
-        if (list.length >= item.count) {
-          percentage = 100;
-        } else {
-          for (let i = list.length; i < item.count; i++) {
-            list.push(0);
-          }
-          percentage =
-            list.reduce((partialSum, a) => partialSum + a, 0) / list.length;
-        }
-      }
-
-      if (percentage > 100) {
-        return 100;
-      } else if (percentage < 0) {
-        return 0;
-      } else {
-        return round2Decimals(percentage);
-      }
-    },
-    getUnitPercent(unit: Unit, type: string, target: number) {
-      if (type === "Power") {
-        return (unit.power / target) * 100;
-      } else if (type === "Relic") {
-        const total = target + maxGearLevel;
-        return ((unit.gearLevel + unit.relicLevel) / total) * 100;
-      } else if (type === "Gear") {
-        return (unit.gearLevel / target) * 100;
-      } else if (type === "Stars") {
-        return (unit.stars / target) * 100;
-      }
-      return 0;
-    },
-    getUnitsByTag(tags: string[]): Unit[] {
-      return [...this.player.units, ...this.unitList]
-        .filter((u: Unit) => {
-          return tags.every((tag) => {
-            if (tag === "is_ship") {
-              return u.isShip;
-            } else if (tag.includes("!")) {
-              const notTag = tag.replace("!", "");
-              if (notTag === "is_ship") {
-                return !u.isShip;
-              } else {
-                return !u.categories.includes(notTag);
-              }
-            } else {
-              return u.categories.includes(tag);
-            }
-          });
-        })
-        .reduce((acc, el) => {
-          const match = acc.find((x: any) => x.id === el.id);
-          if (!match) {
-            acc.push(el);
-          }
-          return acc;
-        }, []);
-    },
-    getUnit(unitId: string) {
-      return [...this.player.units, ...this.unitList].find(
-        (x) => x.id === unitId
-      );
-    },
+    getPercent,
+    getUnitsByTag,
+    getUnit,
     totalProgress(prerequisiteType: "requirement" | "recommended") {
-      let list: number[] = [];
-      (this.prerequisites ?? []).forEach((item) => {
-        list.push(this.getPercent(item, prerequisiteType));
-      });
-      return round2Decimals(
-        list.reduce((partialSum, a) => partialSum + a, 0) / list.length
-      );
+      return totalProgress(this.prerequisites, prerequisiteType);
     },
   },
   watch: {
@@ -357,5 +288,9 @@ export default defineComponent({
   display: grid;
   grid-template-columns: 2fr 5fr;
   align-items: center;
+}
+.total-progress-bar {
+  flex-basis: 25%;
+  margin: 0 0.5rem;
 }
 </style>
