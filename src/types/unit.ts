@@ -413,12 +413,12 @@ export class Unit {
   public set ownedShards(value) {
     store.dispatch("shards/saveShardsCount", { count: value, id: this.id });
   }
-  private get totalOwnedShards() {
+  public get totalOwnedShards() {
     let amount = 0;
     for (let i = 1; i <= this.stars; i++) {
       amount += shardMapping[i];
     }
-    return amount + this.ownedShards;
+    return Math.min(amount + this.ownedShards, 330);
   }
   public get remainingShards() {
     return 330 - this.totalOwnedShards;
@@ -596,4 +596,118 @@ export function unitsByPriority(
       return priorityA > priorityB ? 1 : -1;
     }
   });
+}
+
+export function getPercent(
+  item: any,
+  prerequisiteType: "requirement" | "recommended"
+): number {
+  let percentage = 0;
+  const type = item[prerequisiteType]?.type ?? item.requirement.type;
+  const value = item[prerequisiteType]?.value ?? item.requirement.value;
+  if (item.id) {
+    const unit = getUnit(item.id);
+    if (unit) {
+      percentage = getUnitPercent(unit, type, value);
+    }
+  } else if (item.tags) {
+    const list = getUnitsByTag(item.tags).map((u) => {
+      return getUnitPercent(u, type, value);
+    });
+
+    if (list.length >= item.count) {
+      percentage = 100;
+    } else {
+      for (let i = list.length; i < item.count; i++) {
+        list.push(0);
+      }
+      percentage =
+        list.reduce((partialSum, a) => partialSum + a, 0) / list.length;
+    }
+  }
+
+  if (percentage > 100) {
+    return 100;
+  } else if (percentage < 0) {
+    return 0;
+  } else {
+    return round2Decimals(percentage);
+  }
+}
+
+export function getUnitPercent(unit: Unit, type: string, target: number) {
+  const shardsPercent = (unit.totalOwnedShards / 330) * 100;
+
+  if (type === "Power") {
+    return (unit.power / target) * 100;
+  } else if (type === "Relic") {
+    const gearPercent = (unit.gearLevel / maxGearLevel) * 100;
+    const relicPercent = (unit.relicLevel / target) * 100;
+
+    return gearPercent * 0.5 + relicPercent * 0.125 + shardsPercent * 0.375;
+  } else if (type === "Gear") {
+    const gearPercent = (unit.gearLevel / target) * 100;
+
+    if (target === 12) {
+      return gearPercent * 0.5 + shardsPercent * 0.5;
+    } else if (target === 13) {
+      return gearPercent * 0.57 + shardsPercent * 0.43;
+    } else {
+      return gearPercent;
+    }
+  } else if (type === "Stars") {
+    let shardsAmount = 0;
+    for (let i = 1; i <= target; i++) {
+      shardsAmount += shardMapping[i];
+    }
+    return Math.min(unit.totalOwnedShards / shardsAmount, 1) * 100;
+  }
+  return 0;
+}
+
+export function getUnitsByTag(tags: string[]): Unit[] {
+  const playerUnits = store.state.player.player?.units ?? [];
+  const otherUnits = store.state.unit.unitList;
+
+  return [...playerUnits, ...otherUnits]
+    .filter((u: Unit) => {
+      return tags.every((tag) => {
+        if (tag === "is_ship") {
+          return u.isShip;
+        } else if (tag.includes("!")) {
+          const notTag = tag.replace("!", "");
+          if (notTag === "is_ship") {
+            return !u.isShip;
+          } else {
+            return !u.categories.includes(notTag);
+          }
+        } else {
+          return u.categories.includes(tag);
+        }
+      });
+    })
+    .reduce((acc, el) => {
+      const match = acc.find((x: any) => x.id === el.id);
+      if (!match) {
+        acc.push(el);
+      }
+      return acc;
+    }, [] as Unit[]);
+}
+export function getUnit(unitId: string) {
+  const playerUnits = store.state.player.player?.units ?? [];
+  const otherUnits = store.state.unit.unitList;
+  return [...playerUnits, ...otherUnits].find((x) => x.id === unitId);
+}
+export function totalProgress(
+  prerequisites: any[],
+  prerequisiteType: "requirement" | "recommended"
+) {
+  let list: number[] = [];
+  (prerequisites ?? []).forEach((item) => {
+    list.push(getPercent(item, prerequisiteType));
+  });
+  return round2Decimals(
+    list.reduce((partialSum, a) => partialSum + a, 0) / list.length
+  );
 }
