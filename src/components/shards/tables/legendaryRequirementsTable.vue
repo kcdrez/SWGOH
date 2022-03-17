@@ -90,7 +90,7 @@
                 class="d-flex justify-content-center"
               >
                 <span>{{ item.requirement.value }}</span>
-                <img src="/images/star.png" class="mx-1" />
+                <img src="images/star.png" class="mx-1" />
               </div>
               <GearText
                 :level="item.requirement.value"
