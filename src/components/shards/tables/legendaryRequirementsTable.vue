@@ -108,6 +108,15 @@
             <div v-else>-</div>
           </td>
         </tr>
+        <tr>
+          <td class="align-middle text-center">Total:</td>
+          <td class="align-middle text-center">
+            <ProgressBar :percent="totalProgress('requirement')" />
+          </td>
+          <td class="align-middle text-center">
+            <ProgressBar :percent="totalProgress('recommended')" />
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -303,6 +312,15 @@ export default defineComponent({
     getUnit(unitId: string) {
       return [...this.player.units, ...this.unitList].find(
         (x) => x.id === unitId
+      );
+    },
+    totalProgress(prerequisiteType: "requirement" | "recommended") {
+      let list: number[] = [];
+      (this.prerequisites ?? []).forEach((item) => {
+        list.push(this.getPercent(item, prerequisiteType));
+      });
+      return round2Decimals(
+        list.reduce((partialSum, a) => partialSum + a, 0) / list.length
       );
     },
   },
