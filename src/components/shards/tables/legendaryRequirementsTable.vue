@@ -56,6 +56,7 @@
               v-model="searchText"
             />
           </th>
+          <th>Current</th>
           <th v-if="showCol('requirements')">Requirements</th>
           <th v-if="showCol('recommended')">Recommended</th>
         </tr>
@@ -82,6 +83,9 @@
                 />
               </div>
             </template>
+          </td>
+          <td class="text-center align-middle">
+            {{ getCurrent(item) }}
           </td>
           <td class="text-center align-middle" v-if="showCol('requirements')">
             <div class="percent-container">
@@ -114,15 +118,6 @@
             <div v-else>-</div>
           </td>
         </tr>
-        <!-- <tr>
-          <td class="align-middle text-center">Total:</td>
-          <td class="align-middle text-center">
-            <ProgressBar :percent="totalProgress('requirement')" />
-          </td>
-          <td class="align-middle text-center">
-            <ProgressBar :percent="totalProgress('recommended')" />
-          </td>
-        </tr> -->
       </tbody>
     </table>
   </div>
@@ -130,7 +125,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 
 import RelicLevelIcon from "../../units/relicLevelIcon.vue";
 import UnitIcon from "../../units/unitIcon.vue";
@@ -186,6 +181,7 @@ export default defineComponent({
   computed: {
     ...mapState("shards", ["shardFarming"]),
     ...mapState("player", ["player"]),
+    ...mapGetters("player", ["unitData"]),
     ...mapState("unit", ["unitList"]),
     prerequisites() {
       const legendaryUnits: FarmingNode = this.shardFarming.find(
@@ -253,6 +249,24 @@ export default defineComponent({
     getUnit,
     totalProgress(prerequisiteType: "requirement" | "recommended") {
       return totalProgress(this.prerequisites, prerequisiteType);
+    },
+    getCurrent(item: any) {
+      if (item.id) {
+        const unit: Unit = this.unitData(item.id);
+        if (unit) {
+          if (item.requirement.type === "Relic") {
+            return unit.relicLevel;
+          } else if (item.requirement.type === "Gear") {
+            return unit.gearLevel;
+          } else if (item.requirement.type === "Stars") {
+            return unit.stars;
+          } else if (item.requirement.type === "Power") {
+            return unit.power;
+          }
+        }
+      } else if (item.tags) {
+      }
+      return 0;
     },
   },
   watch: {
