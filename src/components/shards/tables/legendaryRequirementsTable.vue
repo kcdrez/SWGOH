@@ -56,8 +56,10 @@
               v-model="searchText"
             />
           </th>
+          <th v-if="showCol('current')">Current Level</th>
           <th v-if="showCol('requirements')">Requirements</th>
-          <th v-if="showCol('recommended')">Recommended</th>
+          <th v-if="showCol('recommended') && showRecommended">Recommended</th>
+          <th v-if="showCol('progress')">Progress</th>
         </tr>
       </thead>
       <tbody>
@@ -83,46 +85,36 @@
               </div>
             </template>
           </td>
-          <td class="text-center align-middle" v-if="showCol('requirements')">
-            <div class="percent-container">
-              <RelicLevelIcon
-                v-if="item.requirement.type === 'Relic'"
-                class="m-auto"
-                :relicLevel="item.requirement.value"
-                :forceSide="getUnit(item.requirement.id).alignment"
-              />
-              <div
-                v-else-if="item.requirement.type === 'Stars'"
-                class="d-flex justify-content-center"
-              >
-                <span>{{ item.requirement.value }}</span>
-                <img src="images/star.png" class="mx-1" />
-              </div>
-              <GearText
-                :level="item.requirement.value"
-                v-else-if="item.requirement.type === 'Gear'"
-              />
-              <span v-else>{{ getRequirement(item) }} </span>
-              <ProgressBar :percent="getPercent(item, 'requirement')" />
-            </div>
+          <td class="text-center align-middle" v-if="showCol('current')">
+            <RequirementIcon
+              class="justify-content-center"
+              :type="item.requirement.type"
+              :unitId="item.id"
+              currentLevel
+            />
           </td>
-          <td class="text-center align-middle" v-if="showCol('recommended')">
+          <td class="text-center align-middle" v-if="showCol('requirements')">
+            <RequirementIcon
+              class="justify-content-center"
+              :value="item.requirement.value"
+              :type="item.requirement.type"
+              :unitId="item.id"
+            />
+          </td>
+          <td
+            class="text-center align-middle"
+            v-if="showCol('recommended') && showRecommended"
+          >
             <div class="percent-container" v-if="getRecommended(item)">
               <span>{{ getRecommended(item) }}</span>
               <ProgressBar :percent="getPercent(item, 'recommended')" />
             </div>
             <div v-else>-</div>
           </td>
+          <td class="text-center align-middle" v-if="showCol('progress')">
+            <ProgressBar :percent="getPercent(item, 'requirement')" />
+          </td>
         </tr>
-        <!-- <tr>
-          <td class="align-middle text-center">Total:</td>
-          <td class="align-middle text-center">
-            <ProgressBar :percent="totalProgress('requirement')" />
-          </td>
-          <td class="align-middle text-center">
-            <ProgressBar :percent="totalProgress('recommended')" />
-          </td>
-        </tr> -->
       </tbody>
     </table>
   </div>
@@ -130,11 +122,12 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 
 import RelicLevelIcon from "../../units/relicLevelIcon.vue";
 import UnitIcon from "../../units/unitIcon.vue";
 import GearText from "../../gear/gearText.vue";
+import RequirementIcon from "./legendary/requirementIcon.vue";
 import {
   Unit,
   getPercent,
@@ -148,7 +141,7 @@ import { round2Decimals } from "../../../utils";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
-  components: { UnitIcon, RelicLevelIcon, GearText },
+  components: { UnitIcon, RelicLevelIcon, GearText, RequirementIcon },
   props: {
     unit: {
       type: Object as () => Unit,
@@ -186,6 +179,7 @@ export default defineComponent({
   computed: {
     ...mapState("shards", ["shardFarming"]),
     ...mapState("player", ["player"]),
+    ...mapGetters("player", ["unitData"]),
     ...mapState("unit", ["unitList"]),
     prerequisites() {
       const legendaryUnits: FarmingNode = this.shardFarming.find(
@@ -204,6 +198,9 @@ export default defineComponent({
         },
       ];
       return list;
+    },
+    showRecommended(): boolean {
+      return this.nodeKey === "legendary";
     },
   },
   methods: {
@@ -233,13 +230,6 @@ export default defineComponent({
           sortMethod: this.sortMethod,
         })
       );
-    },
-    getRequirement(item: any): string {
-      if (item.requirement) {
-        return `${item.requirement.type}: ${item.requirement.value}`;
-      } else {
-        return "-";
-      }
     },
     getRecommended(item: any): string {
       if (item.recommended) {

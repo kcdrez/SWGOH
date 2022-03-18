@@ -138,12 +138,16 @@ export default defineComponent({
           value: "name",
         },
         {
+          text: "Current Level",
+          value: "current",
+        },
+        {
           text: "Requirements",
           value: "requirements",
         },
         {
-          text: "Recommended",
-          value: "recommended",
+          text: "Progress",
+          value: "progress",
         },
       ];
     },
@@ -177,8 +181,11 @@ export default defineComponent({
       this.$nextTick(() => {
         newVal.forEach((unit: Unit) => {
           this.simpleView[unit.id] = this.simpleView[unit.id] ?? true;
+
           (this.selectedColumns as any)[unit.id] =
-            (this.selectedColumns as any)[unit.id] ?? [];
+            (this.selectedColumns as any)[unit.id].filter(
+              (x: string) => x !== "recommended"
+            ) ?? [];
 
           setupEvents(
             (this.$refs[`${storageKey}Collapse${unit.id}`] as any[])[0]

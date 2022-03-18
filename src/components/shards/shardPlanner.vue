@@ -222,7 +222,7 @@ export default defineComponent({
         });
       },
     },
-    cols() {
+    cols(): any {
       return {
         shards: [
           {
@@ -300,12 +300,20 @@ export default defineComponent({
             value: "name",
           },
           {
+            text: "Current Level",
+            value: "current",
+          },
+          {
             text: "Requirements",
             value: "requirements",
           },
           {
             text: "Recommended",
             value: "recommended",
+          },
+          {
+            text: "Progress",
+            value: "progress",
           },
         ],
         gl: [
@@ -314,12 +322,16 @@ export default defineComponent({
             value: "name",
           },
           {
+            text: "Current Level",
+            value: "current",
+          },
+          {
             text: "Requirements",
             value: "requirements",
           },
           {
-            text: "Recommended",
-            value: "recommended",
+            text: "Progress",
+            value: "progress",
           },
         ],
       };

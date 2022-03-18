@@ -32,7 +32,7 @@ export default defineComponent({
   },
 });
 </script>
-  
+
 <style lang="scss" scoped>
 .relic-level {
   background-image: url("../../images/relicAtlas.png");
