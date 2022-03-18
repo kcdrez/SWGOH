@@ -644,7 +644,7 @@ export function getUnitPercent(unit: Unit, type: string, target: number) {
     const gearPercent = (unit.gearLevel / maxGearLevel) * 100;
     const relicPercent = (unit.relicLevel / target) * 100;
 
-    return gearPercent * 0.5 + relicPercent * 0.125 + shardsPercent * 0.375;
+    return gearPercent * 0.5 + relicPercent * 0.4 + shardsPercent * 0.1;
   } else if (type === "Gear") {
     const gearPercent = (unit.gearLevel / target) * 100;
 
