@@ -56,9 +56,10 @@
               v-model="searchText"
             />
           </th>
-          <th>Current</th>
+          <th v-if="showCol('current')">Current Level</th>
           <th v-if="showCol('requirements')">Requirements</th>
-          <th v-if="showCol('recommended')">Recommended</th>
+          <th v-if="showCol('recommended') && showRecommended">Recommended</th>
+          <th v-if="showCol('progress')">Progress</th>
         </tr>
       </thead>
       <tbody>
@@ -84,38 +85,34 @@
               </div>
             </template>
           </td>
-          <td class="text-center align-middle">
-            {{ getCurrent(item) }}
+          <td class="text-center align-middle" v-if="showCol('current')">
+            <RequirementIcon
+              class="justify-content-center"
+              :type="item.requirement.type"
+              :unitId="item.id"
+              currentLevel
+            />
           </td>
           <td class="text-center align-middle" v-if="showCol('requirements')">
-            <div class="percent-container">
-              <RelicLevelIcon
-                v-if="item.requirement.type === 'Relic'"
-                class="m-auto"
-                :relicLevel="item.requirement.value"
-                :forceSide="getUnit(item.requirement.id).alignment"
-              />
-              <div
-                v-else-if="item.requirement.type === 'Stars'"
-                class="d-flex justify-content-center"
-              >
-                <span>{{ item.requirement.value }}</span>
-                <img src="images/star.png" class="mx-1" />
-              </div>
-              <GearText
-                :level="item.requirement.value"
-                v-else-if="item.requirement.type === 'Gear'"
-              />
-              <span v-else>{{ getRequirement(item) }} </span>
-              <ProgressBar :percent="getPercent(item, 'requirement')" />
-            </div>
+            <RequirementIcon
+              class="justify-content-center"
+              :value="item.requirement.value"
+              :type="item.requirement.type"
+              :unitId="item.id"
+            />
           </td>
-          <td class="text-center align-middle" v-if="showCol('recommended')">
+          <td
+            class="text-center align-middle"
+            v-if="showCol('recommended') && showRecommended"
+          >
             <div class="percent-container" v-if="getRecommended(item)">
               <span>{{ getRecommended(item) }}</span>
               <ProgressBar :percent="getPercent(item, 'recommended')" />
             </div>
             <div v-else>-</div>
+          </td>
+          <td class="text-center align-middle" v-if="showCol('progress')">
+            <ProgressBar :percent="getPercent(item, 'requirement')" />
           </td>
         </tr>
       </tbody>
@@ -130,6 +127,7 @@ import { mapState, mapGetters } from "vuex";
 import RelicLevelIcon from "../../units/relicLevelIcon.vue";
 import UnitIcon from "../../units/unitIcon.vue";
 import GearText from "../../gear/gearText.vue";
+import RequirementIcon from "./legendary/requirementIcon.vue";
 import {
   Unit,
   getPercent,
@@ -143,7 +141,7 @@ import { round2Decimals } from "../../../utils";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
-  components: { UnitIcon, RelicLevelIcon, GearText },
+  components: { UnitIcon, RelicLevelIcon, GearText, RequirementIcon },
   props: {
     unit: {
       type: Object as () => Unit,
@@ -201,6 +199,9 @@ export default defineComponent({
       ];
       return list;
     },
+    showRecommended(): boolean {
+      return this.nodeKey === "legendary";
+    },
   },
   methods: {
     sortBy(type: string): void {
@@ -230,13 +231,6 @@ export default defineComponent({
         })
       );
     },
-    getRequirement(item: any): string {
-      if (item.requirement) {
-        return `${item.requirement.type}: ${item.requirement.value}`;
-      } else {
-        return "-";
-      }
-    },
     getRecommended(item: any): string {
       if (item.recommended) {
         return `${item.recommended.type}: ${item.recommended.value}`;
@@ -249,24 +243,6 @@ export default defineComponent({
     getUnit,
     totalProgress(prerequisiteType: "requirement" | "recommended") {
       return totalProgress(this.prerequisites, prerequisiteType);
-    },
-    getCurrent(item: any) {
-      if (item.id) {
-        const unit: Unit = this.unitData(item.id);
-        if (unit) {
-          if (item.requirement.type === "Relic") {
-            return unit.relicLevel;
-          } else if (item.requirement.type === "Gear") {
-            return unit.gearLevel;
-          } else if (item.requirement.type === "Stars") {
-            return unit.stars;
-          } else if (item.requirement.type === "Power") {
-            return unit.power;
-          }
-        }
-      } else if (item.tags) {
-      }
-      return 0;
     },
   },
   watch: {
