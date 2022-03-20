@@ -206,6 +206,12 @@ const store = {
       );
       commit("SET_EVENTS", response);
     },
+    async fetchGuildUnitData({ state }: ActionCtx, unitId: string) {
+      return await apiClient.fetchGuildUnitData(
+        state.guildId,
+        unitId
+      );
+    }
   },
 };
 

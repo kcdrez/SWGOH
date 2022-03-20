@@ -8,6 +8,7 @@ import TeamPage from "../pages/team.vue";
 import MatchUpPage from "../pages/matchUpPage.vue";
 import StarProgressionPage from "../pages/starProgression.vue";
 import GuildEventsPage from "../pages/guildEvents.vue";
+import GuildUnitsPage from "../pages/guildUnits.vue";
 import DamageCalculatorPage from "../pages/damageCalculator.vue";
 import GLChecklist from "../pages/glChecklist.vue";
 
@@ -56,6 +57,11 @@ const routes = [
     path: "/gl-checklist",
     name: "GLChecklist",
     component: GLChecklist,
+  },
+  {
+    path: "/guild/units",
+    name: "GuildUnitsPage",
+    component: GuildUnitsPage,
   },
 ];
 

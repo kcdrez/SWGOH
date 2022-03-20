@@ -76,6 +76,13 @@
                   >Guild Event History</router-link
                 >
               </li>
+              <li>
+                <router-link
+                  class="dropdown-item"
+                  :to="{ name: 'GuildUnitsPage' }"
+                  >Guild Units Status</router-link
+                >
+              </li>
             </ul>
           </li>
           <li class="nav-item dropdown">
