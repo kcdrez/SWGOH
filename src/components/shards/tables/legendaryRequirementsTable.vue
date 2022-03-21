@@ -56,10 +56,38 @@
               v-model="searchText"
             />
           </th>
-          <th v-if="showCol('current')">Current Level</th>
-          <th v-if="showCol('requirements')">Requirements</th>
-          <th v-if="showCol('recommended') && showRecommended">Recommended</th>
-          <th v-if="showCol('progress')">Progress</th>
+          <th
+            v-if="showCol('current')"
+            @click="sortBy('current')"
+            class="c-pointer"
+          >
+            <span>Current Level</span>
+            <i class="fas mx-2" :class="sortIcon('current')"></i>
+          </th>
+          <th
+            v-if="showCol('requirements')"
+            @click="sortBy('requirements')"
+            class="c-pointer"
+          >
+            <span>Requirements</span>
+            <i class="fas mx-2" :class="sortIcon('requirements')"></i>
+          </th>
+          <th
+            v-if="showCol('recommended') && showRecommended"
+            @click="sortBy('recommended')"
+            class="c-pointer"
+          >
+            <span>Recommended</span>
+            <i class="fas mx-2" :class="sortIcon('recommended')"></i>
+          </th>
+          <th
+            v-if="showCol('progress')"
+            @click="sortBy('progress')"
+            class="c-pointer"
+          >
+            <span>Progress</span>
+            <i class="fas mx-2" :class="sortIcon('progress')"></i>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -123,6 +151,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
+import _ from "lodash";
 
 import RelicLevelIcon from "../../units/relicLevelIcon.vue";
 import UnitIcon from "../../units/unitIcon.vue";
@@ -135,9 +164,8 @@ import {
   getUnit,
   totalProgress,
 } from "../../../types/unit";
-import { FarmingNode, shardMapping } from "../../../types/shards";
-import { maxGearLevel } from "../../../types/gear";
-import { round2Decimals } from "../../../utils";
+import { displayValue, FarmingNode } from "../../../types/shards";
+import { isGearRequirement, isRelicRequirement } from "../../../types/shards";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
@@ -173,6 +201,7 @@ export default defineComponent({
     return {
       sortDir: "desc",
       sortMethod: "name",
+      _searchText: "",
       searchText: "",
     };
   },
@@ -185,19 +214,178 @@ export default defineComponent({
       const legendaryUnits: FarmingNode = this.shardFarming.find(
         (x: FarmingNode) => x.id === this.nodeKey
       );
-      return (
+      const prereqs =
         legendaryUnits?.characters.find((x) => x.id === this.unit.id)
-          ?.prerequisites ?? []
-      );
-    },
-    cols(): { text: string; value: any }[] {
-      const list = [
-        {
-          text: "Name",
-          value: "name",
-        },
-      ];
-      return list;
+          ?.prerequisites ?? [];
+      return prereqs
+        .filter((p) => {
+          const unit: Unit | undefined = getUnit(p?.id || "");
+          if (unit) {
+            const name = unit.name.toLowerCase().replace(/\s/g, "");
+            const compare = this._searchText.toLowerCase().replace(/\s/g, "");
+            return name.includes(compare);
+          } else {
+            return false;
+          }
+        })
+        .sort((a, b) => {
+          const unitA: Unit | undefined = getUnit(a?.id ?? "");
+          const unitB: Unit | undefined = getUnit(b?.id ?? "");
+          if (unitA && unitB) {
+            if (this.sortMethod === "name") {
+              const compareA = unitA.name.toLowerCase();
+              const compareB = unitB.name.toLowerCase();
+              if (this.sortDir === "asc") {
+                return compareA > compareB ? 1 : -1;
+              } else {
+                return compareA > compareB ? -1 : 1;
+              }
+            } else if (this.sortMethod === "current") {
+              const isRelicA = isRelicRequirement(
+                a.requirement?.type || "",
+                null,
+                unitA.relicLevel
+              );
+              const isRelicB = isRelicRequirement(
+                b.requirement?.type || "",
+                null,
+                unitB.relicLevel
+              );
+              const isGearA = isGearRequirement(
+                a.requirement?.type || "",
+                null,
+                unitA.relicLevel
+              );
+              const isGearB = isGearRequirement(
+                b.requirement?.type || "",
+                null,
+                unitB.relicLevel
+              );
+              const isStarsA = a.requirement?.type === "Stars";
+              const isStarsB = b.requirement?.type === "Stars";
+              const isPowerA = a.requirement?.type === "Power";
+              const isPowerB = b.requirement?.type === "Power";
+              const valueA = displayValue(
+                a.requirement?.type || "",
+                null,
+                unitA.relicLevel,
+                unitA.gearLevel,
+                unitA.stars
+              );
+              const valueB = displayValue(
+                b.requirement?.type || "",
+                null,
+                unitB.relicLevel,
+                unitB.gearLevel,
+                unitB.stars
+              );
+
+              if (isStarsA || isStarsB) {
+                if (isStarsA && isStarsB) {
+                  if (this.sortDir === "asc") {
+                    return valueA > valueB ? 1 : -1;
+                  } else {
+                    return valueA > valueB ? -1 : 1;
+                  }
+                } else if (this.sortDir === "asc") {
+                  return isStarsA ? 1 : -1;
+                } else {
+                  return isStarsA ? -1 : 1;
+                }
+              } else if (isPowerA || isPowerB) {
+                if (isPowerA && isPowerB) {
+                  if (this.sortDir === "asc") {
+                    return valueA > valueB ? 1 : -1;
+                  } else {
+                    return valueA > valueB ? -1 : 1;
+                  }
+                } else if (this.sortDir === "asc") {
+                  return isPowerA ? 1 : -1;
+                } else {
+                  return isPowerB ? -1 : 1;
+                }
+              } else if (isRelicA === isRelicB || isGearA === isGearB) {
+                if (this.sortDir === "asc") {
+                  return valueA > valueB ? 1 : -1;
+                } else {
+                  return valueA > valueB ? -1 : 1;
+                }
+              } else if (isRelicA || isRelicB) {
+                if (this.sortDir === "asc") {
+                  return isRelicA ? 1 : -1;
+                } else {
+                  return isRelicA ? -1 : 1;
+                }
+              } else if (isGearA || isGearB) {
+                if (this.sortDir === "asc") {
+                  return isGearA ? 1 : -1;
+                } else {
+                  return isGearA ? -1 : 1;
+                }
+              } else if (!isGearA && !isGearB) {
+                if (this.sortDir === "asc") {
+                  return a.requirement?.type === "Stars" ? 1 : -1;
+                } else {
+                  return a.requirement?.type === "Stars" ? -1 : 1;
+                }
+              } else if (
+                a.requirement?.type === "Power" ||
+                b.requirement?.type === "Power"
+              ) {
+                if (this.sortDir === "asc") {
+                  return a.requirement?.type === "Power" ? 1 : -1;
+                } else {
+                  return a.requirement?.type === "Power" ? -1 : 1;
+                }
+              }
+            } else if (this.sortMethod === "requirements") {
+              const typeA = a.requirement?.type ?? "";
+              const typeB = b.requirement?.type ?? "";
+              if (typeA === typeB) {
+                const valueA = a.requirement?.value ?? 0;
+                const valueB = b.requirement?.value ?? 0;
+                if (this.sortDir === "asc") {
+                  return valueA > valueB ? 1 : -1;
+                } else {
+                  return valueA > valueB ? -1 : 1;
+                }
+              } else {
+                if (this.sortDir === "asc") {
+                  return typeA > typeB ? 1 : -1;
+                } else {
+                  return typeA > typeB ? -1 : 1;
+                }
+              }
+            } else if (this.sortMethod === "recommended") {
+              const typeA = a.recommended?.type ?? "";
+              const typeB = b.recommended?.type ?? "";
+              if (typeA === typeB) {
+                const valueA = a.recommended?.value ?? 0;
+                const valueB = b.recommended?.value ?? 0;
+                if (this.sortDir === "asc") {
+                  return valueA > valueB ? 1 : -1;
+                } else {
+                  return valueA > valueB ? -1 : 1;
+                }
+              } else {
+                if (this.sortDir === "asc") {
+                  return typeA > typeB ? 1 : -1;
+                } else {
+                  return typeA > typeB ? -1 : 1;
+                }
+              }
+            } else if (this.sortMethod === "progress") {
+              const percentA = this.getPercent(a, "requirement");
+              const percentB = this.getPercent(b, "requirement");
+              if (this.sortDir === "asc") {
+                return percentA > percentB ? 1 : -1;
+              } else {
+                return percentA > percentB ? -1 : 1;
+              }
+            }
+          }
+          return 0;
+        });
     },
     showRecommended(): boolean {
       return this.nodeKey === "legendary";
@@ -244,6 +432,9 @@ export default defineComponent({
     totalProgress(prerequisiteType: "requirement" | "recommended") {
       return totalProgress(this.prerequisites, prerequisiteType);
     },
+    setSearchText: _.debounce(function (this: any) {
+      this._searchText = this.searchText;
+    }, 500),
   },
   watch: {
     sortDir() {
@@ -251,6 +442,9 @@ export default defineComponent({
     },
     sortMethod() {
       this.saveSortData();
+    },
+    searchText() {
+      this.setSearchText();
     },
   },
   created() {
