@@ -182,3 +182,49 @@ function unitEstimated(unit: Unit, tableNames: string[]) {
     ? 0
     : Math.ceil(unit.remainingShards / shardsPerDay);
 }
+
+export function getCurrentLevel() {}
+
+export function isRelicRequirement(
+  type: string,
+  value: any,
+  relicLevel: any
+): boolean {
+  if (type !== "Relic") {
+    return false;
+  } else if (value === null) {
+    return (relicLevel ?? 0) > 0;
+  } else {
+    return true;
+  }
+}
+
+export function isGearRequirement(
+  type: string,
+  value: any,
+  relicLevel: any
+): boolean {
+  return (
+    (type === "Relic" && !isRelicRequirement(type, value, relicLevel)) ||
+    type === "Gear"
+  );
+}
+
+export function displayValue(
+  type: string,
+  value: any,
+  relicLevel: any,
+  gearLevel: any,
+  stars: any
+) {
+  if (value === null) {
+    if (type === "Relic" && relicLevel) {
+      return relicLevel ?? 0;
+    } else if (type === "Relic" || type === "Gear") {
+      return gearLevel ?? 0;
+    } else if (type === "Stars") {
+      return stars ?? 0;
+    }
+  }
+  return value;
+}

@@ -21,6 +21,11 @@ import { defineComponent } from "vue";
 import RelicLevelIcon from "../../../units/relicLevelIcon.vue";
 import GearText from "../../../gear/gearText.vue";
 import { getUnit } from "../../../../types/unit";
+import {
+  displayValue,
+  isGearRequirement,
+  isRelicRequirement,
+} from "../../../../types/shards";
 
 export default defineComponent({
   name: "RequirementIcon",
@@ -53,34 +58,19 @@ export default defineComponent({
       return this.unit?.alignment || "Light Side";
     },
     displayValue(): number {
-      if (this.value === null) {
-        if (this.type === "Relic" && this.unit?.relicLevel) {
-          return this.unit.relicLevel ?? 0;
-        } else if (this.type === "Relic" || this.type === "Gear") {
-          return this.unit?.gearLevel ?? 0;
-        } else if (this.type === "Stars") {
-          return this.unit?.stars ?? 0;
-        }
-      }
-      return this.value;
+      return displayValue(
+        this.type,
+        this.value,
+        this.unit?.relicLevel,
+        this.unit?.gearLevel,
+        this.unit?.stars
+      );
     },
     shouldDisplayRelicIcon(): boolean {
-      if (this.type !== "Relic") {
-        return false;
-      } else if (this.value === null) {
-        return (this.unit?.relicLevel ?? 0) > 0;
-      } else {
-        return true;
-      }
+      return isRelicRequirement(this.type, this.value, this.unit?.relicLevel);
     },
     shouldDisplayGearIcon(): boolean {
-      if (
-        (this.type === "Relic" && !this.shouldDisplayRelicIcon) ||
-        this.type === "Gear"
-      ) {
-        return true;
-      }
-      return false;
+      return isGearRequirement(this.type, this.value, this.unit?.relicLevel);
     },
   },
 });
