@@ -32,6 +32,50 @@ export interface TerritoryBattleEvent {
   characterShards: { id: string; count: number };
 }
 
+type unitMappingData = {
+  [key: number]: number;
+};
+
+interface IUnitOwned {
+  allyCode: number;
+  name: string;
+  gearLevel: number;
+  relicLevel: number;
+  zetas: number;
+  omicrons: number;
+  speed: number;
+  offensePhysical: number;
+  offenseSpecial: number;
+  protection: number;
+  health: number;
+  tenacity: number;
+  potency: number;
+  critChancePhysical: number;
+  critChanceSpecial: number;
+  critDamage: number;
+  armor: number;
+  resistance: number;
+  ultimate: boolean;
+}
+
+interface IUnitUnowned {
+  allyCode: number;
+  name: string;
+}
+
+export interface IGuildUnitMap {
+  zetas: unitMappingData;
+  speed?: {
+    min: number;
+    max: number;
+    average: number;
+  };
+  gearLevels: unitMappingData;
+  relicLevels: unitMappingData;
+  owned: IUnitOwned[];
+  unowned: IUnitUnowned[];
+}
+
 export function estimatedTime(unit: Unit): number {
   const type =
     unit.id === "KIADIMUNDI" || unit.id === "IMPERIALPROBEDROID"

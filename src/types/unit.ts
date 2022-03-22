@@ -31,6 +31,8 @@ export interface IUnit {
   crew?: Crew[];
   stars?: number;
   is_ship?: boolean;
+  zeta_abilities: string[];
+  omicron_abilities: string[];
 }
 
 export class Unit {
@@ -51,6 +53,9 @@ export class Unit {
   private _gear_list: UnitTier[];
   private _stats: any;
   private _power?: number;
+  private _zeta_abilities?: string[];
+  private _omicron_abilities?: string[];
+  private _has_ultimate?: boolean;
 
   constructor(payload: IUnit) {
     this._id = payload.id;
@@ -58,7 +63,7 @@ export class Unit {
     this._gear_level = payload.gear_level || 0;
     this._current_level_gear = payload?.gear || [];
     this._ability_data = payload?.ability_data || [];
-    this._relic_tier = payload?.relic_tier || 0;
+    this._relic_tier = (payload?.relic_tier ?? 0) - 2;
     this._mods = payload?.mods || [];
     this._stars = payload?.stars || 0;
     this._categories = payload.categories;
@@ -70,6 +75,9 @@ export class Unit {
     this._gear_list = payload.gear_levels;
     this._stats = payload.stats;
     this._power = payload.power;
+    this._zeta_abilities = payload.zeta_abilities;
+    this._omicron_abilities = payload.omicron_abilities;
+    this._has_ultimate = payload.has_ultimate;
   }
 
   public get id() {
@@ -86,6 +94,9 @@ export class Unit {
   }
   public get abilities() {
     return this._ability_data;
+  }
+  public get hasUlt() {
+    return this._has_ultimate ?? false;
   }
   public get relicLevel() {
     if (!this._relic_tier) {
@@ -127,6 +138,12 @@ export class Unit {
   public get categories() {
     return this._categories;
   }
+  public get zetas() {
+    return this._zeta_abilities ?? [];
+  }
+  public get omicrons() {
+    return this._omicron_abilities ?? [];
+  }
 
   public get hasSpeedSet() {
     return this.mods.filter((x) => x.set === 4).length >= 4;
@@ -148,6 +165,24 @@ export class Unit {
     return list;
   }
 
+  public get protection() {
+    return this._stats["28"];
+  }
+  public get health() {
+    return this._stats["1"];
+  }
+  public get tenacity() {
+    return round2Decimals(this._stats["18"] * 100);
+  }
+  public get potency() {
+    return round2Decimals(this._stats["17"] * 100);
+  }
+  public get armor() {
+    return {
+      physical: round2Decimals(this._stats["8"] * 100),
+      special: round2Decimals(this._stats["9"] * 100),
+    };
+  }
   public get speed() {
     return this._stats["5"];
   }
@@ -636,22 +671,22 @@ export function getPercent(
 }
 
 export function getUnitPercent(unit: Unit, type: string, target: number) {
-  const shardsPercent = (unit.totalOwnedShards / 330) * 100;
-
   if (type === "Power") {
     return (unit.power / target) * 100;
   } else if (type === "Relic") {
-    const gearPercent = (unit.gearLevel / maxGearLevel) * 100;
-    const relicPercent = (unit.relicLevel / target) * 100;
+    const gearPercent = (unit.gearLevel / maxGearLevel) * 0.5;
+    const relicPercent = (unit.relicLevel / target) * 0.4;
+    const shardsPercent = (unit.totalOwnedShards / 330) * 0.1;
 
-    return gearPercent * 0.5 + relicPercent * 0.4 + shardsPercent * 0.1;
+    return (gearPercent + relicPercent + shardsPercent) * 100;
   } else if (type === "Gear") {
-    const gearPercent = (unit.gearLevel / target) * 100;
+    const gearPercent = unit.gearLevel / target;
+    const shardsPercent = unit.totalOwnedShards / 330;
 
     if (target === 12) {
-      return gearPercent * 0.5 + shardsPercent * 0.5;
+      return (gearPercent * 0.5 + shardsPercent * 0.5) * 100;
     } else if (target === 13) {
-      return gearPercent * 0.57 + shardsPercent * 0.43;
+      return (gearPercent * 0.57 + shardsPercent * 0.43) * 100;
     } else {
       return gearPercent;
     }

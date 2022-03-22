@@ -92,7 +92,7 @@ import { mapState, mapActions, mapGetters } from "vuex";
 import { initializeModules, setupEvents } from "../utils";
 import { loadingState } from "../types/loading";
 import { totalProgress, Unit } from "../types/unit";
-import LegendaryRequirementsTable from "../components/shards/tables/legendaryRequirementsTable.vue";
+import LegendaryRequirementsTable from "../components/shards/tables/legendary/legendaryRequirementsTable.vue";
 import { FarmingNode } from "@/types/shards";
 
 const dependencyModules = ["player", "unit", "shards"];

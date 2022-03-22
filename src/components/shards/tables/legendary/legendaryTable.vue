@@ -1,12 +1,8 @@
 <template>
   <div v-if="unitList.length > 0">
     <div class="collapse-header section-header">
-      <h3
-        class="w-100"
-        data-bs-toggle="collapse"
-        href="#galacticLegendsSection"
-      >
-        <div class="d-inline">Galactic Legend Units</div>
+      <h3 class="w-100" data-bs-toggle="collapse" href="#legendarySection">
+        <div class="d-inline">Legendary Units</div>
       </h3>
       <div class="simple-view-container">
         <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
@@ -19,11 +15,11 @@
       />
     </div>
     <ShardTable
-      id="galacticLegendsSection"
+      id="legendarySection"
       class="collapse"
-      ref="galacticLegendsSection"
+      ref="legendarySection"
       :units="unitList"
-      :nodeTableNames="['Galactic Legend Events']"
+      :nodeTableNames="['Legendary Events']"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
@@ -37,14 +33,14 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents } from "../../../utils";
-import { Unit } from "../../../types/unit";
-import ShardTable from "./shardTable.vue";
+import { setupEvents } from "../../../../utils";
+import { Unit } from "../../../../types/unit";
+import ShardTable from "../shardTable.vue";
 
-const storageKey = "glUnits";
+const storageKey = "legendaryUnits";
 
 export default defineComponent({
-  name: "GLTable",
+  name: "LegendaryTable",
   components: { ShardTable },
   data() {
     return {
@@ -95,7 +91,7 @@ export default defineComponent({
     unitList(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
         return unit.whereToFarm.some(
-          (node) => node.table === "Galactic Legend Events"
+          (node) => node.table === "Legendary Events"
         );
       });
     },
@@ -107,7 +103,7 @@ export default defineComponent({
   },
   mounted() {
     setupEvents(
-      (this.$refs?.galacticLegendsSection as any)?.$el as HTMLElement,
+      (this.$refs?.legendarySection as any)?.$el as HTMLElement,
       storageKey + "Collapse"
     );
   },
