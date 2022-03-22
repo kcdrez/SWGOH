@@ -31,6 +31,8 @@ export interface IUnit {
   crew?: Crew[];
   stars?: number;
   is_ship?: boolean;
+  zeta_abilities: string[];
+  omicron_abilities: string[];
 }
 
 export class Unit {
@@ -51,6 +53,9 @@ export class Unit {
   private _gear_list: UnitTier[];
   private _stats: any;
   private _power?: number;
+  private _zeta_abilities?: string[];
+  private _omicron_abilities?: string[];
+  private _has_ultimate?: boolean;
 
   constructor(payload: IUnit) {
     this._id = payload.id;
@@ -70,6 +75,9 @@ export class Unit {
     this._gear_list = payload.gear_levels;
     this._stats = payload.stats;
     this._power = payload.power;
+    this._zeta_abilities = payload.zeta_abilities;
+    this._omicron_abilities = payload.omicron_abilities;
+    this._has_ultimate = payload.has_ultimate;
   }
 
   public get id() {
@@ -86,6 +94,9 @@ export class Unit {
   }
   public get abilities() {
     return this._ability_data;
+  }
+  public get hasUlt() {
+    return this._has_ultimate ?? false
   }
   public get relicLevel() {
     if (!this._relic_tier) {
@@ -127,6 +138,12 @@ export class Unit {
   public get categories() {
     return this._categories;
   }
+  public get zetas() {
+    return this._zeta_abilities ?? [];
+  }
+  public get omicrons() {
+    return this._omicron_abilities ?? [];
+  }
 
   public get hasSpeedSet() {
     return this.mods.filter((x) => x.set === 4).length >= 4;
@@ -148,6 +165,25 @@ export class Unit {
     return list;
   }
 
+
+  public get protection() {
+    return this._stats["28"];
+  }
+  public get health() {
+    return this._stats["1"];
+  }
+  public get tenacity() {
+    return round2Decimals(this._stats["18"] * 100);
+  }
+  public get potency() {
+    return round2Decimals(this._stats["17"] * 100);
+  }
+  public get armor() {
+    return {
+      physical: round2Decimals(this._stats["8"] * 100),
+      special: round2Decimals(this._stats["9"] * 100)
+    };
+  }
   public get speed() {
     return this._stats["5"];
   }
@@ -189,11 +225,11 @@ export class Unit {
     return {
       physical: round2Decimals(
         (this.offense.physical - this.modOffense.amount) /
-          (1 + this.modOffense.percent)
+        (1 + this.modOffense.percent)
       ),
       special: round2Decimals(
         (this.offense.special - this.modOffense.amount) /
-          (1 + this.modOffense.percent)
+        (1 + this.modOffense.percent)
       ),
     };
   }

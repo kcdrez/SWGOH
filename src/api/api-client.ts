@@ -8,6 +8,7 @@ import { OwnedRelicConfig } from "../types/relic";
 import { ITeam, Match, Team } from "../types/teams";
 import {
   GuildPayload,
+  IGuildUnitMap,
   TerritoryBattleEvent,
   TerritoryWarEvent,
 } from "../types/guild";
@@ -213,7 +214,81 @@ class ApiClient {
   }
   async fetchGuildUnitData(guildId: string, unitId: string) {
     const response = await axios.get(`${this.baseUrl}/guild/${guildId}/${unitId}`);
-    return response.data
+    const guildData = response.data;
+
+    const unitMapping: IGuildUnitMap = {
+      zetas: {
+      },
+      gearLevels: {
+      },
+      relicLevels: {
+      },
+      owned: [],
+      unowned: []
+    }
+
+    guildData.players.forEach((player: any) => {
+      const unitMatch = player.units.find((unitEl: any) => {
+        return unitEl.data.base_id === unitId
+      })
+      if (unitMatch) {
+        const unit = new Unit(unitMatch.data)
+        // const equipped = unitMatch.data.gear.filter(x => x.is_obtained).length;
+        // const gearLevel = unitMatch.data.gear_level + (equipped / 10);
+        // const relicLevel = unitMatch.data.relic_tier - 2;
+
+        if (unit.gearLevel >= 12) {
+
+          if (unitMapping.gearLevels[unit.gearLevel]) {
+            unitMapping.gearLevels[unit.gearLevel]++
+          } else {
+            unitMapping.gearLevels[unit.gearLevel] = 1
+          }
+        }
+
+        if (unit.relicLevel >= 0) {
+          if (unitMapping.relicLevels[unit.relicLevel]) {
+            unitMapping.relicLevels[unit.relicLevel]++
+          } else {
+            unitMapping.relicLevels[unit.relicLevel] = 1
+          }
+        }
+
+        unitMapping.owned.push({
+          allyCode: player.data.ally_code,
+          name: player.data.name,
+          gearLevel: unit.gearLevel,
+          relicLevel: unit.relicLevel,
+          zetas: unit.zetas.length,
+          omicrons: unit.omicrons.length,
+          speed: unit.speed,
+          offense: unit.offense,
+          protection: unit.protection,
+          health: unit.health,
+          tenacity: unit.tenacity,
+          potency: unit.potency,
+          critChance: unit.critChance,
+          critDamage: unit.critDamage,
+          armor: unit.armor,
+          ultimate: unit.hasUlt,
+        })
+      } else {
+        unitMapping.unowned.push({
+          allyCode: player.data.ally_code,
+          name: player.data.name,
+        })
+      }
+    })
+
+    const speedArr = unitMapping.owned.map(u => u.speed)
+
+    unitMapping.speed = {
+      min: Math.min(...speedArr),
+      max: Math.max(...speedArr),
+      average: speedArr.reduce((total, x) => total + x) / speedArr.length
+    }
+
+    return unitMapping
   }
 }
 

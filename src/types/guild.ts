@@ -20,16 +20,66 @@ export interface TerritoryBattleEvent {
   date: string;
   type: "Dark" | "Light";
   name:
-    | "Separatist Might"
-    | "Republic Offensive"
-    | "Rebel Assault"
-    | "Imperial Retaliation";
+  | "Separatist Might"
+  | "Republic Offensive"
+  | "Rebel Assault"
+  | "Imperial Retaliation";
   get1: number;
   get2: number;
   stars: number;
   gear: any[];
   crystals: number;
   characterShards: { id: string; count: number };
+}
+
+type unitMappingData = {
+  [key: number]: number;
+}
+
+interface IUnitOwned {
+  allyCode: number,
+  name: string,
+  gearLevel: number,
+  relicLevel: number,
+  zetas: number,
+  omicrons: number,
+  speed: number,
+  offense: {
+    physical: number,
+    special: number
+  },
+  protection: number,
+  health: number,
+  tenacity: number,
+  potency: number,
+  critChance: {
+    physical: number,
+    special: number
+  },
+  critDamage: number,
+  armor: {
+    physical: number,
+    special: number
+  },
+  ultimate: boolean,
+}
+
+interface IUnitUnowned {
+  allyCode: number,
+  name: string
+}
+
+export interface IGuildUnitMap {
+  zetas: unitMappingData,
+  speed?: {
+    min: number,
+    max: number,
+    average: number
+  },
+  gearLevels: unitMappingData,
+  relicLevels: unitMappingData,
+  owned: IUnitOwned[],
+  unowned: IUnitUnowned[]
 }
 
 export function estimatedTime(unit: Unit): number {
