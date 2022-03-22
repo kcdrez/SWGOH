@@ -153,19 +153,22 @@ import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 import _ from "lodash";
 
-import RelicLevelIcon from "../../units/relicLevelIcon.vue";
-import UnitIcon from "../../units/unitIcon.vue";
-import GearText from "../../gear/gearText.vue";
-import RequirementIcon from "./legendary/requirementIcon.vue";
+import RelicLevelIcon from "../../../units/relicLevelIcon.vue";
+import UnitIcon from "../../../units/unitIcon.vue";
+import GearText from "../../../gear/gearText.vue";
+import RequirementIcon from "./requirementIcon.vue";
 import {
   Unit,
   getPercent,
   getUnitsByTag,
   getUnit,
   totalProgress,
-} from "../../../types/unit";
-import { displayValue, FarmingNode } from "../../../types/shards";
-import { isGearRequirement, isRelicRequirement } from "../../../types/shards";
+} from "../../../../types/unit";
+import { displayValue, FarmingNode } from "../../../../types/shards";
+import {
+  isGearRequirement,
+  isRelicRequirement,
+} from "../../../../types/shards";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",

@@ -63,7 +63,7 @@ export class Unit {
     this._gear_level = payload.gear_level || 0;
     this._current_level_gear = payload?.gear || [];
     this._ability_data = payload?.ability_data || [];
-    this._relic_tier = payload?.relic_tier || 0;
+    this._relic_tier = (payload?.relic_tier ?? 0) - 2;
     this._mods = payload?.mods || [];
     this._stars = payload?.stars || 0;
     this._categories = payload.categories;
@@ -96,7 +96,7 @@ export class Unit {
     return this._ability_data;
   }
   public get hasUlt() {
-    return this._has_ultimate ?? false
+    return this._has_ultimate ?? false;
   }
   public get relicLevel() {
     if (!this._relic_tier) {
@@ -165,7 +165,6 @@ export class Unit {
     return list;
   }
 
-
   public get protection() {
     return this._stats["28"];
   }
@@ -181,7 +180,7 @@ export class Unit {
   public get armor() {
     return {
       physical: round2Decimals(this._stats["8"] * 100),
-      special: round2Decimals(this._stats["9"] * 100)
+      special: round2Decimals(this._stats["9"] * 100),
     };
   }
   public get speed() {
@@ -225,11 +224,11 @@ export class Unit {
     return {
       physical: round2Decimals(
         (this.offense.physical - this.modOffense.amount) /
-        (1 + this.modOffense.percent)
+          (1 + this.modOffense.percent)
       ),
       special: round2Decimals(
         (this.offense.special - this.modOffense.amount) /
-        (1 + this.modOffense.percent)
+          (1 + this.modOffense.percent)
       ),
     };
   }

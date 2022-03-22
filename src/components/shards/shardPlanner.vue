@@ -129,7 +129,7 @@ import { mapState, mapGetters } from "vuex";
 import ShardTable from "./tables/shardTable.vue";
 import StoreTable from "./tables/storeTable.vue";
 import TerritoryBattleShardTable from "./tables/territoryBattleShardTable.vue";
-import LegendaryRequirementsTable from "./tables/legendaryRequirementsTable.vue";
+import LegendaryRequirementsTable from "./tables/legendary/legendaryRequirementsTable.vue";
 import EnergySpent from "../energySpent.vue";
 import { loadingState } from "../../types/loading";
 import { setupEvents } from "../../utils";

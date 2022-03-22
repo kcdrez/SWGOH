@@ -33,8 +33,8 @@ import GalacticWarTable from "./tables/galacticWarTable.vue";
 import FleetArenaTable from "./tables/fleetArenaTable.vue";
 import GuildEventsTable from "./tables/guildEventsTable.vue";
 import ShardStoreTable from "./tables/shardStoreTable.vue";
-import LegendaryTable from "./tables/legendaryTable.vue";
-import GLTable from "./tables/glTable.vue";
+import LegendaryTable from "./tables/legendary/legendaryTable.vue";
+import GLTable from "./tables/legendary/glTable.vue";
 
 export default defineComponent({
   name: "ShardTableContainer",

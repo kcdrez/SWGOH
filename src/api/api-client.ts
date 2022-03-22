@@ -15,10 +15,10 @@ import {
 import { IDailyCurrency, IWallet } from "../types/currency";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3000/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3000/dev";
 
-  constructor() { }
+  constructor() {}
 
   async fetchPlayer(allyCode: string): Promise<PlayerResponse> {
     const response = await axios.get(`${this.baseUrl}/player/${allyCode}`);
@@ -213,44 +213,42 @@ class ApiClient {
     }
   }
   async fetchGuildUnitData(guildId: string, unitId: string) {
-    const response = await axios.get(`${this.baseUrl}/guild/${guildId}/${unitId}`);
+    const response = await axios.get(
+      `${this.baseUrl}/guild/${guildId}/${unitId}`
+    );
     const guildData = response.data;
 
     const unitMapping: IGuildUnitMap = {
-      zetas: {
-      },
-      gearLevels: {
-      },
-      relicLevels: {
-      },
+      zetas: {},
+      gearLevels: {},
+      relicLevels: {},
       owned: [],
-      unowned: []
-    }
+      unowned: [],
+    };
 
     guildData.players.forEach((player: any) => {
       const unitMatch = player.units.find((unitEl: any) => {
-        return unitEl.data.base_id === unitId
-      })
+        return unitEl.data.base_id === unitId;
+      });
       if (unitMatch) {
-        const unit = new Unit(unitMatch.data)
+        const unit = new Unit(unitMatch.data);
         // const equipped = unitMatch.data.gear.filter(x => x.is_obtained).length;
         // const gearLevel = unitMatch.data.gear_level + (equipped / 10);
         // const relicLevel = unitMatch.data.relic_tier - 2;
 
         if (unit.gearLevel >= 12) {
-
           if (unitMapping.gearLevels[unit.gearLevel]) {
-            unitMapping.gearLevels[unit.gearLevel]++
+            unitMapping.gearLevels[unit.gearLevel]++;
           } else {
-            unitMapping.gearLevels[unit.gearLevel] = 1
+            unitMapping.gearLevels[unit.gearLevel] = 1;
           }
         }
 
         if (unit.relicLevel >= 0) {
           if (unitMapping.relicLevels[unit.relicLevel]) {
-            unitMapping.relicLevels[unit.relicLevel]++
+            unitMapping.relicLevels[unit.relicLevel]++;
           } else {
-            unitMapping.relicLevels[unit.relicLevel] = 1
+            unitMapping.relicLevels[unit.relicLevel] = 1;
           }
         }
 
@@ -262,33 +260,36 @@ class ApiClient {
           zetas: unit.zetas.length,
           omicrons: unit.omicrons.length,
           speed: unit.speed,
-          offense: unit.offense,
+          offensePhysical: unit.offense.physical,
+          offenseSpecial: unit.offense.special,
           protection: unit.protection,
           health: unit.health,
           tenacity: unit.tenacity,
           potency: unit.potency,
-          critChance: unit.critChance,
+          critChancePhysical: unit.critChance.physical,
+          critChanceSpecial: unit.critChance.special,
           critDamage: unit.critDamage,
-          armor: unit.armor,
+          armor: unit.armor.physical,
+          resistance: unit.armor.special,
           ultimate: unit.hasUlt,
-        })
+        });
       } else {
         unitMapping.unowned.push({
           allyCode: player.data.ally_code,
           name: player.data.name,
-        })
+        });
       }
-    })
+    });
 
-    const speedArr = unitMapping.owned.map(u => u.speed)
+    const speedArr = unitMapping.owned.map((u) => u.speed);
 
     unitMapping.speed = {
       min: Math.min(...speedArr),
       max: Math.max(...speedArr),
-      average: speedArr.reduce((total, x) => total + x) / speedArr.length
-    }
+      average: speedArr.reduce((total, x) => total + x) / speedArr.length,
+    };
 
-    return unitMapping
+    return unitMapping;
   }
 }
 
