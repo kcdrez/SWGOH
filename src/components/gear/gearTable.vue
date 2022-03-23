@@ -291,6 +291,9 @@ export default defineComponent({
           return name.includes(compare);
         })
         .sort((a: Gear, b: Gear) => {
+          //owned
+          //needed
+          //required
           if (this.sortMethod === "name") {
             const compareA = a.name.toLowerCase();
             const compareB = b.name.toLowerCase();
