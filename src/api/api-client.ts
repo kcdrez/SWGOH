@@ -227,15 +227,8 @@ class ApiClient {
     };
 
     guildData.players.forEach((player: any) => {
-      const unitMatch = player.units.find((unitEl: any) => {
-        return unitEl.data.base_id === unitId;
-      });
-      if (unitMatch) {
-        const unit = new Unit(unitMatch.data);
-        // const equipped = unitMatch.data.gear.filter(x => x.is_obtained).length;
-        // const gearLevel = unitMatch.data.gear_level + (equipped / 10);
-        // const relicLevel = unitMatch.data.relic_tier - 2;
-
+      if (player.unit) {
+        const unit = new Unit(player.unit);
         if (unit.gearLevel >= 12) {
           if (unitMapping.gearLevels[unit.gearLevel]) {
             unitMapping.gearLevels[unit.gearLevel]++;
