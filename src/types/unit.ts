@@ -186,6 +186,32 @@ export class Unit {
   public get speed() {
     return this._stats["5"];
   }
+  public get baseSpeed() {
+    let amount = 0;
+    let percent = 0;
+    if (this.hasSpeedSet) {
+      const modSet = this._mods.filter((mod) => mod.set === 4);
+      percent += modSet.every((mod) => mod.level === 15) ? 10 : 5;
+    }
+    this._mods.forEach((mod) => {
+      if (mod.primaryStat.unitStat === 5) {
+        amount += mod.primaryStat.value;
+      }
+
+      mod.secondaryStat.forEach((stat) => {
+        if (stat.unitStat === 5) {
+          amount += stat.value;
+        }
+      });
+    });
+
+    percent = percent / 100;
+
+    return Math.ceil((this.speed - amount) / (1 + percent));
+  }
+  public get modSpeed() {
+    return this.speed - this.baseSpeed;
+  }
 
   public get offense() {
     return {
@@ -571,7 +597,7 @@ export interface UnitGear {
   slot: number;
 }
 
-interface Ability {
+export interface Ability {
   id: string;
   ability_tier: number;
   tier_max: number;

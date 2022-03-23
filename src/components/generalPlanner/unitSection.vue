@@ -113,12 +113,15 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="unit in fullUnitList" :key="unit.id">
+          <tr v-for="unit in unitList" :key="unit.id">
             <td class="align-middle text-center" v-if="showCol('name')">
               <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
             </td>
             <td class="align-middle text-center" v-if="showCol('curLevel')">
-              <GearText :level="unit.gearLevel" v-if="unit.relicLevel <= 0" />
+              <GearText
+                :level="unit.gearLevel"
+                v-if="unit.gearLevel < maxGearLevel"
+              />
               <RelicLevelIcon
                 class="d-inline-block"
                 :relicLevel="unit.relicLevel"
@@ -167,8 +170,6 @@
               <span class="row-label">Est. Gear Level:</span>
               <Timestamp
                 :timeLength="unit.gearTotalDays"
-                :displayText="$filters.pluralText(unit.gearTotalDays, 'day')"
-                :title="$filters.daysFromNow(unit.gearTotalDays)"
                 displayClasses="d-inline"
               />
             </td>
@@ -182,8 +183,6 @@
               <span class="row-label">Est. Relic Level:</span>
               <Timestamp
                 :timeLength="unit.relicTotalDays"
-                :displayText="$filters.pluralText(unit.relicTotalDays, 'day')"
-                :title="$filters.daysFromNow(unit.relicTotalDays)"
                 displayClasses="d-inline"
               />
             </td>
@@ -191,15 +190,6 @@
               <span class="row-label">Est. Total Level:</span>
               <Timestamp
                 :timeLength="unit.relicTotalDays + unit.gearTotalDays"
-                :displayText="
-                  $filters.pluralText(
-                    unit.relicTotalDays + unit.gearTotalDays,
-                    'day'
-                  )
-                "
-                :title="
-                  $filters.daysFromNow(unit.relicTotalDays + unit.gearTotalDays)
-                "
                 displayClasses="d-inline"
               />
             </td>
@@ -255,6 +245,76 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters("planner", ["fullUnitList"]),
+    unitList(): Unit[] {
+      return this.fullUnitList.sort((a: Unit, b: Unit) => {
+        if (this.sortMethod === "name") {
+          const compareA = a.name.toLowerCase();
+          const compareB = b.name.toLowerCase();
+          if (this.sortDir === "asc") {
+            return compareA > compareB ? 1 : -1;
+          } else {
+            return compareA > compareB ? -1 : 1;
+          }
+        } else if (this.sortMethod === "curLevel") {
+          const compareA =
+            a.gearLevel === maxGearLevel
+              ? a.relicLevel + maxGearLevel
+              : a.gearLevel;
+          const compareB =
+            b.gearLevel === maxGearLevel
+              ? b.relicLevel + maxGearLevel
+              : b.gearLevel;
+          if (this.sortDir === "asc") {
+            return compareA > compareB ? 1 : -1;
+          } else {
+            return compareA > compareB ? -1 : 1;
+          }
+        } else if (this.sortMethod === "targetLevel") {
+          const compareA =
+            a.gearTarget === maxGearLevel
+              ? a.relicTarget + maxGearLevel
+              : a.gearTarget;
+          const compareB =
+            b.gearTarget === maxGearLevel
+              ? b.relicTarget + maxGearLevel
+              : b.gearTarget;
+          if (this.sortDir === "asc") {
+            return compareA > compareB ? 1 : -1;
+          } else {
+            return compareA > compareB ? -1 : 1;
+          }
+        } else if (this.sortMethod === "estGear") {
+          const compareA = a.gearTotalDays === 0 ? Infinity : a.gearTotalDays;
+          const compareB = b.gearTotalDays === 0 ? Infinity : b.gearTotalDays;
+          if (this.sortDir === "asc") {
+            return compareA > compareB ? 1 : -1;
+          } else {
+            return compareA > compareB ? -1 : 1;
+          }
+        } else if (this.sortMethod === "estRelic") {
+          const compareA = a.relicTotalDays === 0 ? Infinity : a.relicTotalDays;
+          const compareB = b.relicTotalDays === 0 ? Infinity : b.relicTotalDays;
+          if (this.sortDir === "asc") {
+            return compareA > compareB ? 1 : -1;
+          } else {
+            return compareA > compareB ? -1 : 1;
+          }
+        } else if (this.sortMethod === "completed") {
+          let compareA = a.gearTotalDays + a.relicTotalDays;
+          compareA = compareA === 0 ? Infinity : compareA;
+
+          let compareB = b.gearTotalDays + b.relicTotalDays;
+          compareB = compareB === 0 ? Infinity : compareB;
+
+          if (this.sortDir === "asc") {
+            return compareA > compareB ? 1 : -1;
+          } else {
+            return compareA > compareB ? -1 : 1;
+          }
+        }
+        return 0;
+      });
+    },
     cols(): { text: string; value: any }[] {
       const list = [
         {

@@ -2,6 +2,7 @@
   <div>
     <div class="text-center my-2" v-if="state === 'LOADING'">
       <i class="fas fa-spinner fa-spin" :class="sizeClass" :title="message" />
+      <div v-if="displayText">{{ displayText }}</div>
     </div>
     <slot v-else />
   </div>
@@ -25,6 +26,10 @@ export default defineComponent({
     },
     size: {
       type: String as PropType<loadingSize>,
+      default: "",
+    },
+    displayText: {
+      type: String,
       default: "",
     },
   },

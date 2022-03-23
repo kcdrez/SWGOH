@@ -2,7 +2,12 @@
   <div class="container swgoh-page mb-3">
     <Loading :state="requestState" message="Loading Guild Data" size="lg">
       <SearchInput :list="unitList" @select="selectUnit($event)" />
-      <Loading :state="loading" message="Loading Guild's Unit Data" size="lg">
+      <Loading
+        :state="loading"
+        message="Loading Guild's Unit Data"
+        size="lg"
+        displayText="Please wait...This may take a few minutes."
+      >
         <template v-if="data">
           <button class="btn btn-sm btn-primary my-3" @click="downloadXlsx()">
             Download as XLSX
@@ -26,31 +31,175 @@
             >
               <thead class="sticky-header show-on-mobile">
                 <tr class="text-center align-middle">
-                  <th v-if="showCol('allyCode')">Ally Code</th>
-                  <th v-if="showCol('name')">Player Name</th>
-                  <th v-if="showCol('gearLevel')">Gear Level</th>
-                  <th v-if="showCol('relicLevel')">Relic Level</th>
-                  <th v-if="showCol('zetas')">Zetas</th>
-                  <th v-if="showCol('omicrons')">Omicrons</th>
-                  <th v-if="showCol('speed')">Speed</th>
-                  <th v-if="showCol('physicalOffense')">Physical Offense</th>
-                  <th v-if="showCol('specialOffense')">Special Offense</th>
-                  <th v-if="showCol('protection')">Protection</th>
-                  <th v-if="showCol('health')">Health</th>
-                  <th v-if="showCol('tenacity')">Tenacity</th>
-                  <th v-if="showCol('potency')">Potency</th>
-                  <th v-if="showCol('physicalCrit')">Physical Crit Chance</th>
-                  <th v-if="showCol('specialCrit')">Special Crit Chance</th>
-                  <th v-if="showCol('critDamage')">Crit Damage</th>
-                  <th v-if="showCol('armor')">Armor</th>
-                  <th v-if="showCol('resistance')">Resistance</th>
-                  <th v-if="showCol('ult')">Has Ult?</th>
+                  <th
+                    v-if="showCol('allyCode')"
+                    @click="sortBy('allyCode')"
+                    class="c-pointer"
+                  >
+                    <span>Ally Code</span>
+                    <i class="fas mx-2" :class="sortIcon('allyCode')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('name')"
+                    @click="sortBy('name')"
+                    class="c-pointer"
+                  >
+                    <span>Player Name</span>
+                    <i class="fas mx-2" :class="sortIcon('name')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('gearLevel')"
+                    @click="sortBy('gearLevel')"
+                    class="c-pointer"
+                  >
+                    <span>Gear Level</span>
+                    <i class="fas mx-2" :class="sortIcon('gearLevel')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('relicLevel')"
+                    @click="sortBy('relicLevel')"
+                    class="c-pointer"
+                  >
+                    <span>Relic Level</span>
+                    <i class="fas mx-2" :class="sortIcon('relicLevel')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('zetas')"
+                    @click="sortBy('zetas')"
+                    class="c-pointer"
+                  >
+                    <span>Zetas</span>
+                    <i class="fas mx-2" :class="sortIcon('allyCode')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('omicrons')"
+                    @click="sortBy('omicrons')"
+                    class="c-pointer"
+                  >
+                    <span>Omicrons</span>
+                    <i class="fas mx-2" :class="sortIcon('omicrons')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('speed')"
+                    @click="sortBy('speed')"
+                    class="c-pointer"
+                  >
+                    <span>Speed</span>
+                    <i class="fas mx-2" :class="sortIcon('speed')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('speed')"
+                    @click="sortBy('speedMod')"
+                    class="c-pointer"
+                  >
+                    <span>Speed (Mods)</span>
+                    <i class="fas mx-2" :class="sortIcon('speedMod')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('physicalOffense')"
+                    @click="sortBy('physicalOffense')"
+                    class="c-pointer"
+                  >
+                    <span>Physical Offense</span>
+                    <i
+                      class="fas mx-2"
+                      :class="sortIcon('physicalOffense')"
+                    ></i>
+                  </th>
+                  <th
+                    v-if="showCol('specialOffense')"
+                    @click="sortBy('specialOffense')"
+                    class="c-pointer"
+                  >
+                    <span>Special Offense</span>
+                    <i class="fas mx-2" :class="sortIcon('specialOffense')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('protection')"
+                    @click="sortBy('protection')"
+                    class="c-pointer"
+                  >
+                    <span>Protection</span>
+                    <i class="fas mx-2" :class="sortIcon('protection')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('health')"
+                    @click="sortBy('health')"
+                    class="c-pointer"
+                  >
+                    <span>Health</span>
+                    <i class="fas mx-2" :class="sortIcon('health')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('tenacity')"
+                    @click="sortBy('tenacity')"
+                    class="c-pointer"
+                  >
+                    <span>Tenacity</span>
+                    <i class="fas mx-2" :class="sortIcon('tenacity')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('potency')"
+                    @click="sortBy('potency')"
+                    class="c-pointer"
+                  >
+                    <span>Potency</span>
+                    <i class="fas mx-2" :class="sortIcon('potency')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('physicalCrit')"
+                    @click="sortBy('physicalCrit')"
+                    class="c-pointer"
+                  >
+                    <span>Physical Crit Chance</span>
+                    <i class="fas mx-2" :class="sortIcon('physicalCrit')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('specialCrit')"
+                    @click="sortBy('specialCrit')"
+                    class="c-pointer"
+                  >
+                    <span>Special Crit Chance</span>
+                    <i class="fas mx-2" :class="sortIcon('specialCrit')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('critDamage')"
+                    @click="sortBy('critDamage')"
+                    class="c-pointer"
+                  >
+                    <span>Crit Damage</span>
+                    <i class="fas mx-2" :class="sortIcon('critDamage')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('armor')"
+                    @click="sortBy('armor')"
+                    class="c-pointer"
+                  >
+                    <span>Armor</span>
+                    <i class="fas mx-2" :class="sortIcon('armor')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('resistance')"
+                    @click="sortBy('resistance')"
+                    class="c-pointer"
+                  >
+                    <span>Resistance</span>
+                    <i class="fas mx-2" :class="sortIcon('resistance')"></i>
+                  </th>
+                  <th
+                    v-if="showCol('ultimate')"
+                    @click="sortBy('ultimate')"
+                    class="c-pointer"
+                  >
+                    <span>Has Ult?</span>
+                    <i class="fas mx-2" :class="sortIcon('ultimate')"></i>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr
                   class="text-center align-middle"
-                  v-for="player in data.owned"
+                  v-for="player in players"
                   :key="player.allyCode"
                 >
                   <td v-if="showCol('allyCode')">{{ player.allyCode }}</td>
@@ -60,61 +209,33 @@
                   <td v-if="showCol('zetas')">{{ player.zetas }}</td>
                   <td v-if="showCol('omicrons')">{{ player.omicrons }}</td>
                   <td v-if="showCol('speed')">{{ player.speed }}</td>
+                  <td v-if="showCol('speed')">{{ player.speedMod }}</td>
                   <td v-if="showCol('physicalOffense')">
-                    {{ player.offensePhysical }}
+                    {{ player.physicalOffense }}
                   </td>
                   <td v-if="showCol('specialOffense')">
-                    {{ player.offenseSpecial }}
+                    {{ player.specialOffense }}
                   </td>
                   <td v-if="showCol('protection')">{{ player.protection }}</td>
                   <td v-if="showCol('health')">{{ player.health }}</td>
                   <td v-if="showCol('tenacity')">{{ player.tenacity }}%</td>
                   <td v-if="showCol('potency')">{{ player.potency }}%</td>
                   <td v-if="showCol('physicalCrit')">
-                    {{ player.critChancePhysical }}%
+                    {{ player.physicalCrit }}%
                   </td>
                   <td v-if="showCol('specialCrit')">
-                    {{ player.critChanceSpecial }}%
+                    {{ player.specialCrit }}%
                   </td>
                   <td v-if="showCol('critDamage')">{{ player.critDamage }}</td>
                   <td v-if="showCol('armor')">{{ player.armor }}</td>
                   <td v-if="showCol('resistance')">{{ player.resistance }}</td>
-                  <td v-if="showCol('ult')">
+                  <td v-if="showCol('ultimate')">
                     {{ player.ultimate ? "Yes" : "No" }}
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <!-- <div class="collapse-header section-header mt-3">
-          <h3>
-            <div data-bs-toggle="collapse" href="#guild-data">Guild Data</div>
-          </h3>
-          <MultiSelect
-            class="select-columns"
-            :options="guildCols"
-            :storageKey="storageKey + 'GuildColumns'"
-            @checked="selectedColumns = $event"
-          />
-        </div>
-        <div id="guild-data" class="collapse" ref="playerData">
-          <table
-            class="table table-bordered table-dark table-sm table-striped swgoh-table"
-          >
-            <thead class="sticky-header show-on-mobile">
-              <tr class="text-center align-middle">
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                class="text-center align-middle"
-                v-for="player in data.owned"
-                :key="player.allyCode"
-              >
-              </tr>
-            </tbody>
-          </table>
-        </div> -->
         </template>
       </Loading>
     </Loading>
@@ -130,15 +251,16 @@ import _ from "lodash";
 import { loadingState } from "../types/loading";
 import { initializeModules, setupEvents, unvue } from "../utils";
 import { Unit } from "../types/unit";
+import { IGuildUnitMap, tUnitOwnedKeys } from "../types/guild";
 
 const dependencyModules = ["player", "guild"];
 const storageKey = "guildUnits";
 
 interface dataModel {
   sortDir: "asc" | "desc";
-  sortMethod: string;
+  sortMethod: tUnitOwnedKeys;
   selected: null | Unit;
-  data: any;
+  data: IGuildUnitMap | null;
   loading: loadingState;
   selectedColumns: string[];
   storageKey: string;
@@ -163,6 +285,27 @@ export default defineComponent({
   computed: {
     ...mapGetters(["someLoading"]),
     ...mapState("unit", ["unitList"]),
+    players(): any[] {
+      return (this.data?.owned ?? []).sort((a, b) => {
+        if (this.sortMethod === "name") {
+          const compareA = a.name.toLowerCase();
+          const compareB = b.name.toLowerCase();
+          if (this.sortDir === "asc") {
+            return compareA > compareB ? 1 : -1;
+          } else {
+            return compareA > compareB ? -1 : 1;
+          }
+        } else {
+          const compareA = a[this.sortMethod];
+          const compareB = b[this.sortMethod];
+          if (this.sortDir === "asc") {
+            return compareA > compareB ? 1 : -1;
+          } else {
+            return compareA > compareB ? -1 : 1;
+          }
+        }
+      });
+    },
     requestState(): loadingState {
       return this.someLoading(dependencyModules);
     },
@@ -245,88 +388,7 @@ export default defineComponent({
         },
         {
           text: "Has Ult?",
-          value: "ult",
-        },
-      ];
-      return list;
-    },
-    guildCols(): { text: string; value: any }[] {
-      const list = [
-        {
-          text: "Ally Code",
-          value: "allyCode",
-        },
-        {
-          text: "Player Name",
-          value: "name",
-        },
-        {
-          text: "Gear Level",
-          value: "gearLevel",
-        },
-        {
-          text: "Relic Level",
-          value: "relicLevel",
-        },
-        {
-          text: "Zetas",
-          value: "zetas",
-        },
-        {
-          text: "Omicrons",
-          value: "omicrons",
-        },
-        {
-          text: "Speed",
-          value: "speed",
-        },
-        {
-          text: "Physical Offense",
-          value: "physicalOffense",
-        },
-        {
-          text: "Special Offense",
-          value: "specialOffense",
-        },
-        {
-          text: "Protection",
-          value: "protection",
-        },
-        {
-          text: "Health",
-          value: "health",
-        },
-        {
-          text: "Tenacity",
-          value: "tenacity",
-        },
-        {
-          text: "potency",
-          value: "potency",
-        },
-        {
-          text: "Physical Crit Chance",
-          value: "physicalCrit",
-        },
-        {
-          text: "Special Crit Chance",
-          value: "specialCrit",
-        },
-        {
-          text: "Crit Damage",
-          value: "critDamage",
-        },
-        {
-          text: "Armor",
-          value: "armor",
-        },
-        {
-          text: "Resistance",
-          value: "resistance",
-        },
-        {
-          text: "Has Ult?",
-          value: "ult",
+          value: "ultimate",
         },
       ];
       return list;
@@ -339,6 +401,17 @@ export default defineComponent({
     sortMethod() {
       this.saveSortData();
     },
+    initialize(newVal, oldVal) {
+      if (newVal && !oldVal) {
+        this.$nextTick(() => {
+          setupEvents(
+            this.$refs.playerData as HTMLElement,
+            storageKey + "Collapse",
+            true
+          );
+        });
+      }
+    },
   },
   methods: {
     ...mapActions("guild", ["fetchGuildUnitData"]),
@@ -347,17 +420,7 @@ export default defineComponent({
         this.loading = loadingState.loading;
         this.data = await this.fetchGuildUnitData(unit.id);
         this.loading = loadingState.ready;
-      }
-
-      if (!this.initialize) {
         this.initialize = true;
-
-        this.$nextTick(() => {
-          setupEvents(
-            this.$refs.playerData as HTMLElement,
-            storageKey + "Collapse"
-          );
-        });
       }
     }, 500),
     downloadXlsx(): void {
@@ -379,7 +442,7 @@ export default defineComponent({
       const fileName = this.selected?.id;
       writeFile(wb, fileName + ".xlsx");
     },
-    sortBy(type: string): void {
+    sortBy(type: tUnitOwnedKeys): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
       } else {
@@ -415,7 +478,6 @@ export default defineComponent({
     this.sortDir = storageData.sortDir ?? "asc";
     this.sortMethod = storageData.sortMethod ?? "name";
   },
-  mounted() {},
 });
 </script>
 
