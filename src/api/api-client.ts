@@ -8,6 +8,7 @@ import { OwnedRelicConfig } from "../types/relic";
 import { ITeam, Match, Team } from "../types/teams";
 import {
   GuildPayload,
+  GuildUnit,
   IGuildUnitMap,
   TerritoryBattleEvent,
   TerritoryWarEvent,
@@ -15,8 +16,8 @@ import {
 import { IDailyCurrency, IWallet } from "../types/currency";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3000/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3000/dev";
 
   constructor() {}
 
@@ -216,8 +217,6 @@ class ApiClient {
     const response = await axios.get(
       `${this.baseUrl}/guild/${guildId}/${unitId}`
     );
-    const guildData = response.data;
-
     const unitMapping: IGuildUnitMap = {
       zetas: {},
       gearLevels: {},
@@ -226,7 +225,7 @@ class ApiClient {
       unowned: [],
     };
 
-    guildData.players.forEach((player: any) => {
+    response.data.forEach((player: any) => {
       if (player.unit) {
         const unit = new Unit(player.unit);
         if (unit.gearLevel >= 12) {
@@ -246,21 +245,22 @@ class ApiClient {
         }
 
         unitMapping.owned.push({
-          allyCode: player.data.ally_code,
-          name: player.data.name,
+          allyCode: player.allyCode,
+          name: player.name,
           gearLevel: unit.gearLevel,
           relicLevel: unit.relicLevel,
           zetas: unit.zetas.length,
           omicrons: unit.omicrons.length,
           speed: unit.speed,
-          offensePhysical: unit.offense.physical,
-          offenseSpecial: unit.offense.special,
+          speedMod: unit.modSpeed,
+          physicalOffense: unit.offense.physical,
+          specialOffense: unit.offense.special,
           protection: unit.protection,
           health: unit.health,
           tenacity: unit.tenacity,
           potency: unit.potency,
-          critChancePhysical: unit.critChance.physical,
-          critChanceSpecial: unit.critChance.special,
+          physicalCrit: unit.critChance.physical,
+          specialCrit: unit.critChance.special,
           critDamage: unit.critDamage,
           armor: unit.armor.physical,
           resistance: unit.armor.special,
@@ -268,8 +268,8 @@ class ApiClient {
         });
       } else {
         unitMapping.unowned.push({
-          allyCode: player.data.ally_code,
-          name: player.data.name,
+          allyCode: player.allyCode,
+          name: player.name,
         });
       }
     });

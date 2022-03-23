@@ -5,11 +5,16 @@ export function unvue(data: any) {
   return JSON.parse(JSON.stringify(data));
 }
 
-export function setupEvents(el: HTMLElement, name: string) {
+export function setupEvents(
+  el: HTMLElement,
+  name: string,
+  defaultExpand = false
+) {
   if (el) {
     if (
-      name in store.state.collapseSections &&
-      !store.state.collapseSections[name]
+      (name in store.state.collapseSections &&
+        !store.state.collapseSections[name]) ||
+      defaultExpand
     ) {
       el.classList.value += " show";
     }
