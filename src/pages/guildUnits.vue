@@ -125,6 +125,7 @@
 import { defineComponent } from "vue";
 import { mapActions, mapGetters, mapState } from "vuex";
 import { writeFile, utils } from "xlsx";
+import _ from "lodash";
 
 import { loadingState } from "../types/loading";
 import { initializeModules, setupEvents, unvue } from "../utils";
@@ -341,7 +342,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("guild", ["fetchGuildUnitData"]),
-    async selectUnit(unit: null | Unit) {
+    selectUnit: _.debounce(async function (this: any, unit: null | Unit) {
       if (unit && unit.id) {
         this.loading = loadingState.loading;
         this.data = await this.fetchGuildUnitData(unit.id);
@@ -358,7 +359,7 @@ export default defineComponent({
           );
         });
       }
-    },
+    }, 500),
     downloadXlsx(): void {
       const rows = unvue(this.data?.owned ?? []);
       const wb = utils.book_new();
