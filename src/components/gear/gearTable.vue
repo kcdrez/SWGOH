@@ -291,9 +291,6 @@ export default defineComponent({
           return name.includes(compare);
         })
         .sort((a: Gear, b: Gear) => {
-          //owned
-          //needed
-          //required
           if (this.sortMethod === "name") {
             const compareA = a.name.toLowerCase();
             const compareB = b.name.toLowerCase();
@@ -315,10 +312,33 @@ export default defineComponent({
               return b.progress - a.progress;
             }
           } else if (this.sortMethod === "time") {
+            const compareA =
+              a.timeEstimation === 0 ? Infinity : a.timeEstimation;
+            const compareB =
+              b.timeEstimation === 0 ? Infinity : b.timeEstimation;
+
             if (this.sortDir === "asc") {
-              return a.timeEstimation - b.timeEstimation;
+              return compareA > compareB ? 1 : -1;
             } else {
-              return b.timeEstimation - a.timeEstimation;
+              return compareA > compareB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.owned - b.owned;
+            } else {
+              return b.owned - a.owned;
+            }
+          } else if (this.sortMethod === "required") {
+            if (this.sortDir === "asc") {
+              return a.totalAmount - b.totalAmount;
+            } else {
+              return b.totalAmount - a.totalAmount;
+            }
+          } else if (this.sortMethod === "needed") {
+            if (this.sortDir === "asc") {
+              return a.neededBy[0] > b.neededBy[0] ? 1 : -1;
+            } else {
+              return a.neededBy[0] < b.neededBy[0] ? -1 : 1;
             }
           }
           return 0;
