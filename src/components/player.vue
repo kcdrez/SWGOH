@@ -1,6 +1,6 @@
 <template>
   <div>
-    <SearchInput :list="unitList" @select="selectUnit($event)" />
+    <UnitSearch @select="selectUnit($event)" />
     <div v-if="selected" class="text-center my-3">
       <UnitIcon :unit="selected" size="lg" isLink />
       <div class="btn-group btn-group-sm text-center mt-1" role="group">
@@ -21,6 +21,7 @@ import { mapActions, mapGetters, mapState } from "vuex";
 
 import { Unit } from "../types/unit";
 import UnitIcon from "./units/unitIcon.vue";
+import UnitSearch from "./units/unitSearch.vue";
 
 interface dataModel {
   selected: null | Unit;
@@ -28,9 +29,8 @@ interface dataModel {
 
 export default defineComponent({
   name: "Player",
-  components: { UnitIcon },
+  components: { UnitIcon, UnitSearch },
   computed: {
-    ...mapState("unit", ["unitList"]),
     ...mapState("planner", { generalPlannerUnitList: "unitList" }),
     ...mapGetters("shards", { shardPlannerList: "plannerList" }),
     ...mapGetters("player", ["unitData"]),

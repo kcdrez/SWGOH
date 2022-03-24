@@ -128,9 +128,13 @@
             </template>
           </td>
           <td class="align-middle" v-if="showCol('owned')">
-            <ShardsOwned :unit="unit" />
+            <div class="input-group input-group-sm">
+              <span class="input-group-text row-label">Shards Owned:</span>
+              <ShardsOwned :unit="unit" class="shards-owned" />
+            </div>
           </td>
           <td class="align-middle text-center" v-if="showCol('remaining')">
+            <span class="row-label">Shards Remaining:</span>
             {{ unit.remainingShards }}
           </td>
           <td class="align-middle progress-cell" v-if="showCol('progress')">
@@ -144,14 +148,21 @@
             class="text-center align-middle"
             v-if="showUnitName && showCol('time')"
           >
-            <span class="row-label">Completion Date: </span>
+            <span class="row-label">Completion Date:</span>
             <Timestamp
               :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
             />
           </td>
           <td class="align-middle" v-if="showCol('priority') && showPriority">
-            <ShardPriority :unit="unit" :nodeTableNames="nodeTableNames" />
+            <div class="input-group input-group-sm">
+              <span class="input-group-text row-label">Priority:</span>
+              <ShardPriority
+                :unit="unit"
+                :nodeTableNames="nodeTableNames"
+                class="priority-input"
+              />
+            </div>
           </td>
           <td class="align-middle" v-if="showCol('actions') && showActions">
             <div
@@ -363,13 +374,5 @@ export default defineComponent({
 <style lang="scss" scoped>
 .progress-cell {
   min-width: 125px;
-}
-@media only screen and (max-width: 768px) {
-  .farming-locations {
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-  }
 }
 </style>

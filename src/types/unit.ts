@@ -9,6 +9,7 @@ import _ from "lodash";
 export interface IUnit {
   id: string;
   name: string;
+  aliases?: string[];
   image: string;
   gear_levels: UnitTier[];
   categories: string[];
@@ -38,6 +39,7 @@ export interface IUnit {
 export class Unit {
   private _gear_level;
   private _name: string;
+  private _aliases: string[];
   private _current_level_gear: UnitGear[];
   private _ability_data: Ability[];
   private _relic_tier: number;
@@ -60,6 +62,7 @@ export class Unit {
   constructor(payload: IUnit) {
     this._id = payload.id;
     this._name = payload.name;
+    this._aliases = payload.aliases ?? [];
     this._gear_level = payload.gear_level || 0;
     this._current_level_gear = payload?.gear || [];
     this._ability_data = payload?.ability_data || [];
@@ -88,6 +91,9 @@ export class Unit {
   }
   public get name() {
     return this._name;
+  }
+  public get aliases() {
+    return this._aliases;
   }
   public get power() {
     return this._power ?? 0;

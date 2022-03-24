@@ -1,7 +1,7 @@
 <template>
   <div class="container swgoh-page mb-3">
     <Loading :state="requestState" message="Loading Guild Data" size="lg">
-      <SearchInput :list="unitList" @select="selectUnit($event)" />
+      <UnitSearch @select="selectUnit($event)" />
       <Loading
         :state="loading"
         message="Loading Guild's Unit Data"
@@ -284,7 +284,6 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters(["someLoading"]),
-    ...mapState("unit", ["unitList"]),
     players(): any[] {
       return (this.data?.owned ?? []).sort((a, b) => {
         if (this.sortMethod === "name") {

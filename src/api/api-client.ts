@@ -8,7 +8,6 @@ import { OwnedRelicConfig } from "../types/relic";
 import { ITeam, Match, Team } from "../types/teams";
 import {
   GuildPayload,
-  GuildUnit,
   IGuildUnitMap,
   TerritoryBattleEvent,
   TerritoryWarEvent,

@@ -1,17 +1,15 @@
 <template>
-  <div>
-    <input
-      v-if="allowEdit"
-      class="form-control form-control-sm"
-      type="number"
-      v-model.number="dailyAvg"
-      min="0"
-      @keydown.enter="saveDailyAverage"
-      @blur="saveDailyAverage"
-      @change="saveDailyAverage"
-    />
-    <span v-else>{{ dailyAvg }}</span>
-  </div>
+  <input
+    v-if="allowEdit"
+    class="form-control form-control-sm"
+    type="number"
+    v-model.number="dailyAvg"
+    min="0"
+    @keydown.enter="saveDailyAverage"
+    @blur="saveDailyAverage"
+    @change="saveDailyAverage"
+  />
+  <span v-else>{{ dailyAvg }}</span>
 </template>
 
 <script lang="ts">
