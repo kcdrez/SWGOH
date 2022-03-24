@@ -101,7 +101,7 @@
             {{ mat.name }}
           </td>
           <td class="text-center align-middle" v-if="showCol('locations')">
-            <span class="row-label">Location: </span>
+            <span class="row-label">Location:</span>
             {{ mat.location.node }}
           </td>
           <td class="text-center align-middle" v-if="showCol('owned')">
@@ -223,6 +223,24 @@ export default defineComponent({
               return compareA > compareB ? 1 : -1;
             } else {
               return compareA > compareB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.owned - b.owned;
+            } else {
+              return b.owned - a.owned;
+            }
+          } else if (this.sortMethod === "needed") {
+            if (this.sortDir === "asc") {
+              return (
+                a.amountNeeded(this.targetLevels) -
+                b.amountNeeded(this.targetLevels)
+              );
+            } else {
+              return (
+                b.amountNeeded(this.targetLevels) -
+                a.amountNeeded(this.targetLevels)
+              );
             }
           } else if (this.sortMethod === "progress") {
             const amountNeededA = a.amountNeeded(this.targetLevels);

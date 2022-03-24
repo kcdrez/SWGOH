@@ -52,6 +52,10 @@
               v-model="searchText"
             />
           </th>
+          <th class="c-pointer" @click="sortBy('mark')" v-if="showCol('mark')">
+            Mark
+            <i class="fas mx-1" :class="sortIcon('mark')"></i>
+          </th>
           <th
             class="c-pointer"
             @click="sortBy('location')"
@@ -106,6 +110,9 @@
           </td>
           <td class="align-middle text-center" v-if="showCol('name')">
             {{ salvage.name }}
+          </td>
+          <td class="align-middle text-center" v-if="showCol('mark')">
+            {{ salvage.mark }}
           </td>
           <td v-if="showCol('locations')">
             <div v-if="salvage.locations.length <= 0" class="text-center">
@@ -298,6 +305,12 @@ export default defineComponent({
               return compareA > compareB ? 1 : -1;
             } else {
               return compareA > compareB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "mark") {
+            if (this.sortDir === "asc") {
+              return a.markLevel - b.markLevel;
+            } else {
+              return b.markLevel - a.markLevel;
             }
           } else if (this.sortMethod === "locations") {
             if (this.sortDir === "asc") {
