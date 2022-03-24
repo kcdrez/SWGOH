@@ -1,52 +1,11 @@
 <template>
   <div class="container swgoh-page">
     <Loading :state="requestState" message="Loading Data" size="lg">
-      <div class="mb-2">
-        <div class="collapse-header section-header">
-          <h3
-            class="w-100"
-            data-bs-toggle="collapse"
-            :href="`#${storageKey}Summary`"
-          >
-            <div class="d-inline">Summary</div>
-          </h3>
-          <!-- <div class="simple-view-container">
-            <Toggle
-              v-model="simpleView[unit.id]"
-              onLabel="Simple"
-              offLabel="Advanced"
-            />
-          </div> -->
-        </div>
-        <div
-          :id="`${storageKey}Summary`"
-          class="collapse"
-          :ref="`${storageKey}Summary`"
-        >
-          <table
-            class="table table-bordered table-dark table-sm table-striped swgoh-table"
-          >
-            <thead>
-              <tr class="text-center align-middle">
-                <th>
-                  <span>Unit Name</span>
-                </th>
-                <th>Progress</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="unit in glUnitList" :key="unit.id">
-                <td class="align-middle text-center">{{ unit.name }}</td>
-                <td class="align-middle text-center">
-                  <ProgressBar
-                    :percent="totalProgress(unit.id, 'requirement')"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <LegendarySummaryTable
+        :unitList="glUnitList"
+        :storageKey="storageKey + 'Summary'"
+        nodeKey="galactic_legends"
+      />
       <div v-for="unit in glUnitList" :key="unit.id" class="mb-2">
         <div class="collapse-header section-header">
           <h3
@@ -87,20 +46,20 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapActions, mapGetters } from "vuex";
+import { mapState, mapGetters } from "vuex";
 
 import { initializeModules, setupEvents } from "../utils";
 import { loadingState } from "../types/loading";
-import { totalProgress, Unit } from "../types/unit";
+import { Unit } from "../types/unit";
 import LegendaryRequirementsTable from "../components/shards/tables/legendary/legendaryRequirementsTable.vue";
-import { FarmingNode } from "@/types/shards";
+import LegendarySummaryTable from "../components/shards/tables/legendary/legendarySummaryTable.vue";
 
 const dependencyModules = ["player", "unit", "shards"];
 const storageKey = "glChecklist";
 
 export default defineComponent({
   name: "GLChecklistPage",
-  components: { LegendaryRequirementsTable },
+  components: { LegendaryRequirementsTable, LegendarySummaryTable },
   data() {
     return {
       storageKey,
@@ -112,7 +71,6 @@ export default defineComponent({
     ...mapGetters(["someLoading"]),
     ...mapState("unit", ["unitList"]),
     ...mapState("player", ["player"]),
-    ...mapState("shards", ["shardFarming"]),
     requestState(): loadingState {
       return this.someLoading(dependencyModules);
     },
@@ -152,24 +110,6 @@ export default defineComponent({
       ];
     },
   },
-  methods: {
-    totalProgress(
-      unitId: string,
-      prerequisiteType: "requirement" | "recommended"
-    ): number {
-      const x = this.getPrerequisites(unitId);
-      return totalProgress(x, prerequisiteType);
-    },
-    getPrerequisites(unitId: string) {
-      const legendaryUnits: FarmingNode = this.shardFarming.find(
-        (x: FarmingNode) => x.id === "galactic_legends"
-      );
-      return (
-        legendaryUnits?.characters.find((x) => x.id === unitId)
-          ?.prerequisites ?? []
-      );
-    },
-  },
   watch: {
     simpleView: {
       handler(newVal) {
@@ -194,16 +134,6 @@ export default defineComponent({
           );
         });
       });
-    },
-    requestState(newVal) {
-      if (newVal === loadingState.ready) {
-        this.$nextTick(() => {
-          setupEvents(
-            this.$refs[`${storageKey}Summary`] as HTMLElement,
-            `${storageKey}Summary`
-          );
-        });
-      }
     },
   },
   async created() {

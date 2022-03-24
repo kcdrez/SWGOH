@@ -1,6 +1,6 @@
 <template>
   <div v-if="unit.stars < 7">
-    <div class="collapse-header section-header mt-3">
+    <div class="collapse-header section-header shard-section-header mt-3">
       <h3 class="w-100" data-bs-toggle="collapse" href="#shardSection">
         <div class="d-inline">Shard Planner</div>
       </h3>
@@ -69,8 +69,16 @@
             :storageKey="storageKey + 'TBTable'"
           />
         </template>
-        <template v-if="showLegendaryTable">
-          <div class="position-relative">
+        <div class="legendary-container" v-if="showLegendaryTable">
+          <div class="collapse-header section-header">
+            <h5 class="w-100">
+              <div
+                data-bs-toggle="collapse"
+                href="#prerequisite-legendary-table"
+              >
+                Prerequisites
+              </div>
+            </h5>
             <div class="simple-view-container">
               <Toggle
                 v-model="simpleView.legendary"
@@ -85,14 +93,21 @@
               @checked="selectedColumns.legendary = $event"
             />
           </div>
-          <LegendaryRequirementsTable
-            :unit="unit"
-            :selectedColumns="selectedColumns.legendary"
-            :storageKey="storageKey + 'Legendary'"
-            :simpleView="simpleView.legendary"
-            nodeKey="legendary"
-          />
-        </template>
+          <div
+            id="prerequisite-legendary-table"
+            class="collapse"
+            ref="prerequisiteLegendaryTable"
+          >
+            <LegendaryRequirementsTable
+              class="mt-2"
+              :unit="unit"
+              :selectedColumns="selectedColumns.legendary"
+              :storageKey="storageKey + 'Legendary'"
+              :simpleView="simpleView.legendary"
+              nodeKey="legendary"
+            />
+          </div>
+        </div>
         <template v-if="showGLTable">
           <div class="position-relative">
             <div class="simple-view-container">
@@ -408,6 +423,10 @@ export default defineComponent({
         this.$refs.shardSection as HTMLElement,
         storageKey + "Collapse"
       );
+      setupEvents(
+        this.$refs.prerequisiteLegendaryTable as HTMLElement,
+        storageKey + "LegendaryCollapse"
+      );
     }
   },
 });
@@ -518,7 +537,7 @@ export default defineComponent({
   }
 }
 
-.collapse-header {
+.section-header.shard-section-header {
   text-shadow: 2px 2px 2px black;
   display: flex;
   align-items: center;
@@ -528,6 +547,17 @@ export default defineComponent({
     &:hover {
       text-decoration: underline;
     }
+  }
+}
+
+.legendary-container {
+  .section-header {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid $light;
+    position: sticky;
+    top: 56px;
+    height: 50px;
   }
 }
 

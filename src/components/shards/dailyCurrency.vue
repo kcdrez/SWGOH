@@ -1,6 +1,5 @@
 <template>
   <input
-    v-if="allowEdit"
     class="form-control form-control-sm"
     type="number"
     v-model.number="dailyAvg"
@@ -8,8 +7,8 @@
     @keydown.enter="saveDailyAverage"
     @blur="saveDailyAverage"
     @change="saveDailyAverage"
+    :disabled="!allowEdit"
   />
-  <span v-else>{{ dailyAvg }}</span>
 </template>
 
 <script lang="ts">
@@ -58,4 +57,11 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+@media only screen and (min-width: 769px) {
+  input {
+    border-top-left-radius: 0.2rem !important;
+    border-bottom-left-radius: 0.2rem !important;
+  }
+}
+</style>

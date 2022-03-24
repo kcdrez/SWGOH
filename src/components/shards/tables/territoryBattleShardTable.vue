@@ -86,17 +86,15 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="unit in filteredUnitList" :key="unit.id">
-          <td
-            class="text-center align-middle"
-            v-if="showUnitName && showCol('name')"
-          >
+        <tr
+          v-for="unit in filteredUnitList"
+          :key="unit.id"
+          class="align-middle text-center"
+        >
+          <td v-if="showUnitName && showCol('name')">
             <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
-          <td
-            class="align-middle text-center farming-locations"
-            v-if="showCol('locations')"
-          >
+          <td class="farming-locations" v-if="showCol('locations')">
             <div v-if="unit.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
@@ -109,23 +107,20 @@
               </ul>
             </template>
           </td>
-          <td class="align-middle" v-if="showCol('owned')">
+          <td v-if="showCol('owned')">
             <div class="input-group input-group-sm">
               <span class="input-group-text row-label">Shards Owned:</span>
               <ShardsOwned :unit="unit" class="shards-owned" />
             </div>
           </td>
-          <td class="align-middle text-center" v-if="showCol('remaining')">
+          <td v-if="showCol('remaining')">
             <span class="row-label">Remaining Shards:</span>
             {{ unit.remainingShards }}
           </td>
-          <td class="align-middle" v-if="showCol('progress')">
+          <td v-if="showCol('progress')">
             <ProgressBar :percent="unit.shardPercent" />
           </td>
-          <td
-            class="text-center align-middle"
-            v-if="showUnitName && showCol('time')"
-          >
+          <td v-if="showUnitName && showCol('time')">
             <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="estimatedTime(unit)"
