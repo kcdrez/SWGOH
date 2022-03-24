@@ -19,6 +19,7 @@
               <SearchInput
                 placeholder="Select a Character"
                 :list="player.units"
+                :searchBy="['name', 'id', 'aliases']"
                 @select="selectUnit($event)"
               />
               <template v-if="selected">
@@ -59,6 +60,7 @@
               <SearchInput
                 placeholder="Select a Character"
                 :list="player.units"
+                :searchBy="['name', 'id', 'aliases']"
                 @select="selectMods($event)"
               />
               <div class="input-group input-group-sm">

@@ -52,6 +52,10 @@
               v-model="searchText"
             />
           </th>
+          <th class="c-pointer" @click="sortBy('mark')" v-if="showCol('mark')">
+            Mark
+            <i class="fas mx-1" :class="sortIcon('mark')"></i>
+          </th>
           <th
             class="c-pointer"
             @click="sortBy('location')"
@@ -106,6 +110,9 @@
           </td>
           <td class="align-middle text-center" v-if="showCol('name')">
             {{ salvage.name }}
+          </td>
+          <td class="align-middle text-center" v-if="showCol('mark')">
+            {{ salvage.mark }}
           </td>
           <td v-if="showCol('locations')">
             <div v-if="salvage.locations.length <= 0" class="text-center">
@@ -299,6 +306,12 @@ export default defineComponent({
             } else {
               return compareA > compareB ? -1 : 1;
             }
+          } else if (this.sortMethod === "mark") {
+            if (this.sortDir === "asc") {
+              return a.markLevel - b.markLevel;
+            } else {
+              return b.markLevel - a.markLevel;
+            }
           } else if (this.sortMethod === "locations") {
             if (this.sortDir === "asc") {
               return a.locations[0] > b.locations[0] ? 1 : -1;
@@ -312,10 +325,33 @@ export default defineComponent({
               return b.progress - a.progress;
             }
           } else if (this.sortMethod === "time") {
+            const compareA =
+              a.timeEstimation === 0 ? Infinity : a.timeEstimation;
+            const compareB =
+              b.timeEstimation === 0 ? Infinity : b.timeEstimation;
+
             if (this.sortDir === "asc") {
-              return a.timeEstimation - b.timeEstimation;
+              return compareA > compareB ? 1 : -1;
             } else {
-              return b.timeEstimation - a.timeEstimation;
+              return compareA > compareB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "owned") {
+            if (this.sortDir === "asc") {
+              return a.owned - b.owned;
+            } else {
+              return b.owned - a.owned;
+            }
+          } else if (this.sortMethod === "required") {
+            if (this.sortDir === "asc") {
+              return a.totalAmount - b.totalAmount;
+            } else {
+              return b.totalAmount - a.totalAmount;
+            }
+          } else if (this.sortMethod === "needed") {
+            if (this.sortDir === "asc") {
+              return a.neededBy[0] > b.neededBy[0] ? 1 : -1;
+            } else {
+              return a.neededBy[0] < b.neededBy[0] ? -1 : 1;
             }
           }
           return 0;

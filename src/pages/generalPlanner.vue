@@ -5,7 +5,7 @@
         You have no units in the General Planner.
       </div>
       <div class="input-group input-group-sm my-2">
-        <SearchInput :list="unitList" @select="selected = $event" />
+        <UnitSearch @select="selected = $event" />
         <button
           class="btn btn-sm btn-primary"
           :disabled="!selected"
@@ -39,6 +39,7 @@ import UnitSection from "../components/generalPlanner/unitSection.vue";
 import GearSection from "../components/generalPlanner/gearSection.vue";
 import RelicSection from "../components/generalPlanner/relicSection.vue";
 import ShardSection from "../components/generalPlanner/shardSection.vue";
+import UnitSearch from "../components/units/unitSearch.vue";
 import { loadingState } from "../types/loading";
 import { Unit } from "../types/unit";
 import { initializeModules } from "../utils";
@@ -51,7 +52,13 @@ interface dataModel {
 
 export default defineComponent({
   name: "GeneralPlannerPage",
-  components: { UnitSection, GearSection, RelicSection, ShardSection },
+  components: {
+    UnitSection,
+    GearSection,
+    RelicSection,
+    ShardSection,
+    UnitSearch,
+  },
   data() {
     return {
       selected: null,
@@ -128,6 +135,7 @@ export default defineComponent({
   top: 56px;
   height: 50px;
 }
+
 ::v-deep(thead.sticky-header) {
   top: 106px !important;
 }

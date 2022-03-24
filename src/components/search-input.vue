@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 
 export default defineComponent({
   name: "SearchInput",
@@ -33,8 +33,10 @@ export default defineComponent({
       required: true,
     },
     searchBy: {
-      type: String,
-      default: "name",
+      type: Array as PropType<string[]>,
+      default: () => {
+        return ["name"];
+      },
     },
     sortBy: {
       type: String,
@@ -62,10 +64,21 @@ export default defineComponent({
   computed: {
     filteredList(): any[] {
       const results = this.list.filter((item: any) => {
-        if (this.searchBy) {
-          return item[this.searchBy]
-            .toLowerCase()
-            .includes(this.searchText.toLowerCase());
+        if (this.searchBy.length) {
+          return this.searchBy.some((key) => {
+            const type = typeof item[key];
+            if (type === "string") {
+              return item[key]
+                .toLowerCase()
+                .includes(this.searchText.toLowerCase());
+            } else if (Array.isArray(item[key])) {
+              return item[key].some((val: string) => {
+                return val
+                  .toLowerCase()
+                  .includes(this.searchText.toLowerCase());
+              });
+            }
+          });
         } else {
           return item.toLowerCase().includes(this.searchText.toLowerCase());
         }
@@ -84,7 +97,7 @@ export default defineComponent({
   },
   methods: {
     selectItem(item: any) {
-      this.searchText = item[this.searchBy];
+      this.searchText = item[this.displayBy];
       this.showList = false;
       this.$emit("select", item);
     },
@@ -95,7 +108,7 @@ export default defineComponent({
     },
     submit(val: any, clearSelection: boolean) {
       const match = this.list.find((x: any) => {
-        return x[this.searchBy] === val;
+        return x[this.displayBy] === val;
       });
       if (match) {
         this.$emit("select", match);

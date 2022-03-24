@@ -93,7 +93,10 @@
           >
             <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
-          <td class="align-middle text-center" v-if="showCol('locations')">
+          <td
+            class="align-middle text-center farming-locations"
+            v-if="showCol('locations')"
+          >
             <div v-if="unit.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
@@ -107,14 +110,16 @@
             </template>
           </td>
           <td class="align-middle" v-if="showCol('owned')">
-            <span class="row-label">Owned Amount:</span>
-            <ShardsOwned :unit="unit" />
+            <div class="input-group input-group-sm">
+              <span class="input-group-text row-label">Shards Owned:</span>
+              <ShardsOwned :unit="unit" class="shards-owned" />
+            </div>
           </td>
           <td class="align-middle text-center" v-if="showCol('remaining')">
+            <span class="row-label">Remaining Shards:</span>
             {{ unit.remainingShards }}
           </td>
           <td class="align-middle" v-if="showCol('progress')">
-            <span class="row-label">Progress:</span>
             <ProgressBar :percent="unit.shardPercent" />
           </td>
           <td
@@ -277,42 +282,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-@import "../../../styles/variables.scss";
-
-.show-on-desktop {
-  @media only screen and (max-width: 1200px) {
-    ::v-deep(.nodes-container) {
-      flex-basis: 100%;
-
-      .input-group {
-        display: block;
-
-        * {
-          width: 100%;
-
-          &:first-child {
-            border-radius: 0.2rem 0.2rem 0 0 !important;
-            justify-content: center;
-          }
-
-          &:last-child {
-            border-radius: 0 0 0.2rem 0.2rem !important;
-          }
-
-          &:not(:first-child) {
-            &:not(button) {
-              display: block;
-            }
-            border-top: none;
-            text-align: center;
-            //everything except the first element is off so the following is used to compensate :shrug:
-            position: relative;
-            left: 1px;
-          }
-        }
-      }
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

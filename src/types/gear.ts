@@ -122,6 +122,42 @@ export class Gear {
   public get mark() {
     return this._mark;
   }
+  public get markLevel() {
+    switch (this._mark) {
+      case "Mk I":
+        return 1;
+      case "Mk II":
+        return 2;
+      case "Mk III":
+        return 3;
+      case "Mk IV":
+        return 4;
+      case "Mk V":
+        return 5;
+      case "Mk VI":
+        return 6;
+      case "Mk VII":
+        return 7;
+      case "Mk VIII":
+        return 8;
+      case "Mk IX":
+        return 9;
+      case "Mk X":
+        return 10;
+      case "Mk XI":
+        return 11;
+      case "Mk XII":
+        return 12;
+      case "Mk XIII":
+        return 13;
+      case "Mk XIV":
+        return 14;
+      case "Mk XV":
+        return 15;
+      default:
+        return 0;
+    }
+  }
   public get irrelevant(): boolean {
     const gearConfig = store.state.gear.gearConfig;
     if (this.id in gearConfig) {

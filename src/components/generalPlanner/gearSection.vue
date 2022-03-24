@@ -72,6 +72,10 @@ export default defineComponent({
           value: "name",
         },
         {
+          text: "Mark",
+          value: "mark",
+        },
+        {
           text: "Locations",
           value: "locations",
         },

@@ -126,36 +126,54 @@
             <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
           <td class="align-middle" v-if="showCol('owned')">
-            <ShardsOwned :unit="unit" />
+            <div class="input-group input-group-sm">
+              <span class="input-group-text row-label">Shards Owned:</span>
+              <ShardsOwned :unit="unit" class="shards-owned" />
+            </div>
           </td>
           <td class="align-middle text-center" v-if="showCol('remaining')">
+            <span class="row-label">Shards Remaining:</span>
             {{ unit.remainingShards }}
           </td>
           <td class="align-middle" v-if="showCol('progress')">
-            <span class="row-label">Progress:</span>
             <ProgressBar :percent="unit.shardPercent" />
           </td>
           <td class="align-middle" v-if="showCol('wallet')">
             <template v-for="currency in currencyTypes" :key="currency">
-              <Wallet
+              <div
+                class="input-group input-group-sm"
                 v-if="unit.currencyTypes.includes(currency)"
-                :currencyType="currency"
-              />
+              >
+                <span class="input-group-text row-label flex">
+                  Wallet
+                  <img
+                    class="currency-img"
+                    :src="`./images/${currency}.png`"
+                    v-if="['get1', 'get2'].includes(currency)"
+                  />
+                </span>
+                <Wallet :currencyType="currency" class="wallet-input" />
+              </div>
             </template>
           </td>
           <td class="align-middle text-center" v-if="showCol('dailyCurrency')">
             <template v-for="currency in currencyTypes" :key="currency">
               <template v-if="unit.currencyTypes.includes(currency)">
-                <img
-                  class="currency-img"
-                  :src="`./images/${currency}.png`"
-                  v-if="['get1', 'get2'].includes(currency)"
-                />
-                <DailyCurrency
-                  class="d-inline"
-                  :currencyType="currency"
-                  :allowEdit="!['get1', 'get2'].includes(currency)"
-                />
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text row-label">
+                    Daily Currency:
+                    <img
+                      class="currency-img"
+                      :src="`./images/${currency}.png`"
+                      v-if="['get1', 'get2'].includes(currency)"
+                    />
+                  </span>
+                  <DailyCurrency
+                    class="d-inline"
+                    :currencyType="currency"
+                    :allowEdit="!['get1', 'get2'].includes(currency)"
+                  />
+                </div>
               </template>
             </template>
           </td>
@@ -165,6 +183,7 @@
           >
             <template v-for="currency in currencyTypes" :key="currency">
               <template v-if="unit.currencyTypes.includes(currency)">
+                <span class="row-label me-1">Remaining Currency:</span>
                 <img class="currency-img" :src="`./images/${currency}.png`" />
                 {{ remainingCurrency(unit, currency) }}
               </template>
@@ -181,7 +200,14 @@
             />
           </td>
           <td class="align-middle" v-if="showCol('priority')">
-            <ShardPriority :unit="unit" :nodeTableNames="nodeTableNames" />
+            <div class="input-group input-group-sm">
+              <span class="input-group-text row-label">Priority:</span>
+              <ShardPriority
+                :unit="unit"
+                :nodeTableNames="nodeTableNames"
+                class="priority-input"
+              />
+            </div>
           </td>
         </tr>
       </tbody>

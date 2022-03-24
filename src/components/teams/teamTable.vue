@@ -243,7 +243,7 @@
         <tr v-if="team.units.length < 5">
           <td colspan="100%" class="text-center">
             <div class="input-group input-group-sm add-unit-container">
-              <SearchInput
+              <UnitSearch
                 :list="unitList"
                 @select="selected = $event"
                 @enterPress="team.addUnit($event)"
@@ -269,6 +269,7 @@ import { defineComponent, PropType } from "vue";
 import { SortType, Team } from "../../types/teams";
 import { Unit } from "../../types/unit";
 import ModIcon from "../units/modIcon.vue";
+import UnitSearch from "../units/unitSearch.vue";
 
 type dataModel = {
   editTeamName: string;
@@ -279,7 +280,7 @@ type dataModel = {
 
 export default defineComponent({
   name: "TeamTable",
-  components: { ModIcon },
+  components: { ModIcon, UnitSearch },
   props: {
     team: {
       required: true,
