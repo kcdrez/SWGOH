@@ -6,7 +6,11 @@
         <ProgressBar :percent="totalProgress('requirement')" />
       </div>
     </div>
+    <div v-if="totalProgress('requirement') === 100">
+      <!-- Feature in progress: Track GL Ticket trajectory -->
+    </div>
     <table
+      v-else
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <thead class="sticky-header show-on-mobile">
@@ -392,6 +396,10 @@ export default defineComponent({
     },
     showRecommended(): boolean {
       return this.nodeKey === "legendary";
+    },
+    totalGLTicketsNeeded() {
+      //https://www.reddit.com/r/SWGalaxyOfHeroes/comments/fp035k/gl_event_cost_by_the_numbers/
+      return null;
     },
   },
   methods: {

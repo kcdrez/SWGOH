@@ -118,27 +118,28 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="unit in filteredUnitList" :key="unit.id">
-          <td
-            class="text-center align-middle"
-            v-if="showUnitName && showCol('name')"
-          >
+        <tr
+          v-for="unit in filteredUnitList"
+          :key="unit.id"
+          class="text-center align-middle"
+        >
+          <td v-if="showUnitName && showCol('name')">
             <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
-          <td class="align-middle" v-if="showCol('owned')">
+          <td v-if="showCol('owned')">
             <div class="input-group input-group-sm">
               <span class="input-group-text row-label">Shards Owned:</span>
               <ShardsOwned :unit="unit" class="shards-owned" />
             </div>
           </td>
-          <td class="align-middle text-center" v-if="showCol('remaining')">
+          <td v-if="showCol('remaining')">
             <span class="row-label">Shards Remaining:</span>
             {{ unit.remainingShards }}
           </td>
-          <td class="align-middle" v-if="showCol('progress')">
+          <td v-if="showCol('progress')">
             <ProgressBar :percent="unit.shardPercent" />
           </td>
-          <td class="align-middle" v-if="showCol('wallet')">
+          <td v-if="showCol('wallet')">
             <template v-for="currency in currencyTypes" :key="currency">
               <div
                 class="input-group input-group-sm"
@@ -156,7 +157,7 @@
               </div>
             </template>
           </td>
-          <td class="align-middle text-center" v-if="showCol('dailyCurrency')">
+          <td v-if="showCol('dailyCurrency')">
             <template v-for="currency in currencyTypes" :key="currency">
               <template v-if="unit.currencyTypes.includes(currency)">
                 <div class="input-group input-group-sm">
@@ -169,7 +170,6 @@
                     />
                   </span>
                   <DailyCurrency
-                    class="d-inline"
                     :currencyType="currency"
                     :allowEdit="!['get1', 'get2'].includes(currency)"
                   />
@@ -177,10 +177,7 @@
               </template>
             </template>
           </td>
-          <td
-            class="align-middle text-center"
-            v-if="showCol('remainingCurrency')"
-          >
+          <td v-if="showCol('remainingCurrency')">
             <template v-for="currency in currencyTypes" :key="currency">
               <template v-if="unit.currencyTypes.includes(currency)">
                 <span class="row-label me-1">Remaining Currency:</span>
@@ -189,17 +186,14 @@
               </template>
             </template>
           </td>
-          <td
-            class="text-center align-middle"
-            v-if="showUnitName && showCol('time')"
-          >
+          <td v-if="showUnitName && showCol('time')">
             <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="estimatedTime(unit)"
               displayClasses="d-inline"
             />
           </td>
-          <td class="align-middle" v-if="showCol('priority')">
+          <td v-if="showCol('priority')">
             <div class="input-group input-group-sm">
               <span class="input-group-text row-label">Priority:</span>
               <ShardPriority

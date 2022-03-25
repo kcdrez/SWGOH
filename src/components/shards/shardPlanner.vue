@@ -1,6 +1,6 @@
 <template>
-  <div v-if="unit.stars < 7">
-    <div class="collapse-header section-header mt-3">
+  <div>
+    <div class="collapse-header section-header shard-section-header mt-3">
       <h3 class="w-100" data-bs-toggle="collapse" href="#shardSection">
         <div class="d-inline">Shard Planner</div>
       </h3>
@@ -26,8 +26,9 @@
           label="Estimated completion:"
           :timeLength="shardTimeUnlock"
           displayClasses="d-inline"
+          v-if="unit.stars < 7"
         />
-        <EnergySpent showStandard showFleet showCantina />
+        <EnergySpent showStandard showFleet showCantina v-if="showNodeTable" />
         <template v-if="showNodeTable">
           <MultiSelect
             class="select-columns"
@@ -69,8 +70,16 @@
             :storageKey="storageKey + 'TBTable'"
           />
         </template>
-        <template v-if="showLegendaryTable">
-          <div class="position-relative">
+        <div class="legendary-container" v-if="showLegendaryTable">
+          <div class="collapse-header section-header">
+            <h5 class="w-100">
+              <div
+                data-bs-toggle="collapse"
+                href="#prerequisite-legendary-table"
+              >
+                Prerequisites
+              </div>
+            </h5>
             <div class="simple-view-container">
               <Toggle
                 v-model="simpleView.legendary"
@@ -85,16 +94,28 @@
               @checked="selectedColumns.legendary = $event"
             />
           </div>
-          <LegendaryRequirementsTable
-            :unit="unit"
-            :selectedColumns="selectedColumns.legendary"
-            :storageKey="storageKey + 'Legendary'"
-            :simpleView="simpleView.legendary"
-            nodeKey="legendary"
-          />
-        </template>
-        <template v-if="showGLTable">
-          <div class="position-relative">
+          <div
+            id="prerequisite-legendary-table"
+            class="collapse"
+            ref="prerequisiteLegendaryTable"
+          >
+            <LegendaryRequirementsTable
+              class="mt-2"
+              :unit="unit"
+              :selectedColumns="selectedColumns.legendary"
+              :storageKey="storageKey + 'Legendary'"
+              :simpleView="simpleView.legendary"
+              nodeKey="legendary"
+            />
+          </div>
+        </div>
+        <div class="gl-container" v-if="showGLTable">
+          <div class="collapse-header section-header">
+            <h5 class="w-100">
+              <div data-bs-toggle="collapse" href="#prerequisite-gl-table">
+                Prerequisites
+              </div>
+            </h5>
             <div class="simple-view-container">
               <Toggle
                 v-model="simpleView.gl"
@@ -109,14 +130,21 @@
               @checked="selectedColumns.gl = $event"
             />
           </div>
-          <LegendaryRequirementsTable
-            :unit="unit"
-            :selectedColumns="selectedColumns.gl"
-            :storageKey="storageKey + 'GL'"
-            :simpleView="simpleView.gl"
-            nodeKey="galactic_legends"
-          />
-        </template>
+          <div
+            id="prerequisite-gl-table"
+            class="collapse"
+            ref="prerequisiteGLTable"
+          >
+            <LegendaryRequirementsTable
+              class="mt-2"
+              :unit="unit"
+              :selectedColumns="selectedColumns.gl"
+              :storageKey="storageKey + 'GL'"
+              :simpleView="simpleView.gl"
+              nodeKey="galactic_legends"
+            />
+          </div>
+        </div>
       </template>
     </div>
   </div>
@@ -177,50 +205,6 @@ export default defineComponent({
     ...mapGetters("shards", ["unitFarmingList"]),
     requestState(): loadingState {
       return this.someLoading(["unit"]);
-    },
-    energySpentStandard: {
-      get(): number {
-        return this.$store.state.gear.energy.standard ?? 0;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateEnergy", {
-          value,
-          type: "standard",
-        });
-      },
-    },
-    energySpentFleet: {
-      get(): number {
-        return this.$store.state.gear.energy.fleet ?? 0;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateEnergy", {
-          value,
-          type: "fleet",
-        });
-      },
-    },
-    refreshesStandard: {
-      get(): number {
-        return this.$store.state.gear.refreshes.standard ?? 0;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateRefreshes", {
-          value,
-          type: "standard",
-        });
-      },
-    },
-    refreshesFleet: {
-      get(): number {
-        return this.$store.state.gear.refreshes.fleet ?? 0;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateRefreshes", {
-          value,
-          type: "fleet",
-        });
-      },
     },
     cols(): any {
       return {
@@ -403,12 +387,18 @@ export default defineComponent({
     },
   },
   mounted() {
-    if (this.unit.stars < 7) {
-      setupEvents(
-        this.$refs.shardSection as HTMLElement,
-        storageKey + "Collapse"
-      );
-    }
+    setupEvents(
+      this.$refs.shardSection as HTMLElement,
+      storageKey + "Collapse"
+    );
+    setupEvents(
+      this.$refs.prerequisiteLegendaryTable as HTMLElement,
+      storageKey + "LegendaryCollapse"
+    );
+    setupEvents(
+      this.$refs.prerequisiteGLTable as HTMLElement,
+      storageKey + "GLCollapse"
+    );
   },
 });
 </script>
@@ -518,7 +508,7 @@ export default defineComponent({
   }
 }
 
-.collapse-header {
+.section-header.shard-section-header {
   text-shadow: 2px 2px 2px black;
   display: flex;
   align-items: center;
@@ -528,6 +518,19 @@ export default defineComponent({
     &:hover {
       text-decoration: underline;
     }
+  }
+}
+
+.legendary-container,
+.gl-container {
+  .section-header {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid $light;
+    position: sticky;
+    top: 56px;
+    height: 50px;
+    z-index: 5;
   }
 }
 

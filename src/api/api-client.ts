@@ -278,7 +278,10 @@ class ApiClient {
     unitMapping.speed = {
       min: Math.min(...speedArr),
       max: Math.max(...speedArr),
-      average: speedArr.reduce((total, x) => total + x) / speedArr.length,
+      average:
+        speedArr.reduce((total, x) => {
+          return total + x;
+        }, 0) / speedArr.length,
     };
 
     return unitMapping;
