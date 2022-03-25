@@ -34,6 +34,9 @@ export interface IUnit {
   is_ship?: boolean;
   zeta_abilities: string[];
   omicron_abilities: string[];
+
+  //comes from .gg API
+  stat_diffs?: any; //looks the same as stats
 }
 
 export class Unit {
@@ -44,6 +47,7 @@ export class Unit {
   private _ability_data: Ability[];
   private _relic_tier: number;
   private _mods: Mod[];
+
   private _stars: number;
   private _categories: string[];
   private _ability_classes: string[];
@@ -54,6 +58,7 @@ export class Unit {
   private _image: string;
   private _gear_list: UnitTier[];
   private _stats: any;
+  private _stat_diffs: any;
   private _power?: number;
   private _zeta_abilities?: string[];
   private _omicron_abilities?: string[];
@@ -66,7 +71,7 @@ export class Unit {
     this._gear_level = payload.gear_level || 0;
     this._current_level_gear = payload?.gear || [];
     this._ability_data = payload?.ability_data || [];
-    this._relic_tier = (payload?.relic_tier ?? 0) - 2;
+    this._relic_tier = payload?.relic_tier ?? 0;
     this._mods = payload?.mods || [];
     this._stars = payload?.stars || 0;
     this._categories = payload.categories;
@@ -81,6 +86,7 @@ export class Unit {
     this._zeta_abilities = payload.zeta_abilities;
     this._omicron_abilities = payload.omicron_abilities;
     this._has_ultimate = payload.has_ultimate;
+    this._stat_diffs = payload.stat_diffs ?? null;
   }
 
   public get id() {
@@ -193,30 +199,38 @@ export class Unit {
     return this._stats["5"];
   }
   public get baseSpeed() {
-    let amount = 0;
-    let percent = 0;
-    if (this.hasSpeedSet) {
-      const modSet = this._mods.filter((mod) => mod.set === 4);
-      percent += modSet.every((mod) => mod.level === 15) ? 10 : 5;
-    }
-    this._mods.forEach((mod) => {
-      if (mod.primaryStat.unitStat === 5) {
-        amount += mod.primaryStat.value;
+    if (this._stat_diffs) {
+      return this.speed - (this._stat_diffs["5"] ?? 0);
+    } else if (this._mods) {
+      let amount = 0;
+      let percent = 0;
+      if (this.hasSpeedSet) {
+        const modSet = this._mods.filter((mod) => mod.set === 4);
+        percent += modSet.every((mod) => mod.level === 15) ? 10 : 5;
       }
-
-      mod.secondaryStat.forEach((stat) => {
-        if (stat.unitStat === 5) {
-          amount += stat.value;
+      this._mods.forEach((mod) => {
+        if (mod.primaryStat.unitStat === 5) {
+          amount += mod.primaryStat.value;
         }
+
+        mod.secondaryStat.forEach((stat) => {
+          if (stat.unitStat === 5) {
+            amount += stat.value;
+          }
+        });
       });
-    });
 
-    percent = percent / 100;
+      percent = percent / 100;
 
-    return Math.ceil((this.speed - amount) / (1 + percent));
+      return Math.ceil((this.speed - amount) / (1 + percent));
+    }
   }
   public get modSpeed() {
-    return this.speed - this.baseSpeed;
+    if (this._stat_diffs) {
+      return this._stat_diffs["5"];
+    } else {
+      return this.speed - (this.baseSpeed ?? 0);
+    }
   }
 
   public get offense() {

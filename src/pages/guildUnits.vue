@@ -252,6 +252,7 @@ import { loadingState } from "../types/loading";
 import { initializeModules, setupEvents, unvue } from "../utils";
 import { Unit } from "../types/unit";
 import { IGuildUnitMap, tUnitOwnedKeys } from "../types/guild";
+import UnitSearch from "../components/units/unitSearch.vue";
 
 const dependencyModules = ["player", "guild"];
 const storageKey = "guildUnits";
@@ -269,7 +270,7 @@ interface dataModel {
 
 export default defineComponent({
   name: "GuildUnitsPage",
-  components: {},
+  components: { UnitSearch },
   data() {
     return {
       sortDir: "asc",

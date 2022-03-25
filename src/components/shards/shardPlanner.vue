@@ -108,7 +108,43 @@
             />
           </div>
         </div>
-        <template v-if="showGLTable">
+        <div class="gl-container" v-if="showGLTable">
+          <div class="collapse-header section-header">
+            <h5 class="w-100">
+              <div data-bs-toggle="collapse" href="#prerequisite-gl-table">
+                Prerequisites
+              </div>
+            </h5>
+            <div class="simple-view-container">
+              <Toggle
+                v-model="simpleView.gl"
+                onLabel="Simple"
+                offLabel="Advanced"
+              />
+            </div>
+            <MultiSelect
+              class="select-columns"
+              :options="cols.gl"
+              :storageKey="storageKey + 'GLColumns'"
+              @checked="selectedColumns.gl = $event"
+            />
+          </div>
+          <div
+            id="prerequisite-gl-table"
+            class="collapse"
+            ref="prerequisiteGLTable"
+          >
+            <LegendaryRequirementsTable
+              class="mt-2"
+              :unit="unit"
+              :selectedColumns="selectedColumns.gl"
+              :storageKey="storageKey + 'GL'"
+              :simpleView="simpleView.gl"
+              nodeKey="galactic_legends"
+            />
+          </div>
+        </div>
+        <!-- <template v-if="showGLTable">
           <div class="position-relative">
             <div class="simple-view-container">
               <Toggle
@@ -131,7 +167,7 @@
             :simpleView="simpleView.gl"
             nodeKey="galactic_legends"
           />
-        </template>
+        </template> -->
       </template>
     </div>
   </div>
@@ -427,6 +463,10 @@ export default defineComponent({
         this.$refs.prerequisiteLegendaryTable as HTMLElement,
         storageKey + "LegendaryCollapse"
       );
+      setupEvents(
+        this.$refs.prerequisiteGLTable as HTMLElement,
+        storageKey + "GLCollapse"
+      );
     }
   },
 });
@@ -550,7 +590,8 @@ export default defineComponent({
   }
 }
 
-.legendary-container {
+.legendary-container,
+.gl-container {
   .section-header {
     display: flex;
     align-items: center;
@@ -558,6 +599,7 @@ export default defineComponent({
     position: sticky;
     top: 56px;
     height: 50px;
+    z-index: 5;
   }
 }
 
