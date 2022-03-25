@@ -1,5 +1,5 @@
 <template>
-  <div v-if="unit.stars < 7">
+  <div>
     <div class="collapse-header section-header shard-section-header mt-3">
       <h3 class="w-100" data-bs-toggle="collapse" href="#shardSection">
         <div class="d-inline">Shard Planner</div>
@@ -26,8 +26,9 @@
           label="Estimated completion:"
           :timeLength="shardTimeUnlock"
           displayClasses="d-inline"
+          v-if="unit.stars < 7"
         />
-        <EnergySpent showStandard showFleet showCantina />
+        <EnergySpent showStandard showFleet showCantina v-if="showNodeTable" />
         <template v-if="showNodeTable">
           <MultiSelect
             class="select-columns"
@@ -144,30 +145,6 @@
             />
           </div>
         </div>
-        <!-- <template v-if="showGLTable">
-          <div class="position-relative">
-            <div class="simple-view-container">
-              <Toggle
-                v-model="simpleView.gl"
-                onLabel="Simple"
-                offLabel="Advanced"
-              />
-            </div>
-            <MultiSelect
-              class="select-columns"
-              :options="cols.gl"
-              :storageKey="storageKey + 'GLColumns'"
-              @checked="selectedColumns.gl = $event"
-            />
-          </div>
-          <LegendaryRequirementsTable
-            :unit="unit"
-            :selectedColumns="selectedColumns.gl"
-            :storageKey="storageKey + 'GL'"
-            :simpleView="simpleView.gl"
-            nodeKey="galactic_legends"
-          />
-        </template> -->
       </template>
     </div>
   </div>
@@ -228,50 +205,6 @@ export default defineComponent({
     ...mapGetters("shards", ["unitFarmingList"]),
     requestState(): loadingState {
       return this.someLoading(["unit"]);
-    },
-    energySpentStandard: {
-      get(): number {
-        return this.$store.state.gear.energy.standard ?? 0;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateEnergy", {
-          value,
-          type: "standard",
-        });
-      },
-    },
-    energySpentFleet: {
-      get(): number {
-        return this.$store.state.gear.energy.fleet ?? 0;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateEnergy", {
-          value,
-          type: "fleet",
-        });
-      },
-    },
-    refreshesStandard: {
-      get(): number {
-        return this.$store.state.gear.refreshes.standard ?? 0;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateRefreshes", {
-          value,
-          type: "standard",
-        });
-      },
-    },
-    refreshesFleet: {
-      get(): number {
-        return this.$store.state.gear.refreshes.fleet ?? 0;
-      },
-      set(value: number) {
-        this.$store.dispatch("gear/updateRefreshes", {
-          value,
-          type: "fleet",
-        });
-      },
     },
     cols(): any {
       return {
@@ -454,20 +387,18 @@ export default defineComponent({
     },
   },
   mounted() {
-    if (this.unit.stars < 7) {
-      setupEvents(
-        this.$refs.shardSection as HTMLElement,
-        storageKey + "Collapse"
-      );
-      setupEvents(
-        this.$refs.prerequisiteLegendaryTable as HTMLElement,
-        storageKey + "LegendaryCollapse"
-      );
-      setupEvents(
-        this.$refs.prerequisiteGLTable as HTMLElement,
-        storageKey + "GLCollapse"
-      );
-    }
+    setupEvents(
+      this.$refs.shardSection as HTMLElement,
+      storageKey + "Collapse"
+    );
+    setupEvents(
+      this.$refs.prerequisiteLegendaryTable as HTMLElement,
+      storageKey + "LegendaryCollapse"
+    );
+    setupEvents(
+      this.$refs.prerequisiteGLTable as HTMLElement,
+      storageKey + "GLCollapse"
+    );
   },
 });
 </script>
