@@ -4,7 +4,15 @@ import { Gear, ConfigType, OwnedCount, EnergyType } from "../types/gear";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
-import { PlayerResponse } from "../types/player";
+import {
+  challenges,
+  difficultyIds,
+  mapIds,
+  missionIds,
+  missionIdsOffset,
+  tableIds,
+} from "../types/locationMapping";
+import { nodeList, gearList, storesData } from "../components/gear/tempData";
 
 type updateEnergy = {
   value: number;
@@ -32,7 +40,158 @@ const store = {
     refreshes: { standard: 0, fleet: 0 },
     energy: { standard: 0, fleet: 0 },
   },
-  getters: {},
+  getters: {
+    allFarmableNodes(state: State) {
+      const locations: any[] = [];
+      state.gearList.forEach((gear) => {
+        gear.missionList.forEach((mission) => {
+          const {
+            campaignId,
+            campaignNodeDifficulty,
+            campaignMapId,
+            campaignMissionId,
+            campaignNodeId,
+          } = mission.missionIdentifier;
+          const difficulty: string = difficultyIds[campaignNodeDifficulty];
+          const table: string = tableIds[campaignId];
+          const level: string = mapIds[campaignMapId];
+          let node: string = "";
+
+          if (campaignMapId === "CHALLENGES") {
+            // const label = `Daily Challenges (${challenges[campaignNodeId]})`;
+          } else if (table) {
+            const tableStr =
+              table === "Light" || table === "Dark" ? `${table} Side` : table;
+
+            if (difficulty === "Hard") {
+              node = missionIdsOffset[campaignMissionId];
+            } else if (difficulty === "Normal") {
+              node = missionIds[campaignMissionId];
+            } else {
+              console.log("unknown difficulty", difficulty);
+            }
+
+            const id = `${tableStr
+              .replace(" ", "")
+              .toLowerCase()}_${difficulty.toLowerCase()}_${level}${node.toLowerCase()}`;
+            const locationMatch = locations.find((x) => x.id === id);
+            if (locationMatch) {
+              locationMatch.gear.push({
+                id: gear.id,
+              });
+            } else {
+              locations.push({
+                id,
+                table: tableStr,
+                difficulty,
+                level,
+                node,
+                gear: [{ id: gear.id }],
+              });
+            }
+          }
+        });
+      });
+
+      const hardNodes = nodeList.map((node) => {
+        const match = locations.find((x) => x.id === node.id);
+        if (match) {
+          return {
+            ...node,
+            ...match,
+          };
+        } else {
+          // console.warn("Couldnt find gear data for " + node.id);
+          // return { ...node, gear: [] };
+          return node;
+        }
+      });
+      const normalNodes = locations.map((location) => {
+        const match = nodeList.find((x) => x.id === location.id);
+        if (match) {
+          return {
+            ...location,
+            ...match,
+          };
+        } else {
+          // console.warn("Couldnt find character data for " + location.id);
+          // return { ...location, characters: [] };
+          return location;
+        }
+      });
+      const allNodes = [...hardNodes, ...normalNodes];
+      const combined: any[] = [];
+
+      allNodes.forEach((x) => {
+        const filtered = combined.filter((y: any) => y.id === x.id);
+        if (filtered.length > 0) {
+          const combinedData = filtered.reduce(
+            (acc, el) => {
+              return { ...acc, ...el };
+            },
+            { ...x }
+          );
+          combined.push(combinedData);
+        } else {
+          combined.push(x);
+        }
+      });
+      return combined;
+    },
+    allGearFarmableLocations(state: State) {
+      return state.gearList.map((gear: Gear) => {
+        const locations = gear.locations;
+        const guildStoreMatch = storesData.guildStore.find(
+          (x) => x.id === gear.id
+        );
+        const squadArenaMatch = storesData.squadArenaStore.find(
+          (x) => x.id === gear.id
+        );
+        const get2 = storesData.guildEventsStore_get2.find(
+          (x) => x.id === gear.id
+        );
+        const get1 = storesData.guildEventsStore_get1.find(
+          (x) => x.id === gear.id
+        );
+        const champMatch = storesData.championshipStore.find(
+          (x) => x.id === gear.id
+        );
+        const shardShopMatch = storesData.shardShop.find(
+          (x) => x.id === gear.id
+        );
+        const conquestStoreMatch = storesData.conquestStore.find(
+          (x) => x.id === gear.id
+        );
+
+        if (guildStoreMatch) {
+          locations.push("Guild Store");
+        }
+        if (squadArenaMatch) {
+          locations.push("Squad Arena Store");
+        }
+        if (get1) {
+          locations.push("Guild Events Store (GET1)");
+        }
+        if (get2) {
+          locations.push("Guild Events Store (GET2)");
+        }
+        if (champMatch) {
+          locations.push("Championship Store");
+        }
+        if (shardShopMatch) {
+          locations.push("Shard Shop Currency");
+        }
+        if (conquestStoreMatch) {
+          locations.push("Conquest Store");
+        }
+        return {
+          id: gear.id,
+          name: gear.name,
+          locations,
+        };
+      });
+    },
+  },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {
       state.requestState = payload;

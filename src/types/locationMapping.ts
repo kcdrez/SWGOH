@@ -44,6 +44,22 @@ export const missionIds = {
   DIFF05: "",
 };
 
+export const missionIdsOffset = {
+  Mi01: "A",
+  Mi02: "B",
+  Mi03: "A",
+  Mi04: "B",
+  Mi05: "C",
+  Mi06: "D",
+  Mi07: "E",
+  Mi08: "F",
+  Mi09: "F",
+  Mi10: "H",
+  Mi11: "E",
+  Mi12: "F",
+  DIFF05: "",
+};
+
 export const challenges = {
   EQUIPMENT_STRENGTH: "Sun, Mon, Thurs",
   EQUIPMENT_INTELLIGENCE: "Sun, Tues, Fri",
