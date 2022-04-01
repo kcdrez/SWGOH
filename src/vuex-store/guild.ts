@@ -30,6 +30,46 @@ const store = {
     territoryWarEvents: [],
     territoryBattleEvents: [],
     accessLevel: 0,
+    tbRecommended: {
+      DSGeos: {
+        phase1: {
+          top: {
+            teams: [
+              {
+                name: "Poggle Geos",
+                units: [
+                  {
+                    id: "POGGLETHELESSER",
+                    level: 12,
+                    type: "Gear",
+                  },
+                  {
+                    id: "GEONOSIANSPY",
+                    level: 12,
+                    type: "Gear",
+                  },
+                  {
+                    id: "GEONOSIANSOLDIER",
+                    level: 12,
+                    type: "Gear",
+                  },
+                  {
+                    id: "GEONOSIANBROODALPHA",
+                    level: 12,
+                    type: "Gear",
+                  },
+                  {
+                    id: "SUNFAC",
+                    level: 12,
+                    type: "Gear",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    },
   },
   getters: {
     tbEvents(state: State) {
@@ -207,11 +247,8 @@ const store = {
       commit("SET_EVENTS", response);
     },
     async fetchGuildUnitData({ state }: ActionCtx, unitId: string) {
-      return await apiClient.fetchGuildUnitData(
-        state.guildId,
-        unitId
-      );
-    }
+      return await apiClient.fetchGuildUnitData(state.guildId, unitId);
+    },
   },
 };
 

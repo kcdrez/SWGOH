@@ -104,14 +104,18 @@
             There are no gear pieces that meet that search criteria.
           </td>
         </tr>
-        <tr v-for="salvage in filteredSalvageList" :key="salvage.id">
+        <tr
+          class="align-middle text-center"
+          v-for="salvage in filteredSalvageList"
+          :key="salvage.id"
+        >
           <td v-if="showCol('icon')">
             <GearIcon :gear="salvage" />
           </td>
-          <td class="align-middle text-center" v-if="showCol('name')">
+          <td v-if="showCol('name')">
             {{ salvage.name }}
           </td>
-          <td class="align-middle text-center" v-if="showCol('mark')">
+          <td v-if="showCol('mark')">
             {{ salvage.mark }}
           </td>
           <td v-if="showCol('locations')">
@@ -133,19 +137,16 @@
               </ul>
             </template>
           </td>
-          <td class="align-middle" v-if="showCol('owned')">
+          <td v-if="showCol('owned')">
             <OwnedAmount :salvage="salvage" />
           </td>
-          <td class="align-middle text-center" v-if="showCol('needed')">
+          <td v-if="showCol('needed')">
             {{ salvage.totalAmount }}
           </td>
-          <td class="align-middle" v-if="showCol('progress')">
+          <td v-if="showCol('progress')">
             <ProgressBar :percent="salvage.percent" />
           </td>
-          <td
-            class="align-middle"
-            v-if="showRequiredByUnit && showCol('required')"
-          >
+          <td v-if="showRequiredByUnit && showCol('required')">
             <ul class="mb-0">
               <li v-for="unit in salvage.neededBy" :key="unit.id">
                 <Popper hover arrow placement="left">
@@ -170,14 +171,14 @@
               </li>
             </ul>
           </td>
-          <td class="align-middle text-center" v-if="showCol('time')">
+          <td v-if="showCol('time')">
             <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="salvage.timeEstimation"
               displayClasses="d-inline"
             />
           </td>
-          <td class="align-middle" v-if="showCol('actions')">
+          <td v-if="showCol('actions')">
             <div
               class="btn-group btn-group-sm d-block text-center"
               role="group"

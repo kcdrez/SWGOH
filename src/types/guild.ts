@@ -108,3 +108,170 @@ export function estimatedTime(unit: Unit): number {
   const avgShardsPerEvent = store.getters["guild/tbAvgShards"](type, unit.id);
   return Math.ceil(unit.remainingShards / (avgShardsPerEvent / 30));
 }
+
+const see = {
+  name: "SEE + Sith Buddies",
+  units: [
+    {
+      id: "SITHPALPATINE",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "DARTHSION",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "DARTHNIHILUS",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "MAUL",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "DARTHSIDIOUS",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
+const sithEmpire = {
+  name: "Sith Empire",
+  units: [
+    {
+      id: "DARTHREVAN",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "DARTHMALAK",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "HK47",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "BASTILASHANDARK",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "SITHMARAUDER",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
+const fo = {
+  name: "First Order",
+  units: [
+    {
+      id: "KYLORENUNMASKED",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "KYLOREN",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "FIRSTORDEREXECUTIONER",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "FIRSTORDEROFFICERMALE",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "FIRSTORDERTROOPER",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
+const bh = {
+  name: "Bounty Hunters",
+  units: [
+    {
+      id: "BOSSK",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "JANGOFETT",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "BOBAFETT",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "DENGAR",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "CADBANE",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
+const geos = {
+  name: "Poggle Geos",
+  units: [
+    {
+      id: "POGGLETHELESSER",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "GEONOSIANSPY",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "GEONOSIANSOLDIER",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "GEONOSIANBROODALPHA",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "SUNFAC",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
+
+const tbRecommended = {
+  DSGeos: {
+    phase1: {
+      top: {
+        combatMission1: {
+          teams: [geos],
+          required: "POGGLETHELESSER",
+        },
+        combatMission2: {
+          teams: [see, sithEmpire, fo, bh],
+        },
+      },
+    },
+  },
+};
