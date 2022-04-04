@@ -11,7 +11,7 @@ import { store as guildStore, State as GuildState } from "./guild";
 import { store as currencyStore, State as CurrencyState } from "./currency";
 import { loadingState } from "../types/loading";
 
-type ModuleTypes =
+export type ModuleTypes =
   | "gear"
   | "relic"
   | "unit"

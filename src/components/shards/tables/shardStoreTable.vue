@@ -107,10 +107,10 @@ export default defineComponent({
     },
   },
   mounted() {
-    setupEvents(
-      (this.$refs?.shardStoreSection as any)?.$el as HTMLElement,
-      storageKey + "Collapse"
-    );
+    const tableComponent = this.$refs?.shardStoreSection as any;
+    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
+      tableComponent?.refresh();
+    });
   },
 });
 </script>

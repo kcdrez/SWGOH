@@ -1,5 +1,6 @@
 import moment from "moment";
-import store from "./vuex-store/store";
+import { loadingState } from "./types/loading";
+import store, { ModuleTypes } from "./vuex-store/store";
 
 export function unvue(data: any) {
   return JSON.parse(JSON.stringify(data));
@@ -8,7 +9,9 @@ export function unvue(data: any) {
 export function setupEvents(
   el: HTMLElement,
   name: string,
-  defaultExpand = false
+  defaultExpand = false,
+  callbackOnShow?: Function,
+  callbackOnHide?: Function
 ) {
   if (el) {
     if (
@@ -17,12 +20,22 @@ export function setupEvents(
       defaultExpand
     ) {
       el.classList.value += " show";
+
+      if (callbackOnShow) {
+        callbackOnShow();
+      }
     }
     el.addEventListener("hidden.bs.collapse", () => {
       store.dispatch("toggleCollapse", { name, hidden: true });
+      if (callbackOnHide) {
+        callbackOnHide();
+      }
     });
     el.addEventListener("shown.bs.collapse", () => {
       store.dispatch("toggleCollapse", { name, hidden: false });
+      if (callbackOnShow) {
+        callbackOnShow();
+      }
     });
   } else {
     console.warn(
@@ -47,6 +60,7 @@ export async function initializeModules(
   if (synchronously) {
     for (let i = 0; i < modulesList.length; i++) {
       const moduleName = modulesList[i];
+      //this doesnt fucking work for player module
       await store.dispatch(`${moduleName}/initialize`);
     }
   } else {

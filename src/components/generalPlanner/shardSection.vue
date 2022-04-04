@@ -16,16 +16,17 @@
         @checked="selectedColumns = $event"
       />
     </div>
-    <div id="shard-section-table" class="collapse" ref="shardSection">
-      <ShardTable
-        :units="plannerList"
-        showUnitName
-        showActions
-        :selectedColumns="selectedColumns"
-        :simpleView="simpleView"
-        :storageKey="storageKey + 'Table'"
-      />
-    </div>
+    <ShardTable
+      id="shard-section-table"
+      class="collapse"
+      ref="shardSection"
+      :units="plannerList"
+      showUnitName
+      showActions
+      :selectedColumns="selectedColumns"
+      :simpleView="simpleView"
+      :storageKey="storageKey + 'Table'"
+    />
   </div>
 </template>
 
@@ -96,10 +97,10 @@ export default defineComponent({
     },
   },
   mounted() {
-    setupEvents(
-      this.$refs.shardSection as HTMLElement,
-      storageKey + "Collapse"
-    );
+    const tableComponent = this.$refs?.shardSection as any;
+    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
+      tableComponent?.refresh();
+    });
   },
 });
 </script>

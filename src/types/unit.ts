@@ -64,6 +64,8 @@ export class Unit {
   private _omicron_abilities?: string[];
   private _has_ultimate?: boolean;
 
+  private _estimatedTime: number = 0;
+
   constructor(payload: IUnit) {
     this._id = payload.id;
     this._name = payload.name;
@@ -91,6 +93,12 @@ export class Unit {
 
   public get id() {
     return this._id;
+  }
+  public get estimatedTime() {
+    return this._estimatedTime;
+  }
+  public set estimatedTime(val) {
+    this._estimatedTime = val;
   }
   public get gearLevel() {
     return this._gear_level;
@@ -129,15 +137,9 @@ export class Unit {
   public get stars() {
     return this._stars;
   }
-  /*
-   * Gets a list of all gear for the current gear level
-   */
   public get currentLevelGear() {
     return this._current_level_gear;
   }
-  /*
-   * Gets a list of all gear (ids) for all gear levels
-   */
   public get gearList() {
     return this._gear_list;
   }
@@ -599,16 +601,6 @@ export class Unit {
     const match = this.shardNodes.find((n) => n.id === matchFarmingNode?.id);
     return match?.priority ?? 0;
   }
-  // public currencyAmountRemaining(currencies: CurrencyTypeConfig[]) {
-  //   const locations = this.whereToFarm.filter((x) => {
-  //     if (x.currencyType) {
-  //       return currencies.includes(x.currencyType);
-  //     } else {
-  //       return false;
-  //     }
-  //   });
-  //   return locations.map((location) => this.currencyAmountByLocation(location));
-  // }
 }
 
 export interface UnitGear {

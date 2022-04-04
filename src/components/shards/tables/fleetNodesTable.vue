@@ -100,10 +100,10 @@ export default defineComponent({
     },
   },
   mounted() {
-    setupEvents(
-      (this.$refs?.fleetNodesTable as any)?.$el as HTMLElement,
-      storageKey + "Collapse"
-    );
+    const tableComponent = this.$refs?.fleetNodesTable as any;
+    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
+      tableComponent?.refresh();
+    });
   },
 });
 </script>

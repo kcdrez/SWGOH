@@ -28,7 +28,6 @@
           displayClasses="d-inline"
           v-if="unit.stars < 7"
         />
-        <EnergySpent showStandard showFleet showCantina v-if="showNodeTable" />
         <template v-if="showNodeTable">
           <MultiSelect
             class="select-columns"
@@ -40,6 +39,7 @@
             :units="[unit]"
             :selectedColumns="selectedColumns.shards"
             showActions
+            loadOnCreation
             :storageKey="storageKey + 'ShardTable'"
           />
         </template>
@@ -55,6 +55,7 @@
             :selectedColumns="selectedColumns.store"
             :currencyTypes="unit.currencyTypes"
             :storageKey="storageKey + 'StoreTable'"
+            loadOnCreation
           />
         </template>
         <template v-if="showTBTable">
@@ -68,6 +69,7 @@
             :units="[unit]"
             :selectedColumns="selectedColumns.tb"
             :storageKey="storageKey + 'TBTable'"
+            loadOnCreation
           />
         </template>
         <div class="legendary-container" v-if="showLegendaryTable">
@@ -324,25 +326,29 @@ export default defineComponent({
       return this.unit.whereToFarm.map((x: FarmingNode) => x.table);
     },
     showNodeTable(): boolean {
-      return this.tables.some((x) =>
-        ["Light Side", "Dark Side", "Fleet", "Cantina"].includes(x)
+      return (
+        this.tables.some((x) =>
+          ["Light Side", "Dark Side", "Fleet", "Cantina"].includes(x)
+        ) && this.unit.stars < 7
       );
     },
     showTBTable(): boolean {
-      return this.tables.includes("Territory Battles");
+      return this.tables.includes("Territory Battles") && this.unit.stars < 7;
     },
     showShopTable(): boolean {
-      return this.tables.some((x) =>
-        [
-          "Cantina Battles Store",
-          "Fleet Arena Store",
-          "Galactic War Store",
-          "Guild Events Store (Mk 1)",
-          "Guild Events Store (Mk 2)",
-          "Guild Store",
-          "Shard Store",
-          "Squad Arena Store",
-        ].includes(x)
+      return (
+        this.tables.some((x) =>
+          [
+            "Cantina Battles Store",
+            "Fleet Arena Store",
+            "Galactic War Store",
+            "Guild Events Store (Mk 1)",
+            "Guild Events Store (Mk 2)",
+            "Guild Store",
+            "Shard Store",
+            "Squad Arena Store",
+          ].includes(x)
+        ) && this.unit.stars < 7
       );
     },
     showLegendaryTable(): boolean {

@@ -96,10 +96,10 @@ export default defineComponent({
     },
   },
   mounted() {
-    setupEvents(
-      (this.$refs?.territoryBattlesSection as any)?.$el as HTMLElement,
-      storageKey + "Collapse"
-    );
+    const tableComponent = this.$refs?.territoryBattlesSection as any;
+    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
+      tableComponent?.refresh();
+    });
   },
 });
 </script>

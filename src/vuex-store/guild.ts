@@ -134,18 +134,19 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit, state, rootState, rootGetters }: ActionCtx) {
+    async initialize({ commit, state, rootState }: ActionCtx) {
+      commit("SET_REQUEST_STATE", loadingState.loading);
       const guildId = rootState.player.player?.guild_id || "";
       const allyCode = rootState.player.allyCode;
 
       if (state.requestState !== loadingState.initial) {
+        commit("SET_REQUEST_STATE", loadingState.ready);
         return;
       } else if (!guildId) {
         console.error("guildId not set");
+        commit("SET_REQUEST_STATE", loadingState.ready);
         return;
       }
-
-      commit("SET_REQUEST_STATE", loadingState.loading);
       commit("SET_GUILD_ID", guildId);
 
       const [guildData, accessLevel] = await Promise.all([
@@ -207,11 +208,8 @@ const store = {
       commit("SET_EVENTS", response);
     },
     async fetchGuildUnitData({ state }: ActionCtx, unitId: string) {
-      return await apiClient.fetchGuildUnitData(
-        state.guildId,
-        unitId
-      );
-    }
+      return await apiClient.fetchGuildUnitData(state.guildId, unitId);
+    },
   },
 };
 

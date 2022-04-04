@@ -47,6 +47,7 @@ export default defineComponent({
       selectedColumns: [],
       simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
       storageKey,
+      loading: true,
     };
   },
   computed: {
@@ -102,10 +103,10 @@ export default defineComponent({
     },
   },
   mounted() {
-    setupEvents(
-      (this.$refs?.standardNodesTable as any)?.$el as HTMLElement,
-      storageKey + "Collapse"
-    );
+    const tableComponent = this.$refs?.standardNodesTable as any;
+    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
+      tableComponent?.refresh();
+    });
   },
 });
 </script>

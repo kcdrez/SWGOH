@@ -143,9 +143,12 @@ export interface NodePayload extends UnitNodeData {
 export function estimatedTime(
   unitList: Unit[],
   tableNames: string[],
-  unit: Unit
+  unit: Unit,
+  alreadyOrdered: boolean = false
 ): number {
-  const unitListByPriority = unitsByPriority(unitList, tableNames);
+  const unitListByPriority = alreadyOrdered
+    ? unitList
+    : unitsByPriority(unitList, tableNames);
   const index = unitListByPriority.findIndex((u) => u.id === unit.id);
 
   const priority = unit.tablePriority(tableNames);
@@ -182,8 +185,6 @@ function unitEstimated(unit: Unit, tableNames: string[]) {
     ? 0
     : Math.ceil(unit.remainingShards / shardsPerDay);
 }
-
-export function getCurrentLevel() {}
 
 export function isRelicRequirement(
   type: string,
