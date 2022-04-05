@@ -67,7 +67,7 @@ export default defineComponent({
     ...mapState("unit", ["unitList"]),
     ...mapState("player", ["player"]),
     glUnitList(): Unit[] {
-      return this.unitList.filter((unit: Unit) => {
+      return this.unitList.reduce((list: Unit[], unit: Unit) => {
         const isGL = !!unit.whereToFarm.find(
           (x) => x.table === "Galactic Legends"
         );
@@ -75,11 +75,14 @@ export default defineComponent({
           const playerUnit = this.player.units.find(
             (u: Unit) => u.id === unit.id
           );
-
-          return playerUnit ? playerUnit.stars < 7 : true;
+          if (playerUnit && !playerUnit.hasUlt) {
+            list.push(playerUnit);
+          } else {
+            list.push(unit);
+          }
         }
-        return false;
-      });
+        return list;
+      }, []);
     },
     cols() {
       return [
@@ -109,24 +112,22 @@ export default defineComponent({
       },
       deep: true,
     },
-    glUnitList(newVal) {
-      this.$nextTick(() => {
-        newVal.forEach((unit: Unit) => {
-          this.simpleView[unit.id] = this.simpleView[unit.id] ?? true;
+  },
+  mounted() {
+    this.glUnitList.forEach((unit: Unit) => {
+      this.simpleView[unit.id] = this.simpleView[unit.id] ?? true;
 
-          (this.selectedColumns as any)[unit.id] =
-            (this.selectedColumns as any)[unit.id].filter(
-              (x: string) => x !== "recommended"
-            ) ?? [];
+      (this.selectedColumns as any)[unit.id] =
+        (this.selectedColumns as any)[unit.id].filter(
+          (x: string) => x !== "recommended"
+        ) ?? [];
 
-          setupEvents(
-            (this.$refs[`${storageKey}Collapse${unit.id}`] as any[])[0]
-              ?.$el as HTMLElement,
-            `${storageKey}Collapse${unit.id}`
-          );
-        });
-      });
-    },
+      setupEvents(
+        (this.$refs[`${storageKey}Collapse${unit.id}`] as any[])[0]
+          ?.$el as HTMLElement,
+        `${storageKey}Collapse${unit.id}`
+      );
+    });
   },
 });
 </script>
