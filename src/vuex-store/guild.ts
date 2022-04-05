@@ -135,7 +135,6 @@ const store = {
   },
   actions: {
     async initialize({ commit, state, rootState }: ActionCtx) {
-      commit("SET_REQUEST_STATE", loadingState.loading);
       const guildId = rootState.player.player?.guild_id || "";
       const allyCode = rootState.player.allyCode;
 
@@ -147,6 +146,8 @@ const store = {
         commit("SET_REQUEST_STATE", loadingState.ready);
         return;
       }
+
+      commit("SET_REQUEST_STATE", loadingState.loading);
       commit("SET_GUILD_ID", guildId);
 
       const [guildData, accessLevel] = await Promise.all([

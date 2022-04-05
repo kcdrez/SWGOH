@@ -79,7 +79,7 @@
                 data-bs-toggle="collapse"
                 href="#prerequisite-legendary-table"
               >
-                Prerequisites
+                Unlock Status
               </div>
             </h5>
             <div class="simple-view-container">
@@ -115,7 +115,7 @@
           <div class="collapse-header section-header">
             <h5 class="w-100">
               <div data-bs-toggle="collapse" href="#prerequisite-gl-table">
-                Prerequisites
+                Unlock Status
               </div>
             </h5>
             <div class="simple-view-container">

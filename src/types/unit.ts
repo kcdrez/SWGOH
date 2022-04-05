@@ -158,6 +158,39 @@ export class Unit {
   public get omicrons() {
     return this._omicron_abilities ?? [];
   }
+  public get glTier4() {
+    return store.state.shards.ownedShards[this.id]?.glFarming?.tier4 || false;
+  }
+  public set glTier4(val) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier4: val,
+      tier5: !val ? false : this.glTier5,
+      ultMats: this.glUltMats,
+      id: this.id,
+    });
+  }
+  public get glTier5() {
+    return store.state.shards.ownedShards[this.id]?.glFarming?.tier5 || false;
+  }
+  public set glTier5(val) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier4: val ? true : this.glTier4,
+      tier5: val,
+      ultMats: this.glUltMats,
+      id: this.id,
+    });
+  }
+  public get glUltMats() {
+    return store.state.shards.ownedShards[this.id]?.glFarming?.ultMats || 0;
+  }
+  public set glUltMats(val) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier4: this.glTier4,
+      tier5: this.glTier5,
+      ultMats: val,
+      id: this.id,
+    });
+  }
 
   public get hasSpeedSet() {
     return this.mods.filter((x) => x.set === 4).length >= 4;

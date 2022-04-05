@@ -52,7 +52,13 @@ const store = {
         commit("SET_REQUEST_STATE", loadingState.ready);
       }
     },
-    async fetchUnit({ commit, rootState, dispatch }: ActionCtx, id: string) {
+    async fetchUnit(
+      { state, commit, rootState, dispatch }: ActionCtx,
+      id: string
+    ) {
+      if (id === state.unit?.id) {
+        return;
+      }
       commit("SET_REQUEST_STATE", loadingState.loading);
       try {
         const exists = rootState.player.player?.units.find((x) => x.id === id);

@@ -26,6 +26,7 @@ export default defineComponent({
       if (this.requestState !== loadingState.ready) {
         return loadingState.loading;
       } else {
+        this.someLoading(this.dependencyModules);
         return this.someLoading(this.dependencyModules);
       }
     },

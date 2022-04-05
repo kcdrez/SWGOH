@@ -1,13 +1,78 @@
 <template>
   <div v-if="prerequisites">
-    <div class="mb-2 d-flex justify-content-center">
+    <div class="mb-2 d-flex justify-content-center" v-if="unit.stars < 7">
       <h5 class="text-center mb-0">Total Progress:</h5>
       <div class="total-progress-bar">
         <ProgressBar :percent="totalProgress('requirement')" />
       </div>
     </div>
-    <div v-if="totalProgress('requirement') === 100">
-      <!-- Feature in progress: Track GL Ticket trajectory -->
+    <div
+      v-if="
+        totalProgress('requirement') === 100 && nodeKey === 'galactic_legends'
+      "
+      class="container mb-3"
+    >
+      <div class="row">
+        <div class="col">
+          <div class="input-group input-group-sm" v-if="unit.stars < 7">
+            <span class="input-group-text">Shards Owned:</span>
+            <ShardsOwned :unit="unit" class="form-control" />
+          </div>
+          <template v-else>
+            <div class="input-group input-group-sm mb-1">
+              <span class="input-group-text">Tier 4 Completed:</span>
+              <span class="input-group-text tier-toggle">
+                <Toggle
+                  class="toggle-gl-tier"
+                  v-model="unit.glTier4"
+                  onLabel="Complete"
+                  offLabel="Incomplete"
+                />
+              </span>
+            </div>
+            <div class="input-group input-group-sm mb-1">
+              <span class="input-group-text">Tier 5 Completed:</span>
+              <span class="input-group-text tier-toggle">
+                <Toggle
+                  class="toggle-gl-tier"
+                  v-model="unit.glTier5"
+                  onLabel="Complete"
+                  offLabel="Incomplete"
+                />
+              </span>
+            </div>
+            <div class="input-group input-group-sm mb-1">
+              <span class="input-group-text">Ultimate Ability Mats:</span>
+              <input
+                class="form-control"
+                v-model.number="unit.glUltMats"
+                type="number"
+              />
+            </div>
+          </template>
+          <EnergySpent showStandard />
+        </div>
+        <div class="col">
+          <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">Remaining GL Tickets:</span>
+            <span class="input-group-text flex-fill">{{
+              totalGLTicketsNeeded
+            }}</span>
+          </div>
+          <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">Estimated Energy Spent:</span>
+            <span class="input-group-text flex-fill">{{
+              estimatedEnergy
+            }}</span>
+          </div>
+          <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">Estimated Time to Ultimate:</span>
+            <span class="input-group-text flex-fill">
+              <Timestamp :timeLength="estimatedTime"
+            /></span>
+          </div>
+        </div>
+      </div>
     </div>
     <table
       v-else
@@ -161,6 +226,9 @@ import RelicLevelIcon from "../../../units/relicLevelIcon.vue";
 import UnitIcon from "../../../units/unitIcon.vue";
 import GearText from "../../../gear/gearText.vue";
 import RequirementIcon from "./requirementIcon.vue";
+import ShardsOwned from "../../shardsOwned.vue";
+import Timestamp from "../../../timestamp.vue";
+import EnergySpent from "../../../energySpent.vue";
 import {
   Unit,
   getPercent,
@@ -173,10 +241,19 @@ import {
   isGearRequirement,
   isRelicRequirement,
 } from "../../../../types/shards";
+import { round2Decimals } from "../../../../utils";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
-  components: { UnitIcon, RelicLevelIcon, GearText, RequirementIcon },
+  components: {
+    UnitIcon,
+    RelicLevelIcon,
+    GearText,
+    RequirementIcon,
+    ShardsOwned,
+    Timestamp,
+    EnergySpent,
+  },
   props: {
     unit: {
       type: Object as () => Unit,
@@ -397,9 +474,60 @@ export default defineComponent({
     showRecommended(): boolean {
       return this.nodeKey === "legendary";
     },
-    totalGLTicketsNeeded() {
-      //https://www.reddit.com/r/SWGalaxyOfHeroes/comments/fp035k/gl_event_cost_by_the_numbers/
-      return null;
+    totalGLTicketsNeeded(): number {
+      const shardsCount = this.unit.stars === 7 ? 330 : this.unit.ownedShards;
+      let tier1 = 8;
+      let tier2 = 4;
+      let tier3 = 3;
+      let tier4 = 1;
+      let tier5 = 1;
+      let tier6 = 10;
+      if (shardsCount <= 80) {
+        tier1 = (80 - shardsCount) / 10;
+      } else if (shardsCount <= 180) {
+        tier1 = 0;
+        tier2 = (180 - shardsCount) / 25;
+      } else if (shardsCount < 330) {
+        tier1 = 0;
+        tier2 = 0;
+        tier3 = (330 - shardsCount) / 50;
+      } else if (!this.unit.glTier4) {
+        tier1 = 0;
+        tier2 = 0;
+        tier3 = 0;
+      } else if (!this.unit.glTier5) {
+        tier1 = 0;
+        tier2 = 0;
+        tier3 = 0;
+        tier4 = 0;
+      } else {
+        tier1 = 0;
+        tier2 = 0;
+        tier3 = 0;
+        tier4 = 0;
+        tier5 = 0;
+        tier6 = 10 - this.unit.glUltMats;
+      }
+
+      return (
+        tier1 * 15 +
+        tier2 * 30 +
+        tier3 * 60 +
+        tier4 * 70 +
+        tier5 * 70 +
+        tier6 * 70
+      );
+    },
+    estimatedEnergy() {
+      return this.totalGLTicketsNeeded / 0.2;
+    },
+    estimatedTime() {
+      const refreshes = this.$store.state.gear.refreshes.standard ?? 0;
+      const energySpent = this.$store.state.gear.energy.standard ?? 0;
+
+      return Math.ceil(
+        this.estimatedEnergy / (375 - energySpent + 120 * refreshes)
+      );
     },
   },
   methods: {
@@ -469,6 +597,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import "../../../../styles/variables.scss";
+
 .unit-list-tags {
   display: flex;
   justify-content: center;
@@ -487,5 +617,31 @@ export default defineComponent({
 .total-progress-bar {
   flex-basis: 25%;
   margin: 0 0.5rem;
+}
+::v-deep(.tier-toggle) {
+  width: 120px;
+  flex: 1 1 auto;
+  justify-content: center;
+
+  .toggle {
+    width: 100px;
+    justify-content: unset;
+
+    &.toggle-on {
+      .toggle-label {
+        margin-right: 0.5rem;
+        width: 100%;
+      }
+    }
+    &.toggle-off {
+      background: $dark;
+      color: $light;
+      border-color: $gray-2;
+
+      .toggle-label {
+        margin-left: 1.75rem;
+      }
+    }
+  }
 }
 </style>

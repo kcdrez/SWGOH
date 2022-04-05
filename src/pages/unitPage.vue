@@ -1,5 +1,5 @@
 <template>
-  <div class="container swgoh-page">
+  <div class="container swgoh-page" v-if="unit">
     <UnitIcon :unit="unit" size="lg" class="text-center mt-3">
       <div class="btn-group btn-group-sm d-block text-center my-2" role="group">
         <button class="btn btn-primary" @click="addToGeneralPlanner()">
@@ -85,15 +85,15 @@ export default defineComponent({
     },
   },
   watch: {
-    async playerRequestState(newVal) {
+    playerRequestState(newVal, oldVal) {
       if (newVal === loadingState.ready) {
-        await this.fetchUnit(this.$route.params.unitId);
+        this.fetchUnit(this.$route.params.unitId);
       }
     },
     "$route.params.unitId": {
-      async handler(unitId) {
+      handler(unitId) {
         if (unitId) {
-          await this.fetchUnit(unitId);
+          this.fetchUnit(unitId);
         }
       },
       deep: true,
