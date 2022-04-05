@@ -1,34 +1,32 @@
 <template>
-  <Loading :state="requestState" message="Loading Planner Data" size="lg">
-    <div class="container swgoh-page">
-      <div v-if="fullUnitList.length === 0">
-        You have no units in the General Planner.
-      </div>
-      <div class="input-group input-group-sm my-2">
-        <UnitSearch @select="selected = $event" />
-        <button
-          class="btn btn-sm btn-primary"
-          :disabled="!selected"
-          @click="addToGeneral(selected)"
-        >
-          Add Unit to General Planner
-        </button>
-        <button
-          class="btn btn-sm btn-secondary"
-          :disabled="!selected"
-          @click="addToShardPlanner(selected)"
-        >
-          Add Unit to Shard Planner
-        </button>
-      </div>
-      <template v-if="fullUnitList.length > 0">
-        <UnitSection class="unit-section" />
-        <GearSection class="gear-section" />
-        <RelicSection class="relic-section" />
-      </template>
-      <ShardSection class="shard-section" />
+  <div class="container swgoh-page">
+    <div v-if="fullUnitList.length === 0">
+      You have no units in the General Planner.
     </div>
-  </Loading>
+    <div class="input-group input-group-sm my-2">
+      <UnitSearch @select="selected = $event" />
+      <button
+        class="btn btn-sm btn-primary"
+        :disabled="!selected"
+        @click="addToGeneral(selected)"
+      >
+        Add Unit to General Planner
+      </button>
+      <button
+        class="btn btn-sm btn-secondary"
+        :disabled="!selected"
+        @click="addToShardPlanner(selected)"
+      >
+        Add Unit to Shard Planner
+      </button>
+    </div>
+    <template v-if="fullUnitList.length > 0">
+      <UnitSection class="unit-section" />
+      <GearSection class="gear-section" />
+      <RelicSection class="relic-section" />
+    </template>
+    <ShardSection class="shard-section" />
+  </div>
 </template>
 
 <script lang="ts">
@@ -40,11 +38,7 @@ import GearSection from "../components/generalPlanner/gearSection.vue";
 import RelicSection from "../components/generalPlanner/relicSection.vue";
 import ShardSection from "../components/generalPlanner/shardSection.vue";
 import UnitSearch from "../components/units/unitSearch.vue";
-import { loadingState } from "../types/loading";
 import { Unit } from "../types/unit";
-import { initializeModules } from "../utils";
-
-const dependencyModules = ["planner", "unit", "gear", "relic", "shards"];
 
 interface dataModel {
   selected: Unit | null;
@@ -65,13 +59,9 @@ export default defineComponent({
     } as dataModel;
   },
   computed: {
-    ...mapGetters(["someLoading"]),
     ...mapGetters("planner", ["fullUnitList"]),
     ...mapState("unit", ["unitList"]),
     ...mapGetters("shards", ["plannerList"]),
-    requestState(): loadingState {
-      return this.someLoading(dependencyModules);
-    },
   },
   methods: {
     ...mapActions("planner", { addUnitToGeneral: "addUnit" }),
@@ -104,9 +94,6 @@ export default defineComponent({
         });
       }
     },
-  },
-  async created() {
-    await initializeModules(dependencyModules);
   },
 });
 </script>

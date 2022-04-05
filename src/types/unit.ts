@@ -64,6 +64,8 @@ export class Unit {
   private _omicron_abilities?: string[];
   private _has_ultimate?: boolean;
 
+  private _estimatedTime: number = 0;
+
   constructor(payload: IUnit) {
     this._id = payload.id;
     this._name = payload.name;
@@ -91,6 +93,12 @@ export class Unit {
 
   public get id() {
     return this._id;
+  }
+  public get estimatedTime() {
+    return this._estimatedTime;
+  }
+  public set estimatedTime(val) {
+    this._estimatedTime = val;
   }
   public get gearLevel() {
     return this._gear_level;
@@ -129,15 +137,9 @@ export class Unit {
   public get stars() {
     return this._stars;
   }
-  /*
-   * Gets a list of all gear for the current gear level
-   */
   public get currentLevelGear() {
     return this._current_level_gear;
   }
-  /*
-   * Gets a list of all gear (ids) for all gear levels
-   */
   public get gearList() {
     return this._gear_list;
   }
@@ -155,6 +157,39 @@ export class Unit {
   }
   public get omicrons() {
     return this._omicron_abilities ?? [];
+  }
+  public get glTier4() {
+    return store.state.shards.ownedShards[this.id]?.glFarming?.tier4 || false;
+  }
+  public set glTier4(val) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier4: val,
+      tier5: !val ? false : this.glTier5,
+      ultMats: this.glUltMats,
+      id: this.id,
+    });
+  }
+  public get glTier5() {
+    return store.state.shards.ownedShards[this.id]?.glFarming?.tier5 || false;
+  }
+  public set glTier5(val) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier4: val ? true : this.glTier4,
+      tier5: val,
+      ultMats: this.glUltMats,
+      id: this.id,
+    });
+  }
+  public get glUltMats() {
+    return store.state.shards.ownedShards[this.id]?.glFarming?.ultMats || 0;
+  }
+  public set glUltMats(val) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier4: this.glTier4,
+      tier5: this.glTier5,
+      ultMats: val,
+      id: this.id,
+    });
   }
 
   public get hasSpeedSet() {
@@ -599,16 +634,6 @@ export class Unit {
     const match = this.shardNodes.find((n) => n.id === matchFarmingNode?.id);
     return match?.priority ?? 0;
   }
-  // public currencyAmountRemaining(currencies: CurrencyTypeConfig[]) {
-  //   const locations = this.whereToFarm.filter((x) => {
-  //     if (x.currencyType) {
-  //       return currencies.includes(x.currencyType);
-  //     } else {
-  //       return false;
-  //     }
-  //   });
-  //   return locations.map((location) => this.currencyAmountByLocation(location));
-  // }
 }
 
 export interface UnitGear {

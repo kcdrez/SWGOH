@@ -1,243 +1,234 @@
 <template>
   <div class="container swgoh-page mb-3">
-    <Loading :state="requestState" message="Loading Guild Data" size="lg">
-      <UnitSearch @select="selectUnit($event)" />
-      <Loading
-        :state="loading"
-        message="Loading Guild's Unit Data"
-        size="lg"
-        displayText="Please wait...This may take a few minutes."
-      >
-        <template v-if="data">
-          <button class="btn btn-sm btn-primary my-3" @click="downloadXlsx()">
-            Download as XLSX
-          </button>
-          <div class="collapse-header section-header">
-            <h3>
-              <div data-bs-toggle="collapse" href="#player-data">
-                Player Data
-              </div>
-            </h3>
-            <MultiSelect
-              class="select-columns"
-              :options="playerCols"
-              :storageKey="storageKey + 'PlayerColumns'"
-              @checked="selectedColumns = $event"
-            />
-          </div>
-          <div id="player-data" class="collapse" ref="playerData">
-            <table
-              class="table table-bordered table-dark table-sm table-striped swgoh-table"
-            >
-              <thead class="sticky-header show-on-mobile">
-                <tr class="text-center align-middle">
-                  <th
-                    v-if="showCol('allyCode')"
-                    @click="sortBy('allyCode')"
-                    class="c-pointer"
-                  >
-                    <span>Ally Code</span>
-                    <i class="fas mx-2" :class="sortIcon('allyCode')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('name')"
-                    @click="sortBy('name')"
-                    class="c-pointer"
-                  >
-                    <span>Player Name</span>
-                    <i class="fas mx-2" :class="sortIcon('name')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('gearLevel')"
-                    @click="sortBy('gearLevel')"
-                    class="c-pointer"
-                  >
-                    <span>Gear Level</span>
-                    <i class="fas mx-2" :class="sortIcon('gearLevel')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('relicLevel')"
-                    @click="sortBy('relicLevel')"
-                    class="c-pointer"
-                  >
-                    <span>Relic Level</span>
-                    <i class="fas mx-2" :class="sortIcon('relicLevel')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('zetas')"
-                    @click="sortBy('zetas')"
-                    class="c-pointer"
-                  >
-                    <span>Zetas</span>
-                    <i class="fas mx-2" :class="sortIcon('allyCode')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('omicrons')"
-                    @click="sortBy('omicrons')"
-                    class="c-pointer"
-                  >
-                    <span>Omicrons</span>
-                    <i class="fas mx-2" :class="sortIcon('omicrons')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('speed')"
-                    @click="sortBy('speed')"
-                    class="c-pointer"
-                  >
-                    <span>Speed</span>
-                    <i class="fas mx-2" :class="sortIcon('speed')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('speed')"
-                    @click="sortBy('speedMod')"
-                    class="c-pointer"
-                  >
-                    <span>Speed (Mods)</span>
-                    <i class="fas mx-2" :class="sortIcon('speedMod')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('physicalOffense')"
-                    @click="sortBy('physicalOffense')"
-                    class="c-pointer"
-                  >
-                    <span>Physical Offense</span>
-                    <i
-                      class="fas mx-2"
-                      :class="sortIcon('physicalOffense')"
-                    ></i>
-                  </th>
-                  <th
-                    v-if="showCol('specialOffense')"
-                    @click="sortBy('specialOffense')"
-                    class="c-pointer"
-                  >
-                    <span>Special Offense</span>
-                    <i class="fas mx-2" :class="sortIcon('specialOffense')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('protection')"
-                    @click="sortBy('protection')"
-                    class="c-pointer"
-                  >
-                    <span>Protection</span>
-                    <i class="fas mx-2" :class="sortIcon('protection')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('health')"
-                    @click="sortBy('health')"
-                    class="c-pointer"
-                  >
-                    <span>Health</span>
-                    <i class="fas mx-2" :class="sortIcon('health')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('tenacity')"
-                    @click="sortBy('tenacity')"
-                    class="c-pointer"
-                  >
-                    <span>Tenacity</span>
-                    <i class="fas mx-2" :class="sortIcon('tenacity')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('potency')"
-                    @click="sortBy('potency')"
-                    class="c-pointer"
-                  >
-                    <span>Potency</span>
-                    <i class="fas mx-2" :class="sortIcon('potency')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('physicalCrit')"
-                    @click="sortBy('physicalCrit')"
-                    class="c-pointer"
-                  >
-                    <span>Physical Crit Chance</span>
-                    <i class="fas mx-2" :class="sortIcon('physicalCrit')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('specialCrit')"
-                    @click="sortBy('specialCrit')"
-                    class="c-pointer"
-                  >
-                    <span>Special Crit Chance</span>
-                    <i class="fas mx-2" :class="sortIcon('specialCrit')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('critDamage')"
-                    @click="sortBy('critDamage')"
-                    class="c-pointer"
-                  >
-                    <span>Crit Damage</span>
-                    <i class="fas mx-2" :class="sortIcon('critDamage')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('armor')"
-                    @click="sortBy('armor')"
-                    class="c-pointer"
-                  >
-                    <span>Armor</span>
-                    <i class="fas mx-2" :class="sortIcon('armor')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('resistance')"
-                    @click="sortBy('resistance')"
-                    class="c-pointer"
-                  >
-                    <span>Resistance</span>
-                    <i class="fas mx-2" :class="sortIcon('resistance')"></i>
-                  </th>
-                  <th
-                    v-if="showCol('ultimate')"
-                    @click="sortBy('ultimate')"
-                    class="c-pointer"
-                  >
-                    <span>Has Ult?</span>
-                    <i class="fas mx-2" :class="sortIcon('ultimate')"></i>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  class="text-center align-middle"
-                  v-for="player in players"
-                  :key="player.allyCode"
+    <UnitSearch @select="selectUnit($event)" />
+    <Loading
+      :state="loading"
+      message="Loading Guild's Unit Data"
+      size="lg"
+      displayText="Please wait...This may take a few minutes."
+    >
+      <template v-if="data">
+        <button class="btn btn-sm btn-primary my-3" @click="downloadXlsx()">
+          Download as XLSX
+        </button>
+        <div class="collapse-header section-header">
+          <h3>
+            <div data-bs-toggle="collapse" href="#player-data">Player Data</div>
+          </h3>
+          <MultiSelect
+            class="select-columns"
+            :options="playerCols"
+            :storageKey="storageKey + 'PlayerColumns'"
+            @checked="selectedColumns = $event"
+          />
+        </div>
+        <div id="player-data" class="collapse" ref="playerData">
+          <table
+            class="table table-bordered table-dark table-sm table-striped swgoh-table"
+          >
+            <thead class="sticky-header show-on-mobile">
+              <tr class="text-center align-middle">
+                <th
+                  v-if="showCol('allyCode')"
+                  @click="sortBy('allyCode')"
+                  class="c-pointer"
                 >
-                  <td v-if="showCol('allyCode')">{{ player.allyCode }}</td>
-                  <td v-if="showCol('name')">{{ player.name }}</td>
-                  <td v-if="showCol('gearLevel')">{{ player.gearLevel }}</td>
-                  <td v-if="showCol('relicLevel')">{{ player.relicLevel }}</td>
-                  <td v-if="showCol('zetas')">{{ player.zetas }}</td>
-                  <td v-if="showCol('omicrons')">{{ player.omicrons }}</td>
-                  <td v-if="showCol('speed')">{{ player.speed }}</td>
-                  <td v-if="showCol('speed')">{{ player.speedMod }}</td>
-                  <td v-if="showCol('physicalOffense')">
-                    {{ player.physicalOffense }}
-                  </td>
-                  <td v-if="showCol('specialOffense')">
-                    {{ player.specialOffense }}
-                  </td>
-                  <td v-if="showCol('protection')">{{ player.protection }}</td>
-                  <td v-if="showCol('health')">{{ player.health }}</td>
-                  <td v-if="showCol('tenacity')">{{ player.tenacity }}%</td>
-                  <td v-if="showCol('potency')">{{ player.potency }}%</td>
-                  <td v-if="showCol('physicalCrit')">
-                    {{ player.physicalCrit }}%
-                  </td>
-                  <td v-if="showCol('specialCrit')">
-                    {{ player.specialCrit }}%
-                  </td>
-                  <td v-if="showCol('critDamage')">{{ player.critDamage }}</td>
-                  <td v-if="showCol('armor')">{{ player.armor }}</td>
-                  <td v-if="showCol('resistance')">{{ player.resistance }}</td>
-                  <td v-if="showCol('ultimate')">
-                    {{ player.ultimate ? "Yes" : "No" }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </template>
-      </Loading>
+                  <span>Ally Code</span>
+                  <i class="fas mx-2" :class="sortIcon('allyCode')"></i>
+                </th>
+                <th
+                  v-if="showCol('name')"
+                  @click="sortBy('name')"
+                  class="c-pointer"
+                >
+                  <span>Player Name</span>
+                  <i class="fas mx-2" :class="sortIcon('name')"></i>
+                </th>
+                <th
+                  v-if="showCol('gearLevel')"
+                  @click="sortBy('gearLevel')"
+                  class="c-pointer"
+                >
+                  <span>Gear Level</span>
+                  <i class="fas mx-2" :class="sortIcon('gearLevel')"></i>
+                </th>
+                <th
+                  v-if="showCol('relicLevel')"
+                  @click="sortBy('relicLevel')"
+                  class="c-pointer"
+                >
+                  <span>Relic Level</span>
+                  <i class="fas mx-2" :class="sortIcon('relicLevel')"></i>
+                </th>
+                <th
+                  v-if="showCol('zetas')"
+                  @click="sortBy('zetas')"
+                  class="c-pointer"
+                >
+                  <span>Zetas</span>
+                  <i class="fas mx-2" :class="sortIcon('allyCode')"></i>
+                </th>
+                <th
+                  v-if="showCol('omicrons')"
+                  @click="sortBy('omicrons')"
+                  class="c-pointer"
+                >
+                  <span>Omicrons</span>
+                  <i class="fas mx-2" :class="sortIcon('omicrons')"></i>
+                </th>
+                <th
+                  v-if="showCol('speed')"
+                  @click="sortBy('speed')"
+                  class="c-pointer"
+                >
+                  <span>Speed</span>
+                  <i class="fas mx-2" :class="sortIcon('speed')"></i>
+                </th>
+                <th
+                  v-if="showCol('speed')"
+                  @click="sortBy('speedMod')"
+                  class="c-pointer"
+                >
+                  <span>Speed (Mods)</span>
+                  <i class="fas mx-2" :class="sortIcon('speedMod')"></i>
+                </th>
+                <th
+                  v-if="showCol('physicalOffense')"
+                  @click="sortBy('physicalOffense')"
+                  class="c-pointer"
+                >
+                  <span>Physical Offense</span>
+                  <i class="fas mx-2" :class="sortIcon('physicalOffense')"></i>
+                </th>
+                <th
+                  v-if="showCol('specialOffense')"
+                  @click="sortBy('specialOffense')"
+                  class="c-pointer"
+                >
+                  <span>Special Offense</span>
+                  <i class="fas mx-2" :class="sortIcon('specialOffense')"></i>
+                </th>
+                <th
+                  v-if="showCol('protection')"
+                  @click="sortBy('protection')"
+                  class="c-pointer"
+                >
+                  <span>Protection</span>
+                  <i class="fas mx-2" :class="sortIcon('protection')"></i>
+                </th>
+                <th
+                  v-if="showCol('health')"
+                  @click="sortBy('health')"
+                  class="c-pointer"
+                >
+                  <span>Health</span>
+                  <i class="fas mx-2" :class="sortIcon('health')"></i>
+                </th>
+                <th
+                  v-if="showCol('tenacity')"
+                  @click="sortBy('tenacity')"
+                  class="c-pointer"
+                >
+                  <span>Tenacity</span>
+                  <i class="fas mx-2" :class="sortIcon('tenacity')"></i>
+                </th>
+                <th
+                  v-if="showCol('potency')"
+                  @click="sortBy('potency')"
+                  class="c-pointer"
+                >
+                  <span>Potency</span>
+                  <i class="fas mx-2" :class="sortIcon('potency')"></i>
+                </th>
+                <th
+                  v-if="showCol('physicalCrit')"
+                  @click="sortBy('physicalCrit')"
+                  class="c-pointer"
+                >
+                  <span>Physical Crit Chance</span>
+                  <i class="fas mx-2" :class="sortIcon('physicalCrit')"></i>
+                </th>
+                <th
+                  v-if="showCol('specialCrit')"
+                  @click="sortBy('specialCrit')"
+                  class="c-pointer"
+                >
+                  <span>Special Crit Chance</span>
+                  <i class="fas mx-2" :class="sortIcon('specialCrit')"></i>
+                </th>
+                <th
+                  v-if="showCol('critDamage')"
+                  @click="sortBy('critDamage')"
+                  class="c-pointer"
+                >
+                  <span>Crit Damage</span>
+                  <i class="fas mx-2" :class="sortIcon('critDamage')"></i>
+                </th>
+                <th
+                  v-if="showCol('armor')"
+                  @click="sortBy('armor')"
+                  class="c-pointer"
+                >
+                  <span>Armor</span>
+                  <i class="fas mx-2" :class="sortIcon('armor')"></i>
+                </th>
+                <th
+                  v-if="showCol('resistance')"
+                  @click="sortBy('resistance')"
+                  class="c-pointer"
+                >
+                  <span>Resistance</span>
+                  <i class="fas mx-2" :class="sortIcon('resistance')"></i>
+                </th>
+                <th
+                  v-if="showCol('ultimate')"
+                  @click="sortBy('ultimate')"
+                  class="c-pointer"
+                >
+                  <span>Has Ult?</span>
+                  <i class="fas mx-2" :class="sortIcon('ultimate')"></i>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="text-center align-middle"
+                v-for="player in players"
+                :key="player.allyCode"
+              >
+                <td v-if="showCol('allyCode')">{{ player.allyCode }}</td>
+                <td v-if="showCol('name')">{{ player.name }}</td>
+                <td v-if="showCol('gearLevel')">{{ player.gearLevel }}</td>
+                <td v-if="showCol('relicLevel')">{{ player.relicLevel }}</td>
+                <td v-if="showCol('zetas')">{{ player.zetas }}</td>
+                <td v-if="showCol('omicrons')">{{ player.omicrons }}</td>
+                <td v-if="showCol('speed')">{{ player.speed }}</td>
+                <td v-if="showCol('speed')">{{ player.speedMod }}</td>
+                <td v-if="showCol('physicalOffense')">
+                  {{ player.physicalOffense }}
+                </td>
+                <td v-if="showCol('specialOffense')">
+                  {{ player.specialOffense }}
+                </td>
+                <td v-if="showCol('protection')">{{ player.protection }}</td>
+                <td v-if="showCol('health')">{{ player.health }}</td>
+                <td v-if="showCol('tenacity')">{{ player.tenacity }}%</td>
+                <td v-if="showCol('potency')">{{ player.potency }}%</td>
+                <td v-if="showCol('physicalCrit')">
+                  {{ player.physicalCrit }}%
+                </td>
+                <td v-if="showCol('specialCrit')">{{ player.specialCrit }}%</td>
+                <td v-if="showCol('critDamage')">{{ player.critDamage }}</td>
+                <td v-if="showCol('armor')">{{ player.armor }}</td>
+                <td v-if="showCol('resistance')">{{ player.resistance }}</td>
+                <td v-if="showCol('ultimate')">
+                  {{ player.ultimate ? "Yes" : "No" }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
     </Loading>
   </div>
 </template>
@@ -254,7 +245,6 @@ import { Unit } from "../types/unit";
 import { IGuildUnitMap, tUnitOwnedKeys } from "../types/guild";
 import UnitSearch from "../components/units/unitSearch.vue";
 
-const dependencyModules = ["player", "guild"];
 const storageKey = "guildUnits";
 
 interface dataModel {
@@ -305,9 +295,6 @@ export default defineComponent({
           }
         }
       });
-    },
-    requestState(): loadingState {
-      return this.someLoading(dependencyModules);
     },
     loadingUnitState(): loadingState {
       return this.loading ? loadingState.loading : loadingState.ready;
@@ -471,7 +458,6 @@ export default defineComponent({
     },
   },
   async created() {
-    await initializeModules(dependencyModules);
     const storageData = JSON.parse(
       window.localStorage.getItem(this.storageKey) || "{}"
     );

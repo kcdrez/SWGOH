@@ -113,10 +113,10 @@ export default defineComponent({
     },
   },
   mounted() {
-    setupEvents(
-      (this.$refs?.fleetArenaStoreSection as any)?.$el as HTMLElement,
-      storageKey + "Collapse"
-    );
+    const tableComponent = this.$refs?.fleetArenaStoreSection as any;
+    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
+      tableComponent?.refresh();
+    });
   },
 });
 </script>
