@@ -3,7 +3,7 @@
     <div v-if="fullUnitList.length === 0">
       You have no units in the General Planner.
     </div>
-    <div class="input-group input-group-sm my-2">
+    <div class="input-group input-group-sm my-2 search-units-input-group">
       <UnitSearch @select="selected = $event" />
       <button
         class="btn btn-sm btn-primary"
@@ -116,14 +116,61 @@ export default defineComponent({
   }
 }
 
-::v-deep(.section-header) {
-  border-bottom: 1px solid $light;
-  position: sticky;
-  top: 56px;
-  height: 50px;
-}
-
 ::v-deep(thead.sticky-header) {
   top: 106px !important;
+}
+
+::v-deep(.search-units-input-group) {
+  @media only screen and (max-width: 775px) {
+    button,
+    > div {
+      width: 100%;
+    }
+
+    input {
+      border-bottom-left-radius: 0px;
+      border-bottom-right-radius: 0px;
+      border-top-right-radius: 0.2rem !important;
+      border-top-left-radius: 0.2rem !important;
+      position: relative;
+      right: 1px;
+    }
+    button:first-of-type {
+      border-radius: 0px;
+    }
+    button:not(:first-of-type) {
+      border-top-left-radius: 0px;
+      border-top-right-radius: 0px;
+      border-bottom-right-radius: 0.2rem !important;
+      border-bottom-left-radius: 0.2rem !important;
+    }
+
+    // .input-group {
+    //   display: block;
+
+    //   * {
+    //     width: 100%;
+    //   }
+
+    //   .energy-text {
+    //     border-radius: 0.2rem 0.2rem 0 0 !important;
+    //   }
+    //   .energy-spent-input {
+    //     border-radius: 0 0 0.2rem 0.2rem !important;
+    //   }
+
+    //   .refresh-text,
+    //   .energy-spent-text,
+    //   .energy-spent-input,
+    //   input {
+    //     display: block;
+    //     border-top: none;
+    //     text-align: center;
+    //     //everything except the first element is off so the following is used to compensate :shrug:
+    //     position: relative;
+    //     left: 1px;
+    //   }
+    // }
+  }
 }
 </style>

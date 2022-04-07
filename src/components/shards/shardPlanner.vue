@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="collapse-header section-header shard-section-header mt-3">
-      <h3 class="w-100" data-bs-toggle="collapse" href="#shardSection">
-        <div class="d-inline">Shard Planner</div>
+    <div class="collapse-header section-header">
+      <h3>
+        <div data-bs-toggle="collapse" href="#shardSection">Shard Planner</div>
       </h3>
     </div>
     <div id="shardSection" class="collapse" ref="shardSection">
@@ -514,18 +514,18 @@ export default defineComponent({
   }
 }
 
-.section-header.shard-section-header {
-  text-shadow: 2px 2px 2px black;
-  display: flex;
-  align-items: center;
+// .section-header.shard-section-header {
+//   text-shadow: 2px 2px 2px black;
+//   display: flex;
+//   align-items: center;
 
-  a {
-    text-decoration: none;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
+//   a {
+//     text-decoration: none;
+//     &:hover {
+//       text-decoration: underline;
+//     }
+//   }
+// }
 
 .legendary-container,
 .gl-container {

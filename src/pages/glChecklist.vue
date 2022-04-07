@@ -6,7 +6,7 @@
       nodeKey="galactic_legends"
     />
     <div v-for="unit in glUnitList" :key="unit.id" class="mb-2">
-      <div class="collapse-header section-header">
+      <div class="collapse-header section-header extended-2">
         <h3
           class="w-100"
           data-bs-toggle="collapse"
@@ -132,4 +132,8 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.section-header {
+  z-index: 1;
+}
+</style>

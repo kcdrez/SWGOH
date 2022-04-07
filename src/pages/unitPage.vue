@@ -14,8 +14,8 @@
       </div>
     </UnitIcon>
     <GearPlanner />
-    <RelicPlanner />
-    <ShardPlanner />
+    <RelicPlanner class="mt-3" />
+    <ShardPlanner class="mt-3" />
   </div>
 </template>
 
