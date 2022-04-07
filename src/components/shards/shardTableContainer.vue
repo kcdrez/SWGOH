@@ -106,42 +106,6 @@ export default defineComponent({
   }
 }
 
-::v-deep(.section-header) {
-  border-bottom: 1px solid $light;
-  position: sticky;
-  top: 56px;
-  height: 50px;
-
-  @media only screen and (max-width: 900px) and (min-width: 601px) {
-    height: 83px;
-
-    .simple-view-container {
-      position: unset;
-      float: left;
-      width: 20%;
-      margin-top: 0.25rem;
-    }
-    .select-columns {
-      padding: 0;
-      margin: 0.25rem 0.5rem 0 0;
-      width: 78%;
-      float: right;
-    }
-  }
-  @media only screen and (max-width: 600px) {
-    height: 112px;
-
-    .simple-view-container {
-      position: unset;
-      margin-top: 0.25rem;
-    }
-    .select-columns {
-      padding: 0;
-      margin: 0.5rem;
-      width: 97%;
-    }
-  }
-}
 ::v-deep(thead.sticky-header) {
   top: 106px !important;
 }

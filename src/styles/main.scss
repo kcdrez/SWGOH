@@ -258,6 +258,10 @@ button:disabled {
   background-color: black;
   text-align: center;
   padding: 0.5rem 0;
+  border-bottom: 1px solid $light;
+  position: sticky;
+  top: 56px;
+  height: 50px;
 
   h1,
   h2,
@@ -281,7 +285,7 @@ button:disabled {
     top: 12.5px;
     right: 280px;
   }
-  @media only screen and (max-width: 900px) {
+  @media only screen and (max-width: 1100px) {
     & {
       padding-bottom: 0;
 
@@ -290,6 +294,55 @@ button:disabled {
         width: 100%;
         padding: 0 0.25rem;
         margin: 0.5rem 0 0;
+      }
+    }
+  }
+  @media only screen and (max-width: 1100px) and (min-width: 601px) {
+    &.extended-1,
+    &.extended-2 {
+      height: 83px;
+
+      .simple-view-container {
+        position: unset;
+        margin-top: 0.25rem;
+      }
+      .select-columns {
+        padding: 0;
+        margin: 0.25rem 0.5rem 0 0;
+      }
+    }
+    &.extended-1 {
+      .select-columns {
+        margin: 0.25rem 0.5rem;
+        width: 97%;
+      }
+    }
+    &.extended-2 {
+      .simple-view-container {
+        float: left;
+        width: 20%;
+      }
+      .select-columns {
+        width: 78%;
+        float: right;
+      }
+    }
+  }
+  @media only screen and (max-width: 600px) {
+    &.extended-1 {
+      height: 83px;
+    }
+    &.extended-2 {
+      height: 112px;
+
+      .simple-view-container {
+        position: unset;
+        margin-top: 0.25rem;
+      }
+      .select-columns {
+        padding: 0;
+        margin: 0.5rem;
+        width: 97%;
       }
     }
   }

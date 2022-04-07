@@ -1,6 +1,6 @@
 <template>
   <div class="container swgoh-page mb-3">
-    <div class="collapse-header section-header mt-3 position-relative">
+    <div class="collapse-header section-header mt-3 extended-1">
       <h3
         class="w-100"
         data-bs-toggle="collapse"
@@ -22,7 +22,7 @@
       class="collapse"
       :selectedColumns="twSelectedColumns"
     />
-    <div class="collapse-header section-header mt-3">
+    <div class="collapse-header section-header mt-3 extended-1">
       <h3
         class="w-100"
         data-bs-toggle="collapse"
@@ -163,4 +163,8 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.section-header {
+  z-index: 1;
+}
+</style>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="collapse-header section-header mt-3">
+    <div class="collapse-header section-header mt-3 extended-1">
       <h3>
         <div data-bs-toggle="collapse" href="#relic-section-table">
           Relic Summary

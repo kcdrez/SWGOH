@@ -1,6 +1,6 @@
 <template>
   <div v-if="unitList.length > 0">
-    <div class="collapse-header section-header">
+    <div class="collapse-header section-header extended-2">
       <h3 class="w-100" data-bs-toggle="collapse" href="#cantinaStoreSection">
         <div class="d-inline">Cantina Store</div>
       </h3>
