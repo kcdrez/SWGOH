@@ -6,4 +6,6 @@ declare module "bootstrap";
 
 declare module "vue3-popper";
 
-declare module 'node-json-xlsx';
+declare module "node-json-xlsx";
+
+declare module "vue3-resize";
