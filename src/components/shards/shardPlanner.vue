@@ -149,6 +149,59 @@
             />
           </div>
         </div>
+        <div v-if="unitUsages.length > 0">
+          <h5 class="text-center">
+            This unit is required for the following Legendary/GL events:
+          </h5>
+          <table
+            class="table table-bordered table-dark table-sm table-striped swgoh-table"
+          >
+            <thead class="align-middle text-center">
+              <tr>
+                <th>Unit Name</th>
+                <th>Requirement</th>
+                <th>Progress</th>
+              </tr>
+            </thead>
+            <tbody class="align-middle text-center">
+              <tr v-for="item in unitUsages" :key="item.requirementId">
+                <td>
+                  <UnitIcon
+                    :unit="getUnit(item.requirementId)"
+                    isLink
+                    hideImage
+                  />
+                </td>
+                <td>
+                  <RequirementIcon
+                    class="justify-content-center"
+                    v-if="item.requirement"
+                    :type="item.requirement.type"
+                    :unitId="unit.id"
+                    :value="item.requirement.value"
+                  />
+                  <RequirementIcon
+                    class="justify-content-center"
+                    v-else
+                    :type="item.recommended.type"
+                    :unitId="unit.id"
+                    :value="item.recommended.value"
+                  />
+                </td>
+                <td>
+                  <ProgressBar
+                    v-if="item.requirement"
+                    :percent="getPercent(item, 'requirement')"
+                  />
+                  <ProgressBar
+                    v-else
+                    :percent="getPercent(item, 'recommended')"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </template>
     </div>
   </div>
@@ -163,6 +216,8 @@ import StoreTable from "./tables/storeTable.vue";
 import TerritoryBattleShardTable from "./tables/territoryBattleShardTable.vue";
 import LegendaryRequirementsTable from "./tables/legendary/legendaryRequirementsTable.vue";
 import EnergySpent from "../energySpent.vue";
+import RequirementIcon from "../shards/tables/legendary/requirementIcon.vue";
+import UnitIcon from "../units/unitIcon.vue";
 import { loadingState } from "../../types/loading";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
@@ -171,7 +226,7 @@ import {
   estimatedTime as nodeEstimatedTime,
 } from "../../types/shards";
 import { estimatedTime as shopEstimatedTime } from "../../types/currency";
-import { Unit } from "../../types/unit";
+import { Unit, getUnit, getPercent } from "../../types/unit";
 import { estimatedTime as tbEstimatedTime } from "../../types/guild";
 
 const storageKey = "shardPlanner";
@@ -185,6 +240,8 @@ export default defineComponent({
     LegendaryRequirementsTable,
     Timestamp,
     EnergySpent,
+    RequirementIcon,
+    UnitIcon,
   },
   data() {
     return {
@@ -204,9 +261,11 @@ export default defineComponent({
   },
   computed: {
     ...mapState("unit", ["unit"]),
+    ...mapGetters("player", ["unitData"]),
     ...mapGetters(["someLoading"]),
     ...mapState(["collapseSections"]),
     ...mapGetters("shards", ["unitFarmingList"]),
+    ...mapState("shards", ["shardFarming"]),
     requestState(): loadingState {
       return this.someLoading(["unit"]);
     },
@@ -385,6 +444,48 @@ export default defineComponent({
 
       return Math.min(...days);
     },
+    unitUsages(): any[] {
+      const legendaries = this.shardFarming.filter(
+        (x: FarmingNode) => x.id === "galactic_legends" || x.id === "legendary"
+      );
+      return legendaries
+        .reduce((acc: any[], node: FarmingNode) => {
+          node.characters.forEach((char) => {
+            (char?.prerequisites ?? []).forEach((requirement) => {
+              const idMatch = requirement.id === this.unit.id;
+
+              const tagsMatch = (() => {
+                if ((requirement?.tags ?? []).length === 0) {
+                  return false;
+                }
+                return (requirement?.tags ?? []).every((tag) => {
+                  if (tag === "is_ship") {
+                    return this.unit.isShip;
+                  } else if (tag.includes("!")) {
+                    const notTag = tag.replace("!", "");
+                    if (notTag === "is_ship") {
+                      return !this.unit.isShip;
+                    } else {
+                      return !this.unit.categories.includes(notTag);
+                    }
+                  } else {
+                    return this.unit.categories.includes(tag);
+                  }
+                });
+              })();
+
+              if (idMatch || tagsMatch) {
+                acc.push({ ...requirement, requirementId: char.id });
+              }
+            });
+          });
+          return acc;
+        }, [])
+        .filter((unit: any) => {
+          const match: Unit | undefined = this.unitData(unit.requirementId);
+          return match ? match.stars < 7 : true;
+        });
+    },
   },
   watch: {
     simpleView: {
@@ -393,6 +494,10 @@ export default defineComponent({
       },
       deep: true,
     },
+  },
+  methods: {
+    getUnit,
+    getPercent,
   },
   mounted() {
     setupEvents(
