@@ -2,7 +2,9 @@
   <div>
     <div class="collapse-header section-header">
       <h3>
-        <div data-bs-toggle="collapse" href="#shardSection">Shard Planner</div>
+        <div data-bs-toggle="collapse" href="#shardSection">
+          7 Star Unlock Planner
+        </div>
       </h3>
     </div>
     <div id="shardSection" class="collapse" ref="shardSection">
