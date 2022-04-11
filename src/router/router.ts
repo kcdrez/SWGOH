@@ -182,7 +182,29 @@ const routes = [
   {
     path: "/widgets",
     name: "Widgets",
-    component: WidgetsPage,
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: [
+          "unit",
+          "gear",
+          "relic",
+          "shards",
+          "planner",
+          "guild",
+          "currency",
+        ],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "Widgets",
+        component: WidgetsPage,
+      },
+    ],
   },
 ];
 

@@ -5,51 +5,55 @@
       <i class="fa fa-times" @click="handleDelete"></i>
     </div>
     <div class="my-custom-content">
-      Here's a cool table!
-      <table
-        class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
-      >
-        <thead>
-          <tr>
-            <th>Column A</th>
-            <th>Column B</th>
-            <th>Column C</th>
-            <th>Column D</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>A1</td>
-            <td>A2</td>
-            <td>A3</td>
-            <td>A4</td>
-          </tr>
-          <tr>
-            <td>B1</td>
-            <td>B2</td>
-            <td>B3</td>
-            <td>B4</td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- {{ payload.name }} -->
+      <UnitData v-if="type === 'unitData' && payload" :unit="payload" />
     </div>
     <ResizeObserver @notify="handleResize"></ResizeObserver>
   </div>
 </template>
 
-<script>
-import Modal from "./Modal.vue";
+<script lang="ts">
+import { defineComponent } from "vue";
 
-export default {
+import Modal from "./Modal.vue";
+import UnitData from "../units/unitData.vue";
+import { mapGetters } from "vuex";
+
+export default defineComponent({
   name: "WidgetItem",
   components: {
     Modal,
+    UnitData,
   },
-  props: ["uniqueKey"],
+  props: {
+    uniqueKey: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      default: "unitData",
+    },
+    componentData: {
+      type: String,
+      default: null,
+      // default: () => {
+      //   return {};
+      // },
+    },
+  },
   data() {
     return {
       showModal: false,
     };
+  },
+  computed: {
+    ...mapGetters("player", ["unitData"]),
+    payload() {
+      if (this.type === "unitData") {
+        return this.unitData(this.componentData);
+      }
+    },
   },
   methods: {
     handleResize() {
@@ -59,7 +63,7 @@ export default {
       this.$emit("delete", this.uniqueKey);
     },
   },
-};
+});
 </script>
 
 <style scoped lang="scss">
