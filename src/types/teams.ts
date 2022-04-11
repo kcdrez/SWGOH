@@ -420,20 +420,18 @@ export class Match extends Team {
     return this._opponentTeamId;
   }
   public get playerTeam() {
-    const playerTeam: Team | undefined = store.state.teams.teams.find(
+    return store.state.teams.teams.find(
       (team) => team.id === this.playerTeamId
     );
-    return playerTeam;
   }
   public get opponentTeam() {
-    const opponentTeam: Team | undefined = store.state.opponents.teams.find(
+    return store.state.opponents.teams.find(
       (team) => team.id === this.opponentTeamId
     );
-
-    return opponentTeam;
   }
 
   private updateUnitList() {
+    //todo: this isnt reactive when adding/removing units on the matchTable component
     this._units = [
       ...(this.playerTeam?.units || []),
       ...(this.opponentTeam?.units || []),
@@ -442,7 +440,7 @@ export class Match extends Team {
 
   protected save() {
     //todo debounce
-    store.dispatch("opponent/saveMatches");
+    store.dispatch("opponents/saveMatches", { root: true });
   }
 
   public sanitize(): IMatch {

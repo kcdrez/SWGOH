@@ -315,25 +315,19 @@ export default defineComponent({
         }
       } else if (playerType === "opponent") {
         if (this.newOpponentTeamName.trim() !== "") {
-          this.addOpponentTeam({
-            id: uuid(),
-            name: this.newOpponentTeamName,
-            units: [],
-          });
+          this.addOpponentTeam(
+            new Team(
+              {
+                id: uuid(),
+                name: this.newOpponentTeamName,
+                units: [],
+              },
+              this.opponent.id
+            )
+          );
           this.newOpponentTeamName = "";
         }
       }
-    },
-    getMatchTeamList(match: MatchPayload): Team {
-      const units: TeamMember[] = [
-        ...(match.playerTeam?.units || []),
-        ...(match.opponentTeam?.units || []),
-      ];
-      return new Team({
-        id: uuid(),
-        name: "",
-        // units,
-      });
     },
     removeOpponent() {
       this.deleteOpponent();

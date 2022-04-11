@@ -241,7 +241,6 @@ import {
   isGearRequirement,
   isRelicRequirement,
 } from "../../../../types/shards";
-import { round2Decimals } from "../../../../utils";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
