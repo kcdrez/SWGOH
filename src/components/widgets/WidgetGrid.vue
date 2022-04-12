@@ -40,7 +40,6 @@ import { Unit } from "../../types/unit";
 interface dataModel {
   grid: null | Muuri;
   keys: { id: string; type: string; data: any }[];
-  showDebug: boolean;
   layout: any[];
   searchUnit: null | Unit;
 }
@@ -55,7 +54,6 @@ export default defineComponent({
     return {
       grid: null,
       keys: [],
-      showDebug: false,
       layout: JSON.parse(window.localStorage.getItem("layout") || "[]"),
       searchUnit: null,
     } as dataModel;

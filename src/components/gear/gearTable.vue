@@ -1,6 +1,5 @@
 <template>
   <div>
-    <button @click="debug">Debug</button>
     <table
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
       v-if="gearList.length > 0"
