@@ -11,7 +11,7 @@
       type="button"
       @click="addWidget(searchUnit.id, 'unitData', searchUnit.id)"
     >
-      Search
+      Add Widget
     </button>
   </div>
   <div class="widget-grid">
@@ -21,7 +21,7 @@
       :uniqueKey="key.id"
       :type="key.type"
       :componentData="key.data"
-      ref="widgets"
+      :ref="`widgets-${key.id}`"
       @delete="handleDelete(index, key)"
       @resized="handleResize"
     />
@@ -90,32 +90,20 @@ export default defineComponent({
       });
       window.localStorage.setItem("layout", JSON.stringify(itemOrder));
     },
-    loadLayout(gridLayout: any) {
-      let currentItems = this.grid?.getItems();
-      let newItems: any[] = [];
-      let itemId;
-      let itemIndex;
-
-      // for (let i = 0; i < gridLayout.length; i++) {
-      //   //Get the ID we are looking for, find the index of item, get the actual item
-      //   itemId = gridLayout[i].id;
-      //   itemIndex = currentItemIds.indexOf(itemId);
-      //   if (itemIndex > -1) {
-      //     let item = currentItems[itemIndex];
-      //     // item._width = gridLayout[i].height;
-      //     item.getElement().style.height = gridLayout[i].height + "px";
-      //     item.getElement().style.width = gridLayout[i].width + "px";
-      //     newItems.push(item);
-      //   }
-      // }
-      this.grid?.sort(newItems, { layout: "instant" });
-      this.grid?.refreshItems();
-      this.grid?.layout();
-    },
-    addWidget(id: string, type: string, data: any) {
+    addWidget(
+      id: string,
+      type: string,
+      data: any,
+      height?: number,
+      width?: number
+    ) {
       this.keys.push({ id, type, data });
       this.$nextTick(() => {
-        const element = (this.$refs.widgets as any)[this.keys.length - 1].$el;
+        const element = (this.$refs[`widgets-${id}`] as any)[0].$el;
+        if (height && width) {
+          element.style.height = `${height}px`;
+          element.style.width = `${width}px`;
+        }
         this.grid?.add(element);
         this.saveLayout();
       });
@@ -126,18 +114,11 @@ export default defineComponent({
       dragEnabled: true,
       dragHandle: ".header",
     }).on("move", () => {
+      console.warn("moving grid. when does this trigger?");
       this.saveLayout();
     });
-    if (this.layout.length > 0) {
-      this.loadLayout(this.layout);
-    } else {
-      this.grid.layout(true);
-      this.saveLayout();
-    }
-  },
-  created() {
-    this.keys = this.layout.map((x) => {
-      return { id: x.id, type: x.type, data: x.data };
+    this.layout.forEach(({ id, type, data, height, width }) => {
+      this.addWidget(id, type, data, height, width);
     });
   },
 });
@@ -146,5 +127,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .widget-grid {
   position: relative;
+  margin: 0.25rem 0;
 }
 </style>
