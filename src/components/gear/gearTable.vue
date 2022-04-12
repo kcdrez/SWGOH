@@ -1,5 +1,6 @@
 <template>
   <div>
+    <button @click="debug">Debug</button>
     <table
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
       v-if="gearList.length > 0"
@@ -104,14 +105,18 @@
             There are no gear pieces that meet that search criteria.
           </td>
         </tr>
-        <tr v-for="salvage in filteredSalvageList" :key="salvage.id">
+        <tr
+          v-for="salvage in filteredSalvageList"
+          :key="salvage.id"
+          class="align-middle text-center"
+        >
           <td v-if="showCol('icon')">
             <GearIcon :gear="salvage" />
           </td>
-          <td class="align-middle text-center" v-if="showCol('name')">
+          <td v-if="showCol('name')">
             {{ salvage.name }}
           </td>
-          <td class="align-middle text-center" v-if="showCol('mark')">
+          <td v-if="showCol('mark')">
             {{ salvage.mark }}
           </td>
           <td v-if="showCol('locations')">
@@ -127,25 +132,22 @@
                 Show/Hide Locations
               </button>
               <ul class="m-0 collapse" :id="`locations-${salvage.id}`">
-                <li v-for="(l, index) in salvage.locations" :key="index">
+                <li v-for="(l, index) in salvage.locationLabels" :key="index">
                   {{ l }}
                 </li>
               </ul>
             </template>
           </td>
-          <td class="align-middle" v-if="showCol('owned')">
+          <td v-if="showCol('owned')">
             <OwnedAmount :salvage="salvage" />
           </td>
-          <td class="align-middle text-center" v-if="showCol('needed')">
+          <td v-if="showCol('needed')">
             {{ salvage.totalAmount }}
           </td>
-          <td class="align-middle" v-if="showCol('progress')">
+          <td v-if="showCol('progress')">
             <ProgressBar :percent="salvage.percent" />
           </td>
-          <td
-            class="align-middle"
-            v-if="showRequiredByUnit && showCol('required')"
-          >
+          <td v-if="showRequiredByUnit && showCol('required')">
             <ul class="mb-0">
               <li v-for="unit in salvage.neededBy" :key="unit.id">
                 <Popper hover arrow placement="left">
@@ -170,14 +172,14 @@
               </li>
             </ul>
           </td>
-          <td class="align-middle text-center" v-if="showCol('time')">
+          <td v-if="showCol('time')">
             <span class="row-label">Completion Date: </span>
             <Timestamp
               :timeLength="salvage.timeEstimation"
               displayClasses="d-inline"
             />
           </td>
-          <td class="align-middle" v-if="showCol('actions')">
+          <td v-if="showCol('actions')">
             <div
               class="btn-group btn-group-sm d-block text-center"
               role="group"
@@ -245,7 +247,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
+import { writeFile, utils } from "xlsx";
 
 import { Gear } from "../../types/gear";
 import OwnedAmount from "./gearOwned.vue";
@@ -287,6 +290,7 @@ export default defineComponent({
     };
   },
   computed: {
+    ...mapState("gear", { allGear: "gearList" }),
     filteredSalvageList(): Gear[] {
       return this.gearList
         .filter((gear: Gear) => {
@@ -399,6 +403,9 @@ export default defineComponent({
           sortMethod: this.sortMethod,
         })
       );
+    },
+    getGear(id: string): Gear | undefined {
+      return this.allGear.find((x: Gear) => x.id === id);
     },
   },
   created() {
