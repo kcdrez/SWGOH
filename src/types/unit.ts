@@ -485,12 +485,10 @@ export class Unit {
     let totalChallenges = 0;
 
     this.fullSalvageList.forEach((gear: Gear) => {
-      const isChallenge = gear.missionList.some(
-        (x) => x.missionIdentifier.campaignMapId === "CHALLENGES"
+      const isChallenge = gear.locations.some(
+        (x) => x.nodeData?.table === "Challenge"
       );
-      const isFleet = gear.missionList.some(
-        (x) => x.missionIdentifier.campaignId === "C01SP"
-      );
+      const isFleet = gear.locations.some((x) => x.nodeData?.table === "Fleet");
       const timeToGet = gear.timeEstimation;
 
       if (gear.irrelevant || timeToGet < 0) {

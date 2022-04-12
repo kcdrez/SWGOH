@@ -1,19 +1,14 @@
 import store from "../vuex-store/store";
 import { round2Decimals, unvue } from "../utils";
-import {
-  challenges,
-  difficultyIds,
-  mapIds,
-  missionIds,
-  tableIds,
-} from "./locationMapping";
+import { FarmingNode } from "./shards";
 
 export const maxGearLevel = 13;
 export interface IGear {
   id: string;
   image: string;
   name: string;
-  lookupMissionList: Mission[];
+  // lookupMissionList: Mission[];
+  locations: ILocation[];
   tier: number;
   ingredients: IIngredient[];
   mark: string;
@@ -39,13 +34,16 @@ export interface INeededBy {
   gearLevels: { amount: number; level: number }[];
 }
 
+interface ILocationNode extends ILocation {
+  nodeData: FarmingNode | null;
+}
 export class Gear {
   private _id: string;
   private _image: string;
   private _name: string;
   private _mark: string;
   private _totalAmount: number = 0;
-  private _lookupMissionList: Mission[];
+  private _locations: ILocationNode[];
   private _tier: number;
   private _neededBy: INeededBy[] = [];
   private _ingredients: IIngredient[];
@@ -56,7 +54,22 @@ export class Gear {
     this._image = data.image;
     this._name = data.name;
     this._mark = data.mark;
-    this._lookupMissionList = data.lookupMissionList;
+    this._locations = data.locations.map((location) => {
+      const match = store.state.shards.shardFarming.find(
+        (x) => x.id === location.id
+      );
+      if (match) {
+        return {
+          ...location,
+          nodeData: match,
+        };
+      } else {
+        return {
+          ...location,
+          nodeData: null,
+        };
+      }
+    });
     this._tier = data.tier;
     this._ingredients = data.ingredients;
     this._recipes = data.recipes;
@@ -101,8 +114,18 @@ export class Gear {
   public get remaining() {
     return this.totalAmount - this.owned;
   }
-  public get missionList() {
-    return this._lookupMissionList;
+  public get locations() {
+    return this._locations;
+  }
+  public get locationLabels() {
+    return this._locations.map((location) => {
+      if (location.nodeData) {
+        return `${location.nodeData.label}`;
+      } else {
+        return `${location.id}`;
+      }
+      return ``;
+    });
   }
   public get tier() {
     return this._tier;
@@ -178,40 +201,12 @@ export class Gear {
       id: this.id,
       image: this.image,
       name: this.name,
-      lookupMissionList: this.missionList,
+      locations: this._locations,
       tier: this.tier,
       ingredients: this.ingredients,
       mark: this.mark,
       recipes: this.recipes,
     });
-  }
-
-  public get locations(): string[] {
-    const locations: string[] = [];
-
-    this.missionList.forEach((mission) => {
-      const {
-        campaignId,
-        campaignNodeDifficulty,
-        campaignMapId,
-        campaignMissionId,
-        campaignNodeId,
-      } = mission.missionIdentifier;
-      const difficulty: any = difficultyIds[campaignNodeDifficulty];
-      const table: any = tableIds[campaignId];
-      const level: any = mapIds[campaignMapId];
-      const node: any = missionIds[campaignMissionId];
-
-      if (campaignMapId === "CHALLENGES") {
-        const label = `Daily Challenges (${challenges[campaignNodeId]})`;
-        if (!locations.includes(label)) {
-          locations.push(label);
-        }
-      } else if (table) {
-        locations.push(`${table} ${level}-${node} (${difficulty})`);
-      }
-    });
-    return locations.sort((a, b) => (a > b ? 1 : -1));
   }
 
   public get timeEstimation(): number {
@@ -225,53 +220,46 @@ export class Gear {
       let energy = 100;
       let totalDays = 0;
 
-      this.missionList.forEach((mission) => {
-        const {
-          campaignId,
-          campaignNodeDifficulty,
-          campaignMapId,
-          campaignMissionId,
-          campaignNodeId,
-        } = mission.missionIdentifier;
-
-        if (["C01SP", "C01D", "C01L"].includes(campaignId)) {
-          let missionEnergy = 1;
-          const node = Number(campaignMissionId.replace(/\D/g, ""));
-
-          if (node <= 4) {
-            missionEnergy = 6;
-          } else if (node >= 6) {
-            missionEnergy = 8;
-          } else if (node >= 9) {
-            missionEnergy = 10;
+      this._locations.forEach((location) => {
+        if (location.nodeData) {
+          if (
+            ["Light Side", "Dark Side", "Fleet"].includes(
+              location.nodeData.table
+            )
+          ) {
+            const missionEnergy = location.nodeData.energy ?? 100;
+            if (missionEnergy < energy) {
+              const dropRate = 0.2; //todo
+              const refreshes = ["Light Side", "Dark Side"].includes(
+                location.nodeData.table
+              )
+                ? store.state.gear.refreshes?.standard ?? 0
+                : store.state.gear.refreshes?.fleet ?? 0;
+              const extraEnergy = ["Light Side", "Dark Side"].includes(
+                location.nodeData.table
+              )
+                ? 135
+                : 45;
+              const otherEnergy = ["Light Side", "Dark Side"].includes(
+                location.nodeData.table
+              )
+                ? store.state.gear.energy?.standard ?? 0
+                : store.state.gear.energy?.fleet ?? 0;
+              const totalEnergy =
+                240 + extraEnergy + 120 * refreshes - otherEnergy;
+              const chancesPerDay = totalEnergy / missionEnergy;
+              const piecesPerDay = chancesPerDay * dropRate;
+              totalDays = this.remaining / piecesPerDay;
+              energy = missionEnergy;
+            }
+          } else if (
+            ["challenges_tac", "challenges_str", "challenges_agi"].includes(
+              location.nodeData.id
+            )
+          ) {
+            energy = 0;
+            totalDays = this.remaining / (60 / 7);
           }
-
-          if (campaignNodeDifficulty === 5) {
-            missionEnergy *= 2;
-          }
-
-          if (missionEnergy < energy) {
-            const dropRate = 0.2; //todo
-            const refreshes = ["C01D", "C01L"].includes(campaignId)
-              ? store.state.gear.refreshes?.standard ?? 0
-              : store.state.gear.refreshes?.fleet ?? 0;
-            const extraEnergy = ["C01D", "C01L"].includes(campaignId)
-              ? 135
-              : 45;
-            const otherEnergy = ["C01D", "C01L"].includes(campaignId)
-              ? store.state.gear.energy?.standard ?? 0
-              : store.state.gear.energy?.fleet ?? 0;
-            const totalEnergy =
-              240 + extraEnergy + 120 * refreshes - otherEnergy;
-
-            const chancesPerDay = totalEnergy / missionEnergy;
-            const piecesPerDay = chancesPerDay * dropRate;
-            totalDays = this.remaining / piecesPerDay;
-            energy = missionEnergy;
-          }
-        } else if (campaignMapId === "CHALLENGES") {
-          energy = 0;
-          totalDays = this.remaining / (60 / 7);
         }
       });
       return Math.ceil(totalDays);
@@ -290,6 +278,13 @@ export class Gear {
 
 export interface Mission {
   missionIdentifier: MissionNode;
+}
+
+export interface ILocation {
+  id: string;
+  dropRate?: number;
+  slot?: number;
+  count?: number;
 }
 
 type campaignTypes = {

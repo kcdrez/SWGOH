@@ -4,7 +4,6 @@ import { Gear, ConfigType, OwnedCount, EnergyType } from "../types/gear";
 import { loadingState } from "../types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
-import { PlayerResponse } from "../types/player";
 
 type updateEnergy = {
   value: number;
