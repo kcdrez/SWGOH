@@ -132,7 +132,7 @@
                 Show/Hide Locations
               </button>
               <ul class="m-0 collapse" :id="`locations-${salvage.id}`">
-                <li v-for="(l, index) in salvage.locations" :key="index">
+                <li v-for="(l, index) in salvage.locationLabels" :key="index">
                   {{ l }}
                 </li>
               </ul>
@@ -242,31 +242,6 @@
         </tr>
       </tbody>
     </table>
-    <!-- debugging -->
-    <table
-      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
-    >
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Characters</th>
-          <th>Gear</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="location in allFarmableNodes" :key="location.id">
-          <td>{{ location.id }}</td>
-          <td>{{ location.characters }}</td>
-          <td>
-            <GearIcon
-              v-for="gear in location.gear"
-              :key="gear.id"
-              :gear="getGear(gear.id)"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </template>
 
@@ -316,7 +291,6 @@ export default defineComponent({
   },
   computed: {
     ...mapState("gear", { allGear: "gearList" }),
-    ...mapGetters("gear", ["allFarmableNodes", "allGearFarmableLocations"]),
     filteredSalvageList(): Gear[] {
       return this.gearList
         .filter((gear: Gear) => {
@@ -432,45 +406,6 @@ export default defineComponent({
     },
     getGear(id: string): Gear | undefined {
       return this.allGear.find((x: Gear) => x.id === id);
-    },
-    debug() {
-      const rows1 = this.allGearFarmableLocations.map(
-        ({ id, name, locations }: any) => {
-          return {
-            id,
-            name,
-            locations: locations.join("\n"),
-          };
-        }
-      );
-      const rows2 = this.allFarmableNodes.map(
-        ({ id, table, difficulty, map, mission, characters, gear }: any) => {
-          const gearList =
-            gear
-              ?.map((gear: any) => {
-                const gearData = this.getGear(gear.id);
-                return gearData?.name ?? "unknown";
-              })
-              .join("\n") ?? "";
-          return {
-            id,
-            table,
-            difficulty,
-            map,
-            mission,
-            characters: characters?.join("\n") ?? "",
-            gear: gearList,
-          };
-        }
-      );
-      const wb = utils.book_new();
-      const ws1 = utils.json_to_sheet(rows1);
-      const ws2 = utils.json_to_sheet(rows2);
-
-      utils.book_append_sheet(wb, ws1, "Gear Locations");
-      utils.book_append_sheet(wb, ws2, "Farmable Node Data");
-
-      writeFile(wb, "FarmingData.xlsx");
     },
   },
   created() {
