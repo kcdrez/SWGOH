@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import { mapGetters, mapState } from "vuex";
 
 import RelicTable from "./relicTable.vue";
@@ -58,12 +58,19 @@ import RelicLevelIcon from "../units/relicLevelIcon.vue";
 import { loadingState } from "../../types/loading";
 import { Relic, maxRelicLevel } from "../../types/relic";
 import { setupEvents } from "../../utils";
+import { Unit } from "../../types/unit";
 
 const storageKey = "relicPlanner";
 
 export default defineComponent({
   name: "RelicPlannerComponent",
   components: { RelicTable, Timestamp, EnergySpent, RelicLevelIcon },
+  props: {
+    unit: {
+      type: Object as PropType<Unit>,
+      required: true,
+    },
+  },
   data() {
     return {
       maxRelicLevel,
@@ -73,7 +80,6 @@ export default defineComponent({
   },
   computed: {
     ...mapState("relic", ["relicConfig"]),
-    ...mapState("unit", ["unit"]),
     ...mapGetters(["someLoading"]),
     requestState(): loadingState {
       return this.someLoading(["relic", "unit"]);

@@ -3,10 +3,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "@vueform/toggle/themes/default.css";
 import "bootstrap";
 import "./styles/main.scss";
+import "vue3-resize/dist/vue3-resize.css";
 import Toaster from "vue-dk-toast";
 import moment from "moment";
 import Toggle from "@vueform/toggle";
 import Popper from "vue3-popper";
+import { ResizeObserver } from "vue3-resize";
 
 import App from "./App.vue";
 import store from "./vuex-store/store";
@@ -54,4 +56,5 @@ app
   .component("MultiSelect", MultiSelect)
   .component("Toggle", Toggle)
   .component("Popper", Popper)
+  .component("ResizeObserver", ResizeObserver)
   .mount("#app");

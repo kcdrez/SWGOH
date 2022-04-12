@@ -11,6 +11,7 @@ import GuildEventsPage from "../pages/guildEvents.vue";
 import GuildUnitsPage from "../pages/guildUnits.vue";
 import DamageCalculatorPage from "../pages/damageCalculator.vue";
 import GLChecklist from "../pages/glChecklist.vue";
+import WidgetsPage from "../pages/widgets.vue";
 
 const routes = [
   {
@@ -175,6 +176,33 @@ const routes = [
         path: "",
         name: "GLChecklist",
         component: GLChecklist,
+      },
+    ],
+  },
+  {
+    path: "/widgets",
+    name: "Widgets",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: [
+          "unit",
+          "gear",
+          "relic",
+          "shards",
+          "planner",
+          "guild",
+          "currency",
+        ],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "Widgets",
+        component: WidgetsPage,
       },
     ],
   },

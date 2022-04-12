@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import { mapState, mapGetters } from "vuex";
 
 import { loadingState } from "../../types/loading";
@@ -53,12 +53,19 @@ import EnergySpent from "../energySpent.vue";
 import GearText from "./gearText.vue";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
+import { Unit } from "../../types/unit";
 
 const storageKey = "gearPlanner";
 
 export default defineComponent({
   name: "GearPlannerComponent",
   components: { GearTable, Timestamp, EnergySpent, GearText },
+  props: {
+    unit: {
+      type: Object as PropType<Unit>,
+      required: true,
+    },
+  },
   data() {
     return {
       maxGearLevel,
@@ -67,7 +74,6 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("unit", ["unit"]),
     ...mapGetters(["someLoading"]),
     ...mapState(["collapseSections"]),
     requestState(): loadingState {
