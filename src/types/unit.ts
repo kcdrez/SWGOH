@@ -507,10 +507,9 @@ export class Unit {
   }
 
   public get relicTotalDays() {
-    const { target } = store.state.planner.targetConfig[this.id].relic;
     return Object.values(store.state.relic.relicConfig).reduce((acc, relic) => {
       const days = relic.timeEstimation([
-        { level: this.relicLevel ?? 0, target },
+        { level: this.relicLevel ?? 0, target: this.relicTarget },
       ]);
       return days > 0 ? acc + days : acc;
     }, 0);
