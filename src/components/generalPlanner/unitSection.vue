@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="collapse-header section-header">
+    <div class="collapse-header section-header extended-2">
       <h3>
         <div data-bs-toggle="collapse" href="#unit-section-table">
           Unit Summary
@@ -187,7 +187,7 @@
               />
             </td>
             <td class="align-middle text-center" v-if="showCol('totalDate')">
-              <span class="row-label">Est. Total Level:</span>
+              <span class="row-label">Est. Completed Date:</span>
               <Timestamp
                 :timeLength="unit.relicTotalDays + unit.gearTotalDays"
                 displayClasses="d-inline"

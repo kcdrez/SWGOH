@@ -1,12 +1,12 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 
-import store from "../vuex-store/store";
+import PlayerLoadingPage from "../pages/playerLoadingPage.vue";
 import HomePage from "../pages/homepage.vue";
 import UnitPage from "../pages/unitPage.vue";
 import GeneralPlannerPage from "../pages/generalPlanner.vue";
 import TeamPage from "../pages/team.vue";
 import MatchUpPage from "../pages/matchUpPage.vue";
-import StarProgressionPage from "../pages/starProgression.vue";
+import CharacterFarmingPage from "../pages/characterFarming.vue";
 import GuildEventsPage from "../pages/guildEvents.vue";
 import GuildUnitsPage from "../pages/guildUnits.vue";
 import DamageCalculatorPage from "../pages/damageCalculator.vue";
@@ -16,75 +16,173 @@ const routes = [
   {
     path: "/",
     name: "home",
-    component: HomePage,
-  },
-  {
-    path: "/unit/:unitId",
-    name: "UnitPage",
-    component: UnitPage,
+    // redirect: { name: "GeneralPlannerPage" },
+    components: {
+      default: HomePage,
+    },
   },
   {
     path: "/general-planner",
-    name: "GeneralPlannerPage",
-    component: GeneralPlannerPage,
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["planner", "unit", "gear", "relic", "shards"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GeneralPlannerPage",
+        component: GeneralPlannerPage,
+      },
+    ],
+  },
+  {
+    path: "/unit/:unitId",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: [
+          "unit",
+          "gear",
+          "relic",
+          "shards",
+          "planner",
+          "guild",
+          "currency",
+        ],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "UnitPage",
+        component: UnitPage,
+      },
+    ],
   },
   {
     path: "/teams",
-    name: "TeamPage",
-    component: TeamPage,
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["teams"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "TeamPage",
+        component: TeamPage,
+      },
+    ],
   },
   {
     path: "/matchup",
-    name: "MatchUpPage",
-    component: MatchUpPage,
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["teams", "opponents"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "MatchUpPage",
+        component: MatchUpPage,
+      },
+    ],
   },
   {
     path: "/character-farming",
-    name: "StarProgressionPage",
-    component: StarProgressionPage,
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["shards", "planner", "unit", "guild", "currency"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "CharacterFarmingPage",
+        component: CharacterFarmingPage,
+      },
+    ],
   },
   {
     path: "/guild",
-    name: "GuildEventsPage",
-    component: GuildEventsPage,
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["guild"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GuildEventsPage",
+        component: GuildEventsPage,
+      },
+      {
+        path: "units",
+        name: "GuildUnitsPage",
+        component: GuildUnitsPage,
+      },
+    ],
   },
   {
     path: "/damage-calculator",
-    name: "DamageCalculatorPage",
-    component: DamageCalculatorPage,
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: [],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "DamageCalculatorPage",
+        component: DamageCalculatorPage,
+      },
+    ],
   },
   {
     path: "/gl-checklist",
-    name: "GLChecklist",
-    component: GLChecklist,
-  },
-  {
-    path: "/guild/units",
-    name: "GuildUnitsPage",
-    component: GuildUnitsPage,
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["unit", "shards"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GLChecklist",
+        component: GLChecklist,
+      },
+    ],
   },
 ];
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
-});
-
-router.beforeEach((to, _from, next) => {
-  if (to.name === "home") {
-    next();
-  } else if (!store.state.player.player) {
-    store.watch(
-      (state) => {
-        return state.player.player;
-      },
-      () => {
-        next();
-      }
-    );
-  } else {
-    next();
-  }
 });
 
 export default router;

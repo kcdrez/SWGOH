@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <Loading :state="loading ? 'LOADING' : 'READY'" size="md">
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
@@ -150,7 +150,7 @@
           >
             <span class="row-label">Completion Date:</span>
             <Timestamp
-              :timeLength="estimatedTime(unit)"
+              :timeLength="unit.estimatedTime"
               displayClasses="d-inline"
             />
           </td>
@@ -191,7 +191,7 @@
         </tr>
       </tbody>
     </table>
-  </div>
+  </Loading>
 </template>
 
 <script lang="ts">
@@ -202,7 +202,7 @@ import UnitIcon from "../../units/unitIcon.vue";
 import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
 import Timestamp from "../../timestamp.vue";
-import { Unit } from "../../../types/unit";
+import { Unit, unitsByPriority } from "../../../types/unit";
 import { estimatedTime } from "../../../types/shards";
 
 export default defineComponent({
@@ -254,12 +254,17 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    loadOnCreation: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       sortDir: "asc",
       sortMethod: "name",
       searchText: "",
+      loading: true,
     };
   },
   computed: {
@@ -299,9 +304,9 @@ export default defineComponent({
             }
           } else if (this.sortMethod === "time") {
             if (this.sortDir === "asc") {
-              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
+              return a.estimatedTime > b.estimatedTime ? 1 : -1;
             } else {
-              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
+              return a.estimatedTime > b.estimatedTime ? -1 : 1;
             }
           } else if (this.sortMethod === "priority") {
             const priorityA = a.tablePriority(this.nodeTableNames);
@@ -319,6 +324,9 @@ export default defineComponent({
           }
           return 0;
         });
+    },
+    orderedPriorityList(): Unit[] {
+      return unitsByPriority(this.units, this.nodeTableNames);
     },
   },
   watch: {
@@ -357,8 +365,17 @@ export default defineComponent({
         })
       );
     },
-    estimatedTime(unit: Unit) {
-      return estimatedTime(this.units, this.nodeTableNames, unit);
+    refresh() {
+      this.loading = true;
+      this.orderedPriorityList.forEach((unit) => {
+        unit.estimatedTime = estimatedTime(
+          this.orderedPriorityList,
+          this.nodeTableNames,
+          unit,
+          true
+        );
+      });
+      this.loading = false;
     },
   },
   created() {
@@ -367,6 +384,10 @@ export default defineComponent({
     );
     this.sortDir = storageData.sortDir ?? "asc";
     this.sortMethod = storageData.sortMethod ?? "name";
+
+    if (this.loadOnCreation) {
+      this.refresh();
+    }
   },
 });
 </script>
