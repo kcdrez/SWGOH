@@ -1,6 +1,6 @@
 <template>
   <div v-if="unitList.length > 0">
-    <div class="collapse-header section-header">
+    <div class="collapse-header section-header extended-2">
       <h3
         class="w-100"
         data-bs-toggle="collapse"
@@ -96,10 +96,10 @@ export default defineComponent({
     },
   },
   mounted() {
-    setupEvents(
-      (this.$refs?.territoryBattlesSection as any)?.$el as HTMLElement,
-      storageKey + "Collapse"
-    );
+    const tableComponent = this.$refs?.territoryBattlesSection as any;
+    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
+      tableComponent?.refresh();
+    });
   },
 });
 </script>

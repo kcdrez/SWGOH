@@ -174,14 +174,16 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit, state, rootState, rootGetters }: ActionCtx) {
+    async initialize({ commit, state, rootState }: ActionCtx) {
       const guildId = rootState.player.player?.guild_id || "";
       const allyCode = rootState.player.allyCode;
 
       if (state.requestState !== loadingState.initial) {
+        commit("SET_REQUEST_STATE", loadingState.ready);
         return;
       } else if (!guildId) {
         console.error("guildId not set");
+        commit("SET_REQUEST_STATE", loadingState.ready);
         return;
       }
 

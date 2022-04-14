@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <Loading :state="loading ? 'LOADING' : 'READY'" size="md">
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
@@ -130,7 +130,7 @@
         </tr>
       </tbody>
     </table>
-  </div>
+  </Loading>
 </template>
 
 <script lang="ts">
@@ -142,7 +142,7 @@ import UnitIcon from "../../units/unitIcon.vue";
 import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
 import Timestamp from "../../timestamp.vue";
-import { Unit } from "../../../types/unit";
+import { Unit, unitsByPriority } from "../../../types/unit";
 import { estimatedTime } from "../../../types/guild";
 
 export default defineComponent({
@@ -180,16 +180,20 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    loadOnCreation: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       sortDir: "asc",
       sortMethod: "name",
       searchText: "",
+      loading: true,
     };
   },
   computed: {
-    // ...mapGetters("guild", ["tbAvgShards"]),
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -234,6 +238,9 @@ export default defineComponent({
           return 0;
         });
     },
+    orderedPriorityList(): Unit[] {
+      return unitsByPriority(this.units, []);
+    },
   },
   methods: {
     ...mapActions("guild", ["initialize"]),
@@ -265,6 +272,13 @@ export default defineComponent({
       );
     },
     estimatedTime,
+    refresh() {
+      this.loading = true;
+      this.orderedPriorityList.forEach((unit) => {
+        unit.estimatedTime = this.estimatedTime(unit);
+      });
+      this.loading = false;
+    },
   },
   async created() {
     await this.initialize();
@@ -273,6 +287,10 @@ export default defineComponent({
     );
     this.sortDir = storageData.sortDir ?? "asc";
     this.sortMethod = storageData.sortMethod ?? "name";
+
+    if (this.loadOnCreation) {
+      this.refresh();
+    }
   },
 });
 </script>

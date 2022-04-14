@@ -1,8 +1,8 @@
 <template>
   <div v-if="!unit.isShip && unit.relicLevel < maxRelicLevel">
-    <div class="collapse-header section-header mt-3">
-      <h3 class="w-100" data-bs-toggle="collapse" href="#relicSection">
-        <div class="d-inline">Relic Planner</div>
+    <div class="collapse-header section-header">
+      <h3>
+        <div data-bs-toggle="collapse" href="#relicSection">Relic Planner</div>
       </h3>
     </div>
     <div id="relicSection" class="collapse" ref="relicSection">

@@ -1,130 +1,122 @@
 <template>
   <div class="container swgoh-page mb-3">
-    <Loading :state="requestState" message="Loading Unit Data" size="lg">
-      <div class="damage-calculator-container">
-        <div class="container">
-          <div class="row">
-            <div class="col">
-              <div class="input-group input-group-sm add-unit-container"></div>
-              <Toggle
-                v-model="physical"
-                onLabel="Physical"
-                offLabel="Special"
-              />
-            </div>
+    <div class="damage-calculator-container">
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <div class="input-group input-group-sm add-unit-container"></div>
+            <Toggle v-model="physical" onLabel="Physical" offLabel="Special" />
           </div>
-          <div class="row mt-2">
-            <div class="col">
-              <h6>Select a Character to view their stats:</h6>
-              <SearchInput
-                placeholder="Select a Character"
-                :list="player.units"
-                :searchBy="['name', 'id', 'aliases']"
-                @select="selectUnit($event)"
-              />
-              <template v-if="selected">
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">Offense:</span>
-                  <span class="input-group-text value">{{
-                    physical
-                      ? selected.offense.physical
-                      : selected.offense.special
-                  }}</span>
-                </div>
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">Crit Chance:</span>
-                  <span class="input-group-text value">{{
-                    physical
-                      ? selected.critChance.physical
-                      : selected.critChance.special
-                  }}</span>
-                </div>
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">Crit Damage:</span>
-                  <span class="input-group-text value">{{
-                    selected.critDamage
-                  }}</span>
-                </div>
-                <div class="average-damage">
-                  <div>
-                    Average Damage per Hit: {{ averageDamagePerHitUnit }}
-                  </div>
-                </div>
-              </template>
-            </div>
-            <div class="col">
-              <h6>
-                Select a Character to apply their mods to the other character or
-                modify them directly:
-              </h6>
-              <SearchInput
-                placeholder="Select a Character"
-                :list="player.units"
-                :searchBy="['name', 'id', 'aliases']"
-                @select="selectMods($event)"
-              />
+        </div>
+        <div class="row mt-2">
+          <div class="col">
+            <h6>Select a Character to view their stats:</h6>
+            <SearchInput
+              placeholder="Select a Character"
+              :list="player.units"
+              :searchBy="['name', 'id', 'aliases']"
+              @select="selectUnit($event)"
+            />
+            <template v-if="selected">
               <div class="input-group input-group-sm">
-                <span
-                  class="input-group-text c-help energy-text"
-                  title="Energy used on Light and Dark side tables"
-                  >Offense:</span
-                >
-                <input
-                  class="form-control refresh-input"
-                  type="number"
-                  v-model.number="offense"
-                  min="0"
-                />
+                <span class="input-group-text">Offense:</span>
+                <span class="input-group-text value">{{
+                  physical
+                    ? selected.offense.physical
+                    : selected.offense.special
+                }}</span>
               </div>
               <div class="input-group input-group-sm">
-                <span
-                  class="input-group-text c-help energy-text"
-                  title="Energy used on Light and Dark side tables"
-                  >Crit Chance:</span
-                >
-                <input
-                  class="form-control refresh-input"
-                  type="number"
-                  v-model.number="critChance"
-                  min="0"
-                />
+                <span class="input-group-text">Crit Chance:</span>
+                <span class="input-group-text value">{{
+                  physical
+                    ? selected.critChance.physical
+                    : selected.critChance.special
+                }}</span>
               </div>
               <div class="input-group input-group-sm">
-                <span
-                  class="input-group-text c-help energy-text"
-                  title="Energy used on Light and Dark side tables"
-                  >Crit Damage:</span
-                >
-                <input
-                  class="form-control refresh-input"
-                  type="number"
-                  v-model.number="critDamage"
-                  min="0"
-                />
+                <span class="input-group-text">Crit Damage:</span>
+                <span class="input-group-text value">{{
+                  selected.critDamage
+                }}</span>
               </div>
               <div class="average-damage">
-                Average Damage per Hit: {{ averageDamagePerHit }}
+                <div>Average Damage per Hit: {{ averageDamagePerHitUnit }}</div>
               </div>
+            </template>
+          </div>
+          <div class="col">
+            <h6>
+              Select a Character to apply their mods to the other character or
+              modify them directly:
+            </h6>
+            <SearchInput
+              placeholder="Select a Character"
+              :list="player.units"
+              :searchBy="['name', 'id', 'aliases']"
+              @select="selectMods($event)"
+            />
+            <div class="input-group input-group-sm">
+              <span
+                class="input-group-text c-help energy-text"
+                title="Energy used on Light and Dark side tables"
+                >Offense:</span
+              >
+              <input
+                class="form-control refresh-input"
+                type="number"
+                v-model.number="offense"
+                min="0"
+              />
+            </div>
+            <div class="input-group input-group-sm">
+              <span
+                class="input-group-text c-help energy-text"
+                title="Energy used on Light and Dark side tables"
+                >Crit Chance:</span
+              >
+              <input
+                class="form-control refresh-input"
+                type="number"
+                v-model.number="critChance"
+                min="0"
+              />
+            </div>
+            <div class="input-group input-group-sm">
+              <span
+                class="input-group-text c-help energy-text"
+                title="Energy used on Light and Dark side tables"
+                >Crit Damage:</span
+              >
+              <input
+                class="form-control refresh-input"
+                type="number"
+                v-model.number="critDamage"
+                min="0"
+              />
+            </div>
+            <div class="average-damage">
+              Average Damage per Hit: {{ averageDamagePerHit }}
             </div>
           </div>
-          <div class="row" v-if="selected">
-            <div class="col difference-container">
-              <div
-                class="rounded text-dark"
-                :class="{
-                  'bg-danger': averageDamagePerHit < averageDamagePerHitUnit,
-                  'bg-success': averageDamagePerHit > averageDamagePerHitUnit,
-                  'bg-warning': averageDamagePerHit === averageDamagePerHitUnit,
-                }"
-              >
-                Difference:
-                <span>{{ difference }}</span>
-              </div>
+        </div>
+        <div class="row" v-if="selected">
+          <div class="col difference-container">
+            <div
+              class="rounded text-dark"
+              :class="{
+                'bg-danger': averageDamagePerHit < averageDamagePerHitUnit,
+                'bg-success': averageDamagePerHit > averageDamagePerHitUnit,
+                'bg-warning': averageDamagePerHit === averageDamagePerHitUnit,
+              }"
+            >
+              Difference:
+              <span>{{ difference }}</span>
             </div>
           </div>
         </div>
       </div>
-    </Loading>
+    </div>
   </div>
 </template>
 
@@ -135,8 +127,6 @@ import { mapGetters, mapState } from "vuex";
 import { initializeModules, randomNumber, round2Decimals } from "../utils";
 import { loadingState } from "../types/loading";
 import { Unit } from "../types/unit";
-
-const dependencyModules = ["player", "guild"];
 
 interface dataModel {
   selected: null | Unit;
@@ -159,12 +149,8 @@ export default defineComponent({
     } as dataModel;
   },
   computed: {
-    ...mapGetters(["someLoading"]),
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
-    requestState(): loadingState {
-      return this.someLoading(dependencyModules);
-    },
     averageDamagePerHit(): number {
       //see https://gaming-fans.com/2017/02/15/swgoh-a-look-at-offense-critical-damage-and-critical-chance/
       const critChance = this.critChance / 100;
@@ -228,7 +214,6 @@ export default defineComponent({
     },
   },
   async created() {
-    await initializeModules(dependencyModules);
     const unitId = window.localStorage.getItem("damageCalculatorUnit") ?? "";
     if (unitId) {
       this.selectUnit(this.unitData(unitId));

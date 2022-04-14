@@ -1,59 +1,52 @@
 <template>
   <div class="container swgoh-page">
-    <Error :state="requestState" :message="`Unable to find player data.`" />
-    <Loading :state="requestState" message="Loading Player Data" size="lg">
-      <div class="input-group input-group-sm new-team">
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Team Name"
-          v-model="newTeamName"
-          @keypress.enter="addNewTeam"
-        />
-        <button
-          class="btn btn-primary"
-          type="button"
-          @click="addNewTeam"
-          :disabled="newTeamName.trim() === ''"
-        >
-          Add New Team
-        </button>
-      </div>
-      <TeamTable
-        v-for="team in teams"
-        :key="team.id"
-        :team="team"
-        :unitList="player.units"
-        @deleteTeam="confirmDeleteTeam(team)"
-        size="lg"
+    <div class="input-group input-group-sm new-team">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Team Name"
+        v-model="newTeamName"
+        @keypress.enter="addNewTeam"
       />
-      <Confirm
-        :isOpen="deleteTarget !== null"
-        title="Are you sure?"
-        :text="`Are you sure you want to delete this team (${
-          deleteTarget ? deleteTarget.name : ''
-        })? This cannot be undone.`"
-        @confirm="
-          deleteTeam(deleteTarget);
-          deleteTarget = null;
-        "
-        @cancel="cancelDelete"
-      />
-    </Loading>
+      <button
+        class="btn btn-primary"
+        type="button"
+        @click="addNewTeam"
+        :disabled="newTeamName.trim() === ''"
+      >
+        Add New Team
+      </button>
+    </div>
+    <TeamTable
+      v-for="team in teams"
+      :key="team.id"
+      :team="team"
+      :unitList="player.units"
+      @deleteTeam="confirmDeleteTeam(team)"
+      size="lg"
+    />
+    <Confirm
+      :isOpen="deleteTarget !== null"
+      title="Are you sure?"
+      :text="`Are you sure you want to delete this team (${
+        deleteTarget ? deleteTarget.name : ''
+      })? This cannot be undone.`"
+      @confirm="
+        deleteTeam(deleteTarget);
+        deleteTarget = null;
+      "
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapActions, mapGetters } from "vuex";
+import { mapState, mapActions } from "vuex";
 import { v4 as uuid } from "uuid";
 
 import { Team } from "../types/teams";
-import { loadingState } from "../types/loading";
 import TeamTable from "../components/teams/teamTable.vue";
-import { initializeModules } from "../utils";
-
-const dependencyModules = ["player", "teams"];
 
 type dataModel = {
   newTeamName: string;
@@ -72,10 +65,6 @@ export default defineComponent({
   computed: {
     ...mapState("teams", ["teams"]),
     ...mapState("player", ["player"]),
-    ...mapGetters(["someLoading"]),
-    requestState(): loadingState {
-      return this.someLoading(dependencyModules);
-    },
   },
   methods: {
     ...mapActions("teams", [
@@ -100,9 +89,6 @@ export default defineComponent({
     cancelDelete() {
       this.deleteTarget = null;
     },
-  },
-  async created() {
-    await initializeModules(dependencyModules);
   },
 });
 </script>

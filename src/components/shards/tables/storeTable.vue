@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <Loading :state="loading ? 'LOADING' : 'READY'" size="md">
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
@@ -189,7 +189,7 @@
           <td v-if="showUnitName && showCol('time')">
             <span class="row-label">Completion Date: </span>
             <Timestamp
-              :timeLength="estimatedTime(unit)"
+              :timeLength="unit.estimatedTime"
               displayClasses="d-inline"
             />
           </td>
@@ -206,7 +206,7 @@
         </tr>
       </tbody>
     </table>
-  </div>
+  </Loading>
 </template>
 
 <script lang="ts">
@@ -219,7 +219,7 @@ import ShardPriority from "../shardPriority.vue";
 import Timestamp from "../../timestamp.vue";
 import Wallet from "../wallet.vue";
 import DailyCurrency from "../dailyCurrency.vue";
-import { Unit } from "../../../types/unit";
+import { Unit, unitsByPriority } from "../../../types/unit";
 import { mapState } from "vuex";
 import { CurrencyTypeConfig, estimatedTime } from "../../../types/currency";
 
@@ -275,12 +275,17 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    loadOnCreation: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       sortDir: "desc",
       sortMethod: "progress",
       searchText: "",
+      loading: true,
     };
   },
   computed: {
@@ -309,9 +314,9 @@ export default defineComponent({
             }
           } else if (this.sortMethod === "time") {
             if (this.sortDir === "asc") {
-              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
+              return a.estimatedTime > b.estimatedTime ? 1 : -1;
             } else {
-              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
+              return a.estimatedTime > b.estimatedTime ? -1 : 1;
             }
           } else if (this.sortMethod === "owned") {
             if (this.sortDir === "asc") {
@@ -392,6 +397,9 @@ export default defineComponent({
           return 0;
         });
     },
+    orderedPriorityList(): Unit[] {
+      return unitsByPriority(this.units, this.nodeTableNames);
+    },
   },
   watch: {
     sortDir() {
@@ -429,14 +437,6 @@ export default defineComponent({
         })
       );
     },
-    estimatedTime(unit: Unit) {
-      return estimatedTime(
-        unit,
-        this.currencyTypes as CurrencyTypeConfig[],
-        this.nodeTableNames,
-        this.units
-      );
-    },
     remainingCurrency(unit: Unit, currencyType: CurrencyTypeConfig) {
       const location = unit.whereToFarm.find(
         (l) => l.currencyType === currencyType
@@ -454,6 +454,18 @@ export default defineComponent({
         return 0;
       }
     },
+    refresh() {
+      this.loading = true;
+      this.orderedPriorityList.forEach((unit) => {
+        unit.estimatedTime = estimatedTime(
+          unit,
+          this.currencyTypes as CurrencyTypeConfig[],
+          this.nodeTableNames,
+          this.units
+        );
+      });
+      this.loading = false;
+    },
   },
   created() {
     const storageData = JSON.parse(
@@ -461,6 +473,10 @@ export default defineComponent({
     );
     this.sortDir = storageData.sortDir ?? "asc";
     this.sortMethod = storageData.sortMethod ?? "name";
+
+    if (this.loadOnCreation) {
+      this.refresh();
+    }
   },
 });
 </script>

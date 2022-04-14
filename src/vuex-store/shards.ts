@@ -110,6 +110,25 @@ const store = {
         tracking: tracking ?? match?.tracking ?? false,
       };
     },
+    UPSERT_GL_STATUS(state: State, { id, tier4, tier5, ultMats }: any) {
+      const match = state.ownedShards[id];
+      if (match) {
+        match.glFarming = {
+          tier4,
+          tier5,
+          ultMats,
+        };
+      } else {
+        state.ownedShards[id] = {
+          owned: 0,
+          glFarming: {
+            tier4,
+            tier5,
+            ultMats,
+          },
+        };
+      }
+    },
     ADD_UNIT(state: State, unitId: string) {
       const match = state.ownedShards[unitId];
       if (match) {
@@ -143,11 +162,15 @@ const store = {
         commit("SET_REQUEST_STATE", loadingState.error);
       }
     },
-    saveShardsCount(
-      { commit, dispatch, getters }: ActionCtx,
-      data: NodePayload
-    ) {
+    saveShardsCount({ commit, dispatch }: ActionCtx, data: NodePayload) {
       commit("UPSERT_SHARD_COUNT", data);
+      dispatch("save");
+    },
+    glProgressUpdate(
+      { commit, dispatch }: ActionCtx,
+      payload: { id: string; tier4: boolean; tier5: boolean; ultMats: number }
+    ) {
+      commit("UPSERT_GL_STATUS", payload);
       dispatch("save");
     },
     addUnit({ commit, dispatch }: ActionCtx, unitId: string) {

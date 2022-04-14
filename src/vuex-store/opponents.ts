@@ -75,7 +75,10 @@ const store = {
         state.teams.splice(index, 1);
       }
     },
-    SET_OPPONENT(state: State, payload: any) {
+    SET_OPPONENT(state: State, payload: Player) {
+      if (!payload.id) {
+        payload.id = uuid();
+      }
       state.player = payload;
     },
     SET_ALLY_CODE(state: State, payload: string | null) {
@@ -180,13 +183,19 @@ const store = {
         }
       }
     },
-    upsertTeam({ commit, dispatch }: ActionCtx, team: Team) {
+    upsertTeam({ commit, dispatch, state }: ActionCtx, team: Team) {
       if (!team) {
-        commit("UPSERT_TEAM", {
-          id: uuid(),
-          name: "Default Name",
-          units: [],
-        });
+        commit(
+          "UPSERT_TEAM",
+          new Team(
+            {
+              id: uuid(),
+              name: "Default Name",
+              units: [],
+            },
+            state.player?.id
+          )
+        );
       } else {
         commit("UPSERT_TEAM", team);
       }

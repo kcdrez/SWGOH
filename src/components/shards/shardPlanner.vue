@@ -1,8 +1,10 @@
 <template>
   <div>
-    <div class="collapse-header section-header shard-section-header mt-3">
-      <h3 class="w-100" data-bs-toggle="collapse" href="#shardSection">
-        <div class="d-inline">Shard Planner</div>
+    <div class="collapse-header section-header">
+      <h3>
+        <div data-bs-toggle="collapse" href="#shardSection">
+          7 Star Unlock Planner
+        </div>
       </h3>
     </div>
     <div id="shardSection" class="collapse" ref="shardSection">
@@ -28,7 +30,6 @@
           displayClasses="d-inline"
           v-if="unit.stars < 7"
         />
-        <EnergySpent showStandard showFleet showCantina v-if="showNodeTable" />
         <template v-if="showNodeTable">
           <MultiSelect
             class="select-columns"
@@ -40,6 +41,7 @@
             :units="[unit]"
             :selectedColumns="selectedColumns.shards"
             showActions
+            loadOnCreation
             :storageKey="storageKey + 'ShardTable'"
           />
         </template>
@@ -55,6 +57,7 @@
             :selectedColumns="selectedColumns.store"
             :currencyTypes="unit.currencyTypes"
             :storageKey="storageKey + 'StoreTable'"
+            loadOnCreation
           />
         </template>
         <template v-if="showTBTable">
@@ -68,6 +71,7 @@
             :units="[unit]"
             :selectedColumns="selectedColumns.tb"
             :storageKey="storageKey + 'TBTable'"
+            loadOnCreation
           />
         </template>
         <div class="legendary-container" v-if="showLegendaryTable">
@@ -77,7 +81,7 @@
                 data-bs-toggle="collapse"
                 href="#prerequisite-legendary-table"
               >
-                Prerequisites
+                Unlock Status
               </div>
             </h5>
             <div class="simple-view-container">
@@ -113,7 +117,7 @@
           <div class="collapse-header section-header">
             <h5 class="w-100">
               <div data-bs-toggle="collapse" href="#prerequisite-gl-table">
-                Prerequisites
+                Unlock Status
               </div>
             </h5>
             <div class="simple-view-container">
@@ -145,6 +149,59 @@
             />
           </div>
         </div>
+        <div v-if="unitUsages.length > 0">
+          <h5 class="text-center">
+            This unit is required for the following Legendary/GL events:
+          </h5>
+          <table
+            class="table table-bordered table-dark table-sm table-striped swgoh-table"
+          >
+            <thead class="align-middle text-center">
+              <tr>
+                <th>Unit Name</th>
+                <th>Requirement</th>
+                <th>Progress</th>
+              </tr>
+            </thead>
+            <tbody class="align-middle text-center">
+              <tr v-for="item in unitUsages" :key="item.requirementId">
+                <td>
+                  <UnitIcon
+                    :unit="getUnit(item.requirementId)"
+                    isLink
+                    hideImage
+                  />
+                </td>
+                <td>
+                  <RequirementIcon
+                    class="justify-content-center"
+                    v-if="item.requirement"
+                    :type="item.requirement.type"
+                    :unitId="unit.id"
+                    :value="item.requirement.value"
+                  />
+                  <RequirementIcon
+                    class="justify-content-center"
+                    v-else
+                    :type="item.recommended.type"
+                    :unitId="unit.id"
+                    :value="item.recommended.value"
+                  />
+                </td>
+                <td>
+                  <ProgressBar
+                    v-if="item.requirement"
+                    :percent="getPercent(item, 'requirement')"
+                  />
+                  <ProgressBar
+                    v-else
+                    :percent="getPercent(item, 'recommended')"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </template>
     </div>
   </div>
@@ -159,6 +216,8 @@ import StoreTable from "./tables/storeTable.vue";
 import TerritoryBattleShardTable from "./tables/territoryBattleShardTable.vue";
 import LegendaryRequirementsTable from "./tables/legendary/legendaryRequirementsTable.vue";
 import EnergySpent from "../energySpent.vue";
+import RequirementIcon from "../shards/tables/legendary/requirementIcon.vue";
+import UnitIcon from "../units/unitIcon.vue";
 import { loadingState } from "../../types/loading";
 import { setupEvents } from "../../utils";
 import Timestamp from "../timestamp.vue";
@@ -167,7 +226,7 @@ import {
   estimatedTime as nodeEstimatedTime,
 } from "../../types/shards";
 import { estimatedTime as shopEstimatedTime } from "../../types/currency";
-import { Unit } from "../../types/unit";
+import { Unit, getUnit, getPercent } from "../../types/unit";
 import { estimatedTime as tbEstimatedTime } from "../../types/guild";
 
 const storageKey = "shardPlanner";
@@ -181,6 +240,8 @@ export default defineComponent({
     LegendaryRequirementsTable,
     Timestamp,
     EnergySpent,
+    RequirementIcon,
+    UnitIcon,
   },
   data() {
     return {
@@ -200,9 +261,11 @@ export default defineComponent({
   },
   computed: {
     ...mapState("unit", ["unit"]),
+    ...mapGetters("player", ["unitData"]),
     ...mapGetters(["someLoading"]),
     ...mapState(["collapseSections"]),
     ...mapGetters("shards", ["unitFarmingList"]),
+    ...mapState("shards", ["shardFarming"]),
     requestState(): loadingState {
       return this.someLoading(["unit"]);
     },
@@ -324,25 +387,29 @@ export default defineComponent({
       return this.unit.whereToFarm.map((x: FarmingNode) => x.table);
     },
     showNodeTable(): boolean {
-      return this.tables.some((x) =>
-        ["Light Side", "Dark Side", "Fleet", "Cantina"].includes(x)
+      return (
+        this.tables.some((x) =>
+          ["Light Side", "Dark Side", "Fleet", "Cantina"].includes(x)
+        ) && this.unit.stars < 7
       );
     },
     showTBTable(): boolean {
-      return this.tables.includes("Territory Battles");
+      return this.tables.includes("Territory Battles") && this.unit.stars < 7;
     },
     showShopTable(): boolean {
-      return this.tables.some((x) =>
-        [
-          "Cantina Battles Store",
-          "Fleet Arena Store",
-          "Galactic War Store",
-          "Guild Events Store (Mk 1)",
-          "Guild Events Store (Mk 2)",
-          "Guild Store",
-          "Shard Store",
-          "Squad Arena Store",
-        ].includes(x)
+      return (
+        this.tables.some((x) =>
+          [
+            "Cantina Battles Store",
+            "Fleet Arena Store",
+            "Galactic War Store",
+            "Guild Events Store (Mk 1)",
+            "Guild Events Store (Mk 2)",
+            "Guild Store",
+            "Shard Store",
+            "Squad Arena Store",
+          ].includes(x)
+        ) && this.unit.stars < 7
       );
     },
     showLegendaryTable(): boolean {
@@ -377,6 +444,48 @@ export default defineComponent({
 
       return Math.min(...days);
     },
+    unitUsages(): any[] {
+      const legendaries = this.shardFarming.filter(
+        (x: FarmingNode) => x.id === "galactic_legends" || x.id === "legendary"
+      );
+      return legendaries
+        .reduce((acc: any[], node: FarmingNode) => {
+          node.characters.forEach((char) => {
+            (char?.prerequisites ?? []).forEach((requirement) => {
+              const idMatch = requirement.id === this.unit.id;
+
+              const tagsMatch = (() => {
+                if ((requirement?.tags ?? []).length === 0) {
+                  return false;
+                }
+                return (requirement?.tags ?? []).every((tag) => {
+                  if (tag === "is_ship") {
+                    return this.unit.isShip;
+                  } else if (tag.includes("!")) {
+                    const notTag = tag.replace("!", "");
+                    if (notTag === "is_ship") {
+                      return !this.unit.isShip;
+                    } else {
+                      return !this.unit.categories.includes(notTag);
+                    }
+                  } else {
+                    return this.unit.categories.includes(tag);
+                  }
+                });
+              })();
+
+              if (idMatch || tagsMatch) {
+                acc.push({ ...requirement, requirementId: char.id });
+              }
+            });
+          });
+          return acc;
+        }, [])
+        .filter((unit: any) => {
+          const match: Unit | undefined = this.unitData(unit.requirementId);
+          return match ? match.stars < 7 : true;
+        });
+    },
   },
   watch: {
     simpleView: {
@@ -385,6 +494,10 @@ export default defineComponent({
       },
       deep: true,
     },
+  },
+  methods: {
+    getUnit,
+    getPercent,
   },
   mounted() {
     setupEvents(
@@ -508,18 +621,18 @@ export default defineComponent({
   }
 }
 
-.section-header.shard-section-header {
-  text-shadow: 2px 2px 2px black;
-  display: flex;
-  align-items: center;
+// .section-header.shard-section-header {
+//   text-shadow: 2px 2px 2px black;
+//   display: flex;
+//   align-items: center;
 
-  a {
-    text-decoration: none;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
+//   a {
+//     text-decoration: none;
+//     &:hover {
+//       text-decoration: underline;
+//     }
+//   }
+// }
 
 .legendary-container,
 .gl-container {
