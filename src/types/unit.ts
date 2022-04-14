@@ -11,7 +11,7 @@ export interface IUnit {
   name: string;
   aliases?: string[];
   image: string;
-  gear_levels: UnitTier[];
+  gear_levels?: UnitTier[]; //doesnt exist on ships
   categories: string[];
   ability_classes: string[];
   role: string;
@@ -56,7 +56,7 @@ export class Unit {
   private _is_ship: boolean;
   private _id: string;
   private _image: string;
-  private _gear_list: UnitTier[];
+  private _gear_list?: UnitTier[];
   private _stats: any;
   private _stat_diffs: any;
   private _power?: number;
@@ -409,7 +409,7 @@ export class Unit {
   }
 
   private get fullGearListByLevel() {
-    const futureGear = this.gearList.filter(
+    const futureGear = (this.gearList ?? []).filter(
       ({ tier }: UnitTier) => tier >= this.gearLevel
     );
 

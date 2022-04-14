@@ -13,6 +13,7 @@ export interface IGear {
   ingredients: IIngredient[];
   mark: string;
   recipes: IRecipe[];
+  scavenger?: IScavenger[];
 }
 
 export interface IRecipe {
@@ -34,6 +35,11 @@ export interface INeededBy {
   gearLevels: { amount: number; level: number }[];
 }
 
+interface IScavenger {
+  id: string;
+  count: number;
+}
+
 interface ILocationNode extends ILocation {
   nodeData: FarmingNode | null;
 }
@@ -48,6 +54,7 @@ export class Gear {
   private _neededBy: INeededBy[] = [];
   private _ingredients: IIngredient[];
   private _recipes: IRecipe[];
+  private _scavenger?: IScavenger[];
 
   constructor(data: IGear) {
     this._id = data.id;
@@ -73,6 +80,7 @@ export class Gear {
     this._tier = data.tier;
     this._ingredients = data.ingredients;
     this._recipes = data.recipes;
+    this._scavenger = data.scavenger;
   }
 
   public get id() {
@@ -180,6 +188,9 @@ export class Gear {
       default:
         return 0;
     }
+  }
+  public get scavenger() {
+    return this._scavenger ?? [];
   }
   public get irrelevant(): boolean {
     const gearConfig = store.state.gear.gearConfig;

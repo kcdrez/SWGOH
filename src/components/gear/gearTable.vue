@@ -113,7 +113,10 @@
             <GearIcon :gear="salvage" />
           </td>
           <td v-if="showCol('name')">
-            {{ salvage.name }}
+            <router-link
+              :to="{ name: 'GearPage', params: { id: salvage.id } }"
+              >{{ salvage.name }}</router-link
+            >
           </td>
           <td v-if="showCol('mark')">
             {{ salvage.mark }}
@@ -246,8 +249,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
-import { writeFile, utils } from "xlsx";
+import { mapActions, mapState } from "vuex";
 
 import { Gear } from "../../types/gear";
 import OwnedAmount from "./gearOwned.vue";

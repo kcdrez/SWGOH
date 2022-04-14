@@ -1,30 +1,34 @@
-<template></template>
+<template>
+  <div class="swgoh-page">
+    <GearTable
+      :gearList="gearList"
+      :selectedColumns="selectedColumns"
+      :storageKey="storageKey"
+    />
+  </div>
+</template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapState } from "vuex";
 
-import UnitSection from "../components/generalPlanner/unitSection.vue";
-import GearSection from "../components/generalPlanner/gearSection.vue";
-import RelicSection from "../components/generalPlanner/relicSection.vue";
-import ShardSection from "../components/generalPlanner/shardSection.vue";
-import UnitSearch from "../components/units/unitSearch.vue";
-import { loadingState } from "../types/loading";
-import { Unit } from "../types/unit";
-import { initializeModules } from "../utils";
+import GearTable from "../components/gear/gearTable.vue";
 
-const dependencyModules = ["planner", "unit", "gear", "relic", "shards"];
+const storageKey = "gearListPage";
 
 export default defineComponent({
   name: "GearListPage",
-  components: {},
-  data() {},
-  computed: {},
-  methods: {},
-  created() {},
+  components: { GearTable },
+  data() {
+    return {
+      selectedColumns: ["icon", "name", "mark", "locations", "owned"],
+      storageKey,
+    };
+  },
+  computed: {
+    ...mapState("gear", ["gearList"]),
+  },
 });
 </script>
 
-<style lang="scss" scoped>
-@import "../styles/variables.scss";
-</style>
+<style lang="scss" scoped></style>

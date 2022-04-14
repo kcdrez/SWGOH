@@ -1,8 +1,6 @@
 <template>
-  <div>
-    <div class="text-center gear-border" :class="`gear-tier-${gear.tier}`">
-      <img :src="gear.image" />
-    </div>
+  <div class="text-center gear-border" :class="`gear-tier-${gear.tier}`">
+    <img :src="gear.image" />
   </div>
 </template>
 
