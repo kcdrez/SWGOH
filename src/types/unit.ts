@@ -274,6 +274,12 @@ export class Unit {
       special: this._stats["7"],
     };
   }
+  public get physicalOffense() {
+    return this.offense.physical;
+  }
+  public get specialOffense() {
+    return this.offense.special;
+  }
   public get modOffense() {
     let amount = 0;
     let percent = 0;
@@ -319,6 +325,12 @@ export class Unit {
       physical: round2Decimals(this._stats["14"]),
       special: round2Decimals(this._stats["15"]),
     };
+  }
+  public get physicalCritChance() {
+    return this.critChance.physical;
+  }
+  public get specialCritChance() {
+    return this.critChance.special;
   }
   public get modCritChance() {
     let amount = 0;

@@ -259,9 +259,39 @@ const geos = {
     },
   ],
 };
+const shaakClones = {
+  name: "Shaak Ti + Clones",
+  units: [
+    {
+      id: "SHAAKTI",
+      level: 5,
+      type: "Relic",
+    },
+    {
+      id: "GEONOSIANSPY",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "GEONOSIANSOLDIER",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "GEONOSIANBROODALPHA",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "SUNFAC",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
 
-const tbRecommended = {
-  DSGeos: {
+export const tbRecommended = {
+  DSSeparatistMight: {
     phase1: {
       top: {
         combatMission1: {
@@ -270,6 +300,98 @@ const tbRecommended = {
         },
         combatMission2: {
           teams: [see, sithEmpire, fo, bh],
+        },
+      },
+    },
+  },
+  LSRepublicOffensive: {
+    phase3: {
+      bottom: {
+        special: {
+          teams: [
+            {
+              name: "Shaak Ti + Clones",
+              units: [
+                {
+                  id: "SHAAKTI",
+                  stats: [
+                    {
+                      key: "speed",
+                      min: 300,
+                    },
+                    {
+                      key: "health",
+                      min: 85000,
+                    },
+                    {
+                      key: "critAvoidance",
+                      min: 24,
+                    },
+                  ],
+                },
+                {
+                  id: "CT210408",
+                  stats: [
+                    {
+                      key: "specialCritChance",
+                      min: 30,
+                    },
+                    {
+                      key: "health",
+                      min: 65000,
+                    },
+                    {
+                      key: "specialOffense",
+                      min: 10000,
+                    },
+                  ],
+                },
+                {
+                  id: "CT7567",
+                  stats: [
+                    {
+                      key: "speed",
+                      min: 300,
+                    },
+                    {
+                      key: "health",
+                      min: 65000,
+                    },
+                  ],
+                },
+                {
+                  id: "CT5555",
+                  stats: [
+                    {
+                      key: "speed",
+                      min: 220,
+                    },
+                    {
+                      key: "health",
+                      min: 100000,
+                    },
+                  ],
+                },
+                {
+                  id: "ARCTROOPER501ST",
+                  stats: [
+                    {
+                      key: "speed",
+                      min: 270,
+                    },
+                    {
+                      key: "health",
+                      min: 85000,
+                    },
+                    {
+                      key: "physicalOffense",
+                      min: 10000,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       },
     },
