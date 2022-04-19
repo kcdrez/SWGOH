@@ -479,7 +479,7 @@ export default defineComponent({
                 });
               })();
 
-              if (idMatch || tagsMatch) {
+              if (idMatch || (tagsMatch && char.id !== this.unit.id)) {
                 acc.push({ ...requirement, requirementId: char.id });
               }
             });
