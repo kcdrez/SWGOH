@@ -513,13 +513,13 @@ export class Unit {
     }, 0);
   }
 
-  private get totalRemainingShards() {
-    let amount = 0;
-    for (let i = this.stars + 1; i <= 7; i++) {
-      amount += shardMapping[i];
-    }
-    return amount;
-  }
+  // private get totalRemainingShards() {
+  //   let amount = 0;
+  //   for (let i = this.stars + 1; i <= 7; i++) {
+  //     amount += shardMapping[i];
+  //   }
+  //   return amount;
+  // }
   public get ownedShards() {
     return store.state.shards.ownedShards[this.id]?.owned || 0;
   }
