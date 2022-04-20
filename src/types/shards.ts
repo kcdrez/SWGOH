@@ -23,6 +23,7 @@ export class FarmingNode {
   private _mission?: string;
   private _characters?: NodeCharacter[];
   private _gear?: any;
+  private _energy?: number;
 
   constructor(data: IFarmingNode) {
     this._id = data.id;
@@ -32,6 +33,7 @@ export class FarmingNode {
     this._mission = data.mission;
     this._characters = data.characters;
     this._gear = data.gear;
+    this._energy = data.energy;
   }
 
   public get id() {
@@ -65,6 +67,9 @@ export class FarmingNode {
     }
     return str;
   }
+  public get energy() {
+    return this._energy;
+  }
   public get currencyType(): CurrencyTypeConfig | undefined {
     switch (this.id) {
       case "guild_events_store1":
@@ -94,6 +99,7 @@ export interface IFarmingNode {
   mission?: string;
   characters: NodeCharacter[];
   gear?: any[];
+  energy?: number;
 }
 
 interface NodeCharacter {

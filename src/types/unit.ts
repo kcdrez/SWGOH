@@ -11,7 +11,7 @@ export interface IUnit {
   name: string;
   aliases?: string[];
   image: string;
-  gear_levels: UnitTier[];
+  gear_levels?: UnitTier[]; //doesnt exist on ships
   categories: string[];
   ability_classes: string[];
   role: string;
@@ -56,7 +56,7 @@ export class Unit {
   private _is_ship: boolean;
   private _id: string;
   private _image: string;
-  private _gear_list: UnitTier[];
+  private _gear_list?: UnitTier[];
   private _stats: any;
   private _stat_diffs: any;
   private _power?: number;
@@ -421,7 +421,7 @@ export class Unit {
   }
 
   private get fullGearListByLevel() {
-    const futureGear = this.gearList.filter(
+    const futureGear = (this.gearList ?? []).filter(
       ({ tier }: UnitTier) => tier >= this.gearLevel
     );
 
@@ -497,12 +497,10 @@ export class Unit {
     let totalChallenges = 0;
 
     this.fullSalvageList.forEach((gear: Gear) => {
-      const isChallenge = gear.missionList.some(
-        (x) => x.missionIdentifier.campaignMapId === "CHALLENGES"
+      const isChallenge = gear.locations.some(
+        (x) => x.nodeData?.table === "Challenge"
       );
-      const isFleet = gear.missionList.some(
-        (x) => x.missionIdentifier.campaignId === "C01SP"
-      );
+      const isFleet = gear.locations.some((x) => x.nodeData?.table === "Fleet");
       const timeToGet = gear.timeEstimation;
 
       if (gear.irrelevant || timeToGet < 0) {
@@ -519,22 +517,21 @@ export class Unit {
   }
 
   public get relicTotalDays() {
-    const { target } = store.state.planner.targetConfig[this.id].relic;
     return Object.values(store.state.relic.relicConfig).reduce((acc, relic) => {
       const days = relic.timeEstimation([
-        { level: this.relicLevel ?? 0, target },
+        { level: this.relicLevel ?? 0, target: this.relicTarget },
       ]);
       return days > 0 ? acc + days : acc;
     }, 0);
   }
 
-  private get totalRemainingShards() {
-    let amount = 0;
-    for (let i = this.stars + 1; i <= 7; i++) {
-      amount += shardMapping[i];
-    }
-    return amount;
-  }
+  // private get totalRemainingShards() {
+  //   let amount = 0;
+  //   for (let i = this.stars + 1; i <= 7; i++) {
+  //     amount += shardMapping[i];
+  //   }
+  //   return amount;
+  // }
   public get ownedShards() {
     return store.state.shards.ownedShards[this.id]?.owned || 0;
   }

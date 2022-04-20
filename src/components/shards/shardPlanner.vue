@@ -208,7 +208,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import { mapState, mapGetters } from "vuex";
 
 import ShardTable from "./tables/shardTable.vue";
@@ -243,6 +243,12 @@ export default defineComponent({
     RequirementIcon,
     UnitIcon,
   },
+  props: {
+    unit: {
+      type: Object as PropType<Unit>,
+      required: true,
+    },
+  },
   data() {
     return {
       selectedColumns: {
@@ -260,7 +266,6 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState("unit", ["unit"]),
     ...mapGetters("player", ["unitData"]),
     ...mapGetters(["someLoading"]),
     ...mapState(["collapseSections"]),

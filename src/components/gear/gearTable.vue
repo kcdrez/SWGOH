@@ -131,7 +131,7 @@
                 Show/Hide Locations
               </button>
               <ul class="m-0 collapse" :id="`locations-${salvage.id}`">
-                <li v-for="(l, index) in salvage.locations" :key="index">
+                <li v-for="(l, index) in salvage.locationLabels" :key="index">
                   {{ l }}
                 </li>
               </ul>
@@ -246,7 +246,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 import { Gear } from "../../types/gear";
 import OwnedAmount from "./gearOwned.vue";
@@ -288,6 +288,7 @@ export default defineComponent({
     };
   },
   computed: {
+    ...mapState("gear", { allGear: "gearList" }),
     filteredSalvageList(): Gear[] {
       return this.gearList
         .filter((gear: Gear) => {
@@ -400,6 +401,9 @@ export default defineComponent({
           sortMethod: this.sortMethod,
         })
       );
+    },
+    getGear(id: string): Gear | undefined {
+      return this.allGear.find((x: Gear) => x.id === id);
     },
   },
   created() {

@@ -12,6 +12,10 @@ import GuildUnitsPage from "../pages/guildUnits.vue";
 import DamageCalculatorPage from "../pages/damageCalculator.vue";
 import GLChecklist from "../pages/glChecklist.vue";
 import TBStatusPage from "../pages/TBStatusPage.vue";
+import WidgetsPage from "../pages/widgets.vue";
+import GearListPage from "../pages/gearList.vue";
+import GearPage from "../pages/gearPage.vue";
+import ScavengerPage from "../pages/scavenger.vue";
 
 const routes = [
   {
@@ -194,6 +198,89 @@ const routes = [
         path: "",
         name: "TBStatusPage",
         component: TBStatusPage,
+      },
+    ],
+  },
+  {
+    path: "/widgets",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: [
+          "unit",
+          "gear",
+          "relic",
+          "shards",
+          "planner",
+          "guild",
+          "currency",
+        ],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "Widgets",
+        component: WidgetsPage,
+      },
+    ],
+  },
+  {
+    path: "/gear-list",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["shards", "gear"],
+        loadAsync: false,
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GearList",
+        component: GearListPage,
+      },
+    ],
+  },
+  {
+    path: "/gear/:id",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["shards", "gear", "planner"],
+        loadAsync: false,
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GearPage",
+        component: GearPage,
+      },
+    ],
+  },
+  {
+    path: "/scavenger",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["shards", "gear", "planner"],
+        loadAsync: false,
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "ScavengerPage",
+        component: ScavengerPage,
       },
     ],
   },

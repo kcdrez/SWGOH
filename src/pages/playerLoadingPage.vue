@@ -18,6 +18,10 @@ export default defineComponent({
       type: Array as PropType<string[]>,
       required: true,
     },
+    loadAsync: {
+      type: Boolean,
+      default: true,
+    },
   },
   computed: {
     ...mapState("player", ["requestState"]),
@@ -35,7 +39,7 @@ export default defineComponent({
     ...mapActions("player", ["initialize"]),
     refresh() {
       this.$nextTick(() => {
-        initializeModules(this.dependencyModules);
+        initializeModules(this.dependencyModules, !this.loadAsync);
       });
     },
   },

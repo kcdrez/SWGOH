@@ -106,6 +106,23 @@
                   >GL Checklist</router-link
                 >
               </li>
+              <li>
+                <router-link class="dropdown-item" :to="{ name: 'Widgets' }"
+                  >Widgets</router-link
+                >
+              </li>
+              <!-- <li>
+                <router-link class="dropdown-item" :to="{ name: 'GearList' }"
+                  >Gear List</router-link
+                >
+              </li>
+              <li>
+                <router-link
+                  class="dropdown-item"
+                  :to="{ name: 'ScavengerPage' }"
+                  >Scavenger</router-link
+                >
+              </li> -->
             </ul>
           </li>
         </ul>
