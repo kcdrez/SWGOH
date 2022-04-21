@@ -145,14 +145,14 @@
             <div>Player Team</div>
             <SearchInput
               :list="playerTeams"
-              @select="newMatchup.playerTeam = $event"
+              @update:modelValue="newMatchup.playerTeam = $event"
             />
           </div>
           <div class="col">
             <div>Opponent Team</div>
             <SearchInput
               :list="opponentTeams"
-              @select="newMatchup.opponentTeam = $event"
+              @update:modelValue="newMatchup.opponentTeam = $event"
             />
           </div>
           <div class="col d-flex justify-content-center align-items-end">

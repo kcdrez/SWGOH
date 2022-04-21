@@ -53,7 +53,7 @@
               placeholder="Select a Character"
               :list="player.units"
               :searchBy="['name', 'id', 'aliases']"
-              @input="selectMods($event)"
+              @update:modelValue="selectMods($event)"
             />
             <div class="input-group input-group-sm">
               <span
@@ -210,7 +210,6 @@ export default defineComponent({
     },
     selected(newVal: Unit) {
       if (newVal) {
-        console.log(newVal.id);
         window.localStorage.setItem("damageCalculatorUnit", newVal.id);
 
         const type = this.physical ? "physical" : "special";
@@ -228,6 +227,7 @@ export default defineComponent({
   methods: {
     selectMods(unit: Unit | null) {
       if (!unit) return;
+
       const type = this.physical ? "physical" : "special";
 
       if (this.selected) {
