@@ -107,6 +107,13 @@
                 >
               </li>
               <li>
+                <router-link
+                  class="dropdown-item"
+                  :to="{ name: 'TBStatusPage' }"
+                  >TB Status</router-link
+                >
+              </li>
+              <li>
                 <router-link class="dropdown-item" :to="{ name: 'Widgets' }"
                   >Widgets</router-link
                 >

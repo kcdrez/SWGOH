@@ -1,7 +1,60 @@
 <template>
   <div class="swgoh-page container my-3">
+    <div class="input-group input-group-sm w-25">
+      <span class="input-group-text">Map:</span>
+      <select class="form-control" v-model="map">
+        <option v-for="map in mapOptions" :key="map.value" :value="map.value">
+          {{ map.label }}
+        </option>
+      </select>
+    </div>
+    <div class="input-group input-group-sm w-25" v-if="showPhase">
+      <span class="input-group-text">Phase:</span>
+      <select class="form-control" v-model="phase">
+        <option
+          v-for="phase in phaseOptions"
+          :key="phase.value"
+          :value="phase.value"
+        >
+          {{ phase.label }}
+        </option>
+      </select>
+    </div>
+    <div class="input-group input-group-sm w-25" v-if="showPosition">
+      <span class="input-group-text">Position:</span>
+      <select class="form-control" v-model="position">
+        <option
+          v-for="position in positionOptions"
+          :key="position.value"
+          :value="position.value"
+        >
+          {{ position.label }}
+        </option>
+      </select>
+    </div>
+    <div class="input-group input-group-sm w-25" v-if="showMission">
+      <span class="input-group-text">Mission:</span>
+      <select class="form-control" v-model="mission">
+        <option
+          v-for="mission in missionOptions"
+          :key="mission.value"
+          :value="mission.value"
+        >
+          {{ mission.label }}
+        </option>
+      </select>
+    </div>
+    <div class="input-group input-group-sm w-25" v-if="showTeams">
+      <span class="input-group-text">Team:</span>
+      <select class="form-control" v-model="team">
+        <option v-for="team in teamOptions" :key="team.id" :value="team.id">
+          {{ team.label }}
+        </option>
+      </select>
+    </div>
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
+      v-if="teamUnits.length > 0"
     >
       <thead class="align-middle text-center">
         <tr>
@@ -13,15 +66,15 @@
         </tr>
       </thead>
       <tbody class="align-middle text-center">
-        <template v-for="unit in teams[0].units" :key="unit.id">
+        <template v-for="unit in teamUnits" :key="unit.id">
           <tr>
             <td>{{ unitName(unit.id) }}</td>
             <td>
-              <div class="container stat-container">
-                <div v-for="stat in unit.stats" :key="stat.key" class="row">
-                  <b class="text-capitalize col">{{ stat.key }}:</b>
-                  <div class="col">{{ getStat(unit, stat.key) }}</div>
-                  <div :class="statClass(unit, stat.key)" class="col">
+              <div class="stat-container d-flex">
+                <div v-for="stat in unit.stats" :key="stat.key" class="">
+                  <b class="text-capitalize">{{ stat.label }}:</b>
+                  <div>{{ getStat(unit, stat.key) }}</div>
+                  <div :class="statClass(unit, stat.key)">
                     Actual: {{ unitMap[unit.id][stat.key] }}
                   </div>
                 </div>
@@ -43,23 +96,23 @@ import { loadingState } from "../types/loading";
 import { Unit } from "../types/unit";
 import { tbRecommended } from "../types/guild";
 
-const dependencyModules = ["player", "guild"];
-
 interface dataModel {
-  map: "LSRepublicOffensive" | "DSSeparatistMight";
-  phase: "phase1" | "phase2" | "phase3" | "phase4";
-  position: "bottom" | "middle" | "top";
-  mission: "special";
+  map: "LSRepublicOffensive" | "DSSeparatistMight" | "";
+  phase: "phase1" | "phase2" | "phase3" | "phase4" | "";
+  position: "bottom" | "middle" | "top" | "";
+  mission: "special" | "";
+  team: any;
 }
 
 export default defineComponent({
   name: "TBStatusPage",
   data() {
     return {
-      map: "LSRepublicOffensive",
-      phase: "phase3",
-      position: "bottom",
-      mission: "special",
+      map: "",
+      phase: "",
+      position: "",
+      mission: "",
+      team: null,
     } as dataModel;
   },
   computed: {
@@ -67,15 +120,91 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapGetters("unit", ["unitName"]),
-    selected(): any {
-      const map: any = tbRecommended[this.map];
-      const phase = map[this.phase];
-      const position = phase[this.position];
-      const mission = position[this.mission];
-      return mission;
+    mapOptions() {
+      return [
+        {
+          value: "LSRepublicOffensive",
+          label: "Republic Offensive",
+        },
+      ];
     },
-    teams(): any {
-      return this.selected.teams;
+    phaseOptions() {
+      return [
+        {
+          value: "phase3",
+          label: "Phase 3",
+        },
+      ];
+    },
+    positionOptions() {
+      return [
+        {
+          value: "bottom",
+          label: "Bottom",
+        },
+      ];
+    },
+    missionOptions() {
+      return [
+        {
+          value: "special",
+          label: "Special (KAM)",
+        },
+      ];
+    },
+    teamOptions(): any[] {
+      if (this.selected) {
+        return this.selected.teams.map(({ id, label }: any) => {
+          return {
+            id,
+            label,
+          };
+        });
+      } else {
+        return [];
+      }
+    },
+    teamUnits(): any[] {
+      if (this.team && this.selected) {
+        const match = this.selected?.teams.find(
+          (team: any) => team.id === this.team
+        );
+        if (match) {
+          return match.units;
+        }
+      }
+      return [];
+    },
+    showPhase(): boolean {
+      return this.map !== "";
+    },
+    showPosition(): boolean {
+      return this.showPhase && this.phase !== "";
+    },
+    showMission(): boolean {
+      return this.showPosition && this.position !== "";
+    },
+    showTeams(): boolean {
+      return (this.selected?.teams ?? []).length > 0;
+    },
+    selected(): any {
+      if (this.showMission && this.map) {
+        try {
+          const map: any = tbRecommended[this.map];
+          const phase = map[this.phase];
+          const position = phase[this.position];
+          const mission = position[this.mission];
+          return mission;
+        } catch (err) {
+          console.error(err);
+          return null;
+        }
+      } else {
+        return null;
+      }
+    },
+    teams(): any[] {
+      return this.selected?.teams ?? [];
     },
     unitMap(): any {
       const unitIds = this.teams[0].units.map((x: any) => x.id);
@@ -121,17 +250,18 @@ export default defineComponent({
       }
     },
   },
-  async created() {
-    console.log(this.selected);
-  },
 });
 </script>
 
 <style lang="scss" scoped>
 .stat-container {
-  .row {
-    &:not(:last-of-type) {
-      border-bottom: 1px solid white;
+  & > * {
+    margin: 0 0.5rem;
+    padding: 0 0.5rem;
+    flex-basis: 200px;
+
+    &:not(:last-child) {
+      border-right: 1px solid white;
     }
   }
 }

@@ -310,7 +310,8 @@ export const tbRecommended = {
         special: {
           teams: [
             {
-              name: "Shaak Ti + Clones",
+              label: "Shaak Ti + Clones",
+              id: "shaakClones",
               units: [
                 {
                   id: "SHAAKTI",
@@ -318,14 +319,17 @@ export const tbRecommended = {
                     {
                       key: "speed",
                       min: 300,
+                      label: "Speed",
                     },
                     {
                       key: "health",
                       min: 85000,
+                      label: "Health",
                     },
                     {
                       key: "critAvoidance",
                       min: 24,
+                      label: "Crit Avoidance",
                     },
                   ],
                 },
@@ -335,14 +339,17 @@ export const tbRecommended = {
                     {
                       key: "specialCritChance",
                       min: 30,
+                      label: "Special Crit",
                     },
                     {
                       key: "health",
                       min: 65000,
+                      label: "Health",
                     },
                     {
                       key: "specialOffense",
                       min: 10000,
+                      label: "Special Offense",
                     },
                   ],
                 },
@@ -352,10 +359,12 @@ export const tbRecommended = {
                     {
                       key: "speed",
                       min: 300,
+                      label: "Speed",
                     },
                     {
                       key: "health",
                       min: 65000,
+                      label: "Health",
                     },
                   ],
                 },
@@ -365,10 +374,12 @@ export const tbRecommended = {
                     {
                       key: "speed",
                       min: 220,
+                      label: "Speed",
                     },
                     {
                       key: "health",
                       min: 100000,
+                      label: "Health",
                     },
                   ],
                 },
@@ -378,14 +389,17 @@ export const tbRecommended = {
                     {
                       key: "speed",
                       min: 270,
+                      label: "Speed",
                     },
                     {
                       key: "health",
                       min: 85000,
+                      label: "Health",
                     },
                     {
                       key: "physicalOffense",
                       min: 10000,
+                      label: "Physical Offense",
                     },
                   ],
                 },
