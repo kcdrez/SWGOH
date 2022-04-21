@@ -54,6 +54,9 @@ export default defineComponent({
       type: String,
       default: "",
     },
+    modelValue: {
+      // required: true,
+    },
   },
   data() {
     return {
@@ -99,28 +102,26 @@ export default defineComponent({
     selectItem(item: any) {
       this.searchText = item[this.displayBy];
       this.showList = false;
-      this.$emit("select", item);
+      this.$emit("update:modelValue", item);
     },
     blur() {
       setTimeout(() => {
         this.showList = false;
       }, 300);
     },
-    submit(val: any, clearSelection: boolean) {
+    submit(val: any) {
       const match = this.list.find((x: any) => {
         return x[this.displayBy] === val;
       });
       if (match) {
-        this.$emit("select", match);
-      } else if (clearSelection) {
-        this.$emit("select", null);
+        this.$emit("update:modelValue", match);
       }
     },
     enterPress() {
       if (this.filteredList.length > 0) {
         const selected = this.filteredList[0];
         this.showList = false;
-        this.$emit("select", selected);
+        this.$emit("update:modelValue", selected);
         this.$emit("enterPress", selected);
         this.searchText = "";
       }
@@ -132,8 +133,13 @@ export default defineComponent({
   },
   watch: {
     searchText(newVal) {
-      this.submit(newVal, true);
+      this.submit(newVal);
     },
+  },
+  created() {
+    if (this.modelValue) {
+      this.searchText = (this.modelValue as any)[this.displayBy];
+    }
   },
 });
 </script>

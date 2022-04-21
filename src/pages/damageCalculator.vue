@@ -1,13 +1,7 @@
 <template>
-  <div class="container swgoh-page mb-3">
+  <div class="swgoh-page mb-3">
     <div class="damage-calculator-container">
       <div class="container">
-        <div class="row">
-          <div class="col">
-            <div class="input-group input-group-sm add-unit-container"></div>
-            <Toggle v-model="physical" onLabel="Physical" offLabel="Special" />
-          </div>
-        </div>
         <div class="row mt-2">
           <div class="col">
             <h6>Select a Character to view their stats:</h6>
@@ -15,30 +9,35 @@
               placeholder="Select a Character"
               :list="player.units"
               :searchBy="['name', 'id', 'aliases']"
-              @select="selectUnit($event)"
+              v-model="selected"
             />
             <template v-if="selected">
               <div class="input-group input-group-sm">
                 <span class="input-group-text">Offense:</span>
-                <span class="input-group-text value">{{
-                  physical
-                    ? selected.offense.physical
-                    : selected.offense.special
-                }}</span>
+                <input
+                  class="form-control refresh-input"
+                  type="number"
+                  v-model.number="subject.offense"
+                  min="0"
+                />
               </div>
               <div class="input-group input-group-sm">
                 <span class="input-group-text">Crit Chance:</span>
-                <span class="input-group-text value">{{
-                  physical
-                    ? selected.critChance.physical
-                    : selected.critChance.special
-                }}</span>
+                <input
+                  class="form-control refresh-input"
+                  type="number"
+                  v-model.number="subject.critChance"
+                  min="0"
+                />
               </div>
               <div class="input-group input-group-sm">
                 <span class="input-group-text">Crit Damage:</span>
-                <span class="input-group-text value">{{
-                  selected.critDamage
-                }}</span>
+                <input
+                  class="form-control refresh-input"
+                  type="number"
+                  v-model.number="subject.critDamage"
+                  min="0"
+                />
               </div>
               <div class="average-damage">
                 <div>Average Damage per Hit: {{ averageDamagePerHitUnit }}</div>
@@ -47,14 +46,14 @@
           </div>
           <div class="col">
             <h6>
-              Select a Character to apply their mods to the other character or
-              modify them directly:
+              Select another Character to apply their mods and/or modify the
+              values directly:
             </h6>
             <SearchInput
               placeholder="Select a Character"
               :list="player.units"
               :searchBy="['name', 'id', 'aliases']"
-              @select="selectMods($event)"
+              @input="selectMods($event)"
             />
             <div class="input-group input-group-sm">
               <span
@@ -65,7 +64,7 @@
               <input
                 class="form-control refresh-input"
                 type="number"
-                v-model.number="offense"
+                v-model.number="target.offense"
                 min="0"
               />
             </div>
@@ -78,7 +77,7 @@
               <input
                 class="form-control refresh-input"
                 type="number"
-                v-model.number="critChance"
+                v-model.number="target.critChance"
                 min="0"
               />
             </div>
@@ -91,13 +90,22 @@
               <input
                 class="form-control refresh-input"
                 type="number"
-                v-model.number="critDamage"
+                v-model.number="target.critDamage"
                 min="0"
               />
             </div>
             <div class="average-damage">
               Average Damage per Hit: {{ averageDamagePerHit }}
             </div>
+          </div>
+        </div>
+        <div class="row my-1">
+          <div class="col justify-content-center d-flex">
+            <Toggle
+              v-model="physical"
+              onLabel="Physical Damage"
+              offLabel="Special Damage"
+            />
           </div>
         </div>
         <div class="row" v-if="selected">
@@ -130,9 +138,16 @@ import { Unit } from "../types/unit";
 
 interface dataModel {
   selected: null | Unit;
-  offense: number;
-  critChance: number;
-  critDamage: number;
+  subject: {
+    offense: number;
+    critChance: number;
+    critDamage: number;
+  };
+  target: {
+    offense: number;
+    critChance: number;
+    critDamage: number;
+  };
   physical: boolean;
 }
 
@@ -141,10 +156,16 @@ export default defineComponent({
   data() {
     return {
       selected: null,
-      offense: 0,
-      offensePercent: 0,
-      critChance: 0,
-      critDamage: 0,
+      subject: {
+        offense: 0,
+        critChance: 0,
+        critDamage: 0,
+      },
+      target: {
+        offense: 0,
+        critChance: 0,
+        critDamage: 0,
+      },
       physical: true,
     } as dataModel;
   },
@@ -153,9 +174,11 @@ export default defineComponent({
     ...mapGetters("player", ["unitData"]),
     averageDamagePerHit(): number {
       //see https://gaming-fans.com/2017/02/15/swgoh-a-look-at-offense-critical-damage-and-critical-chance/
-      const critChance = this.critChance / 100;
-      const critDamage = this.critDamage / 100;
-      return Math.floor(this.offense * (critChance * (critDamage - 1) + 1));
+      const critChance = this.target.critChance / 100;
+      const critDamage = this.target.critDamage / 100;
+      return Math.floor(
+        this.target.offense * (critChance * (critDamage - 1) + 1)
+      );
     },
     averageDamagePerHitUnit(): number {
       if (this.selected) {
@@ -178,45 +201,51 @@ export default defineComponent({
       if (this.selected) {
         const type = newVal ? "physical" : "special";
 
-        this.offense = this.selected.offense[type];
-        this.critChance = this.selected.critChance[type];
+        this.target.offense = this.selected.offense[type];
+        this.target.critChance = this.selected.critChance[type];
+
+        this.subject.offense = this.selected.offense[type];
+        this.subject.critChance = this.selected.critChance[type];
       }
     },
     selected(newVal: Unit) {
-      window.localStorage.setItem("damageCalculatorUnit", newVal.id);
+      if (newVal) {
+        console.log(newVal.id);
+        window.localStorage.setItem("damageCalculatorUnit", newVal.id);
+
+        const type = this.physical ? "physical" : "special";
+
+        this.target.offense = newVal.offense[type];
+        this.target.critChance = newVal.critChance[type];
+        this.target.critDamage = newVal.critDamage;
+
+        this.subject.offense = newVal.offense[type];
+        this.subject.critChance = newVal.critChance[type];
+        this.subject.critDamage = newVal.critDamage;
+      }
     },
   },
   methods: {
-    selectUnit(unit: Unit | null) {
-      if (!unit) {
-        return;
-      }
-      const type = this.physical ? "physical" : "special";
-
-      this.selected = unit;
-      this.offense = this.selected.offense[type];
-      this.critChance = this.selected.critChance[type];
-      this.critDamage = this.selected.critDamage;
-    },
     selectMods(unit: Unit | null) {
       if (!unit) return;
       const type = this.physical ? "physical" : "special";
 
       if (this.selected) {
-        this.offense = round2Decimals(
+        this.target.offense = round2Decimals(
           (this.selected.baseOffense[type] + unit.modOffense.amount) *
             (1 + unit.modOffense.percent)
         );
-        this.critChance =
+        this.target.critChance =
           this.selected.baseCritChance[type] + unit.modCritChance;
-        this.critDamage = this.selected.baseCritDamage + unit.modCritDamage;
+        this.target.critDamage =
+          this.selected.baseCritDamage + unit.modCritDamage;
       }
     },
   },
   async created() {
     const unitId = window.localStorage.getItem("damageCalculatorUnit") ?? "";
     if (unitId) {
-      this.selectUnit(this.unitData(unitId));
+      this.selected = this.unitData(unitId) ?? null;
     }
   },
 });
@@ -252,7 +281,7 @@ export default defineComponent({
 }
 
 ::v-deep(.toggle) {
-  width: 80px;
+  width: 130px;
   justify-content: unset;
 
   &.toggle-on {
