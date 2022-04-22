@@ -290,124 +290,334 @@ const shaakClones = {
   ],
 };
 
-export const tbRecommended = {
-  DSSeparatistMight: {
-    phase1: {
-      top: {
-        combatMission1: {
-          teams: [geos],
-          required: "POGGLETHELESSER",
-        },
-        combatMission2: {
-          teams: [see, sithEmpire, fo, bh],
-        },
+// export const tbRecommended = {
+//   DSSeparatistMight: {
+//     phase1: {
+//       top: {
+//         combatMission1: {
+//           teams: [
+//             {
+//               label: "Poggle Geos",
+//               id: "poggleGeos",
+//               units: [
+//                 {
+//                   id: "POGGLETHELESSER",
+//                   level: 12,
+//                   type: "Gear",
+//                 },
+//                 {
+//                   id: "GEONOSIANSPY",
+//                   level: 12,
+//                   type: "Gear",
+//                 },
+//                 {
+//                   id: "GEONOSIANSOLDIER",
+//                   level: 12,
+//                   type: "Gear",
+//                 },
+//                 {
+//                   id: "GEONOSIANBROODALPHA",
+//                   level: 12,
+//                   type: "Gear",
+//                 },
+//                 {
+//                   id: "SUNFAC",
+//                   level: 12,
+//                   type: "Gear",
+//                 },
+//               ],
+//             },
+//           ],
+//           required: "POGGLETHELESSER",
+//         },
+//         combatMission2: {
+//           teams: [see, sithEmpire, fo, bh],
+//         },
+//       },
+//     },
+//   },
+//   LSRepublicOffensive: {
+//     phase3: {
+//       bottom: {
+//         special: {
+//           teams: [
+//             {
+//               label: "Shaak Ti + Clones",
+//               id: "shaakClones",
+//               units: [
+//                 {
+//                   id: "SHAAKTI",
+//                   stats: [
+//                     {
+//                       key: "speed",
+//                       min: 300,
+//                       label: "Speed",
+//                     },
+//                     {
+//                       key: "health",
+//                       min: 85000,
+//                       label: "Health",
+//                     },
+//                     {
+//                       key: "critAvoidance",
+//                       min: 24,
+//                       label: "Crit Avoidance",
+//                     },
+//                   ],
+//                 },
+//                 {
+//                   id: "CT210408",
+//                   stats: [
+//                     {
+//                       key: "specialCritChance",
+//                       min: 30,
+//                       label: "Special Crit",
+//                     },
+//                     {
+//                       key: "health",
+//                       min: 65000,
+//                       label: "Health",
+//                     },
+//                     {
+//                       key: "specialOffense",
+//                       min: 10000,
+//                       label: "Special Offense",
+//                     },
+//                   ],
+//                 },
+//                 {
+//                   id: "CT7567",
+//                   stats: [
+//                     {
+//                       key: "speed",
+//                       min: 300,
+//                       label: "Speed",
+//                     },
+//                     {
+//                       key: "health",
+//                       min: 65000,
+//                       label: "Health",
+//                     },
+//                   ],
+//                 },
+//                 {
+//                   id: "CT5555",
+//                   stats: [
+//                     {
+//                       key: "speed",
+//                       min: 220,
+//                       label: "Speed",
+//                     },
+//                     {
+//                       key: "health",
+//                       min: 100000,
+//                       label: "Health",
+//                     },
+//                   ],
+//                 },
+//                 {
+//                   id: "ARCTROOPER501ST",
+//                   stats: [
+//                     {
+//                       key: "speed",
+//                       min: 270,
+//                       label: "Speed",
+//                     },
+//                     {
+//                       key: "health",
+//                       min: 85000,
+//                       label: "Health",
+//                     },
+//                     {
+//                       key: "physicalOffense",
+//                       min: 10000,
+//                       label: "Physical Offense",
+//                     },
+//                   ],
+//                 },
+//               ],
+//             },
+//           ],
+//         },
+//       },
+//     },
+//   },
+// };
+
+export const tbRecommended = [
+  {
+    id: "DSSeparatistMight",
+    label: "Separatist Might",
+    phases: [
+      {
+        id: "phase1",
+        label: "Phase 1",
+        positions: [
+          {
+            id: "top",
+            label: "Top",
+            missions: [
+              {
+                id: "mission1",
+                label: "Combat Mission 1",
+                teams: [
+                  {
+                    label: "Poggle Geos",
+                    id: "poggleGeos",
+                    units: [
+                      {
+                        id: "POGGLETHELESSER",
+                        level: 12,
+                        type: "Gear",
+                      },
+                      {
+                        id: "GEONOSIANSPY",
+                        level: 12,
+                        type: "Gear",
+                      },
+                      {
+                        id: "GEONOSIANSOLDIER",
+                        level: 12,
+                        type: "Gear",
+                      },
+                      {
+                        id: "GEONOSIANBROODALPHA",
+                        level: 12,
+                        type: "Gear",
+                      },
+                      {
+                        id: "SUNFAC",
+                        level: 12,
+                        type: "Gear",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       },
-    },
+    ],
   },
-  LSRepublicOffensive: {
-    phase3: {
-      bottom: {
-        special: {
-          teams: [
-            {
-              label: "Shaak Ti + Clones",
-              id: "shaakClones",
-              units: [
-                {
-                  id: "SHAAKTI",
-                  stats: [
-                    {
-                      key: "speed",
-                      min: 300,
-                      label: "Speed",
-                    },
-                    {
-                      key: "health",
-                      min: 85000,
-                      label: "Health",
-                    },
-                    {
-                      key: "critAvoidance",
-                      min: 24,
-                      label: "Crit Avoidance",
-                    },
-                  ],
-                },
-                {
-                  id: "CT210408",
-                  stats: [
-                    {
-                      key: "specialCritChance",
-                      min: 30,
-                      label: "Special Crit",
-                    },
-                    {
-                      key: "health",
-                      min: 65000,
-                      label: "Health",
-                    },
-                    {
-                      key: "specialOffense",
-                      min: 10000,
-                      label: "Special Offense",
-                    },
-                  ],
-                },
-                {
-                  id: "CT7567",
-                  stats: [
-                    {
-                      key: "speed",
-                      min: 300,
-                      label: "Speed",
-                    },
-                    {
-                      key: "health",
-                      min: 65000,
-                      label: "Health",
-                    },
-                  ],
-                },
-                {
-                  id: "CT5555",
-                  stats: [
-                    {
-                      key: "speed",
-                      min: 220,
-                      label: "Speed",
-                    },
-                    {
-                      key: "health",
-                      min: 100000,
-                      label: "Health",
-                    },
-                  ],
-                },
-                {
-                  id: "ARCTROOPER501ST",
-                  stats: [
-                    {
-                      key: "speed",
-                      min: 270,
-                      label: "Speed",
-                    },
-                    {
-                      key: "health",
-                      min: 85000,
-                      label: "Health",
-                    },
-                    {
-                      key: "physicalOffense",
-                      min: 10000,
-                      label: "Physical Offense",
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
+  {
+    id: "LSRepublicOffensive",
+    label: "Republic Offensive",
+    phases: [
+      {
+        id: "phase3",
+        label: "Phase 3",
+        positions: [
+          {
+            id: "bottom",
+            label: "Bottom",
+            missions: [
+              {
+                id: "special",
+                label: "Special Mission (KAM)",
+                teams: [
+                  {
+                    label: "Shaak Ti + Clones",
+                    id: "shaakClones",
+                    units: [
+                      {
+                        id: "SHAAKTI",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 300,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 85000,
+                            label: "Health",
+                          },
+                          {
+                            key: "critAvoidance",
+                            min: 24,
+                            label: "Crit Avoidance",
+                          },
+                        ],
+                      },
+                      {
+                        id: "CT210408",
+                        stats: [
+                          {
+                            key: "specialCritChance",
+                            min: 30,
+                            label: "Special Crit",
+                          },
+                          {
+                            key: "health",
+                            min: 65000,
+                            label: "Health",
+                          },
+                          {
+                            key: "specialOffense",
+                            min: 10000,
+                            label: "Special Offense",
+                          },
+                        ],
+                      },
+                      {
+                        id: "CT7567",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 300,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 65000,
+                            label: "Health",
+                          },
+                        ],
+                      },
+                      {
+                        id: "CT5555",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 220,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 100000,
+                            label: "Health",
+                          },
+                        ],
+                      },
+                      {
+                        id: "ARCTROOPER501ST",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 270,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 85000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalOffense",
+                            min: 10000,
+                            label: "Physical Offense",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       },
-    },
+    ],
   },
-};
+];

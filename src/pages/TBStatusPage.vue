@@ -47,7 +47,11 @@
     <div class="input-group input-group-sm w-25" v-if="showTeams">
       <span class="input-group-text">Team:</span>
       <select class="form-control" v-model="team">
-        <option v-for="team in teamOptions" :key="team.id" :value="team.id">
+        <option
+          v-for="team in teamOptions"
+          :key="team.value"
+          :value="team.value"
+        >
           {{ team.label }}
         </option>
       </select>
@@ -58,18 +62,19 @@
     >
       <thead class="align-middle text-center">
         <tr>
-          <th colspan="100%">KAM Mission</th>
+          <th colspan="100%">{{ missionText }}</th>
         </tr>
         <tr>
           <th>Name</th>
-          <th>Stats</th>
+          <th v-if="showStats">Stats</th>
+          <th v-if="showLevels">Level</th>
         </tr>
       </thead>
       <tbody class="align-middle text-center">
         <template v-for="unit in teamUnits" :key="unit.id">
           <tr>
             <td>{{ unitName(unit.id) }}</td>
-            <td>
+            <td v-if="showStats">
               <div class="stat-container d-flex">
                 <div v-for="stat in unit.stats" :key="stat.key" class="">
                   <b class="text-capitalize">{{ stat.label }}:</b>
@@ -77,6 +82,39 @@
                   <div :class="statClass(unit, stat.key)">
                     Actual: {{ unitMap[unit.id][stat.key] }}
                   </div>
+                </div>
+              </div>
+            </td>
+            <td v-if="showLevels">
+              <div class="d-flex justify-content-center align-items-center">
+                <div class="mx-2">Current Level:</div>
+                <RequirementIcon
+                  :type="unit.type"
+                  :unitId="unit.id"
+                  currentLevel
+                />
+              </div>
+              <div class="d-flex justify-content-center align-items-center">
+                <div class="mx-2">Requirement Level:</div>
+                <RequirementIcon
+                  :value="unit.level"
+                  :type="unit.type"
+                  :unitId="unit.id"
+                />
+              </div>
+              <div>
+                <div
+                  class="text-center"
+                  :class="{
+                    'text-success': levelStatus(unit.id, unit.level, unit.type),
+                    'text-danger': !levelStatus(unit.id, unit.level, unit.type),
+                  }"
+                >
+                  {{
+                    levelStatus(unit.id, unit.level, unit.type)
+                      ? "Completed"
+                      : "Not Completed"
+                  }}
                 </div>
               </div>
             </td>
@@ -91,10 +129,9 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { initializeModules, round2Decimals } from "../utils";
-import { loadingState } from "../types/loading";
 import { Unit } from "../types/unit";
 import { tbRecommended } from "../types/guild";
+import RequirementIcon from "../components/shards/tables/legendary/requirementIcon.vue";
 
 interface dataModel {
   map: "LSRepublicOffensive" | "DSSeparatistMight" | "";
@@ -106,6 +143,7 @@ interface dataModel {
 
 export default defineComponent({
   name: "TBStatusPage",
+  components: { RequirementIcon },
   data() {
     return {
       map: "",
@@ -121,48 +159,60 @@ export default defineComponent({
     ...mapGetters("player", ["unitData"]),
     ...mapGetters("unit", ["unitName"]),
     mapOptions() {
-      return [
-        {
-          value: "LSRepublicOffensive",
-          label: "Republic Offensive",
-        },
-      ];
+      return tbRecommended.map((x) => {
+        return {
+          value: x.id,
+          label: x.label,
+        };
+      });
     },
     phaseOptions() {
-      return [
-        {
-          value: "phase3",
-          label: "Phase 3",
-        },
-      ];
+      const map: any = tbRecommended.find((x: any) => x.id === this.map);
+      return (map?.phases ?? []).map((x: any) => {
+        return {
+          value: x.id,
+          label: x.label,
+        };
+      });
     },
     positionOptions() {
-      return [
-        {
-          value: "bottom",
-          label: "Bottom",
-        },
-      ];
+      const map: any = tbRecommended.find((x: any) => x.id === this.map);
+      const phase: any = map.phases.find((x: any) => x.id === this.phase);
+      return (phase?.positions ?? []).map((x: any) => {
+        return {
+          value: x.id,
+          label: x.label,
+        };
+      });
     },
     missionOptions() {
-      return [
-        {
-          value: "special",
-          label: "Special (KAM)",
-        },
-      ];
+      const map: any = tbRecommended.find((x: any) => x.id === this.map);
+      const phase: any = map.phases.find((x: any) => x.id === this.phase);
+      const position: any = phase.positions.find(
+        (x: any) => x.id === this.position
+      );
+      return (position?.missions ?? []).map((x: any) => {
+        return {
+          value: x.id,
+          label: x.label,
+        };
+      });
     },
     teamOptions(): any[] {
-      if (this.selected) {
-        return this.selected.teams.map(({ id, label }: any) => {
-          return {
-            id,
-            label,
-          };
-        });
-      } else {
-        return [];
-      }
+      const map: any = tbRecommended.find((x: any) => x.id === this.map);
+      const phase: any = map.phases.find((x: any) => x.id === this.phase);
+      const position: any = phase.positions.find(
+        (x: any) => x.id === this.position
+      );
+      const mission: any = position.missions.find(
+        (x: any) => x.id === this.mission
+      );
+      return (mission?.teams ?? []).map((x: any) => {
+        return {
+          value: x.id,
+          label: x.label,
+        };
+      });
     },
     teamUnits(): any[] {
       if (this.team && this.selected) {
@@ -187,13 +237,58 @@ export default defineComponent({
     showTeams(): boolean {
       return (this.selected?.teams ?? []).length > 0;
     },
+    showStats(): boolean {
+      if (this.team) {
+        const map: any = tbRecommended.find((x: any) => x.id === this.map);
+        const phase: any = map.phases.find((x: any) => x.id === this.phase);
+        const position: any = phase.positions.find(
+          (x: any) => x.id === this.position
+        );
+        const mission: any = position.missions.find(
+          (x: any) => x.id === this.mission
+        );
+        const team: any = mission.teams.find((x: any) => x.id === this.team);
+        return team.units.every((unit: any) => !!unit.stats);
+      }
+      return false;
+    },
+    showLevels(): boolean {
+      if (this.team) {
+        const map: any = tbRecommended.find((x: any) => x.id === this.map);
+        const phase: any = map.phases.find((x: any) => x.id === this.phase);
+        const position: any = phase.positions.find(
+          (x: any) => x.id === this.position
+        );
+        const mission: any = position.missions.find(
+          (x: any) => x.id === this.mission
+        );
+        const team: any = mission.teams.find((x: any) => x.id === this.team);
+        return team.units.every((unit: any) => !!unit.level);
+      }
+      return false;
+    },
+    missionText(): string {
+      const map: any = tbRecommended.find((x: any) => x.id === this.map);
+      const phase: any = map.phases.find((x: any) => x.id === this.phase);
+      const position: any = phase.positions.find(
+        (x: any) => x.id === this.position
+      );
+      const mission: any = position.missions.find(
+        (x: any) => x.id === this.mission
+      );
+      return mission?.label ?? "";
+    },
     selected(): any {
       if (this.showMission && this.map) {
         try {
-          const map: any = tbRecommended[this.map];
-          const phase = map[this.phase];
-          const position = phase[this.position];
-          const mission = position[this.mission];
+          const map: any = tbRecommended.find((x: any) => x.id === this.map);
+          const phase: any = map.phases.find((x: any) => x.id === this.phase);
+          const position: any = phase.positions.find(
+            (x: any) => x.id === this.position
+          );
+          const mission: any = position.missions.find(
+            (x: any) => x.id === this.mission
+          );
           return mission;
         } catch (err) {
           console.error(err);
@@ -215,6 +310,26 @@ export default defineComponent({
         map[unit.id] = unit;
         return map;
       }, {});
+    },
+  },
+  watch: {
+    map() {
+      this.phase = "";
+      this.position = "";
+      this.mission = "";
+      this.team = "";
+    },
+    phase() {
+      this.position = "";
+      this.mission = "";
+      this.team = "";
+    },
+    position() {
+      this.mission = "";
+      this.team = "";
+    },
+    mission() {
+      this.team = "";
     },
   },
   methods: {
@@ -247,6 +362,18 @@ export default defineComponent({
         return "text-warning";
       } else {
         return "text-success";
+      }
+    },
+    levelStatus(unitId: string, minimumLevel: number, type: string): boolean {
+      const unit: Unit = this.unitData(unitId);
+      if (!unit) {
+        return false;
+      } else if (type === "Relic") {
+        return unit.relicLevel >= minimumLevel;
+      } else if (type === "Gear") {
+        return unit.gearLevel >= minimumLevel;
+      } else {
+        return false;
       }
     },
   },
