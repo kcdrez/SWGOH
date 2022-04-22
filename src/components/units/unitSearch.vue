@@ -1,7 +1,7 @@
 <template>
   <SearchInput
     :list="fullList"
-    @select="$emit('select', $event)"
+    @update:modelValue="$emit('select', $event)"
     @enterPress="$emit('enterPress', $event)"
     :searchBy="['name', 'id', 'aliases']"
   />

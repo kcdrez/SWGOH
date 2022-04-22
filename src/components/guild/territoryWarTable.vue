@@ -94,7 +94,7 @@
           </td>
           <td v-if="showCol('get2')">
             <span class="row-label">Avg GET2: </span>
-            {{ averageGet1 }}
+            {{ averageGet2 }}
           </td>
           <td v-if="showCol('zetas')">
             <span class="row-label">Avg Zetas: </span>
