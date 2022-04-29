@@ -65,9 +65,10 @@
           <th colspan="100%">{{ missionText }}</th>
         </tr>
         <tr>
-          <th>Name</th>
-          <th v-if="showStats">Stats</th>
-          <th v-if="showLevels">Level</th>
+          <th width="20%">Name</th>
+          <th v-if="showStats" width="60%">Stats</th>
+          <th v-if="showLevels" width="20%">Level</th>
+          <th>Zetas</th>
         </tr>
       </thead>
       <tbody class="align-middle text-center">
@@ -75,8 +76,8 @@
           <tr>
             <td>{{ unitName(unit.id) }}</td>
             <td v-if="showStats">
-              <div class="stat-container d-flex">
-                <div v-for="stat in unit.stats" :key="stat.key" class="">
+              <div class="stat-container">
+                <div v-for="stat in unit.stats" :key="stat.key">
                   <b class="text-capitalize">{{ stat.label }}:</b>
                   <div>{{ getStat(unit, stat.key) }}</div>
                   <div :class="statClass(unit, stat.key)">
@@ -118,6 +119,24 @@
                 </div>
               </div>
             </td>
+            <td>
+              <div class="">
+                <template
+                  v-for="ability in zetaAbilities(unit.id, unit.zetas)"
+                  :key="ability.id"
+                >
+                  <b class="text-capitalize">{{ ability.name }}:</b>
+                  <div
+                    :class="{
+                      'text-success': ability.isZeta,
+                      'text-danger': !ability.isZeta,
+                    }"
+                  >
+                    {{ ability.isZeta ? "Ready" : "Not Ready" }}
+                  </div>
+                </template>
+              </div>
+            </td>
           </tr>
         </template>
       </tbody>
@@ -140,6 +159,8 @@ interface dataModel {
   mission: "special" | "";
   team: any;
 }
+
+const storageKey = "TBStatusPage";
 
 export default defineComponent({
   name: "TBStatusPage",
@@ -167,52 +188,68 @@ export default defineComponent({
       });
     },
     phaseOptions() {
-      const map: any = tbRecommended.find((x: any) => x.id === this.map);
-      return (map?.phases ?? []).map((x: any) => {
-        return {
-          value: x.id,
-          label: x.label,
-        };
-      });
+      try {
+        const map: any = tbRecommended.find((x: any) => x.id === this.map);
+        return (map?.phases ?? []).map((x: any) => {
+          return {
+            value: x.id,
+            label: x.label,
+          };
+        });
+      } catch (err) {
+        return [];
+      }
     },
     positionOptions() {
-      const map: any = tbRecommended.find((x: any) => x.id === this.map);
-      const phase: any = map.phases.find((x: any) => x.id === this.phase);
-      return (phase?.positions ?? []).map((x: any) => {
-        return {
-          value: x.id,
-          label: x.label,
-        };
-      });
+      try {
+        const map: any = tbRecommended.find((x: any) => x.id === this.map);
+        const phase: any = map.phases.find((x: any) => x.id === this.phase);
+        return (phase?.positions ?? []).map((x: any) => {
+          return {
+            value: x.id,
+            label: x.label,
+          };
+        });
+      } catch (err) {
+        return [];
+      }
     },
     missionOptions() {
-      const map: any = tbRecommended.find((x: any) => x.id === this.map);
-      const phase: any = map.phases.find((x: any) => x.id === this.phase);
-      const position: any = phase.positions.find(
-        (x: any) => x.id === this.position
-      );
-      return (position?.missions ?? []).map((x: any) => {
-        return {
-          value: x.id,
-          label: x.label,
-        };
-      });
+      try {
+        const map: any = tbRecommended.find((x: any) => x.id === this.map);
+        const phase: any = map.phases.find((x: any) => x.id === this.phase);
+        const position: any = phase.positions.find(
+          (x: any) => x.id === this.position
+        );
+        return (position?.missions ?? []).map((x: any) => {
+          return {
+            value: x.id,
+            label: x.label,
+          };
+        });
+      } catch (err) {
+        return [];
+      }
     },
     teamOptions(): any[] {
-      const map: any = tbRecommended.find((x: any) => x.id === this.map);
-      const phase: any = map.phases.find((x: any) => x.id === this.phase);
-      const position: any = phase.positions.find(
-        (x: any) => x.id === this.position
-      );
-      const mission: any = position.missions.find(
-        (x: any) => x.id === this.mission
-      );
-      return (mission?.teams ?? []).map((x: any) => {
-        return {
-          value: x.id,
-          label: x.label,
-        };
-      });
+      try {
+        const map: any = tbRecommended.find((x: any) => x.id === this.map);
+        const phase: any = map.phases.find((x: any) => x.id === this.phase);
+        const position: any = phase.positions.find(
+          (x: any) => x.id === this.position
+        );
+        const mission: any = position.missions.find(
+          (x: any) => x.id === this.mission
+        );
+        return (mission?.teams ?? []).map((x: any) => {
+          return {
+            value: x.id,
+            label: x.label,
+          };
+        });
+      } catch (err) {
+        return [];
+      }
     },
     teamUnits(): any[] {
       if (this.team && this.selected) {
@@ -314,22 +351,37 @@ export default defineComponent({
   },
   watch: {
     map() {
-      this.phase = "";
+      this.phase =
+        this.phaseOptions.length === 1 ? this.phaseOptions[0].value : "";
       this.position = "";
       this.mission = "";
       this.team = "";
+
+      this.save();
     },
     phase() {
-      this.position = "";
+      this.position =
+        this.positionOptions.length === 1 ? this.positionOptions[0].value : "";
       this.mission = "";
       this.team = "";
+
+      this.save();
     },
     position() {
-      this.mission = "";
+      this.mission =
+        this.missionOptions.length === 1 ? this.missionOptions[0].value : "";
       this.team = "";
+
+      this.save();
     },
     mission() {
-      this.team = "";
+      this.team =
+        this.teamOptions.length === 1 ? this.teamOptions[0].value : "";
+
+      this.save();
+    },
+    team() {
+      this.save();
     },
   },
   methods: {
@@ -376,16 +428,65 @@ export default defineComponent({
         return false;
       }
     },
+    zetaAbilities(unitId: string, zetaIds: string[] = []) {
+      const unit: Unit = this.unitData(unitId);
+      return zetaIds.map((abilityId) => {
+        const match = unit.abilities.find(
+          (ability) => ability.id === abilityId
+        );
+        if (match) {
+          return {
+            id: abilityId,
+            name: match.name,
+            isZeta: match.has_zeta_learned,
+          };
+        } else {
+          return {
+            id: abilityId,
+            name: abilityId,
+            isZeta: false,
+          };
+        }
+      });
+    },
+    save() {
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          map: this.map,
+          phase: this.phase,
+          position: this.position,
+          mission: this.mission,
+          team: this.team,
+        })
+      );
+    },
+  },
+  created() {
+    const storageData = JSON.parse(
+      window.localStorage.getItem(storageKey) || "{}"
+    );
+
+    this.map = storageData?.map ?? "";
+    this.phase = storageData?.phase ?? "";
+    this.position = storageData?.position ?? "";
+    this.mission = storageData?.mission ?? "";
+    this.team = storageData?.team ?? "";
   },
 });
 </script>
 
 <style lang="scss" scoped>
 .stat-container {
+  max-width: 100%;
+  flex-wrap: wrap;
+  display: flex;
+
   & > * {
-    margin: 0 0.5rem;
+    margin: 0.25rem 0.5rem;
     padding: 0 0.5rem;
     flex-basis: 200px;
+    min-width: 200px;
 
     &:not(:last-child) {
       border-right: 1px solid white;

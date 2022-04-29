@@ -498,6 +498,699 @@ export const tbRecommended = [
           },
         ],
       },
+      {
+        id: "phase2",
+        label: "Phase 2",
+        positions: [
+          {
+            id: "mid",
+            label: "Middle",
+            missions: [
+              {
+                id: "dookuCombatMission",
+                label: "Combat Mission: Dooku & Asajj",
+                teams: [
+                  {
+                    label: "Dooku & Asajj",
+                    id: "dookuAsajj",
+                    units: [
+                      {
+                        id: "COUNTDOOKU",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 275,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 40000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 25000,
+                            label: "Health",
+                          },
+                          {
+                            key: "potency",
+                            min: 100,
+                            label: "Potency",
+                          },
+                        ],
+                        zetas: ["uniqueskill_COUNTDOOKU01"],
+                      },
+                      {
+                        id: "ASAJVENTRESS",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 220,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 65000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: ["uniqueskill_ASAJVENTRESS01"],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: "bot",
+            label: "Bottom",
+            missions: [
+              {
+                id: "geoAcklay",
+                label: "Special Mission: Geos vs Acklay",
+                teams: [
+                  {
+                    label: "Geonosians",
+                    id: "geos",
+                    units: [
+                      {
+                        id: "GEONOSIANBROODALPHA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 300,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 80000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 80000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalArmor",
+                            min: 55,
+                            label: "Armor",
+                          },
+                        ],
+                        zetas: ["uniqueskill_GEONOSIANBROODALPHA01"],
+                      },
+                      {
+                        id: "SUNFAC",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 180,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 60000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 30000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalArmor",
+                            min: 55,
+                            label: "Armor",
+                          },
+                        ],
+                      },
+                      {
+                        id: "GEONOSIANSOLDIER",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 225,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 20000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 20000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalArmor",
+                            min: 35,
+                            label: "Armor",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 75,
+                            label: "Physical Crit Chance",
+                          },
+                        ],
+                      },
+                      {
+                        id: "POGGLETHELESSER",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 250,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 20000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 25000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalArmor",
+                            min: 35,
+                            label: "Armor",
+                          },
+                        ],
+                      },
+                      {
+                        id: "GEONOSIANSPY",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 200,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 20000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 25000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 65,
+                            label: "Physical Crit Chance",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 216,
+                            label: "Critical Damage",
+                          },
+                          {
+                            key: "physicalOffense",
+                            min: 3200,
+                            label: "Physical Offense",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: "phase3",
+        label: "Phase 3",
+        positions: [
+          {
+            id: "mid",
+            label: "Middle",
+            missions: [
+              {
+                id: "watTamborMission",
+                label: "Special Mission: Wat Tambor",
+                teams: [
+                  {
+                    label: "Geonosians",
+                    id: "geos",
+                    units: [
+                      {
+                        id: "GEONOSIANBROODALPHA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 225,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 60000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 40000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: ["uniqueskill_GEONOSIANBROODALPHA01"],
+                      },
+                      {
+                        id: "SUNFAC",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 180,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 75000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 30000,
+                            label: "Health",
+                          },
+                        ],
+                      },
+                      {
+                        id: "GEONOSIANSOLDIER",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 225,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 20000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 20000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 75,
+                            label: "Physical Crit Chance",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 186,
+                            label: "Critical Damage",
+                          },
+                        ],
+                      },
+                      {
+                        id: "POGGLETHELESSER",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 215,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 30000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 20000,
+                            label: "Health",
+                          },
+                        ],
+                      },
+                      {
+                        id: "GEONOSIANSPY",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 200,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 20000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 20000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 60,
+                            label: "Physical Crit Chance",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 216,
+                            label: "Critical Damage",
+                          },
+                          {
+                            key: "physicalOffense",
+                            min: 2800,
+                            label: "Physical Offense",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: "phase4",
+        label: "Phase 4",
+        positions: [
+          {
+            id: "mid",
+            label: "Middle",
+            missions: [
+              {
+                id: "dookuSeparatists",
+                label: "Combat Mission: Separatists",
+                teams: [
+                  {
+                    label: "Dooku & Droids",
+                    id: "dookuDroids",
+                    units: [
+                      {
+                        id: "COUNTDOOKU",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 320,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 50000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 50000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: [],
+                      },
+                      {
+                        id: "MAGNAGUARD",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 220,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 70000,
+                            label: "Health",
+                          },
+                          {
+                            key: "protection",
+                            min: 110000,
+                            label: "Protection",
+                          },
+                        ],
+                      },
+                      {
+                        id: "B2SUPERBATTLEDROID",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 210,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 60000,
+                            label: "Health",
+                          },
+                          {
+                            key: "protection",
+                            min: 90000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "potency",
+                            min: 100,
+                            label: "Potency",
+                          },
+                          {
+                            key: "tenacity",
+                            min: 100,
+                            label: "Tenacity",
+                          },
+                        ],
+                      },
+                      {
+                        id: "B1BATTLEDROIDV2",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 300,
+                            label: "Speed",
+                          },
+                          {
+                            key: "physicalOffense",
+                            max: 10000,
+                            label: "Physical Offense",
+                          },
+                        ],
+                      },
+                      {
+                        id: "DROIDEKA",
+                        stats: [
+                          {
+                            key: "speed",
+                            max: 150,
+                            label: "Speed",
+                          },
+                          {
+                            key: "physicalOffense",
+                            max: 10000,
+                            label: "Physical Offense",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: "bot",
+            label: "Bottom",
+            missions: [
+              {
+                id: "watFriends",
+                label: "Special Mission: Wat & Friends",
+                teams: [
+                  {
+                    label: "Wat & Geos",
+                    id: "watGeos",
+                    units: [
+                      {
+                        id: "GEONOSIANBROODALPHA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 300,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 90000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 70000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: ["uniqueskill_GEONOSIANBROODALPHA01"],
+                      },
+                      {
+                        id: "GEONOSIANSPY",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 275,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 30000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 40000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 65,
+                            label: "Physical Crit Chance",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 226.5,
+                            label: "Critical Damage",
+                          },
+                          {
+                            key: "physicalOffense",
+                            min: 6000,
+                            label: "Physical Offense",
+                          },
+                        ],
+                      },
+                      {
+                        id: "SUNFAC",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 270,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 80000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 70000,
+                            label: "Health",
+                          },
+                        ],
+                      },
+                      {
+                        id: "GEONOSIANSOLDIER",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 325,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 40000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 25000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 85,
+                            label: "Physical Crit Chance",
+                          },
+                        ],
+                      },
+                      {
+                        id: "WATTAMBOR",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 300,
+                            label: "Speed",
+                          },
+                          {
+                            key: "protection",
+                            min: 65000,
+                            label: "Protection",
+                          },
+                          {
+                            key: "health",
+                            min: 120000,
+                            label: "Health",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  // {
+                  //   label: "Wat & Droids",
+                  //   id: "watDroids",
+                  //   units: [
+                  //     {
+                  //       id: "GRIEVOUS",
+                  //       stats: [],
+                  //       zetas: [],
+                  //     },
+                  //     {
+                  //       id: "B1BATTLEDROIDV2",
+                  //       stats: [
+                  //         {
+                  //           key: "speed",
+                  //           min: 300,
+                  //           label: "Speed",
+                  //         },
+                  //         {
+                  //           key: "physicalCritChance",
+                  //           min: 85,
+                  //           label: "Physical Crit Chance",
+                  //         },
+                  //       ],
+                  //     },
+                  //     {
+                  //       id: "B2SUPERBATTLEDROID",
+                  //       stats: [],
+                  //     },
+                  //     {
+                  //       id: "MAGNAGUARD",
+                  //       stats: [
+                  //         {
+                  //           key: "speed",
+                  //           min: 220,
+                  //           label: "Speed",
+                  //         },
+                  //         {
+                  //           key: "protection",
+                  //           min: 90000,
+                  //           label: "Protection",
+                  //         },
+                  //         {
+                  //           key: "health",
+                  //           min: 80000,
+                  //           label: "Health",
+                  //         },
+                  //       ],
+                  //     },
+                  //     {
+                  //       id: "WATTAMBOR",
+                  //       stats: [],
+                  //     },
+                  //   ],
+                  // },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
   {

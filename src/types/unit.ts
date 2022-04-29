@@ -226,9 +226,15 @@ export class Unit {
   }
   public get armor() {
     return {
-      physical: round2Decimals(this._stats["8"] * 100),
-      special: round2Decimals(this._stats["9"] * 100),
+      physical: round2Decimals(this._stats["8"]),
+      special: round2Decimals(this._stats["9"]),
     };
+  }
+  public get physicalArmor() {
+    return this.armor.physical;
+  }
+  public get specialArmor() {
+    return this.armor.special;
   }
   public get speed() {
     return this._stats["5"];
