@@ -290,160 +290,6 @@ const shaakClones = {
   ],
 };
 
-// export const tbRecommended = {
-//   DSSeparatistMight: {
-//     phase1: {
-//       top: {
-//         combatMission1: {
-//           teams: [
-//             {
-//               label: "Poggle Geos",
-//               id: "poggleGeos",
-//               units: [
-//                 {
-//                   id: "POGGLETHELESSER",
-//                   level: 12,
-//                   type: "Gear",
-//                 },
-//                 {
-//                   id: "GEONOSIANSPY",
-//                   level: 12,
-//                   type: "Gear",
-//                 },
-//                 {
-//                   id: "GEONOSIANSOLDIER",
-//                   level: 12,
-//                   type: "Gear",
-//                 },
-//                 {
-//                   id: "GEONOSIANBROODALPHA",
-//                   level: 12,
-//                   type: "Gear",
-//                 },
-//                 {
-//                   id: "SUNFAC",
-//                   level: 12,
-//                   type: "Gear",
-//                 },
-//               ],
-//             },
-//           ],
-//           required: "POGGLETHELESSER",
-//         },
-//         combatMission2: {
-//           teams: [see, sithEmpire, fo, bh],
-//         },
-//       },
-//     },
-//   },
-//   LSRepublicOffensive: {
-//     phase3: {
-//       bottom: {
-//         special: {
-//           teams: [
-//             {
-//               label: "Shaak Ti + Clones",
-//               id: "shaakClones",
-//               units: [
-//                 {
-//                   id: "SHAAKTI",
-//                   stats: [
-//                     {
-//                       key: "speed",
-//                       min: 300,
-//                       label: "Speed",
-//                     },
-//                     {
-//                       key: "health",
-//                       min: 85000,
-//                       label: "Health",
-//                     },
-//                     {
-//                       key: "critAvoidance",
-//                       min: 24,
-//                       label: "Crit Avoidance",
-//                     },
-//                   ],
-//                 },
-//                 {
-//                   id: "CT210408",
-//                   stats: [
-//                     {
-//                       key: "specialCritChance",
-//                       min: 30,
-//                       label: "Special Crit",
-//                     },
-//                     {
-//                       key: "health",
-//                       min: 65000,
-//                       label: "Health",
-//                     },
-//                     {
-//                       key: "specialOffense",
-//                       min: 10000,
-//                       label: "Special Offense",
-//                     },
-//                   ],
-//                 },
-//                 {
-//                   id: "CT7567",
-//                   stats: [
-//                     {
-//                       key: "speed",
-//                       min: 300,
-//                       label: "Speed",
-//                     },
-//                     {
-//                       key: "health",
-//                       min: 65000,
-//                       label: "Health",
-//                     },
-//                   ],
-//                 },
-//                 {
-//                   id: "CT5555",
-//                   stats: [
-//                     {
-//                       key: "speed",
-//                       min: 220,
-//                       label: "Speed",
-//                     },
-//                     {
-//                       key: "health",
-//                       min: 100000,
-//                       label: "Health",
-//                     },
-//                   ],
-//                 },
-//                 {
-//                   id: "ARCTROOPER501ST",
-//                   stats: [
-//                     {
-//                       key: "speed",
-//                       min: 270,
-//                       label: "Speed",
-//                     },
-//                     {
-//                       key: "health",
-//                       min: 85000,
-//                       label: "Health",
-//                     },
-//                     {
-//                       key: "physicalOffense",
-//                       min: 10000,
-//                       label: "Physical Offense",
-//                     },
-//                   ],
-//                 },
-//               ],
-//             },
-//           ],
-//         },
-//       },
-//     },
-//   },
-// };
-
 export const tbRecommended = [
   {
     id: "DSSeparatistMight",
@@ -489,6 +335,89 @@ export const tbRecommended = [
                         id: "SUNFAC",
                         level: 12,
                         type: "Gear",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: "bot",
+            label: "Bottom",
+            missions: [
+              {
+                id: "nuteSpecialMission",
+                label: "Special Mission: Nute & Droid Friends",
+                teams: [
+                  {
+                    label: "Nute & Wat",
+                    id: "nuteWat",
+                    units: [
+                      {
+                        id: "NUTEGUNRAY",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_NUTEGUNRAY01"],
+                      },
+                      {
+                        id: "WATTAMBOR",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_WATTAMBOR02"],
+                      },
+                      {
+                        id: "B1BATTLEDROIDV2",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_b1battledroidv2_02"],
+                      },
+                      {
+                        id: "B2SUPERBATTLEDROID",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_B2SUPERBATTLEDROID02"],
+                      },
+                      {
+                        id: "DROIDEKA",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_DROIDEKA01"],
+                      },
+                    ],
+                  },
+                  {
+                    label: "Nute & Maggie",
+                    id: "nuteMaggie",
+                    units: [
+                      {
+                        id: "NUTEGUNRAY",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_NUTEGUNRAY01"],
+                      },
+                      {
+                        id: "MAGNAGUARD",
+                        level: 12,
+                        type: "Gear",
+                      },
+                      {
+                        id: "B1BATTLEDROIDV2",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_b1battledroidv2_02"],
+                      },
+                      {
+                        id: "B2SUPERBATTLEDROID",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_B2SUPERBATTLEDROID02"],
+                      },
+                      {
+                        id: "DROIDEKA",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_DROIDEKA01"],
                       },
                     ],
                   },
@@ -869,6 +798,50 @@ export const tbRecommended = [
                   },
                 ],
               },
+              {
+                id: "grievousMission",
+                label: "Special Combat Mission: Grievous",
+                teams: [
+                  {
+                    label: "Grievous & Droids",
+                    id: "grievousFriends",
+                    units: [
+                      {
+                        id: "GRIEVOUS",
+                        level: 12,
+                        type: "Gear",
+                        zetas: [
+                          "leaderskill_GRIEVOUS",
+                          "uniqueskill_GRIEVOUS01",
+                        ],
+                      },
+                      {
+                        id: "MAGNAGUARD",
+                        level: 12,
+                        type: "Gear",
+                      },
+                      {
+                        id: "B1BATTLEDROIDV2",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_b1battledroidv2_02"],
+                      },
+                      {
+                        id: "B2SUPERBATTLEDROID",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_B2SUPERBATTLEDROID02"],
+                      },
+                      {
+                        id: "DROIDEKA",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["uniqueskill_DROIDEKA01"],
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
           },
         ],
@@ -1131,60 +1104,44 @@ export const tbRecommended = [
                       },
                     ],
                   },
-                  // {
-                  //   label: "Wat & Droids",
-                  //   id: "watDroids",
-                  //   units: [
-                  //     {
-                  //       id: "GRIEVOUS",
-                  //       stats: [],
-                  //       zetas: [],
-                  //     },
-                  //     {
-                  //       id: "B1BATTLEDROIDV2",
-                  //       stats: [
-                  //         {
-                  //           key: "speed",
-                  //           min: 300,
-                  //           label: "Speed",
-                  //         },
-                  //         {
-                  //           key: "physicalCritChance",
-                  //           min: 85,
-                  //           label: "Physical Crit Chance",
-                  //         },
-                  //       ],
-                  //     },
-                  //     {
-                  //       id: "B2SUPERBATTLEDROID",
-                  //       stats: [],
-                  //     },
-                  //     {
-                  //       id: "MAGNAGUARD",
-                  //       stats: [
-                  //         {
-                  //           key: "speed",
-                  //           min: 220,
-                  //           label: "Speed",
-                  //         },
-                  //         {
-                  //           key: "protection",
-                  //           min: 90000,
-                  //           label: "Protection",
-                  //         },
-                  //         {
-                  //           key: "health",
-                  //           min: 80000,
-                  //           label: "Health",
-                  //         },
-                  //       ],
-                  //     },
-                  //     {
-                  //       id: "WATTAMBOR",
-                  //       stats: [],
-                  //     },
-                  //   ],
-                  // },
+                  {
+                    label: "Wat & Droids",
+                    id: "watDroids",
+                    units: [
+                      {
+                        id: "GRIEVOUS",
+                        level: 5,
+                        type: "Relic",
+                        zetas: [
+                          "leaderskill_GRIEVOUS",
+                          "uniqueskill_GRIEVOUS01",
+                        ],
+                      },
+                      {
+                        id: "B1BATTLEDROIDV2",
+                        level: 5,
+                        type: "Relic",
+                        zetas: ["uniqueskill_b1battledroidv2_02"],
+                      },
+                      {
+                        id: "B2SUPERBATTLEDROID",
+                        level: 5,
+                        type: "Relic",
+                        zetas: ["uniqueskill_B2SUPERBATTLEDROID02"],
+                      },
+                      {
+                        id: "MAGNAGUARD",
+                        level: 5,
+                        type: "Relic",
+                      },
+                      {
+                        id: "WATTAMBOR",
+                        level: 5,
+                        type: "Relic",
+                        zetas: ["uniqueskill_WATTAMBOR02"],
+                      },
+                    ],
+                  },
                 ],
               },
             ],
@@ -1197,6 +1154,705 @@ export const tbRecommended = [
     id: "LSRepublicOffensive",
     label: "Republic Offensive",
     phases: [
+      {
+        id: "phase1",
+        label: "Phase 1",
+        positions: [
+          {
+            id: "middle",
+            label: "Middle",
+            missions: [
+              {
+                id: "special",
+                label: "Special Mission: Padme & Friends",
+                teams: [
+                  {
+                    label: "Padme + CAT",
+                    id: "padmeCAT",
+                    units: [
+                      {
+                        id: "PADMEAMIDALA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 280,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 90000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: [
+                          "leaderskill_PADMEAMIDALA",
+                          "uniqueskill_PADMEAMIDALA01",
+                        ],
+                      },
+                      {
+                        id: "AHSOKATANO",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 220,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 60000,
+                            label: "Health",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 216,
+                            label: "Critical Damage",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 75,
+                            label: "Physical Crit",
+                          },
+                        ],
+                        zetas: ["uniqueskill_AHSOKATANO01"],
+                      },
+                      {
+                        id: "ANAKINKNIGHT",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 250,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 75000,
+                            label: "Health",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 192,
+                            label: "Critical Damage",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 75,
+                            label: "Physical Crit",
+                          },
+                        ],
+                        zetas: ["uniqueskill_ANAKINKNIGHT01"],
+                      },
+                      {
+                        id: "GENERALKENOBI",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 200,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 100000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalArmor",
+                            min: 40,
+                            label: "Armor",
+                          },
+                        ],
+                        zetas: ["uniqueskill_GENERALKENOBI01"],
+                      },
+                      {
+                        id: "COMMANDERAHSOKA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 310,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 75000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: [
+                          "specialskill_COMMANDERAHSOKA01",
+                          "specialskill_COMMANDERAHSOKA02",
+                          "uniqueskill_COMMANDERAHSOKA01",
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    label: "Padme (No CAT)",
+                    id: "padmeNoCAT",
+                    units: [
+                      {
+                        id: "PADMEAMIDALA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 280,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 90000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: [
+                          "leaderskill_PADMEAMIDALA",
+                          "uniqueskill_PADMEAMIDALA01",
+                        ],
+                      },
+                      {
+                        id: "AHSOKATANO",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 220,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 60000,
+                            label: "Health",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 216,
+                            label: "Critical Damage",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 75,
+                            label: "Physical Crit",
+                          },
+                        ],
+                        zetas: ["uniqueskill_AHSOKATANO01"],
+                      },
+                      {
+                        id: "ANAKINKNIGHT",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 250,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 75000,
+                            label: "Health",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 192,
+                            label: "Critical Damage",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 75,
+                            label: "Physical Crit",
+                          },
+                        ],
+                        zetas: ["uniqueskill_ANAKINKNIGHT01"],
+                      },
+                      {
+                        id: "GENERALKENOBI",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 200,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 100000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalArmor",
+                            min: 40,
+                            label: "Armor",
+                          },
+                        ],
+                        zetas: ["uniqueskill_GENERALKENOBI01"],
+                      },
+                      {
+                        id: "C3POLEGENDARY",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 275,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 75000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: [
+                          "specialskill_C3POLEGENDARY01",
+                          "uniqueskill_C3POLEGENDARY02",
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    label: "Padme & Clones",
+                    id: "padmeClones",
+                    units: [
+                      {
+                        id: "PADMEAMIDALA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 280,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 90000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: [
+                          "leaderskill_PADMEAMIDALA",
+                          "uniqueskill_PADMEAMIDALA01",
+                        ],
+                      },
+                      {
+                        id: "CT210408",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 270,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 60000,
+                            label: "Health",
+                          },
+                          {
+                            key: "potency",
+                            min: 100,
+                            label: "Potency",
+                          },
+                        ],
+                        zetas: ["uniqueskill_ct21040802"],
+                      },
+                      {
+                        id: "ARCTROOPER501ST",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 300,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 75000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalOffense",
+                            min: 10000,
+                            label: "Physical Offense",
+                          },
+                        ],
+                        zetas: ["uniqueskill_ARCTROOPER501ST01"],
+                      },
+                      {
+                        id: "CT7567",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 320,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 65000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: ["uniqueskill_REX01"],
+                      },
+                      {
+                        id: "CT5555",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 200,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 100000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalArmor",
+                            min: 70,
+                            label: "Armor",
+                          },
+                        ],
+                        zetas: ["uniqueskill_CT555501", "uniqueskill_CT555502"],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                id: "jedi",
+                label: "Combat Mission: Jedi",
+                teams: [
+                  {
+                    label: "Double Luke",
+                    id: "jkl",
+                    units: [
+                      {
+                        id: "JEDIKNIGHTLUKE",
+                        level: 7,
+                        type: "Relic",
+                        zetas: [
+                          "leaderskill_JEDIKNIGHTLUKE",
+                          "uniqueskill_JEDIKNIGHTLUKE01",
+                        ],
+                      },
+                      {
+                        id: "GRANDMASTERLUKE",
+                        level: 8,
+                        type: "Relic",
+                        zetas: [
+                          "basicskill_GRANDMASTERLUKE",
+                          "specialskill_GRANDMASTERLUKE01",
+                          "specialskill_GRANDMASTERLUKE02",
+                          "uniqueskill_GRANDMASTERLUKE01",
+                          "uniqueskill_GALACTICLEGEND01",
+                        ],
+                      },
+                      {
+                        id: "HERMITYODA",
+                        level: 5,
+                        type: "Relic",
+                        zetas: ["specialskill_HERMITYODA02"],
+                      },
+                      {
+                        id: "OLDBENKENOBI",
+                        level: 5,
+                        type: "Relic",
+                      },
+                      {
+                        id: "GRANDMASTERYODA",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["specialskill_GRANDMASTERYODA03"],
+                      },
+                    ],
+                  },
+                  {
+                    label: "Jedi Knight Revan",
+                    id: "jkr",
+                    units: [
+                      {
+                        id: "JEDIKNIGHTREVAN",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 275,
+                            label: "Speed",
+                          },
+                        ],
+                        zetas: [
+                          "leaderskill_JEDIKNIGHTREVAN",
+                          "uniqueskill_JEDIKNIGHTREVAN01",
+                          "uniqueskill_JEDIKNIGHTREVAN02",
+                        ],
+                      },
+                      {
+                        id: "GENERALSKYWALKER",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 250,
+                            label: "Speed",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 222,
+                            label: "Crit Damage",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 70,
+                            label: "Physical Crit Chance",
+                          },
+                        ],
+                        zetas: [
+                          "basicskill_GENERALSKYWALKER",
+                          "uniqueskill_GENERALSKYWALKER01",
+                        ],
+                      },
+                      {
+                        id: "HERMITYODA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 250,
+                            label: "Speed",
+                          },
+                        ],
+                        zetas: ["specialskill_HERMITYODA03"],
+                      },
+                      {
+                        id: "GRANDMASTERYODA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 275,
+                            label: "Speed",
+                          },
+                        ],
+                        zetas: ["specialskill_GRANDMASTERYODA01"],
+                      },
+                      {
+                        id: "JOLEEBINDO",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 215,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 50000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: ["specialskill_JOLEEBINDO02"],
+                      },
+                    ],
+                  },
+                  {
+                    label: "Jedi Master Kenobi",
+                    id: "jmk",
+                    units: [
+                      {
+                        id: "JEDIMASTERKENOBI",
+                        level: 8,
+                        type: "Relic",
+                        zetas: [],
+                      },
+                      {
+                        id: "MACEWINDU",
+                        level: 3,
+                        type: "Relic",
+                        zetas: [],
+                      },
+                      {
+                        id: "AAYLASECURA",
+                        level: 3,
+                        type: "Relic",
+                        zetas: [],
+                      },
+                      {
+                        id: "QUIGONJINN",
+                        level: 3,
+                        type: "Relic",
+                      },
+                      {
+                        id: "AHSOKATANO",
+                        level: 12,
+                        type: "Gear",
+                        zetas: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: "bot",
+            label: "Bottom",
+            missions: [
+              {
+                id: "jedi",
+                label: "Combat Mission: Jedi",
+                teams: [
+                  {
+                    label: "Double Luke",
+                    id: "jkl",
+                    units: [
+                      {
+                        id: "JEDIKNIGHTLUKE",
+                        level: 7,
+                        type: "Relic",
+                        zetas: [
+                          "leaderskill_JEDIKNIGHTLUKE",
+                          "uniqueskill_JEDIKNIGHTLUKE01",
+                        ],
+                      },
+                      {
+                        id: "GRANDMASTERLUKE",
+                        level: 8,
+                        type: "Relic",
+                        zetas: [
+                          "basicskill_GRANDMASTERLUKE",
+                          "specialskill_GRANDMASTERLUKE01",
+                          "specialskill_GRANDMASTERLUKE02",
+                          "uniqueskill_GRANDMASTERLUKE01",
+                          "uniqueskill_GALACTICLEGEND01",
+                        ],
+                      },
+                      {
+                        id: "HERMITYODA",
+                        level: 5,
+                        type: "Relic",
+                        zetas: ["specialskill_HERMITYODA02"],
+                      },
+                      {
+                        id: "OLDBENKENOBI",
+                        level: 5,
+                        type: "Relic",
+                      },
+                      {
+                        id: "GRANDMASTERYODA",
+                        level: 12,
+                        type: "Gear",
+                        zetas: ["specialskill_GRANDMASTERYODA03"],
+                      },
+                    ],
+                  },
+                  {
+                    label: "Jedi Knight Revan",
+                    id: "jkr",
+                    units: [
+                      {
+                        id: "JEDIKNIGHTREVAN",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 275,
+                            label: "Speed",
+                          },
+                        ],
+                        zetas: [
+                          "leaderskill_JEDIKNIGHTREVAN",
+                          "uniqueskill_JEDIKNIGHTREVAN01",
+                          "uniqueskill_JEDIKNIGHTREVAN02",
+                        ],
+                      },
+                      {
+                        id: "GENERALSKYWALKER",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 250,
+                            label: "Speed",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 222,
+                            label: "Crit Damage",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 70,
+                            label: "Physical Crit Chance",
+                          },
+                        ],
+                        zetas: [
+                          "basicskill_GENERALSKYWALKER",
+                          "uniqueskill_GENERALSKYWALKER01",
+                        ],
+                      },
+                      {
+                        id: "HERMITYODA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 250,
+                            label: "Speed",
+                          },
+                        ],
+                        zetas: ["specialskill_HERMITYODA03"],
+                      },
+                      {
+                        id: "GRANDMASTERYODA",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 275,
+                            label: "Speed",
+                          },
+                        ],
+                        zetas: ["specialskill_GRANDMASTERYODA01"],
+                      },
+                      {
+                        id: "JOLEEBINDO",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 215,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 50000,
+                            label: "Health",
+                          },
+                        ],
+                        zetas: ["specialskill_JOLEEBINDO02"],
+                      },
+                    ],
+                  },
+                  {
+                    label: "Jedi Master Kenobi",
+                    id: "jmk",
+                    units: [
+                      {
+                        id: "JEDIMASTERKENOBI",
+                        level: 8,
+                        type: "Relic",
+                        zetas: [],
+                      },
+                      {
+                        id: "MACEWINDU",
+                        level: 3,
+                        type: "Relic",
+                        zetas: [],
+                      },
+                      {
+                        id: "AAYLASECURA",
+                        level: 3,
+                        type: "Relic",
+                        zetas: [],
+                      },
+                      {
+                        id: "QUIGONJINN",
+                        level: 3,
+                        type: "Relic",
+                      },
+                      {
+                        id: "AHSOKATANO",
+                        level: 12,
+                        type: "Gear",
+                        zetas: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
       {
         id: "phase3",
         label: "Phase 3",

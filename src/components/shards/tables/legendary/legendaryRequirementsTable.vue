@@ -160,58 +160,12 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in prerequisites" :key="index">
-          <td class="text-center align-middle" v-if="showCol('name')">
-            <UnitIcon
-              v-if="item.id"
-              :unit="getUnit(item.id)"
-              isLink
-              :hideImage="simpleView"
-            />
-            <template v-else-if="item.tags">
-              <div>You need {{ item.count }} of the following units:</div>
-              <div class="unit-list-tags">
-                <UnitIcon
-                  class="unit-icon"
-                  v-for="unit in getUnitsByTag(item.tags)"
-                  :key="unit.id"
-                  :unit="unit"
-                  isLink
-                  :hideImage="simpleView"
-                />
-              </div>
-            </template>
-          </td>
-          <td class="text-center align-middle" v-if="showCol('current')">
-            <RequirementIcon
-              class="justify-content-center"
-              :type="item.requirement.type"
-              :unitId="item.id"
-              currentLevel
-            />
-          </td>
-          <td class="text-center align-middle" v-if="showCol('requirements')">
-            <RequirementIcon
-              class="justify-content-center"
-              :value="item.requirement.value"
-              :type="item.requirement.type"
-              :unitId="item.id"
-            />
-          </td>
-          <td
-            class="text-center align-middle"
-            v-if="showCol('recommended') && showRecommended"
-          >
-            <div class="percent-container" v-if="getRecommended(item)">
-              <span>{{ getRecommended(item) }}</span>
-              <ProgressBar :percent="getPercent(item, 'recommended')" />
-            </div>
-            <div v-else>-</div>
-          </td>
-          <td class="text-center align-middle" v-if="showCol('progress')">
-            <ProgressBar :percent="getPercent(item, 'requirement')" />
-          </td>
-        </tr>
+        <LegendaryRequirementRow
+          :prerequisites="prerequisites"
+          :selectedColumns="selectedColumns"
+          :simpleView="simpleView"
+          :showRecommended="showRecommended"
+        />
       </tbody>
     </table>
   </div>
@@ -222,17 +176,13 @@ import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 import _ from "lodash";
 
-import RelicLevelIcon from "../../../units/relicLevelIcon.vue";
-import UnitIcon from "../../../units/unitIcon.vue";
-import GearText from "../../../gear/gearText.vue";
-import RequirementIcon from "./requirementIcon.vue";
 import ShardsOwned from "../../shardsOwned.vue";
 import Timestamp from "../../../timestamp.vue";
 import EnergySpent from "../../../energySpent.vue";
+import LegendaryRequirementRow from "./legendaryRequirementsRow.vue";
 import {
   Unit,
   getPercent,
-  getUnitsByTag,
   getUnit,
   totalProgress,
 } from "../../../../types/unit";
@@ -245,13 +195,10 @@ import {
 export default defineComponent({
   name: "LegendaryRequirementsTable",
   components: {
-    UnitIcon,
-    RelicLevelIcon,
-    GearText,
-    RequirementIcon,
     ShardsOwned,
     Timestamp,
     EnergySpent,
+    LegendaryRequirementRow,
   },
   props: {
     unit: {
@@ -300,6 +247,7 @@ export default defineComponent({
       const prereqs =
         legendaryUnits?.characters.find((x) => x.id === this.unit.id)
           ?.prerequisites ?? [];
+
       return prereqs
         .filter((p) => {
           const unit: Unit | undefined = getUnit(p?.id || "");
@@ -458,8 +406,8 @@ export default defineComponent({
                 }
               }
             } else if (this.sortMethod === "progress") {
-              const percentA = this.getPercent(a, "requirement");
-              const percentB = this.getPercent(b, "requirement");
+              const percentA = getPercent(a, "requirement");
+              const percentB = getPercent(b, "requirement");
               if (this.sortDir === "asc") {
                 return percentA > percentB ? 1 : -1;
               } else {
@@ -557,16 +505,6 @@ export default defineComponent({
         })
       );
     },
-    getRecommended(item: any): string {
-      if (item.recommended) {
-        return `${item.recommended.type}: ${item.recommended.value}`;
-      } else {
-        return "";
-      }
-    },
-    getPercent,
-    getUnitsByTag,
-    getUnit,
     totalProgress(prerequisiteType: "requirement" | "recommended") {
       return totalProgress(this.prerequisites, prerequisiteType);
     },

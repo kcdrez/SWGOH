@@ -81,7 +81,8 @@
                   <b class="text-capitalize">{{ stat.label }}:</b>
                   <div>{{ getStat(unit, stat.key) }}</div>
                   <div :class="statClass(unit, stat.key)">
-                    Actual: {{ unitMap[unit.id][stat.key] }}
+                    Actual:
+                    {{ unitMap[unit.id] ? unitMap[unit.id][stat.key] : 0 }}
                   </div>
                 </div>
               </div>
@@ -113,19 +114,20 @@
                 >
                   {{
                     levelStatus(unit.id, unit.level, unit.type)
-                      ? "Completed"
-                      : "Not Completed"
+                      ? "Ready"
+                      : "Not Ready"
                   }}
                 </div>
               </div>
             </td>
             <td>
-              <div class="">
-                <template
+              <div>
+                <div
                   v-for="ability in zetaAbilities(unit.id, unit.zetas)"
                   :key="ability.id"
+                  class="d-flex justify-content-center"
                 >
-                  <b class="text-capitalize">{{ ability.name }}:</b>
+                  <b class="text-capitalize mx-2">{{ ability.name }}:</b>
                   <div
                     :class="{
                       'text-success': ability.isZeta,
@@ -134,7 +136,7 @@
                   >
                     {{ ability.isZeta ? "Ready" : "Not Ready" }}
                   </div>
-                </template>
+                </div>
               </div>
             </td>
           </tr>
@@ -339,7 +341,7 @@ export default defineComponent({
       return this.selected?.teams ?? [];
     },
     unitMap(): any {
-      const unitIds = this.teams[0].units.map((x: any) => x.id);
+      const unitIds = this.teamUnits.map((x: any) => x.id);
       const ownedUnits = this.player.units.filter((unit: Unit) =>
         unitIds.includes(unit.id)
       );
@@ -402,18 +404,22 @@ export default defineComponent({
       }
     },
     statClass(unit: any, stat: string): string {
-      const match = this.unitMap[unit.id];
-      const statValues = unit.stats.find((x: any) => x.key === stat);
-      const unitStatValue = match[stat];
+      try {
+        const match = this.unitMap[unit.id];
+        const statValues = unit.stats.find((x: any) => x.key === stat);
+        const unitStatValue = match[stat];
 
-      if (!statValues) {
-        return "";
-      } else if (statValues.min > unitStatValue) {
+        if (!statValues) {
+          return "";
+        } else if (statValues.min > unitStatValue) {
+          return "text-danger";
+        } else if (statValues.max < unitStatValue) {
+          return "text-warning";
+        } else {
+          return "text-success";
+        }
+      } catch (err) {
         return "text-danger";
-      } else if (statValues.max < unitStatValue) {
-        return "text-warning";
-      } else {
-        return "text-success";
       }
     },
     levelStatus(unitId: string, minimumLevel: number, type: string): boolean {
