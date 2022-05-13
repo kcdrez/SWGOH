@@ -343,13 +343,13 @@ export default defineComponent({
             } else {
               return b.owned - a.owned;
             }
-          } else if (this.sortMethod === "required") {
+          } else if (this.sortMethod === "needed") {
             if (this.sortDir === "asc") {
               return a.totalAmount - b.totalAmount;
             } else {
               return b.totalAmount - a.totalAmount;
             }
-          } else if (this.sortMethod === "needed") {
+          } else if (this.sortMethod === "required") {
             if (this.sortDir === "asc") {
               return a.neededBy[0] > b.neededBy[0] ? 1 : -1;
             } else {

@@ -232,7 +232,8 @@ export function displayValue(
   value: any,
   relicLevel: any,
   gearLevel: any,
-  stars: any
+  stars: any,
+  power?: any
 ) {
   if (value === null) {
     if (type === "Relic" && relicLevel) {
@@ -241,6 +242,8 @@ export function displayValue(
       return gearLevel ?? 0;
     } else if (type === "Stars") {
       return stars ?? 0;
+    } else if (type === "Power") {
+      return power ?? 0;
     }
   }
   return value;

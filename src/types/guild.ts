@@ -1,6 +1,6 @@
 import store from "../vuex-store/store";
 import { Unit, UnitGear, Ability } from "./unit";
-import { round2Decimals } from "../utils";
+import { round2Decimals, unvue } from "../utils";
 
 export interface GuildPayload {
   territoryWar?: TerritoryWarEvent[];
@@ -110,7 +110,8 @@ export function estimatedTime(unit: Unit): number {
 }
 
 const see = {
-  name: "SEE + Sith Buddies",
+  label: "SEE + Sith Buddies",
+  id: "SEE",
   units: [
     {
       id: "SITHPALPATINE",
@@ -140,7 +141,8 @@ const see = {
   ],
 };
 const sithEmpire = {
-  name: "Sith Empire",
+  label: "Sith Empire",
+  id: "sithEmpire",
   units: [
     {
       id: "DARTHREVAN",
@@ -170,7 +172,8 @@ const sithEmpire = {
   ],
 };
 const fo = {
-  name: "First Order",
+  label: "First Order",
+  id: "firstOrder",
   units: [
     {
       id: "KYLORENUNMASKED",
@@ -199,8 +202,40 @@ const fo = {
     },
   ],
 };
+const slkr = {
+  label: "SLKR + FO",
+  id: "slkr",
+  units: [
+    {
+      id: "SUPREMELEADERKYLOREN",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "KYLOREN",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "KYLORENUNMASKED",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "GENERALHUX",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "FOSITHTROOPER",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
 const bh = {
-  name: "Bounty Hunters",
+  label: "Bounty Hunters",
+  id: "bountyHunters",
   units: [
     {
       id: "BOSSK",
@@ -229,66 +264,360 @@ const bh = {
     },
   ],
 };
-const geos = {
-  name: "Poggle Geos",
+const empire = {
+  label: "Empire",
+  id: "empire",
   units: [
+    {
+      id: "EMPERORPALPATINE",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "Vader",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "GRANDADMIRALTHRAWN",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "GRANDMOFFTARKIN",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "TIEFIGHTERPILOT",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
+const iTroopers = {
+  label: "Imperial Troopers",
+  id: "iTroopers",
+  units: [
+    {
+      id: "VEERS",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "COLONELSTARCK",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "ADMIRALPIETT",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "RANGETROOPER",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "SHORETROOPER",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
+const nightSisters = {
+  label: "Night Sisters",
+  id: "nightSisters",
+  units: [
+    {
+      id: "MOTHERTALZIN",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "ASAJVENTRESS",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "DAKA",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "NIGHTSISTERZOMBIE",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "NIGHTSISTERSPIRIT",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
+const triumvirate = {
+  label: "Sith Triumvirate",
+  id: "triumvirate",
+  units: [
+    {
+      id: "DARTHTRAYA",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "DARTHSION",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "DARTHNIHILUS",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "COUNTDOOKU",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "SITHTROOPER",
+      level: 12,
+      type: "Gear",
+    },
+  ],
+};
+const sepDroids = {
+  label: "Grievous & Droids",
+  id: "grievousFriends",
+  units: [
+    {
+      id: "GRIEVOUS",
+      level: 12,
+      type: "Gear",
+      zetas: ["leaderskill_GRIEVOUS", "uniqueskill_GRIEVOUS01"],
+    },
+    {
+      id: "MAGNAGUARD",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "B1BATTLEDROIDV2",
+      level: 12,
+      type: "Gear",
+      zetas: ["uniqueskill_b1battledroidv2_02"],
+    },
+    {
+      id: "B2SUPERBATTLEDROID",
+      level: 12,
+      type: "Gear",
+      zetas: ["uniqueskill_B2SUPERBATTLEDROID02"],
+    },
+    {
+      id: "DROIDEKA",
+      level: 12,
+      type: "Gear",
+      zetas: ["uniqueskill_DROIDEKA01"],
+    },
+  ],
+};
+const geos = {
+  label: "Geonosians",
+  id: "geos",
+  units: [
+    {
+      id: "GEONOSIANBROODALPHA",
+      level: 12,
+      type: "Gear",
+      zetas: ["uniqueskill_GEONOSIANBROODALPHA01"],
+    },
+    {
+      id: "GEONOSIANSPY",
+      level: 12,
+      type: "Gear",
+    },
+    {
+      id: "GEONOSIANSOLDIER",
+      level: 12,
+      type: "Gear",
+    },
     {
       id: "POGGLETHELESSER",
       level: 12,
       type: "Gear",
     },
     {
-      id: "GEONOSIANSPY",
-      level: 12,
-      type: "Gear",
-    },
-    {
-      id: "GEONOSIANSOLDIER",
-      level: 12,
-      type: "Gear",
-    },
-    {
-      id: "GEONOSIANBROODALPHA",
-      level: 12,
-      type: "Gear",
-    },
-    {
       id: "SUNFAC",
       level: 12,
       type: "Gear",
     },
   ],
 };
-const shaakClones = {
-  name: "Shaak Ti + Clones",
+const executor = {
+  label: "Executor",
+  id: "executor",
   units: [
     {
-      id: "SHAAKTI",
-      level: 5,
-      type: "Relic",
+      id: "CAPITALEXECUTOR",
+      level: 65000,
+      type: "Power",
     },
     {
-      id: "GEONOSIANSPY",
-      level: 12,
-      type: "Gear",
+      id: "HOUNDSTOOTH",
+      level: 65000,
+      type: "Power",
     },
     {
-      id: "GEONOSIANSOLDIER",
-      level: 12,
-      type: "Gear",
+      id: "SLAVE1",
+      level: 65000,
+      type: "Power",
     },
     {
-      id: "GEONOSIANBROODALPHA",
-      level: 12,
-      type: "Gear",
+      id: "XANADUBLOOD",
+      level: 65000,
+      type: "Power",
     },
     {
-      id: "SUNFAC",
-      level: 12,
-      type: "Gear",
+      id: "IG2000",
+      level: 65000,
+      type: "Power",
     },
   ],
 };
+const finalizer = {
+  label: "Finalizer",
+  id: "finalizer",
+  units: [
+    {
+      id: "CAPITALFINALIZER",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "TIESILENCER",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "COMMANDSHUTTLE",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "TIEFIGHTERFIRSTORDER",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "TIEFIGHTERFOSF",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "SITHINFILTRATOR",
+      level: 65000,
+      type: "Power",
+    },
+  ],
+};
+const malevolence = {
+  label: "Malevolence",
+  id: "malevolence",
+  units: [
+    {
+      id: "CAPITALMALEVOLENCE",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "HYENABOMBER",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "VULTUREDROID",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "GEONOSIANSTARFIGHTER1",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "GEONOSIANSTARFIGHTER2",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "GEONOSIANSTARFIGHTER3",
+      level: 65000,
+      type: "Power",
+    },
+  ],
+};
+const chimaera = {
+  label: "Chimaera",
+  id: "chimaera",
+  units: [
+    {
+      id: "CAPITALCHIMAERA",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "HOUNDSTOOTH",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "TIESILENCER",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "TIEFIGHTERIMPERIAL",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "XANADUBLOOD",
+      level: 65000,
+      type: "Power",
+    },
+    {
+      id: "EMPERORSSHUTTLE",
+      level: 65000,
+      type: "Power",
+    },
+  ],
+};
+
+function dsGenericTeams(
+  list: any[] = [
+    see,
+    sithEmpire,
+    fo,
+    slkr,
+    bh,
+    empire,
+    iTroopers,
+    nightSisters,
+    triumvirate,
+  ],
+  type: "Gear" | "Relic" | "Power" = "Gear",
+  level: number = 12
+) {
+  return unvue(list).map((team: any) => {
+    team.units.forEach((unit: any) => {
+      unit.type = type;
+      unit.level = level;
+    });
+    return team;
+  });
+}
 
 export const tbRecommended = [
   {
@@ -304,8 +633,8 @@ export const tbRecommended = [
             label: "Top",
             missions: [
               {
-                id: "mission1",
-                label: "Combat Mission 1",
+                id: "poggleMission",
+                label: "Poggle Mission",
                 teams: [
                   {
                     label: "Poggle Geos",
@@ -339,6 +668,18 @@ export const tbRecommended = [
                     ],
                   },
                 ],
+              },
+              {
+                id: "mission1",
+                label: "Combat Mission 1",
+                teams: dsGenericTeams([
+                  see,
+                  sithEmpire,
+                  fo,
+                  bh,
+                  empire,
+                  iTroopers,
+                ]),
               },
             ],
           },
@@ -423,6 +764,28 @@ export const tbRecommended = [
                   },
                 ],
               },
+              {
+                id: "mission2",
+                label: "Combat Mission 2",
+                teams: dsGenericTeams([
+                  slkr,
+                  fo,
+                  empire,
+                  nightSisters,
+                  triumvirate,
+                ]),
+              },
+              {
+                id: "mission3",
+                label: "Combat Mission 3",
+                teams: dsGenericTeams([
+                  slkr,
+                  fo,
+                  empire,
+                  nightSisters,
+                  triumvirate,
+                ]),
+              },
             ],
           },
         ],
@@ -431,6 +794,30 @@ export const tbRecommended = [
         id: "phase2",
         label: "Phase 2",
         positions: [
+          {
+            id: "top",
+            label: "Top",
+            missions: [
+              {
+                id: "shipMission1",
+                label: "Ship Combat Mission 1",
+                teams: dsGenericTeams(
+                  [malevolence, executor, finalizer, chimaera],
+                  "Power",
+                  50000
+                ),
+              },
+              {
+                id: "shipMission2",
+                label: "Ship Combat Mission 2",
+                teams: dsGenericTeams(
+                  [malevolence, executor, finalizer, chimaera],
+                  "Power",
+                  50000
+                ),
+              },
+            ],
+          },
           {
             id: "mid",
             label: "Middle",
@@ -488,6 +875,16 @@ export const tbRecommended = [
                     ],
                   },
                 ],
+              },
+              {
+                id: "mission1",
+                label: "Combat Mission 1",
+                teams: dsGenericTeams([see, slkr, fo, iTroopers, empire, bh]),
+              },
+              {
+                id: "mission2",
+                label: "Combat Mission 2",
+                teams: dsGenericTeams([see, slkr, fo, iTroopers, empire, bh]),
               },
             ],
           },
@@ -648,6 +1045,30 @@ export const tbRecommended = [
                   },
                 ],
               },
+              {
+                id: "mission3",
+                label: "Combat Mission 3",
+                teams: dsGenericTeams([
+                  see,
+                  slkr,
+                  sithEmpire,
+                  empire,
+                  iTroopers,
+                  sepDroids,
+                ]),
+              },
+              {
+                id: "mission4",
+                label: "Combat Mission 4",
+                teams: dsGenericTeams([
+                  see,
+                  slkr,
+                  sithEmpire,
+                  empire,
+                  iTroopers,
+                  sepDroids,
+                ]),
+              },
             ],
           },
         ],
@@ -656,6 +1077,26 @@ export const tbRecommended = [
         id: "phase3",
         label: "Phase 3",
         positions: [
+          {
+            id: "top",
+            label: "Top",
+            missions: [
+              {
+                id: "shipMission1",
+                label: "Ship Combat Mission 1",
+                teams: dsGenericTeams(
+                  [malevolence, executor, finalizer, chimaera],
+                  "Power",
+                  55000
+                ),
+              },
+              {
+                id: "shipGeos",
+                label: "Ship Combat: Geos",
+                teams: dsGenericTeams([malevolence], "Power", 55000),
+              },
+            ],
+          },
           {
             id: "mid",
             label: "Middle",
@@ -801,46 +1242,42 @@ export const tbRecommended = [
               {
                 id: "grievousMission",
                 label: "Special Combat Mission: Grievous",
-                teams: [
-                  {
-                    label: "Grievous & Droids",
-                    id: "grievousFriends",
-                    units: [
-                      {
-                        id: "GRIEVOUS",
-                        level: 12,
-                        type: "Gear",
-                        zetas: [
-                          "leaderskill_GRIEVOUS",
-                          "uniqueskill_GRIEVOUS01",
-                        ],
-                      },
-                      {
-                        id: "MAGNAGUARD",
-                        level: 12,
-                        type: "Gear",
-                      },
-                      {
-                        id: "B1BATTLEDROIDV2",
-                        level: 12,
-                        type: "Gear",
-                        zetas: ["uniqueskill_b1battledroidv2_02"],
-                      },
-                      {
-                        id: "B2SUPERBATTLEDROID",
-                        level: 12,
-                        type: "Gear",
-                        zetas: ["uniqueskill_B2SUPERBATTLEDROID02"],
-                      },
-                      {
-                        id: "DROIDEKA",
-                        level: 12,
-                        type: "Gear",
-                        zetas: ["uniqueskill_DROIDEKA01"],
-                      },
-                    ],
-                  },
-                ],
+                teams: [sepDroids],
+              },
+              {
+                id: "mission1",
+                label: "Combat Mission 1",
+                teams: dsGenericTeams([
+                  see,
+                  slkr,
+                  empire,
+                  iTroopers,
+                  nightSisters,
+                ]),
+              },
+            ],
+          },
+          {
+            id: "bot",
+            label: "Bottom",
+            missions: [
+              {
+                id: "mission2",
+                label: "Combat Mission 2",
+                teams: dsGenericTeams(
+                  [see, slkr, sithEmpire, bh, empire],
+                  "Relic",
+                  3
+                ),
+              },
+              {
+                id: "mission3",
+                label: "Combat Mission 3",
+                teams: dsGenericTeams(
+                  [see, slkr, sithEmpire, bh, empire],
+                  "Relic",
+                  3
+                ),
               },
             ],
           },
@@ -850,6 +1287,21 @@ export const tbRecommended = [
         id: "phase4",
         label: "Phase 4",
         positions: [
+          {
+            id: "top",
+            label: "Top",
+            missions: [
+              {
+                id: "shipMission1",
+                label: "Ship Combat Mission 1",
+                teams: dsGenericTeams(
+                  [malevolence, executor, finalizer, chimaera],
+                  "Power",
+                  60000
+                ),
+              },
+            ],
+          },
           {
             id: "mid",
             label: "Middle",
@@ -966,6 +1418,24 @@ export const tbRecommended = [
                     ],
                   },
                 ],
+              },
+              {
+                id: "misison1",
+                label: "Combat Mission 1",
+                teams: dsGenericTeams(
+                  [see, empire, nightSisters, iTroopers, geos],
+                  "Relic",
+                  5
+                ),
+              },
+              {
+                id: "misison2",
+                label: "Combat Mission 2",
+                teams: dsGenericTeams(
+                  [see, empire, nightSisters, iTroopers, geos],
+                  "Relic",
+                  5
+                ),
               },
             ],
           },
@@ -1143,6 +1613,24 @@ export const tbRecommended = [
                     ],
                   },
                 ],
+              },
+              {
+                id: "misison3",
+                label: "Combat Mission 3",
+                teams: dsGenericTeams(
+                  [see, slkr, sithEmpire, iTroopers, empire],
+                  "Relic",
+                  5
+                ),
+              },
+              {
+                id: "misison4",
+                label: "Combat Mission 4",
+                teams: dsGenericTeams(
+                  [see, slkr, sithEmpire, iTroopers, empire],
+                  "Relic",
+                  5
+                ),
               },
             ],
           },
@@ -1854,6 +2342,148 @@ export const tbRecommended = [
         ],
       },
       {
+        id: "phase2",
+        label: "Phase 2",
+        positions: [
+          {
+            id: "mid",
+            label: "Middle",
+            missions: [
+              {
+                id: "gasAhsokaCombat",
+                label: "GAS + Ahsoka",
+                teams: [
+                  {
+                    id: "gasAhsoka",
+                    label: "GAS + Ahsoka",
+                    units: [
+                      {
+                        id: "GENERALSKYWALKER",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 290,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 100000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalOffense",
+                            min: 7700,
+                            label: "Physical Offense",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 222,
+                            label: "Crit Damage",
+                          },
+                        ],
+                      },
+                      {
+                        id: "AHSOKATANO",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 230,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 60000,
+                            label: "Health",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 90,
+                            label: "Physical Crit Chance",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: "bot",
+            label: "Bottom",
+            missions: [
+              {
+                id: "specialKenobi",
+                label: "Special: Kenobi + Friends",
+                teams: [
+                  {
+                    id: "kenobiFriends",
+                    label: "Kenobi + Friends",
+                    units: [
+                      {
+                        id: "GENERALKENOBI",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 315,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 90000,
+                            label: "Health",
+                          },
+                        ],
+                      },
+                      {
+                        id: "CLONESERGEANTPHASEI",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 230,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 70000,
+                            label: "Health",
+                          },
+                          {
+                            key: "critDamage",
+                            min: 222,
+                            label: "Crit Damage",
+                          },
+                          {
+                            key: "physicalCritChance",
+                            min: 90,
+                            label: "Physical Crit Chance",
+                          },
+                        ],
+                      },
+                      {
+                        id: "CC2224",
+                        stats: [
+                          {
+                            key: "speed",
+                            min: 250,
+                            label: "Speed",
+                          },
+                          {
+                            key: "health",
+                            min: 85000,
+                            label: "Health",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
         id: "phase3",
         label: "Phase 3",
         positions: [
@@ -1874,12 +2504,12 @@ export const tbRecommended = [
                         stats: [
                           {
                             key: "speed",
-                            min: 300,
+                            min: 315,
                             label: "Speed",
                           },
                           {
                             key: "health",
-                            min: 85000,
+                            min: 80000,
                             label: "Health",
                           },
                           {
@@ -1893,13 +2523,19 @@ export const tbRecommended = [
                         id: "CT210408",
                         stats: [
                           {
+                            key: "speed",
+                            min: 215,
+                            label: "Speed",
+                          },
+                          ,
+                          {
                             key: "specialCritChance",
                             min: 30,
                             label: "Special Crit",
                           },
                           {
                             key: "health",
-                            min: 65000,
+                            min: 50000,
                             label: "Health",
                           },
                           {
@@ -1919,7 +2555,7 @@ export const tbRecommended = [
                           },
                           {
                             key: "health",
-                            min: 65000,
+                            min: 60000,
                             label: "Health",
                           },
                         ],
@@ -1929,12 +2565,12 @@ export const tbRecommended = [
                         stats: [
                           {
                             key: "speed",
-                            min: 220,
+                            min: 215,
                             label: "Speed",
                           },
                           {
                             key: "health",
-                            min: 100000,
+                            min: 95000,
                             label: "Health",
                           },
                         ],
@@ -1944,12 +2580,12 @@ export const tbRecommended = [
                         stats: [
                           {
                             key: "speed",
-                            min: 270,
+                            min: 280,
                             label: "Speed",
                           },
                           {
                             key: "health",
-                            min: 85000,
+                            min: 70000,
                             label: "Health",
                           },
                           {
@@ -1958,6 +2594,64 @@ export const tbRecommended = [
                             label: "Physical Offense",
                           },
                         ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: "top",
+            label: "Top",
+            missions: [
+              {
+                id: "ships_special",
+                label: "Ships Special Mission (GET2)",
+                teams: [
+                  {
+                    id: "grShips",
+                    label: "Galactic Republic Ships",
+                    units: [
+                      {
+                        id: "CAPITALNEGOTIATOR",
+                        level: 73000,
+                        type: "Power",
+                      },
+                      {
+                        id: "UMBARANSTARFIGHTER",
+                        level: 79000,
+                        type: "Power",
+                      },
+                      {
+                        id: "ARC170REX",
+                        level: 67000,
+                        type: "Power",
+                      },
+                      {
+                        id: "JEDISTARFIGHTERANAKIN",
+                        level: 73000,
+                        type: "Power",
+                      },
+                      {
+                        id: "JEDISTARFIGHTERAHSOKATANO",
+                        level: 63000,
+                        type: "Power",
+                      },
+                      {
+                        id: "ARC170CLONESERGEANT",
+                        level: 44000,
+                        type: "Power",
+                      },
+                      {
+                        id: "GAUNTLETSTARFIGHTER",
+                        level: 44000,
+                        type: "Power",
+                      },
+                      {
+                        id: "JEDISTARFIGHTERCONSULAR",
+                        level: 42000,
+                        type: "Power",
                       },
                     ],
                   },
