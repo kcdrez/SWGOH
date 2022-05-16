@@ -1,6 +1,6 @@
 <template>
   <div class="container swgoh-page" v-if="unit">
-    <UnitIcon :unit="unit" size="lg" class="text-center mt-3">
+    <UnitIcon :unit="unit" size="lg" class="text-center mt-3 w-100">
       <div class="btn-group btn-group-sm d-block text-center my-2" role="group">
         <button class="btn btn-primary" @click="addToGeneralPlanner()">
           Add to General Planner

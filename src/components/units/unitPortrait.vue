@@ -21,7 +21,17 @@
         :size="size"
         :forceSide="unit.alignment"
       />
+      <span class="zetas" v-if="unit.zetas.length > 0">
+        <span>{{ unit.zetas.length }}</span>
+      </span>
+      <span class="omicrons" v-if="unit.omicrons.length > 0">
+        <span>{{ unit.omicrons.length }}</span>
+      </span>
     </div>
+    <GearText
+      :level="unit.gearLevel"
+      v-if="unit.gearLevel < maxGearLevel && showGearLevel"
+    />
     <div class="unit-name">{{ unit?.name }}</div>
   </div>
 </template>
@@ -31,10 +41,12 @@ import { defineComponent, PropType } from "vue";
 
 import { Unit } from "../../types/unit";
 import RelicIcon from "./relicLevelIcon.vue";
+import GearText from "../gear/gearText.vue";
+import { maxGearLevel } from "../../types/gear";
 
 export default defineComponent({
   name: "UnitPortrait",
-  components: { RelicIcon },
+  components: { RelicIcon, GearText },
   props: {
     unit: {
       required: true,
@@ -43,6 +55,20 @@ export default defineComponent({
     size: {
       type: String,
       default: "md",
+    },
+    showGearLevel: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      maxGearLevel,
+    };
+  },
+  computed: {
+    zetasCount() {
+      return this.unit.zetas.length;
     },
   },
   methods: {
@@ -90,6 +116,35 @@ export default defineComponent({
           left: -27px;
           width: 140%;
           height: 115%;
+        }
+      }
+
+      ::v-deep(.relic-level) {
+        bottom: -10%;
+        right: 31%;
+      }
+
+      .zetas {
+        bottom: 0%;
+        left: 5%;
+        width: 35px;
+        height: 35px;
+        background-size: 35px 40px;
+
+        span {
+          top: 3px;
+        }
+      }
+
+      .omicrons {
+        bottom: 3%;
+        right: 8%;
+        width: 30px;
+        height: 30px;
+        background-size: 30px 30px;
+
+        span {
+          top: 0px;
         }
       }
     }
@@ -163,7 +218,7 @@ export default defineComponent({
 
     &.dark-side {
       .gear-level13 {
-        background-position: 0 -100%;
+        background-position: 0 50%;
       }
     }
     &.light-side {
@@ -213,10 +268,48 @@ export default defineComponent({
       }
     }
 
+    .zetas,
+    .omicrons {
+      position: absolute;
+      color: white;
+      background-repeat: no-repeat;
+
+      span {
+        font-size: 0.75rem;
+        font-weight: bold;
+        position: relative;
+      }
+    }
+
+    .zetas {
+      background-image: url("../../images/zeta.png");
+      bottom: -9%;
+      left: -20%;
+      width: 35px;
+      height: 35px;
+      background-size: 35px 40px;
+
+      span {
+        top: 3px;
+      }
+    }
+
+    .omicrons {
+      background-image: url("../../images/omicron.png");
+      bottom: 3%;
+      right: -15%;
+      width: 25px;
+      background-size: 25px 25px;
+
+      span {
+        top: -1px;
+      }
+    }
+
     ::v-deep(.relic-level) {
       position: absolute;
-      bottom: -3%;
-      right: -14%;
+      bottom: -25%;
+      right: 13%;
     }
   }
 }

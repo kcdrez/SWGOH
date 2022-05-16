@@ -122,14 +122,14 @@
                 <router-link class="dropdown-item" :to="{ name: 'GearList' }"
                   >Gear List</router-link
                 >
-              </li>
+              </li> -->
               <li>
                 <router-link
                   class="dropdown-item"
                   :to="{ name: 'ScavengerPage' }"
                   >Scavenger</router-link
                 >
-              </li> -->
+              </li>
             </ul>
           </li>
         </ul>

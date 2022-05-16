@@ -18,25 +18,21 @@ body {
     }
   }
 
-  .collapse.show {
-    .table-bordered {
-      .sticky-header {
-        position: sticky;
-        z-index: 4;
-        top: 56px;
+  .sticky-header {
+    position: sticky;
+    z-index: 4;
+    top: 56px;
 
-        th {
-          position: relative;
+    th {
+      position: relative;
 
-          &::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            right: 0;
-            height: 100%;
-            border-right: 1px solid #3c3c3c;
-          }
-        }
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        border-right: 1px solid #3c3c3c;
       }
     }
   }
@@ -262,6 +258,7 @@ button:disabled {
   position: sticky;
   top: 56px;
   height: 50px;
+  z-index: 10;
 
   h1,
   h2,
