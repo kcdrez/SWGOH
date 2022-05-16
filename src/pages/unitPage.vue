@@ -1,5 +1,5 @@
 <template>
-  <UnitData :unit="unit" />
+  <UnitData v-if="unit" :unit="unit" />
 </template>
 
 <script lang="ts">

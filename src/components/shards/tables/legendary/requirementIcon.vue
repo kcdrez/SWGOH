@@ -11,7 +11,7 @@
       <span>{{ displayValue }}</span>
       <img src="images/star.png" class="mx-1" />
     </div>
-    <span v-else>{{ type }}: {{ displayValue }}</span>
+    <div v-else>{{ type }}: {{ displayValue }}</div>
   </div>
 </template>
 
@@ -44,7 +44,7 @@ export default defineComponent({
     },
     unitId: {
       type: String,
-      required: true,
+      // required: true,
     },
   },
   computed: {
@@ -52,7 +52,7 @@ export default defineComponent({
       return `${this.type}: ${this.value}`;
     },
     unit() {
-      return getUnit(this.unitId);
+      return getUnit(this.unitId ?? "");
     },
     alignment(): string {
       return this.unit?.alignment || "Light Side";
@@ -63,7 +63,8 @@ export default defineComponent({
         this.value,
         this.unit?.relicLevel,
         this.unit?.gearLevel,
-        this.unit?.stars
+        this.unit?.stars,
+        this.unit?.power
       );
     },
     shouldDisplayRelicIcon(): boolean {

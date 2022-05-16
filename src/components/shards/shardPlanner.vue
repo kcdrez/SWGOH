@@ -166,11 +166,17 @@
             <tbody class="align-middle text-center">
               <tr v-for="item in unitUsages" :key="item.requirementId">
                 <td>
-                  <UnitIcon
-                    :unit="getUnit(item.requirementId)"
-                    isLink
-                    hideImage
-                  />
+                  <div class="requirement-container">
+                    <template v-if="item.id && item.id !== unit.id">
+                      <UnitIcon :unit="getUnit(item.id)" isLink hideImage />
+                      <i class="fa fa-arrow-right"></i>
+                    </template>
+                    <UnitIcon
+                      :unit="getUnit(item.requirementId)"
+                      isLink
+                      hideImage
+                    />
+                  </div>
                 </td>
                 <td>
                   <RequirementIcon
@@ -224,6 +230,7 @@ import Timestamp from "../timestamp.vue";
 import {
   FarmingNode,
   estimatedTime as nodeEstimatedTime,
+  isRequired,
 } from "../../types/shards";
 import { estimatedTime as shopEstimatedTime } from "../../types/currency";
 import { Unit, getUnit, getPercent } from "../../types/unit";
@@ -418,10 +425,10 @@ export default defineComponent({
       );
     },
     showLegendaryTable(): boolean {
-      return this.tables.includes("Legendary Events");
+      return this.tables.includes("Legendary Events") && this.unit.stars < 7;
     },
     showGLTable(): boolean {
-      return this.tables.includes("Galactic Legends");
+      return this.tables.includes("Galactic Legends") && this.unit.stars < 7;
     },
     shardTimeUnlock(): number {
       const unitList = this.unitFarmingList.filter((el: Unit) => {
@@ -450,46 +457,10 @@ export default defineComponent({
       return Math.min(...days);
     },
     unitUsages(): any[] {
-      const legendaries = this.shardFarming.filter(
-        (x: FarmingNode) => x.id === "galactic_legends" || x.id === "legendary"
-      );
-      return legendaries
-        .reduce((acc: any[], node: FarmingNode) => {
-          node.characters.forEach((char) => {
-            (char?.prerequisites ?? []).forEach((requirement) => {
-              const idMatch = requirement.id === this.unit.id;
-
-              const tagsMatch = (() => {
-                if ((requirement?.tags ?? []).length === 0) {
-                  return false;
-                }
-                return (requirement?.tags ?? []).every((tag) => {
-                  if (tag === "is_ship") {
-                    return this.unit.isShip;
-                  } else if (tag.includes("!")) {
-                    const notTag = tag.replace("!", "");
-                    if (notTag === "is_ship") {
-                      return !this.unit.isShip;
-                    } else {
-                      return !this.unit.categories.includes(notTag);
-                    }
-                  } else {
-                    return this.unit.categories.includes(tag);
-                  }
-                });
-              })();
-
-              if (idMatch || (tagsMatch && char.id !== this.unit.id)) {
-                acc.push({ ...requirement, requirementId: char.id });
-              }
-            });
-          });
-          return acc;
-        }, [])
-        .filter((unit: any) => {
-          const match: Unit | undefined = this.unitData(unit.requirementId);
-          return match ? match.stars < 7 : true;
-        });
+      return isRequired(this.unit).filter((unit: any) => {
+        const match: Unit | undefined = this.unitData(unit.requirementId);
+        return match ? match.stars < 7 : true;
+      });
     },
   },
   watch: {
@@ -659,6 +630,16 @@ export default defineComponent({
 
   img:first-child {
     margin-left: 1rem;
+  }
+}
+
+.requirement-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  > * {
+    margin: 0 0.25rem;
   }
 }
 </style>

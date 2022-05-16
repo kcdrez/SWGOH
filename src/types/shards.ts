@@ -1,5 +1,8 @@
+import _ from "lodash";
+
 import { CurrencyTypeConfig } from "./currency";
 import { Unit, unitsByPriority } from "./unit";
+import store from "../vuex-store/store";
 
 export type ShardsConfigType = {
   [key: number]: number;
@@ -107,16 +110,18 @@ interface NodeCharacter {
   dropRate?: number;
   shardCount?: number;
   cost?: number;
-  prerequisites?: {
-    id?: string;
-    requirement?: IPrerequisite;
-    tags?: string[];
-    count?: number;
-    recommended?: IPrerequisite;
-  }[];
+  prerequisites?: IPrerequisite[];
 }
 
-interface IPrerequisite {
+export interface IPrerequisite {
+  id?: string;
+  requirement?: IPrerequisiteItem;
+  tags?: string[];
+  count?: number;
+  recommended?: IPrerequisiteItem;
+  prerequisites?: IPrerequisite;
+}
+interface IPrerequisiteItem {
   value: number;
   type: "Relic" | "Power" | "Gear" | "Stars";
 }
@@ -227,7 +232,8 @@ export function displayValue(
   value: any,
   relicLevel: any,
   gearLevel: any,
-  stars: any
+  stars: any,
+  power?: any
 ) {
   if (value === null) {
     if (type === "Relic" && relicLevel) {
@@ -236,7 +242,58 @@ export function displayValue(
       return gearLevel ?? 0;
     } else if (type === "Stars") {
       return stars ?? 0;
+    } else if (type === "Power") {
+      return power ?? 0;
     }
   }
   return value;
+}
+
+export function isRequired(unit: Unit, checkList: any[] = []): any {
+  const list: any[] = store.state.shards.shardFarming
+    .filter(
+      (x: FarmingNode) => x.id === "galactic_legends" || x.id === "legendary"
+    )
+    .reduce((acc: any[], node: FarmingNode) => {
+      node.characters.forEach((char) => {
+        (char?.prerequisites ?? []).forEach((requirement) => {
+          const idMatch = requirement.id === unit.id;
+
+          const tagsMatch = (() => {
+            if ((requirement?.tags ?? []).length === 0) {
+              return false;
+            }
+            return (requirement?.tags ?? []).every((tag) => {
+              if (tag === "is_ship") {
+                return unit.isShip;
+              } else if (tag.includes("!")) {
+                const notTag = tag.replace("!", "");
+                if (notTag === "is_ship") {
+                  return !unit.isShip;
+                } else {
+                  return !unit.categories.includes(notTag);
+                }
+              } else {
+                return unit.categories.includes(tag);
+              }
+            });
+          })();
+
+          const alreadyExists = checkList.find((x) => x.id === char.id);
+
+          if (
+            !alreadyExists &&
+            (idMatch || (tagsMatch && char.id !== unit.id))
+          ) {
+            acc.push({
+              id: unit.id,
+              ...requirement,
+              requirementId: char.id,
+            });
+          }
+        });
+      });
+      return acc;
+    }, []);
+  return _.uniqBy(list, "requirementId");
 }

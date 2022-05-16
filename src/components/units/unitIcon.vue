@@ -1,28 +1,33 @@
 <template>
-  <div>
-    <router-link
-      v-if="isLink"
-      :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-    >
-      <span v-if="hideImage">{{ unit.name }}</span>
-      <UnitPortrait
-        v-else
-        :unit="unit"
-        :size="size"
-        :class="{ 'hide-on-mobile': hideImgOnMobile }"
-      />
-    </router-link>
-    <template v-else>
-      <span v-if="hideImage">{{ unit.name }}</span>
-      <UnitPortrait
-        v-else
-        :unit="unit"
-        :size="size"
-        :class="{ 'hide-on-mobile': hideImgOnMobile }"
-      />
-      <slot />
+  <Popper hover arrow placement="right">
+    <template #content v-if="hideImage">
+      <UnitPortrait :unit="unit" :size="size" showGearLevel />
     </template>
-  </div>
+    <div>
+      <router-link
+        v-if="isLink"
+        :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+      >
+        <span v-if="hideImage">{{ unit.name }}</span>
+        <UnitPortrait
+          v-else
+          :unit="unit"
+          :size="size"
+          :class="{ 'hide-on-mobile': hideImgOnMobile }"
+        />
+      </router-link>
+      <template v-else>
+        <span v-if="hideImage">{{ unit.name }}</span>
+        <UnitPortrait
+          v-else
+          :unit="unit"
+          :size="size"
+          :class="{ 'hide-on-mobile': hideImgOnMobile }"
+        />
+        <slot />
+      </template>
+    </div>
+  </Popper>
 </template>
 
 <script lang="ts">

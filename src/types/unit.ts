@@ -736,10 +736,11 @@ export function getPercent(
       return getUnitPercent(u, type, value);
     });
 
-    if (list.length >= item.count) {
+    const amountNeeded = item.count ?? 1;
+    if (list.length >= amountNeeded) {
       percentage = 100;
     } else {
-      for (let i = list.length; i < item.count; i++) {
+      for (let i = list.length; i < amountNeeded; i++) {
         list.push(0);
       }
       percentage =
@@ -786,26 +787,33 @@ export function getUnitPercent(unit: Unit, type: string, target: number) {
   return 0;
 }
 
-export function getUnitsByTag(tags: string[]): Unit[] {
+export function getUnitsByTag(
+  tags: string[],
+  parentIds: string[] = []
+): Unit[] {
   const playerUnits = store.state.player.player?.units ?? [];
   const otherUnits = store.state.unit.unitList;
 
   return [...playerUnits, ...otherUnits]
     .filter((u: Unit) => {
-      return tags.every((tag) => {
-        if (tag === "is_ship") {
-          return u.isShip;
-        } else if (tag.includes("!")) {
-          const notTag = tag.replace("!", "");
-          if (notTag === "is_ship") {
-            return !u.isShip;
+      if (parentIds.includes(u.id)) {
+        return false;
+      } else {
+        return tags.every((tag) => {
+          if (tag === "is_ship") {
+            return u.isShip;
+          } else if (tag.includes("!")) {
+            const notTag = tag.replace("!", "");
+            if (notTag === "is_ship") {
+              return !u.isShip;
+            } else {
+              return !u.categories.includes(notTag);
+            }
           } else {
-            return !u.categories.includes(notTag);
+            return u.categories.includes(tag);
           }
-        } else {
-          return u.categories.includes(tag);
-        }
-      });
+        });
+      }
     })
     .reduce((acc, el) => {
       const match = acc.find((x: any) => x.id === el.id);
