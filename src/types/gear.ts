@@ -35,9 +35,12 @@ export interface INeededBy {
   gearLevels: { amount: number; level: number }[];
 }
 
-interface IScavenger {
+export interface IScavenger {
   id: string;
   count: number;
+  priority?: number;
+  nodes?: string[];
+  notes?: string;
 }
 
 interface ILocationNode extends ILocation {
