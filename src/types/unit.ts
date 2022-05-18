@@ -158,6 +158,9 @@ export class Unit {
   public get omicrons() {
     return this._omicron_abilities ?? [];
   }
+  public get abilityClasses() {
+    return this._ability_classes ?? [];
+  }
   public get glTier4() {
     return store.state.shards.ownedShards[this.id]?.glFarming?.tier4 || false;
   }
