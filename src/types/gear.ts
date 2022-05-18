@@ -230,6 +230,8 @@ export class Gear {
       return -1;
     }
 
+    console.log(this.remaining);
+
     if (this.remaining > 0) {
       let energy = 100;
       let totalDays = 0;
@@ -273,6 +275,9 @@ export class Gear {
           ) {
             energy = 0;
             totalDays = this.remaining / (60 / 7);
+          } else {
+            //unfarmable, raid only gear probably
+            totalDays = totalDays > 0 ? totalDays : -1;
           }
         }
       });
