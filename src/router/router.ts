@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 
 import PlayerLoadingPage from "../pages/playerLoadingPage.vue";
+import UnitLoadingPage from "../pages/unitLoadingPage.vue";
 import HomePage from "../pages/homepage.vue";
 import UnitPage from "../pages/unitPage.vue";
 import GeneralPlannerPage from "../pages/generalPlanner.vue";
@@ -14,8 +15,9 @@ import GLChecklist from "../pages/glChecklist.vue";
 import TBStatusPage from "../pages/TBStatusPage.vue";
 import WidgetsPage from "../pages/widgets.vue";
 import GearListPage from "../pages/gearList.vue";
-import GearPage from "../pages/gearPage.vue";
+// import GearPage from "../pages/gearPage.vue";
 import ScavengerPage from "../pages/scavenger.vue";
+import UnitSearchPage from "../pages/unitSearch.vue";
 
 const routes = [
   {
@@ -247,21 +249,20 @@ const routes = [
     ],
   },
   {
-    path: "/gear/:id",
+    path: "/search",
     components: {
-      default: PlayerLoadingPage,
+      default: UnitLoadingPage,
     },
     props: {
       default: {
-        dependencyModules: ["shards", "gear", "planner"],
-        loadAsync: false,
+        dependencyModules: [],
       },
     },
     children: [
       {
         path: "",
-        name: "GearPage",
-        component: GearPage,
+        name: "UnitSearchPage",
+        component: UnitSearchPage,
       },
     ],
   },
