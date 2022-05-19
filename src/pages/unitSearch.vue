@@ -252,10 +252,10 @@ export default defineComponent({
         query.tag = this.getSearchSyntax(tagSearches);
       }
       if (unitTypeSearches.length) {
-        query.ability = this.getSearchSyntax(unitTypeSearches);
+        query.unitType = this.getSearchSyntax(unitTypeSearches);
       }
       if (abilitySearches.length) {
-        query.unitType = this.getSearchSyntax(abilitySearches);
+        query.ability = this.getSearchSyntax(abilitySearches);
       }
 
       this.$router.push({ query });
