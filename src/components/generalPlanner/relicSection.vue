@@ -59,6 +59,10 @@ export default defineComponent({
           value: "name",
         },
         {
+          text: "Rarity",
+          value: "rarity",
+        },
+        {
           text: "Locations",
           value: "locations",
         },

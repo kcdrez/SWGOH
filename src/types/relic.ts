@@ -10,6 +10,7 @@ export interface IRelic {
   amount: AmountConfigType;
   image: string;
   name: string;
+  rarity: number;
   neededBy?: { name: string; id: string; amount: number }[];
 }
 
@@ -20,6 +21,7 @@ export class Relic {
   private _amount: AmountConfigType;
   private _image: string;
   private _name: string;
+  private _rarity: number;
   private _neededBy?: { name: string; id: string; amount: number }[];
 
   constructor(data: IRelic) {
@@ -29,6 +31,7 @@ export class Relic {
     this._amount = data.amount;
     this._image = data.image;
     this._name = data.name;
+    this._rarity = data.rarity;
     this._neededBy = data.neededBy || [];
   }
 
@@ -40,6 +43,9 @@ export class Relic {
   }
   public get name() {
     return this._name;
+  }
+  public get rarity() {
+    return this._rarity;
   }
   public get location() {
     return this._location;
