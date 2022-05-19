@@ -1,155 +1,164 @@
 <template>
-  <div>
-    <table
-      class="table table-bordered table-dark table-sm table-striped swgoh-table"
-    >
-      <thead class="sticky-header show-on-mobile">
-        <tr class="sort-methods">
-          <th class="show-on-mobile">
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort By:</span>
-              <select
-                class="form-control"
-                @change="sortMethod = $event.target.value"
-              >
-                <option value="name">Name</option>
-                <option value="location">Location</option>
-                <option value="progress">Progress</option>
-                <option value="time">Time Remaining</option>
-              </select>
-            </div>
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort Direction:</span>
-              <select
-                class="form-control"
-                @change="sortDir = $event.target.value"
-              >
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </div>
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Search:</span>
-              <input
-                class="form-control"
-                v-model="searchText"
-                placeholder="Search by name"
-              />
-            </div>
-          </th>
-        </tr>
-        <tr class="text-center align-middle">
-          <th v-if="showCol('icon')">Icon</th>
-          <th v-if="showCol('name')">
-            <div class="c-pointer" @click="sortBy('name')">
-              Mat Name
-              <i class="fas mx-1" :class="sortIcon('name')"></i>
-            </div>
+  <table
+    class="table table-bordered table-dark table-sm table-striped swgoh-table"
+  >
+    <thead class="sticky-header show-on-mobile">
+      <tr class="sort-methods">
+        <th class="show-on-mobile">
+          <div class="input-group input-group-sm my-2">
+            <span class="input-group-text">Sort By:</span>
+            <select
+              class="form-control"
+              @change="sortMethod = $event.target.value"
+            >
+              <option value="name">Name</option>
+              <option value="location">Location</option>
+              <option value="progress">Progress</option>
+              <option value="time">Time Remaining</option>
+            </select>
+          </div>
+          <div class="input-group input-group-sm my-2">
+            <span class="input-group-text">Sort Direction:</span>
+            <select
+              class="form-control"
+              @change="sortDir = $event.target.value"
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
+          <div class="input-group input-group-sm my-2">
+            <span class="input-group-text">Search:</span>
             <input
-              class="form-control form-control-sm mx-auto my-1 w-75"
-              placeholder="Search"
+              class="form-control"
               v-model="searchText"
+              placeholder="Search by name"
             />
-          </th>
-          <th
-            v-if="showCol('locations')"
-            class="c-pointer"
-            @click="sortBy('location')"
-          >
-            Locations
-            <i class="fas mx-1" :class="sortIcon('location')"></i>
-          </th>
-          <th
-            v-if="showCol('owned')"
-            class="c-pointer"
-            @click="sortBy('owned')"
-            width="160px"
-          >
-            Amount Owned
-            <i class="fas mx-1" :class="sortIcon('owned')"></i>
-          </th>
-          <th
-            v-if="showCol('needed')"
-            class="c-pointer"
-            @click="sortBy('needed')"
-          >
-            Amount Needed
-            <i class="fas mx-1" :class="sortIcon('needed')"></i>
-          </th>
-          <th
-            v-if="showCol('progress')"
-            class="c-pointer"
-            @click="sortBy('progress')"
-            width="145px"
-          >
-            Progress
-            <i class="fas mx-1" :class="sortIcon('progress')"></i>
-          </th>
-          <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
-          <th v-if="showCol('time')" class="c-pointer" @click="sortBy('time')">
-            Est. Time
-            <i class="fas mx-1" :class="sortIcon('time')"></i>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="mat in filteredRelics" :key="mat.id">
-          <td class="text-center align-middle" v-if="showCol('icon')">
-            <RelicIcon :item="mat" />
-          </td>
-          <td class="align-middle text-center" v-if="showCol('name')">
-            {{ mat.name }}
-          </td>
-          <td class="text-center align-middle" v-if="showCol('locations')">
-            <span class="row-label">Location:</span>
-            {{ mat.location.node }}
-          </td>
-          <td class="text-center align-middle" v-if="showCol('owned')">
-            <OwnedAmount :item="mat" :needed="mat.amountNeeded(targetLevels)" />
-          </td>
-          <td class="align-middle text-center" v-if="showCol('needed')">
-            {{ mat.amountNeeded(targetLevels) }}
-          </td>
-          <td class="align-middle" v-if="showCol('progress')">
-            <ProgressBar :percent="mat.percent(targetLevels)" class="mt-2" />
-          </td>
-          <td
-            class="align-middle"
-            v-if="showRequiredByUnit && showCol('required')"
-          >
-            <span class="row-label">Required By: </span>
-            <ul class="mb-0">
-              <li v-for="unit in mat.neededBy" :key="unit.id">
-                <Popper hover arrow placement="left">
-                  <router-link
-                    :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-                    >{{ unit.name }}</router-link
-                  >
-                  <template #content>
-                    <div class="border-bottom mb-1">{{ unit.name }}</div>
-                    <div>
-                      {{ unit.amount }}
-                    </div>
-                  </template>
-                </Popper>
-              </li>
-            </ul>
-          </td>
-          <td class="text-center align-middle" v-if="showCol('time')">
-            <span class="row-label">Completion Date: </span>
-            <Timestamp
-              :timeLength="mat.timeEstimation(targetLevels)"
-              :displayText="
-                $filters.pluralText(mat.timeEstimation(targetLevels), 'day')
-              "
-              :title="$filters.daysFromNow(mat.timeEstimation(targetLevels))"
-              displayClasses="d-inline"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+          </div>
+        </th>
+      </tr>
+      <tr class="text-center align-middle">
+        <th v-if="showCol('icon')">Icon</th>
+        <th v-if="showCol('name')">
+          <div class="c-pointer" @click="sortBy('name')">
+            Mat Name
+            <i class="fas mx-1" :class="sortIcon('name')"></i>
+          </div>
+          <input
+            class="form-control form-control-sm mx-auto my-1 w-75"
+            placeholder="Search"
+            v-model="searchText"
+          />
+        </th>
+        <th
+          v-if="showCol('rarity')"
+          class="c-pointer"
+          @click="sortBy('rarity')"
+        >
+          Rarity
+          <i class="fas mx-1" :class="sortIcon('rarity')"></i>
+        </th>
+        <th
+          v-if="showCol('locations')"
+          class="c-pointer"
+          @click="sortBy('location')"
+        >
+          Locations
+          <i class="fas mx-1" :class="sortIcon('location')"></i>
+        </th>
+        <th
+          v-if="showCol('owned')"
+          class="c-pointer"
+          @click="sortBy('owned')"
+          width="160px"
+        >
+          Amount Owned
+          <i class="fas mx-1" :class="sortIcon('owned')"></i>
+        </th>
+        <th
+          v-if="showCol('needed')"
+          class="c-pointer"
+          @click="sortBy('needed')"
+        >
+          Amount Needed
+          <i class="fas mx-1" :class="sortIcon('needed')"></i>
+        </th>
+        <th
+          v-if="showCol('progress')"
+          class="c-pointer"
+          @click="sortBy('progress')"
+          width="145px"
+        >
+          Progress
+          <i class="fas mx-1" :class="sortIcon('progress')"></i>
+        </th>
+        <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
+        <th v-if="showCol('time')" class="c-pointer" @click="sortBy('time')">
+          Est. Time
+          <i class="fas mx-1" :class="sortIcon('time')"></i>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="mat in filteredRelics" :key="mat.id">
+        <td class="text-center align-middle" v-if="showCol('icon')">
+          <RelicIcon :item="mat" />
+        </td>
+        <td class="align-middle text-center" v-if="showCol('name')">
+          {{ mat.name }}
+        </td>
+        <td class="align-middle text-center" v-if="showCol('rarity')">
+          {{ mat.rarity }}
+        </td>
+        <td class="text-center align-middle" v-if="showCol('locations')">
+          <span class="row-label">Location:</span>
+          {{ mat.location.node }}
+        </td>
+        <td class="text-center align-middle" v-if="showCol('owned')">
+          <OwnedAmount :item="mat" :needed="mat.amountNeeded(targetLevels)" />
+        </td>
+        <td class="align-middle text-center" v-if="showCol('needed')">
+          {{ mat.amountNeeded(targetLevels) }}
+        </td>
+        <td class="align-middle" v-if="showCol('progress')">
+          <ProgressBar :percent="mat.percent(targetLevels)" class="mt-2" />
+        </td>
+        <td
+          class="align-middle"
+          v-if="showRequiredByUnit && showCol('required')"
+        >
+          <span class="row-label">Required By: </span>
+          <ul class="mb-0">
+            <li v-for="unit in mat.neededBy" :key="unit.id">
+              <Popper hover arrow placement="left">
+                <router-link
+                  :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
+                  >{{ unit.name }}</router-link
+                >
+                <template #content>
+                  <div class="border-bottom mb-1">{{ unit.name }}</div>
+                  <div>
+                    {{ unit.amount }}
+                  </div>
+                </template>
+              </Popper>
+            </li>
+          </ul>
+        </td>
+        <td class="text-center align-middle" v-if="showCol('time')">
+          <span class="row-label">Completion Date: </span>
+          <Timestamp
+            :timeLength="mat.timeEstimation(targetLevels)"
+            :displayText="
+              $filters.pluralText(mat.timeEstimation(targetLevels), 'day')
+            "
+            :title="$filters.daysFromNow(mat.timeEstimation(targetLevels))"
+            displayClasses="d-inline"
+          />
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script lang="ts">
@@ -223,6 +232,12 @@ export default defineComponent({
               return compareA > compareB ? 1 : -1;
             } else {
               return compareA > compareB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "rarity") {
+            if (this.sortDir === "asc") {
+              return a.rarity - b.rarity;
+            } else {
+              return b.rarity - a.rarity;
             }
           } else if (this.sortMethod === "owned") {
             if (this.sortDir === "asc") {
