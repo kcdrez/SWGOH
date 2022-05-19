@@ -134,6 +134,9 @@ export class Unit {
   public get isShip() {
     return this._is_ship;
   }
+  public get unitType() {
+    return this._is_ship ? "Ship" : "Unit";
+  }
   public get stars() {
     return this._stars;
   }

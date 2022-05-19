@@ -23,6 +23,7 @@ export default {
     image:
       "https://wiki.swgoh.help/images/0/08/Gear-Fragmented_Signal_Data.png",
     name: "Fragmented Signal Data",
+    rarity: 11,
   }),
   incomplete_green: new Relic({
     id: "incomplete_green",
@@ -45,6 +46,7 @@ export default {
     image:
       "https://wiki.swgoh.help/images/2/26/Gear-Incomplete_Signal_Data.png",
     name: "Incomplete Signal Data",
+    rarity: 12,
   }),
   flawed_blue: new Relic({
     id: "flawed_blue",
@@ -66,6 +68,7 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/b/b7/Gear-Flawed_Signal_Data.png",
     name: "Flawed Signal Data",
+    rarity: 13,
   }),
   carbonite_circuit_board: new Relic({
     id: "carbonite_circuit_board",
@@ -86,6 +89,7 @@ export default {
     image:
       "https://wiki.swgoh.help/images/6/6d/Gear-Carbonite_Circuit_Board.png",
     name: "Carbonite Circuit Board",
+    rarity: 1,
   }),
   bronzium_wiring: new Relic({
     id: "bronzium_wiring",
@@ -105,6 +109,7 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/e/e0/Gear-Bronzium_Wiring.png",
     name: "Bronzium Wiring",
+    rarity: 2,
   }),
   chromium_transistor: new Relic({
     id: "chromium_transistor",
@@ -124,6 +129,7 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/2/23/Gear-Chromium_Transistor.png",
     name: "Chromium Transistor",
+    rarity: 3,
   }),
   aurodium_heatsink: new Relic({
     id: "aurodium_heatsink",
@@ -143,6 +149,7 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/5/52/Gear-Aurodium_Heatsink.png",
     name: "Aurodium Heatsink",
+    rarity: 4,
   }),
   electrium_conductor: new Relic({
     id: "electrium_conductor",
@@ -162,6 +169,7 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/7/7b/Gear-Electrium_Conductor.png",
     name: "Electrium Conductor",
+    rarity: 5,
   }),
   zinbiddle_card: new Relic({
     id: "zinbiddle_card",
@@ -181,6 +189,7 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/2/2e/Game-Icon-Zinbiddle_Card.png",
     name: "Zinbiddle Card",
+    rarity: 6,
   }),
   impulse_detector: new Relic({
     id: "impulse_detector",
@@ -200,6 +209,7 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/1/1a/Game-Icon-Impulse_Detector.png",
     name: "Impulse Detector",
+    rarity: 7,
   }),
   aeromagnifier: new Relic({
     id: "aeromagnifier",
@@ -219,6 +229,7 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/6/6a/Game-Icon-Aeromagnifier.png",
     name: "Aeromagnifier",
+    rarity: 8,
   }),
   gyrda_keypad: new Relic({
     id: "gyrda_keypad",
@@ -238,6 +249,7 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/6/67/Game-Icon-Gyrda_Keypad.png",
     name: "Gyrda Keypad",
+    rarity: 9,
   }),
   droid_brains: new Relic({
     id: "droid_brains",
@@ -257,5 +269,6 @@ export default {
     },
     image: "https://wiki.swgoh.help/images/0/0f/Game-Icon-Droid_Brain.png",
     name: "Droid Brains",
+    rarity: 10,
   }),
 } as RelicConfigType;
