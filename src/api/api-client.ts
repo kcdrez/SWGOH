@@ -246,6 +246,7 @@ class ApiClient {
         unitMapping.owned.push({
           allyCode: player.allyCode,
           name: player.name,
+          stars: unit.stars,
           gearLevel: unit.gearLevel,
           relicLevel: unit.relicLevel,
           zetas: unit.zetas.length,

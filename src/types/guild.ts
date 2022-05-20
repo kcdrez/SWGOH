@@ -40,6 +40,7 @@ type unitMappingData = {
 interface IUnitOwned {
   allyCode: number;
   name: string;
+  stars: number;
   gearLevel: number;
   relicLevel: number;
   zetas: number;
