@@ -278,8 +278,9 @@ export default defineComponent({
         if (queryKey in this && value) {
           const { type, label, key } = (this as any)[queryKey];
           const searchValues = decodeURI(value?.toString()).split(
-            /(?=[\+\-\|])/g
+            /(?:=[\+\-\|])/g
           );
+          console.log(searchValues);
 
           (searchValues ?? []).forEach((searchValue) => {
             const condition = (function () {
@@ -292,18 +293,20 @@ export default defineComponent({
                 return "and";
               }
             })();
-            const searchTerms = searchValue.match(/(?<=\[)[^\][]*(?=])/g);
+            const searchTerms = searchValue.match(/\[(.*?)\]/);
 
-            searchTerms?.forEach((searchTerm) => {
-              searchTerm.split(",").forEach((x) => {
-                this.add({
-                  value: { name: x.trim() },
-                  condition,
-                  type,
-                  label,
-                  key,
+            searchTerms?.forEach((searchTerm, index) => {
+              if (index > 0) {
+                searchTerm.split(",").forEach((x) => {
+                  this.add({
+                    value: { name: x.trim() },
+                    condition,
+                    type,
+                    label,
+                    key,
+                  });
                 });
-              });
+              }
             });
           });
         }
