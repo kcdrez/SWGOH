@@ -3,7 +3,7 @@
     <UnitSearch @select="selectUnit($event)" />
     <div v-if="selected" class="text-center my-3">
       <UnitIcon :unit="selected" size="lg" isLink />
-      <div class="btn-group btn-group-sm text-center mt-1" role="group">
+      <div class="btn-group btn-group-sm text-center mt-1 d-block" role="group">
         <button class="btn btn-success text-dark" @click="addToGeneralPlanner">
           Add to General Planner
         </button>
