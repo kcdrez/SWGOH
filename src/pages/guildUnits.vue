@@ -45,6 +45,14 @@
                   <i class="fas mx-2" :class="sortIcon('name')"></i>
                 </th>
                 <th
+                  v-if="showCol('stars')"
+                  @click="sortBy('stars')"
+                  class="c-pointer"
+                >
+                  <span>Stars</span>
+                  <i class="fas mx-2" :class="sortIcon('gearstarsLevel')"></i>
+                </th>
+                <th
                   v-if="showCol('gearLevel')"
                   @click="sortBy('gearLevel')"
                   class="c-pointer"
@@ -198,6 +206,7 @@
               >
                 <td v-if="showCol('allyCode')">{{ player.allyCode }}</td>
                 <td v-if="showCol('name')">{{ player.name }}</td>
+                <td v-if="showCol('stars')">{{ player.stars }}</td>
                 <td v-if="showCol('gearLevel')">{{ player.gearLevel }}</td>
                 <td v-if="showCol('relicLevel')">{{ player.relicLevel }}</td>
                 <td v-if="showCol('zetas')">{{ player.zetas }}</td>
@@ -308,6 +317,10 @@ export default defineComponent({
         {
           text: "Player Name",
           value: "name",
+        },
+        {
+          text: "Stars",
+          value: "stars",
         },
         {
           text: "Gear Level",
