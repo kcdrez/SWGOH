@@ -271,13 +271,15 @@ export default defineComponent({
       str += and.length > 0 ? `+[${and.join(",")}]` : "";
       str += or.length > 0 ? `|[${or.join(",")}]` : "";
       str += not.length > 0 ? `-[${not.join(",")}]` : "";
-      return str;
+      return encodeURI(str);
     },
     search() {
       Object.entries(this.$route.query).forEach(([queryKey, value]) => {
-        if (queryKey in this) {
+        if (queryKey in this && value) {
           const { type, label, key } = (this as any)[queryKey];
-          const searchValues = value?.toString().split(/(?=[\+\-\|])/g);
+          const searchValues = decodeURI(value?.toString()).split(
+            /(?=[\+\-\|])/g
+          );
 
           (searchValues ?? []).forEach((searchValue) => {
             const condition = (function () {
