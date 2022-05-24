@@ -232,7 +232,7 @@ const routes = [
   {
     path: "/gear-list",
     components: {
-      default: PlayerLoadingPage,
+      default: UnitLoadingPage,
     },
     props: {
       default: {

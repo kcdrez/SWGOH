@@ -1,5 +1,10 @@
 <template>
-  <div class="text-center gear-border" :class="`gear-tier-${gear.tier}`">
+  <div
+    class="text-center gear-border"
+    :class="`gear-tier-${gear.tier}`"
+    :title="gear.name"
+  >
+    <div class="mark-level">{{ gear.mark }}</div>
     <img :src="gear.image" />
   </div>
 </template>
@@ -24,6 +29,16 @@ export default defineComponent({
   border: 2px solid;
   max-width: 45px;
   margin: auto;
+  position: relative;
+
+  .mark-level {
+    position: absolute;
+    font-size: 0.5rem;
+    text-align: right;
+    width: 100%;
+    padding-right: 0.1rem;
+    text-shadow: 1px 1px 1px black;
+  }
 
   img {
     max-width: 35px;

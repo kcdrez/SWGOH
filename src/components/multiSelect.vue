@@ -107,6 +107,7 @@ export default defineComponent({
 .multiselect {
   position: relative;
   z-index: 50;
+  text-align: left;
 
   ul {
     background-color: $light;
@@ -123,6 +124,9 @@ export default defineComponent({
   }
   label {
     margin-left: 0.5rem;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: left;
   }
 }
 
