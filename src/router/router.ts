@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 
 import PlayerLoadingPage from "../pages/playerLoadingPage.vue";
 import UnitLoadingPage from "../pages/unitLoadingPage.vue";
+import BasicLoadingPage from "../pages/basicLoadingPage.vue";
 import HomePage from "../pages/homepage.vue";
 import UnitPage from "../pages/unitPage.vue";
 import GeneralPlannerPage from "../pages/generalPlanner.vue";
@@ -269,11 +270,11 @@ const routes = [
   {
     path: "/scavenger",
     components: {
-      default: PlayerLoadingPage,
+      default: BasicLoadingPage,
     },
     props: {
       default: {
-        dependencyModules: ["shards", "gear", "planner"],
+        dependencyModules: ["shards", "gear"],
         loadAsync: false,
       },
     },
