@@ -280,7 +280,6 @@ export default defineComponent({
           const searchValues = decodeURI(value?.toString()).split(
             /(?:=[\+\-\|])/g
           );
-          console.log(searchValues);
 
           (searchValues ?? []).forEach((searchValue) => {
             const condition = (function () {

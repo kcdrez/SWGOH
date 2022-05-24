@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :title="item.name">
     <img :src="item.image" v-if="!simpleView" />
   </div>
 </template>

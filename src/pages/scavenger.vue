@@ -42,6 +42,7 @@
           label="Gyrda Keypads"
           class="mb-2"
         />
+        <ScavengerFarmingTable />
       </div>
     </div>
   </div>
@@ -51,10 +52,11 @@
 import { defineComponent } from "vue";
 
 import ScavengerTable from "../components/gear/scavengerTable.vue";
+import ScavengerFarmingTable from "../components/gear/scavengerFarmingTable.vue";
 
 export default defineComponent({
   name: "ScavengerPage",
-  components: { ScavengerTable },
+  components: { ScavengerTable, ScavengerFarmingTable },
 });
 </script>
 
