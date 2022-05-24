@@ -23,7 +23,7 @@
           <th width="100px" v-if="showCol('icon')">Icon</th>
           <th width="300px" v-if="showCol('name')">Name</th>
           <th width="100px" v-if="showCol('amount')">Amount</th>
-          <th width="100px" v-if="showCol('priority')">Priority</th>
+          <th width="100px" v-if="showCol('priority')">Efficiency Rating</th>
           <th width="300px" v-if="showCol('locations')">
             Best Farming Locations
           </th>
@@ -126,7 +126,7 @@ export default defineComponent({
           value: "amount",
         },
         {
-          text: "Priority",
+          text: "Efficiency Rating",
           value: "priority",
         },
         {
