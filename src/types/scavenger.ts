@@ -59,7 +59,7 @@ const scavengerFarming = [
         id: "102Salvage",
         scavenger: ["aurodium_heatsink"],
         notes:
-          "Best source by far, but also used frequently in gearing characters. ALWAYS craft this piece, never scavenge the base salvage.",
+          "Best source by far, but also used frequently in gearing characters. Recommended to save 60-100 in reserves. ALWAYS craft this piece, never scavenge the base salvage.",
       },
     ],
   },
