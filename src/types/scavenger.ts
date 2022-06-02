@@ -77,6 +77,11 @@ const scavengerFarming = [
         notes: "Recommended to save 300-600 in reserves.",
       },
       {
+        id: "035",
+        scavenger: ["carbonite_circuit_board"],
+        notes: "Recommended to save 20-40 in reserves.",
+      },
+      {
         id: "055Prototype",
         scavenger: ["bronzium_wiring"],
       },
