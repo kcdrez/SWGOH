@@ -1,6 +1,7 @@
 <template>
   <div :title="item.name">
     <img :src="item.image" v-if="!simpleView" />
+    <!-- <div>{{ item.name }}</div> -->
   </div>
 </template>
 
