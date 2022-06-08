@@ -6,12 +6,6 @@
           Farming Locations
         </div>
       </h3>
-      <!-- <MultiSelect
-        class="select-columns"
-        :options="cols"
-        :storageKey="storageKey + 'Columns'"
-        @checked="selectedColumns = $event"
-      /> -->
     </div>
     <table
       :id="storageKey"
@@ -20,13 +14,13 @@
     >
       <thead class="text-center sticky-header">
         <tr>
-          <th width="300px">
-            <div class="location-col">
+          <th class="location-col">
+            <div class="col-container">
               <div class="w-100">Location</div>
             </div>
           </th>
-          <th width="300px">
-            <div class="d-flex align-items-center gear-col">
+          <th class="gear-col">
+            <div class="d-flex align-items-center col-container">
               <div class="w-100">Gear</div>
               <MultiSelect
                 class="filter-mats"
@@ -45,28 +39,44 @@
             {{ locationName(location.id) }}
           </td>
           <td>
-            <div class="container">
+            <div class="container gear-container">
               <div
-                class="row my-1"
+                class="row py-1"
                 v-for="gear in location.gear"
                 :key="gear.id"
               >
-                <div class="col-1 align-self-center">
-                  <GearIcon :gear="gearData(gear.id)" />
+                <div class="col-2 align-self-center">
+                  <GearIcon :gear="gearData(gear.id)" showName />
                 </div>
                 <div class="col-1 align-self-center">
-                  <i class="fa fa-arrow-right" v-if="gear.scavenger"></i>
+                  <div
+                    class="d-flex justify-content-center align-items-center"
+                    v-if="gear.cost"
+                  >
+                    <img
+                      class="currency-img"
+                      :src="`./images/${location.currency}.png`"
+                    />
+                    <div class="text-small">{{ gear.cost }}</div>
+                  </div>
                 </div>
                 <div
-                  class="col-2 align-self-center d-flex justify-content-evenly"
+                  class="col-2 d-flex justify-content-center align-items-center"
                 >
-                  <template v-if="gear.scavenger">
-                    <RelicIcon
+                  <div v-if="gear.scavenger">
+                    <div
                       v-for="scavenger in gear.scavenger"
-                      :key="scavenger"
-                      :item="relicConfig[scavenger]"
-                    />
-                  </template>
+                      :key="scavenger.id"
+                    >
+                      <RelicIcon :item="relicConfig[scavenger.id]" />
+                      <div v-if="gear.cost && gear.amount">
+                        <div class="text-small">
+                          Amount Per Purchase:
+                          {{ getScavengerMatAmount(scavenger, gear) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="col text-left align-self-center">
                   {{ gear.notes }}
@@ -89,8 +99,9 @@ import GearIcon from "./gearIcon.vue";
 import RelicIcon from "../relic/relicIcon.vue";
 import { FarmingNode } from "../../types/shards";
 import { setupEvents } from "../../utils";
-import { scavengerFarming } from "../../types/scavenger";
+import { scavengerFarming, scavengerCost } from "../../types/scavenger";
 import { Relic } from "../../types/relic";
+import { round2Decimals } from "../../utils";
 
 const storageKey = "ScavengerFarmingTable";
 
@@ -168,9 +179,8 @@ export default defineComponent({
           return {
             gear: gear.filter((gearEl) => {
               return this.filteredRelicMats.some((r) =>
-                (gearEl?.scavenger ?? []).includes(r)
+                (gearEl?.scavenger ?? []).some((x) => x.id === r)
               );
-              // return this.filteredRelicMats.includes(gearEl?.scavenger ?? "");
             }),
             ...x,
           };
@@ -194,6 +204,12 @@ export default defineComponent({
     relicData(id: string): Relic | undefined {
       return this.relicConfig[id];
     },
+    getScavengerMatAmount(scavengerData: any, gearData: any) {
+      return round2Decimals(
+        (scavengerData.amount * gearData.amount) /
+          (scavengerCost as any)[scavengerData.id]
+      );
+    },
   },
   mounted() {
     setupEvents(this.$refs[this.storageKey] as HTMLElement, this.storageKey);
@@ -202,19 +218,41 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import "../../styles/variables.scss";
+
 .sticky-header {
   top: 106px;
 }
 .gear-col,
 .location-col {
-  height: 40px;
-  display: flex;
-  align-items: center;
+  .col-container {
+    height: 40px;
+    display: flex;
+    align-items: center;
+  }
+}
+.location-col {
+  width: 300px;
 }
 .filter-mats {
   width: 275px;
   position: absolute;
   right: 0;
   margin-right: 1rem;
+}
+
+.gear-container {
+  .row {
+    &:nth-of-type(2n + 1) {
+      background-color: $gray-2 !important; //cant use variable here? same as $gray-8
+    }
+    &:nth-of-type(2n) {
+      background-color: $gray-1 !important; //cant use variable here? same as $gray-8
+    }
+  }
+}
+
+.currency-img {
+  max-width: 30px;
 }
 </style>

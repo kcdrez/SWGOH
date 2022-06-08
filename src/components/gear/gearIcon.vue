@@ -1,11 +1,14 @@
 <template>
-  <div
-    class="text-center gear-border"
-    :class="`gear-tier-${gear.tier}`"
-    :title="gear.name"
-  >
-    <div class="mark-level">{{ gear.mark }}</div>
-    <img :src="gear.image" />
+  <div>
+    <div
+      class="text-center gear-border"
+      :class="`gear-tier-${gear.tier}`"
+      :title="gear.name"
+    >
+      <div class="mark-level">{{ gear.mark }}</div>
+      <img :src="gear.image" />
+    </div>
+    <div v-if="showName" class="text-small">{{ gear.name }}</div>
   </div>
 </template>
 
@@ -19,6 +22,10 @@ export default defineComponent({
     gear: {
       type: Object as () => Gear,
       required: true,
+    },
+    showName: {
+      type: Boolean,
+      default: false,
     },
   },
 });
