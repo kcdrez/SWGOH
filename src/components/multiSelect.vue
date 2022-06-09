@@ -7,9 +7,6 @@
     >
       <div class="overselect"></div>
       <select class="form-control form-control-sm">
-        <!-- :class="{
-          'border-2 border-danger': options.length !== selected.length,
-        }" -->
         <option value="">{{ label }}</option>
       </select>
       <i
@@ -20,6 +17,12 @@
     </div>
     <div class="multiselect" v-if="show">
       <ul>
+        <li>
+          <input type="checkbox" id="select-all" v-model="selectAll" />
+          <label for="select-all"
+            >{{ selectAll ? "Deselect" : "Select" }} All</label
+          >
+        </li>
         <li v-for="(option, index) in options" :key="index">
           <input
             type="checkbox"
@@ -62,12 +65,16 @@ export default defineComponent({
     return {
       show: false,
       selected: [],
-    };
+      selectAll: null,
+    } as any;
   },
   watch: {
     selected(val): void {
       this.$emit("checked", val);
       window.localStorage.setItem(this.storageKey, JSON.stringify(val));
+    },
+    selectAll(newVal, oldVal): void {
+      this.selected = newVal ? this.options.map((x: any) => x.value) : [];
     },
   },
   methods: {
@@ -85,6 +92,9 @@ export default defineComponent({
     this.selected = JSON.parse(
       window.localStorage.getItem(this.storageKey) || JSON.stringify(fullList)
     );
+    if (this.selected.length === this.options.length) {
+      this.selectAll = true;
+    }
   },
 });
 </script>
