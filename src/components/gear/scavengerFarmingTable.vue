@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="collapse-header section-header extended-2">
+    <div class="collapse-header section-header">
       <h3>
         <div data-bs-toggle="collapse" :href="`#${storageKey}`">
           Farming Locations
@@ -12,7 +12,18 @@
       :ref="storageKey"
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table collapse"
     >
-      <thead class="text-center sticky-header">
+      <thead class="text-center sticky-header align-middle show-on-mobile">
+        <tr class="sort-methods">
+          <th>
+            <MultiSelect
+              class="filter-mats"
+              label="Filter Relic Mats"
+              :options="filterRelicMatCols"
+              :storageKey="storageKey + 'Filter'"
+              @checked="filteredRelicMats = $event"
+            />
+          </th>
+        </tr>
         <tr>
           <th class="location-col">
             <div class="col-container">
@@ -20,7 +31,7 @@
             </div>
           </th>
           <th class="gear-col">
-            <div class="d-flex align-items-center col-container">
+            <div class="col-container">
               <div class="w-100">Gear</div>
               <MultiSelect
                 class="filter-mats"
@@ -45,10 +56,10 @@
                 v-for="gear in location.gear"
                 :key="gear.id"
               >
-                <div class="col-2 align-self-center">
+                <div class="col-lg-2 col-md-5 align-self-center">
                   <GearIcon :gear="gearData(gear.id)" showName />
                 </div>
-                <div class="col-1 align-self-center">
+                <div class="col-lg-1 col-md-3 align-self-center">
                   <div
                     class="d-flex justify-content-center align-items-center"
                     v-if="gear.cost"
@@ -61,7 +72,7 @@
                   </div>
                 </div>
                 <div
-                  class="col-2 d-flex justify-content-center align-items-center"
+                  class="col-lg-2 col-md-4 d-flex justify-content-center align-items-center"
                 >
                   <div v-if="gear.scavenger">
                     <div
@@ -78,7 +89,9 @@
                     </div>
                   </div>
                 </div>
-                <div class="col text-left align-self-center">
+                <div
+                  class="col-lg-7 col-md-12 text-center-md text-center-sm text-left align-self-center"
+                >
                   {{ gear.notes }}
                 </div>
               </div>
@@ -226,7 +239,12 @@ export default defineComponent({
 .gear-col,
 .location-col {
   .col-container {
-    height: 40px;
+    @media only screen and (min-width: 1100px) {
+      height: 40px;
+    }
+    @media only screen and (max-width: 1100px) {
+      flex-wrap: wrap;
+    }
     display: flex;
     align-items: center;
   }
@@ -235,19 +253,24 @@ export default defineComponent({
   width: 300px;
 }
 .filter-mats {
-  width: 275px;
-  position: absolute;
-  right: 0;
-  margin-right: 1rem;
+  @media only screen and (min-width: 1100px) {
+    width: 275px;
+    position: absolute;
+    right: 0;
+    margin-right: 1rem;
+  }
+  @media only screen and (max-width: 1100px) {
+    width: 100%;
+  }
 }
 
 .gear-container {
   .row {
     &:nth-of-type(2n + 1) {
-      background-color: $gray-2 !important; //cant use variable here? same as $gray-8
+      background-color: $gray-2 !important;
     }
     &:nth-of-type(2n) {
-      background-color: $gray-1 !important; //cant use variable here? same as $gray-8
+      background-color: $gray-1 !important;
     }
   }
 }
