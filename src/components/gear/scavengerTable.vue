@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="collapse-header section-header extended-2">
+    <div class="collapse-header section-header extended-1">
       <h3>
         <div data-bs-toggle="collapse" :href="`#${scavengerId}`">
           {{ label }}
@@ -9,7 +9,7 @@
       <MultiSelect
         class="select-columns"
         :options="cols"
-        :storageKey="storageKey"
+        :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
     </div>
@@ -18,27 +18,64 @@
       :ref="storageKey"
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table collapse"
     >
-      <thead class="text-center sticky-header">
+      <thead class="text-center sticky-header align-middle">
         <tr>
           <th width="100px" v-if="showCol('icon')">Icon</th>
-          <th width="300px" v-if="showCol('name')">Name</th>
-          <th width="100px" v-if="showCol('amount')">Amount</th>
-          <th width="100px" v-if="showCol('priority')">Efficiency Rating</th>
-          <th width="300px" v-if="showCol('locations')">
+          <th
+            width="300px"
+            v-if="showCol('name')"
+            @click="sortBy('name')"
+            class="c-pointer"
+          >
+            Name
+            <i class="fas mx-1" :class="sortIcon('name')"></i>
+          </th>
+          <th
+            width="100px"
+            v-if="showCol('amount')"
+            @click="sortBy('amount')"
+            class="c-pointer"
+          >
+            Amount
+            <i class="fas mx-1" :class="sortIcon('amount')"></i>
+          </th>
+          <th
+            width="100px"
+            v-if="showCol('priority')"
+            @click="sortBy('priority')"
+            class="c-pointer"
+          >
+            Efficiency Rating
+            <i class="fas mx-1" :class="sortIcon('priority')"></i>
+          </th>
+          <th
+            width="300px"
+            v-if="showCol('locations')"
+            @click="sortBy('locations')"
+            class="c-pointer"
+          >
             Best Farming Locations
+            <i class="fas mx-1" :class="sortIcon('locations')"></i>
           </th>
           <th width="300px" v-if="showCol('notes')">Notes</th>
         </tr>
       </thead>
-      <tbody class="align-middle">
+      <tbody class="align-middle text-center-sm">
         <tr v-for="gear in list" :key="gear.data.id">
           <td v-if="showCol('icon')">
             <GearIcon :gear="gear.data" />
           </td>
           <td v-if="showCol('name')">{{ gear.data.name }}</td>
-          <td v-if="showCol('amount')">{{ gear.scavenger.count }}</td>
-          <td v-if="showCol('priority')">{{ gear.scavenger.priority }}</td>
+          <td v-if="showCol('amount')">
+            <span class="row-label">Amount:</span>
+            {{ gear.scavenger.count }}
+          </td>
+          <td v-if="showCol('priority')">
+            <span class="row-label">Efficiency Rating:</span>
+            {{ gear.scavenger.priority }}
+          </td>
           <td v-if="showCol('locations')">
+            <span class="row-label">Locations:</span>
             <div v-if="gear.scavenger.nodes.length <= 0" class="text-center">
               No known farmable locations.
             </div>
@@ -51,7 +88,12 @@
               </li>
             </ul>
           </td>
-          <td v-if="showCol('notes')">{{ gear.scavenger.notes }}</td>
+          <td
+            v-if="showCol('notes')"
+            :class="{ 'hidden-sm': !gear.scavenger.notes }"
+          >
+            {{ gear.scavenger.notes }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -86,6 +128,8 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
+      sortDir: "desc",
+      sortMethod: "priority",
     };
   },
   computed: {
@@ -108,8 +152,88 @@ export default defineComponent({
           return acc;
         }, [])
         .sort((a: tScavenger, b: tScavenger) => {
-          return (a.scavenger?.priority ?? 0) > (b.scavenger?.priority ?? 0);
+          // return (a.scavenger?.priority ?? 0) > (b.scavenger?.priority ?? 0);
+          if (this.sortMethod === "name") {
+            const compareA = a.data.name.toLowerCase();
+            const compareB = b.data.name.toLowerCase();
+            if (this.sortDir === "asc") {
+              return compareA > compareB ? 1 : -1;
+            } else {
+              return compareA > compareB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "amount") {
+            if (this.sortDir === "asc") {
+              return a.scavenger.count > b.scavenger.count ? 1 : -1;
+            } else {
+              return a.scavenger.count > b.scavenger.count ? -1 : 1;
+            }
+          } else if (this.sortMethod === "priority") {
+            if (this.sortDir === "asc") {
+              return (a.scavenger.priority ?? 0) > (b.scavenger.priority ?? 0)
+                ? 1
+                : -1;
+            } else {
+              return (a.scavenger.priority ?? 0) > (b.scavenger.priority ?? 0)
+                ? -1
+                : 1;
+            }
+          } else if (this.sortMethod === "locations") {
+            const stores = [
+              "guild_store",
+              "squad_arena_store",
+              "guild_events_store1",
+              "guild_events_store2",
+              "challenges_tac",
+              "challenges_agi",
+              "challenges_str",
+            ];
+
+            for (let i = 0; i < stores.length; i++) {
+              const storeStatus = checkStore(stores[i], a, b);
+
+              if (storeStatus === 1 || storeStatus === 2) {
+                if (this.sortDir === "asc") {
+                  return storeStatus === 1 ? -1 : 1;
+                } else {
+                  return storeStatus === 1 ? 1 : -1;
+                }
+              } else if (storeStatus === 0) {
+                return 1;
+              }
+            }
+            if (this.sortDir === "asc") {
+              return (a.scavenger.nodes ?? []).length >
+                (b.scavenger.nodes ?? []).length
+                ? 1
+                : -1;
+            } else {
+              return (a.scavenger.nodes ?? []).length >
+                (b.scavenger.nodes ?? []).length
+                ? -1
+                : 1;
+            }
+          }
+          return 0;
         });
+
+      function checkStore(
+        storeId: string,
+        a: tScavenger,
+        b: tScavenger
+      ): number {
+        const hasStoreA = a.scavenger.nodes?.some((x) => x === storeId);
+        const hasStoreB = b.scavenger.nodes?.some((x) => x === storeId);
+
+        if (hasStoreA && hasStoreB) {
+          return 0;
+        } else if (hasStoreA) {
+          return 1;
+        } else if (hasStoreB) {
+          return 2;
+        } else {
+          return -1;
+        }
+      }
     },
     cols(): { text: string; value: any }[] {
       const list = [
@@ -144,6 +268,14 @@ export default defineComponent({
       return `${storageKey}-${this.scavengerId}`;
     },
   },
+  watch: {
+    sortDir() {
+      this.saveSortData();
+    },
+    sortMethod() {
+      this.saveSortData();
+    },
+  },
   methods: {
     locationLabels(locationIds: string[]) {
       return locationIds.map((location) => {
@@ -167,9 +299,40 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    sortBy(type: string): void {
+      if (this.sortMethod === type) {
+        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
+      } else {
+        this.sortDir = "asc";
+      }
+      this.sortMethod = type;
+    },
+    sortIcon(type: string): string {
+      if (this.sortMethod === type) {
+        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
+      } else {
+        return "fa-sort";
+      }
+    },
+    saveSortData() {
+      window.localStorage.setItem(
+        this.storageKey,
+        JSON.stringify({
+          sortDir: this.sortDir,
+          sortMethod: this.sortMethod,
+        })
+      );
+    },
   },
   mounted() {
     setupEvents(this.$refs[this.storageKey] as HTMLElement, this.storageKey);
+  },
+  created() {
+    const storageData = JSON.parse(
+      window.localStorage.getItem(this.storageKey) || "{}"
+    );
+    this.sortDir = storageData.sortDir ?? "asc";
+    this.sortMethod = storageData.sortMethod ?? "priority";
   },
 });
 </script>

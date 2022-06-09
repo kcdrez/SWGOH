@@ -1,3 +1,14 @@
+/*
+scavenger: [
+  {
+    id: "carbonite_circuit_board",
+    count: 6,
+    priority: 1,
+    nodes: ["guild_events_store1"],
+  },
+],
+*/
+
 const scavengerFarming = [
   {
     id: "guild_store",
@@ -225,31 +236,43 @@ const scavengerFarming = [
         id: "167PrototypeSalvage", //Mk 12 ArmaTek Key Pad Prototype Salvage
         scavenger: [{ id: "zinbiddle_card", amount: 18 }],
         notes: "Recommended to save 150-200 in reserves.",
+        cost: 400,
+        amount: 4,
       },
       {
         id: "170PrototypeSalvage", //Mk 12 ArmaTek Holo Lens Prototype Salvage
         scavenger: [{ id: "zinbiddle_card", amount: 18 }],
         notes: "Recommended to save 150-200 in reserves.",
+        cost: 400,
+        amount: 4,
       },
       {
         id: "166PrototypeSalvage", //Mk 12 ArmaTek Thermal Detonator Prototype Salvage
         scavenger: [{ id: "zinbiddle_card", amount: 18 }],
         notes: "Recommended to save 100-200 in reserves.",
+        cost: 400,
+        amount: 4,
       },
       {
         id: "168PrototypeSalvage", //Mk 12 ArmaTek Fusion Furnace Prototype Salvage
         scavenger: [{ id: "gyrda_keypad", amount: 10 }],
         notes: "Recommended to save 150-200 in reserves.",
+        cost: 400,
+        amount: 4,
       },
       {
         id: "169PrototypeSalvage", //Mk 12 ArmaTek Data Pad Prototype Salvage
         scavenger: [{ id: "gyrda_keypad", amount: 10 }],
         notes: "Recommended to save 150-250 in reserves.",
+        cost: 400,
+        amount: 4,
       },
       {
         id: "171PrototypeSalvage", //Mk 12 ArmaTek Stun Gun Prototype Salvage
         scavenger: [{ id: "gyrda_keypad", amount: 10 }],
         notes: "Recommended to save 50-100 in reserves.",
+        cost: 400,
+        amount: 4,
       },
     ],
   },
