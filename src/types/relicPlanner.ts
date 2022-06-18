@@ -181,25 +181,25 @@ interface IFarmingNodeData {
 export const tableData: RelicPlanner[] = [new RelicPlanner('carbonite_circuit_board', [{
   ids: ['057Salvage'],
   location: 'challenges_tac',
-  totalGear: 0,
+  totalGear: 120,
   percentOfRelicPiece: 2 / 35
 },
 {
   ids: ['053Salvage'],
   location: 'challenges_agi',
-  totalGear: 0,
+  totalGear: 120,
   percentOfRelicPiece: 2 / 35
 }], [{
   ids: ['036', '053', '060'],
   location: 'guild_store',
-  purchases: 0,
+  purchases: 1,
   currencyPerPurchase: 100,
   percentOfRelicPiece: 6 / 35,
   gearPerPurchase: 10
 }, {
   ids: ['002', '025', '035'],
   location: 'squad_arena_store',
-  purchases: 0,
+  purchases: 1,
   currencyPerPurchase: 100,
   percentOfRelicPiece: 6 / 35,
   gearPerPurchase: 10
@@ -214,33 +214,33 @@ export const tableData: RelicPlanner[] = [new RelicPlanner('carbonite_circuit_bo
 new RelicPlanner('bronzium_wiring', [{
   ids: ['101Salvage', '051Salvage'],
   location: 'challenges_agi',
-  totalGear: 0,
+  totalGear: 240,
   percentOfRelicPiece: 4 / 45
 },
 {
   ids: ['050Salvage', '135Salvage'],
   location: 'challenges_str',
-  totalGear: 0,
+  totalGear: 240,
   percentOfRelicPiece: 4 / 45
 },
 {
   ids: ['095Salvage', '054Salvage', '130Salvage'],
   location: 'challenges_tac',
-  totalGear: 0,
+  totalGear: 360,
   percentOfRelicPiece: 4 / 45
 }], [{
   ids: ['044', '056', '061', '064'],
   location: 'guild_store',
-  purchases: 0,
+  purchases: 2,
   currencyPerPurchase: 100,
   percentOfRelicPiece: 20 / 45,
   gearPerPurchase: 5
 }, {
   ids: ['049Prototype', '055Prototype'],
   location: 'squad_arena_store',
-  purchases: 0,
+  purchases: 3,
   currencyPerPurchase: (180 + 150) / 2,
-  percentOfRelicPiece: 12 / 35,
+  percentOfRelicPiece: 12 / 45,
   gearPerPurchase: 10
 }], {
   ids: ['066'],
@@ -253,12 +253,12 @@ new RelicPlanner('bronzium_wiring', [{
 new RelicPlanner('chromium_transistor', [{
   ids: ['123Salvage'],
   location: 'challenges_tac',
-  totalGear: 0,
-  percentOfRelicPiece: 4 / 45
+  totalGear: 120,
+  percentOfRelicPiece: 6 / 45
 }], [{
   ids: ['073'],
   location: 'guild_store',
-  purchases: 0,
+  purchases: 0.5,
   currencyPerPurchase: 150,
   percentOfRelicPiece: 300 / 45,
   gearPerPurchase: 5
@@ -270,8 +270,8 @@ new RelicPlanner('chromium_transistor', [{
   percentOfRelicPiece: 6 / 45,
   gearPerPurchase: 5
 }], {
-  ids: ['066'],
-  location: 'fleet_normal_2e',
+  ids: ['129Salvage'],
+  location: 'lightside_normal_9f',
   dropRate: 0.1,
   energyPerNode: 10,
   relicSalvage: 6,
@@ -280,17 +280,17 @@ new RelicPlanner('chromium_transistor', [{
 new RelicPlanner('aurodium_heatsink', [{
   ids: ['117PrototypeSalvage'],
   location: 'challenges_tac',
-  totalGear: 0,
+  totalGear: 10,
   percentOfRelicPiece: 10 / 50
 }, {
   ids: ['135Salvage'],
   location: 'challenges_str',
-  totalGear: 0,
+  totalGear: 10,
   percentOfRelicPiece: 10 / 50
 }], [{
   ids: ['102Salvage'],
   location: 'guild_store',
-  purchases: 0,
+  purchases: 2,
   currencyPerPurchase: 280,
   percentOfRelicPiece: (500 / 20) / 50,
   gearPerPurchase: 5
@@ -299,20 +299,20 @@ new RelicPlanner('aurodium_heatsink', [{
   location: 'lightside_normal_9f',
   dropRate: 0.25,
   energyPerNode: 10,
-  relicSalvage: 500 / 20,
+  relicSalvage: 500 / 20, //25
   amountForRelicPiece: 50
 }),
 new RelicPlanner('electrium_conductor', [], [{
   ids: ['159PrototypeSalvage', '164PrototypeSalvage', '163PrototypeSalvage', '162PrototypeSalvage'],
   location: 'guild_events_store1',
-  purchases: 0,
+  purchases: 2,
   currencyPerPurchase: 400,
   percentOfRelicPiece: 15 / 80,
   gearPerPurchase: 5
 }, {
   ids: ['159PrototypeSalvage', '164PrototypeSalvage', '163PrototypeSalvage', '162PrototypeSalvage'],
   location: 'shard_store',
-  purchases: 0,
+  purchases: 3,
   currencyPerPurchase: 360,
   percentOfRelicPiece: 15 / 80,
   gearPerPurchase: 4
@@ -327,14 +327,14 @@ new RelicPlanner('electrium_conductor', [], [{
 new RelicPlanner('zinbiddle_card', [], [{
   ids: ['170PrototypeSalvage', '166PrototypeSalvage', '167PrototypeSalvage'],
   location: 'guild_events_store2',
-  purchases: 0,
+  purchases: 1,
   currencyPerPurchase: 400,
   percentOfRelicPiece: 18 / 90,
   gearPerPurchase: 4
 }, {
   ids: ['170PrototypeSalvage', '166PrototypeSalvage', '167PrototypeSalvage'],
   location: 'shard_store',
-  purchases: 0,
+  purchases: 2,
   currencyPerPurchase: 720,
   percentOfRelicPiece: 18 / 90,
   gearPerPurchase: 4
@@ -349,14 +349,14 @@ new RelicPlanner('zinbiddle_card', [], [{
 new RelicPlanner('impulse_detector', [], [{
   ids: ['165PrototypeSalvage', '158PrototypeSalvage', '160PrototypeSalvage'],
   location: 'guild_events_store1',
-  purchases: 0,
+  purchases: 1,
   currencyPerPurchase: 400,
   percentOfRelicPiece: 12 / 110,
   gearPerPurchase: 5
 }, {
   ids: ['165PrototypeSalvage', '158PrototypeSalvage', '160PrototypeSalvage'],
   location: 'shard_store',
-  purchases: 0,
+  purchases: 1,
   currencyPerPurchase: 360,
   percentOfRelicPiece: 12 / 110,
   gearPerPurchase: 4
