@@ -19,6 +19,7 @@ import GearListPage from "../pages/gearList.vue";
 // import GearPage from "../pages/gearPage.vue";
 import ScavengerPage from "../pages/scavenger.vue";
 import UnitSearchPage from "../pages/unitSearch.vue";
+import RelicCalculatorPage from "../pages/relicCalculator.vue";
 
 const routes = [
   {
@@ -283,6 +284,25 @@ const routes = [
         path: "",
         name: "ScavengerPage",
         component: ScavengerPage,
+      },
+    ],
+  },
+  {
+    path: "/relic-calculator",
+    components: {
+      default: BasicLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["shards", "gear"],
+        loadAsync: false,
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "RelicCalculator",
+        component: RelicCalculatorPage,
       },
     ],
   },

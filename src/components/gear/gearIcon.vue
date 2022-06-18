@@ -2,18 +2,20 @@
   <div>
     <div
       class="text-center gear-border"
-      :class="`gear-tier-${gear.tier}`"
-      :title="gear.name"
+      :class="`gear-tier-${gearData.tier}`"
+      :title="gearData.name"
     >
-      <div class="mark-level">{{ gear.mark }}</div>
-      <img :src="gear.image" />
+      <div class="mark-level">{{ gearData.mark }}</div>
+      <img :src="gearData.image" />
     </div>
-    <div v-if="showName" class="text-small">{{ gear.name }}</div>
+    <div v-if="showName" class="text-small">{{ gearData.name }}</div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { mapState } from "vuex";
+
 import { Gear } from "../../types/gear";
 
 export default defineComponent({
@@ -21,11 +23,27 @@ export default defineComponent({
   props: {
     gear: {
       type: Object as () => Gear,
-      required: true,
     },
     showName: {
       type: Boolean,
       default: false,
+    },
+    gearId: {
+      type: String,
+    },
+  },
+  computed: {
+    ...mapState("gear", ["gearList"]),
+    gearData(): Gear {
+      if (this.gear) {
+        return this.gear;
+      } else if (this.gearId) {
+        const match = this.gearList.find((x: Gear) => x.id === this.gearId);
+        if (match) {
+          return match;
+        }
+      }
+      return this.gearList[0];
     },
   },
 });
