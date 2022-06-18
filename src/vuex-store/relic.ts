@@ -5,14 +5,21 @@ import { State as RootState } from "./store";
 import { unvue } from "../utils";
 import relicConfig from "../types/relicMapping";
 import { RelicConfigType, OwnedRelicConfig } from "../types/relic";
+import { RelicPlanner, tableData } from "../types/relicPlanner";
+
 import { apiClient } from "../api/api-client";
-import { PlayerResponse } from "@/types/player";
+
 interface State {
   requestState: loadingState;
   relicConfig: RelicConfigType;
   ownedRelics: OwnedRelicConfig;
   refreshes: { cantina: number };
   energy: { cantina: number };
+  calculator: {
+    timeline: number,
+    relicTarget: number,
+    tableData: RelicPlanner[]
+  }
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -25,6 +32,11 @@ const store = {
     ownedRelics: {},
     refreshes: { cantina: 0 },
     energy: { cantina: 0 },
+    calculator: {
+      timeline: 14,
+      relicTarget: 8,
+      tableData
+    }
   },
   getters: {},
   mutations: {
