@@ -128,15 +128,22 @@
               <li>
                 <router-link
                   class="dropdown-item"
+                  :to="{ name: 'RelicCalculator' }"
+                  >Relic Planner</router-link
+                >
+              </li>
+              <li>
+                <router-link
+                  class="dropdown-item"
                   :to="{ name: 'UnitSearchPage' }"
                   >Unit Search</router-link
                 >
               </li>
-              <li>
+              <!-- <li>
                 <router-link class="dropdown-item" :to="{ name: 'Widgets' }"
                   >Widgets</router-link
                 >
-              </li>
+              </li> -->
             </ul>
           </li>
         </ul>

@@ -1,5 +1,7 @@
 import { Relic, RelicConfigType } from "./relic";
 
+// export default {}
+
 //https://docs.google.com/spreadsheets/d/10ReT0Q_4yYGd_fU45Clv7XYs23a96xpWgIxLVrg9Eqg/edit#gid=769217271
 export default {
   fragmented_white: new Relic({
