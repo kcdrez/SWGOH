@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import { round2Decimals } from "../utils";
 import store from "../vuex-store/store";
 import relicMapping from "./relicMapping";
@@ -14,6 +16,24 @@ export class RelicPlanner {
     storeGear: IStoreGear[],
     farmingData: IFarmingNodeData
   ) {
+
+    const savedData: any[] = JSON.parse(window.localStorage.getItem('relicCalculatorData') ?? '[]')
+    const match = savedData.find(x => x.id === id)
+    if (match) {
+      challengeGear.forEach(x => {
+        const exists = match.challengeGear.find((challengeGear: any) => _.isEqual(x.ids, challengeGear.ids))
+        if (exists) {
+          x.totalGear = exists.totalGear
+        }
+      })
+      storeGear.forEach(x => {
+        const exists = match.storeGear.find((storeGear: any) => _.isEqual(x.ids, storeGear.ids))
+        if (exists) {
+          x.purchases = exists.purchases
+        }
+      })
+    }
+
     this._id = id;
     this._challengeGear = challengeGear.map(x => new ChallengeGear(x));
     this._storeGear = storeGear.map(x => new StoreGear(x));
@@ -65,6 +85,15 @@ export class RelicPlanner {
   public get totalEnergy() {
     return round2Decimals(this._farmData.energyPerNode * this.remainingGearPerDay)
   }
+
+  public sanitize() {
+    return {
+      challengeGear: this._challengeGear.map(x => x.sanitize()),
+      id: this.id,
+      storeGear: this._storeGear.map(x => x.sanitize()),
+      // farmData: this._farmData
+    }
+  }
 }
 
 interface IChallengeGear {
@@ -101,6 +130,7 @@ class ChallengeGear {
   }
   public set totalGear(val) {
     this._totalGear = val;
+    store.dispatch('relic/saveCalculatorData')
   }
   public get gearPerDay() {
     return round2Decimals(this._totalGear / this.timeline)
@@ -110,6 +140,13 @@ class ChallengeGear {
   }
   public get relicPiecesTotal() {
     return round2Decimals(this.relicPiecesPerDay * this.timeline)
+  }
+
+  public sanitize() {
+    return {
+      ids: this._ids,
+      totalGear: this._totalGear
+    }
   }
 }
 
@@ -153,6 +190,7 @@ class StoreGear {
   }
   public set purchases(val) {
     this._purchases = val;
+    store.dispatch('relic/saveCalculatorData')
   }
   public get totalCurrency() {
     return round2Decimals(this._purchases * this._currencyPerPurchase)
@@ -166,6 +204,13 @@ class StoreGear {
   public get relicPiecesTotal() {
     return round2Decimals(this.relicPiecesPerDay * this.timeline)
   }
+
+  public sanitize() {
+    return {
+      ids: this._ids,
+      purchases: this._purchases
+    }
+  }
 }
 
 interface IFarmingNodeData {
@@ -178,11 +223,22 @@ interface IFarmingNodeData {
   amountForRelicPiece: number;
 }
 
+const savedData: any[] = JSON.parse(window.localStorage.getItem('relicCalculatorData') ?? '[]')
+const carbonite_circuit_board = savedData.find(x => x.id === 'carbonite_circuit_board')
+const bronzium_wiring = savedData.find(x => x.id === 'bronzium_wiring')
+const chromium_transistor = savedData.find(x => x.id === 'chromium_transistor')
+const aurodium_heatsink = savedData.find(x => x.id === 'aurodium_heatsink')
+const electrium_conductor = savedData.find(x => x.id === 'electrium_conductor')
+const zinbiddle_card = savedData.find(x => x.id === 'zinbiddle_card')
+const impulse_detector = savedData.find(x => x.id === 'impulse_detector')
+const gyrda_keypad = savedData.find(x => x.id === 'gyrda_keypad')
+
+
 export const tableData: RelicPlanner[] = [new RelicPlanner('carbonite_circuit_board', [{
   ids: ['057Salvage'],
   location: 'challenges_tac',
   totalGear: 120,
-  percentOfRelicPiece: 2 / 35
+  percentOfRelicPiece: 2 / 35,
 },
 {
   ids: ['053Salvage'],
