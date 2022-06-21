@@ -31,7 +31,10 @@
           </thead>
           <tbody class="text-center align-middle">
             <tr>
-              <td>Total Standard Energy</td>
+              <td>
+                Total Standard Energy
+                <img src="../images/standard_energy.png" />
+              </td>
               <td>{{ totalEnergy }}</td>
             </tr>
             <tr>
@@ -43,7 +46,10 @@
               <td>{{ energyRemaining.standard }}</td>
             </tr>
             <tr>
-              <td>Total Fleet Energy</td>
+              <td>
+                Total Fleet Energy
+                <img src="../images/ship_energy.png" />
+              </td>
               <td>{{ totalFleetEnergy }}</td>
             </tr>
             <tr>
@@ -55,7 +61,10 @@
               <td>{{ energyRemaining.fleet }}</td>
             </tr>
             <tr>
-              <td>Crystals</td>
+              <td>
+                Crystals
+                <img src="../images/crystals.png" />
+              </td>
               <td>{{ crystalsSpent }}</td>
             </tr>
             <tr>
@@ -103,6 +112,7 @@
           v-for="table in calculator.tableData"
           :key="table.id"
           :plannerData="table"
+          class="mb-2"
         />
       </div>
     </div>
