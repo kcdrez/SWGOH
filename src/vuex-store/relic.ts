@@ -90,6 +90,9 @@ const store = {
       commit("UPDATE_ENERGY", amount);
       dispatch("player/saveEnergy", null, { root: true });
     },
+    saveCalculatorData({ state }: ActionCtx) {
+      window.localStorage.setItem('relicCalculatorData', JSON.stringify(state.calculator.tableData.map(x => x.sanitize())))
+    }
   },
 };
 
