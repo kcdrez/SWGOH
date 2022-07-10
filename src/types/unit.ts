@@ -221,8 +221,38 @@ export class Unit {
   public get protection() {
     return this._stats["28"];
   }
+  public get baseProtection() {
+    if (this._stat_diffs) {
+      return this.protection - (this._stat_diffs["56"] ?? 0);
+    } else if (this._mods) {
+      let amount = 0;
+      let percent = 0;
+      this._mods.forEach((mod) => {
+        if (mod.primaryStat.unitStat === 56) {
+          percent += mod.primaryStat.value;
+        }
+
+        mod.secondaryStat.forEach((stat) => {
+          if (stat.unitStat === 28) {
+            amount += stat.value;
+          } else if (stat.unitStat === 56) {
+            percent += stat.value;
+          }
+        });
+      });
+
+      percent = percent / 100;
+
+      return Math.ceil((this.protection - amount) / (1 + percent));
+    } else {
+      return 0
+    }
+  }
   public get health() {
     return this._stats["1"];
+  }
+  public get baseHealth() {
+    return 0
   }
   public get tenacity() {
     return round2Decimals(this._stats["18"] * 100);
@@ -239,8 +269,14 @@ export class Unit {
   public get physicalArmor() {
     return this.armor.physical;
   }
+  public get baseArmor() {
+    return 0
+  }
   public get specialArmor() {
     return this.armor.special;
+  }
+  public get baseResistance() {
+    return 0
   }
   public get speed() {
     return this._stats["5"];
@@ -323,11 +359,11 @@ export class Unit {
     return {
       physical: round2Decimals(
         (this.offense.physical - this.modOffense.amount) /
-          (1 + this.modOffense.percent)
+        (1 + this.modOffense.percent)
       ),
       special: round2Decimals(
         (this.offense.special - this.modOffense.amount) /
-          (1 + this.modOffense.percent)
+        (1 + this.modOffense.percent)
       ),
     };
   }
