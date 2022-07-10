@@ -1,0 +1,433 @@
+<template>
+  <div class="collapse-header section-header mt-3 extended-1">
+    <h3
+      class="w-100"
+      data-bs-toggle="collapse"
+      href="#survivabilityCalculatorSection"
+    >
+      <div class="d-inline">Survivability Calculator</div>
+    </h3>
+  </div>
+  <div
+    id="survivabilityCalculatorSection"
+    ref="survivabilityCalculatorSection"
+    class="collapse"
+  >
+    <div class="container">
+      <div class="row mt-2">
+        <div class="col">
+          <!-- <h6>Select a Character to view their stats:</h6>
+          <SearchInput
+            placeholder="Select a Character"
+            :list="player.units"
+            :searchBy="['name', 'id', 'aliases']"
+            v-model="selected"
+          /> -->
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">Base Protection:</span>
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="baseProtection"
+              min="0"
+            />
+          </div>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">Base Health:</span>
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="baseHealth"
+              min="1"
+            />
+          </div>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">Base Armor:</span>
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="baseArmor"
+              min="0"
+              max="99"
+            />
+          </div>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">Bonus Protection:</span>
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="bonusProtection"
+              min="0"
+            />
+          </div>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">Bonus Health:</span>
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="bonusHealth"
+              min="0"
+            />
+          </div>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">Bonus Armor:</span>
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="bonusArmor"
+              min="0"
+            />
+          </div>
+        </div>
+        <div class="col">
+          <table class="table table-bordered table-dark table-sm table-striped">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Total Survivability</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(row, index) in rows"
+                :key="index"
+                class="align-middle text-center"
+              >
+                <td>
+                  <div>{{ row.sets }}</div>
+                  <div>{{ row.primaries }}</div>
+                </td>
+                <td>
+                  <div
+                    class="rounded text-dark"
+                    :class="{
+                      'bg-danger': row.minimum,
+                      'bg-success': row.maximum,
+                      'bg-info': !row.minimum && !row.maximum,
+                    }"
+                  >
+                    {{ row.value }}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent } from "vue";
+import { mapGetters, mapState } from "vuex";
+
+import { round2Decimals, setupEvents } from "../../utils";
+import { Unit } from "../../types/unit";
+
+interface dataModel {
+  selected: null | Unit;
+  baseProtection: number;
+  baseHealth: number;
+  baseArmor: number;
+  bonusProtection: number;
+  bonusHealth: number;
+  bonusArmor: number;
+}
+
+export default defineComponent({
+  name: "SurvivabilityCalculator",
+  data() {
+    return {
+      selected: null,
+      baseProtection: 0,
+      baseHealth: 0,
+      baseArmor: 0,
+      bonusProtection: 0,
+      bonusHealth: 0,
+      bonusArmor: 0,
+    } as dataModel;
+  },
+  computed: {
+    ...mapState("player", ["player"]),
+    ...mapGetters("player", ["unitData"]),
+    rows(): {
+      sets: string;
+      primaries: string;
+      value: number;
+      maximum?: boolean;
+      minimum?: boolean;
+    }[] {
+      const primaries3 = [
+        this.calculateSurvivability({ health: 3 }, { health: 3 }),
+        this.calculateSurvivability(
+          { health: 3 },
+          { health: 2, protection: 1 }
+        ),
+        this.calculateSurvivability({ health: 3 }, { health: 2, defense: 1 }),
+        this.calculateSurvivability(
+          { health: 3 },
+          { health: 1, protection: 2 }
+        ),
+        this.calculateSurvivability({ health: 3 }, { health: 1, defense: 2 }),
+        this.calculateSurvivability(
+          { health: 3 },
+          { health: 1, protection: 1, defense: 1 }
+        ),
+        this.calculateSurvivability({ health: 3 }, { protection: 3 }),
+        this.calculateSurvivability(
+          { health: 3 },
+          { protection: 2, defense: 1 }
+        ),
+        this.calculateSurvivability(
+          { health: 3 },
+          { protection: 1, defense: 2 }
+        ),
+        this.calculateSurvivability({ health: 3 }, { defense: 3 }),
+
+        this.calculateSurvivability({ health: 2, defense: 1 }, { health: 3 }),
+        this.calculateSurvivability(
+          { health: 2, defense: 1 },
+          { health: 2, protection: 1 }
+        ),
+        this.calculateSurvivability(
+          { health: 2, defense: 1 },
+          { health: 2, defense: 1 }
+        ),
+        this.calculateSurvivability(
+          { health: 2, defense: 1 },
+          { health: 1, protection: 2 }
+        ),
+        this.calculateSurvivability(
+          { health: 2, defense: 1 },
+          { health: 1, defense: 2 }
+        ),
+        this.calculateSurvivability(
+          { health: 2, defense: 1 },
+          { health: 1, protection: 1, defense: 1 }
+        ),
+        this.calculateSurvivability(
+          { health: 2, defense: 1 },
+          { protection: 3 }
+        ),
+        this.calculateSurvivability(
+          { health: 2, defense: 1 },
+          { protection: 2, defense: 1 }
+        ),
+        this.calculateSurvivability(
+          { health: 2, defense: 1 },
+          { protection: 1, defense: 2 }
+        ),
+        this.calculateSurvivability({ health: 2, defense: 1 }, { defense: 3 }),
+
+        this.calculateSurvivability({ health: 1, defense: 2 }, { health: 3 }),
+        this.calculateSurvivability(
+          { health: 1, defense: 2 },
+          { health: 2, protection: 1 }
+        ),
+        this.calculateSurvivability(
+          { health: 1, defense: 2 },
+          { health: 2, defense: 1 }
+        ),
+        this.calculateSurvivability(
+          { health: 1, defense: 2 },
+          { health: 1, protection: 2 }
+        ),
+        this.calculateSurvivability(
+          { health: 1, defense: 2 },
+          { health: 1, defense: 2 }
+        ),
+        this.calculateSurvivability(
+          { health: 1, defense: 2 },
+          { health: 1, protection: 1, defense: 1 }
+        ),
+        this.calculateSurvivability(
+          { health: 1, defense: 2 },
+          { protection: 3 }
+        ),
+        this.calculateSurvivability(
+          { health: 1, defense: 2 },
+          { protection: 2, defense: 1 }
+        ),
+        this.calculateSurvivability(
+          { health: 1, defense: 2 },
+          { protection: 1, defense: 2 }
+        ),
+        this.calculateSurvivability({ health: 1, defense: 2 }, { defense: 3 }),
+
+        this.calculateSurvivability({ defense: 3 }, { health: 3 }),
+        this.calculateSurvivability(
+          { defense: 3 },
+          { health: 2, protection: 1 }
+        ),
+        this.calculateSurvivability({ defense: 3 }, { health: 2, defense: 1 }),
+        this.calculateSurvivability(
+          { defense: 3 },
+          { health: 1, protection: 2 }
+        ),
+        this.calculateSurvivability({ defense: 3 }, { health: 1, defense: 2 }),
+        this.calculateSurvivability(
+          { defense: 3 },
+          { health: 1, protection: 1, defense: 1 }
+        ),
+        this.calculateSurvivability({ defense: 3 }, { protection: 3 }),
+        this.calculateSurvivability(
+          { defense: 3 },
+          { protection: 2, defense: 1 }
+        ),
+        this.calculateSurvivability(
+          { defense: 3 },
+          { protection: 1, defense: 2 }
+        ),
+        this.calculateSurvivability({ defense: 3 }, { defense: 3 }),
+      ];
+
+      const maxValue = Math.max(...primaries3.map((x) => x.value));
+      const minValue = Math.min(...primaries3.map((x) => x.value));
+
+      const { minIndexes, maxIndexes } = primaries3.reduce(
+        (
+          acc: {
+            maxIndexes: number[];
+            minIndexes: number[];
+            maxValue: number;
+            minValue: number;
+          },
+          el,
+          index
+        ) => {
+          if (el.value >= acc.maxValue) {
+            acc.maxIndexes.push(index);
+            acc.maxValue = el.value;
+          }
+          if (el.value <= acc.minValue) {
+            acc.minIndexes.push(index);
+            acc.minValue = el.value;
+          }
+          return acc;
+        },
+        { maxIndexes: [], minIndexes: [], maxValue, minValue }
+      );
+
+      maxIndexes.forEach((i) => (primaries3[i].maximum = true));
+      minIndexes.forEach((i) => (primaries3[i].minimum = true));
+
+      return primaries3;
+    },
+  },
+  watch: {
+    selected(newVal: Unit) {
+      if (newVal) {
+        window.localStorage.setItem("survivabilityCalculatorUnit", newVal.id);
+
+        this.baseProtection = newVal.baseProtection;
+        this.baseHealth = newVal.baseHealth;
+        this.baseArmor = newVal.baseArmor;
+      }
+    },
+  },
+  methods: {
+    selectMods(unit: Unit | null) {},
+    calculateSurvivability(
+      sets: { health?: number; defense?: number },
+      primaries: { health?: number; defense?: number; protection?: number }
+    ): {
+      sets: string;
+      primaries: string;
+      value: number;
+      maximum?: boolean;
+      minimum?: boolean;
+    } {
+      const defense = (637.5 * this.baseArmor) / (-this.baseArmor + 100);
+
+      const healthPercent =
+        1 + (sets?.health ?? 0) * 0.1 + (primaries?.health ?? 0) * 0.16;
+      const protectionPercent = 1 + (primaries?.protection ?? 0) * 0.24;
+      const defensePercent =
+        1 + (sets?.defense ?? 0) * 0.25 + (primaries?.defense ?? 1) * 0.2;
+
+      const value = Math.round(
+        (this.baseHealth * healthPercent * ((100 + this.bonusHealth) / 100) +
+          this.baseProtection *
+            protectionPercent *
+            ((100 + this.bonusProtection) / 100)) /
+          (1 -
+            (defense * defensePercent * ((100 + this.bonusArmor) / 100) * 100) /
+              (defense * defensePercent * ((100 + this.bonusArmor) / 100) +
+                637.5) /
+              100)
+      );
+
+      const setsStrings = [];
+      if (sets.health) {
+        setsStrings.push(`${sets.health} Health`);
+      }
+      if (sets.defense) {
+        setsStrings.push(`${sets.defense} Defense`);
+      }
+
+      const primaryStrings = [];
+      if (primaries.health) {
+        primaryStrings.push(`${primaries.health} Health`);
+      }
+      if (primaries.defense) {
+        primaryStrings.push(`${primaries.defense} Defense`);
+      }
+      if (primaries.protection) {
+        primaryStrings.push(`${primaries.protection} Protection`);
+      }
+
+      return {
+        sets: setsStrings.join(", ") + " Sets",
+        primaries: primaryStrings.join(", ") + " Primaries",
+        value,
+        maximum: false,
+        minimum: false,
+      };
+    },
+  },
+  async created() {
+    // const unitId =
+    //   window.localStorage.getItem("survivabilityCalculatorUnit") ?? "";
+    // if (unitId) {
+    //   this.selected = this.unitData(unitId) ?? null;
+    // }
+  },
+  mounted() {
+    setupEvents(
+      this.$refs?.survivabilityCalculatorSection as any as HTMLElement,
+      "survivabilityCalculatorSection"
+    );
+  },
+});
+</script>
+
+<style lang="scss" scoped>
+@import "../../styles/variables.scss";
+
+.damage-calculator-container {
+  margin-top: 1rem;
+}
+.input-group {
+  margin-top: 0.5rem;
+
+  .input-group-text {
+    &:first-child {
+      width: 150px;
+    }
+    &.value {
+      flex: 1 1 auto;
+    }
+  }
+}
+.average-damage {
+  text-align: center;
+  border-radius: 5px;
+  background-color: $dark;
+  margin-top: 0.5rem;
+}
+.difference-container {
+  margin: 0.5rem 33.33%;
+  text-align: center;
+}
+</style>

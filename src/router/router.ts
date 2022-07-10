@@ -11,7 +11,7 @@ import MatchUpPage from "../pages/matchUpPage.vue";
 import CharacterFarmingPage from "../pages/characterFarming.vue";
 import GuildEventsPage from "../pages/guildEvents.vue";
 import GuildUnitsPage from "../pages/guildUnits.vue";
-import DamageCalculatorPage from "../pages/damageCalculator.vue";
+import StatCalculatorPage from "../pages/statCalculator.vue";
 import GLChecklist from "../pages/glChecklist.vue";
 import TBStatusPage from "../pages/TBStatusPage.vue";
 import WidgetsPage from "../pages/widgets.vue";
@@ -152,7 +152,7 @@ const routes = [
     ],
   },
   {
-    path: "/damage-calculator",
+    path: "/stat-calculator",
     components: {
       default: PlayerLoadingPage,
     },
@@ -164,8 +164,8 @@ const routes = [
     children: [
       {
         path: "",
-        name: "DamageCalculatorPage",
-        component: DamageCalculatorPage,
+        name: "StatCalculatorPage",
+        component: StatCalculatorPage,
       },
     ],
   },

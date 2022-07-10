@@ -97,8 +97,8 @@
               <li>
                 <router-link
                   class="dropdown-item"
-                  :to="{ name: 'DamageCalculatorPage' }"
-                  >Damage Calculator</router-link
+                  :to="{ name: 'StatCalculatorPage' }"
+                  >Stat Calculator</router-link
                 >
               </li>
               <li>
