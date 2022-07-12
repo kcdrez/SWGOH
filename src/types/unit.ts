@@ -201,6 +201,13 @@ export class Unit {
   public get hasSpeedSet() {
     return this.mods.filter((x) => x.set === 4).length >= 4;
   }
+  public get healthSetsCount() {
+    return Math.floor(this.mods.filter((x) => x.set === 1).length / 2);
+  }
+  public get defenseSetsCount() {
+    return Math.floor(this.mods.filter((x) => x.set === 3).length / 2);
+  }
+
 
   public get gearOptions() {
     const list = [];
@@ -252,7 +259,34 @@ export class Unit {
     return this._stats["1"];
   }
   public get baseHealth() {
-    return 0
+    if (this._stat_diffs) {
+      return this.health - (this._stat_diffs["1"] ?? 0);
+    } else if (this._mods) {
+      let amount = 0;
+      let percent = 0;
+      percent += this.healthSetsCount * 10
+
+      this._mods.forEach((mod) => {
+        if (mod.primaryStat.unitStat === 55) {
+          percent += mod.primaryStat.value;
+        }
+
+        mod.secondaryStat.forEach((stat) => {
+          if (stat.unitStat === 1) {
+            amount += stat.value;
+          }
+          if (stat.unitStat === 55) {
+            percent += stat.value;
+          }
+        });
+      });
+
+      percent = percent / 100;
+
+      return Math.ceil((this.health - amount) / (1 + percent));
+    } else {
+      return 0
+    }
   }
   public get tenacity() {
     return round2Decimals(this._stats["18"] * 100);
@@ -269,14 +303,44 @@ export class Unit {
   public get physicalArmor() {
     return this.armor.physical;
   }
+  private getBaseDefense(armor: number): number {
+    const defenseFinal = (armor * 637.5) / (100 - armor)
+    if (this._mods) {
+      let amount = 0;
+      let percent = 0;
+      percent += this.defenseSetsCount * 25
+
+      this._mods.forEach((mod) => {
+        if (mod.primaryStat.unitStat === 49) {
+          percent += mod.primaryStat.value;
+        }
+
+        mod.secondaryStat.forEach((stat) => {
+          if (stat.unitStat === 42) {
+            amount += stat.value;
+          }
+          if (stat.unitStat === 49) {
+            percent += stat.value;
+          }
+        });
+      });
+
+      percent = percent / 100;
+      return Math.ceil((defenseFinal - amount) / (1 + percent));
+    } else {
+      return 0
+    }
+  }
   public get baseArmor() {
-    return 0
+    const defense = this.getBaseDefense(this.physicalArmor)
+    return round2Decimals((defense * 100) / (defense + 637.5))
   }
   public get specialArmor() {
     return this.armor.special;
   }
   public get baseResistance() {
-    return 0
+    const defense = this.getBaseDefense(this.specialArmor)
+    return round2Decimals((defense * 100) / (defense + 637.5))
   }
   public get speed() {
     return this._stats["5"];
