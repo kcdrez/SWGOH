@@ -158,7 +158,7 @@ const routes = [
     },
     props: {
       default: {
-        dependencyModules: [],
+        dependencyModules: ["teams"],
       },
     },
     children: [

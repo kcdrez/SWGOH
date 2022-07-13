@@ -15,8 +15,8 @@ import {
 import { IDailyCurrency, IWallet } from "../types/currency";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3000/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3000/dev";
 
   constructor() {}
 
@@ -122,8 +122,8 @@ class ApiClient {
     }
   }
 
-  async speedData() {
-    const response = await axios.get(`${this.baseUrl}/unit/speedAbilities`);
+  async abilityStats() {
+    const response = await axios.get(`${this.baseUrl}/unit/abilityStats`);
     return response.data;
   }
 

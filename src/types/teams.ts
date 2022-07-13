@@ -157,43 +157,50 @@ export class Team {
     const leader = this.units.find(
       (teamMember) => teamMember.isLeader && unit.owner === teamMember.owner
     );
-    const leaderAbility = leader?.leaderAbility;
-    if (leader && leaderAbility) {
-      if (leaderAbility.scalesBy) {
-        if (anyTagsMatch(unit, leader.id, leaderAbility.tags || [])) {
-          return this.units.reduce((total: number, unit: any) => {
-            if (
-              anyTagsMatch(
-                unit.unitData,
-                leader.id,
-                leaderAbility?.scalesBy || []
-              )
-            ) {
-              total += leaderAbility.value || 0;
-            }
-            return total;
-          }, 0);
+    const leaderAbilityList = (leader?.leaderAbility ?? []).filter(
+      (ability) => ability.type === "speed"
+    );
+    let amount = 0;
+    (leaderAbilityList || []).forEach((leaderAbility) => {
+      if (leader && leaderAbility) {
+        if (leaderAbility.scalesBy) {
+          if (anyTagsMatch(unit, leader.id, leaderAbility.tags || [])) {
+            amount += this.units.reduce((total: number, unit: any) => {
+              if (
+                anyTagsMatch(
+                  unit.unitData,
+                  leader.id,
+                  leaderAbility?.scalesBy || []
+                )
+              ) {
+                total += leaderAbility.value || 0;
+              }
+              return total;
+            }, 0);
+          }
+        } else {
+          amount += Math.floor(
+            unitMatchesLeader(
+              leaderAbility,
+              unit,
+              leader.id,
+              this.gameMode,
+              checkGameMode
+            )
+          );
         }
-      } else {
-        return Math.floor(
-          unitMatchesLeader(
-            leaderAbility,
-            unit,
-            leader.id,
-            this.gameMode,
-            checkGameMode
-          )
-        );
       }
-    }
-    return 0;
+    });
+    return amount;
   }
 
   public uniqueSpeedBonus(unit: TeamMember, checkGameMode: boolean): number {
     const uniqueAbilityList = unit?.uniqueAbility;
     let amount = 0;
     (uniqueAbilityList || []).forEach((ability) => {
-      amount += getUniqueAbilitySpeed(ability, unit, this, checkGameMode);
+      if (ability.type === "speed") {
+        amount += getUniqueAbilitySpeed(ability, unit, this, checkGameMode);
+      }
     });
     return Math.floor(amount); //todo why .floor?
   }
@@ -303,8 +310,8 @@ export class TeamMember {
     }
   }
 
-  public get abilityData(): UnitSpeedAbility | undefined {
-    const abilityData = store.state.teams.speedAbilityData[this.id];
+  public get abilityData(): AbilityStat | undefined {
+    const abilityData = store.state.teams.abilityStatsData[this.id];
     return abilityData;
   }
   public get leaderAbility() {
@@ -340,27 +347,40 @@ export class TeamMember {
 
 export type SortType = "leader" | "name" | "subtotal" | "total" | undefined;
 export interface SpeedConfig {
-  [key: string]: UnitSpeedAbility;
+  [key: string]: AbilityStat;
 }
 
-interface UnitSpeedAbility {
-  leader?: SpeedAbility;
-  unique?: SpeedAbility[];
+interface AbilityStat {
+  leader?: IAbilityStat[];
+  unique?: IAbilityStat[];
 }
 
-interface BasicSpeedAbility {
+interface IBasicAbilityStat {
   value?: number;
   tags?: string[];
   note?: string;
+  type:
+    | "speed"
+    | "protection"
+    | "health"
+    | "damage mitigation"
+    | "protection up";
+  flat?: boolean;
   scalesBy?: string[];
   scaleSource?: "total" | "unique";
+  conditions?: {
+    allAllies?: boolean;
+    tags?: string[];
+    leader?: string[];
+    solo?: boolean;
+    enemyLeader?: boolean;
+  };
 }
-export interface SpeedAbility extends BasicSpeedAbility {
-  special?: BasicSpeedAbility;
+export interface IAbilityStat extends IBasicAbilityStat {
   omicron?: OmicronAbility;
 }
 
-interface OmicronAbility extends SpeedAbility {
+interface OmicronAbility extends IAbilityStat {
   mode: "Territory War" | "Territory Battle" | "Grand Arena";
 }
 
@@ -456,7 +476,7 @@ export class Match extends Team {
 }
 
 function unitMatchesLeader(
-  leader: SpeedAbility,
+  leader: IAbilityStat,
   unit: TeamMember,
   leaderId: string,
   gameMode: string = "",
@@ -464,12 +484,6 @@ function unitMatchesLeader(
 ): number {
   if (leader.omicron && gameMode === leader.omicron.mode && checkGameMode) {
     return unitMatchesLeader(leader.omicron, unit, leaderId);
-  } else if (leader.special && leader.special.tags) {
-    if (anyTagsMatch(unit, leaderId, leader.special.tags)) {
-      return leader.special.value || 0;
-    } else if (anyTagsMatch(unit, leaderId, leader.tags || [])) {
-      return leader.value || 0;
-    }
   } else if (leader.tags) {
     if (anyTagsMatch(unit, leaderId, leader.tags)) {
       return leader.value || 0;
@@ -478,8 +492,8 @@ function unitMatchesLeader(
   return 0;
 }
 
-function allTagsMatch(
-  unit: TeamMember,
+export function allTagsMatch(
+  unit: TeamMember | Unit,
   leaderId: string,
   tagsList: string[]
 ): boolean {
@@ -487,14 +501,13 @@ function allTagsMatch(
     let matchesList: boolean[] = [];
     const split = x.split(" & ").map((x) => x.trim());
 
-    split.forEach((el) => {
+    split.forEach((tag) => {
       let tagMatches = false;
-      if (unit.alignment === el) {
-        tagMatches = true;
-      } else if (unit.categories.includes(el)) {
-        tagMatches = true;
-      } else if (el === "Self" && unit.id === leaderId) {
-        tagMatches = true;
+      if (tag.charAt(0) === "!") {
+        const value = tag.substring(1);
+        tagMatches = !tagMatch(value, unit, leaderId);
+      } else {
+        tagMatches = tagMatch(tag, unit, leaderId);
       }
       matchesList.push(tagMatches);
     });
@@ -502,27 +515,38 @@ function allTagsMatch(
   });
 }
 
-function anyTagsMatch(
-  unit: TeamMember,
-  leaderId: string,
-  tagsList: string[]
-): boolean {
-  if (tagsList.includes("!Self") && unit.id === leaderId) {
-    return false;
-  } else if (tagsList.some((r) => r.includes("&"))) {
-    return allTagsMatch(unit, leaderId, tagsList);
-  } else if (tagsList.some((r) => unit.alignment === r)) {
+function tagMatch(tag: string, unit: TeamMember | Unit, leaderId: string) {
+  if (tag === "Self") {
+    return unit.id === leaderId;
+  } else if (tag === "Light Side" || tag === "Dark Side") {
+    return unit.alignment === tag;
+  } else if (unit.categories.includes(tag)) {
     return true;
-  } else if (tagsList.some((r) => unit.categories.includes(r))) {
+  } else if (tag === "Leader Slot") {
     return true;
-  } else if (tagsList.includes("Self") && unit.id === leaderId) {
-    return true;
-  } else if (tagsList.some((r) => r === "Ally")) {
-    return true;
-  } else if (tagsList.some((t) => t === unit.id)) {
+  } else if (tag === leaderId) {
     return true;
   }
   return false;
+}
+
+export function anyTagsMatch(
+  unit: TeamMember | Unit,
+  leaderId: string,
+  tagsList: string[]
+): boolean {
+  if (tagsList.some((r) => r.includes("&"))) {
+    return allTagsMatch(unit, leaderId, tagsList);
+  } else {
+    return tagsList.some((tag) => {
+      if (tag.charAt(0) === "!") {
+        const value = tag.substring(1);
+        return !tagMatch(value, unit, leaderId);
+      } else {
+        return tagMatch(tag, unit, leaderId);
+      }
+    });
+  }
 }
 
 function getSpeedAmount(value: number | undefined, baseSpeed: number): number {
@@ -537,7 +561,7 @@ function getSpeedAmount(value: number | undefined, baseSpeed: number): number {
 }
 
 function getUniqueAbilitySpeed(
-  ability: SpeedAbility,
+  ability: IAbilityStat,
   unit: TeamMember,
   team: Team,
   checkGameMode: boolean
@@ -584,7 +608,7 @@ function getUniqueAbilitySpeed(
 }
 
 function getUniqueFromTeamMembers(
-  ability: SpeedAbility,
+  ability: IAbilityStat,
   unit: TeamMember,
   fullTeam: Team,
   sourceMember: TeamMember,
