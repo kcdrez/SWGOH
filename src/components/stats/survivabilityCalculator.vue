@@ -66,26 +66,58 @@
           <div class="input-group input-group-sm">
             <span
               class="input-group-text c-help"
-              title="The amount of Protection the unit receives from other effects (such as unique abilities). Enter a whole number representing a percent (e.g. a 10% increase enter '10')"
+              title="The amount of Protection the unit receives from other effects (such as unique abilities)"
               >Bonus Protection:</span
+            >
+            <span
+              class="input-group-text c-help"
+              title="Enter a whole number representing a percent (e.g. a 10% increase enter '10')"
+              >Percent:</span
             >
             <input
               class="form-control refresh-input"
               type="number"
-              v-model.number="bonusProtection"
+              v-model.number="bonusProtection.percent"
+              min="0"
+            />
+            <span
+              class="input-group-text c-help"
+              title="Enter a whole number that is a static amount (e.g. Geo Brood Alpha adds 15,000 to all Geos)"
+              >Flat:</span
+            >
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="bonusProtection.flat"
               min="0"
             />
           </div>
           <div class="input-group input-group-sm">
             <span
               class="input-group-text c-help"
-              title="The amount of Health the unit receives from other effects (such as unique abilities). Enter a whole number representing a percent (e.g. a 10% increase enter '10')"
+              title="The amount of Health the unit receives from other effects (such as unique abilities)"
               >Bonus Health:</span
+            >
+            <span
+              class="input-group-text c-help"
+              title="Enter a whole number representing a percent (e.g. a 10% increase enter '10')"
+              >Percent:</span
             >
             <input
               class="form-control refresh-input"
               type="number"
-              v-model.number="bonusHealth"
+              v-model.number="bonusHealth.percent"
+              min="0"
+            />
+            <span
+              class="input-group-text c-help"
+              title="Enter a whole number that is a static amount (e.g. Geo Brood Alpha adds 15,000 to all Geos)"
+              >Flat:</span
+            >
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="bonusHealth.flat"
               min="0"
             />
           </div>
@@ -95,10 +127,26 @@
               title="The amount of Defense the unit receives from other effects (such as unique abilities). Enter a whole number representing a percent (e.g. a 10% increase enter '10')"
               >Bonus Defense:</span
             >
+            <span
+              class="input-group-text c-help"
+              title="Enter a whole number representing a percent (e.g. a 10% increase enter '10')"
+              >Percent:</span
+            >
             <input
               class="form-control refresh-input"
               type="number"
-              v-model.number="bonusDefense"
+              v-model.number="bonusDefense.percent"
+              min="0"
+            />
+            <span
+              class="input-group-text c-help"
+              title="Enter a whole number that is a static amount (e.g. Clone Wars Chewy adds 50 Defense to all allies with his leadership)"
+              >Flat:</span
+            >
+            <input
+              class="form-control refresh-input"
+              type="number"
+              v-model.number="bonusDefense.flat"
               min="0"
             />
           </div>
@@ -177,9 +225,18 @@ interface dataModel {
   baseProtection: number;
   baseHealth: number;
   baseArmor: number;
-  bonusProtection: number;
-  bonusHealth: number;
-  bonusDefense: number;
+  bonusProtection: {
+    flat: number;
+    percent: number;
+  };
+  bonusHealth: {
+    flat: number;
+    percent: number;
+  };
+  bonusDefense: {
+    flat: number;
+    percent: number;
+  };
   sortMethod: "total" | "sets" | "primaries";
   sortDir: "asc" | "desc";
   primaryCount: number;
@@ -193,9 +250,18 @@ export default defineComponent({
       baseProtection: 0,
       baseHealth: 0,
       baseArmor: 0,
-      bonusProtection: 0,
-      bonusHealth: 0,
-      bonusDefense: 0,
+      bonusProtection: {
+        flat: 0,
+        percent: 0,
+      },
+      bonusHealth: {
+        flat: 0,
+        percent: 0,
+      },
+      bonusDefense: {
+        flat: 0,
+        percent: 0,
+      },
       sortMethod: "total",
       sortDir: "desc",
       primaryCount: 3,
@@ -621,9 +687,16 @@ export default defineComponent({
       if (newVal) {
         window.localStorage.setItem("survivabilityCalculatorUnit", newVal.id);
 
+        const { health, protection, defense } = newVal.bonusStats;
         this.baseProtection = newVal.baseProtection;
         this.baseHealth = newVal.baseHealth;
         this.baseArmor = newVal.baseArmor;
+        this.bonusHealth.percent = health.percent * 100;
+        this.bonusHealth.flat = health.flat;
+        this.bonusProtection.percent = protection.percent * 100;
+        this.bonusProtection.flat = protection.flat;
+        this.bonusDefense.percent = defense.percent * 100;
+        this.bonusDefense.flat = defense.flat;
       }
     },
   },
@@ -643,7 +716,9 @@ export default defineComponent({
         label: string;
       };
     } {
-      const defense = (637.5 * this.baseArmor) / (100 - this.baseArmor) + 0; //add defense flat from abilities here?
+      const defense =
+        (637.5 * this.baseArmor) / (100 - this.baseArmor) +
+        this.bonusDefense.flat;
 
       const healthPercent =
         1 + (sets?.health ?? 0) * 0.1 + (primaries?.health ?? 0) * 0.16;
@@ -652,16 +727,22 @@ export default defineComponent({
         1 + (sets?.defense ?? 0) * 0.25 + ((primaries?.defense ?? 0) + 1) * 0.2;
 
       const value = Math.round(
-        (this.baseHealth * healthPercent * ((100 + this.bonusHealth) / 100) +
+        (this.baseHealth *
+          healthPercent *
+          ((100 + this.bonusHealth.percent) / 100) +
+          this.bonusHealth.flat +
           this.baseProtection *
             protectionPercent *
-            ((100 + this.bonusProtection) / 100)) /
+            ((100 + this.bonusProtection.percent) / 100) +
+          this.bonusProtection.flat) /
           (1 -
             (defense *
               defensePercent *
-              ((100 + this.bonusDefense) / 100) *
+              ((100 + this.bonusDefense.percent) / 100) *
               100) /
-              (defense * defensePercent * ((100 + this.bonusDefense) / 100) +
+              (defense *
+                defensePercent *
+                ((100 + this.bonusDefense.percent) / 100) +
                 637.5) /
               100)
       );

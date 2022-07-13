@@ -5,6 +5,7 @@ import { shardMapping } from "./shards";
 import { round2Decimals } from "../utils";
 import { CurrencyTypeConfig } from "./currency";
 import _ from "lodash";
+import { anyTagsMatch } from "./teams";
 
 export interface IUnit {
   id: string;
@@ -208,7 +209,6 @@ export class Unit {
     return Math.floor(this.mods.filter((x) => x.set === 3).length / 2);
   }
 
-
   public get gearOptions() {
     const list = [];
     for (let i = (this.gearLevel || 0) + 1; i <= maxGearLevel; i++) {
@@ -252,7 +252,7 @@ export class Unit {
 
       return Math.ceil((this.protection - amount) / (1 + percent));
     } else {
-      return 0
+      return 0;
     }
   }
   public get health() {
@@ -264,7 +264,7 @@ export class Unit {
     } else if (this._mods) {
       let amount = 0;
       let percent = 0;
-      percent += this.healthSetsCount * 10
+      percent += this.healthSetsCount * 10;
 
       this._mods.forEach((mod) => {
         if (mod.primaryStat.unitStat === 55) {
@@ -285,8 +285,43 @@ export class Unit {
 
       return Math.ceil((this.health - amount) / (1 + percent));
     } else {
-      return 0
+      return 0;
     }
+  }
+  public get bonusStats() {
+    const abilityData = store.state.teams.abilityStatsData[this.id];
+
+    const data = {
+      health: {
+        flat: 0,
+        percent: 0,
+      },
+      protection: {
+        flat: 0,
+        percent: 0,
+      },
+      defense: {
+        flat: 0,
+        percent: 0,
+      },
+      speed: { flat: 0, percent: 0 },
+      "damage mitigation": { flat: 0, percent: 0 },
+      "protection up": { flat: 0, percent: 0 },
+    };
+    (abilityData?.unique ?? []).forEach((ability) => {
+      if (
+        anyTagsMatch(this, this.id, ability?.tags ?? []) &&
+        !ability.conditions &&
+        ["health", "protection", "defense"].includes(ability.type)
+      ) {
+        if (ability.flat) {
+          data[ability.type].flat += ability.value ?? 0;
+        } else {
+          data[ability.type].percent += ability.value ?? 0;
+        }
+      }
+    });
+    return data;
   }
   public get tenacity() {
     return round2Decimals(this._stats["18"] * 100);
@@ -304,11 +339,11 @@ export class Unit {
     return this.armor.physical;
   }
   private getBaseDefense(armor: number): number {
-    const defenseFinal = (armor * 637.5) / (100 - armor)
+    const defenseFinal = (armor * 637.5) / (100 - armor);
     if (this._mods) {
       let amount = 0;
       let percent = 0;
-      percent += this.defenseSetsCount * 25
+      percent += this.defenseSetsCount * 25;
 
       this._mods.forEach((mod) => {
         if (mod.primaryStat.unitStat === 49) {
@@ -328,19 +363,19 @@ export class Unit {
       percent = percent / 100;
       return Math.ceil((defenseFinal - amount) / (1 + percent));
     } else {
-      return 0
+      return 0;
     }
   }
   public get baseArmor() {
-    const defense = this.getBaseDefense(this.physicalArmor)
-    return round2Decimals((defense * 100) / (defense + 637.5))
+    const defense = this.getBaseDefense(this.physicalArmor);
+    return round2Decimals((defense * 100) / (defense + 637.5));
   }
   public get specialArmor() {
     return this.armor.special;
   }
   public get baseResistance() {
-    const defense = this.getBaseDefense(this.specialArmor)
-    return round2Decimals((defense * 100) / (defense + 637.5))
+    const defense = this.getBaseDefense(this.specialArmor);
+    return round2Decimals((defense * 100) / (defense + 637.5));
   }
   public get speed() {
     return this._stats["5"];
@@ -423,11 +458,11 @@ export class Unit {
     return {
       physical: round2Decimals(
         (this.offense.physical - this.modOffense.amount) /
-        (1 + this.modOffense.percent)
+          (1 + this.modOffense.percent)
       ),
       special: round2Decimals(
         (this.offense.special - this.modOffense.amount) /
-        (1 + this.modOffense.percent)
+          (1 + this.modOffense.percent)
       ),
     };
   }

@@ -11,7 +11,7 @@ import { PlayerResponse } from "../types/player";
 interface State {
   requestState: loadingState;
   teams: Team[];
-  speedAbilityData: SpeedConfig;
+  abilityStatsData: SpeedConfig;
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -21,7 +21,7 @@ const store = {
   state: {
     requestState: loadingState.initial,
     teams: [],
-    speedAbilityData: {},
+    abilityStatsData: {},
   },
   getters: {
     speedValueFromMod(_state: State) {
@@ -61,8 +61,8 @@ const store = {
         state.teams.splice(index, 1);
       }
     },
-    SET_SPEED_ABILITY_DATA(state: State, payload: SpeedConfig) {
-      state.speedAbilityData = payload;
+    SET_ABILITY_STATS(state: State, payload: SpeedConfig) {
+      state.abilityStatsData = payload;
     },
   },
   actions: {
@@ -75,7 +75,7 @@ const store = {
             new Team(team, rootState.player.player?.id ?? "")
           );
         });
-        commit("SET_SPEED_ABILITY_DATA", await apiClient.speedData());
+        commit("SET_ABILITY_STATS", await apiClient.abilityStats());
         commit("SET_REQUEST_STATE", loadingState.ready);
       }
     },
