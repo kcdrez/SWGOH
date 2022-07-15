@@ -795,11 +795,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
-
-.damage-calculator-container {
-  margin-top: 1rem;
-}
 .input-group {
   margin-top: 0.5rem;
 
@@ -811,15 +806,5 @@ export default defineComponent({
       flex: 1 1 auto;
     }
   }
-}
-.average-damage {
-  text-align: center;
-  border-radius: 5px;
-  background-color: $dark;
-  margin-top: 0.5rem;
-}
-.difference-container {
-  margin: 0.5rem 33.33%;
-  text-align: center;
 }
 </style>
