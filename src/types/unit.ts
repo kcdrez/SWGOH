@@ -81,7 +81,7 @@ export class Unit {
     this._ability_classes = payload.ability_classes;
     this._role = payload.role;
     this._alignment = payload.alignment;
-    this._is_ship = payload.is_ship || false;
+    this._is_ship = payload.is_ship ?? false;
     this._image = payload.image;
     this._gear_list = payload.gear_levels;
     this._stats = payload.stats;

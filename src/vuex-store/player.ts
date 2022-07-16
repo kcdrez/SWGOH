@@ -24,6 +24,9 @@ const store = {
     requestState: loadingState.initial,
   },
   getters: {
+    shipsList(state: State) {
+      return state.player?.units.filter((unit) => unit.isShip);
+    },
     unitData(state: State) {
       return (unitId: string): Unit | undefined => {
         return state.player?.units.find((x) => x.id === unitId);

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { PlayerResponse } from "../types/player";
+import { Player, PlayerResponse } from "../types/player";
 import { ConfigType, Gear, IGear } from "../types/gear";
 import { IUnit, Unit } from "../types/unit";
 import { FarmingNode, IFarmingNode, OwnedShardsMap } from "../types/shards";
@@ -15,12 +15,12 @@ import {
 import { IDailyCurrency, IWallet } from "../types/currency";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3000/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3000/dev";
 
   constructor() {}
 
-  async fetchPlayer(allyCode: string): Promise<PlayerResponse> {
+  async fetchPlayer(allyCode: string): Promise<Player> {
     const response = await axios.get(`${this.baseUrl}/player/${allyCode}`);
     const { data } = response;
     return {
@@ -36,7 +36,7 @@ class ApiClient {
     }
   }
 
-  async createPlayer(allyCode: string): Promise<PlayerResponse> {
+  async createPlayer(allyCode: string): Promise<Player> {
     const response = await axios.post(`${this.baseUrl}/player/${allyCode}`);
     const { data } = response;
     return {
