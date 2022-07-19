@@ -30,7 +30,7 @@ export interface IUnit {
   has_ultimate?: boolean;
   xp?: number;
   mods?: Mod[];
-  crew?: Crew[];
+  crew?: ICrew[];
   stars?: number;
   is_ship?: boolean;
   zeta_abilities: string[];
@@ -50,6 +50,7 @@ export class Unit {
   private _mods: Mod[];
 
   private _stars: number;
+  private _level: number;
   private _categories: string[];
   private _ability_classes: string[];
   private _role: string;
@@ -64,6 +65,7 @@ export class Unit {
   private _zeta_abilities?: string[];
   private _omicron_abilities?: string[];
   private _has_ultimate?: boolean;
+  private _crew?: ICrew[];
 
   private _estimatedTime: number = 0;
 
@@ -71,12 +73,13 @@ export class Unit {
     this._id = payload.id;
     this._name = payload.name;
     this._aliases = payload.aliases ?? [];
-    this._gear_level = payload.gear_level || 0;
-    this._current_level_gear = payload?.gear || [];
-    this._ability_data = payload?.ability_data || [];
+    this._gear_level = payload.gear_level ?? 0;
+    this._current_level_gear = payload?.gear ?? [];
+    this._ability_data = payload?.ability_data ?? [];
     this._relic_tier = payload?.relic_tier ?? 0;
-    this._mods = payload?.mods || [];
-    this._stars = payload?.stars || 0;
+    this._mods = payload?.mods ?? [];
+    this._stars = payload?.stars ?? 0;
+    this._level = payload.level ?? 0;
     this._categories = payload.categories;
     this._ability_classes = payload.ability_classes;
     this._role = payload.role;
@@ -90,6 +93,7 @@ export class Unit {
     this._omicron_abilities = payload.omicron_abilities;
     this._has_ultimate = payload.has_ultimate;
     this._stat_diffs = payload.stat_diffs ?? null;
+    this._crew = payload.crew ?? [];
   }
 
   public get id() {
@@ -104,8 +108,14 @@ export class Unit {
   public get gearLevel() {
     return this._gear_level;
   }
+  public get level() {
+    return this._level;
+  }
   public get name() {
     return this._name;
+  }
+  public get crew() {
+    return this._crew ?? [];
   }
   public get aliases() {
     return this._aliases;
@@ -826,16 +836,16 @@ export interface UnitTier {
   gear: string[];
 }
 
-interface Crew {
+interface ICrew {
   unitId: string;
   slot: number;
-  skillReferenceList: CrewSkill[];
+  skillReferenceList: ICrewSkill[];
   skilllessCrewAbilityId: string;
   gp: number;
   cp: number;
 }
 
-interface CrewSkill {
+interface ICrewSkill {
   skillId: string;
   requiredTier: number;
   requiredRarity: number;
