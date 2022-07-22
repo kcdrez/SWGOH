@@ -160,3 +160,15 @@ button:not(.btn-close),
   --popper-theme-padding: 1rem;
   --popper-theme-box-shadow: 0 6px 30px -6px rgba(0, 0, 0, 0.25);
 }
+
+//tabs
+.nav-tabs {
+  .nav-link {
+    background-color: $gray-2;
+    color: $light !important;
+
+    &.active {
+      background-color: $primary;
+    }
+  }
+}

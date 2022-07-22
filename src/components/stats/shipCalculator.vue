@@ -17,166 +17,264 @@
           />
         </div>
       </div>
-      <div class="row mt-2" v-if="selected">
-        <div class="col" v-for="pilot in crew" :key="pilot.id">
-          <div class="text-center">{{ pilot.name }}</div>
-          <div class="input-group input-group-sm mt-0">
-            <span class="input-group-text">Stars:</span>
-            <span class="input-group-text">Current:</span>
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="pilot.current.stars"
-              min="0"
-              max="7"
-            />
-            <span class="input-group-text">Projected:</span>
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="pilot.projected.stars"
-              min="0"
-              max="7"
-            />
-          </div>
-          <div class="input-group input-group-sm">
-            <span class="input-group-text">Level:</span>
-            <span class="input-group-text">Current:</span>
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="pilot.current.level"
-              min="0"
-              max="85"
-            />
-            <span class="input-group-text">Projected:</span>
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="pilot.projected.level"
-              min="0"
-              max="85"
-            />
-          </div>
-          <div class="input-group input-group-sm">
-            <span class="input-group-text">Gear Level:</span>
-            <span class="input-group-text">Current:</span>
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="pilot.current.gearLevel"
-              min="0"
-              :max="maxGearLevel"
-            />
-            <span class="input-group-text">Projected:</span>
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="pilot.projected.gearLevel"
-              min="0"
-              :max="maxGearLevel"
-            />
-          </div>
-          <div class="input-group input-group-sm">
-            <span class="input-group-text">Gear Pieces:</span>
-            <span class="input-group-text">Current:</span>
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="pilot.current.gearPieces"
-              min="0"
-              max="6"
-            />
-            <span class="input-group-text">Projected:</span>
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="pilot.projected.gearPieces"
-              min="0"
-              max="6"
-            />
-          </div>
-          <div class="input-group input-group-sm">
-            <span class="input-group-text">Relic Level:</span>
-            <span class="input-group-text">Current:</span>
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="pilot.current.relicLevel"
-              min="0"
-              :max="maxRelicLevel"
-            />
-            <span class="input-group-text">Projected:</span>
-            <input
-              class="form-control refresh-input"
-              type="number"
-              v-model.number="pilot.projected.relicLevel"
-              min="0"
-              :max="maxRelicLevel"
-            />
-          </div>
-          <div class="mt-2">
-            <div class="text-center">Mods</div>
-            <div v-for="(mod, index) in pilot.mods" :key="mod.id">
-              <div class="input-group input-group-sm mt-1">
-                <span class="input-group-text">Mod {{ index + 1 }}</span>
-                <input
-                  class="form-control refresh-input"
-                  type="number"
-                  v-model.number="mod.level.current"
-                  min="0"
-                  max="15"
-                />
-                <input
-                  class="form-control refresh-input"
-                  type="number"
-                  v-model.number="mod.level.projected"
-                  min="0"
-                  max="15"
-                />
-                <input
-                  class="form-control refresh-input"
-                  type="number"
-                  v-model.number="mod.pips.current"
-                  min="0"
-                  max="6"
-                />
-                <input
-                  class="form-control refresh-input"
-                  type="number"
-                  v-model.number="mod.pips.projected"
-                  min="0"
-                  max="6"
-                />
-              </div>
+      <template v-if="selected">
+        <div class="row mt-2">
+          <div class="col">
+            <div class="input-group input-group-sm mt-0">
+              <span class="input-group-text">Stars:</span>
+              <span class="input-group-text">Current:</span>
+              <input
+                class="form-control refresh-input"
+                type="number"
+                v-model.number="stars.current"
+                min="0"
+                max="7"
+              />
+              <span class="input-group-text">Projected:</span>
+              <input
+                class="form-control refresh-input"
+                type="number"
+                v-model.number="stars.projected"
+                min="0"
+                max="7"
+              />
             </div>
-          </div>
-          <div class="mt-2">
-            <div class="text-center">Abilities</div>
-            <div v-for="(ability, index) in pilot.abilities" :key="ability.id">
-              <div class="input-group input-group-sm mt-1">
-                <span class="input-group-text">Ability {{ index + 1 }}</span>
-                <span class="input-group-text">Current:</span>
-                <input
-                  class="form-control refresh-input"
-                  type="number"
-                  v-model.number="ability.current"
-                  min="0"
-                  :max="ability.max"
-                />
-                <span class="input-group-text">Projected:</span>
-                <input
-                  class="form-control refresh-input"
-                  type="number"
-                  v-model.number="ability.projected"
-                  min="0"
-                  :max="ability.max"
-                />
+            <ul class="nav nav-tabs nav-fill mt-1" role="tablist">
+              <li
+                class="nav-item"
+                v-for="pilot in crew"
+                :key="pilot.id"
+                role="presentation"
+              >
+                <button
+                  class="nav-link"
+                  data-bs-toggle="tab"
+                  :data-bs-target="`#${pilot.id}`"
+                  type="button"
+                  role="tab"
+                >
+                  {{ pilot.name }}
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link active"
+                  data-bs-toggle="tab"
+                  data-bs-target="#output"
+                  type="button"
+                  role="tab"
+                >
+                  Output
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content mt-1">
+              <div
+                v-for="pilot in crew"
+                :key="pilot.id"
+                :id="pilot.id"
+                class="tab-pane fade"
+              >
+                <div class="input-group input-group-sm mt-0">
+                  <span class="input-group-text">Stars:</span>
+                  <span class="input-group-text">Current:</span>
+                  <input
+                    class="form-control refresh-input"
+                    type="number"
+                    v-model.number="pilot.current.stars"
+                    min="0"
+                    max="7"
+                  />
+                  <span class="input-group-text">Projected:</span>
+                  <input
+                    class="form-control refresh-input"
+                    type="number"
+                    v-model.number="pilot.projected.stars"
+                    min="0"
+                    max="7"
+                  />
+                </div>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">Level:</span>
+                  <span class="input-group-text">Current:</span>
+                  <input
+                    class="form-control refresh-input"
+                    type="number"
+                    v-model.number="pilot.current.level"
+                    min="0"
+                    max="85"
+                  />
+                  <span class="input-group-text">Projected:</span>
+                  <input
+                    class="form-control refresh-input"
+                    type="number"
+                    v-model.number="pilot.projected.level"
+                    min="0"
+                    max="85"
+                  />
+                </div>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">Gear Level:</span>
+                  <span class="input-group-text">Current:</span>
+                  <input
+                    class="form-control refresh-input"
+                    type="number"
+                    v-model.number="pilot.current.gearLevel"
+                    min="0"
+                    :max="maxGearLevel"
+                  />
+                  <span class="input-group-text">Projected:</span>
+                  <input
+                    class="form-control refresh-input"
+                    type="number"
+                    v-model.number="pilot.projected.gearLevel"
+                    min="0"
+                    :max="maxGearLevel"
+                  />
+                </div>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">Gear Pieces:</span>
+                  <span class="input-group-text">Current:</span>
+                  <input
+                    class="form-control refresh-input"
+                    type="number"
+                    v-model.number="pilot.current.gearPieces"
+                    min="0"
+                    max="6"
+                  />
+                  <span class="input-group-text">Projected:</span>
+                  <input
+                    class="form-control refresh-input"
+                    type="number"
+                    v-model.number="pilot.projected.gearPieces"
+                    min="0"
+                    max="6"
+                  />
+                </div>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">Relic Level:</span>
+                  <span class="input-group-text">Current:</span>
+                  <input
+                    class="form-control refresh-input"
+                    type="number"
+                    v-model.number="pilot.current.relicLevel"
+                    min="0"
+                    :max="maxRelicLevel"
+                  />
+                  <span class="input-group-text">Projected:</span>
+                  <input
+                    class="form-control refresh-input"
+                    type="number"
+                    v-model.number="pilot.projected.relicLevel"
+                    min="0"
+                    :max="maxRelicLevel"
+                  />
+                </div>
+                <div class="mt-2">
+                  <div class="text-center">Mods</div>
+                  <div v-for="mod in pilot.mods" :key="mod.id">
+                    <div class="input-group input-group-sm mt-1">
+                      <span class="input-group-text">{{ modLabel(mod) }}</span>
+                      <input
+                        class="form-control refresh-input"
+                        type="number"
+                        v-model.number="mod.level.current"
+                        min="0"
+                        max="15"
+                      />
+                      <input
+                        class="form-control refresh-input"
+                        type="number"
+                        v-model.number="mod.level.projected"
+                        min="0"
+                        max="15"
+                      />
+                      <input
+                        class="form-control refresh-input"
+                        type="number"
+                        v-model.number="mod.pips.current"
+                        min="0"
+                        max="6"
+                      />
+                      <input
+                        class="form-control refresh-input"
+                        type="number"
+                        v-model.number="mod.pips.projected"
+                        min="0"
+                        max="6"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <div class="text-center">Abilities</div>
+                  <div v-for="ability in pilot.abilities" :key="ability.id">
+                    <div class="input-group input-group-sm mt-1">
+                      <span class="input-group-text"> {{ ability.name }}</span>
+                      <span class="input-group-text">Current:</span>
+                      <input
+                        class="form-control refresh-input"
+                        type="number"
+                        v-model.number="ability.current"
+                        min="0"
+                        :max="ability.max"
+                      />
+                      <span class="input-group-text">Projected:</span>
+                      <input
+                        class="form-control refresh-input"
+                        type="number"
+                        v-model.number="ability.projected"
+                        min="0"
+                        :max="ability.max"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane fade active show" id="output">
+                <table
+                  class="table table-bordered table-dark table-sm table-striped swgoh-table"
+                >
+                  <thead class="text-center align-middle">
+                    <tr>
+                      <th></th>
+                      <th>Current</th>
+                      <th>Projected</th>
+                      <th>Difference</th>
+                    </tr>
+                  </thead>
+                  <tbody class="text-center align-middle">
+                    <tr v-for="stat in stats" :key="stat.label">
+                      <td>{{ stat.label }}</td>
+                      <td>{{ stat.current }}</td>
+                      <td>{{ stat.projected }}</td>
+                      <td
+                        :class="{
+                          'text-danger': stat.projected - stat.current < 0,
+                          'text-success': stat.projected - stat.current > 0,
+                        }"
+                      >
+                        <span v-if="stat.projected - stat.current > 0">+</span>
+                        <span>{{ stat.projected - stat.current }}</span>
+                        <span
+                          v-if="stat.projected - stat.current !== 0"
+                          class="mx-1"
+                          >({{
+                            round2Decimals(
+                              ((stat.projected - stat.current) / stat.current) *
+                                100
+                            )
+                          }}%)</span
+                        >
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -185,10 +283,19 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { setupEvents } from "../../utils";
-import { Unit } from "../../types/unit";
+import { round2Decimals, setupEvents } from "../../utils";
+import { Mod, Unit } from "../../types/unit";
 import { maxGearLevel } from "../../types/gear";
 import { maxRelicLevel } from "../../types/relic";
+import {
+  abilityMap,
+  crewLevelMap,
+  crewStarsMap,
+  gearLevelMap,
+  modsMap,
+  multiplierMap,
+  relicLevelMap,
+} from "../../types/pilots";
 
 interface Crew {
   stars: number;
@@ -208,6 +315,10 @@ interface dataModel {
     abilities: any[];
     mods: any[];
   }[];
+  stars: {
+    current: number;
+    projected: number;
+  };
   maxGearLevel: number;
   maxRelicLevel: number;
 }
@@ -220,19 +331,267 @@ export default defineComponent({
       crew: [],
       maxGearLevel,
       maxRelicLevel,
+      stars: {
+        current: 1,
+        projected: 1,
+      },
     } as dataModel;
   },
   computed: {
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData", "shipsList"]),
+    stats(): any {
+      const baseSpeed = this.selected?.statMultipliers?.baseSpeed ?? 0;
+      const baseProtection =
+        this.selected?.statMultipliers?.baseProtection ?? 0;
+      const baseHealth = this.selected?.statMultipliers?.baseHealth ?? 0;
+      const baseDamage = this.selected?.statMultipliers?.baseDamage ?? 0;
+      const baseCrit = this.selected?.statMultipliers?.baseCrit ?? 0;
+      const baseSpecialDamage =
+        this.selected?.statMultipliers?.baseSpecialDamage ?? 0;
+      const baseSpecialCrit =
+        this.selected?.statMultipliers?.baseSpecialCrit ?? 0;
+      const basePotency = this.selected?.statMultipliers?.basePotency ?? 0;
+      const baseTenacity = this.selected?.statMultipliers?.baseTenacity ?? 0;
+
+      const shipMultiplier = {
+        current: (multiplierMap as any)[this.stars.current],
+        projected: (multiplierMap as any)[this.stars.projected],
+      };
+
+      const crewTotal = this.crew.reduce(
+        (acc, pilot) => {
+          const starsRating = {
+            current: (crewStarsMap as any)[pilot.current.stars],
+            projected: (crewStarsMap as any)[pilot.projected.stars],
+          };
+          const levelRating = {
+            current: (crewLevelMap as any)[pilot.current.level],
+            projected: (crewLevelMap as any)[pilot.projected.level],
+          };
+          const gearRating = {
+            current: (gearLevelMap as any)[pilot.current.gearLevel].cumulative,
+            projected: (gearLevelMap as any)[pilot.projected.gearLevel]
+              .cumulative,
+          };
+          const partialGearRating = {
+            current:
+              (gearLevelMap as any)[pilot.current.gearLevel].perPiece *
+              pilot.current.gearPieces,
+            projected:
+              (gearLevelMap as any)[pilot.projected.gearLevel].perPiece *
+              pilot.projected.gearPieces,
+          };
+          const relicRating = {
+            current:
+              (relicLevelMap as any)[pilot.current.relicLevel].rating +
+              (relicLevelMap as any)[pilot.current.relicLevel].multiplier *
+                pilot.current.level,
+            projected:
+              (relicLevelMap as any)[pilot.projected.relicLevel].rating +
+              (relicLevelMap as any)[pilot.projected.relicLevel].multiplier *
+                pilot.projected.level,
+          };
+          const abilityRating = pilot.abilities.reduce(
+            (acc, ability) => {
+              acc.current += (abilityMap as any)[ability.current];
+              acc.projected += (abilityMap as any)[ability.projected];
+              return acc;
+            },
+            {
+              current: 0,
+              projected: 0,
+            }
+          );
+
+          const modsRating = pilot.mods.reduce(
+            (acc, mod) => {
+              acc.current += (modsMap as any)[mod.level.current][
+                mod.pips.current
+              ];
+              acc.projected += (modsMap as any)[mod.level.projected][
+                mod.pips.projected
+              ];
+              return acc;
+            },
+            {
+              current: 0,
+              projected: 0,
+            }
+          );
+
+          acc.current +=
+            starsRating.current +
+            levelRating.current +
+            gearRating.current +
+            partialGearRating.current +
+            relicRating.current +
+            abilityRating.current +
+            modsRating.current;
+
+          acc.projected +=
+            starsRating.projected +
+            levelRating.projected +
+            gearRating.projected +
+            partialGearRating.projected +
+            relicRating.projected +
+            abilityRating.projected +
+            modsRating.projected;
+
+          return acc;
+        },
+        { current: 0, projected: 0 }
+      );
+
+      return {
+        speed: {
+          current:
+            Math.floor(
+              crewTotal.current *
+                shipMultiplier.current *
+                (this.selected?.statMultipliers?.speed ?? 1)
+            ) + baseSpeed,
+          projected:
+            Math.floor(
+              crewTotal.projected *
+                shipMultiplier.projected *
+                (this.selected?.statMultipliers?.speed ?? 1)
+            ) + baseSpeed,
+          label: "Speed",
+        },
+        protection: {
+          current: Math.floor(
+            crewTotal.current *
+              shipMultiplier.current *
+              (this.selected?.statMultipliers?.protection ?? 1) +
+              baseProtection
+          ),
+          projected: Math.floor(
+            crewTotal.projected *
+              shipMultiplier.projected *
+              (this.selected?.statMultipliers?.protection ?? 1) +
+              baseProtection
+          ),
+          label: "Protection",
+        },
+        health: {
+          current: Math.floor(
+            crewTotal.current *
+              shipMultiplier.current *
+              (this.selected?.statMultipliers?.health ?? 1) +
+              baseHealth
+          ),
+          projected: Math.floor(
+            crewTotal.projected *
+              shipMultiplier.projected *
+              (this.selected?.statMultipliers?.health ?? 1) +
+              baseHealth
+          ),
+          label: "Health",
+        },
+        damage: {
+          current: Math.floor(
+            crewTotal.current *
+              shipMultiplier.current *
+              (this.selected?.statMultipliers?.physicalDamage ?? 1) +
+              baseDamage
+          ),
+          projected: Math.floor(
+            crewTotal.projected *
+              shipMultiplier.projected *
+              (this.selected?.statMultipliers?.physicalDamage ?? 1) +
+              baseDamage
+          ),
+          label: "Physical Damage",
+        },
+        critChance: {
+          current: Math.floor(
+            crewTotal.current *
+              shipMultiplier.current *
+              (this.selected?.statMultipliers?.critRating ?? 1) +
+              baseCrit
+          ),
+          projected: Math.floor(
+            crewTotal.projected *
+              shipMultiplier.projected *
+              (this.selected?.statMultipliers?.critRating ?? 1) +
+              baseCrit
+          ),
+          label: "Physical Crit Chance",
+        },
+        specialDamage: {
+          current: Math.floor(
+            crewTotal.current *
+              shipMultiplier.current *
+              (this.selected?.statMultipliers?.specialDamage ?? 1) +
+              baseSpecialDamage
+          ),
+          projected: Math.floor(
+            crewTotal.projected *
+              shipMultiplier.projected *
+              (this.selected?.statMultipliers?.specialDamage ?? 1) +
+              baseSpecialDamage
+          ),
+          label: "Special Damage",
+        },
+        specialCrit: {
+          current: Math.floor(
+            crewTotal.current *
+              shipMultiplier.current *
+              (this.selected?.statMultipliers?.specialCritRating ?? 1) +
+              baseSpecialCrit
+          ),
+          projected: Math.floor(
+            crewTotal.projected *
+              shipMultiplier.projected *
+              (this.selected?.statMultipliers?.specialCritRating ?? 1) +
+              baseSpecialCrit
+          ),
+          label: "Special Crit Chance",
+        },
+        potency: {
+          current: Math.floor(
+            crewTotal.current *
+              shipMultiplier.current *
+              (this.selected?.statMultipliers?.potency ?? 1) +
+              basePotency
+          ),
+          projected: Math.floor(
+            crewTotal.projected *
+              shipMultiplier.projected *
+              (this.selected?.statMultipliers?.potency ?? 1) +
+              basePotency
+          ),
+          label: "Potency",
+        },
+        tenacity: {
+          current: Math.floor(
+            crewTotal.current *
+              shipMultiplier.current *
+              (this.selected?.statMultipliers?.tenacity ?? 1) +
+              baseTenacity
+          ),
+          projected: Math.floor(
+            crewTotal.projected *
+              shipMultiplier.projected *
+              (this.selected?.statMultipliers?.tenacity ?? 1) +
+              baseTenacity
+          ),
+          label: "Tenacity",
+        },
+      };
+    },
   },
   watch: {
     selected(newVal: Unit) {
       if (newVal) {
         window.localStorage.setItem("shipCalculatorUnit", newVal.id);
+
+        this.stars.current = newVal.stars ?? 1;
+        this.stars.projected = newVal.stars ?? 1;
+
         this.crew = newVal.crew.map((crewMember) => {
           const unit: Unit = this.unitData(crewMember.unitId);
-          console.log(unit.mods);
           return {
             id: unit?.id ?? null,
             name: unit?.name ?? "",
@@ -274,6 +633,7 @@ export default defineComponent({
                   current: mod.pips,
                   projected: mod.pips,
                 },
+                slot: mod.slot,
               };
             }),
           };
@@ -281,7 +641,20 @@ export default defineComponent({
       }
     },
   },
-  methods: {},
+  methods: {
+    round2Decimals,
+    modLabel(mod: any) {
+      const modLabelMap = {
+        1: "Square",
+        2: "Arrow",
+        3: "Diamond",
+        4: "Triangle",
+        5: "Circle",
+        6: "Cross",
+      };
+      return (modLabelMap as any)[mod.slot];
+    },
+  },
   async created() {
     const unitId = window.localStorage.getItem("shipCalculatorUnit") ?? "";
     if (unitId) {
@@ -305,7 +678,11 @@ export default defineComponent({
 
   .input-group-text {
     &:first-child {
-      width: 100px;
+      width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
     }
     &.value {
       flex: 1 1 auto;

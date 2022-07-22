@@ -7,6 +7,26 @@ import { CurrencyTypeConfig } from "./currency";
 import _ from "lodash";
 import { anyTagsMatch } from "./teams";
 
+interface IStatMultiplier {
+  speed: number;
+  health: number;
+  protection: number;
+  physicalDamage: number;
+  critRating: number;
+  specialDamage: number;
+  specialCritRating: number;
+  potency: number;
+  tenacity: number;
+  baseSpeed: number;
+  baseHealth: number;
+  baseProtection: number;
+  baseDamage: number;
+  baseCrit: number;
+  baseSpecialDamage: number;
+  baseSpecialCrit: number;
+  basePotency: number;
+  baseTenacity: number;
+}
 export interface IUnit {
   id: string;
   name: string;
@@ -17,6 +37,7 @@ export interface IUnit {
   ability_classes: string[];
   role: string;
   alignment: string;
+  statMultipliers?: IStatMultiplier;
 
   //attributes that only exist when the character is unlocked
   gear_level?: number;
@@ -66,6 +87,7 @@ export class Unit {
   private _omicron_abilities?: string[];
   private _has_ultimate?: boolean;
   private _crew?: ICrew[];
+  private _stat_multipliers?: IStatMultiplier;
 
   private _estimatedTime: number = 0;
 
@@ -94,6 +116,7 @@ export class Unit {
     this._has_ultimate = payload.has_ultimate;
     this._stat_diffs = payload.stat_diffs ?? null;
     this._crew = payload.crew ?? [];
+    this._stat_multipliers = payload.statMultipliers;
   }
 
   public get id() {
@@ -235,6 +258,9 @@ export class Unit {
     return list;
   }
 
+  public get statMultipliers() {
+    return this._stat_multipliers;
+  }
   public get protection() {
     return this._stats["28"];
   }
