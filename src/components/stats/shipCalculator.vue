@@ -174,7 +174,8 @@
                   <div class="text-center">Mods</div>
                   <div v-for="mod in pilot.mods" :key="mod.id">
                     <div class="input-group input-group-sm mt-1">
-                      <span class="input-group-text">{{ modLabel(mod) }}</span>
+                      <span class="input-group-text">{{ modLabel(mod) }}:</span>
+                      <span class="input-group-text">Current Level:</span>
                       <input
                         class="form-control refresh-input"
                         type="number"
@@ -182,6 +183,7 @@
                         min="0"
                         max="15"
                       />
+                      <span class="input-group-text">Projected Level:</span>
                       <input
                         class="form-control refresh-input"
                         type="number"
@@ -189,6 +191,7 @@
                         min="0"
                         max="15"
                       />
+                      <span class="input-group-text">Current Pips:</span>
                       <input
                         class="form-control refresh-input"
                         type="number"
@@ -196,6 +199,7 @@
                         min="0"
                         max="6"
                       />
+                      <span class="input-group-text">Projected Pips:</span>
                       <input
                         class="form-control refresh-input"
                         type="number"
@@ -211,7 +215,7 @@
                   <div v-for="ability in pilot.abilities" :key="ability.id">
                     <div class="input-group input-group-sm mt-1">
                       <span class="input-group-text"> {{ ability.name }}</span>
-                      <span class="input-group-text">Current:</span>
+                      <span class="input-group-text">Current Level:</span>
                       <input
                         class="form-control refresh-input"
                         type="number"
@@ -219,7 +223,7 @@
                         min="0"
                         :max="ability.max"
                       />
-                      <span class="input-group-text">Projected:</span>
+                      <span class="input-group-text">Projected Level:</span>
                       <input
                         class="form-control refresh-input"
                         type="number"
@@ -592,26 +596,31 @@ export default defineComponent({
 
         this.crew = newVal.crew.map((crewMember) => {
           const unit: Unit = this.unitData(crewMember.unitId);
+          const gearLevel = unit?.gearLevel ?? 0;
+          const relicLevel =
+            gearLevel < maxGearLevel ? 0 : unit?.relicLevel ?? 0;
+          const gearPieces =
+            gearLevel >= maxGearLevel
+              ? 0
+              : unit?.currentLevelGear.filter((gear) => gear.is_obtained)
+                  .length ?? 0;
+
           return {
             id: unit?.id ?? null,
             name: unit?.name ?? "",
             current: {
               stars: unit?.stars ?? 0,
               level: unit?.level ?? 0,
-              gearLevel: unit?.gearLevel ?? 0,
-              gearPieces:
-                unit?.currentLevelGear.filter((gear) => gear.is_obtained)
-                  .length ?? 0,
-              relicLevel: unit?.relicLevel ?? 0,
+              gearLevel,
+              gearPieces,
+              relicLevel,
             },
             projected: {
               stars: unit?.stars ?? 0,
               level: unit?.level ?? 0,
-              gearLevel: unit?.gearLevel ?? 0,
-              gearPieces:
-                unit?.currentLevelGear.filter((gear) => gear.is_obtained)
-                  .length ?? 0,
-              relicLevel: unit?.relicLevel ?? 0,
+              gearLevel,
+              gearPieces,
+              relicLevel,
             },
             abilities: unit.abilities.map((ability) => {
               return {
