@@ -131,6 +131,11 @@ nav.navbar-light {
   select,
   select:disabled {
     border: 1px solid $dark;
+
+    &:disabled {
+      background-color: $gray-6;
+      cursor: not-allowed;
+    }
   }
 }
 
