@@ -20,262 +20,188 @@
       <template v-if="selected">
         <div class="row mt-2">
           <div class="col">
-            <div class="input-group input-group-sm mt-0">
-              <span class="input-group-text">Stars:</span>
-              <span class="input-group-text">Current:</span>
-              <input
-                class="form-control refresh-input"
-                type="number"
-                v-model.number="stars.current"
-                min="0"
-                max="7"
-              />
-              <span class="input-group-text">Projected:</span>
-              <input
-                class="form-control refresh-input"
-                type="number"
-                v-model.number="stars.projected"
-                min="0"
-                max="7"
-              />
-            </div>
-            <ul class="nav nav-tabs nav-fill mt-1" role="tablist">
-              <li
-                class="nav-item"
-                v-for="pilot in crew"
-                :key="pilot.id"
-                role="presentation"
-              >
-                <button
-                  class="nav-link"
-                  data-bs-toggle="tab"
-                  :data-bs-target="`#${pilot.id}`"
-                  type="button"
-                  role="tab"
+            <div v-for="(pilot, index) in crew" :key="pilot.id">
+              <hr v-if="index > 0" />
+              <h3 class="text-center">Crew: {{ pilot.name }}</h3>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Gear Level:</span>
+                <span class="input-group-text">Current:</span>
+                <select
+                  class="form-control"
+                  v-model.number="pilot.current.gearLevel"
                 >
-                  {{ pilot.name }}
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link active"
-                  data-bs-toggle="tab"
-                  data-bs-target="#output"
-                  type="button"
-                  role="tab"
+                  <option
+                    v-for="index in maxGearLevel"
+                    :key="index"
+                    :value="index"
+                  >
+                    {{ index }}
+                  </option>
+                </select>
+                <span class="input-group-text">Projected:</span>
+                <select
+                  class="form-control"
+                  v-model.number="pilot.projected.gearLevel"
                 >
-                  Output
-                </button>
-              </li>
-            </ul>
-            <div class="tab-content mt-1">
-              <div
-                v-for="pilot in crew"
-                :key="pilot.id"
-                :id="pilot.id"
-                class="tab-pane fade"
-              >
-                <div class="input-group input-group-sm mt-0">
-                  <span class="input-group-text">Stars:</span>
-                  <span class="input-group-text">Current:</span>
-                  <input
-                    class="form-control refresh-input"
-                    type="number"
-                    v-model.number="pilot.current.stars"
-                    min="0"
-                    max="7"
-                  />
-                  <span class="input-group-text">Projected:</span>
-                  <input
-                    class="form-control refresh-input"
-                    type="number"
-                    v-model.number="pilot.projected.stars"
-                    min="0"
-                    max="7"
-                  />
-                </div>
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">Level:</span>
-                  <span class="input-group-text">Current:</span>
-                  <input
-                    class="form-control refresh-input"
-                    type="number"
-                    v-model.number="pilot.current.level"
-                    min="0"
-                    max="85"
-                  />
-                  <span class="input-group-text">Projected:</span>
-                  <input
-                    class="form-control refresh-input"
-                    type="number"
-                    v-model.number="pilot.projected.level"
-                    min="0"
-                    max="85"
-                  />
-                </div>
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">Gear Level:</span>
-                  <span class="input-group-text">Current:</span>
-                  <input
-                    class="form-control refresh-input"
-                    type="number"
-                    v-model.number="pilot.current.gearLevel"
-                    min="0"
-                    :max="maxGearLevel"
-                  />
-                  <span class="input-group-text">Projected:</span>
-                  <input
-                    class="form-control refresh-input"
-                    type="number"
-                    v-model.number="pilot.projected.gearLevel"
-                    min="0"
-                    :max="maxGearLevel"
-                  />
-                </div>
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">Gear Pieces:</span>
-                  <span class="input-group-text">Current:</span>
-                  <input
-                    class="form-control refresh-input"
-                    type="number"
-                    v-model.number="pilot.current.gearPieces"
-                    min="0"
-                    max="6"
-                  />
-                  <span class="input-group-text">Projected:</span>
-                  <input
-                    class="form-control refresh-input"
-                    type="number"
-                    v-model.number="pilot.projected.gearPieces"
-                    min="0"
-                    max="6"
-                  />
-                </div>
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">Relic Level:</span>
-                  <span class="input-group-text">Current:</span>
-                  <input
-                    class="form-control refresh-input"
-                    type="number"
-                    v-model.number="pilot.current.relicLevel"
-                    min="0"
-                    :max="maxRelicLevel"
-                  />
-                  <span class="input-group-text">Projected:</span>
-                  <input
-                    class="form-control refresh-input"
-                    type="number"
-                    v-model.number="pilot.projected.relicLevel"
-                    min="0"
-                    :max="maxRelicLevel"
-                  />
-                </div>
-                <div class="mt-2">
-                  <div class="text-center">Mods</div>
-                  <div v-for="mod in pilot.mods" :key="mod.id">
-                    <div class="input-group input-group-sm mt-1">
-                      <span class="input-group-text">{{ modLabel(mod) }}:</span>
-                      <span class="input-group-text">Current Level:</span>
-                      <input
-                        class="form-control refresh-input"
-                        type="number"
-                        v-model.number="mod.level.current"
-                        min="0"
-                        max="15"
-                      />
-                      <span class="input-group-text">Projected Level:</span>
-                      <input
-                        class="form-control refresh-input"
-                        type="number"
-                        v-model.number="mod.level.projected"
-                        min="0"
-                        max="15"
-                      />
-                      <span class="input-group-text">Current Pips:</span>
-                      <input
-                        class="form-control refresh-input"
-                        type="number"
-                        v-model.number="mod.pips.current"
-                        min="0"
-                        max="6"
-                      />
-                      <span class="input-group-text">Projected Pips:</span>
-                      <input
-                        class="form-control refresh-input"
-                        type="number"
-                        v-model.number="mod.pips.projected"
-                        min="0"
-                        max="6"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div class="mt-2">
-                  <div class="text-center">Abilities</div>
-                  <div v-for="ability in pilot.abilities" :key="ability.id">
-                    <div class="input-group input-group-sm mt-1">
-                      <span class="input-group-text"> {{ ability.name }}</span>
-                      <span class="input-group-text">Current Level:</span>
-                      <input
-                        class="form-control refresh-input"
-                        type="number"
-                        v-model.number="ability.current"
-                        min="0"
-                        :max="ability.max"
-                      />
-                      <span class="input-group-text">Projected Level:</span>
-                      <input
-                        class="form-control refresh-input"
-                        type="number"
-                        v-model.number="ability.projected"
-                        min="0"
-                        :max="ability.max"
-                      />
-                    </div>
+                  <option
+                    v-for="index in maxGearLevel"
+                    :key="index"
+                    :value="index"
+                  >
+                    {{ index }}
+                  </option>
+                </select>
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Gear Pieces:</span>
+                <span class="input-group-text">Current:</span>
+                <select
+                  class="form-control"
+                  v-model.number="pilot.current.gearPieces"
+                >
+                  <option v-for="(el, index) in 7" :key="index" :value="index">
+                    {{ index }}
+                  </option>
+                </select>
+                <span class="input-group-text">Projected:</span>
+                <select
+                  class="form-control"
+                  v-model.number="pilot.projected.gearPieces"
+                >
+                  <option v-for="(el, index) in 7" :key="index" :value="index">
+                    {{ index }}
+                  </option>
+                </select>
+              </div>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">Relic Level:</span>
+                <span class="input-group-text">Current:</span>
+                <select
+                  class="form-control"
+                  v-model.number="pilot.current.relicLevel"
+                >
+                  <option
+                    v-for="(el, index) in maxRelicLevel + 1"
+                    :key="index"
+                    :value="index"
+                  >
+                    {{ index }}
+                  </option>
+                </select>
+                <span class="input-group-text">Projected:</span>
+                <select
+                  class="form-control"
+                  v-model.number="pilot.projected.relicLevel"
+                >
+                  <option
+                    v-for="(el, index) in maxRelicLevel + 1"
+                    :key="index"
+                    :value="index"
+                  >
+                    {{ index }}
+                  </option>
+                </select>
+              </div>
+              <div class="mt-2">
+                <div class="text-center">Mods</div>
+                <div v-for="mod in pilot.mods" :key="mod.id">
+                  <div class="input-group input-group-sm mt-1">
+                    <span class="input-group-text">{{ modLabel(mod) }}:</span>
+                    <span class="input-group-text">Current Pips:</span>
+                    <select
+                      class="form-control"
+                      v-model.number="mod.pips.current"
+                    >
+                      <option v-for="index in 6" :key="index" :value="index">
+                        {{ index }}
+                      </option>
+                    </select>
+                    <span class="input-group-text">Projected Pips:</span>
+                    <select
+                      class="form-control"
+                      v-model.number="mod.pips.projected"
+                    >
+                      <option v-for="index in 6" :key="index" :value="index">
+                        {{ index }}
+                      </option>
+                    </select>
                   </div>
                 </div>
               </div>
-              <div class="tab-pane fade active show" id="output">
-                <table
-                  class="table table-bordered table-dark table-sm table-striped swgoh-table"
-                >
-                  <thead class="text-center align-middle">
-                    <tr>
-                      <th></th>
-                      <th>Current</th>
-                      <th>Projected</th>
-                      <th>Difference</th>
-                    </tr>
-                  </thead>
-                  <tbody class="text-center align-middle">
-                    <tr v-for="stat in stats" :key="stat.label">
-                      <td>{{ stat.label }}</td>
-                      <td>{{ stat.current }}</td>
-                      <td>{{ stat.projected }}</td>
-                      <td
-                        :class="{
-                          'text-danger': stat.projected - stat.current < 0,
-                          'text-success': stat.projected - stat.current > 0,
-                        }"
+              <div class="mt-2">
+                <div class="text-center">Abilities</div>
+                <div v-for="ability in pilot.abilities" :key="ability.id">
+                  <div class="input-group input-group-sm mt-1">
+                    <span class="input-group-text"> {{ ability.name }}</span>
+                    <span class="input-group-text">Current Level:</span>
+                    <select
+                      class="form-control"
+                      v-model.number="ability.current"
+                    >
+                      <option
+                        v-for="index in ability.max"
+                        :key="index"
+                        :value="index"
                       >
-                        <span v-if="stat.projected - stat.current > 0">+</span>
-                        <span>{{ stat.projected - stat.current }}</span>
-                        <span
-                          v-if="stat.projected - stat.current !== 0"
-                          class="mx-1"
-                          >({{
-                            round2Decimals(
-                              ((stat.projected - stat.current) / stat.current) *
-                                100
-                            )
-                          }}%)</span
-                        >
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                        {{ index }}
+                      </option>
+                    </select>
+                    <span class="input-group-text">Projected Level:</span>
+                    <select
+                      class="form-control"
+                      v-model.number="ability.projected"
+                    >
+                      <option
+                        v-for="index in ability.max"
+                        :key="index"
+                        :value="index"
+                      >
+                        {{ index }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+          <div class="col">
+            <table
+              class="table table-bordered table-dark table-sm table-striped swgoh-table output-table"
+            >
+              <thead class="text-center align-middle">
+                <tr>
+                  <th></th>
+                  <th>Current</th>
+                  <th>Projected</th>
+                  <th>Difference</th>
+                </tr>
+              </thead>
+              <tbody class="text-center align-middle">
+                <tr v-for="stat in stats" :key="stat.label">
+                  <td>{{ stat.label }}</td>
+                  <td>{{ stat.current }}</td>
+                  <td>{{ stat.projected }}</td>
+                  <td
+                    :class="{
+                      'text-danger': stat.projected - stat.current < 0,
+                      'text-success': stat.projected - stat.current > 0,
+                    }"
+                  >
+                    <span v-if="stat.projected - stat.current > 0">+</span>
+                    <span>{{ stat.projected - stat.current }}</span>
+                    <span
+                      v-if="stat.projected - stat.current !== 0"
+                      class="mx-1"
+                      >({{
+                        round2Decimals(
+                          ((stat.projected - stat.current) / stat.current) * 100
+                        )
+                      }}%)</span
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </template>
@@ -697,5 +623,17 @@ export default defineComponent({
       flex: 1 1 auto;
     }
   }
+}
+
+.output-table {
+  position: sticky;
+  top: 105px;
+  z-index: 9;
+}
+
+hr {
+  height: 2px;
+  color: black;
+  opacity: 100;
 }
 </style>
