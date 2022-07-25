@@ -8,13 +8,15 @@
       >
         <div class="d-inline">Territory War History</div>
       </h3>
-      <MultiSelect
-        class="select-columns"
-        :options="twCols"
-        storageKey="twTable"
-        @checked="twSelectedColumns = $event"
-        @click.stop=""
-      />
+      <div class="toggles-container">
+        <MultiSelect
+          class="select-columns"
+          :options="twCols"
+          storageKey="twTable"
+          @checked="twSelectedColumns = $event"
+          @click.stop=""
+        />
+      </div>
     </div>
     <TerritoryWarTable
       id="guildTerritoryWarSection"
@@ -30,13 +32,15 @@
       >
         <div class="d-inline">Territory Battles History</div>
       </h3>
-      <MultiSelect
-        class="select-columns"
-        :options="tbCols"
-        storageKey="tbTable"
-        @checked="tbSelectedColumns = $event"
-        @click.stop=""
-      />
+      <div class="toggles-container">
+        <MultiSelect
+          class="select-columns"
+          :options="tbCols"
+          storageKey="tbTable"
+          @checked="tbSelectedColumns = $event"
+          @click.stop=""
+        />
+      </div>
     </div>
     <TerritoryBattleTable
       id="guildTerritoryBattleSection"

@@ -11,16 +11,18 @@
         <button class="btn btn-sm btn-primary my-3" @click="downloadXlsx()">
           Download as XLSX
         </button>
-        <div class="collapse-header section-header">
+        <div class="collapse-header section-header extended-1">
           <h3>
             <div data-bs-toggle="collapse" href="#player-data">Player Data</div>
           </h3>
-          <MultiSelect
-            class="select-columns"
-            :options="playerCols"
-            :storageKey="storageKey + 'PlayerColumns'"
-            @checked="selectedColumns = $event"
-          />
+          <div class="toggles-container">
+            <MultiSelect
+              class="select-columns"
+              :options="playerCols"
+              :storageKey="storageKey + 'PlayerColumns'"
+              @checked="selectedColumns = $event"
+            />
+          </div>
         </div>
         <div id="player-data" class="collapse" ref="playerData">
           <table
@@ -204,33 +206,80 @@
                 v-for="player in players"
                 :key="player.allyCode"
               >
-                <td v-if="showCol('allyCode')">{{ player.allyCode }}</td>
-                <td v-if="showCol('name')">{{ player.name }}</td>
-                <td v-if="showCol('stars')">{{ player.stars }}</td>
-                <td v-if="showCol('gearLevel')">{{ player.gearLevel }}</td>
-                <td v-if="showCol('relicLevel')">{{ player.relicLevel }}</td>
-                <td v-if="showCol('zetas')">{{ player.zetas }}</td>
-                <td v-if="showCol('omicrons')">{{ player.omicrons }}</td>
-                <td v-if="showCol('speed')">{{ player.speed }}</td>
-                <td v-if="showCol('speed')">{{ player.speedMod }}</td>
+                <td v-if="showCol('allyCode')">
+                  <span class="row-label">Ally Code:</span>
+                  {{ player.allyCode }}
+                </td>
+                <td v-if="showCol('name')">
+                  <span class="row-label">Player Name:</span> {{ player.name }}
+                </td>
+                <td v-if="showCol('stars')">
+                  <span class="row-label">Stars:</span> {{ player.stars }}
+                </td>
+                <td v-if="showCol('gearLevel')">
+                  <span class="row-label">Gear Level:</span>
+                  {{ player.gearLevel }}
+                </td>
+                <td v-if="showCol('relicLevel')">
+                  <span class="row-label">Relic Level:</span>
+                  {{ player.relicLevel }}
+                </td>
+                <td v-if="showCol('zetas')">
+                  <span class="row-label">Zetas:</span> {{ player.zetas }}
+                </td>
+                <td v-if="showCol('omicrons')">
+                  <span class="row-label">Omicrons:</span> {{ player.omicrons }}
+                </td>
+                <td v-if="showCol('speed')">
+                  <span class="row-label">Speed:</span> {{ player.speed }}
+                </td>
+                <td v-if="showCol('speed')">
+                  <span class="row-label">Speed (Mods):</span>
+                  {{ player.speedMod }}
+                </td>
                 <td v-if="showCol('physicalOffense')">
+                  <span class="row-label">Physical Offense:</span>
                   {{ player.physicalOffense }}
                 </td>
                 <td v-if="showCol('specialOffense')">
+                  <span class="row-label">Special Offense:</span>
                   {{ player.specialOffense }}
                 </td>
-                <td v-if="showCol('protection')">{{ player.protection }}</td>
-                <td v-if="showCol('health')">{{ player.health }}</td>
-                <td v-if="showCol('tenacity')">{{ player.tenacity }}%</td>
-                <td v-if="showCol('potency')">{{ player.potency }}%</td>
+                <td v-if="showCol('protection')">
+                  <span class="row-label">Protection:</span>
+                  {{ player.protection }}
+                </td>
+                <td v-if="showCol('health')">
+                  <span class="row-label">Health:</span> {{ player.health }}
+                </td>
+                <td v-if="showCol('tenacity')">
+                  <span class="row-label">Tenacity:</span>
+                  {{ player.tenacity }}%
+                </td>
+                <td v-if="showCol('potency')">
+                  <span class="row-label">Potency:</span> {{ player.potency }}%
+                </td>
                 <td v-if="showCol('physicalCrit')">
+                  <span class="row-label">Physical Crit Chance:</span>
                   {{ player.physicalCrit }}%
                 </td>
-                <td v-if="showCol('specialCrit')">{{ player.specialCrit }}%</td>
-                <td v-if="showCol('critDamage')">{{ player.critDamage }}</td>
-                <td v-if="showCol('armor')">{{ player.armor }}</td>
-                <td v-if="showCol('resistance')">{{ player.resistance }}</td>
+                <td v-if="showCol('specialCrit')">
+                  <span class="row-label">Special Crit Chance:</span>
+                  {{ player.specialCrit }}%
+                </td>
+                <td v-if="showCol('critDamage')">
+                  <span class="row-label">Crit Damage:</span>
+                  {{ player.critDamage }}
+                </td>
+                <td v-if="showCol('armor')">
+                  <span class="row-label">Armor:</span> {{ player.armor }}
+                </td>
+                <td v-if="showCol('resistance')">
+                  <span class="row-label">Resistance:</span>
+                  {{ player.resistance }}
+                </td>
                 <td v-if="showCol('ultimate')">
+                  <span class="row-label">Has Ult?:</span>
                   {{ player.ultimate ? "Yes" : "No" }}
                 </td>
               </tr>

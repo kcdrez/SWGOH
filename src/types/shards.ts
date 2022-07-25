@@ -105,7 +105,7 @@ export interface IFarmingNode {
   energy?: number;
 }
 
-interface NodeCharacter {
+export interface NodeCharacter {
   id: string;
   dropRate?: number;
   shardCount?: number;

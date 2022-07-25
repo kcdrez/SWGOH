@@ -189,6 +189,9 @@ export class Unit {
   public get categories() {
     return this._categories;
   }
+  public get isGL() {
+    return this.categories.includes("Galactic Legend");
+  }
   public get zetas() {
     return this._zeta_abilities ?? [];
   }
@@ -1000,11 +1003,13 @@ export function getUnitsByTag(
       return acc;
     }, [] as Unit[]);
 }
+
 export function getUnit(unitId: string) {
   const playerUnits = store.state.player.player?.units ?? [];
   const otherUnits = store.state.unit.unitList;
   return [...playerUnits, ...otherUnits].find((x) => x.id === unitId);
 }
+
 export function totalProgress(
   prerequisites: any[],
   prerequisiteType: "requirement" | "recommended"

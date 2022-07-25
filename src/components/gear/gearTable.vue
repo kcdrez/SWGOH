@@ -115,7 +115,7 @@
           <td v-if="showCol('name')">
             {{ salvage.name }}
           </td>
-          <td v-if="showCol('mark')">
+          <td v-if="showCol('mark')" :class="{ 'hidden-sm': !!salvage.mark }">
             {{ salvage.mark }}
           </td>
           <td v-if="showCol('locations')">
@@ -138,16 +138,19 @@
             </template>
           </td>
           <td v-if="showCol('owned')">
+            <span class="row-label">Amount Owned:</span>
             <OwnedAmount :salvage="salvage" />
           </td>
           <td v-if="showCol('needed')">
+            <span class="row-label">Amount Needed:</span>
             {{ salvage.totalAmount }}
           </td>
           <td v-if="showCol('progress')">
             <ProgressBar :percent="salvage.percent" />
           </td>
           <td v-if="showRequiredByUnit && showCol('required')">
-            <ul class="mb-0">
+            <span class="row-label">Needed By:</span>
+            <ul class="mb-0 no-bullets-sm">
               <li v-for="unit in salvage.neededBy" :key="unit.id">
                 <Popper hover arrow placement="left">
                   <router-link
@@ -172,7 +175,7 @@
             </ul>
           </td>
           <td v-if="showCol('time')">
-            <span class="row-label">Completion Date: </span>
+            <span class="row-label">Completion Date:</span>
             <Timestamp
               :timeLength="salvage.timeEstimation"
               displayClasses="d-inline"

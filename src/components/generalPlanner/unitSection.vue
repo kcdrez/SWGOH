@@ -6,15 +6,17 @@
           Unit Summary
         </div>
       </h3>
-      <div class="simple-view-container">
-        <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
+      <div class="toggles-container">
+        <div class="simple-view-container">
+          <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
+        </div>
+        <MultiSelect
+          class="select-columns"
+          :options="cols"
+          storageKey="unitTable"
+          @checked="selectedColumns = $event"
+        />
       </div>
-      <MultiSelect
-        class="select-columns"
-        :options="cols"
-        storageKey="unitTable"
-        @checked="selectedColumns = $event"
-      />
     </div>
     <div id="unit-section-table" class="collapse" ref="unitSection">
       <table

@@ -8,14 +8,16 @@
           <th class="show-on-mobile">
             <div class="input-group input-group-sm my-2">
               <span class="input-group-text">Sort By:</span>
-              <select
-                class="form-control"
-                @change="sortMethod = $event.target.value"
-              >
-                <option value="name" v-if="showUnitName">Name</option>
-                <option value="location">Location</option>
-                <option value="progress">Progress</option>
-                <option value="time">Time Remaining</option>
+              <select class="form-control" v-model="sortMethod">
+                <template v-for="option in sortByOptions">
+                  <option
+                    :key="option.value"
+                    :value="option.value"
+                    v-if="!option.hidden"
+                  >
+                    {{ option.label }}
+                  </option>
+                </template>
               </select>
             </div>
             <div class="input-group input-group-sm my-2">
@@ -327,6 +329,41 @@ export default defineComponent({
     },
     orderedPriorityList(): Unit[] {
       return unitsByPriority(this.units, this.nodeTableNames);
+    },
+    sortByOptions() {
+      return [
+        {
+          value: "name",
+          label: "Name",
+          hidden: !this.showUnitName,
+        },
+        {
+          value: "locations",
+          label: "Locations",
+        },
+        {
+          value: "owned",
+          label: "Shards Owned",
+        },
+        {
+          value: "remaining",
+          label: "Shards Remaining",
+        },
+        {
+          value: "progress",
+          label: "Progress",
+        },
+        {
+          value: "time",
+          label: "Est. Time",
+          hidden: !this.showUnitName,
+        },
+        {
+          value: "priority",
+          label: "Priority",
+          hidden: !this.showPriority,
+        },
+      ];
     },
   },
   watch: {

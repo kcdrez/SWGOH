@@ -307,13 +307,17 @@ button:disabled {
     &.extended-2 {
       height: 83px;
 
+      .toggles-container {
+        display: flex;
+        align-items: center;
+        margin-top: 0.25rem;
+      }
       .simple-view-container {
         position: unset;
-        margin-top: 0.25rem;
       }
       .select-columns {
         padding: 0;
-        margin: 0.25rem 0.5rem 0 0;
+        margin: 0;
       }
     }
     &.extended-1 {
@@ -339,9 +343,12 @@ button:disabled {
     &.extended-2 {
       height: 112px;
 
+      .toggles-container {
+        margin-top: 0.25rem;
+      }
       .simple-view-container {
         position: unset;
-        margin-top: 0.25rem;
+        margin: 0.25rem 0;
       }
       .select-columns {
         padding: 0;
@@ -355,4 +362,16 @@ button:disabled {
   width: 200px;
   margin-left: auto;
   margin-bottom: 0.25rem;
+}
+
+.no-bullets {
+  list-style-type: none;
+  padding: 0;
+}
+
+.no-bullets-sm {
+  @media only screen and (max-width: 768px) {
+    list-style: none;
+    padding: 0;
+  }
 }

@@ -54,21 +54,21 @@
           class="text-center align-middle"
         >
           <td v-if="showCol('date')">
-            <span class="row-label">Date: </span>
+            <span class="row-label">Date:</span>
             {{ $filters.formatDate(event.date) }}
           </td>
-          <td class="hidden-sm" v-if="showCol('type')">
-            {{ event.type }} Side
+          <td v-if="showCol('type')">{{ event.type }} Side</td>
+          <td v-if="showCol('name')">
+            <span class="row-label">Battle Type:</span>{{ event.name }}
           </td>
-          <td v-if="showCol('name')">{{ event.name }}</td>
           <td v-if="showCol('stars')">
-            <span class="row-label">Stars: </span>{{ event.stars }}
+            <span class="row-label">Stars:</span>{{ event.stars }}
           </td>
           <td v-if="showCol('get1')">
-            <span class="row-label">GET1: </span>{{ event.get1 }}
+            <span class="row-label">GET1:</span>{{ event.get1 }}
           </td>
           <td v-if="showCol('get2')">
-            <span class="row-label">GET2: </span>{{ event.get2 }}
+            <span class="row-label">GET2:</span>{{ event.get2 }}
           </td>
           <td v-if="showCol('character')">
             <span class="row-label character-shards-label"
@@ -106,13 +106,15 @@
             <td :colspan="avgColSpan" :class="{ 'd-none': avgColSpan <= 0 }">
               Light Side<span class="hide-lg"> Averages</span>
             </td>
-            <td v-if="showCol('stars')">{{ tbAvgStars("Light") }}</td>
+            <td v-if="showCol('stars')">
+              <span class="row-label">Stars: </span>{{ tbAvgStars("Light") }}
+            </td>
             <td v-if="showCol('get1')">
-              <span class="row-label">GET1: </span>
+              <span class="row-label">GET1:</span>
               {{ tbAvgCurrency("Light", "get1") }}
             </td>
             <td v-if="showCol('get2')">
-              <span class="row-label">GET2: </span>
+              <span class="row-label">GET2:</span>
               {{ tbAvgCurrency("Light", "get2") }}
             </td>
             <td v-if="showCol('character')">
@@ -129,15 +131,15 @@
             Dark Side<span class="hide-lg"> Averages</span>
           </td>
           <td v-if="showCol('stars')">
-            <span class="row-label">Stars: </span>
+            <span class="row-label">Stars:</span>
             {{ tbAvgStars("Dark") }}
           </td>
           <td v-if="showCol('get1')">
-            <span class="row-label">GET1: </span>
+            <span class="row-label">GET1:</span>
             {{ tbAvgCurrency("Dark", "get1") }}
           </td>
           <td v-if="showCol('get2')">
-            <span class="row-label">GET2: </span>
+            <span class="row-label">GET2:</span>
             {{ tbAvgCurrency("Dark", "get2") }}
           </td>
           <td v-if="showCol('character')">

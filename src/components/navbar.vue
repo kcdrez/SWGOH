@@ -103,7 +103,7 @@
               </li>
               <li>
                 <router-link class="dropdown-item" :to="{ name: 'GLChecklist' }"
-                  >GL Checklist</router-link
+                  >GL/Legendary Checklist</router-link
                 >
               </li>
               <li>

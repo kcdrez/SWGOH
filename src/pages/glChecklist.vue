@@ -3,7 +3,6 @@
     <LegendarySummaryTable
       :unitList="glUnitList"
       :storageKey="storageKey + 'Summary'"
-      nodeKey="galactic_legends"
     />
     <div v-for="unit in glUnitList" :key="unit.id" class="mb-2">
       <div class="collapse-header section-header extended-2">
@@ -14,19 +13,21 @@
         >
           <div class="d-inline">{{ unit.name }}</div>
         </h3>
-        <div class="simple-view-container">
-          <Toggle
-            v-model="simpleView[unit.id]"
-            onLabel="Simple"
-            offLabel="Advanced"
+        <div class="toggles-container">
+          <div class="simple-view-container">
+            <Toggle
+              v-model="simpleView[unit.id]"
+              onLabel="Simple"
+              offLabel="Advanced"
+            />
+          </div>
+          <MultiSelect
+            class="select-columns"
+            :options="cols"
+            :storageKey="storageKey + unit.id + 'Columns'"
+            @checked="selectedColumns[unit.id] = $event"
           />
         </div>
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          :storageKey="storageKey + unit.id + 'Columns'"
-          @checked="selectedColumns[unit.id] = $event"
-        />
       </div>
       <LegendaryRequirementsTable
         :id="`${storageKey}Collapse${unit.id}`"
@@ -36,7 +37,7 @@
         :selectedColumns="selectedColumns[unit.id] ?? []"
         :storageKey="storageKey + unit.id + 'Table'"
         :simpleView="simpleView[unit.id]"
-        nodeKey="galactic_legends"
+        :nodeKey="unit.isGL ? 'galactic_legends' : 'legendary'"
       />
     </div>
   </div>
@@ -68,15 +69,22 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     glUnitList(): Unit[] {
       return this.unitList.reduce((list: Unit[], unit: Unit) => {
-        const isGL = !!unit.whereToFarm.find(
-          (x) => x.table === "Galactic Legends"
+        const isLegendary = !!unit.whereToFarm.find(
+          (x) =>
+            x.table === "Galactic Legends" || x.table === "Legendary Events"
         );
-        if (isGL) {
+        if (isLegendary) {
           const playerUnit = this.player.units.find(
             (u: Unit) => u.id === unit.id
           );
-          if (playerUnit && !playerUnit.hasUlt) {
-            list.push(playerUnit);
+
+          if (playerUnit) {
+            if (
+              (playerUnit.isGL && !playerUnit.hasUlt) ||
+              playerUnit.stars < 7
+            ) {
+              list.push(playerUnit);
+            }
           } else {
             list.push(unit);
           }

@@ -1,5 +1,5 @@
 <template>
-  <div class="collapse-header section-header mt-3 extended-1">
+  <div class="collapse-header section-header mt-3">
     <h3 class="w-100" data-bs-toggle="collapse" href="#shipCalculatorSection">
       <div class="d-inline">Ship Stat Calculator</div>
     </h3>

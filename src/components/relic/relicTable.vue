@@ -12,7 +12,10 @@
               @change="sortMethod = $event.target.value"
             >
               <option value="name">Name</option>
+              <option value="rarity">Rarity</option>
               <option value="location">Location</option>
+              <option value="owned">Amount Owned</option>
+              <option value="needed">Amount Needed</option>
               <option value="progress">Progress</option>
               <option value="time">Time Remaining</option>
             </select>
@@ -108,6 +111,7 @@
           {{ mat.name }}
         </td>
         <td class="align-middle text-center" v-if="showCol('rarity')">
+          <span class="row-label">Rarity:</span>
           {{ mat.rarity }}
         </td>
         <td class="text-center align-middle" v-if="showCol('locations')">
@@ -124,11 +128,11 @@
           <ProgressBar :percent="mat.percent(targetLevels)" class="mt-2" />
         </td>
         <td
-          class="align-middle"
+          class="align-middle text-center"
           v-if="showRequiredByUnit && showCol('required')"
         >
-          <span class="row-label">Required By: </span>
-          <ul class="mb-0">
+          <span class="row-label">Required By:</span>
+          <ul class="mb-0 no-bullets-sm">
             <li v-for="unit in mat.neededBy" :key="unit.id">
               <Popper hover arrow placement="left">
                 <router-link
@@ -146,7 +150,7 @@
           </ul>
         </td>
         <td class="text-center align-middle" v-if="showCol('time')">
-          <span class="row-label">Completion Date: </span>
+          <span class="row-label">Completion Date:</span>
           <Timestamp
             :timeLength="mat.timeEstimation(targetLevels)"
             :displayText="

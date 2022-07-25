@@ -6,12 +6,14 @@
           Relic Summary
         </div>
       </h3>
-      <MultiSelect
-        class="select-columns"
-        :options="cols"
-        :storageKey="storageKey + 'Columns'"
-        @checked="selectedColumns = $event"
-      />
+      <div class="toggles-container">
+        <MultiSelect
+          class="select-columns"
+          :options="cols"
+          :storageKey="storageKey + 'Columns'"
+          @checked="selectedColumns = $event"
+        />
+      </div>
     </div>
     <div id="relic-section-table" class="collapse" ref="relicSection">
       <RelicTable

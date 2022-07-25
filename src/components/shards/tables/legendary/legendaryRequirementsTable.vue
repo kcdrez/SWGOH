@@ -79,40 +79,6 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <thead class="sticky-header show-on-mobile">
-        <!-- <tr class="sort-methods" v-if="showUnitName">
-          <th class="show-on-mobile">
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort By:</span>
-              <select
-                class="form-control"
-                @change="sortMethod = $event.target.value"
-              >
-                <option value="name" v-if="showUnitName">Name</option>
-                <option value="location">Location</option>
-                <option value="progress">Progress</option>
-                <option value="time">Time Remaining</option>
-              </select>
-            </div>
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort Direction:</span>
-              <select
-                class="form-control"
-                @change="sortDir = $event.target.value"
-              >
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </div>
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Search:</span>
-              <input
-                class="form-control"
-                v-model="searchText"
-                placeholder="Search by name"
-              />
-            </div>
-          </th>
-        </tr> -->
         <tr class="text-center align-middle">
           <th v-if="showCol('name')" width="750px">
             <div class="c-pointer" @click="sortBy('name')">

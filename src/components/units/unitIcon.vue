@@ -13,7 +13,7 @@
           v-else
           :unit="unit"
           :size="size"
-          :class="{ 'hide-on-mobile': hideImgOnMobile }"
+          :class="{ 'hidden-sm': hideImgOnMobile }"
         />
       </router-link>
       <template v-else>
@@ -22,7 +22,7 @@
           v-else
           :unit="unit"
           :size="size"
-          :class="{ 'hide-on-mobile': hideImgOnMobile }"
+          :class="{ 'hidden-sm': hideImgOnMobile }"
         />
         <slot />
       </template>

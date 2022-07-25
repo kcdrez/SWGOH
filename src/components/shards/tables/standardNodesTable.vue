@@ -4,15 +4,17 @@
       <h3 class="w-100" data-bs-toggle="collapse" href="#standardNodesTable">
         <div class="d-inline">Light & Dark Side Battles</div>
       </h3>
-      <div class="simple-view-container">
-        <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
+      <div class="toggles-container">
+        <div class="simple-view-container">
+          <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
+        </div>
+        <MultiSelect
+          class="select-columns"
+          :options="cols"
+          :storageKey="storageKey + 'Columns'"
+          @checked="selectedColumns = $event"
+        />
       </div>
-      <MultiSelect
-        class="select-columns"
-        :options="cols"
-        :storageKey="storageKey + 'Columns'"
-        @checked="selectedColumns = $event"
-      />
     </div>
     <ShardTable
       id="standardNodesTable"

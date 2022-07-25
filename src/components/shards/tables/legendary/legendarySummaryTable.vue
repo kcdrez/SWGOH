@@ -38,7 +38,7 @@ import { mapState } from "vuex";
 
 import { setupEvents } from "../../../../utils";
 import { totalProgress } from "../../../../types/unit";
-import { FarmingNode } from "../../../../types/shards";
+import { FarmingNode, NodeCharacter } from "../../../../types/shards";
 import UnitIcon from "../../../../components/units/unitIcon.vue";
 
 export default defineComponent({
@@ -59,7 +59,7 @@ export default defineComponent({
     },
     nodeKey: {
       type: String,
-      default: "legendary",
+      default: null,
     },
   },
   computed: {
@@ -74,13 +74,20 @@ export default defineComponent({
       return totalProgress(x, prerequisiteType);
     },
     getPrerequisites(unitId: string) {
-      const legendaryUnits: FarmingNode = this.shardFarming.find(
-        (x: FarmingNode) => x.id === this.nodeKey
+      const legendaryUnits: NodeCharacter[] = this.shardFarming.reduce(
+        (characterList: NodeCharacter[], x: FarmingNode) => {
+          if (!!this.nodeKey) {
+            if (x.id === this.nodeKey) {
+              characterList.push(...x.characters);
+            }
+          } else if (x.id === "legendary" || x.id === "galactic_legends") {
+            characterList.push(...x.characters);
+          }
+          return characterList;
+        },
+        []
       );
-      return (
-        legendaryUnits?.characters.find((x) => x.id === unitId)
-          ?.prerequisites ?? []
-      );
+      return legendaryUnits?.find((x) => x.id === unitId)?.prerequisites ?? [];
     },
   },
   mounted() {
