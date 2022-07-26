@@ -2519,6 +2519,7 @@ export const tbRecommended = [
                             label: "Crit Avoidance",
                           },
                         ],
+                        zetas: ["leaderskill_SHAAKTI", "uniqueskill_SHAAKTI01"],
                       },
                       {
                         id: "CT210408",
@@ -2528,7 +2529,6 @@ export const tbRecommended = [
                             min: 215,
                             label: "Speed",
                           },
-                          ,
                           {
                             key: "specialCritChance",
                             min: 30,
@@ -2545,6 +2545,7 @@ export const tbRecommended = [
                             label: "Special Offense",
                           },
                         ],
+                        zetas: ["uniqueskill_ct21040802"],
                       },
                       {
                         id: "CT7567",
@@ -2560,6 +2561,7 @@ export const tbRecommended = [
                             label: "Health",
                           },
                         ],
+                        zetas: ["uniqueskill_REX01"],
                       },
                       {
                         id: "CT5555",
@@ -2575,6 +2577,7 @@ export const tbRecommended = [
                             label: "Health",
                           },
                         ],
+                        zetas: ["uniqueskill_CT555501", "uniqueskill_CT555502"],
                       },
                       {
                         id: "ARCTROOPER501ST",
@@ -2595,6 +2598,7 @@ export const tbRecommended = [
                             label: "Physical Offense",
                           },
                         ],
+                        zetas: ["uniqueskill_ARCTROOPER501ST01"],
                       },
                     ],
                   },
