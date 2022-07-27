@@ -27,6 +27,7 @@ export class FarmingNode {
   private _characters?: NodeCharacter[];
   private _gear?: any;
   private _energy?: number;
+  private _dropRate?: number;
 
   constructor(data: IFarmingNode) {
     this._id = data.id;
@@ -37,6 +38,7 @@ export class FarmingNode {
     this._characters = data.characters;
     this._gear = data.gear;
     this._energy = data.energy;
+    this._dropRate = data.dropRate;
   }
 
   public get id() {
@@ -73,6 +75,9 @@ export class FarmingNode {
   public get energy() {
     return this._energy;
   }
+  public get dropRate() {
+    return this._dropRate ?? 0.2; //todo: implement on the api
+  }
   public get currencyType(): CurrencyTypeConfig | undefined {
     switch (this.id) {
       case "guild_events_store1":
@@ -103,6 +108,7 @@ export interface IFarmingNode {
   characters: NodeCharacter[];
   gear?: any[];
   energy?: number;
+  dropRate?: number;
 }
 
 export interface NodeCharacter {

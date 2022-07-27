@@ -113,6 +113,11 @@ nav.navbar-light {
   .modal-body {
     background-color: $background-light-2;
     color: $dark;
+    margin: 0;
+
+    p {
+      margin: 0;
+    }
   }
   .modal-footer {
     border-top-color: $light;
