@@ -243,7 +243,7 @@ export class Gear {
           ) {
             const missionEnergy = location.nodeData.energy ?? 100;
             if (missionEnergy < energy) {
-              const dropRate = 0.2; //todo
+              const dropRate = location.nodeData.dropRate;
               const refreshes = ["Light Side", "Dark Side"].includes(
                 location.nodeData.table
               )

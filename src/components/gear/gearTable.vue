@@ -68,15 +68,24 @@
             v-if="showCol('owned')"
             class="c-pointer"
             @click="sortBy('owned')"
-            width="145px"
+            width="165px"
           >
-            Amount Owned
-            <i class="fas mx-1" :class="sortIcon('owned')"></i>
+            <div>
+              Amount Owned
+              <i class="fas mx-1" :class="sortIcon('owned')"></i>
+            </div>
+            <button
+              class="btn btn-sm btn-primary"
+              @click="showResetConfirm = true"
+            >
+              Reset
+            </button>
           </th>
           <th
             v-if="showCol('needed')"
             class="c-pointer"
             @click="sortBy('needed')"
+            width="165px"
           >
             Amount Needed
             <i class="fas mx-1" :class="sortIcon('needed')"></i>
@@ -91,7 +100,12 @@
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
           </th>
           <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
-          <th class="c-pointer" @click="sortBy('time')" v-if="showCol('time')">
+          <th
+            class="c-pointer"
+            @click="sortBy('time')"
+            v-if="showCol('time')"
+            width="125px"
+          >
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
           </th>
@@ -244,6 +258,13 @@
         </tr>
       </tbody>
     </table>
+    <Confirm
+      :isOpen="showResetConfirm"
+      title="Are you sure?"
+      :text="`Are you sure you want to reset all the gear and set the owned quantity to zero?`"
+      @confirm="reset()"
+      @cancel="showResetConfirm = false"
+    />
   </div>
 </template>
 
@@ -288,6 +309,7 @@ export default defineComponent({
       sortDir: "asc",
       sortMethod: "name",
       searchText: "",
+      showResetConfirm: false,
     };
   },
   computed: {
@@ -407,6 +429,12 @@ export default defineComponent({
     },
     getGear(id: string): Gear | undefined {
       return this.allGear.find((x: Gear) => x.id === id);
+    },
+    reset() {
+      this.filteredSalvageList.forEach((gear: Gear) => {
+        gear.owned = 0;
+      });
+      this.showResetConfirm = false;
     },
   },
   created() {
