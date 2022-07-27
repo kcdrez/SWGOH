@@ -37,6 +37,12 @@
                 placeholder="Search by name"
               />
             </div>
+            <button
+              class="btn btn-sm btn-primary w-50 mx-auto d-block"
+              @click="showResetConfirm = true"
+            >
+              Reset
+            </button>
           </th>
         </tr>
         <tr class="text-center align-middle">
@@ -152,7 +158,6 @@
             </template>
           </td>
           <td v-if="showCol('owned')">
-            <span class="row-label">Amount Owned:</span>
             <OwnedAmount :salvage="salvage" />
           </td>
           <td v-if="showCol('needed')">

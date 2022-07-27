@@ -1,6 +1,6 @@
 <template>
   <div class="swgoh-page container my-3">
-    <div class="input-group input-group-sm w-25">
+    <div class="input-group input-group-sm">
       <span class="input-group-text">Map:</span>
       <select class="form-control" v-model="map">
         <option v-for="map in mapOptions" :key="map.value" :value="map.value">
@@ -8,7 +8,7 @@
         </option>
       </select>
     </div>
-    <div class="input-group input-group-sm w-25" v-if="showPhase">
+    <div class="input-group input-group-sm" v-if="showPhase">
       <span class="input-group-text">Phase:</span>
       <select class="form-control" v-model="phase">
         <option
@@ -20,7 +20,7 @@
         </option>
       </select>
     </div>
-    <div class="input-group input-group-sm w-25" v-if="showPosition">
+    <div class="input-group input-group-sm" v-if="showPosition">
       <span class="input-group-text">Position:</span>
       <select class="form-control" v-model="position">
         <option
@@ -32,7 +32,7 @@
         </option>
       </select>
     </div>
-    <div class="input-group input-group-sm w-25" v-if="showMission">
+    <div class="input-group input-group-sm" v-if="showMission">
       <span class="input-group-text">Mission:</span>
       <select class="form-control" v-model="mission">
         <option
@@ -44,7 +44,7 @@
         </option>
       </select>
     </div>
-    <div class="input-group input-group-sm w-25" v-if="showTeams">
+    <div class="input-group input-group-sm" v-if="showTeams">
       <span class="input-group-text">Team:</span>
       <select class="form-control" v-model="team">
         <option
@@ -76,6 +76,7 @@
           <tr>
             <td>{{ unitName(unit.id) }}</td>
             <td v-if="showStats">
+              <span class="row-label">Stats:</span>
               <div class="stat-container">
                 <div v-for="stat in unit.stats" :key="stat.key">
                   <b class="text-capitalize">{{ stat.label }}:</b>
@@ -121,6 +122,7 @@
               </div>
             </td>
             <td>
+              <span class="row-label">Zetas:</span>
               <div>
                 <div
                   v-for="ability in zetaAbilities(unit.id, unit.zetas)"
@@ -496,6 +498,22 @@ export default defineComponent({
 
     &:not(:last-child) {
       border-right: 1px solid white;
+    }
+  }
+}
+.input-group {
+  width: 25%;
+
+  @media only screen and (max-width: 1200px) {
+    width: 50%;
+  }
+  @media only screen and (max-width: 600px) {
+    width: 100%;
+  }
+
+  .input-group-text {
+    &:first-child {
+      width: 75px;
     }
   }
 }

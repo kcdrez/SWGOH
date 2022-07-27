@@ -1,12 +1,15 @@
 <template>
-  <input
-    class="form-control form-control-sm"
-    type="number"
-    v-model.number="owned"
-    min="0"
-    @keydown="save"
-    @change="save"
-  />
+  <div class="input-group input-group-sm">
+    <span class="input-group-text row-label">Amount Owned:</span>
+    <input
+      class="form-control form-control-sm"
+      type="number"
+      v-model.number="owned"
+      min="0"
+      @keydown="save"
+      @change="save"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -37,4 +40,10 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+@media only screen and (min-width: 769px) {
+  input {
+    border-radius: 0.2rem !important;
+  }
+}
+</style>

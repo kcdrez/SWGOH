@@ -122,6 +122,7 @@
           <OwnedAmount :item="mat" :needed="mat.amountNeeded(targetLevels)" />
         </td>
         <td class="align-middle text-center" v-if="showCol('needed')">
+          <span class="row-label">Amount Needed:</span>
           {{ mat.amountNeeded(targetLevels) }}
         </td>
         <td class="align-middle" v-if="showCol('progress')">
