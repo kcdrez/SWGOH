@@ -438,7 +438,7 @@ export default defineComponent({
 
       let days = [];
       if (this.showNodeTable) {
-        days.push(nodeEstimatedTime(unitList, this.tables, this.unit));
+        days.push(nodeEstimatedTime(unitList, this.tables));
       }
       if (this.showTBTable) {
         days.push(tbEstimatedTime(this.unit));

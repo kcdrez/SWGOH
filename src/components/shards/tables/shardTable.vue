@@ -404,14 +404,14 @@ export default defineComponent({
     },
     refresh() {
       this.loading = true;
-      this.orderedPriorityList.forEach((unit) => {
-        unit.estimatedTime = estimatedTime(
-          this.orderedPriorityList,
-          this.nodeTableNames,
-          unit,
-          true
-        );
-      });
+      let currentTime = 0;
+      estimatedTime(this.orderedPriorityList, this.nodeTableNames, true);
+      // this.orderedPriorityList.forEach((unit) => {
+      //   //todo this is a double loop which is likely causing slow load times
+      //   const days =
+      //   currentTime += days;
+      //   unit.estimatedTime = currentTime;
+      // });
       this.loading = false;
     },
   },

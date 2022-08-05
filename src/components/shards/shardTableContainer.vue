@@ -5,6 +5,7 @@
     <CantinaNodesTable class="my-2 cantina-nodes" />
     <TbTableContainer class="my-2 tb-table" />
     <RaidsTable class="my-2 raids-table" />
+    <AssaultBattlesTable class="my-2 assault-battles-nodes" />
     <CantinaStoreTable class="my-2 cantina-store" />
     <GuildStoreTable class="my-2 guild-store" />
     <GuildEventsTable class="my-2 guild-events" />
@@ -25,6 +26,7 @@ import FleetNodesTable from "./tables/fleetNodesTable.vue";
 import CantinaNodesTable from "./tables/cantinaNodesTable.vue";
 import TbTableContainer from "./tables/tbTableContainer.vue";
 import RaidsTable from "./tables/raidsTable.vue";
+import AssaultBattlesTable from "./tables/assaultBattles.vue";
 import ConquestTable from "./tables/conquestTable.vue";
 import CantinaStoreTable from "./tables/cantinaStoreTable.vue";
 import GuildStoreTable from "./tables/guildStoreTable.vue";
@@ -43,6 +45,7 @@ export default defineComponent({
     FleetNodesTable,
     CantinaNodesTable,
     TbTableContainer,
+    AssaultBattlesTable,
     RaidsTable,
     ConquestTable,
     CantinaStoreTable,
