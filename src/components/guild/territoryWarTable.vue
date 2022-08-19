@@ -233,7 +233,11 @@ export default defineComponent({
   computed: {
     ...mapState("guild", ["territoryWarEvents", "accessLevel"]),
     filteredEvents(): TerritoryWarEvent[] {
-      return this.territoryWarEvents.sort(
+      return this.territoryWarEvents
+      .filter((e: TerritoryWarEvent) => {
+        return moment(e.date).isAfter(moment().subtract(6, "months"))
+      })
+      .sort(
         (a: TerritoryWarEvent, b: TerritoryWarEvent) => {
           if (this.sortMethod === "date") {
             if (this.sortDir === "asc") {
@@ -351,4 +355,8 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.sticky-header {
+  top: 105px;
+}
+</style>

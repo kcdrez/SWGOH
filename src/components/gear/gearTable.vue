@@ -167,7 +167,7 @@
           <td v-if="showCol('progress')">
             <ProgressBar :percent="salvage.percent" />
           </td>
-          <td v-if="showRequiredByUnit && showCol('required')">
+          <td v-if="showRequiredByUnit && showCol('required')" class="text-left">
             <span class="row-label">Needed By:</span>
             <ul class="mb-0 no-bullets-sm">
               <li v-for="unit in salvage.neededBy" :key="unit.id">

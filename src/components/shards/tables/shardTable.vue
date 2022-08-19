@@ -114,7 +114,7 @@
             <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
           <td
-            class="align-middle text-center farming-locations"
+            class="align-middle farming-locations"
             v-if="showCol('locations')"
           >
             <div v-if="unit.locations.length <= 0" class="text-center">
