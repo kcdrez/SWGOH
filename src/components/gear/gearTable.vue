@@ -65,6 +65,7 @@
           <th
             class="c-pointer"
             @click="sortBy('location')"
+            width="150px"
             v-if="showCol('locations')"
           >
             Locations
@@ -74,10 +75,11 @@
             v-if="showCol('owned')"
             class="c-pointer"
             @click="sortBy('owned')"
-            width="165px"
+            width="125px"
+            title="Amount of gear owned"
           >
             <div>
-              Amount Owned
+              Owned
               <i class="fas mx-1" :class="sortIcon('owned')"></i>
             </div>
             <button
@@ -91,9 +93,10 @@
             v-if="showCol('needed')"
             class="c-pointer"
             @click="sortBy('needed')"
-            width="165px"
+            width="125px"
+            title="Amount of gear needed for all characters being tracked"
           >
-            Amount Needed
+            Needed
             <i class="fas mx-1" :class="sortIcon('needed')"></i>
           </th>
           <th
@@ -150,7 +153,10 @@
               >
                 Show/Hide Locations
               </button>
-              <ul class="m-0 collapse" :id="`locations-${salvage.id}`">
+              <ul
+                class="m-0 collapse no-bullets"
+                :id="`locations-${salvage.id}`"
+              >
                 <li v-for="(l, index) in salvage.locationLabels" :key="index">
                   {{ l }}
                 </li>
@@ -167,9 +173,9 @@
           <td v-if="showCol('progress')">
             <ProgressBar :percent="salvage.percent" />
           </td>
-          <td v-if="showRequiredByUnit && showCol('required')">
+          <td v-if="showRequiredByUnit && showCol('required')" width="150px">
             <span class="row-label">Needed By:</span>
-            <ul class="mb-0 no-bullets-sm">
+            <ul class="mb-0 no-bullets">
               <li v-for="unit in salvage.neededBy" :key="unit.id">
                 <Popper hover arrow placement="left">
                   <router-link

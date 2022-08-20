@@ -26,7 +26,7 @@
         <table class="table table-bordered table-dark table-sm table-striped">
           <thead class="text-center align-middle">
             <tr>
-              <th colspan="2">Summary</th>
+              <th colspan="2">Total Daily Expenses</th>
             </tr>
           </thead>
           <tbody class="text-center align-middle">
