@@ -129,7 +129,7 @@
           <ProgressBar :percent="mat.percent(targetLevels)" class="mt-2" />
         </td>
         <td
-          class="align-middle text-center"
+          class="align-middle"
           v-if="showRequiredByUnit && showCol('required')"
         >
           <span class="row-label">Required By:</span>
