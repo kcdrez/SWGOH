@@ -291,7 +291,11 @@ export default defineComponent({
       }
     },
     filteredEvents(): TerritoryBattleEvent[] {
-      return this.territoryBattleEvents.sort(
+      return this.territoryBattleEvents
+      .filter((e: TerritoryBattleEvent) => {
+        return moment(e.date).isAfter(moment().subtract(6, "months"))
+      })
+      .sort(
         (a: TerritoryBattleEvent, b: TerritoryBattleEvent) => {
           if (this.sortMethod === "date") {
             if (this.sortDir === "asc") {
@@ -425,5 +429,8 @@ export default defineComponent({
   @media only screen and (max-width: 768px) {
     display: block;
   }
+}
+.sticky-header {
+  top: 105px;
 }
 </style>

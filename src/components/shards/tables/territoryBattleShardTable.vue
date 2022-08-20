@@ -94,7 +94,7 @@
           <td v-if="showUnitName && showCol('name')">
             <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
-          <td class="farming-locations" v-if="showCol('locations')">
+          <td class="farming-locations text-left" v-if="showCol('locations')">
             <div v-if="unit.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
