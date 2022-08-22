@@ -502,6 +502,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../../../styles/variables.scss";
 
+.sticky-header {
+  top: 105px;
+}
 .unit-list-tags {
   display: flex;
   justify-content: center;
