@@ -202,7 +202,7 @@ const store = {
       commit("SET_ACCESS_LEVEL", accessLevel.role);
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
-    addTerritoryWarEvent(
+    async addTerritoryWarEvent(
       { commit, dispatch }: ActionCtx,
       event: TerritoryWarEvent
     ) {
@@ -210,14 +210,14 @@ const store = {
         event.id = uuid();
       }
       commit("UPSERT_TERRITORY_WAR_EVENT", event);
-      dispatch("saveTerritoryWarEvents");
+      await dispatch("saveTerritoryWarEvents");
     },
-    removeTerritoryWarEvent({ commit, dispatch }: ActionCtx, eventId: string) {
+    async removeTerritoryWarEvent({ commit, dispatch }: ActionCtx, eventId: string) {
       commit("REMOVE_TERRITORY_WAR_EVENT", eventId);
-      dispatch("saveTerritoryWarEvents");
+      await dispatch("saveTerritoryWarEvents");
     },
-    saveTerritoryWarEvents({ state }: ActionCtx) {
-      apiClient.updateTerritoryWarEvents(
+    async saveTerritoryWarEvents({ state }: ActionCtx) {
+      await apiClient.updateTerritoryWarEvents(
         state.guildId,
         state.territoryWarEvents
       );
