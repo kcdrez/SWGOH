@@ -24,7 +24,7 @@
               <span class="input-group-text">Sort Direction:</span>
               <select
                 class="form-control"
-                @change="sortDir = $event.target.value"
+                v-model="sortDir"
               >
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
@@ -327,9 +327,6 @@ export default defineComponent({
           return 0;
         });
     },
-    orderedPriorityList(): Unit[] {
-      return unitsByPriority(this.units, this.nodeTableNames);
-    },
     sortByOptions() {
       return [
         {
@@ -404,14 +401,7 @@ export default defineComponent({
     },
     refresh() {
       this.loading = true;
-      let currentTime = 0;
-      estimatedTime(this.orderedPriorityList, this.nodeTableNames, true);
-      // this.orderedPriorityList.forEach((unit) => {
-      //   //todo this is a double loop which is likely causing slow load times
-      //   const days =
-      //   currentTime += days;
-      //   unit.estimatedTime = currentTime;
-      // });
+      estimatedTime(this.units, this.nodeTableNames);
       this.loading = false;
     },
   },

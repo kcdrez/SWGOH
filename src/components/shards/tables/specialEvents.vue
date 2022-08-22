@@ -1,8 +1,8 @@
 <template>
   <div v-if="unitList.length > 0">
     <div class="collapse-header section-header extended-2">
-      <h3 class="w-100" data-bs-toggle="collapse" href="#assaultBattlesTable">
-        <div class="d-inline">Assault Battles</div>
+      <h3 class="w-100" data-bs-toggle="collapse" href="#specialEventsTable">
+        <div class="d-inline">Special Events</div>
       </h3>
       <div class="toggles-container">
         <div class="simple-view-container">
@@ -17,11 +17,11 @@
       </div>
     </div>
     <ShardTable
-      id="assaultBattlesTable"
+      id="specialEventsTable"
       class="collapse"
-      ref="assaultBattlesTable"
+      ref="specialEventsTable"
       :units="unitList"
-      :nodeTableNames="['Assault Battles']"
+      :nodeTableNames="tableNames"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
@@ -39,10 +39,10 @@ import { setupEvents } from "../../../utils";
 import { Unit } from "../../../types/unit";
 import ShardTable from "./shardTable.vue";
 
-const storageKey = "assaultBattles";
+const storageKey = "specialEvents";
 
 export default defineComponent({
-  name: "AssaultBattlesTable",
+  name: "specialEventsTable",
   components: { ShardTable },
   data() {
     return {
@@ -50,6 +50,7 @@ export default defineComponent({
       simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
       storageKey,
       loading: true,
+      tableNames: ["Proving Grounds", "Galactic Bounties I", "Galactic Bounties II", "Assault Battles"]
     };
   },
   computed: {
@@ -86,7 +87,9 @@ export default defineComponent({
     unitList(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
         return unit.whereToFarm.some(
-          (node) => node.table === "Assault Battles"
+          (node) => {
+            return this.tableNames.includes(node.table)
+          }
         );
       });
     },
@@ -97,7 +100,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    const tableComponent = this.$refs?.assaultBattlesTable as any;
+    const tableComponent = this.$refs?.specialEventsTable as any;
     setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
       tableComponent?.refresh();
     });

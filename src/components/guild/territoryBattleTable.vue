@@ -266,7 +266,7 @@ export default defineComponent({
         characterShards: 0,
         name: "",
       },
-    };
+    } as any;
   },
   computed: {
     ...mapState("guild", ["territoryBattleEvents", "accessLevel"]),
@@ -411,7 +411,7 @@ export default defineComponent({
       }
     },
     showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
+      return this.selectedColumns.some((x: any) => x === key);
     },
   },
   watch: {

@@ -185,29 +185,11 @@ export function estimatedTime(
 
   let totalTime = 0;
   unitListByPriority.forEach((unit) => {
-    const priority = unit.tablePriority(tableNames);
     let days = unitEstimated(unit, tableNames);
     totalTime += days;
     unit.estimatedTime = days;
   });
   return totalTime;
-  // const index = unitListByPriority.findIndex((u) => u.id === unit.id);
-
-  // const alreadyCheckedPriorities: number[] = [];
-  // for (let i = index - 1; i >= 0; i--) {
-  //   const el = unitListByPriority[i];
-  //   const prevPriority = el.tablePriority(tableNames);
-  //   if (
-  //     priority > prevPriority &&
-  //     !alreadyCheckedPriorities.includes(prevPriority)
-  //   ) {
-  //     days += unitEstimated(el, tableNames);
-  //     alreadyCheckedPriorities.push(prevPriority);
-  //   }
-  // }
-  // console.log(unit.id, days);
-
-  // return days;
 }
 
 function unitEstimated(unit: Unit, tableNames: string[]) {
