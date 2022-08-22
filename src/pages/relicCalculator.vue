@@ -26,77 +26,109 @@
         <table class="table table-bordered table-dark table-sm table-striped">
           <thead class="text-center align-middle">
             <tr>
-              <th colspan="2">Daily Summary</th>
+              <th colspan="2">Total Daily Expenses</th>
             </tr>
           </thead>
           <tbody class="text-center align-middle">
             <tr>
-              <td :title="`Total amount of standard energy needed to spend each day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`">
+              <td
+                :title="`Total amount of standard energy needed to spend each day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
                 Total Daily Standard Energy
                 <img src="../images/standard_energy.png" />
               </td>
               <td>{{ totalEnergy }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of standard energy refreshes needed each day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`">Standard Energy Refreshes Daily</td>
+              <td
+                :title="`Total amount of standard energy refreshes needed each day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
+                Standard Energy Refreshes Daily
+              </td>
               <td>{{ refreshes.standard }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of standard energy available to spend on other projets each day (e.g. character shards)`">Standard Energy Remainder Daily</td>
+              <td
+                :title="`Total amount of standard energy available to spend on other projets each day (e.g. character shards)`"
+              >
+                Standard Energy Remainder Daily
+              </td>
               <td>{{ energyRemaining.standard }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of fleet energy needed to spend each day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`">
+              <td
+                :title="`Total amount of fleet energy needed to spend each day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
                 Total Fleet Energy Daily
                 <img src="../images/ship_energy.png" />
               </td>
               <td>{{ totalFleetEnergy }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of fleet energy refreshes needed each day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`">Fleet Energy Refreshes Daily</td>
+              <td
+                :title="`Total amount of fleet energy refreshes needed each day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
+                Fleet Energy Refreshes Daily
+              </td>
               <td>{{ refreshes.fleet }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of fleet energy available to spend on other projets each day (e.g. character shards)`">Fleet Energy Remainder Daily</td>
+              <td
+                :title="`Total amount of fleet energy available to spend on other projets each day (e.g. character shards)`"
+              >
+                Fleet Energy Remainder Daily
+              </td>
               <td>{{ energyRemaining.fleet }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of crystals needed to spend for energy refreshes every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`">
+              <td
+                :title="`Total amount of crystals needed to spend for energy refreshes every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
                 Daily Crystals Spent
                 <img src="../images/crystals.png" />
               </td>
               <td>{{ crystalsSpent }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of guild store currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`">
+              <td
+                :title="`Total amount of guild store currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
                 Daily Guild Store Currency Spent
                 <img src="../images/guildStoreCurrency.png" />
               </td>
               <td>{{ currencySpent.guild_store }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of Squad Arena Store Currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`">
+              <td
+                :title="`Total amount of Squad Arena Store Currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
                 Daily Squad Arena Currency Spent
                 <img src="../images/squadArenaCurrency.png" />
               </td>
               <td>{{ currencySpent.squad_arena_store }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of Guild Events Mk 1 currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`">
+              <td
+                :title="`Total amount of Guild Events Mk 1 currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
                 Daily Guild Events (I) Currency Spent
                 <img src="../images/get1.png" />
               </td>
               <td>{{ currencySpent.guild_events_store1 }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of Guild Events Mk 2 needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`">
+              <td
+                :title="`Total amount of Guild Events Mk 2 needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
                 Daily Guild Events (II) Currency Spent
                 <img src="../images/get2.png" />
               </td>
               <td>{{ currencySpent.guild_events_store2 }}</td>
             </tr>
             <tr>
-              <td :title="`Total amount of Shard Shop Currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`">
+              <td
+                :title="`Total amount of Shard Shop Currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
                 Daily Shard Shop Currency Spent
                 <img src="../images/shardCurrency.png" />
               </td>

@@ -5,6 +5,7 @@
     <CantinaNodesTable class="my-2 cantina-nodes" />
     <TbTableContainer class="my-2 tb-table" />
     <RaidsTable class="my-2 raids-table" />
+    <SpecialEventsTable class="my-2 proving-grounds-nodes" />
     <CantinaStoreTable class="my-2 cantina-store" />
     <GuildStoreTable class="my-2 guild-store" />
     <GuildEventsTable class="my-2 guild-events" />
@@ -25,6 +26,7 @@ import FleetNodesTable from "./tables/fleetNodesTable.vue";
 import CantinaNodesTable from "./tables/cantinaNodesTable.vue";
 import TbTableContainer from "./tables/tbTableContainer.vue";
 import RaidsTable from "./tables/raidsTable.vue";
+import SpecialEventsTable from "./tables/specialEvents.vue";
 import ConquestTable from "./tables/conquestTable.vue";
 import CantinaStoreTable from "./tables/cantinaStoreTable.vue";
 import GuildStoreTable from "./tables/guildStoreTable.vue";
@@ -43,6 +45,7 @@ export default defineComponent({
     FleetNodesTable,
     CantinaNodesTable,
     TbTableContainer,
+    SpecialEventsTable,
     RaidsTable,
     ConquestTable,
     CantinaStoreTable,
@@ -63,18 +66,24 @@ export default defineComponent({
 
 .shard-table-container {
   ::v-deep(.standard-nodes .section-header) {
-    z-index: 18;
+    z-index: 20;
   }
   ::v-deep(.fleet-nodes .section-header) {
-    z-index: 17;
+    z-index: 19;
   }
   ::v-deep(.cantina-nodes .section-header) {
-    z-index: 16;
+    z-index: 18;
   }
   ::v-deep(.tb-table .section-header) {
-    z-index: 15;
+    z-index: 17;
   }
   ::v-deep(.raids-table .section-header) {
+    z-index: 16;
+  }
+  ::v-deep(.assault-battles-nodes .section-header) {
+    z-index: 15;
+  }
+    ::v-deep(.proving-grounds-nodes .section-header) {
     z-index: 14;
   }
   ::v-deep(.cantina-store .section-header) {

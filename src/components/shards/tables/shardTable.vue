@@ -24,7 +24,7 @@
               <span class="input-group-text">Sort Direction:</span>
               <select
                 class="form-control"
-                @change="sortDir = $event.target.value"
+                v-model="sortDir"
               >
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
@@ -114,7 +114,7 @@
             <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
           <td
-            class="align-middle farming-locations"
+            class="align-middle text-left farming-locations"
             v-if="showCol('locations')"
           >
             <div v-if="unit.locations.length <= 0" class="text-center">
@@ -327,9 +327,6 @@ export default defineComponent({
           return 0;
         });
     },
-    orderedPriorityList(): Unit[] {
-      return unitsByPriority(this.units, this.nodeTableNames);
-    },
     sortByOptions() {
       return [
         {
@@ -404,14 +401,7 @@ export default defineComponent({
     },
     refresh() {
       this.loading = true;
-      this.orderedPriorityList.forEach((unit) => {
-        unit.estimatedTime = estimatedTime(
-          this.orderedPriorityList,
-          this.nodeTableNames,
-          unit,
-          true
-        );
-      });
+      estimatedTime(this.units, this.nodeTableNames);
       this.loading = false;
     },
   },
