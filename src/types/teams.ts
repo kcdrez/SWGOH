@@ -374,7 +374,7 @@ interface IBasicAbilityStat {
     leader?: string[];
     solo?: boolean;
     enemyLeader?: boolean;
-  };
+  }[];
 }
 export interface IAbilityStat extends IBasicAbilityStat {
   omicron?: OmicronAbility;

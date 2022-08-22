@@ -62,7 +62,7 @@ export default defineComponent({
       storageKey,
       selectedColumns: {},
       simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "{}"),
-    };
+    } as any;
   },
   computed: {
     ...mapState("unit", ["unitList"]),

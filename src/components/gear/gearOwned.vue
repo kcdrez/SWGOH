@@ -6,8 +6,7 @@
       type="number"
       v-model.number="owned"
       min="0"
-      @keydown="save"
-      @change="save"
+      @blur="save"
     />
   </div>
 </template>

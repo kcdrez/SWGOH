@@ -36,17 +36,17 @@
         <td class="text-center align-middle" v-if="showCol('current')">
           <RequirementIcon
             class="justify-content-center"
-            :type="item.requirement.type"
+            :type="item.requirement?.type"
             :unitId="item.id"
             v-if="item.id"
             currentLevel
           />
           <template v-else-if="item.tags && bestUnitByTag(item)">
-            {{ bestUnitByTag(item).name }}:
+            {{ bestUnitByTag(item)?.name }}:
             <RequirementIcon
               class="justify-content-center"
-              :type="item.requirement.type"
-              :unitId="bestUnitByTag(item).id"
+              :type="item.requirement?.type"
+              :unitId="bestUnitByTag(item)?.id"
               currentLevel
             />
           </template>
@@ -54,8 +54,8 @@
         <td class="text-center align-middle" v-if="showCol('requirements')">
           <RequirementIcon
             class="justify-content-center"
-            :value="item.requirement.value"
-            :type="item.requirement.type"
+            :value="item.requirement?.value"
+            :type="item.requirement?.type"
             :unitId="item.id"
           />
         </td>

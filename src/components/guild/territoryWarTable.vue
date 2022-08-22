@@ -70,7 +70,7 @@
                 type="button"
                 class="btn btn-danger"
                 title="Remove event"
-                @click="removeTerritoryWarEvent(event.id)"
+                @click="removeEvent(event.id)"
               >
                 <i class="fas fa-trash"></i>
               </button>
@@ -228,12 +228,16 @@ export default defineComponent({
         get2: 0,
         zetas: 0,
       },
-    };
+    } as any;
   },
   computed: {
     ...mapState("guild", ["territoryWarEvents", "accessLevel"]),
     filteredEvents(): TerritoryWarEvent[] {
-      return this.territoryWarEvents.sort(
+      return this.territoryWarEvents
+      .filter((e: TerritoryWarEvent) => {
+        return moment(e.date).isAfter(moment().subtract(6, "months"))
+      })
+      .sort(
         (a: TerritoryWarEvent, b: TerritoryWarEvent) => {
           if (this.sortMethod === "date") {
             if (this.sortDir === "asc") {
@@ -339,16 +343,37 @@ export default defineComponent({
         return "fa-sort";
       }
     },
-    addNewEvent() {
+    async addNewEvent() {
       if (!this.addNewDisabled) {
-        this.addTerritoryWarEvent(unvue(this.newEvent));
+        await this.addTerritoryWarEvent(unvue(this.newEvent));
       }
+      this.$toast(
+        `Territory War event added successfully`,
+        {
+          positionY: "top",
+          class: "toast-success",
+        }
+      );
+    },
+    async removeEvent(id: string) {
+      await this.removeTerritoryWarEvent(id);
+      this.$toast(
+        `Territory War event removed successfully`,
+        {
+          positionY: "top",
+          class: "toast-success",
+        }
+      );
     },
     showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
+      return this.selectedColumns.some((x: any) => x === key);
     },
   },
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.sticky-header {
+  top: 105px;
+}
+</style>

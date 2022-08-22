@@ -941,14 +941,14 @@ export function getUnitPercent(unit: Unit, type: string, target: number) {
   if (type === "Power") {
     return (unit.power / target) * 100;
   } else if (type === "Relic") {
-    const gearPercent = (unit.gearLevel / maxGearLevel) * 0.5;
-    const relicPercent = ((unit.relicLevel + 1) / (target + 1)) * 0.4;
-    const shardsPercent = (unit.totalOwnedShards / 330) * 0.1;
+    const gearPercent = ((unit.gearLevel + 0.01) / maxGearLevel) * 0.5;
+    const relicPercent = ((unit.relicLevel + 0.01) / (target + 0.01)) * 0.4;
+    const shardsPercent = ((unit.totalOwnedShards + 0.01) / 330) * 0.1;
 
     return (gearPercent + relicPercent + shardsPercent) * 100;
   } else if (type === "Gear") {
-    const gearPercent = unit.gearLevel / target;
-    const shardsPercent = unit.totalOwnedShards / 330;
+    const gearPercent = (unit.gearLevel + 0.01) / target;
+    const shardsPercent = (unit.totalOwnedShards + 0.01) / 330;
 
     if (target === 12) {
       return (gearPercent * 0.5 + shardsPercent * 0.5) * 100;

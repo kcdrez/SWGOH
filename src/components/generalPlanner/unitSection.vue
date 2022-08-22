@@ -92,7 +92,7 @@
               class="c-pointer"
               @click="sortBy('estGear')"
             >
-              Est. Gear Level
+              Est. Gear Date
               <i class="fas mx-1" :class="sortIcon('estGear')"></i>
             </th>
             <th
@@ -100,7 +100,7 @@
               class="c-pointer"
               @click="sortBy('estRelic')"
             >
-              Est. Relic Level
+              Est. Relic Date
               <i class="fas mx-1" :class="sortIcon('estRelic')"></i>
             </th>
             <th
@@ -169,7 +169,7 @@
               }"
               v-if="showCol('gearDate')"
             >
-              <span class="row-label">Est. Gear Level:</span>
+              <span class="row-label">Est. Gear Date:</span>
               <Timestamp
                 :timeLength="unit.gearTotalDays"
                 displayClasses="d-inline"
@@ -182,7 +182,7 @@
               }"
               v-if="showCol('relicDate')"
             >
-              <span class="row-label">Est. Relic Level:</span>
+              <span class="row-label">Est. Relic Date:</span>
               <Timestamp
                 :timeLength="unit.relicTotalDays"
                 displayClasses="d-inline"
@@ -210,6 +210,27 @@
                 </button>
               </div>
             </td>
+          </tr>
+          <tr>
+            <td :colspan="totalColSpan" class="text-center align-middle">
+              Total
+            </td>
+            <td class="text-center align-middle" v-if="showCol('gearDate')">
+              <span class="row-label">Est. Gear Date:</span>
+              <Timestamp :timeLength="total.gear" displayClasses="d-inline" />
+            </td>
+            <td class="text-center align-middle" v-if="showCol('relicDate')">
+              <span class="row-label">Est. Relic Date:</span>
+              <Timestamp :timeLength="total.relic" displayClasses="d-inline" />
+            </td>
+            <td class="text-center align-middle" v-if="showCol('totalDate')">
+              <span class="row-label">Est. Completed Date:</span>
+              <Timestamp
+                :timeLength="total.gear + total.relic"
+                displayClasses="d-inline"
+              />
+            </td>
+            <td v-if="showCol('actions')" class="hidden-sm"></td>
           </tr>
         </tbody>
       </table>
@@ -349,6 +370,26 @@ export default defineComponent({
         },
       ];
       return list;
+    },
+    total(): { gear: number; relic: number } {
+      return this.unitList.reduce(
+        (total: any, unit: Unit) => {
+          total.gear += unit.gearTotalDays;
+          total.relic += unit.relicTotalDays;
+          return total;
+        },
+        {
+          gear: 0,
+          relic: 0,
+        }
+      );
+    },
+    totalColSpan(): number {
+      return [
+        this.showCol("name"),
+        this.showCol("curLevel"),
+        this.showCol("targetLevel"),
+      ].filter((x) => !!x).length;
     },
   },
   watch: {

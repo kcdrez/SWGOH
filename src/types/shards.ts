@@ -28,6 +28,10 @@ export class FarmingNode {
   private _gear?: any;
   private _energy?: number;
   private _dropRate?: number;
+  private _freqency?: {
+    type: "month" | "week" | "day";
+    amount: number;
+  };
 
   constructor(data: IFarmingNode) {
     this._id = data.id;
@@ -39,6 +43,7 @@ export class FarmingNode {
     this._gear = data.gear;
     this._energy = data.energy;
     this._dropRate = data.dropRate;
+    this._freqency = data.frequency;
   }
 
   public get id() {
@@ -78,6 +83,9 @@ export class FarmingNode {
   public get dropRate() {
     return this._dropRate ?? 0.2; //todo: implement on the api
   }
+  public get freqency() {
+    return this._freqency;
+  }
   public get currencyType(): CurrencyTypeConfig | undefined {
     switch (this.id) {
       case "guild_events_store1":
@@ -109,6 +117,10 @@ export interface IFarmingNode {
   gear?: any[];
   energy?: number;
   dropRate?: number;
+  frequency?: {
+    type: "month" | "week" | "day";
+    amount: number;
+  };
 }
 
 export interface NodeCharacter {
@@ -165,42 +177,49 @@ export interface NodePayload extends UnitNodeData {
 export function estimatedTime(
   unitList: Unit[],
   tableNames: string[],
-  unit: Unit,
   alreadyOrdered: boolean = false
 ): number {
   const unitListByPriority = alreadyOrdered
     ? unitList
     : unitsByPriority(unitList, tableNames);
-  const index = unitListByPriority.findIndex((u) => u.id === unit.id);
 
-  const priority = unit.tablePriority(tableNames);
-  let days = unitEstimated(unit, tableNames);
-  const alreadyCheckedPriorities: number[] = [];
-  for (let i = index - 1; i >= 0; i--) {
-    const el = unitListByPriority[i];
-    const prevPriority = el.tablePriority(tableNames);
-    if (
-      priority > prevPriority &&
-      !alreadyCheckedPriorities.includes(prevPriority)
-    ) {
-      days += unitEstimated(el, tableNames);
-      alreadyCheckedPriorities.push(prevPriority);
-    }
-  }
-
-  return days;
+  let totalTime = 0;
+  unitListByPriority.forEach((unit) => {
+    let days = unitEstimated(unit, tableNames);
+    totalTime += days;
+    unit.estimatedTime = days;
+  });
+  return totalTime;
 }
 
 function unitEstimated(unit: Unit, tableNames: string[]) {
   let shardsPerDay = 0;
 
   unit.whereToFarm.forEach((location) => {
-    const defaultNodesPerDay = tableNames.includes(location.table) ? 5 : 0;
-    const nodesPerDay =
-      unit.shardNodes.find((n) => n.id === location.id)?.count ||
-      defaultNodesPerDay;
+    if (location.freqency) {
+      let numEvents = 0;
+      if (location.freqency.type === "month") {
+        numEvents = 30 / location.freqency.amount;
+      } else if (location.freqency.type === "week") {
+        numEvents = 7 / location.freqency.amount;
+      } else if (location.freqency.type === "day") {
+        numEvents = location.freqency.amount;
+      }
+      const match = location.characters.find((x) => x.id === unit.id);
+      if (match) {
+        shardsPerDay +=
+          ((match?.shardCount ?? 0) * (match?.dropRate ?? 1)) / numEvents;
+      }
+    } else if (location.currencyType) {
+      //todo for stores
+    } else {
+      const defaultNodesPerDay = tableNames.includes(location.table) ? 5 : 0;
+      const nodesPerDay =
+        unit.shardNodes.find((n) => n.id === location.id)?.count ||
+        defaultNodesPerDay;
 
-    shardsPerDay += nodesPerDay * 0.33 * unit.shardDropRate;
+      shardsPerDay += nodesPerDay * 0.33 * unit.shardDropRate;
+    }
   });
 
   return shardsPerDay === 0

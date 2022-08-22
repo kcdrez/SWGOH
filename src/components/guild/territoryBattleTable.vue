@@ -84,7 +84,7 @@
                 type="button"
                 class="btn btn-danger"
                 title="Remove event"
-                @click="removeTerritoryBattleEvent(event.id)"
+                @click="removeEvent(event.id)"
               >
                 <i class="fas fa-trash"></i>
               </button>
@@ -266,7 +266,7 @@ export default defineComponent({
         characterShards: 0,
         name: "",
       },
-    };
+    } as any;
   },
   computed: {
     ...mapState("guild", ["territoryBattleEvents", "accessLevel"]),
@@ -291,7 +291,11 @@ export default defineComponent({
       }
     },
     filteredEvents(): TerritoryBattleEvent[] {
-      return this.territoryBattleEvents.sort(
+      return this.territoryBattleEvents
+      .filter((e: TerritoryBattleEvent) => {
+        return moment(e.date).isAfter(moment().subtract(6, "months"))
+      })
+      .sort(
         (a: TerritoryBattleEvent, b: TerritoryBattleEvent) => {
           if (this.sortMethod === "date") {
             if (this.sortDir === "asc") {
@@ -401,13 +405,30 @@ export default defineComponent({
         return "fa-sort";
       }
     },
-    addNewEvent() {
+    async addNewEvent() {
       if (!this.addNewDisabled) {
-        this.addTerritoryBattleEvent(unvue(this.newEvent));
+        await this.addTerritoryBattleEvent(unvue(this.newEvent));
       }
+      this.$toast(
+        `Territory Battle event added successfully`,
+        {
+          positionY: "top",
+          class: "toast-success",
+        }
+      );
+    },
+    async removeEvent(id: string) {
+      await this.removeTerritoryBattleEvent(id);
+      this.$toast(
+        `Territory Battle event removed successfully`,
+        {
+          positionY: "top",
+          class: "toast-success",
+        }
+      );
     },
     showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
+      return this.selectedColumns.some((x: any) => x === key);
     },
   },
   watch: {
@@ -425,5 +446,8 @@ export default defineComponent({
   @media only screen and (max-width: 768px) {
     display: block;
   }
+}
+.sticky-header {
+  top: 105px;
 }
 </style>
