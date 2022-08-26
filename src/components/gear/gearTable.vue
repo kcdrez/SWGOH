@@ -175,11 +175,10 @@
           </td>
           <td
             v-if="showRequiredByUnit && showCol('required')"
-            width="150px"
-            class="text-left"
+            class="text-left text-center-sm"
           >
             <span class="row-label">Needed By:</span>
-            <ul class="mb-0 no-bullets">
+            <ul class="mb-0 no-bullets-sm">
               <li v-for="unit in salvage.neededBy" :key="unit.id">
                 <Popper hover arrow placement="left">
                   <router-link

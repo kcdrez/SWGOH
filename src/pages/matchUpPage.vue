@@ -215,7 +215,7 @@
         deleteMatchTarget ? deleteMatchTarget.name : ''
       })? This cannot be undone.`"
       @confirm="
-        removeMatch({ matchId: deleteMatchTarget.id });
+        removeMatch({ matchId: deleteMatchTarget?.id });
         deleteMatchTarget = null;
       "
       @cancel="deleteMatchTarget = null"
@@ -228,7 +228,7 @@ import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 import { v4 as uuid } from "uuid";
 
-import { Match, MatchPayload, Team, TeamMember } from "../types/teams";
+import { Match, MatchPayload, Team } from "../types/teams";
 import TeamTable from "../components/teams/teamTable.vue";
 import MatchTable from "../components/teams/matchTable.vue";
 

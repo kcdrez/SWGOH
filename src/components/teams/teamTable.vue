@@ -138,7 +138,7 @@
             <th class="mod-col">
               <img src="images/mod_cross.png" />
             </th>
-            <th>Speed Set?</th>
+            <th>Has Speed Set?</th>
           </template>
           <th v-if="showCol('subTotal')">
             <div class="c-pointer" @click="sortBy('subtotal')">
@@ -171,7 +171,7 @@
               >{{ unit.name }}</router-link
             >
           </td>
-          <td v-if="showCol('leader')" class="text-left">
+          <td v-if="showCol('leader')" class="text-left text-center-sm">
             <span class="row-label">Is Leader?</span>
             <div class="form-check is-leader">
               <input
@@ -202,6 +202,7 @@
               <ModIcon :unitId="unit.id" shape="cross" />
             </td>
             <td>
+              <span class="row-label mx-1">Has Speed Set?</span>
               <span class="text-success" v-if="unit.hasSpeedSet">Yes</span>
               <span class="text-white-50" v-else>No</span>
             </td>
@@ -210,8 +211,7 @@
             <span class="row-label">Subtotal:</span>
             {{ unit.speed }}
           </td>
-          <td v-if="showCol('bonuses')">
-            <span class="row-label">Bonuses:</span>
+          <td v-if="showCol('bonuses')" :class="{'hide-sm': !hasBonuses(unit) }">
             <div v-if="team.leaderSpeedBonus(unit, showGameMode) > 0">
               Leader Bonus:
               {{ team.leaderSpeedBonus(unit, showGameMode) }}
@@ -266,7 +266,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import { SortType, Team } from "../../types/teams";
+import { SortType, Team, TeamMember } from "../../types/teams";
 import { Unit } from "../../types/unit";
 import ModIcon from "../units/modIcon.vue";
 import UnitSearch from "../units/unitSearch.vue";
@@ -396,6 +396,11 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    hasBonuses(unit: TeamMember):boolean {
+      return this.team.leaderSpeedBonus(unit, this.showGameMode) > 0 && 
+        this.team.uniqueSpeedBonus(unit, this.showGameMode) > 0 && 
+        this.team.speedBonusFromTeamMembers(unit, this.showGameMode) > 0
+    }
   },
 });
 </script>
