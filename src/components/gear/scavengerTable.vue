@@ -79,7 +79,7 @@
             <div v-if="gear.scavenger.nodes.length <= 0" class="text-center">
               No known farmable locations.
             </div>
-            <ul class="m-0" v-else>
+            <ul class="m-0 no-bullets-sm" v-else>
               <li
                 v-for="(l, index) in locationLabels(gear.scavenger.nodes)"
                 :key="index"

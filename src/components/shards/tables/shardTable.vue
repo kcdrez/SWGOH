@@ -114,7 +114,7 @@
             <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
           <td
-            class="align-middle text-left farming-locations"
+            class="align-middle text-left text-center-sm farming-locations"
             v-if="showCol('locations')"
           >
             <div v-if="unit.locations.length <= 0" class="text-center">
@@ -204,7 +204,7 @@ import UnitIcon from "../../units/unitIcon.vue";
 import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
 import Timestamp from "../../timestamp.vue";
-import { Unit, unitsByPriority } from "../../../types/unit";
+import { Unit } from "../../../types/unit";
 import { estimatedTime } from "../../../types/shards";
 
 export default defineComponent({

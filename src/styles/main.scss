@@ -187,6 +187,27 @@ body {
 
 button:disabled {
   cursor: not-allowed;
+
+  &.btn-primary {
+    background-color: $primary-light-1;
+    color: $primary-text-light;
+  }
+  &.btn-secondary {
+    background-color: $secondary-light-1;
+    color: $secondary-text-light;
+  }
+  &.btn-success {
+    background-color: $success-light-1;
+    color: $success-text-light;
+  }
+  &.btn-danger {
+    background-color: $danger-light-1;
+    color: $danger-text-light;
+  }
+  &.btn-warning {
+    background-color: $warning-light-1;
+    color: $warning-text-light;
+  }
 }
 
 .card-header {

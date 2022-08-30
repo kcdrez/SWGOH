@@ -47,7 +47,7 @@
         </tr>
         <tr class="text-center align-middle">
           <th v-if="showCol('icon')">Icon</th>
-          <th v-if="showCol('name')">
+          <th v-if="showCol('name')" max-width="300px">
             <div class="c-pointer" @click="sortBy('name')">
               Name
               <i class="fas mx-1" :class="sortIcon('name')"></i>
@@ -65,7 +65,7 @@
           <th
             class="c-pointer"
             @click="sortBy('location')"
-            width="150px"
+            min-width="150px"
             v-if="showCol('locations')"
           >
             Locations
@@ -75,7 +75,7 @@
             v-if="showCol('owned')"
             class="c-pointer"
             @click="sortBy('owned')"
-            width="125px"
+            min-width="125px"
             title="Amount of gear owned"
           >
             <div>
@@ -93,7 +93,7 @@
             v-if="showCol('needed')"
             class="c-pointer"
             @click="sortBy('needed')"
-            width="125px"
+            min-width="125px"
             title="Amount of gear needed for all characters being tracked"
           >
             Needed
@@ -103,7 +103,7 @@
             class="c-pointer"
             @click="sortBy('progress')"
             v-if="showCol('progress')"
-            width="145px"
+            min-width="145px"
           >
             Progress
             <i class="fas mx-1" :class="sortIcon('progress')"></i>
@@ -113,7 +113,7 @@
             class="c-pointer"
             @click="sortBy('time')"
             v-if="showCol('time')"
-            width="125px"
+            min-width="125px"
           >
             Est. Time
             <i class="fas mx-1" :class="sortIcon('time')"></i>
@@ -154,7 +154,7 @@
                 Show/Hide Locations
               </button>
               <ul
-                class="m-0 collapse no-bullets"
+                class="m-0 collapse text-left text-center-sm no-bullets-sm"
                 :id="`locations-${salvage.id}`"
               >
                 <li v-for="(l, index) in salvage.locationLabels" :key="index">
@@ -175,11 +175,10 @@
           </td>
           <td
             v-if="showRequiredByUnit && showCol('required')"
-            width="150px"
-            class="text-left"
+            class="text-left text-center-sm"
           >
             <span class="row-label">Needed By:</span>
-            <ul class="mb-0 no-bullets">
+            <ul class="mb-0 no-bullets-sm">
               <li v-for="unit in salvage.neededBy" :key="unit.id">
                 <Popper hover arrow placement="left">
                   <router-link

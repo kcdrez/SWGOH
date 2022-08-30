@@ -104,9 +104,9 @@
               >{{ unit.name }}</router-link
             >
           </td>
-          <td v-if="showCol('leader')" class="text-left">
-            <span class="row-label">Is Leader?</span>
-            <div :class="{ 'text-success': unit.isLeader }">
+          <td v-if="showCol('leader')" class="text-center">
+            <span class="row-label mx-1">Is Leader?</span>
+            <div :class="{ 'text-success': unit.isLeader }" class="d-inline">
               {{ unit.isLeader ? "Yes" : "No" }}
             </div>
           </td>
@@ -118,7 +118,7 @@
             <span class="row-label">Subtotal:</span>
             {{ unit.speed }}
           </td>
-          <td v-if="showCol('bonuses')">
+          <td v-if="showCol('bonuses')" :class="{'hide-sm': !hasBonuses(unit) }">
             <span class="row-label">Bonuses:</span>
             <div v-if="match.leaderSpeedBonus(unit, true) > 0">
               Leader Bonus:
@@ -146,7 +146,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import { Match, SortType } from "../../types/teams";
+import { Match, SortType, TeamMember } from "../../types/teams";
 import MultiSelect from "../multiSelect.vue";
 import ModIcon from "../units/modIcon.vue";
 
@@ -225,6 +225,11 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
+    hasBonuses(unit: TeamMember):boolean {
+      return this.match.leaderSpeedBonus(unit, true) > 0 && 
+        this.match.uniqueSpeedBonus(unit, true) > 0 && 
+        this.match.speedBonusFromTeamMembers(unit, true) > 0
+    }
   },
 });
 </script>
