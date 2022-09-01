@@ -6,7 +6,8 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
-import UnitData from "../components/units/unitData.vue";
+// import UnitData from "../components/units/unitData.vue";
+import UnitData from "@c/units/unitData.vue";
 import { loadingState } from "../types/loading";
 
 export default defineComponent({

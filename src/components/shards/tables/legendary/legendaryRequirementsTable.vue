@@ -131,6 +131,7 @@
           :selectedColumns="selectedColumns"
           :simpleView="simpleView"
           :showRecommended="showRecommended"
+          :unitId="unit.id"
         />
       </tbody>
     </table>
@@ -151,8 +152,9 @@ import {
   getPercent,
   getUnit,
   totalProgress,
+  getPrerequisites
 } from "../../../../types/unit";
-import { displayValue, FarmingNode } from "../../../../types/shards";
+import { displayValue, IPrerequisite } from "../../../../types/shards";
 import {
   isGearRequirement,
   isRelicRequirement,
@@ -206,15 +208,11 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapState("unit", ["unitList"]),
-    prerequisites() {
-      const legendaryUnits: FarmingNode = this.shardFarming.find(
-        (x: FarmingNode) => x.id === this.nodeKey
-      );
-      const prereqs =
-        legendaryUnits?.characters.find((x) => x.id === this.unit.id)
-          ?.prerequisites ?? [];
-
-      return prereqs
+    prerequisites(): IPrerequisite[] {
+      return getPrerequisites(this.unit.id)
+    },
+    prerequisitiesFiltered() {
+      return this.prerequisites
         .filter((p) => {
           const unit: Unit | undefined = getUnit(p?.id || "");
           if (unit) {

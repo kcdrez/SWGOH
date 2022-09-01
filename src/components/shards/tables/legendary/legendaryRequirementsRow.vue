@@ -14,8 +14,8 @@
               <div>You need {{ item.count ?? 1 }} of the following units:</div>
               <div class="unit-list-tags">
                 <UnitIcon
-                  class="unit-icon d-block border-0 m-0"
-                  v-for="unit in getUnitsByTag(item.tags, parentIds)"
+                  class="unit-icon border-0"
+                  v-for="unit in getUnitsByTag(item.tags, parentIds, unitId)"
                   :key="unit.id"
                   :unit="unit"
                   isLink
@@ -124,8 +124,11 @@ export default defineComponent({
         return [];
       },
     },
+    unitId: {
+      type: String,
+      default: null
+    }
   },
-  computed: {},
   methods: {
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
@@ -172,3 +175,10 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.unit-icon {
+  height: 130px;
+  margin: 0rem .5rem 0 !important;
+}
+</style>
