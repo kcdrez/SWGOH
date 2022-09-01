@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-import store from "../vuex-store/store";
+import store from "vuex-store/store";
 import { Unit } from "./unit";
 
 export class Team {

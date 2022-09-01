@@ -240,8 +240,8 @@ import moment from "moment";
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
-import { unvue } from "../../utils";
-import { TerritoryBattleEvent } from "../../types/guild";
+import { unvue } from "utils";
+import { TerritoryBattleEvent } from "types/guild";
 
 export default defineComponent({
   name: "TerritoryBattleTable",

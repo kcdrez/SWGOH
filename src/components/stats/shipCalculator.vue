@@ -213,10 +213,10 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { round2Decimals, setupEvents } from "../../utils";
-import { Mod, Unit } from "../../types/unit";
-import { maxGearLevel } from "../../types/gear";
-import { maxRelicLevel } from "../../types/relic";
+import { round2Decimals, setupEvents } from "utils";
+import { Mod, Unit } from "types/unit";
+import { maxGearLevel } from "types/gear";
+import { maxRelicLevel } from "types/relic";
 import {
   abilityMap,
   crewLevelMap,
@@ -225,7 +225,7 @@ import {
   modsMap,
   multiplierMap,
   relicLevelMap,
-} from "../../types/pilots";
+} from "types/pilots";
 
 interface Crew {
   stars: number;
@@ -606,7 +606,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
+@import "styles/variables.scss";
 
 .input-group {
   margin-top: 0.5rem;

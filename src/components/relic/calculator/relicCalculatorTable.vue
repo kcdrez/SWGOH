@@ -21,8 +21,7 @@
         mb-0
         swgoh-table
         collapse
-      "
-    >
+      ">
       <thead class="text-center sticky-header align-middle">
         <tr>
           <th
@@ -91,7 +90,7 @@
         </tr>
       </thead>
       <tbody class="align-middle text-center">
-        <tr v-for="row in plannerData.challengeGear" :key="row.id">
+        <tr v-for="(row, index) in plannerData.challengeGear" :key="index">
           <td v-if="showCol('name')">
             <GearIcon v-for="id in row.ids" :key="id" :gearId="id" showName />
           </td>
@@ -114,7 +113,7 @@
             {{ row.relicPiecesTotal }}
           </td>
         </tr>
-        <tr v-for="row in plannerData.storeGear" :key="row.id">
+        <tr v-for="(row, index) in plannerData.storeGear" :key="index">
           <td v-if="showCol('name')">
             <GearIcon v-for="id in row.ids" :key="id" :gearId="id" showName />
           </td>
@@ -176,10 +175,10 @@
 import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 
-import GearIcon from "../../gear/gearIcon.vue";
-import { FarmingNode } from "../../../types/shards";
-import { setupEvents } from "../../../utils";
-import { RelicPlanner } from "../../../types/relicPlanner";
+import GearIcon from "components/gear/gearIcon.vue";
+import { FarmingNode } from "types/shards";
+import { RelicPlanner } from "types/relicPlanner";
+import { setupEvents } from "utils";
 
 const storageKey = "relicCalculatorTable";
 

@@ -105,16 +105,16 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
 
-import { Gear, IScavenger } from "../../types/gear";
-import GearIcon from "./gearIcon.vue";
-import RelicIcon from "../relic/relicIcon.vue";
-import { FarmingNode } from "../../types/shards";
-import { setupEvents } from "../../utils";
-import { scavengerFarming, scavengerCost } from "../../types/scavenger";
-import { Relic } from "../../types/relic";
-import { round2Decimals } from "../../utils";
+import { Gear } from "types/gear";
+import GearIcon from "components/gear/gearIcon.vue";
+import RelicIcon from "components/relic/relicIcon.vue";
+import { FarmingNode } from "types/shards";
+import { setupEvents } from "utils";
+import { scavengerFarming, scavengerCost } from "types/scavenger";
+import { Relic } from "types/relic";
+import { round2Decimals } from "utils";
 
 const storageKey = "ScavengerFarmingTable";
 
@@ -231,7 +231,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
+@import "styles/variables.scss";
 
 .sticky-header {
   top: 106px;

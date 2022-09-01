@@ -13,8 +13,8 @@
 import { defineComponent } from "vue";
 import _ from "lodash";
 
-import { Unit } from "../../types/unit";
-import { unvue } from "../../utils";
+import { Unit } from "types/unit";
+import { unvue } from "utils";
 
 export default defineComponent({
   name: "ShardsOwned",

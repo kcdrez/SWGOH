@@ -2,11 +2,11 @@ import { ActionContext } from "vuex";
 import moment from "moment";
 import momentTz from "moment-timezone";
 
-import { Player } from "../types/player";
-import { loadingState } from "../types/loading";
+import { Player } from "types/player";
+import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
-import { Unit } from "../types/unit";
+import { Unit } from "types/unit";
 
 interface State {
   player: Player | null;

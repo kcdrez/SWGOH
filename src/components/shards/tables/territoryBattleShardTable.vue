@@ -138,12 +138,12 @@ import { defineComponent, PropType } from "vue";
 import { mapActions } from "vuex";
 
 import ShardsOwned from "../shardsOwned.vue";
-import UnitIcon from "../../units/unitIcon.vue";
+import UnitIcon from "components/units/unitIcon.vue";
 import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
-import Timestamp from "../../timestamp.vue";
-import { Unit, unitsByPriority } from "../../../types/unit";
-import { estimatedTime } from "../../../types/guild";
+import Timestamp from "components/timestamp.vue";
+import { Unit, unitsByPriority } from "types/unit";
+import { estimatedTime } from "types/guild";
 
 export default defineComponent({
   name: "TerritoryBattleShardTable",

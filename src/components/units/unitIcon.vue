@@ -33,7 +33,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import { Unit } from "../../types/unit";
+import { Unit } from "types/unit";
 import UnitPortrait from "./unitPortrait.vue";
 
 export default defineComponent({

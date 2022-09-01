@@ -200,12 +200,12 @@
 import { defineComponent, PropType } from "vue";
 
 import ShardsOwned from "../shardsOwned.vue";
-import UnitIcon from "../../units/unitIcon.vue";
+import UnitIcon from "components/units/unitIcon.vue";
 import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
-import Timestamp from "../../timestamp.vue";
-import { Unit } from "../../../types/unit";
-import { estimatedTime } from "../../../types/shards";
+import Timestamp from "components/timestamp.vue";
+import { Unit } from "types/unit";
+import { estimatedTime } from "types/shards";
 
 export default defineComponent({
   name: "ShardTable",

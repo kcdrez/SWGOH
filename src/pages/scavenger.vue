@@ -51,8 +51,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import ScavengerTable from "../components/gear/scavengerTable.vue";
-import ScavengerFarmingTable from "../components/gear/scavengerFarmingTable.vue";
+import ScavengerTable from "components/gear/scavengerTable.vue";
+import ScavengerFarmingTable from "components/gear/scavengerFarmingTable.vue";
 
 export default defineComponent({
   name: "ScavengerPage",

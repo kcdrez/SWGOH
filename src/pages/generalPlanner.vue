@@ -33,12 +33,12 @@
 import { defineComponent } from "vue";
 import { mapActions, mapGetters, mapState } from "vuex";
 
-import UnitSection from "../components/generalPlanner/unitSection.vue";
-import GearSection from "../components/generalPlanner/gearSection.vue";
-import RelicSection from "../components/generalPlanner/relicSection.vue";
-import ShardSection from "../components/generalPlanner/shardSection.vue";
-import UnitSearch from "../components/units/unitSearch.vue";
-import { Unit } from "../types/unit";
+import UnitSection from "components/generalPlanner/unitSection.vue";
+import GearSection from "components/generalPlanner/gearSection.vue";
+import RelicSection from "components/generalPlanner/relicSection.vue";
+import ShardSection from "components/generalPlanner/shardSection.vue";
+import UnitSearch from "components/units/unitSearch.vue";
+import { Unit } from "types/unit";
 
 interface dataModel {
   selected: Unit | null;
@@ -99,7 +99,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../styles/variables.scss";
+@import "styles/variables.scss";
 
 .swgoh-page {
   ::v-deep(.unit-section .section-header) {

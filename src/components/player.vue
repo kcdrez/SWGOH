@@ -19,7 +19,7 @@
 import { defineComponent } from "vue";
 import { mapActions, mapGetters, mapState } from "vuex";
 
-import { Unit } from "../types/unit";
+import { Unit } from "types/unit";
 import UnitIcon from "./units/unitIcon.vue";
 import UnitSearch from "./units/unitSearch.vue";
 

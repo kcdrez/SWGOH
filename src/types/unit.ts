@@ -1,8 +1,8 @@
-import { maxRelicLevel } from "../types/relic";
+import { maxRelicLevel } from "./relic";
 import { Gear, IIngredient, maxGearLevel } from "./gear";
-import store from "../vuex-store/store";
-import { shardMapping } from "./shards";
-import { round2Decimals } from "../utils";
+import store from "vuex-store/store";
+import { FarmingNode, NodeCharacter, shardMapping } from "./shards";
+import { round2Decimals } from "utils";
 import { CurrencyTypeConfig } from "./currency";
 import _ from "lodash";
 import { anyTagsMatch } from "./teams";
@@ -969,14 +969,15 @@ export function getUnitPercent(unit: Unit, type: string, target: number) {
 
 export function getUnitsByTag(
   tags: string[],
-  parentIds: string[] = []
+  parentIds: string[] = [],
+  excludeUnitId: string | null = null
 ): Unit[] {
   const playerUnits = store.state.player.player?.units ?? [];
   const otherUnits = store.state.unit.unitList;
 
   return [...playerUnits, ...otherUnits]
     .filter((u: Unit) => {
-      if (parentIds.includes(u.id)) {
+      if (parentIds.includes(u.id) || u.id === excludeUnitId) {
         return false;
       } else {
         return tags.every((tag) => {
@@ -1021,4 +1022,18 @@ export function totalProgress(
   return round2Decimals(
     list.reduce((partialSum, a) => partialSum + a, 0) / list.length
   );
+}
+
+export function getPrerequisites(unitId: string) {
+  const legendaryUnits: NodeCharacter[] =
+    store.state.shards.shardFarming.reduce(
+      (characterList: NodeCharacter[], x: FarmingNode) => {
+        if (x.id === "legendary" || x.id === "galactic_legends") {
+          characterList.push(...x.characters);
+        }
+        return characterList;
+      },
+      []
+    );
+  return legendaryUnits?.find((x) => x.id === unitId)?.prerequisites ?? [];
 }

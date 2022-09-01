@@ -15,8 +15,8 @@
 import { defineComponent } from "vue";
 import _ from "lodash";
 
-import { unvue } from "../../utils";
-import { Gear } from "../../types/gear";
+import { unvue } from "utils";
+import { Gear } from "types/gear";
 
 export default defineComponent({
   name: "GearOwned",

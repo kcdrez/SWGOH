@@ -286,11 +286,11 @@
 import { defineComponent, PropType } from "vue";
 import { mapActions, mapState } from "vuex";
 
-import { Gear } from "../../types/gear";
-import OwnedAmount from "./gearOwned.vue";
-import GearIcon from "./gearIcon.vue";
-import Timestamp from "../timestamp.vue";
-import GearText from "../gear/gearText.vue";
+import { Gear } from "types/gear";
+import OwnedAmount from "components/gear/gearOwned.vue";
+import GearIcon from "components/gear/gearIcon.vue";
+import Timestamp from "components/timestamp.vue";
+import GearText from "components/gear/gearText.vue";
 
 export default defineComponent({
   name: "GearTable",

@@ -45,8 +45,8 @@ import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 import { v4 as uuid } from "uuid";
 
-import { Team } from "../types/teams";
-import TeamTable from "../components/teams/teamTable.vue";
+import { Team } from "types/teams";
+import TeamTable from "components/teams/teamTable.vue";
 
 type dataModel = {
   newTeamName: string;
@@ -94,7 +94,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../styles/variables.scss";
+@import "styles/variables.scss";
 
 .mods-list {
   display: flex;

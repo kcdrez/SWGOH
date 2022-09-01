@@ -152,9 +152,9 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { Unit } from "../types/unit";
-import { tbRecommended } from "../types/guild";
-import RequirementIcon from "../components/shards/tables/legendary/requirementIcon.vue";
+import { Unit } from "types/unit";
+import { tbRecommended } from "types/guild";
+import RequirementIcon from "components/shards/tables/legendary/requirementIcon.vue";
 
 interface dataModel {
   map: "LSRepublicOffensive" | "DSSeparatistMight" | "";

@@ -297,11 +297,11 @@ import { mapActions, mapGetters, mapState } from "vuex";
 import { writeFile, utils } from "xlsx";
 import _ from "lodash";
 
-import { loadingState } from "../types/loading";
-import { initializeModules, setupEvents, unvue } from "../utils";
-import { Unit } from "../types/unit";
-import { IGuildUnitMap, tUnitOwnedKeys } from "../types/guild";
-import UnitSearch from "../components/units/unitSearch.vue";
+import { loadingState } from "types/loading";
+import { setupEvents, unvue } from "utils";
+import { Unit } from "types/unit";
+import { IGuildUnitMap, tUnitOwnedKeys } from "types/guild";
+import UnitSearch from "components/units/unitSearch.vue";
 
 const storageKey = "guildUnits";
 

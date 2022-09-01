@@ -23,9 +23,9 @@ import { defineComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 import _ from "lodash";
 
-import { FarmingNode, NodePayload, Node } from "../../types/shards";
-import { Unit } from "../../types/unit";
-import { unvue } from "../../utils";
+import { FarmingNode, NodePayload, Node } from "types/shards";
+import { Unit } from "types/unit";
+import { unvue } from "utils";
 
 interface dataModel {
   nodes: Node[];

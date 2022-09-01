@@ -31,10 +31,10 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { Unit } from "../..//types/unit";
-import { setupEvents } from "../../utils";
-import RelicTable from "../relic/relicTable.vue";
-import { Relic } from "../../types/relic";
+import { Unit } from "types/unit";
+import { Relic } from "types/relic";
+import { setupEvents } from "utils";
+import RelicTable from "components/relic/relicTable.vue";
 
 const storageKey = "relicSection";
 

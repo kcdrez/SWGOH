@@ -33,20 +33,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import { mapState } from "vuex";
 
-import { setupEvents } from "../../../../utils";
-import { totalProgress } from "../../../../types/unit";
-import { FarmingNode, NodeCharacter } from "../../../../types/shards";
-import UnitIcon from "../../../../components/units/unitIcon.vue";
+import { setupEvents } from "utils";
+import { totalProgress, getPrerequisites, Unit } from "types/unit";
+import UnitIcon from "components/units/unitIcon.vue";
 
 export default defineComponent({
   name: "GLChecklistPage",
   components: { UnitIcon },
   props: {
     unitList: {
-      type: Array,
+      type: Array as PropType<Unit[]>,
       required: true,
     },
     header: {
@@ -70,24 +69,7 @@ export default defineComponent({
       unitId: string,
       prerequisiteType: "requirement" | "recommended"
     ): number {
-      const x = this.getPrerequisites(unitId);
-      return totalProgress(x, prerequisiteType);
-    },
-    getPrerequisites(unitId: string) {
-      const legendaryUnits: NodeCharacter[] = this.shardFarming.reduce(
-        (characterList: NodeCharacter[], x: FarmingNode) => {
-          if (!!this.nodeKey) {
-            if (x.id === this.nodeKey) {
-              characterList.push(...x.characters);
-            }
-          } else if (x.id === "legendary" || x.id === "galactic_legends") {
-            characterList.push(...x.characters);
-          }
-          return characterList;
-        },
-        []
-      );
-      return legendaryUnits?.find((x) => x.id === unitId)?.prerequisites ?? [];
+      return totalProgress(getPrerequisites(unitId), prerequisiteType);
     },
   },
   mounted() {

@@ -45,7 +45,7 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 
-import Player from "../components/player.vue";
+import Player from "components/player.vue";
 
 export default defineComponent({
   name: "HomePage",

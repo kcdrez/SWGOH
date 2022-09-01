@@ -1,6 +1,6 @@
 import moment from "moment";
 import { read, utils } from "xlsx";
-import { loadingState } from "./types/loading";
+import { loadingState } from "types/loading";
 import store, { ModuleTypes } from "./vuex-store/store";
 
 export function unvue(data: any) {

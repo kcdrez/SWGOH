@@ -155,10 +155,9 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import RelicCalculatorTable from "../components/relic/calculator/relicCalculatorTable.vue";
-import { maxRelicLevel } from "../types/relic";
-import { RelicPlanner } from "../types/relicPlanner";
-import { round2Decimals } from "../utils";
+import RelicCalculatorTable from "components/relic/calculator/relicCalculatorTable.vue";
+import { maxRelicLevel } from "types/relic";
+import { RelicPlanner } from "types/relicPlanner";
 
 export default defineComponent({
   name: "RelicCalculatorPage",

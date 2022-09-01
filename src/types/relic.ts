@@ -1,5 +1,5 @@
-import { round2Decimals } from "../utils";
-import store from "../vuex-store/store";
+import { round2Decimals } from "utils";
+import store from "vuex-store/store";
 
 export const maxRelicLevel = 9;
 

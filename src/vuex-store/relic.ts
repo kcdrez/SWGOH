@@ -1,12 +1,11 @@
 import { ActionContext } from "vuex";
 
-import { loadingState } from "../types/loading";
+import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
-import { unvue } from "../utils";
-import relicConfig from "../types/relicMapping";
-import { RelicConfigType, OwnedRelicConfig } from "../types/relic";
-import { RelicPlanner, tableData } from "../types/relicPlanner";
-
+import { unvue } from "utils";
+import relicConfig from "types/relicMapping";
+import { RelicConfigType, OwnedRelicConfig } from "types/relic";
+import { RelicPlanner, tableData } from "types/relicPlanner";
 import { apiClient } from "../api/api-client";
 
 interface State {
@@ -16,10 +15,10 @@ interface State {
   refreshes: { cantina: number };
   energy: { cantina: number };
   calculator: {
-    timeline: number,
-    relicTarget: number,
-    tableData: RelicPlanner[]
-  }
+    timeline: number;
+    relicTarget: number;
+    tableData: RelicPlanner[];
+  };
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -35,8 +34,8 @@ const store = {
     calculator: {
       timeline: 14,
       relicTarget: 8,
-      tableData
-    }
+      tableData,
+    },
   },
   getters: {},
   mutations: {
@@ -91,8 +90,11 @@ const store = {
       dispatch("player/saveEnergy", null, { root: true });
     },
     saveCalculatorData({ state }: ActionCtx) {
-      window.localStorage.setItem('relicCalculatorData', JSON.stringify(state.calculator.tableData.map(x => x.sanitize())))
-    }
+      window.localStorage.setItem(
+        "relicCalculatorData",
+        JSON.stringify(state.calculator.tableData.map((x) => x.sanitize()))
+      );
+    },
   },
 };
 

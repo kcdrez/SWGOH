@@ -34,8 +34,8 @@ import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
 import WidgetItem from "./WidgetItem.vue";
-import UnitSearch from "../units/unitSearch.vue";
-import { Unit } from "../../types/unit";
+import UnitSearch from "components/units/unitSearch.vue";
+import { Unit } from "types/unit";
 
 interface dataModel {
   grid: null | Muuri;

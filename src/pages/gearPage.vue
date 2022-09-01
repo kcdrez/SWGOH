@@ -90,11 +90,11 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { Gear, INeededBy } from "../types/gear";
-import GearIcon from "../components/gear/gearIcon.vue";
-import GearText from "../components/gear/gearText.vue";
-import OwnedAmount from "../components/gear/gearOwned.vue";
-import { Unit } from "../types/unit";
+import { Gear, INeededBy } from "types/gear";
+import GearIcon from "components/gear/gearIcon.vue";
+import GearText from "components/gear/gearText.vue";
+import OwnedAmount from "components/gear/gearOwned.vue";
+import { Unit } from "types/unit";
 
 const storageKey = "gearPage";
 

@@ -221,20 +221,20 @@ import ShardTable from "./tables/shardTable.vue";
 import StoreTable from "./tables/storeTable.vue";
 import TerritoryBattleShardTable from "./tables/territoryBattleShardTable.vue";
 import LegendaryRequirementsTable from "./tables/legendary/legendaryRequirementsTable.vue";
+import RequirementIcon from "./tables/legendary/requirementIcon.vue";
 import EnergySpent from "../energySpent.vue";
-import RequirementIcon from "../shards/tables/legendary/requirementIcon.vue";
-import UnitIcon from "../units/unitIcon.vue";
-import { loadingState } from "../../types/loading";
-import { setupEvents } from "../../utils";
+import UnitIcon from "components/units/unitIcon.vue";
+import { loadingState } from "types/loading";
+import { setupEvents } from "utils";
 import Timestamp from "../timestamp.vue";
 import {
   FarmingNode,
   estimatedTime as nodeEstimatedTime,
   isRequired,
-} from "../../types/shards";
-import { estimatedTime as shopEstimatedTime } from "../../types/currency";
-import { Unit, getUnit, getPercent } from "../../types/unit";
-import { estimatedTime as tbEstimatedTime } from "../../types/guild";
+} from "types/shards";
+import { estimatedTime as shopEstimatedTime } from "types/currency";
+import { Unit, getUnit, getPercent } from "types/unit";
+import { estimatedTime as tbEstimatedTime } from "types/guild";
 
 const storageKey = "shardPlanner";
 
@@ -493,7 +493,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
+@import "styles/variables.scss";
 
 .shard-header,
 .time-estimate {

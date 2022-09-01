@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import { loadingState, loadingSize } from "../types/loading";
+import { loadingState, loadingSize } from "types/loading";
 
 export default defineComponent({
   name: "LoadingComponent",

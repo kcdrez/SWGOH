@@ -16,8 +16,8 @@
 import { defineComponent } from "vue";
 import _ from "lodash";
 
-import { unvue } from "../../utils";
-import { Relic } from "../../types/relic";
+import { unvue } from "utils";
+import { Relic } from "types/relic";
 
 export default defineComponent({
   name: "RelicOwned",

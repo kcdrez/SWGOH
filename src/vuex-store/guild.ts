@@ -1,16 +1,15 @@
 import { ActionContext } from "vuex";
 import { v4 as uuid } from "uuid";
 
-import { loadingState } from "../types/loading";
+import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
 import {
   GuildPayload,
   TerritoryBattleEvent,
   TerritoryWarEvent,
-} from "../types/guild";
-import { round2Decimals } from "../utils";
-import { Unit } from "../types/unit";
+} from "types/guild";
+import { round2Decimals } from "utils";
 
 interface State {
   requestState: loadingState;
@@ -212,7 +211,10 @@ const store = {
       commit("UPSERT_TERRITORY_WAR_EVENT", event);
       await dispatch("saveTerritoryWarEvents");
     },
-    async removeTerritoryWarEvent({ commit, dispatch }: ActionCtx, eventId: string) {
+    async removeTerritoryWarEvent(
+      { commit, dispatch }: ActionCtx,
+      eventId: string
+    ) {
       commit("REMOVE_TERRITORY_WAR_EVENT", eventId);
       await dispatch("saveTerritoryWarEvents");
     },

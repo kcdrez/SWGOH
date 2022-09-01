@@ -28,7 +28,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { pluralText, daysFromNow } from "../utils";
+import { pluralText, daysFromNow } from "utils";
 
 export default defineComponent({
   name: "Timestamp",

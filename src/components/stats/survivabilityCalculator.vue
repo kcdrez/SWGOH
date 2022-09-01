@@ -217,8 +217,8 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { setupEvents } from "../../utils";
-import { Unit } from "../../types/unit";
+import { setupEvents } from "utils";
+import { Unit } from "types/unit";
 
 interface dataModel {
   selected: null | Unit;

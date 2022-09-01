@@ -6,9 +6,10 @@
 </template>
 
 <script lang="ts">
-import { Unit } from "@/types/unit";
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
+
+import { Unit } from "@/types/unit";
 
 export default defineComponent({
   name: "ModIcon",

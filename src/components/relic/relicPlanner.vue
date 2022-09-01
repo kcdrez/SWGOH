@@ -51,14 +51,14 @@
 import { defineComponent, PropType } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import RelicTable from "./relicTable.vue";
-import Timestamp from "../timestamp.vue";
-import EnergySpent from "../energySpent.vue";
-import RelicLevelIcon from "../units/relicLevelIcon.vue";
-import { loadingState } from "../../types/loading";
-import { Relic, maxRelicLevel } from "../../types/relic";
-import { setupEvents } from "../../utils";
-import { Unit } from "../../types/unit";
+import RelicTable from "components/relic/relicTable.vue";
+import Timestamp from "components/timestamp.vue";
+import EnergySpent from "components/energySpent.vue";
+import RelicLevelIcon from "components/units/relicLevelIcon.vue";
+import { loadingState } from "types/loading";
+import { Relic, maxRelicLevel } from "types/relic";
+import { Unit } from "types/unit";
+import { setupEvents } from "utils";
 
 const storageKey = "relicPlanner";
 
@@ -134,7 +134,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
+@import "styles/variables.scss";
 
 .relic-header,
 .time-estimate {

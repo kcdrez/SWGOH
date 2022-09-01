@@ -18,14 +18,14 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import RelicLevelIcon from "../../../units/relicLevelIcon.vue";
-import GearText from "../../../gear/gearText.vue";
-import { getUnit } from "../../../../types/unit";
+import RelicLevelIcon from "components/units/relicLevelIcon.vue";
+import GearText from "components/gear/gearText.vue";
+import { getUnit } from "types/unit";
 import {
   displayValue,
   isGearRequirement,
   isRelicRequirement,
-} from "../../../../types/shards";
+} from "types/shards";
 
 export default defineComponent({
   name: "RequirementIcon",

@@ -8,8 +8,8 @@
 import { defineComponent, PropType } from "vue";
 import { mapActions, mapGetters, mapState } from "vuex";
 
-import { loadingState } from "../types/loading";
-import { initializeModules } from "../utils";
+import { loadingState } from "types/loading";
+import { initializeModules } from "utils";
 
 export default defineComponent({
   name: "LoadingPlayerPage",

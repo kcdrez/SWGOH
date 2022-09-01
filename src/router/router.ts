@@ -1,25 +1,25 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 
-import PlayerLoadingPage from "../pages/playerLoadingPage.vue";
-import UnitLoadingPage from "../pages/unitLoadingPage.vue";
-import BasicLoadingPage from "../pages/basicLoadingPage.vue";
-import HomePage from "../pages/homepage.vue";
-import UnitPage from "../pages/unitPage.vue";
-import GeneralPlannerPage from "../pages/generalPlanner.vue";
-import TeamPage from "../pages/team.vue";
-import MatchUpPage from "../pages/matchUpPage.vue";
-import CharacterFarmingPage from "../pages/characterFarming.vue";
-import GuildEventsPage from "../pages/guildEvents.vue";
-import GuildUnitsPage from "../pages/guildUnits.vue";
-import StatCalculatorPage from "../pages/statCalculator.vue";
-import GLChecklist from "../pages/glChecklist.vue";
-import TBStatusPage from "../pages/TBStatusPage.vue";
-import WidgetsPage from "../pages/widgets.vue";
-import GearListPage from "../pages/gearList.vue";
-// import GearPage from "../pages/gearPage.vue";
-import ScavengerPage from "../pages/scavenger.vue";
-import UnitSearchPage from "../pages/unitSearch.vue";
-import RelicCalculatorPage from "../pages/relicCalculator.vue";
+import PlayerLoadingPage from "pages/playerLoadingPage.vue";
+import UnitLoadingPage from "pages/unitLoadingPage.vue";
+import BasicLoadingPage from "pages/basicLoadingPage.vue";
+import HomePage from "pages/homepage.vue";
+import UnitPage from "pages/unitPage.vue";
+import GeneralPlannerPage from "pages/generalPlanner.vue";
+import TeamPage from "pages/team.vue";
+import MatchUpPage from "pages/matchUpPage.vue";
+import CharacterFarmingPage from "pages/characterFarming.vue";
+import GuildEventsPage from "pages/guildEvents.vue";
+import GuildUnitsPage from "pages/guildUnits.vue";
+import StatCalculatorPage from "pages/statCalculator.vue";
+import GLChecklist from "pages/glChecklist.vue";
+import TBStatusPage from "pages/TBStatusPage.vue";
+import WidgetsPage from "pages/widgets.vue";
+import GearListPage from "pages/gearList.vue";
+// import GearPage from "pages/gearPage.vue";
+import ScavengerPage from "pages/scavenger.vue";
+import UnitSearchPage from "pages/unitSearch.vue";
+import RelicCalculatorPage from "pages/relicCalculator.vue";
 
 const routes = [
   {
