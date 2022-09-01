@@ -46,14 +46,14 @@
 import { defineComponent, PropType } from "vue";
 import { mapState, mapGetters } from "vuex";
 
-import { loadingState } from "../../types/loading";
-import { maxGearLevel } from "../../types/gear";
-import GearTable from "./gearTable.vue";
-import EnergySpent from "../energySpent.vue";
-import GearText from "./gearText.vue";
-import { setupEvents } from "../../utils";
-import Timestamp from "../timestamp.vue";
-import { Unit } from "../../types/unit";
+import { loadingState } from "types/loading";
+import { maxGearLevel } from "types/gear";
+import GearTable from "components/gear/gearTable.vue";
+import EnergySpent from "components/energySpent.vue";
+import GearText from "components/gear/gearText.vue";
+import { setupEvents } from "utils";
+import Timestamp from "components/timestamp.vue";
+import { Unit } from "types/unit";
 
 const storageKey = "gearPlanner";
 
@@ -130,7 +130,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
+@import "styles/variables.scss";
 
 .gear-header,
 .time-estimate {

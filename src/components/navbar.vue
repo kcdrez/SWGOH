@@ -195,7 +195,7 @@ import { mapActions, mapState } from "vuex";
 import LastUpdated from "./lastUpdated.vue";
 import config from "../../package.json";
 import UnitSearch from "./units/unitSearch.vue";
-import { Unit } from "../types/unit";
+import { Unit } from "types/unit";
 
 interface dataModel {
   version: string;

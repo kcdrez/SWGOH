@@ -33,20 +33,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import { mapState } from "vuex";
 
-import { setupEvents } from "../../../../utils";
-import { totalProgress, getPrerequisites } from "../../../../types/unit";
-import { FarmingNode, NodeCharacter } from "../../../../types/shards";
-import UnitIcon from "../../../../components/units/unitIcon.vue";
+import { setupEvents } from "utils";
+import { totalProgress, getPrerequisites, Unit } from "types/unit";
+import UnitIcon from "components/units/unitIcon.vue";
 
 export default defineComponent({
   name: "GLChecklistPage",
   components: { UnitIcon },
   props: {
     unitList: {
-      type: Array,
+      type: Array as PropType<Unit[]>,
       required: true,
     },
     header: {

@@ -9,9 +9,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import DamageCalculator from "../components/stats/damageCalculator.vue";
-import SurvivabilityCalculator from "../components/stats/survivabilityCalculator.vue";
-import ShipCalculator from "../components/stats/shipCalculator.vue";
+import DamageCalculator from "components/stats/damageCalculator.vue";
+import SurvivabilityCalculator from "components/stats/survivabilityCalculator.vue";
+import ShipCalculator from "components/stats/shipCalculator.vue";
 
 export default defineComponent({
   name: "StatCalculatorPage",

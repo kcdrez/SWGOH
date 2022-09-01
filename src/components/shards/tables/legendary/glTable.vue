@@ -12,7 +12,7 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { Unit } from "../../../../types/unit";
+import { Unit } from "types/unit";
 import LegendarySummaryTable from "./legendarySummaryTable.vue";
 
 const storageKey = "glUnits";

@@ -132,9 +132,9 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import { Unit } from "../types/unit";
-import UnitIcon from "../components/units/unitIcon.vue";
-import { unvue } from "../utils";
+import { Unit } from "types/unit";
+import UnitIcon from "components/units/unitIcon.vue";
+import { unvue } from "utils";
 
 interface dataModel {
   tag: tCriteria;
@@ -374,7 +374,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../styles/variables.scss";
+@import "styles/variables.scss";
 
 .search-criterion {
   cursor: pointer;

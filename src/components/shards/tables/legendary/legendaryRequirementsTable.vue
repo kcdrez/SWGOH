@@ -143,9 +143,9 @@ import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 import _ from "lodash";
 
-import ShardsOwned from "../../shardsOwned.vue";
-import Timestamp from "../../../timestamp.vue";
-import EnergySpent from "../../../energySpent.vue";
+import ShardsOwned from "components/shards/shardsOwned.vue";
+import Timestamp from "components/timestamp.vue";
+import EnergySpent from "components/energySpent.vue";
 import LegendaryRequirementRow from "./legendaryRequirementsRow.vue";
 import {
   Unit,
@@ -153,12 +153,12 @@ import {
   getUnit,
   totalProgress,
   getPrerequisites
-} from "../../../../types/unit";
-import { displayValue, IPrerequisite } from "../../../../types/shards";
+} from "types/unit";
+import { displayValue, IPrerequisite } from "types/shards";
 import {
   isGearRequirement,
   isRelicRequirement,
-} from "../../../../types/shards";
+} from "types/shards";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
@@ -498,7 +498,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../../../styles/variables.scss";
+@import "styles/variables.scss";
 
 .sticky-header {
   top: 105px;

@@ -266,10 +266,10 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import { SortType, Team, TeamMember } from "../../types/teams";
-import { Unit } from "../../types/unit";
-import ModIcon from "../units/modIcon.vue";
-import UnitSearch from "../units/unitSearch.vue";
+import { SortType, Team, TeamMember } from "types/teams";
+import { Unit } from "types/unit";
+import ModIcon from "components/units/modIcon.vue";
+import UnitSearch from "components/units/unitSearch.vue";
 
 type dataModel = {
   editTeamName: string;
@@ -406,7 +406,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
+@import "styles/variables.scss";
 
 th {
   &.mod-col {

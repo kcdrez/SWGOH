@@ -1,17 +1,10 @@
 import { ActionContext } from "vuex";
 
-import { Unit } from "../types/unit";
-import { loadingState } from "../types/loading";
+import { Unit } from "types/unit";
+import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
-import { PlayerResponse } from "../types/player";
-import {
-  FarmingNode,
-  NodePayload,
-  OwnedShardsMap,
-  shardMapping,
-  Node,
-} from "../types/shards";
+import { FarmingNode, NodePayload, OwnedShardsMap, Node } from "types/shards";
 
 interface State {
   requestState: loadingState;

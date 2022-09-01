@@ -3,10 +3,10 @@ import { v4 as uuid } from "uuid";
 
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
-import { loadingState } from "../types/loading";
-import { Match, MatchPayload, Team, TeamMember } from "../types/teams";
-import { Unit } from "../types/unit";
-import { OpponentResponse, Player, PlayerResponse } from "../types/player";
+import { loadingState } from "types/loading";
+import { Match, MatchPayload, Team } from "types/teams";
+import { Unit } from "types/unit";
+import { OpponentResponse, Player } from "types/player";
 
 interface State {
   requestState: loadingState;

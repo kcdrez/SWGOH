@@ -81,7 +81,7 @@
             </div>
             <ul class="m-0 no-bullets-sm" v-else>
               <li
-                v-for="(l, index) in locationLabels(gear.scavenger.nodes)"
+                v-for="(l, index) in locationLabels(gear?.scavenger?.nodes ?? [])"
                 :key="index"
               >
                 {{ l }}
@@ -104,10 +104,10 @@
 import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 
-import { Gear, IScavenger } from "../../types/gear";
-import GearIcon from "./gearIcon.vue";
-import { FarmingNode } from "../../types/shards";
-import { setupEvents } from "../../utils";
+import { Gear, IScavenger } from "types/gear";
+import GearIcon from "components/gear/gearIcon.vue";
+import { FarmingNode } from "types/shards";
+import { setupEvents } from "utils";
 
 type tScavenger = { data: Gear; scavenger: IScavenger };
 const storageKey = "scavengerTable";

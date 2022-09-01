@@ -39,10 +39,10 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import { Unit } from "../../types/unit";
+import { Unit } from "types/unit";
 import RelicIcon from "./relicLevelIcon.vue";
-import GearText from "../gear/gearText.vue";
-import { maxGearLevel } from "../../types/gear";
+import GearText from "components/gear/gearText.vue";
+import { maxGearLevel } from "types/gear";
 
 export default defineComponent({
   name: "UnitPortrait",

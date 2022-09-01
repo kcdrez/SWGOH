@@ -47,10 +47,10 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import { setupEvents } from "../utils";
-import { Unit } from "../types/unit";
-import LegendaryRequirementsTable from "../components/shards/tables/legendary/legendaryRequirementsTable.vue";
-import LegendarySummaryTable from "../components/shards/tables/legendary/legendarySummaryTable.vue";
+import { setupEvents } from "utils";
+import { Unit } from "types/unit";
+import LegendaryRequirementsTable from "components/shards/tables/legendary/legendaryRequirementsTable.vue";
+import LegendarySummaryTable from "components/shards/tables/legendary/legendarySummaryTable.vue";
 
 const storageKey = "glChecklist";
 

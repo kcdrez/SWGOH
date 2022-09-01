@@ -10,12 +10,15 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "baseUrl": ".",
+    "baseUrl": "src",
     // "types": ["webpack-env", "node"],
     "paths": {
+      "types": ["types/*"],
+      "utils": ["utils"],
+      "store": ["vuex-store"],
       "@/*": [
-        "src/*"
-      ]
+        "*"
+      ],
     },
     "lib": [
       "esnext",
@@ -38,3 +41,13 @@
     "node_modules"
   ]
 }
+
+// {
+//   "compilerOptions": {
+//     //... 
+//     "baseUrl": "src",
+//     "paths": { 
+//       "utils": ["utils/*"]
+//     }
+//   }
+// }

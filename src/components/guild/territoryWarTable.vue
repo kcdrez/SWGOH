@@ -201,8 +201,8 @@ import moment from "moment";
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 
-import { TerritoryWarEvent } from "../../types/guild";
-import { round2Decimals, unvue } from "../../utils";
+import { TerritoryWarEvent } from "types/guild";
+import { round2Decimals, unvue } from "utils";
 
 export default defineComponent({
   name: "TerritoryWarTable",

@@ -1,8 +1,8 @@
-import { maxRelicLevel } from "../types/relic";
+import { maxRelicLevel } from "./relic";
 import { Gear, IIngredient, maxGearLevel } from "./gear";
-import store from "../vuex-store/store";
+import store from "vuex-store/store";
 import { FarmingNode, NodeCharacter, shardMapping } from "./shards";
-import { round2Decimals } from "../utils";
+import { round2Decimals } from "utils";
 import { CurrencyTypeConfig } from "./currency";
 import _ from "lodash";
 import { anyTagsMatch } from "./teams";

@@ -1,5 +1,5 @@
-import store from "../vuex-store/store";
-import { round2Decimals, unvue } from "../utils";
+import store from "vuex-store/store";
+import { round2Decimals, unvue } from "utils";
 import { FarmingNode } from "./shards";
 
 export const maxGearLevel = 13;

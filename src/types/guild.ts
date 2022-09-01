@@ -1,6 +1,6 @@
-import store from "../vuex-store/store";
-import { Unit, UnitGear, Ability } from "./unit";
-import { round2Decimals, unvue } from "../utils";
+import store from "vuex-store/store";
+import { Unit } from "./unit";
+import { unvue } from "utils";
 
 export interface GuildPayload {
   territoryWar?: TerritoryWarEvent[];

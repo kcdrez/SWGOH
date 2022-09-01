@@ -139,8 +139,8 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { round2Decimals, setupEvents } from "../../utils";
-import { Unit } from "../../types/unit";
+import { round2Decimals, setupEvents } from "utils";
+import { Unit } from "types/unit";
 
 interface dataModel {
   selected: null | Unit;
@@ -264,7 +264,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
+@import "styles/variables.scss";
 
 .damage-calculator-container {
   margin-top: 1rem;

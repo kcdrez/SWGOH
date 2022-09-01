@@ -1,12 +1,11 @@
 import { ActionContext } from "vuex";
 import { v4 as uuid } from "uuid";
 
-import { loadingState } from "../types/loading";
+import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
-import { ITeam, SpeedConfig, Team } from "../types/teams";
-import { Mod } from "../types/unit";
+import { ITeam, SpeedConfig, Team } from "types/teams";
+import { Mod } from "types/unit";
 import { apiClient } from "../api/api-client";
-import { PlayerResponse } from "../types/player";
 
 interface State {
   requestState: loadingState;

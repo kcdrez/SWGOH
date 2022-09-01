@@ -1,18 +1,18 @@
 import axios from "axios";
 
-import { Player, PlayerResponse } from "../types/player";
-import { ConfigType, Gear, IGear } from "../types/gear";
-import { IUnit, Unit } from "../types/unit";
-import { FarmingNode, IFarmingNode, OwnedShardsMap } from "../types/shards";
-import { OwnedRelicConfig } from "../types/relic";
-import { ITeam, Match, Team } from "../types/teams";
+import { Player, PlayerResponse } from "types/player";
+import { ConfigType, Gear, IGear } from "types/gear";
+import { IUnit, Unit } from "types/unit";
+import { FarmingNode, IFarmingNode, OwnedShardsMap } from "types/shards";
+import { OwnedRelicConfig } from "types/relic";
+import { ITeam, Match, Team } from "types/teams";
 import {
   GuildPayload,
   IGuildUnitMap,
   TerritoryBattleEvent,
   TerritoryWarEvent,
-} from "../types/guild";
-import { IDailyCurrency, IWallet } from "../types/currency";
+} from "types/guild";
+import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
   baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";

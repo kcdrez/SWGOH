@@ -9,7 +9,7 @@ import { store as opponentsStore, State as OpponentsState } from "./opponents";
 import { store as shardStore, State as ShardState } from "./shards";
 import { store as guildStore, State as GuildState } from "./guild";
 import { store as currencyStore, State as CurrencyState } from "./currency";
-import { loadingState } from "../types/loading";
+import { loadingState } from "types/loading";
 
 export type ModuleTypes =
   | "gear"

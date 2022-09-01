@@ -2,7 +2,7 @@ import _ from "lodash";
 
 import { CurrencyTypeConfig } from "./currency";
 import { Unit, unitsByPriority } from "./unit";
-import store from "../vuex-store/store";
+import store from "vuex-store/store";
 
 export type ShardsConfigType = {
   [key: number]: number;

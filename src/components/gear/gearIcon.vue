@@ -16,7 +16,7 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import { Gear } from "../../types/gear";
+import { Gear } from "types/gear";
 
 export default defineComponent({
   name: "GearIcon",

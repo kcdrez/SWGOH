@@ -36,8 +36,8 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { setupEvents } from "../../utils";
-import ShardTable from "../shards/tables/shardTable.vue";
+import { setupEvents } from "utils";
+import ShardTable from "components/shards/tables/shardTable.vue";
 
 const storageKey = "shardSection";
 

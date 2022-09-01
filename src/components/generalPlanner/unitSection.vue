@@ -242,14 +242,14 @@
 import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 
-import { UnitPlannerItem } from "../../types/planner";
-import { Unit } from "../../types/unit";
-import { maxGearLevel } from "../../types/gear";
-import { setupEvents } from "../../utils";
-import Timestamp from "../timestamp.vue";
-import GearText from "../gear/gearText.vue";
-import RelicLevelIcon from "../units/relicLevelIcon.vue";
-import UnitIcon from "../units/unitIcon.vue";
+import { UnitPlannerItem } from "types/planner";
+import { Unit } from "types/unit";
+import { maxGearLevel } from "types/gear";
+import { setupEvents } from "utils";
+import Timestamp from "components/timestamp.vue";
+import GearText from "components/gear/gearText.vue";
+import RelicLevelIcon from "components/units/relicLevelIcon.vue";
+import UnitIcon from "components/units/unitIcon.vue";
 
 export default defineComponent({
   name: "UnitSection",
@@ -435,7 +435,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
+@import "styles/variables.scss";
 
 .swgoh-row {
   .target-container {

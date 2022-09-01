@@ -15,10 +15,12 @@ module.exports = {
     extensions: [".tsx", ".ts", ".js", ".vue"],
     alias: {
       vue: "vue/dist/vue.esm-bundler.js",
-      "@components": path.resolve(__dirname, "../src/components"),
-      "@pages": path.resolve(__dirname, "../src/pages"),
-      "@types": path.resolve(__dirname, "../src/types"),
-      "@store": path.resolve(__dirname, "../src/vuex-store"),
+      components: path.resolve(__dirname, "../src/components"),
+      pages: path.resolve(__dirname, "../src/pages"),
+      types: path.resolve(__dirname, "../src/types"),
+      "vuex-store": path.resolve(__dirname, "../src/vuex-store"),
+      utils: path.resolve(__dirname, "../src/utils"),
+      styles: path.resolve(__dirname, "../src/styles"),
     },
   },
   devServer: {

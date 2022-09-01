@@ -1,7 +1,7 @@
 import { ActionContext } from "vuex";
 
-import { Unit } from "../types/unit";
-import { loadingState } from "../types/loading";
+import { Unit } from "types/unit";
+import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
 

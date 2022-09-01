@@ -16,8 +16,8 @@ import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
 import Modal from "./Modal.vue";
-import UnitData from "../units/unitData.vue";
-import { Unit } from "../../types/unit";
+import UnitData from "components/units/unitData.vue";
+import { Unit } from "types/unit";
 
 export default defineComponent({
   name: "WidgetItem",
@@ -65,7 +65,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@import "../../styles/variables.scss";
+@import "styles/variables.scss";
 
 .header {
   background: $gray-4;

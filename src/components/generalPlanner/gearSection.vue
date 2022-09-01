@@ -30,10 +30,10 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { Unit } from "../../types/unit";
-import { Gear } from "../../types/gear";
-import { setupEvents } from "../../utils";
-import GearTable from "../gear/gearTable.vue";
+import { Unit } from "types/unit";
+import { Gear } from "types/gear";
+import { setupEvents } from "utils";
+import GearTable from "components/gear/gearTable.vue";
 
 const storageKey = "gearSection";
 

@@ -170,10 +170,10 @@
 import { defineComponent, PropType } from "vue";
 import { mapState } from "vuex";
 
-import { Relic } from "../../types/relic";
-import OwnedAmount from "./relicOwned.vue";
-import RelicIcon from "./relicIcon.vue";
-import Timestamp from "../timestamp.vue";
+import { Relic } from "types/relic";
+import OwnedAmount from "components/relic/relicOwned.vue";
+import RelicIcon from "components/relic/relicIcon.vue";
+import Timestamp from "components/timestamp.vue";
 
 export default defineComponent({
   name: "RelicTable",

@@ -1,15 +1,9 @@
 import { ActionContext } from "vuex";
 
-import { loadingState } from "../types/loading";
+import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
-import { round2Decimals } from "../utils";
-import { PlayerResponse } from "../types/player";
-import {
-  currencyTypeList,
-  DailyCurrency,
-  IWallet,
-  Wallet,
-} from "../types/currency";
+import { round2Decimals } from "utils";
+import { DailyCurrency, IWallet, Wallet } from "types/currency";
 
 export const tbFrequency = 2 / 30;
 export const twFrequency = 4 / 30;

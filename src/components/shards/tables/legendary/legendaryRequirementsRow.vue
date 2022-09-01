@@ -88,10 +88,10 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { IPrerequisite } from "../../../../types/shards";
-import UnitIcon from "../../../units/unitIcon.vue";
+import { IPrerequisite } from "types/shards";
+import { getPercent, getUnitsByTag, getUnit } from "types/unit";
+import UnitIcon from "components/units/unitIcon.vue";
 import RequirementIcon from "./requirementIcon.vue";
-import { getPercent, getUnitsByTag, getUnit } from "../../../../types/unit";
 
 export default defineComponent({
   name: "LegendaryRequirementRow",

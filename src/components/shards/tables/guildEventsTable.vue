@@ -42,8 +42,8 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents } from "../../../utils";
-import { Unit } from "../../../types/unit";
+import { setupEvents } from "utils";
+import { Unit } from "types/unit";
 import StoreTable from "./storeTable.vue";
 
 const storageKey = "cantinaStore";

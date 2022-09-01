@@ -13,8 +13,8 @@
 import { defineComponent, PropType } from "vue";
 import _ from "lodash";
 
-import { Unit } from "../../types/unit";
-import { Node } from "../../types/shards";
+import { Unit } from "types/unit";
+import { Node } from "types/shards";
 
 export default defineComponent({
   name: "ShardPriority",

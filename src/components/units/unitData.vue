@@ -23,11 +23,11 @@
 import { defineComponent, PropType } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
-import GearPlanner from "../gear/gearPlanner.vue";
-import RelicPlanner from "../relic/relicPlanner.vue";
-import ShardPlanner from "../shards/shardPlanner.vue";
-import UnitIcon from "../units/unitIcon.vue";
-import { Unit } from "../../types/unit";
+import GearPlanner from "components/gear/gearPlanner.vue";
+import RelicPlanner from "components/relic/relicPlanner.vue";
+import ShardPlanner from "components/shards/shardPlanner.vue";
+import UnitIcon from "components/units/unitIcon.vue";
+import { Unit } from "types/unit";
 
 export default defineComponent({
   name: "UnitData",

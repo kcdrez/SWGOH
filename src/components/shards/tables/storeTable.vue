@@ -213,15 +213,15 @@
 import { defineComponent, PropType } from "vue";
 
 import ShardsOwned from "../shardsOwned.vue";
-import UnitIcon from "../../units/unitIcon.vue";
+import UnitIcon from "components/units/unitIcon.vue";
 import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
-import Timestamp from "../../timestamp.vue";
+import Timestamp from "components/timestamp.vue";
 import Wallet from "../wallet.vue";
 import DailyCurrency from "../dailyCurrency.vue";
-import { Unit, unitsByPriority } from "../../../types/unit";
+import { Unit, unitsByPriority } from "types/unit";
 import { mapState } from "vuex";
-import { CurrencyTypeConfig, estimatedTime } from "../../../types/currency";
+import { CurrencyTypeConfig, estimatedTime } from "types/currency";
 
 export default defineComponent({
   name: "StoreTable",

@@ -12,7 +12,7 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import GearTable from "../components/gear/gearTable.vue";
+import GearTable from "components/gear/gearTable.vue";
 
 const storageKey = "gearListPage";
 

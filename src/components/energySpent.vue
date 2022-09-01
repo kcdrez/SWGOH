@@ -210,7 +210,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 // cantina broken if just one other one
 
-@import "../styles/variables.scss";
+@import "styles/variables.scss";
 
 .energy-spent-container {
   display: flex;

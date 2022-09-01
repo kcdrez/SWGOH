@@ -1,7 +1,7 @@
 import _ from "lodash";
 
 import { apiClient } from "../api/api-client";
-import store from "../vuex-store/store";
+import store from "vuex-store/store";
 import { Unit, unitsByPriority } from "./unit";
 
 export const currencyTypeList: CurrencyTypeConfig[] = [

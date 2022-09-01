@@ -55,10 +55,10 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import { loadingState } from "../types/loading";
-import TerritoryWarTable from "../components/guild/territoryWarTable.vue";
-import TerritoryBattleTable from "../components/guild/territoryBattleTable.vue";
-import { setupEvents } from "../utils";
+import { loadingState } from "types/loading";
+import TerritoryWarTable from "components/guild/territoryWarTable.vue";
+import TerritoryBattleTable from "components/guild/territoryBattleTable.vue";
+import { setupEvents } from "utils";
 
 export default defineComponent({
   name: "GuildEventsPage",

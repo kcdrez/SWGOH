@@ -146,9 +146,9 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import { Match, SortType, TeamMember } from "../../types/teams";
-import MultiSelect from "../multiSelect.vue";
-import ModIcon from "../units/modIcon.vue";
+import { Match, SortType, TeamMember } from "types/teams";
+import MultiSelect from "components/multiSelect.vue";
+import ModIcon from "components/units/modIcon.vue";
 
 type dataModel = {
   selectedColumns: string[];
@@ -235,7 +235,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/variables.scss";
+@import "styles/variables.scss";
 
 @mixin columns2 {
   display: grid !important;
