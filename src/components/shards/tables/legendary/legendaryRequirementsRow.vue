@@ -15,6 +15,7 @@
               <div class="unit-list-tags">
                 <UnitIcon
                   class="unit-icon border-0"
+                  :class="{'unit-icon-simple': simpleView}"
                   v-for="unit in getUnitsByTag(item.tags, parentIds, unitId)"
                   :key="unit.id"
                   :unit="unit"
@@ -178,7 +179,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .unit-icon {
-  height: 130px;
   margin: 0rem .5rem 0 !important;
+
+  &:not(.unit-icon-simple) {
+    height: 130px;
+  }
 }
 </style>

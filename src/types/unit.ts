@@ -942,7 +942,22 @@ export function getUnitPercent(unit: Unit, type: string, target: number) {
     return (unit.power / target) * 100;
   } else if (type === "Relic") {
     const gearPercent = ((unit.gearLevel + 0.01) / maxGearLevel) * 0.5;
-    const relicPercent = ((unit.relicLevel + 0.01) / (target + 0.01)) * 0.4;
+
+    const { fragmented_white, incomplete_green, flawed_blue } =
+      store.state.relic.relicConfig;
+    const whiteProgress = fragmented_white.percentApplied(
+      unit.relicLevel,
+      target
+    );
+    const greenProgress = incomplete_green.percentApplied(
+      unit.relicLevel,
+      target
+    );
+    const blueProgress = flawed_blue.percentApplied(unit.relicLevel, target);
+
+    const relicPercent =
+      ((whiteProgress + greenProgress + blueProgress + 0.01) / 100 / 3) * 0.4;
+
     const shardsPercent = ((unit.totalOwnedShards + 0.01) / 330) * 0.1;
 
     return (gearPercent + relicPercent + shardsPercent) * 100;
