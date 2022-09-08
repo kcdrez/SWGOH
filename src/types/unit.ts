@@ -1,7 +1,12 @@
 import { maxRelicLevel } from "./relic";
 import { Gear, IIngredient, maxGearLevel } from "./gear";
 import store from "vuex-store/store";
-import { FarmingNode, NodeCharacter, shardMapping } from "./shards";
+import {
+  FarmingNode,
+  IPrerequisite,
+  NodeCharacter,
+  shardMapping,
+} from "./shards";
 import { round2Decimals } from "utils";
 import { CurrencyTypeConfig } from "./currency";
 import _ from "lodash";
@@ -1027,7 +1032,7 @@ export function getUnit(unitId: string) {
 }
 
 export function totalProgress(
-  prerequisites: any[],
+  prerequisites: IPrerequisite[],
   prerequisiteType: "requirement" | "recommended"
 ) {
   let list: number[] = [];

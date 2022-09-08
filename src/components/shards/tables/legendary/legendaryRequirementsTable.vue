@@ -1,6 +1,9 @@
 <template>
   <div v-if="prerequisites">
-    <div class="mb-2 d-flex justify-content-center" v-if="unit.stars < 7">
+    <div
+      class="mb-2 d-flex justify-content-center"
+      v-if="!('stars' in unit) || unit.stars < 7"
+    >
       <h5 class="text-center mb-0">Total Progress:</h5>
       <div class="total-progress-bar">
         <ProgressBar :percent="totalProgress('requirement')" />
@@ -14,7 +17,10 @@
     >
       <div class="row">
         <div class="col">
-          <div class="input-group input-group-sm" v-if="unit.stars < 7">
+          <div
+            class="input-group input-group-sm"
+            v-if="!('stars' in unit) || unit.stars < 7"
+          >
             <span class="input-group-text">Shards Owned:</span>
             <ShardsOwned :unit="unit" class="form-control" />
           </div>
@@ -152,13 +158,10 @@ import {
   getPercent,
   getUnit,
   totalProgress,
-  getPrerequisites
+  getPrerequisites,
 } from "types/unit";
 import { displayValue, IPrerequisite } from "types/shards";
-import {
-  isGearRequirement,
-  isRelicRequirement,
-} from "types/shards";
+import { isGearRequirement, isRelicRequirement } from "types/shards";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
@@ -170,7 +173,7 @@ export default defineComponent({
   },
   props: {
     unit: {
-      type: Object as () => Unit,
+      type: Object as () => Unit | IPrerequisite,
       required: true,
     },
     selectedColumns: {
@@ -209,7 +212,7 @@ export default defineComponent({
     ...mapGetters("player", ["unitData"]),
     ...mapState("unit", ["unitList"]),
     prerequisites(): IPrerequisite[] {
-      return getPrerequisites(this.unit.id)
+      return getPrerequisites(this.unit.id ?? "");
     },
     prerequisitiesFiltered() {
       return this.prerequisites
@@ -386,7 +389,10 @@ export default defineComponent({
       return this.nodeKey === "legendary";
     },
     totalGLTicketsNeeded(): number {
-      const shardsCount = this.unit.stars === 7 ? 330 : this.unit.ownedShards;
+      const shardsCount =
+        !("stars" in this.unit) || this.unit.stars === 7
+          ? 330
+          : this.unit.ownedShards;
       let tier1 = 8;
       let tier2 = 4;
       let tier3 = 3;
@@ -402,11 +408,11 @@ export default defineComponent({
         tier1 = 0;
         tier2 = 0;
         tier3 = (330 - shardsCount) / 50;
-      } else if (!this.unit.glTier4) {
+      } else if ("glTier4" in this.unit && !this.unit.glTier4) {
         tier1 = 0;
         tier2 = 0;
         tier3 = 0;
-      } else if (!this.unit.glTier5) {
+      } else if ("glTier5" in this.unit && !this.unit.glTier5) {
         tier1 = 0;
         tier2 = 0;
         tier3 = 0;
@@ -417,7 +423,7 @@ export default defineComponent({
         tier3 = 0;
         tier4 = 0;
         tier5 = 0;
-        tier6 = 10 - this.unit.glUltMats;
+        tier6 = 10 - ("glUltMats" in this.unit ? this.unit.glUltMats : 0);
       }
 
       return (
