@@ -49,7 +49,7 @@ import { mapState } from "vuex";
 
 import { setupEvents } from "utils";
 import { Unit } from "types/unit";
-import { NodeCharacter, FarmingNode, IPrerequisite } from "types/shards";
+import { NodeCharacter, FarmingNode } from "types/shards";
 import LegendaryRequirementsTable from "components/shards/tables/legendary/legendaryRequirementsTable.vue";
 import LegendarySummaryTable from "components/shards/tables/legendary/legendarySummaryTable.vue";
 
@@ -69,30 +69,37 @@ export default defineComponent({
     ...mapState("unit", ["unitList"]),
     ...mapState("player", ["player"]),
     ...mapState("shards", ["shardFarming"]),
-    glUnitList(): (Unit | IPrerequisite)[] {
-      return this.unitList.reduce((list: Unit[], unit: Unit) => {
-        const isLegendary = !!unit.whereToFarm.find(
-          (x) =>
-            x.table === "Galactic Legends" || x.table === "Legendary Events"
-        );
-        if (isLegendary) {
-          const playerUnit = this.player.units.find(
-            (u: Unit) => u.id === unit.id
-          );
-
-          if (playerUnit) {
-            if (
-              (playerUnit.isGL && !playerUnit.hasUlt) ||
-              playerUnit.stars < 7
-            ) {
-              list.push(playerUnit);
-            }
-          } else {
-            list.push(unit);
+    glUnitList(): (Unit | NodeCharacter)[] {
+      return this.shardFarming.reduce(
+        (characterList: (Unit | NodeCharacter)[], node: FarmingNode) => {
+          if (node.id === "legendary" || node.id === "galactic_legends") {
+            node.characters.forEach((char) => {
+              const playerUnit = this.player.units.find(
+                (u: Unit) => u.id === char.id
+              );
+              if (playerUnit) {
+                if (
+                  (playerUnit.isGL && !playerUnit.hasUlt) ||
+                  playerUnit.stars < 7
+                ) {
+                  characterList.push(playerUnit);
+                }
+              } else {
+                const unownedUnit = this.unitList.find(
+                  (x: Unit) => x.id === char.id
+                );
+                if (unownedUnit) {
+                  characterList.push(unownedUnit);
+                } else {
+                  characterList.push(char);
+                }
+              }
+            });
           }
-        }
-        return list;
-      }, []);
+          return characterList;
+        },
+        []
+      );
     },
     cols() {
       return [

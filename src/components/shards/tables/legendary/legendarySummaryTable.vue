@@ -40,7 +40,7 @@ import { mapState } from "vuex";
 
 import { setupEvents } from "utils";
 import { totalProgress, getPrerequisites, Unit } from "types/unit";
-import { IPrerequisite } from "types/shards";
+import { NodeCharacter } from "types/shards";
 import UnitIcon from "components/units/unitIcon.vue";
 
 export default defineComponent({
@@ -48,7 +48,7 @@ export default defineComponent({
   components: { UnitIcon },
   props: {
     unitList: {
-      type: Array as PropType<(Unit | IPrerequisite)[]>,
+      type: Array as PropType<(Unit | NodeCharacter)[]>,
       required: true,
     },
     header: {
