@@ -160,7 +160,7 @@ import {
   totalProgress,
   getPrerequisites,
 } from "types/unit";
-import { displayValue, IPrerequisite } from "types/shards";
+import { displayValue, IPrerequisite, NodeCharacter } from "types/shards";
 import { isGearRequirement, isRelicRequirement } from "types/shards";
 
 export default defineComponent({
@@ -173,7 +173,7 @@ export default defineComponent({
   },
   props: {
     unit: {
-      type: Object as () => Unit | IPrerequisite,
+      type: Object as () => Unit | NodeCharacter,
       required: true,
     },
     selectedColumns: {

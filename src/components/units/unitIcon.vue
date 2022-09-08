@@ -39,7 +39,7 @@
 import { defineComponent, PropType } from "vue";
 
 import { Unit } from "types/unit";
-import { IPrerequisite } from "types/shards";
+import { NodeCharacter } from "types/shards";
 import UnitPortrait from "./unitPortrait.vue";
 
 export default defineComponent({
@@ -48,7 +48,7 @@ export default defineComponent({
   props: {
     unit: {
       required: true,
-      type: Object as PropType<Unit | IPrerequisite>,
+      type: Object as PropType<Unit | NodeCharacter>,
     },
     isLink: {
       type: Boolean,
