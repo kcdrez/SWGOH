@@ -11,11 +11,15 @@
               <span class="input-group-text">Sort By:</span>
               <select
                 class="form-control"
-                @change="sortMethod = $event.target.value"
+                v-model="sortMethod"
               >
                 <option value="name">Name</option>
+                <option value="mark">Mark</option>
                 <option value="location">Location</option>
+                <option value="owned">Owned</option>
+                <option value="needed">Needed</option>
                 <option value="progress">Progress</option>
+                <option value="required" v-if="showRequiredByUnit">Required By</option>
                 <option value="time">Time Remaining</option>
               </select>
             </div>
@@ -23,7 +27,7 @@
               <span class="input-group-text">Sort Direction:</span>
               <select
                 class="form-control"
-                @change="sortDir = $event.target.value"
+                v-model="sortDir"
               >
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>

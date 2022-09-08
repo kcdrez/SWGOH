@@ -11,7 +11,7 @@
           data-bs-toggle="collapse"
           :href="`#${storageKey}Collapse${unit.id}`"
         >
-          <div class="d-inline">{{ unit.name }}</div>
+          <div class="d-inline">{{ unit.name ?? unit.id }}</div>
         </h3>
         <div class="toggles-container">
           <div class="simple-view-container">
@@ -49,6 +49,7 @@ import { mapState } from "vuex";
 
 import { setupEvents } from "utils";
 import { Unit } from "types/unit";
+import { NodeCharacter, FarmingNode, IPrerequisite } from "types/shards";
 import LegendaryRequirementsTable from "components/shards/tables/legendary/legendaryRequirementsTable.vue";
 import LegendarySummaryTable from "components/shards/tables/legendary/legendarySummaryTable.vue";
 
@@ -67,7 +68,8 @@ export default defineComponent({
   computed: {
     ...mapState("unit", ["unitList"]),
     ...mapState("player", ["player"]),
-    glUnitList(): Unit[] {
+    ...mapState("shards", ["shardFarming"]),
+    glUnitList(): (Unit | IPrerequisite)[] {
       return this.unitList.reduce((list: Unit[], unit: Unit) => {
         const isLegendary = !!unit.whereToFarm.find(
           (x) =>

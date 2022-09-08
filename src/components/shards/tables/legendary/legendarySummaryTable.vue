@@ -23,7 +23,9 @@
               <UnitIcon :unit="unit" isLink hideImage />
             </td>
             <td class="align-middle text-center">
-              <ProgressBar :percent="totalProgress(unit.id, 'requirement')" />
+              <ProgressBar
+                :percent="totalProgress(unit.id ?? '', 'requirement')"
+              />
             </td>
           </tr>
         </tbody>
@@ -38,6 +40,7 @@ import { mapState } from "vuex";
 
 import { setupEvents } from "utils";
 import { totalProgress, getPrerequisites, Unit } from "types/unit";
+import { IPrerequisite } from "types/shards";
 import UnitIcon from "components/units/unitIcon.vue";
 
 export default defineComponent({
@@ -45,7 +48,7 @@ export default defineComponent({
   components: { UnitIcon },
   props: {
     unitList: {
-      type: Array as PropType<Unit[]>,
+      type: Array as PropType<(Unit | IPrerequisite)[]>,
       required: true,
     },
     header: {
