@@ -182,6 +182,9 @@ export class Unit {
   public get currentLevelGear() {
     return this._current_level_gear;
   }
+  public get gearPiecesCount() {
+    return this._current_level_gear.filter((x) => x.is_obtained).length;
+  }
   public get gearList() {
     return this._gear_list;
   }
@@ -646,7 +649,7 @@ export class Unit {
             ({ gear: salvageId, amount }: IIngredient) => {
               const matchGear = this.gearData(salvageId);
               if (matchGear) {
-                const exists = list.find((x: any) => x.id === matchGear.id);
+                const exists = list.find((x: Gear) => x.id === matchGear.id);
                 if (exists) {
                   exists.totalAmount += amount;
                   exists.neededBy[0].totalAmount += amount;
@@ -946,37 +949,21 @@ export function getUnitPercent(unit: Unit, type: string, target: number) {
   if (type === "Power") {
     return (unit.power / target) * 100;
   } else if (type === "Relic") {
-    const gearPercent = ((unit.gearLevel + 0.01) / maxGearLevel) * 0.5;
-
-    const { fragmented_white, incomplete_green, flawed_blue } =
-      store.state.relic.relicConfig;
-    const whiteProgress = fragmented_white.percentApplied(
-      unit.relicLevel,
+    const { gearScale, relicScale, shardsScale } = getScale(
+      unit.gearLevel,
       target
     );
-    const greenProgress = incomplete_green.percentApplied(
-      unit.relicLevel,
-      target
-    );
-    const blueProgress = flawed_blue.percentApplied(unit.relicLevel, target);
-
-    const relicPercent =
-      ((whiteProgress + greenProgress + blueProgress + 0.01) / 100 / 3) * 0.4;
-
-    const shardsPercent = ((unit.totalOwnedShards + 0.01) / 330) * 0.1;
+    const gearPercent = getGearPercent(unit) * gearScale;
+    const relicPercent = getRelicPercent(unit, target) * relicScale;
+    const shardsPercent = ((unit.totalOwnedShards + 0.01) / 330) * shardsScale;
 
     return (gearPercent + relicPercent + shardsPercent) * 100;
   } else if (type === "Gear") {
-    const gearPercent = (unit.gearLevel + 0.01) / target;
+    const { gearScale, shardsScale } = getScale(unit.gearLevel);
+    const gearPercent = getGearPercent(unit, target);
     const shardsPercent = (unit.totalOwnedShards + 0.01) / 330;
 
-    if (target === 12) {
-      return (gearPercent * 0.5 + shardsPercent * 0.5) * 100;
-    } else if (target === 13) {
-      return (gearPercent * 0.57 + shardsPercent * 0.43) * 100;
-    } else {
-      return gearPercent;
-    }
+    return (gearPercent * gearScale + shardsPercent * shardsScale) * 100;
   } else if (type === "Stars") {
     let shardsAmount = 0;
     for (let i = 1; i <= target; i++) {
@@ -1056,4 +1043,176 @@ export function getPrerequisites(unitId: string) {
       []
     );
   return legendaryUnits?.find((x) => x.id === unitId)?.prerequisites ?? [];
+}
+
+function getGearPercent(unit: Unit, target: number = maxGearLevel) {
+  let progress = 0;
+  const { gearLevel, gearPiecesCount } = unit;
+  const scales = {
+    g5: 0.1,
+    g8: 0.15,
+    g11: 0.2,
+    g12: 0.25,
+    g13: 0.3,
+  };
+  let totalScale = 0;
+  if (target >= maxGearLevel) {
+    totalScale = scales.g13 + scales.g12 + scales.g11 + scales.g8 + scales.g5;
+  } else if (target >= 12) {
+    totalScale = scales.g12 + scales.g11 + scales.g8 + scales.g5;
+  } else if (target >= 11) {
+    totalScale = scales.g11 + scales.g8 + scales.g5;
+  } else if (target >= 8) {
+    totalScale = scales.g8 + scales.g5;
+  } else {
+    totalScale = scales.g5;
+  }
+
+  if (target >= maxGearLevel) {
+    if ((gearLevel - 12) * 6 + gearPiecesCount <= 6) {
+      //gear level 12
+      progress +=
+        (((gearLevel - 12) * 6 + gearPiecesCount) / 6) *
+        (scales.g13 / totalScale);
+    } else {
+      progress += scales.g13;
+    }
+  }
+
+  if (target >= 12) {
+    if ((gearLevel - 11) * 6 + gearPiecesCount <= 6) {
+      //gear level 11
+      progress +=
+        (((gearLevel - 11) * 6 + gearPiecesCount) / 6) *
+        (scales.g12 / totalScale);
+    } else {
+      progress += scales.g12;
+    }
+  }
+
+  if (target >= 11) {
+    if ((gearLevel - 8) * 6 + gearPiecesCount <= 18) {
+      //gear level 8-10
+      progress +=
+        (((gearLevel - 8) * 6 + gearPiecesCount) / 6) *
+        (scales.g11 / totalScale);
+    } else {
+      progress += scales.g11;
+    }
+  }
+
+  if (target >= 8) {
+    if ((gearLevel - 5) * 6 + gearPiecesCount <= 18) {
+      //gear level 5-7
+      progress +=
+        (((gearLevel - 5) * 6 + gearPiecesCount) / 6) *
+        (scales.g8 / totalScale);
+    } else {
+      progress += scales.g8;
+    }
+  }
+
+  if (target >= 5) {
+    if (gearLevel * 6 + gearPiecesCount <= 30) {
+      //gear level 0-4
+      progress +=
+        ((gearLevel * 6 + gearPiecesCount) / 6) * (scales.g5 / totalScale);
+    } else {
+      progress += scales.g5;
+    }
+  }
+
+  return progress;
+}
+
+function getRelicPercent(unit: Unit, target: number = maxRelicLevel): number {
+  const { fragmented_white, incomplete_green, flawed_blue } =
+    store.state.relic.relicConfig;
+  const whiteProgress = fragmented_white.percentApplied(
+    unit.relicLevel,
+    target
+  );
+  const greenProgress = incomplete_green.percentApplied(
+    unit.relicLevel,
+    target
+  );
+  const blueProgress = flawed_blue.percentApplied(unit.relicLevel, target);
+
+  return (whiteProgress + greenProgress + blueProgress + 0.01) / 100 / 3;
+}
+
+function getScale(gearLevel: number, relicLevel: number | null = null) {
+  type tRangeMap = {
+    [key: number]: number;
+  };
+
+  if (relicLevel) {
+    const relicScales: tRangeMap = {
+      0: 0,
+      1: 0.2,
+      2: 0.25,
+      3: 0.31,
+      4: 0.38,
+      5: 0.46,
+      6: 0.55,
+      7: 0.65,
+      8: 0.8,
+      9: 1,
+      //update when maxRelicLevel changes
+    };
+    const gearScales: tRangeMap = {
+      0: 0,
+      1: 0.02,
+      2: 0.03,
+      3: 0.04,
+      4: 0.06,
+      5: 0.08,
+      6: 0.11,
+      7: 0.16,
+      8: 0.24,
+      9: 0.34,
+      10: 0.45,
+      11: 0.6,
+      12: 0.78,
+      13: 1,
+      //update if maxGearLevel changes
+    };
+
+    const gearRelative = 0.5;
+    const relicRelative = 0.4;
+    const totalRelative = gearRelative + relicRelative;
+
+    const relicScale =
+      (relicScales[relicLevel] /
+        relicScales["1"] /
+        (gearScales[maxGearLevel] / relicScales["1"])) *
+      relicRelative;
+    const gearScale = totalRelative - relicScale;
+
+    return {
+      gearScale,
+      relicScale,
+      shardsScale: 0.1,
+    };
+  } else {
+    if (gearLevel === 12) {
+      return {
+        gearScale: 0.5,
+        relicScale: 0,
+        shardsScale: 0.5,
+      };
+    } else if (gearLevel === 13) {
+      return {
+        gearScale: 0.57,
+        relicScale: 0,
+        shardsScale: 0.43,
+      };
+    } else {
+      return {
+        gearScale: 1,
+        relicScale: 0,
+        shardsScale: 0,
+      };
+    }
+  }
 }

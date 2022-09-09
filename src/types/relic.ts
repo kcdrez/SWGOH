@@ -141,12 +141,15 @@ export class Relic {
     }
     return amount;
   }
-  public percentApplied(curLevel: number, target: number, debug = false) {
+
+  public percentApplied(curLevel: number, target: number) {
     const totalNeeded = this.totalAmountNeeded(target);
     const currentApplied = this.totalAmountNeeded(curLevel);
     const dropRate = this?.dropRate ?? 1;
 
-    if (currentApplied >= totalNeeded || totalNeeded <= 0) {
+    if (totalNeeded <= 0) {
+      return 0.01;
+    } else if (currentApplied >= totalNeeded) {
       return 100;
     } else {
       return (currentApplied / dropRate / (totalNeeded / dropRate)) * 100;
