@@ -148,7 +148,7 @@ export class Relic {
     const dropRate = this?.dropRate ?? 1;
 
     if (totalNeeded <= 0) {
-      return 0.01;
+      return 100;
     } else if (currentApplied >= totalNeeded) {
       return 100;
     } else {

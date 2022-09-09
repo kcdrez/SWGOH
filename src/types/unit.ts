@@ -1068,7 +1068,7 @@ function getGearPercent(unit: Unit, target: number = maxGearLevel) {
     totalScale = scales.g5;
   }
 
-  if (target >= maxGearLevel) {
+  if (gearLevel >= maxGearLevel) {
     if ((gearLevel - 12) * 6 + gearPiecesCount <= 6) {
       //gear level 12
       progress +=
@@ -1079,7 +1079,7 @@ function getGearPercent(unit: Unit, target: number = maxGearLevel) {
     }
   }
 
-  if (target >= 12) {
+  if (gearLevel >= 12) {
     if ((gearLevel - 11) * 6 + gearPiecesCount <= 6) {
       //gear level 11
       progress +=
@@ -1090,7 +1090,7 @@ function getGearPercent(unit: Unit, target: number = maxGearLevel) {
     }
   }
 
-  if (target >= 11) {
+  if (gearLevel >= 11) {
     if ((gearLevel - 8) * 6 + gearPiecesCount <= 18) {
       //gear level 8-10
       progress +=
@@ -1101,7 +1101,7 @@ function getGearPercent(unit: Unit, target: number = maxGearLevel) {
     }
   }
 
-  if (target >= 8) {
+  if (gearLevel >= 8) {
     if ((gearLevel - 5) * 6 + gearPiecesCount <= 18) {
       //gear level 5-7
       progress +=
@@ -1112,7 +1112,7 @@ function getGearPercent(unit: Unit, target: number = maxGearLevel) {
     }
   }
 
-  if (target >= 5) {
+  if (gearLevel >= 5) {
     if (gearLevel * 6 + gearPiecesCount <= 30) {
       //gear level 0-4
       progress +=
@@ -1122,7 +1122,7 @@ function getGearPercent(unit: Unit, target: number = maxGearLevel) {
     }
   }
 
-  return progress;
+  return progress / totalScale;
 }
 
 function getRelicPercent(unit: Unit, target: number = maxRelicLevel): number {
@@ -1184,8 +1184,8 @@ function getScale(gearLevel: number, relicLevel: number | null = null) {
 
     const relicScale =
       (relicScales[relicLevel] /
-        relicScales["1"] /
-        (gearScales[maxGearLevel] / relicScales["1"])) *
+        relicScales[1] /
+        (gearScales[maxGearLevel] / relicScales[1])) *
       relicRelative;
     const gearScale = totalRelative - relicScale;
 
