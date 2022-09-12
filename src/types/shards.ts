@@ -139,9 +139,9 @@ export interface IPrerequisite {
   recommended?: IPrerequisiteItem;
   prerequisites?: IPrerequisite;
 }
-interface IPrerequisiteItem {
+export interface IPrerequisiteItem {
   value: number;
-  type: "Relic" | "Power" | "Gear" | "Stars";
+  type?: "Relic" | "Power" | "Gear" | "Stars";
 }
 
 export type OwnedShardsMap = {
