@@ -4,6 +4,7 @@ import store from "vuex-store/store";
 import {
   FarmingNode,
   IPrerequisite,
+  IPrerequisiteItem,
   NodeCharacter,
   shardMapping,
 } from "./shards";
@@ -908,12 +909,12 @@ export function unitsByPriority(
 }
 
 export function getPercent(
-  item: any,
+  item: IPrerequisite,
   prerequisiteType: "requirement" | "recommended"
 ): number {
   let percentage = 0;
-  const type = item[prerequisiteType]?.type ?? item.requirement.type;
-  const value = item[prerequisiteType]?.value ?? item.requirement.value;
+  const type = item[prerequisiteType]?.type ?? item?.requirement?.type;
+  const value = item[prerequisiteType]?.value ?? item?.requirement?.value;
   if (item.id) {
     const unit = getUnit(item.id);
     if (unit) {
@@ -945,7 +946,11 @@ export function getPercent(
   }
 }
 
-export function getUnitPercent(unit: Unit, type: string, target: number) {
+export function getUnitPercent(
+  unit: Unit,
+  type: string | undefined,
+  target: number = 0
+) {
   if (type === "Power") {
     return (unit.power / target) * 100;
   } else if (type === "Relic") {
@@ -1022,13 +1027,15 @@ export function totalProgress(
   prerequisites: IPrerequisite[],
   prerequisiteType: "requirement" | "recommended"
 ) {
-  let list: number[] = [];
+  // let list: number[] = [];
+  let progress = 0;
+  const typeList = prerequisites.map((x) => x.requirement?.type);
   (prerequisites ?? []).forEach((item) => {
-    list.push(getPercent(item, prerequisiteType));
+    const scale = getTypeScale(item.requirement?.type, typeList);
+    progress += getPercent(item, prerequisiteType) * scale;
+    // list.push(getPercent(item, prerequisiteType) * scale);
   });
-  return round2Decimals(
-    list.reduce((partialSum, a) => partialSum + a, 0) / list.length
-  );
+  return round2Decimals(progress);
 }
 
 export function getPrerequisites(unitId: string) {
@@ -1043,6 +1050,10 @@ export function getPrerequisites(unitId: string) {
       []
     );
   return legendaryUnits?.find((x) => x.id === unitId)?.prerequisites ?? [];
+}
+
+function getShardsPercent(unit: Unit, shardsScale: number): number {
+  return ((unit.totalOwnedShards + 0.01) / 330) * shardsScale;
 }
 
 function getGearPercent(unit: Unit, target: number = maxGearLevel) {
@@ -1215,4 +1226,70 @@ function getScale(gearLevel: number, relicLevel: number | null = null) {
       };
     }
   }
+}
+
+function getTypeScale(
+  type: IPrerequisiteItem["type"],
+  typeList: IPrerequisiteItem["type"][]
+): number {
+  const hasRelics = typeList.some((x) => x === "Relic");
+  const hasGear = typeList.some((x) => x === "Gear");
+  const hasStars = typeList.some((x) => x === "Stars");
+  const hasPower = typeList.some((x) => x === "Power");
+
+  if (hasRelics && hasGear && hasStars && hasPower) {
+    if (type === "Gear") {
+      return 0.3 / typeList.filter((x) => x === "Gear").length;
+    } else if (type === "Relic") {
+      return 0.4 / typeList.filter((x) => x === "Relic").length;
+    } else if (type === "Stars") {
+      return 0.1 / typeList.filter((x) => x === "Stars").length;
+    } else if (type === "Power") {
+      return 0.2 / typeList.filter((x) => x === "Power").length;
+    }
+  } else if (hasGear && hasStars && hasPower) {
+    if (type === "Gear") {
+      return 0.5 / typeList.filter((x) => x === "Gear").length;
+    } else if (type === "Stars") {
+      return 0.3 / typeList.filter((x) => x === "Stars").length;
+    } else if (type === "Power") {
+      return 0.2 / typeList.filter((x) => x === "Power").length;
+    }
+  } else if (hasRelics && hasStars && hasPower) {
+    if (type === "Relic") {
+      return 0.8 / typeList.filter((x) => x === "Relic").length;
+    } else if (type === "Stars") {
+      return 0.1 / typeList.filter((x) => x === "Stars").length;
+    } else if (type === "Power") {
+      return 0.1 / typeList.filter((x) => x === "Power").length;
+    }
+  } else if (hasRelics && hasPower) {
+    if (type === "Relic") {
+      return 0.8 / typeList.filter((x) => x === "Relic").length;
+    } else if (type === "Power") {
+      return 0.2 / typeList.filter((x) => x === "Power").length;
+    }
+  } else if (hasRelics && hasStars) {
+    if (type === "Relic") {
+      return 0.8 / typeList.filter((x) => x === "Relic").length;
+    } else if (type === "Stars") {
+      return 0.2 / typeList.filter((x) => x === "Stars").length;
+    }
+  } else if (hasGear && hasPower) {
+    if (type === "Gear") {
+      return 0.7 / typeList.filter((x) => x === "Gear").length;
+    } else if (type === "Power") {
+      return 0.3 / typeList.filter((x) => x === "Power").length;
+    }
+  } else if (hasGear && hasStars) {
+    if (type === "Gear") {
+      return 0.7 / typeList.filter((x) => x === "Gear").length;
+    } else if (type === "Stars") {
+      return 0.3 / typeList.filter((x) => x === "Stars").length;
+    }
+  } else if (hasRelics || hasGear || hasStars || hasPower) {
+    return 1 / typeList.length;
+  }
+
+  return 0;
 }
