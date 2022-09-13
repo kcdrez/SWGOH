@@ -107,6 +107,11 @@
                 >
               </li>
               <li>
+                <router-link class="dropdown-item" :to="{ name: 'GoalsPage' }"
+                  >Goals List</router-link
+                >
+              </li>
+              <li>
                 <router-link
                   class="dropdown-item"
                   :to="{ name: 'TBStatusPage' }"

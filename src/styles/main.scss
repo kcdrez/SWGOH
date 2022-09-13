@@ -242,7 +242,13 @@ button:disabled {
 }
 
 .input-group {
-  .search-input {
+  .search-input:not(:first-child) {
+    input {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+  }
+  .search-input:not(:last-child) {
     input {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;

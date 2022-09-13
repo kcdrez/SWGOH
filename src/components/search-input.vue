@@ -190,4 +190,8 @@ input {
   padding-left: 40px !important;
   padding-right: 40px !important;
 }
+
+.search-input {
+  flex: 1 1 auto;
+}
 </style>

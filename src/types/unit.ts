@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import { maxRelicLevel } from "./relic";
 import { Gear, IIngredient, maxGearLevel } from "./gear";
 import store from "vuex-store/store";
@@ -10,7 +12,6 @@ import {
 } from "./shards";
 import { round2Decimals } from "utils";
 import { CurrencyTypeConfig } from "./currency";
-import _ from "lodash";
 import { anyTagsMatch } from "./teams";
 
 interface IStatMultiplier {
@@ -839,7 +840,6 @@ export class Unit {
     return match?.priority ?? 0;
   }
 }
-
 export interface UnitGear {
   base_id: string;
   is_obtained: boolean;
