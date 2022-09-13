@@ -7,6 +7,7 @@ import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
 import { Unit } from "types/unit";
+import { Goal, IGoal } from "types/goals";
 
 interface State {
   player: Player | null;
@@ -99,7 +100,7 @@ const store = {
       commit("SET_PLAYER", null);
       commit("SET_ALLY_CODE", null);
     },
-    saveEnergy({ rootState }: ActionCtx) {
+    saveEnergy({ rootState, state }: ActionCtx) {
       const { refreshes: cantinaRefreshes, energy: cantinaEnergy } =
         rootState.relic;
       const { refreshes: otherRefreshes, energy: otherEnergy } = rootState.gear;
@@ -112,10 +113,29 @@ const store = {
         ...cantinaEnergy,
         ...otherEnergy,
       };
-      apiClient.saveEnergyData(rootState.player.player?.id || "", {
+      apiClient.saveEnergyData(state.player?.id || "", {
         refreshes,
         energy,
       });
+    },
+    async addGoal({ state, dispatch }: ActionCtx, goalData: IGoal) {
+      const newGoal = new Goal(goalData);
+      state.player?.goalList.push(newGoal);
+      await dispatch("saveGoals");
+    },
+    async removeGoal({ state, dispatch }: ActionCtx, goalId: string) {
+      const index =
+        state.player?.goalList.findIndex((x) => x.id === goalId) ?? -1;
+      if (index > -1) {
+        state.player?.goalList.splice(index, 1);
+        await dispatch("saveGoals");
+      }
+    },
+    async saveGoals({ state }: ActionCtx) {
+      await apiClient.saveGoals(
+        state.player?.id ?? "",
+        state.player?.goalList ?? []
+      );
     },
   },
 };

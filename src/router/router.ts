@@ -13,6 +13,7 @@ import GuildEventsPage from "pages/guildEvents.vue";
 import GuildUnitsPage from "pages/guildUnits.vue";
 import StatCalculatorPage from "pages/statCalculator.vue";
 import GLChecklist from "pages/glChecklist.vue";
+import GoalsPage from "pages/goalsPage.vue";
 import TBStatusPage from "pages/TBStatusPage.vue";
 import WidgetsPage from "pages/widgets.vue";
 import GearListPage from "pages/gearList.vue";
@@ -184,6 +185,24 @@ const routes = [
         path: "",
         name: "GLChecklist",
         component: GLChecklist,
+      },
+    ],
+  },
+  {
+    path: "/goal-list",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["unit", "shards"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GoalsPage",
+        component: GoalsPage,
       },
     ],
   },

@@ -5,6 +5,7 @@ import { OwnedRelicConfig } from "./relic";
 import { OwnedShardsMap } from "./shards";
 import { ITeam, Team } from "./teams";
 import { IUnit, Unit } from "./unit";
+import { Goal } from "types/goals";
 
 export interface Player {
   ally_code: number;
@@ -21,6 +22,7 @@ export interface Player {
   shards: OwnedShardsMap;
   wallet: IWallet;
   dailyCurrency: IDailyCurrency;
+  goalList: Goal[];
 }
 
 export interface PlayerResponse {

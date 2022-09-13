@@ -1,8 +1,9 @@
 import axios from "axios";
 
-import { Player, PlayerResponse } from "types/player";
+import { Player } from "types/player";
 import { ConfigType, Gear, IGear } from "types/gear";
 import { IUnit, Unit } from "types/unit";
+import { Goal, IGoal } from "types/goals";
 import { FarmingNode, IFarmingNode, OwnedShardsMap } from "types/shards";
 import { OwnedRelicConfig } from "types/relic";
 import { ITeam, Match, Team } from "types/teams";
@@ -16,7 +17,7 @@ import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
   baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3000/dev";
+  // baseUrl = "http://localhost:3001/dev";
 
   constructor() {}
 
@@ -26,6 +27,7 @@ class ApiClient {
     return {
       ...data,
       units: data.units.map((u: IUnit) => new Unit(u)),
+      goalList: data.goalList.map((el: IGoal) => new Goal(el)),
     };
   }
 
@@ -286,6 +288,13 @@ class ApiClient {
     };
 
     return unitMapping;
+  }
+  async saveGoals(playerId: string | undefined, goals: Goal[]) {
+    if (playerId) {
+      await axios.patch(`${this.baseUrl}/player/goalList/${playerId}`, {
+        goalList: goals.map((x) => x.sanitize()),
+      });
+    }
   }
 }
 
