@@ -487,6 +487,7 @@ const executor = {
     },
   ],
 };
+
 const finalizer = {
   label: "Finalizer",
   id: "finalizer",
@@ -523,6 +524,7 @@ const finalizer = {
     },
   ],
 };
+
 const malevolence = {
   label: "Malevolence",
   id: "malevolence",
@@ -559,6 +561,7 @@ const malevolence = {
     },
   ],
 };
+
 const chimaera = {
   label: "Chimaera",
   id: "chimaera",

@@ -1,9 +1,6 @@
 <template>
   <div v-if="prerequisites">
-    <div
-      class="mb-2 d-flex justify-content-center"
-      v-if="!('stars' in unit) || unit.stars < 7"
-    >
+    <div class="mb-2 d-flex justify-content-center" v-if="unit.stars < 7">
       <h5 class="text-center mb-0">Total Progress:</h5>
       <div class="total-progress-bar">
         <ProgressBar :percent="totalProgress('requirement')" />
@@ -77,6 +74,38 @@
               <Timestamp :timeLength="estimatedTime"
             /></span>
           </div>
+        </div>
+      </div>
+    </div>
+    <div
+      v-else-if="
+        totalProgress('requirement') === 100 &&
+        unit.isCapitalShip &&
+        unit.stars < 7
+      "
+      class="container mb-3"
+    >
+      <div class="row">
+        <div class="col">
+          <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">Shards Owned:</span>
+            <ShardsOwned :unit="unit" class="form-control" />
+          </div>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">Event Refreshes:</span>
+            <input
+              type="number"
+              class="form-control"
+              v-model="unit.capitalShipRefreshes"
+              min="0"
+            />
+          </div>
+        </div>
+        <div class="col">
+          <Timestamp
+            :timeLength="estimatedTime"
+            label="Estimated 7 Star Completion:"
+          />
         </div>
       </div>
     </div>
@@ -173,7 +202,7 @@ export default defineComponent({
   },
   props: {
     unit: {
-      type: Object as () => Unit | NodeCharacter,
+      type: Object as () => Unit,
       required: true,
     },
     selectedColumns: {
@@ -439,15 +468,26 @@ export default defineComponent({
       return this.totalGLTicketsNeeded / 0.2;
     },
     estimatedTime() {
-      const refreshes = this.$store.state.gear.refreshes.standard ?? 0;
-      const energySpent = this.$store.state.gear.energy.standard ?? 0;
+      if (this.unit.isGL) {
+        const refreshes = this.$store.state.gear.refreshes.standard ?? 0;
+        const energySpent = this.$store.state.gear.energy.standard ?? 0;
 
-      return Math.ceil(
-        this.estimatedEnergy / (375 - energySpent + 120 * refreshes)
-      );
+        return Math.ceil(
+          this.estimatedEnergy / (375 - energySpent + 120 * refreshes)
+        );
+      } else if (this.unit.isCapitalShip) {
+        return Math.ceil(
+          (this.unit.remainingShards /
+            (10 * (this.unit.capitalShipRefreshes + 1))) *
+            (30.5 / this.unit.capitalShipEventFrequency)
+        );
+      } else {
+        return 0;
+      }
     },
   },
   methods: {
+    getUnit,
     sortBy(type: string): void {
       if (this.sortMethod === type) {
         this.sortDir = this.sortDir === "asc" ? "desc" : "asc";

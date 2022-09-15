@@ -202,6 +202,9 @@ export class Unit {
   public get isGL() {
     return this.categories.includes("Galactic Legend");
   }
+  public get isCapitalShip() {
+    return this.categories.includes("Capital Ship");
+  }
   public get zetas() {
     return this._zeta_abilities ?? [];
   }
@@ -234,7 +237,7 @@ export class Unit {
     });
   }
   public get glUltMats() {
-    return store.state.shards.ownedShards[this.id]?.glFarming?.ultMats || 0;
+    return store.state.shards.ownedShards[this.id]?.glFarming?.ultMats ?? 0;
   }
   public set glUltMats(val) {
     store.dispatch("shards/glProgressUpdate", {
@@ -243,6 +246,32 @@ export class Unit {
       ultMats: val,
       id: this.id,
     });
+  }
+  public get capitalShipRefreshes() {
+    return store.state.shards.ownedShards[this.id]?.capitalShipRefreshes ?? 0;
+  }
+  public set capitalShipRefreshes(val) {
+    store.dispatch("shards/capitalShipUpdate", {
+      refreshes: val,
+      id: this.id,
+    });
+  }
+  public get capitalShipEventFrequency() {
+    const map: any = {
+      CAPITALFINALIZER: 2,
+      CAPITALRADDUS: 2,
+      CAPITALMONCALAMARICRUISER: 1,
+      CAPITALEXECUTOR: 1,
+      CAPITALPROFUNDITY: 1,
+      CAPITALJEDICRUISER: 1,
+      CAPITALSTARDESTROYER: 1,
+    };
+
+    if (this.id in map) {
+      return map[this.id];
+    } else {
+      return 1;
+    }
   }
 
   public get hasSpeedSet() {
