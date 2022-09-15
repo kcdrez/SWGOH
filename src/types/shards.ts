@@ -155,6 +155,7 @@ interface ShardData extends UnitNodeData {
     tier5: boolean;
     ultMats: number;
   };
+  capitalShipRefreshes?: number;
 }
 
 type UnitNodeData = {

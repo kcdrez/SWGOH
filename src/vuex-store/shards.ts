@@ -122,6 +122,20 @@ const store = {
         };
       }
     },
+    UPSERT_CAPITALSHIP_REFRESHES(
+      state: State,
+      { refreshes, id }: { refreshes: number; id: string }
+    ) {
+      const match = state.ownedShards[id];
+      if (match) {
+        match.capitalShipRefreshes = refreshes;
+      } else {
+        state.ownedShards[id] = {
+          owned: 0,
+          capitalShipRefreshes: refreshes,
+        };
+      }
+    },
     ADD_UNIT(state: State, unitId: string) {
       const match = state.ownedShards[unitId];
       if (match) {
@@ -164,6 +178,13 @@ const store = {
       payload: { id: string; tier4: boolean; tier5: boolean; ultMats: number }
     ) {
       commit("UPSERT_GL_STATUS", payload);
+      dispatch("save");
+    },
+    capitalShipUpdate(
+      { commit, dispatch }: ActionCtx,
+      payload: { refreshes: number }
+    ) {
+      commit("UPSERT_CAPITALSHIP_REFRESHES", payload);
       dispatch("save");
     },
     addUnit({ commit, dispatch }: ActionCtx, unitId: string) {

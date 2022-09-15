@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="unit">
     <Popper hover arrow placement="right" v-if="'name' in unit && unit">
       <template #content v-if="hideImage">
         <UnitPortrait :unit="unit" :size="size" showGearLevel />
@@ -48,7 +48,7 @@ export default defineComponent({
   props: {
     unit: {
       required: true,
-      type: Object as PropType<Unit | NodeCharacter>,
+      type: Object as PropType<Unit | NodeCharacter | undefined>,
     },
     isLink: {
       type: Boolean,
