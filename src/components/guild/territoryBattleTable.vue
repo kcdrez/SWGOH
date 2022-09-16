@@ -291,11 +291,7 @@ export default defineComponent({
       }
     },
     filteredEvents(): TerritoryBattleEvent[] {
-      return this.territoryBattleEvents
-      .filter((e: TerritoryBattleEvent) => {
-        return moment(e.date).isAfter(moment().subtract(6, "months"))
-      })
-      .sort(
+      return this.tbEvents().sort(
         (a: TerritoryBattleEvent, b: TerritoryBattleEvent) => {
           if (this.sortMethod === "date") {
             if (this.sortDir === "asc") {
@@ -409,23 +405,17 @@ export default defineComponent({
       if (!this.addNewDisabled) {
         await this.addTerritoryBattleEvent(unvue(this.newEvent));
       }
-      this.$toast(
-        `Territory Battle event added successfully`,
-        {
-          positionY: "top",
-          class: "toast-success",
-        }
-      );
+      this.$toast(`Territory Battle event added successfully`, {
+        positionY: "top",
+        class: "toast-success",
+      });
     },
     async removeEvent(id: string) {
       await this.removeTerritoryBattleEvent(id);
-      this.$toast(
-        `Territory Battle event removed successfully`,
-        {
-          positionY: "top",
-          class: "toast-success",
-        }
-      );
+      this.$toast(`Territory Battle event removed successfully`, {
+        positionY: "top",
+        class: "toast-success",
+      });
     },
     showCol(key: string): boolean {
       return this.selectedColumns.some((x: any) => x === key);

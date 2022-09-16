@@ -3,17 +3,36 @@ import { Unit } from "./unit";
 import { unvue } from "utils";
 
 export interface GuildPayload {
-  territoryWar?: TerritoryWarEvent[];
+  territoryWar?: ITerritoryWarEvent[];
   territoryBattle?: TerritoryBattleEvent[];
 }
 
-export interface TerritoryWarEvent {
+export interface ITerritoryWarEvent {
   id: string;
   date: string;
   win: boolean;
-  get1: number;
-  get2: number;
-  zetas: number;
+  guildGP: number;
+  currencies: {
+    get1: number;
+    get2: number;
+    guildStore: number;
+    credits: number;
+  };
+  abilityMats: {
+    zetas: number;
+    omegas: number;
+    purple: number;
+  };
+  relicMats: {
+    aeros: number;
+    droidBrains: number;
+  };
+  datacronMats: {
+    mk1: number;
+    mk2: number;
+    mk3: number;
+    dataCache: number;
+  };
 }
 
 export interface TerritoryBattleEvent {

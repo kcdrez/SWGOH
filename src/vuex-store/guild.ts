@@ -7,14 +7,15 @@ import { apiClient } from "../api/api-client";
 import {
   GuildPayload,
   TerritoryBattleEvent,
-  TerritoryWarEvent,
+  ITerritoryWarEvent,
 } from "types/guild";
 import { round2Decimals } from "utils";
+import moment from "moment";
 
 interface State {
   requestState: loadingState;
   guildId: string;
-  territoryWarEvents: TerritoryWarEvent[];
+  territoryWarEvents: ITerritoryWarEvent[];
   territoryBattleEvents: TerritoryBattleEvent[];
   accessLevel: number;
 }
@@ -72,9 +73,12 @@ const store = {
   },
   getters: {
     tbEvents(state: State) {
-      return (type: "Light" | "Dark"): TerritoryBattleEvent[] => {
+      return (type: "Light" | "Dark" | undefined): TerritoryBattleEvent[] => {
         return state.territoryBattleEvents.filter((event) => {
-          return event.type === type;
+          return (
+            (type ? event.type === type : true) &&
+            moment(event.date).isAfter(moment().subtract(6, "months"))
+          );
         });
       };
     },
@@ -82,7 +86,11 @@ const store = {
       return (type: "Light" | "Dark"): number => {
         const total = state.territoryBattleEvents.reduce(
           (total: number, e: TerritoryBattleEvent) => {
-            return e.type === type ? total + e.stars : total;
+            if (moment(e.date).isAfter(moment().subtract(6, "months"))) {
+              return e.type === type ? total + e.stars : total;
+            } else {
+              return total;
+            }
           },
           0
         );
@@ -96,7 +104,11 @@ const store = {
       ): number => {
         const total = state.territoryBattleEvents.reduce(
           (total: number, e: TerritoryBattleEvent) => {
-            return e.type === type ? total + e[currencyType] : total;
+            if (moment(e.date).isAfter(moment().subtract(6, "months"))) {
+              return e.type === type ? total + e[currencyType] : total;
+            } else {
+              return total;
+            }
           },
           0
         );
@@ -107,14 +119,20 @@ const store = {
       return (type: "Light" | "Dark", unitId?: string): number => {
         const total = state.territoryBattleEvents.reduce(
           (total: number, e: TerritoryBattleEvent) => {
-            if (unitId) {
-              if (e.type === type && e.characterShards.id === unitId) {
-                return total + e.characterShards.count;
+            if (moment(e.date).isAfter(moment().subtract(6, "months"))) {
+              if (unitId) {
+                if (e.type === type && e.characterShards.id === unitId) {
+                  return total + e.characterShards.count;
+                } else {
+                  return total;
+                }
               } else {
-                return total;
+                return e.type === type
+                  ? total + e.characterShards.count
+                  : total;
               }
             } else {
-              return e.type === type ? total + e.characterShards.count : total;
+              return total;
             }
           },
           0
@@ -137,7 +155,7 @@ const store = {
       state.territoryWarEvents = payload?.territoryWar || [];
       state.territoryBattleEvents = payload?.territoryBattle || [];
     },
-    UPSERT_TERRITORY_WAR_EVENT(state: State, payload: TerritoryWarEvent) {
+    UPSERT_TERRITORY_WAR_EVENT(state: State, payload: ITerritoryWarEvent) {
       const index = state.territoryWarEvents.findIndex(
         (x) => x.id === payload.id
       );
@@ -202,14 +220,16 @@ const store = {
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     async addTerritoryWarEvent(
-      { commit, dispatch }: ActionCtx,
-      event: TerritoryWarEvent
+      { commit, dispatch, state }: ActionCtx,
+      event: ITerritoryWarEvent
     ) {
       if (!event.id) {
         event.id = uuid();
       }
-      commit("UPSERT_TERRITORY_WAR_EVENT", event);
-      await dispatch("saveTerritoryWarEvents");
+      await dispatch("saveTerritoryWarEvents", [
+        ...state.territoryWarEvents,
+        event,
+      ]);
     },
     async removeTerritoryWarEvent(
       { commit, dispatch }: ActionCtx,
@@ -218,11 +238,16 @@ const store = {
       commit("REMOVE_TERRITORY_WAR_EVENT", eventId);
       await dispatch("saveTerritoryWarEvents");
     },
-    async saveTerritoryWarEvents({ state }: ActionCtx) {
-      await apiClient.updateTerritoryWarEvents(
+    async saveTerritoryWarEvents(
+      { state, commit }: ActionCtx,
+      territoryWarEvents?: any[]
+    ) {
+      const eventList = territoryWarEvents ?? state.territoryWarEvents;
+      const response = await apiClient.updateTerritoryWarEvents(
         state.guildId,
-        state.territoryWarEvents
+        eventList
       );
+      commit("SET_EVENTS", response);
     },
     addTerritoryBattleEvent(
       { dispatch, state }: ActionCtx,

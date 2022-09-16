@@ -11,7 +11,7 @@ import {
   GuildPayload,
   IGuildUnitMap,
   TerritoryBattleEvent,
-  TerritoryWarEvent,
+  ITerritoryWarEvent,
 } from "types/guild";
 import { IDailyCurrency, IWallet } from "types/currency";
 
@@ -173,12 +173,16 @@ class ApiClient {
 
   async updateTerritoryWarEvents(
     guildId: string,
-    territoryWarEvents: TerritoryWarEvent[]
+    territoryWarEvents: ITerritoryWarEvent[]
   ) {
     if (guildId) {
-      await axios.patch(`${this.baseUrl}/guild/${guildId}/territoryWar`, {
-        territoryWarEvents,
-      });
+      const response = await axios.patch(
+        `${this.baseUrl}/guild/${guildId}/territoryWar`,
+        {
+          territoryWarEvents,
+        }
+      );
+      return response.data;
     }
   }
 

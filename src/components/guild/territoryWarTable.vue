@@ -54,15 +54,15 @@
           </td>
           <td v-if="showCol('get1')">
             <span class="row-label">GET1 Currency: </span>
-            {{ event.get1 }}
+            {{ event.currencies.get1 }}
           </td>
           <td v-if="showCol('get2')">
             <span class="row-label">GET2 Currency: </span>
-            {{ event.get2 }}
+            {{ event.currencies.get2 }}
           </td>
           <td v-if="showCol('zetas')">
             <span class="row-label">Zetas: </span>
-            {{ event.zetas }}
+            {{ event.abilityMats.zetas }}
           </td>
           <td v-if="showCol('actions')">
             <div class="btn-group btn-group-sm">
@@ -118,12 +118,10 @@
           <th colspan="6">Add New Event</th>
         </tr>
         <tr>
-          <th width="16.6%">Date</th>
-          <th width="16.6%">Win/Loss</th>
-          <th width="16.6%">GET1 Currency</th>
-          <th width="16.6%">GET2 Currency</th>
-          <th width="16.6%">Zetas</th>
-          <th width="16.6%">Actions</th>
+          <th width="25%">Date</th>
+          <th width="25%">Win/Loss</th>
+          <th width="25%">Event GP Range</th>
+          <th width="25%">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -150,36 +148,15 @@
             </select>
           </td>
           <td class="flex-sm">
-            <span class="row-label">GET1:</span>
-            <input
+            <select
               class="form-control form-control-sm"
-              type="number"
-              v-model="newEvent.get1"
+              v-model="newEvent.guildGP"
               @keypress.enter="addNewEvent"
-              min="0"
-              step="25"
-            />
-          </td>
-          <td class="flex-sm">
-            <span class="row-label">GET2:</span>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              v-model="newEvent.get2"
-              @keypress.enter="addNewEvent"
-              min="0"
-              step="25"
-            />
-          </td>
-          <td class="flex-sm">
-            <span class="row-label">Zetas:</span>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              v-model="newEvent.zetas"
-              @keypress.enter="addNewEvent"
-              min="0"
-            />
+            >
+              <option v-for="option in gpOptions" :value="option.value">
+                {{ option.label }}
+              </option>
+            </select>
           </td>
           <td>
             <button
@@ -201,7 +178,7 @@ import moment from "moment";
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 
-import { TerritoryWarEvent } from "types/guild";
+import { ITerritoryWarEvent } from "types/guild";
 import { round2Decimals, unvue } from "utils";
 
 export default defineComponent({
@@ -224,21 +201,18 @@ export default defineComponent({
       newEvent: {
         date: moment().format("YYYY-MM-DD"),
         win: true,
-        get1: 0,
-        get2: 0,
-        zetas: 0,
+        guildGP: 200,
       },
     } as any;
   },
   computed: {
     ...mapState("guild", ["territoryWarEvents", "accessLevel"]),
-    filteredEvents(): TerritoryWarEvent[] {
+    filteredEvents(): ITerritoryWarEvent[] {
       return this.territoryWarEvents
-      .filter((e: TerritoryWarEvent) => {
-        return moment(e.date).isAfter(moment().subtract(6, "months"))
-      })
-      .sort(
-        (a: TerritoryWarEvent, b: TerritoryWarEvent) => {
+        .filter((e: ITerritoryWarEvent) => {
+          return moment(e.date).isAfter(moment().subtract(6, "months"));
+        })
+        .sort((a: ITerritoryWarEvent, b: ITerritoryWarEvent) => {
           if (this.sortMethod === "date") {
             if (this.sortDir === "asc") {
               return moment(a.date).isBefore(b.date) ? 1 : -1;
@@ -254,76 +228,165 @@ export default defineComponent({
               return b.win ? 1 : -1;
             }
           } else if (this.sortMethod === "get1") {
-            if (a.get1 === b.get1) {
+            if (a.currencies.get1 === b.currencies.get1) {
               return 0;
             } else if (this.sortDir === "asc") {
-              return a.get1 > b.get1 ? 1 : -1;
+              return a.currencies.get1 > b.currencies.get1 ? 1 : -1;
             } else {
-              return a.get1 > b.get1 ? -1 : 1;
+              return a.currencies.get1 > b.currencies.get1 ? -1 : 1;
             }
           } else if (this.sortMethod === "get2") {
-            if (a.get2 === b.get2) {
+            if (a.currencies.get2 === b.currencies.get2) {
               return 0;
             } else if (this.sortDir === "asc") {
-              return a.get2 > b.get2 ? 1 : -1;
+              return a.currencies.get2 > b.currencies.get2 ? 1 : -1;
             } else {
-              return a.get2 > b.get2 ? -1 : 1;
+              return a.currencies.get2 > b.currencies.get2 ? -1 : 1;
             }
           } else if (this.sortMethod === "zetas") {
-            if (a.zetas === b.zetas) {
+            if (a.abilityMats.zetas === b.abilityMats.zetas) {
               return 0;
             } else if (this.sortDir === "asc") {
-              return a.zetas > b.zetas ? 1 : -1;
+              return a.abilityMats.zetas > b.abilityMats.zetas ? 1 : -1;
             } else {
-              return a.zetas > b.zetas ? -1 : 1;
+              return a.abilityMats.zetas > b.abilityMats.zetas ? -1 : 1;
             }
           }
           return 0;
-        }
-      );
+        });
     },
     averageWinRate(): number {
       const num =
-        (this.territoryWarEvents.filter((e: TerritoryWarEvent) => e.win)
-          .length /
-          this.territoryWarEvents.length) *
+        (this.filteredEvents.filter((e: ITerritoryWarEvent) => e.win).length /
+          this.filteredEvents.length) *
         100;
       return round2Decimals(num);
     },
     averageGet1(): number {
-      const total = this.territoryWarEvents.reduce(
-        (total: number, e: TerritoryWarEvent) => {
-          return total + e.get1;
+      const total = this.filteredEvents.reduce(
+        (total: number, e: ITerritoryWarEvent) => {
+          return total + e.currencies.get1;
         },
         0
       );
-      return round2Decimals(total / this.territoryWarEvents.length);
+      return round2Decimals(total / this.filteredEvents.length);
     },
     averageGet2(): number {
-      const total = this.territoryWarEvents.reduce(
-        (total: number, e: TerritoryWarEvent) => {
-          return total + e.get2;
+      const total = this.filteredEvents.reduce(
+        (total: number, e: ITerritoryWarEvent) => {
+          return total + e.currencies.get2;
         },
         0
       );
-      return round2Decimals(total / this.territoryWarEvents.length);
+      return round2Decimals(total / this.filteredEvents.length);
     },
     averageZetas(): number {
-      const total = this.territoryWarEvents.reduce(
-        (total: number, e: TerritoryWarEvent) => {
-          return total + e.zetas;
+      const total = this.filteredEvents.reduce(
+        (total: number, e: ITerritoryWarEvent) => {
+          return total + e.abilityMats.zetas;
         },
         0
       );
-      return round2Decimals(total / this.territoryWarEvents.length);
+      return round2Decimals(total / this.filteredEvents.length);
     },
     addNewDisabled(): boolean {
-      return (
-        !this.newEvent.date ||
-        !this.newEvent.get1 ||
-        !this.newEvent.get2 ||
-        !this.newEvent.zetas
-      );
+      return !this.newEvent.date || !this.newEvent.guildGP;
+    },
+    gpOptions() {
+      return [
+        {
+          label: "380m+",
+          value: 380,
+        },
+        {
+          label: "360m-379m",
+          value: 360,
+        },
+        {
+          label: "340m-359m",
+          value: 340,
+        },
+        {
+          label: "320m-339m",
+          value: 320,
+        },
+        {
+          label: "300m-319m",
+          value: 300,
+        },
+        {
+          label: "280m-299m",
+          value: 280,
+        },
+        {
+          label: "260m-279m",
+          value: 260,
+        },
+        {
+          label: "240m-259m",
+          value: 240,
+        },
+        {
+          label: "220m-239m",
+          value: 220,
+        },
+        {
+          label: "200m-219m",
+          value: 200,
+        },
+        {
+          label: "170m-199m",
+          value: 170,
+        },
+        {
+          label: "140m-169m",
+          value: 140,
+        },
+        {
+          label: "120m-1399m",
+          value: 120,
+        },
+        {
+          label: "100m-119m",
+          value: 100,
+        },
+        {
+          label: "80m-99m",
+          value: 80,
+        },
+        {
+          label: "60m-79m",
+          value: 60,
+        },
+        {
+          label: "50-59m",
+          value: 50,
+        },
+        {
+          label: "40m-49m",
+          value: 40,
+        },
+        {
+          label: "30m-39m",
+          value: 30,
+        },
+        {
+          label: "20m-29m",
+          value: 20,
+        },
+        {
+          label: "10m-19m",
+          value: 10,
+        },
+        {
+          label: "5m-9m",
+          value: 5,
+        },
+        {
+          label: "1-4m",
+          value: 0,
+        },
+      ];
     },
   },
   methods: {
@@ -347,23 +410,17 @@ export default defineComponent({
       if (!this.addNewDisabled) {
         await this.addTerritoryWarEvent(unvue(this.newEvent));
       }
-      this.$toast(
-        `Territory War event added successfully`,
-        {
-          positionY: "top",
-          class: "toast-success",
-        }
-      );
+      this.$toast(`Territory War event added successfully`, {
+        positionY: "top",
+        class: "toast-success",
+      });
     },
     async removeEvent(id: string) {
       await this.removeTerritoryWarEvent(id);
-      this.$toast(
-        `Territory War event removed successfully`,
-        {
-          positionY: "top",
-          class: "toast-success",
-        }
-      );
+      this.$toast(`Territory War event removed successfully`, {
+        positionY: "top",
+        class: "toast-success",
+      });
     },
     showCol(key: string): boolean {
       return this.selectedColumns.some((x: any) => x === key);
