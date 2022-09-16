@@ -34,7 +34,7 @@ const store = {
         (amount / rootState.guild.territoryBattleEvents.length) * tbFrequency;
       amount = 0;
       rootState.guild.territoryWarEvents.forEach((event) => {
-        amount += event.get1;
+        amount += event.currencies.get1;
       });
       avgAmount +=
         (amount / rootState.guild.territoryBattleEvents.length) * twFrequency;
@@ -50,7 +50,7 @@ const store = {
         (amount / rootState.guild.territoryBattleEvents.length) * tbFrequency;
       amount = 0;
       rootState.guild.territoryWarEvents.forEach((event) => {
-        amount += event.get2;
+        amount += event.currencies.get2;
       });
       avgAmount +=
         (amount / rootState.guild.territoryBattleEvents.length) * twFrequency;
