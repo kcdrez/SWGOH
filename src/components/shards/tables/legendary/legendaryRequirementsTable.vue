@@ -14,10 +14,7 @@
     >
       <div class="row">
         <div class="col">
-          <div
-            class="input-group input-group-sm"
-            v-if="!('stars' in unit) || unit.stars < 7"
-          >
+          <div class="input-group input-group-sm mb-1" v-if="unit.stars < 7">
             <span class="input-group-text">Shards Owned:</span>
             <ShardsOwned :unit="unit" class="form-control" />
           </div>
@@ -44,15 +41,24 @@
                 />
               </span>
             </div>
-            <div class="input-group input-group-sm mb-1">
-              <span class="input-group-text">Ultimate Ability Mats:</span>
-              <input
-                class="form-control"
-                v-model.number="unit.glUltMats"
-                type="number"
-              />
-            </div>
           </template>
+          <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">Ultimate Ability Mats:</span>
+            <input
+              class="form-control"
+              v-model.number="unit.glUltMats"
+              type="number"
+            />
+          </div>
+          <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">Owned Tickets:</span>
+            <input
+              class="form-control"
+              type="number"
+              v-model.number="unit.glOwnedTickets"
+              min="0"
+            />
+          </div>
           <EnergySpent showStandard />
         </div>
         <div class="col">
@@ -174,7 +180,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, toRefs, watch } from "vue";
+import { defineComponent, toRefs } from "vue";
 import { mapState, mapGetters } from "vuex";
 import _ from "lodash";
 
@@ -424,16 +430,15 @@ export default defineComponent({
       return this.nodeKey === "legendary";
     },
     estimatedEnergy() {
-      return this.unit.totalGLTicketsNeeded / 0.2;
+      return this.unit.totalGLTicketsNeeded / 0.05; //5% drop rate per energy according to reddit
     },
     estimatedTime() {
       if (this.unit.isGL) {
         const refreshes = this.$store.state.gear.refreshes.standard ?? 0;
         const energySpent = this.$store.state.gear.energy.standard ?? 0;
+        const ticketsPerDay = (375 - energySpent + 120 * refreshes) * 0.05; //5% drop rate per energy according to reddit
 
-        return Math.ceil(
-          this.estimatedEnergy / (375 - energySpent + 120 * refreshes)
-        );
+        return Math.ceil(this.unit.totalGLTicketsNeeded / ticketsPerDay);
       } else if (this.unit.isCapitalShip) {
         return Math.ceil(
           (this.unit.remainingShards /

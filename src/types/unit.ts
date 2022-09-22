@@ -223,6 +223,7 @@ export class Unit {
       tier5: !val ? false : this.glTier5,
       ultMats: this.glUltMats,
       id: this.id,
+      ownedTickets: this.glOwnedTickets,
     });
   }
   public get glTier5() {
@@ -234,6 +235,21 @@ export class Unit {
       tier5: val,
       ultMats: this.glUltMats,
       id: this.id,
+      ownedTickets: this.glOwnedTickets,
+    });
+  }
+  public get glOwnedTickets() {
+    return (
+      store.state.shards.ownedShards[this.id]?.glFarming?.ownedTickets ?? 0
+    );
+  }
+  public set glOwnedTickets(val: number) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier4: this.glTier4,
+      tier5: this.glTier5,
+      ultMats: this.glUltMats,
+      id: this.id,
+      ownedTickets: val,
     });
   }
   public get glUltMats() {
@@ -245,6 +261,7 @@ export class Unit {
       tier5: this.glTier5,
       ultMats: val,
       id: this.id,
+      ownedTickets: this.glOwnedTickets,
     });
   }
   public get totalGLTicketsNeeded(): number {
@@ -272,7 +289,8 @@ export class Unit {
     let tier3 = 3;
     let tier4 = 1;
     let tier5 = 1;
-    let tier6 = ultMatsMap[this.id] ?? 0;
+    let tier6 = (ultMatsMap[this.id] ?? 10) - this.glUltMats;
+
     if (shardsCount <= 80) {
       tier1 = (80 - shardsCount) / 10;
     } else if (shardsCount <= 180) {
@@ -297,7 +315,6 @@ export class Unit {
       tier3 = 0;
       tier4 = 0;
       tier5 = 0;
-      tier6 = -this.glUltMats;
     }
 
     return (
@@ -306,7 +323,8 @@ export class Unit {
       tier3 * 60 +
       tier4 * 70 +
       tier5 * 70 +
-      tier6 * 70
+      tier6 * 70 -
+      this.glOwnedTickets
     );
   }
   public get capitalShipRefreshes() {

@@ -5,6 +5,7 @@ import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
 import { FarmingNode, NodePayload, OwnedShardsMap, Node } from "types/shards";
+import _ from "lodash";
 
 interface State {
   requestState: loadingState;
@@ -98,18 +99,23 @@ const store = {
       }
 
       state.ownedShards[id] = {
+        ...match,
         owned: count ?? match?.owned ?? 0,
         nodes: nodesData,
         tracking: tracking ?? match?.tracking ?? false,
       };
     },
-    UPSERT_GL_STATUS(state: State, { id, tier4, tier5, ultMats }: any) {
+    UPSERT_GL_STATUS(
+      state: State,
+      { id, tier4, tier5, ultMats, ownedTickets }: any
+    ) {
       const match = state.ownedShards[id];
       if (match) {
         match.glFarming = {
           tier4,
           tier5,
           ultMats,
+          ownedTickets,
         };
       } else {
         state.ownedShards[id] = {
@@ -118,6 +124,7 @@ const store = {
             tier4,
             tier5,
             ultMats,
+            ownedTickets,
           },
         };
       }
@@ -175,7 +182,13 @@ const store = {
     },
     glProgressUpdate(
       { commit, dispatch }: ActionCtx,
-      payload: { id: string; tier4: boolean; tier5: boolean; ultMats: number }
+      payload: {
+        id: string;
+        tier4: boolean;
+        tier5: boolean;
+        ultMats: number;
+        ownedTickets: number;
+      }
     ) {
       commit("UPSERT_GL_STATUS", payload);
       dispatch("save");
@@ -195,14 +208,14 @@ const store = {
       commit("REMOVE_UNIT", unitId);
       dispatch("save");
     },
-    save({ state, rootState }: ActionCtx) {
+    save: _.debounce(function ({ state, rootState }: ActionCtx) {
       if (rootState.player?.player) {
         apiClient.saveShardFarming(
           rootState.player.player.id,
           state.ownedShards
         );
       }
-    },
+    }, 1000),
   },
 };
 

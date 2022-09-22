@@ -1,5 +1,8 @@
 <template>
-  <div class="energy-spent-container">
+  <div
+    class="energy-spent-container"
+    :class="{ 'only-one-child': showOnlyOne }"
+  >
     <div
       class="standard-energy-container"
       :class="{
@@ -203,18 +206,26 @@ export default defineComponent({
         });
       },
     },
+    showOnlyOne() {
+      return (
+        [this.showStandard, this.showCantina, this.showFleet].filter((x) => !!x)
+          .length === 1
+      );
+    },
   },
 });
 </script>
 
 <style lang="scss" scoped>
-// cantina broken if just one other one
+// todo: cantina broken if just one other one
 
 @import "styles/variables.scss";
 
 .energy-spent-container {
-  display: flex;
-  flex-wrap: wrap;
+  &:not(.only-one-child) {
+    display: flex;
+    flex-wrap: wrap;
+  }
 }
 
 .standard-energy-container,
