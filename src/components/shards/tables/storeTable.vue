@@ -210,7 +210,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, toRefs } from "vue";
 
 import ShardsOwned from "../shardsOwned.vue";
 import UnitIcon from "components/units/unitIcon.vue";
@@ -222,9 +222,26 @@ import DailyCurrency from "../dailyCurrency.vue";
 import { Unit, unitsByPriority } from "types/unit";
 import { mapState } from "vuex";
 import { CurrencyTypeConfig, estimatedTime } from "types/currency";
+import { setupColumnEvents, setupSorting } from "utils";
 
 export default defineComponent({
   name: "StoreTable",
+  setup(props) {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+      props.storageKey
+    );
+    const list = toRefs(props).selectedColumns;
+    const { showCol } = setupColumnEvents(list);
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+      showCol,
+    };
+  },
   components: {
     ShardsOwned,
     UnitIcon,
@@ -237,14 +254,14 @@ export default defineComponent({
   props: {
     units: {
       required: true,
-      type: Object as PropType<Unit[]>,
+      type: Array as () => Unit[],
     },
     showUnitName: {
       type: Boolean,
       default: false,
     },
     selectedColumns: {
-      type: Array,
+      type: Array as () => string[],
       validator: (arr: any[]) => {
         return arr.every((x) => {
           return typeof x === "string";
@@ -401,42 +418,7 @@ export default defineComponent({
       return unitsByPriority(this.units, this.nodeTableNames);
     },
   },
-  watch: {
-    sortDir() {
-      this.saveSortData();
-    },
-    sortMethod() {
-      this.saveSortData();
-    },
-  },
   methods: {
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
-    },
-    saveSortData() {
-      window.localStorage.setItem(
-        this.storageKey,
-        JSON.stringify({
-          sortDir: this.sortDir,
-          sortMethod: this.sortMethod,
-        })
-      );
-    },
     remainingCurrency(unit: Unit, currencyType: CurrencyTypeConfig) {
       const location = unit.whereToFarm.find(
         (l) => l.currencyType === currencyType
@@ -468,12 +450,6 @@ export default defineComponent({
     },
   },
   created() {
-    const storageData = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || "{}"
-    );
-    this.sortDir = storageData.sortDir ?? "asc";
-    this.sortMethod = storageData.sortMethod ?? "name";
-
     if (this.loadOnCreation) {
       this.refresh();
     }

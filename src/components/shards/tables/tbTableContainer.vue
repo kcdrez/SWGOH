@@ -37,7 +37,7 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents } from "utils";
+import { setupEvents, setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import TerritoryBattleShardTable from "./territoryBattleShardTable.vue";
 
@@ -45,11 +45,14 @@ const storageKey = "territoryBattles";
 
 export default defineComponent({
   name: "TbTableContainer",
+  setup() {
+    const { simpleView } = setupSimpleView(storageKey);
+    return { simpleView };
+  },
   components: { TerritoryBattleShardTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
       storageKey,
     };
   },
@@ -90,11 +93,6 @@ export default defineComponent({
           (node) => node.table === "Territory Battles"
         );
       });
-    },
-  },
-  watch: {
-    simpleView(newVal) {
-      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {

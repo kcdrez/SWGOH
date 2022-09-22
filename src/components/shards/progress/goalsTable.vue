@@ -212,10 +212,23 @@ import UnitIcon from "components/units/unitIcon.vue";
 import Modal from "components/modal.vue";
 import { getPercent, getUnit, totalProgress } from "types/unit";
 import { Goal } from "types/goals";
-import { setupEvents } from "utils";
+import { setupEvents, setupSorting } from "utils";
 
 export default defineComponent({
   name: "GoalsTable",
+  setup(props) {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+      props.storageKey
+    );
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+    };
+  },
   components: {
     UnitSearch,
     RequirementIcon,
@@ -238,10 +251,6 @@ export default defineComponent({
   },
   data() {
     return {
-      sortDir: "desc",
-      sortMethod: "name",
-      _searchText: "",
-      searchText: "",
       searchUnit: null,
       targetType: "Relic",
       targetValue: 1,
@@ -281,54 +290,9 @@ export default defineComponent({
     totalProgress,
     getUnit,
     getPercent,
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
     showCol(key: string): boolean {
       return this.selectedColumns.some((x: string) => x === key);
     },
-    saveSortData() {
-      window.localStorage.setItem(
-        this.storageKey,
-        JSON.stringify({
-          sortDir: this.sortDir,
-          sortMethod: this.sortMethod,
-        })
-      );
-    },
-    setSearchText: _.debounce(function (this: any) {
-      this._searchText = this.searchText;
-    }, 500),
-  },
-  watch: {
-    sortDir() {
-      this.saveSortData();
-    },
-    sortMethod() {
-      this.saveSortData();
-    },
-    searchText() {
-      this.setSearchText();
-    },
-  },
-  created() {
-    const storageData = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || "{}"
-    );
-    this.sortDir = storageData.sortDir ?? "asc";
-    this.sortMethod = storageData.sortMethod ?? "name";
   },
   mounted() {
     setupEvents(

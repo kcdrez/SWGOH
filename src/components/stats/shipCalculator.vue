@@ -578,8 +578,11 @@ export default defineComponent({
   },
   methods: {
     round2Decimals,
-    modLabel(mod: any) {
-      const modLabelMap = {
+    modLabel(mod: Mod) {
+      type tMap = {
+        [key: number]: string;
+      };
+      const modLabelMap: tMap = {
         1: "Square",
         2: "Arrow",
         3: "Diamond",
@@ -587,7 +590,7 @@ export default defineComponent({
         5: "Circle",
         6: "Cross",
       };
-      return (modLabelMap as any)[mod.slot];
+      return modLabelMap[mod.slot] ?? "Unknown";
     },
   },
   async created() {

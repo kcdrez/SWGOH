@@ -35,7 +35,7 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents } from "utils";
+import { setupEvents, setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import ShardTable from "./shardTable.vue";
 
@@ -43,14 +43,22 @@ const storageKey = "specialEvents";
 
 export default defineComponent({
   name: "specialEventsTable",
+  setup() {
+    const { simpleView } = setupSimpleView(storageKey);
+    return { simpleView };
+  },
   components: { ShardTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
       storageKey,
       loading: true,
-      tableNames: ["Proving Grounds", "Galactic Bounties I", "Galactic Bounties II", "Assault Battles"]
+      tableNames: [
+        "Proving Grounds",
+        "Galactic Bounties I",
+        "Galactic Bounties II",
+        "Assault Battles",
+      ],
     };
   },
   computed: {
@@ -86,17 +94,10 @@ export default defineComponent({
     },
     unitList(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.whereToFarm.some(
-          (node) => {
-            return this.tableNames.includes(node.table)
-          }
-        );
+        return unit.whereToFarm.some((node) => {
+          return this.tableNames.includes(node.table);
+        });
       });
-    },
-  },
-  watch: {
-    simpleView(newVal) {
-      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {

@@ -81,7 +81,9 @@
             </div>
             <ul class="m-0 no-bullets-sm" v-else>
               <li
-                v-for="(l, index) in locationLabels(gear?.scavenger?.nodes ?? [])"
+                v-for="(l, index) in locationLabels(
+                  gear?.scavenger?.nodes ?? []
+                )"
                 :key="index"
               >
                 {{ l }}
@@ -101,19 +103,32 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, toRefs } from "vue";
 import { mapState, mapGetters } from "vuex";
 
 import { Gear, IScavenger } from "types/gear";
 import GearIcon from "components/gear/gearIcon.vue";
 import { FarmingNode } from "types/shards";
-import { setupEvents } from "utils";
+import { setupEvents, setupSorting } from "utils";
 
 type tScavenger = { data: Gear; scavenger: IScavenger };
 const storageKey = "scavengerTable";
 
 export default defineComponent({
   name: "ScavengerTable",
+  setup(props) {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+      `${storageKey}-${props.scavengerId}`
+    );
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+    };
+  },
   components: { GearIcon },
   props: {
     scavengerId: {
@@ -127,9 +142,7 @@ export default defineComponent({
   },
   data() {
     return {
-      selectedColumns: [],
-      sortDir: "desc",
-      sortMethod: "priority",
+      selectedColumns: [], //todo: figure out how to use utils function
     };
   },
   computed: {
@@ -268,14 +281,6 @@ export default defineComponent({
       return `${storageKey}-${this.scavengerId}`;
     },
   },
-  watch: {
-    sortDir() {
-      this.saveSortData();
-    },
-    sortMethod() {
-      this.saveSortData();
-    },
-  },
   methods: {
     locationLabels(locationIds: string[]) {
       return locationIds.map((location) => {
@@ -299,40 +304,9 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
-    saveSortData() {
-      window.localStorage.setItem(
-        this.storageKey,
-        JSON.stringify({
-          sortDir: this.sortDir,
-          sortMethod: this.sortMethod,
-        })
-      );
-    },
   },
   mounted() {
     setupEvents(this.$refs[this.storageKey] as HTMLElement, this.storageKey);
-  },
-  created() {
-    const storageData = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || "{}"
-    );
-    this.sortDir = storageData.sortDir ?? "asc";
-    this.sortMethod = storageData.sortMethod ?? "priority";
   },
 });
 </script>

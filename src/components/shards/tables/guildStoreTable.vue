@@ -32,7 +32,7 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents } from "utils";
+import { setupEvents, setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import StoreTable from "./storeTable.vue";
 
@@ -40,11 +40,14 @@ const storageKey = "guildStore";
 
 export default defineComponent({
   name: "GuildStoreTable",
+  setup() {
+    const { simpleView } = setupSimpleView(storageKey);
+    return { simpleView };
+  },
   components: { StoreTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
       storageKey,
     };
   },
@@ -99,11 +102,6 @@ export default defineComponent({
       return this.unitFarmingList.filter((unit: Unit) => {
         return unit.whereToFarm.some((node) => node.table === "Guild Store");
       });
-    },
-  },
-  watch: {
-    simpleView(newVal) {
-      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {

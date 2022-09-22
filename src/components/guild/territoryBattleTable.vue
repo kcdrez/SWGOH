@@ -237,17 +237,34 @@
 
 <script lang="ts">
 import moment from "moment";
-import { defineComponent } from "vue";
+import { defineComponent, toRefs } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
-import { unvue } from "utils";
+import { setupColumnEvents, setupSorting, unvue } from "utils";
 import { TerritoryBattleEvent } from "types/guild";
+
+const storageKey = "territoryBattleTable";
 
 export default defineComponent({
   name: "TerritoryBattleTable",
+  setup(props) {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } =
+      setupSorting(storageKey);
+    const list = toRefs(props).selectedColumns;
+    const { showCol } = setupColumnEvents(list);
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+      showCol,
+    };
+  },
   props: {
     selectedColumns: {
-      type: Array,
+      type: Array as () => string[],
       validator: (arr: string[]) => {
         return arr.every((x) => {
           return typeof x === "string";
@@ -258,8 +275,6 @@ export default defineComponent({
   },
   data() {
     return {
-      sortDir: "asc",
-      sortMethod: "date",
       newEvent: {
         date: moment().format("YYYY-MM-DD"),
         stars: 0,
@@ -386,21 +401,6 @@ export default defineComponent({
       "addTerritoryBattleEvent",
       "removeTerritoryBattleEvent",
     ]),
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
     async addNewEvent() {
       if (!this.addNewDisabled) {
         await this.addTerritoryBattleEvent(unvue(this.newEvent));
@@ -416,9 +416,6 @@ export default defineComponent({
         positionY: "top",
         class: "toast-success",
       });
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x: any) => x === key);
     },
   },
   watch: {

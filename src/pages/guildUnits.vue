@@ -298,7 +298,7 @@ import { writeFile, utils } from "xlsx";
 import _ from "lodash";
 
 import { loadingState } from "types/loading";
-import { setupEvents, unvue } from "utils";
+import { setupEvents, setupSorting, unvue } from "utils";
 import { Unit } from "types/unit";
 import { IGuildUnitMap, tUnitOwnedKeys } from "types/guild";
 import UnitSearch from "components/units/unitSearch.vue";
@@ -306,8 +306,6 @@ import UnitSearch from "components/units/unitSearch.vue";
 const storageKey = "guildUnits";
 
 interface dataModel {
-  sortDir: "asc" | "desc";
-  sortMethod: tUnitOwnedKeys;
   selected: null | Unit;
   data: IGuildUnitMap | null;
   loading: loadingState;
@@ -318,11 +316,21 @@ interface dataModel {
 
 export default defineComponent({
   name: "GuildUnitsPage",
+  setup() {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } =
+      setupSorting(storageKey);
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+    };
+  },
   components: { UnitSearch },
   data() {
     return {
-      sortDir: "asc",
-      sortMethod: "name",
       selected: null,
       data: null,
       loading: loadingState.initial,
@@ -344,8 +352,8 @@ export default defineComponent({
             return compareA > compareB ? -1 : 1;
           }
         } else {
-          const compareA = a[this.sortMethod];
-          const compareB = b[this.sortMethod];
+          const compareA = (a as any)[this.sortMethod];
+          const compareB = (b as any)[this.sortMethod];
           if (this.sortDir === "asc") {
             return compareA > compareB ? 1 : -1;
           } else {
@@ -444,12 +452,6 @@ export default defineComponent({
     },
   },
   watch: {
-    sortDir() {
-      this.saveSortData();
-    },
-    sortMethod() {
-      this.saveSortData();
-    },
     initialize(newVal, oldVal) {
       if (newVal && !oldVal) {
         this.$nextTick(() => {
@@ -491,40 +493,9 @@ export default defineComponent({
       const fileName = this.selected?.id;
       writeFile(wb, fileName + ".xlsx");
     },
-    sortBy(type: tUnitOwnedKeys): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
-    saveSortData() {
-      window.localStorage.setItem(
-        this.storageKey,
-        JSON.stringify({
-          sortDir: this.sortDir,
-          sortMethod: this.sortMethod,
-        })
-      );
-    },
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
-  },
-  async created() {
-    const storageData = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || "{}"
-    );
-    this.sortDir = storageData.sortDir ?? "asc";
-    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>

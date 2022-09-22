@@ -9,26 +9,22 @@
           <th class="show-on-mobile">
             <div class="input-group input-group-sm my-2">
               <span class="input-group-text">Sort By:</span>
-              <select
-                class="form-control"
-                v-model="sortMethod"
-              >
+              <select class="form-control" v-model="sortMethod">
                 <option value="name">Name</option>
                 <option value="mark">Mark</option>
                 <option value="location">Location</option>
                 <option value="owned">Owned</option>
                 <option value="needed">Needed</option>
                 <option value="progress">Progress</option>
-                <option value="required" v-if="showRequiredByUnit">Required By</option>
+                <option value="required" v-if="showRequiredByUnit">
+                  Required By
+                </option>
                 <option value="time">Time Remaining</option>
               </select>
             </div>
             <div class="input-group input-group-sm my-2">
               <span class="input-group-text">Sort Direction:</span>
-              <select
-                class="form-control"
-                v-model="sortDir"
-              >
+              <select class="form-control" v-model="sortDir">
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
               </select>
@@ -287,7 +283,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, toRefs } from "vue";
 import { mapActions, mapState } from "vuex";
 
 import { Gear } from "types/gear";
@@ -295,9 +291,26 @@ import OwnedAmount from "components/gear/gearOwned.vue";
 import GearIcon from "components/gear/gearIcon.vue";
 import Timestamp from "components/timestamp.vue";
 import GearText from "components/gear/gearText.vue";
+import { setupColumnEvents, setupSorting } from "utils";
 
 export default defineComponent({
   name: "GearTable",
+  setup(props) {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+      props.storageKey
+    );
+    const list = toRefs(props).selectedColumns;
+    const { showCol } = setupColumnEvents(list);
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+      showCol,
+    };
+  },
   components: { OwnedAmount, GearIcon, GearText, Timestamp },
   props: {
     gearList: {
@@ -309,7 +322,7 @@ export default defineComponent({
       default: false,
     },
     selectedColumns: {
-      type: Array,
+      type: Array as () => string[],
       validator: (arr: string[]) => {
         return arr.every((x) => {
           return typeof x === "string";
@@ -324,9 +337,6 @@ export default defineComponent({
   },
   data() {
     return {
-      sortDir: "asc",
-      sortMethod: "name",
-      searchText: "",
       showResetConfirm: false,
     };
   },
@@ -408,43 +418,8 @@ export default defineComponent({
       });
     },
   },
-  watch: {
-    sortDir() {
-      this.saveSortData();
-    },
-    sortMethod() {
-      this.saveSortData();
-    },
-  },
   methods: {
     ...mapActions("gear", ["saveOwnedCount"]),
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
-    },
-    saveSortData() {
-      window.localStorage.setItem(
-        this.storageKey,
-        JSON.stringify({
-          sortDir: this.sortDir,
-          sortMethod: this.sortMethod,
-        })
-      );
-    },
     getGear(id: string): Gear | undefined {
       return this.allGear.find((x: Gear) => x.id === id);
     },
@@ -454,13 +429,6 @@ export default defineComponent({
       });
       this.showResetConfirm = false;
     },
-  },
-  created() {
-    const storageData = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || "{}"
-    );
-    this.sortDir = storageData.sortDir ?? "asc";
-    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>

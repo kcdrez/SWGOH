@@ -15,7 +15,7 @@
               <div class="unit-list-tags">
                 <UnitIcon
                   class="unit-icon border-0"
-                  :class="{'unit-icon-simple': simpleView}"
+                  :class="{ 'unit-icon-simple': simpleView }"
                   v-for="unit in getUnitsByTag(item.tags, parentIds, unitId)"
                   :key="unit.id"
                   :unit="unit"
@@ -37,7 +37,7 @@
         <td class="text-center align-middle" v-if="showCol('current')">
           <RequirementIcon
             class="justify-content-center"
-            :type="item.requirement?.type"
+            :type="item.requirement?.type ?? 'requirement'"
             :unitId="item.id"
             v-if="item.id"
             currentLevel
@@ -46,7 +46,7 @@
             {{ bestUnitByTag(item)?.name }}:
             <RequirementIcon
               class="justify-content-center"
-              :type="item.requirement?.type"
+              :type="item.requirement?.type ?? 'requirement'"
               :unitId="bestUnitByTag(item)?.id"
               currentLevel
             />
@@ -56,7 +56,7 @@
           <RequirementIcon
             class="justify-content-center"
             :value="item.requirement?.value"
-            :type="item.requirement?.type"
+            :type="item.requirement?.type ?? 'requirement'"
             :unitId="item.id"
           />
         </td>
@@ -76,26 +76,33 @@
       </tr>
       <LegendaryRequirementRow
         v-if="showChildren(item)"
-        :prerequisites="item.prerequisites"
+        :prerequisites="item?.prerequisites ?? []"
         :selectedColumns="selectedColumns"
         :simpleView="simpleView"
         :showRecommended="showRecommended"
-        :parentIds="[item.id, ...parentIds]"
+        :parentIds="[item?.id ?? '', ...parentIds]"
       />
     </template>
   </template>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref, toRefs } from "vue";
 
 import { IPrerequisite } from "types/shards";
 import { getPercent, getUnitsByTag, getUnit } from "types/unit";
 import UnitIcon from "components/units/unitIcon.vue";
 import RequirementIcon from "./requirementIcon.vue";
+import { setupColumnEvents } from "utils";
 
 export default defineComponent({
   name: "LegendaryRequirementRow",
+  setup(props) {
+    const list = toRefs(props).selectedColumns;
+    const { showCol } = setupColumnEvents(list);
+
+    return { showCol };
+  },
   components: { UnitIcon, RequirementIcon },
   props: {
     prerequisites: {
@@ -103,7 +110,7 @@ export default defineComponent({
       required: true,
     },
     selectedColumns: {
-      type: Array,
+      type: Array as () => string[],
       validator: (arr: any[]) => {
         return arr.every((x) => {
           return typeof x === "string";
@@ -127,13 +134,10 @@ export default defineComponent({
     },
     unitId: {
       type: String,
-      default: null
-    }
+      default: null,
+    },
   },
   methods: {
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
-    },
     getPercent,
     getUnitsByTag,
     getUnit,
@@ -179,7 +183,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .unit-icon {
-  margin: 0rem .5rem 0 !important;
+  margin: 0rem 0.5rem 0 !important;
 
   &:not(.unit-icon-simple) {
     height: 130px;

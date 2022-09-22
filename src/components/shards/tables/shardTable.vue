@@ -22,10 +22,7 @@
             </div>
             <div class="input-group input-group-sm my-2">
               <span class="input-group-text">Sort Direction:</span>
-              <select
-                class="form-control"
-                v-model="sortDir"
-              >
+              <select class="form-control" v-model="sortDir">
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
               </select>
@@ -197,7 +194,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, toRefs } from "vue";
 
 import ShardsOwned from "../shardsOwned.vue";
 import UnitIcon from "components/units/unitIcon.vue";
@@ -206,9 +203,26 @@ import ShardPriority from "../shardPriority.vue";
 import Timestamp from "components/timestamp.vue";
 import { Unit } from "types/unit";
 import { estimatedTime } from "types/shards";
+import { setupColumnEvents, setupSorting } from "utils";
 
 export default defineComponent({
   name: "ShardTable",
+  setup(props) {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+      props.storageKey
+    );
+    const list = toRefs(props).selectedColumns;
+    const { showCol } = setupColumnEvents(list);
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+      showCol,
+    };
+  },
   components: {
     ShardsOwned,
     UnitIcon,
@@ -219,7 +233,7 @@ export default defineComponent({
   props: {
     units: {
       required: true,
-      type: Object as PropType<Unit[]>,
+      type: Array as () => Unit[],
     },
     showUnitName: {
       type: Boolean,
@@ -234,13 +248,13 @@ export default defineComponent({
       default: false,
     },
     nodeTableNames: {
-      type: Array as PropType<string[]>,
+      type: Array as () => string[],
       default: () => {
         return [];
       },
     },
     selectedColumns: {
-      type: Array,
+      type: Array as () => string[],
       validator: (arr: string[]) => {
         return arr.every((x) => {
           return typeof x === "string";
@@ -263,9 +277,6 @@ export default defineComponent({
   },
   data() {
     return {
-      sortDir: "asc",
-      sortMethod: "name",
-      searchText: "",
       loading: true,
     };
   },
@@ -363,42 +374,7 @@ export default defineComponent({
       ];
     },
   },
-  watch: {
-    sortDir() {
-      this.saveSortData();
-    },
-    sortMethod() {
-      this.saveSortData();
-    },
-  },
   methods: {
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
-    },
-    saveSortData() {
-      window.localStorage.setItem(
-        this.storageKey,
-        JSON.stringify({
-          sortDir: this.sortDir,
-          sortMethod: this.sortMethod,
-        })
-      );
-    },
     refresh() {
       this.loading = true;
       estimatedTime(this.units, this.nodeTableNames);
@@ -406,12 +382,6 @@ export default defineComponent({
     },
   },
   created() {
-    const storageData = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || "{}"
-    );
-    this.sortDir = storageData.sortDir ?? "asc";
-    this.sortMethod = storageData.sortMethod ?? "name";
-
     if (this.loadOnCreation) {
       this.refresh();
     }

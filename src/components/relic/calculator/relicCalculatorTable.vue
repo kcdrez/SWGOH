@@ -16,12 +16,8 @@
     <table
       :id="plannerData.id"
       :ref="storageKey"
-      class="
-        table table-bordered table-dark table-sm table-striped
-        mb-0
-        swgoh-table
-        collapse
-      ">
+      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table collapse"
+    >
       <thead class="text-center sticky-header align-middle">
         <tr>
           <th
@@ -172,18 +168,31 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, toRefs } from "vue";
 import { mapState, mapGetters } from "vuex";
 
 import GearIcon from "components/gear/gearIcon.vue";
 import { FarmingNode } from "types/shards";
 import { RelicPlanner } from "types/relicPlanner";
-import { setupEvents } from "utils";
+import { setupEvents, setupSorting } from "utils";
 
 const storageKey = "relicCalculatorTable";
 
 export default defineComponent({
   name: "RelicCalculatorTable",
+  setup(props) {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+      `${storageKey}-${props.plannerData.id}`
+    );
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+    };
+  },
   components: { GearIcon },
   props: {
     plannerData: {
@@ -194,8 +203,6 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-      sortDir: "desc",
-      sortMethod: "priority",
     };
   },
   computed: {
@@ -203,7 +210,6 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapState("shards", ["shardFarming"]),
     ...mapGetters("planner", ["fullUnitList"]),
-
     cols(): { text: string; value: any }[] {
       const list = [
         {
@@ -241,14 +247,6 @@ export default defineComponent({
       return `${storageKey}-${this.plannerData.id}`;
     },
   },
-  watch: {
-    sortDir() {
-      this.saveSortData();
-    },
-    sortMethod() {
-      this.saveSortData();
-    },
-  },
   methods: {
     locationLabel(locationId: string) {
       const match: FarmingNode | undefined = this.shardFarming.find(
@@ -259,40 +257,9 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
-    saveSortData() {
-      window.localStorage.setItem(
-        this.storageKey,
-        JSON.stringify({
-          sortDir: this.sortDir,
-          sortMethod: this.sortMethod,
-        })
-      );
-    },
   },
   mounted() {
     setupEvents(this.$refs[this.storageKey] as HTMLElement, this.storageKey);
-  },
-  created() {
-    const storageData = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || "{}"
-    );
-    this.sortDir = storageData.sortDir ?? "asc";
-    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>

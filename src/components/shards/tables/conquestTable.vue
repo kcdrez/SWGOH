@@ -33,7 +33,7 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents } from "utils";
+import { setupEvents, setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import ShardTable from "./shardTable.vue";
 
@@ -41,11 +41,14 @@ const storageKey = "conquestUnits";
 
 export default defineComponent({
   name: "ConquestTable",
+  setup() {
+    const { simpleView } = setupSimpleView(storageKey);
+    return { simpleView };
+  },
   components: { ShardTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
       storageKey,
     };
   },
@@ -92,11 +95,6 @@ export default defineComponent({
       return this.unitFarmingList.filter((unit: Unit) => {
         return unit.whereToFarm.some((node) => node.table === "Conquest");
       });
-    },
-  },
-  watch: {
-    simpleView(newVal) {
-      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {

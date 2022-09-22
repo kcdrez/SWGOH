@@ -274,7 +274,11 @@ export default defineComponent({
       );
     },
     crystalsSpent(): number {
-      const energyMap = {
+      type tMap = {
+        [key: number]: number;
+      };
+
+      const energyMap: tMap = {
         0: 0,
         1: 50,
         2: 100,
@@ -292,7 +296,7 @@ export default defineComponent({
         14: 3850,
         15: 4650,
       };
-      const cantinaEnergyMap = {
+      const cantinaEnergyMap: tMap = {
         0: 0,
         1: 100,
         2: 200,
@@ -311,15 +315,15 @@ export default defineComponent({
       };
       const standard =
         this.refreshes.standard in energyMap
-          ? (energyMap as any)[this.refreshes.standard]
+          ? energyMap[this.refreshes.standard]
           : Infinity;
       const fleet =
         this.refreshes.fleet in energyMap
-          ? (energyMap as any)[this.refreshes.fleet]
+          ? energyMap[this.refreshes.fleet]
           : Infinity;
       const cantina =
         this.refreshes.cantina in cantinaEnergyMap
-          ? (cantinaEnergyMap as any)[this.refreshes.cantina]
+          ? cantinaEnergyMap[this.refreshes.cantina]
           : Infinity;
 
       return standard + fleet + cantina;

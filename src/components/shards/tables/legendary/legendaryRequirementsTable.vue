@@ -59,7 +59,7 @@
           <div class="input-group input-group-sm mb-1">
             <span class="input-group-text">Remaining GL Tickets:</span>
             <span class="input-group-text flex-fill">{{
-              totalGLTicketsNeeded
+              unit.totalGLTicketsNeeded
             }}</span>
           </div>
           <div class="input-group input-group-sm mb-1">
@@ -174,7 +174,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref, toRefs, watch } from "vue";
 import { mapState, mapGetters } from "vuex";
 import _ from "lodash";
 
@@ -189,8 +189,9 @@ import {
   totalProgress,
   getPrerequisites,
 } from "types/unit";
-import { displayValue, IPrerequisite, NodeCharacter } from "types/shards";
+import { displayValue, IPrerequisite } from "types/shards";
 import { isGearRequirement, isRelicRequirement } from "types/shards";
+import { setupSorting, setupColumnEvents } from "utils";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
@@ -200,13 +201,29 @@ export default defineComponent({
     EnergySpent,
     LegendaryRequirementRow,
   },
+  setup(props) {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+      props.storageKey
+    );
+    const list = toRefs(props).selectedColumns;
+    const { showCol } = setupColumnEvents(list);
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+      showCol,
+    };
+  },
   props: {
     unit: {
       type: Object as () => Unit,
       required: true,
     },
     selectedColumns: {
-      type: Array,
+      type: Array as () => string[],
       validator: (arr: any[]) => {
         return arr.every((x) => {
           return typeof x === "string";
@@ -227,29 +244,18 @@ export default defineComponent({
       default: "legendary",
     },
   },
-  data() {
-    return {
-      sortDir: "desc",
-      sortMethod: "name",
-      _searchText: "",
-      searchText: "",
-    };
-  },
   computed: {
     ...mapState("shards", ["shardFarming"]),
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapState("unit", ["unitList"]),
     prerequisites(): IPrerequisite[] {
-      return getPrerequisites(this.unit.id ?? "");
-    },
-    prerequisitiesFiltered() {
-      return this.prerequisites
+      return getPrerequisites(this.unit.id ?? "")
         .filter((p) => {
           const unit: Unit | undefined = getUnit(p?.id || "");
           if (unit) {
             const name = unit.name.toLowerCase().replace(/\s/g, "");
-            const compare = this._searchText.toLowerCase().replace(/\s/g, "");
+            const compare = this.searchText.toLowerCase().replace(/\s/g, "");
             return name.includes(compare);
           } else {
             return false;
@@ -417,55 +423,8 @@ export default defineComponent({
     showRecommended(): boolean {
       return this.nodeKey === "legendary";
     },
-    totalGLTicketsNeeded(): number {
-      const shardsCount =
-        !("stars" in this.unit) || this.unit.stars === 7
-          ? 330
-          : this.unit.ownedShards;
-      let tier1 = 8;
-      let tier2 = 4;
-      let tier3 = 3;
-      let tier4 = 1;
-      let tier5 = 1;
-      let tier6 = 10;
-      if (shardsCount <= 80) {
-        tier1 = (80 - shardsCount) / 10;
-      } else if (shardsCount <= 180) {
-        tier1 = 0;
-        tier2 = (180 - shardsCount) / 25;
-      } else if (shardsCount < 330) {
-        tier1 = 0;
-        tier2 = 0;
-        tier3 = (330 - shardsCount) / 50;
-      } else if ("glTier4" in this.unit && !this.unit.glTier4) {
-        tier1 = 0;
-        tier2 = 0;
-        tier3 = 0;
-      } else if ("glTier5" in this.unit && !this.unit.glTier5) {
-        tier1 = 0;
-        tier2 = 0;
-        tier3 = 0;
-        tier4 = 0;
-      } else {
-        tier1 = 0;
-        tier2 = 0;
-        tier3 = 0;
-        tier4 = 0;
-        tier5 = 0;
-        tier6 = 10 - ("glUltMats" in this.unit ? this.unit.glUltMats : 0);
-      }
-
-      return (
-        tier1 * 15 +
-        tier2 * 30 +
-        tier3 * 60 +
-        tier4 * 70 +
-        tier5 * 70 +
-        tier6 * 70
-      );
-    },
     estimatedEnergy() {
-      return this.totalGLTicketsNeeded / 0.2;
+      return this.unit.totalGLTicketsNeeded / 0.2;
     },
     estimatedTime() {
       if (this.unit.isGL) {
@@ -487,58 +446,9 @@ export default defineComponent({
     },
   },
   methods: {
-    getUnit,
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
-    },
-    saveSortData() {
-      window.localStorage.setItem(
-        this.storageKey,
-        JSON.stringify({
-          sortDir: this.sortDir,
-          sortMethod: this.sortMethod,
-        })
-      );
-    },
     totalProgress(prerequisiteType: "requirement" | "recommended") {
       return totalProgress(this.prerequisites, prerequisiteType);
     },
-    setSearchText: _.debounce(function (this: any) {
-      this._searchText = this.searchText;
-    }, 500),
-  },
-  watch: {
-    sortDir() {
-      this.saveSortData();
-    },
-    sortMethod() {
-      this.saveSortData();
-    },
-    searchText() {
-      this.setSearchText();
-    },
-  },
-  created() {
-    const storageData = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || "{}"
-    );
-    this.sortDir = storageData.sortDir ?? "asc";
-    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>

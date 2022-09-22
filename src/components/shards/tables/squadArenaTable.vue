@@ -36,7 +36,7 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents } from "utils";
+import { setupEvents, setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import StoreTable from "./storeTable.vue";
 
@@ -44,11 +44,14 @@ const storageKey = "squadArena";
 
 export default defineComponent({
   name: "SquadArenaStoreTable",
+  setup() {
+    const { simpleView } = setupSimpleView(storageKey);
+    return { simpleView };
+  },
   components: { StoreTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
       storageKey,
     };
   },
@@ -105,11 +108,6 @@ export default defineComponent({
           (node) => node.table === "Squad Arena Store"
         );
       });
-    },
-  },
-  watch: {
-    simpleView(newVal) {
-      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {

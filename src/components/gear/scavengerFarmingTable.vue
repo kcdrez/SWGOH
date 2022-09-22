@@ -129,7 +129,7 @@ export default defineComponent({
   components: { GearIcon, RelicIcon },
   data() {
     return {
-      selectedColumns: [],
+      selectedColumns: [], //todo: figure out how to use the utils function
       filteredRelicMats: [],
       storageKey,
     } as dataModel;

@@ -86,7 +86,7 @@
             </h5>
             <div class="simple-view-container">
               <Toggle
-                v-model="simpleView.legendary"
+                v-model="simpleViewLegendary"
                 onLabel="Simple"
                 offLabel="Advanced"
               />
@@ -108,7 +108,7 @@
               :unit="unit"
               :selectedColumns="selectedColumns.legendary"
               :storageKey="storageKey + 'Legendary'"
-              :simpleView="simpleView.legendary"
+              :simpleView="simpleViewLegendary"
               nodeKey="legendary"
             />
           </div>
@@ -122,7 +122,7 @@
             </h5>
             <div class="simple-view-container">
               <Toggle
-                v-model="simpleView.gl"
+                v-model="simpleViewGl"
                 onLabel="Simple"
                 offLabel="Advanced"
               />
@@ -144,7 +144,7 @@
               :unit="unit"
               :selectedColumns="selectedColumns.gl"
               :storageKey="storageKey + 'GL'"
-              :simpleView="simpleView.gl"
+              :simpleView="simpleViewGl"
               nodeKey="galactic_legends"
             />
           </div>
@@ -225,7 +225,7 @@ import RequirementIcon from "./tables/legendary/requirementIcon.vue";
 import EnergySpent from "../energySpent.vue";
 import UnitIcon from "components/units/unitIcon.vue";
 import { loadingState } from "types/loading";
-import { setupEvents } from "utils";
+import { setupEvents, setupSimpleView } from "utils";
 import Timestamp from "../timestamp.vue";
 import {
   FarmingNode,
@@ -240,6 +240,13 @@ const storageKey = "shardPlanner";
 
 export default defineComponent({
   name: "ShardPlannerComponent",
+  setup() {
+    const { simpleView: simpleViewGl } = setupSimpleView(storageKey + "GL");
+    const { simpleView: simpleViewLegendary } = setupSimpleView(
+      storageKey + "Legendary"
+    );
+    return { simpleViewGl, simpleViewLegendary };
+  },
   components: {
     ShardTable,
     StoreTable,
@@ -266,10 +273,6 @@ export default defineComponent({
         gl: [],
       },
       storageKey,
-      simpleView: JSON.parse(
-        window.localStorage.getItem(storageKey) ||
-          '{ "legendary": true, "gl": true }'
-      ),
     };
   },
   computed: {
@@ -461,14 +464,6 @@ export default defineComponent({
         const match: Unit | undefined = this.unitData(unit.requirementId);
         return match ? match.stars < 7 : true;
       });
-    },
-  },
-  watch: {
-    simpleView: {
-      handler(newVal) {
-        window.localStorage.setItem(storageKey, JSON.stringify(newVal));
-      },
-      deep: true,
     },
   },
   methods: {

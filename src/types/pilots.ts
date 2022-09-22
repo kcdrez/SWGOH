@@ -1,4 +1,24 @@
-export const multiplierMap = {
+type tMap = {
+  [key: number]: number;
+};
+type tGearLevelMap = {
+  [key: number]: {
+    perPiece: number;
+    priorTier: number;
+    cumulative: number;
+  };
+};
+type tRelicLevelMap = {
+  [key: number]: {
+    rating: number;
+    multiplier: number;
+  };
+};
+type tModsMap = {
+  [key: number]: tMap;
+};
+
+export const multiplierMap: tMap = {
   1: 1,
   2: 1.05,
   3: 1.1,
@@ -8,7 +28,7 @@ export const multiplierMap = {
   7: 1.5,
 };
 
-export const crewStarsMap = {
+export const crewStarsMap: tMap = {
   1: 200,
   2: 300,
   3: 450,
@@ -18,7 +38,7 @@ export const crewStarsMap = {
   7: 3103,
 };
 
-export const crewLevelMap = {
+export const crewLevelMap: tMap = {
   1: 1,
   2: 2,
   3: 3,
@@ -53,7 +73,6 @@ export const crewLevelMap = {
   32: 79,
   33: 84,
   34: 89,
-
   35: 95,
   36: 101,
   37: 107,
@@ -112,7 +131,7 @@ export const crewLevelMap = {
   90: 1705,
 };
 
-export const gearLevelMap = {
+export const gearLevelMap: tGearLevelMap = {
   1: {
     perPiece: 7,
     priorTier: 0,
@@ -180,7 +199,7 @@ export const gearLevelMap = {
   },
 };
 
-export const relicLevelMap = {
+export const relicLevelMap: tRelicLevelMap = {
   0: {
     rating: 0,
     multiplier: 0,
@@ -223,7 +242,7 @@ export const relicLevelMap = {
   },
 };
 
-export const abilityMap = {
+export const abilityMap: tMap = {
   0: 0,
   1: 0,
   2: 28,
@@ -237,7 +256,7 @@ export const abilityMap = {
 };
 
 //top level is the mod level, secondary is the pips count
-export const modsMap = {
+export const modsMap: tModsMap = {
   1: {
     1: 1,
     2: 1,

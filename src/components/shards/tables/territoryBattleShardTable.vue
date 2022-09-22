@@ -94,7 +94,10 @@
           <td v-if="showUnitName && showCol('name')">
             <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
           </td>
-          <td class="farming-locations text-left text-center-sm" v-if="showCol('locations')">
+          <td
+            class="farming-locations text-left text-center-sm"
+            v-if="showCol('locations')"
+          >
             <div v-if="unit.locations.length <= 0" class="text-center">
               No known farmable locations.
             </div>
@@ -134,7 +137,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, toRefs } from "vue";
 import { mapActions } from "vuex";
 
 import ShardsOwned from "../shardsOwned.vue";
@@ -144,9 +147,26 @@ import ShardPriority from "../shardPriority.vue";
 import Timestamp from "components/timestamp.vue";
 import { Unit, unitsByPriority } from "types/unit";
 import { estimatedTime } from "types/guild";
+import { setupColumnEvents, setupSorting } from "utils";
 
 export default defineComponent({
   name: "TerritoryBattleShardTable",
+  setup(props) {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+      props.storageKey
+    );
+    const list = toRefs(props).selectedColumns;
+    const { showCol } = setupColumnEvents(list);
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+      showCol,
+    };
+  },
   components: {
     ShardsOwned,
     UnitIcon,
@@ -164,7 +184,7 @@ export default defineComponent({
       default: false,
     },
     selectedColumns: {
-      type: Array,
+      type: Array as () => string[],
       validator: (arr: string[]) => {
         return arr.every((x) => {
           return typeof x === "string";
@@ -187,9 +207,6 @@ export default defineComponent({
   },
   data() {
     return {
-      sortDir: "asc",
-      sortMethod: "name",
-      searchText: "",
       loading: true,
     };
   },
@@ -244,33 +261,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("guild", ["initialize"]),
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
-    },
-    saveSortData() {
-      window.localStorage.setItem(
-        this.storageKey,
-        JSON.stringify({
-          sortDir: this.sortDir,
-          sortMethod: this.sortMethod,
-        })
-      );
-    },
     estimatedTime,
     refresh() {
       this.loading = true;
@@ -282,12 +272,6 @@ export default defineComponent({
   },
   async created() {
     await this.initialize();
-    const storageData = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || "{}"
-    );
-    this.sortDir = storageData.sortDir ?? "asc";
-    this.sortMethod = storageData.sortMethod ?? "name";
-
     if (this.loadOnCreation) {
       this.refresh();
     }

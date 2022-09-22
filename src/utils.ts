@@ -1,7 +1,9 @@
 import moment from "moment";
 import { read, utils } from "xlsx";
-import { loadingState } from "types/loading";
-import store, { ModuleTypes } from "./vuex-store/store";
+import { ref, computed, watch, Ref } from "vue";
+import _ from "lodash";
+
+import store from "./vuex-store/store";
 
 export function unvue(data: any) {
   return JSON.parse(JSON.stringify(data));
@@ -106,11 +108,6 @@ async function processXlsxFiles(files: any[], filterTypes = null) {
     arr = arr.concat(await readFile(files[i]));
   }
   return arr;
-  // if (filterTypes) {
-  //   filterTypes = filterTypes.map(x => x.toLowerCase());
-  //   return arr.filter(x => filterTypes.includes(x.type.toLowerCase()));
-  // }
-  // else return arr;
 }
 
 function readFile(file: any) {
@@ -136,4 +133,82 @@ function readFile(file: any) {
 
     reader.readAsArrayBuffer(file);
   });
+}
+
+function saveStorageData(storageKey: string, data: Object) {
+  const existingData = JSON.parse(
+    window.localStorage.getItem(storageKey) || "{}"
+  );
+  const saveData = {
+    ...existingData,
+    ...data,
+  };
+
+  window.localStorage.setItem(storageKey, JSON.stringify(saveData));
+}
+
+export function setupSorting(storageKey: string) {
+  type tSortDir = "asc" | "desc";
+
+  const storageData = JSON.parse(
+    window.localStorage.getItem(storageKey) || "{}"
+  );
+  const sortDir: Ref<tSortDir> = ref(storageData.sortDir ?? "asc");
+  const sortMethod: Ref<string> = ref(storageData.sortMethod ?? "name");
+  const searchTextTemp = ref("");
+  const searchText = computed({
+    get(): string {
+      return searchTextTemp.value;
+    },
+    set: _.debounce(function (newVal: string) {
+      searchTextTemp.value = newVal;
+    }, 500),
+  });
+
+  function sortBy(val: string) {
+    if (sortMethod.value === val) {
+      sortDir.value = sortDir.value === "asc" ? "desc" : "asc";
+    } else {
+      sortDir.value = "asc";
+    }
+    sortMethod.value = val;
+    saveStorageData(storageKey, {
+      sortDir: sortDir.value,
+      sortMethod: sortMethod.value,
+    });
+  }
+
+  function sortIcon(type: string): string {
+    if (sortMethod.value === type) {
+      return sortDir.value === "asc" ? "fa-sort-down" : "fa-sort-up";
+    } else {
+      return "fa-sort";
+    }
+  }
+
+  return { sortDir, sortMethod, searchText, sortBy, sortIcon };
+}
+
+export function setupColumnEvents(columns: Ref<string[]>) {
+  function showCol(key: string) {
+    return columns.value.some((x) => x === key);
+  }
+
+  return { showCol };
+}
+
+export function setupSimpleView(storageKey: string) {
+  const storageData = JSON.parse(
+    window.localStorage.getItem(storageKey) || "{}"
+  );
+
+  const simpleView: Ref<boolean> = ref(storageData.simpleView ?? true);
+
+  watch(simpleView, (newVal) => {
+    saveStorageData(storageKey, {
+      simpleView: newVal,
+    });
+  });
+
+  return { simpleView };
 }

@@ -36,18 +36,21 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { setupEvents } from "utils";
+import { setupEvents, setupSimpleView } from "utils";
 import ShardTable from "components/shards/tables/shardTable.vue";
 
 const storageKey = "shardSection";
 
 export default defineComponent({
   name: "ShardSection",
+  setup() {
+    const { simpleView } = setupSimpleView(storageKey);
+    return { simpleView };
+  },
   components: { ShardTable },
   data() {
     return {
       selectedColumns: [],
-      simpleView: JSON.parse(window.localStorage.getItem(storageKey) || "true"),
       storageKey,
     };
   },
@@ -91,11 +94,6 @@ export default defineComponent({
         },
       ];
       return list;
-    },
-  },
-  watch: {
-    simpleView(newVal) {
-      window.localStorage.setItem(storageKey, newVal);
     },
   },
   mounted() {

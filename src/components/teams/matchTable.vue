@@ -118,7 +118,10 @@
             <span class="row-label">Subtotal:</span>
             {{ unit.speed }}
           </td>
-          <td v-if="showCol('bonuses')" :class="{'hide-sm': !hasBonuses(unit) }">
+          <td
+            v-if="showCol('bonuses')"
+            :class="{ 'hide-sm': !hasBonuses(unit) }"
+          >
             <span class="row-label">Bonuses:</span>
             <div v-if="match.leaderSpeedBonus(unit, true) > 0">
               Leader Bonus:
@@ -149,13 +152,28 @@ import { defineComponent, PropType } from "vue";
 import { Match, SortType, TeamMember } from "types/teams";
 import MultiSelect from "components/multiSelect.vue";
 import ModIcon from "components/units/modIcon.vue";
+import { setupSorting } from "utils";
 
 type dataModel = {
   selectedColumns: string[];
 };
 
+const storageKey = "matchTable";
+
 export default defineComponent({
   name: "MatchTable",
+  setup() {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } =
+      setupSorting(storageKey);
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+    };
+  },
   components: { MultiSelect, ModIcon },
   props: {
     match: {
@@ -204,32 +222,16 @@ export default defineComponent({
     },
   },
   methods: {
-    sortIcon(type: SortType): string {
-      if (
-        this.match.sortMethod === type ||
-        (this.match.sortMethod === undefined && type === "total")
-      ) {
-        return this.match.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
-    sortBy(type: SortType): void {
-      if (this.match.sortMethod === type) {
-        this.match.sortDir = this.match.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.match.sortDir = "asc";
-      }
-      this.match.sortMethod = type;
-    },
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
-    hasBonuses(unit: TeamMember):boolean {
-      return this.match.leaderSpeedBonus(unit, true) > 0 && 
-        this.match.uniqueSpeedBonus(unit, true) > 0 && 
+    hasBonuses(unit: TeamMember): boolean {
+      return (
+        this.match.leaderSpeedBonus(unit, true) > 0 &&
+        this.match.uniqueSpeedBonus(unit, true) > 0 &&
         this.match.speedBonusFromTeamMembers(unit, true) > 0
-    }
+      );
+    },
   },
 });
 </script>

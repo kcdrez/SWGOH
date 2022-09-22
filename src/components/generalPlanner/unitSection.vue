@@ -245,25 +245,35 @@ import { mapActions, mapGetters } from "vuex";
 import { UnitPlannerItem } from "types/planner";
 import { Unit } from "types/unit";
 import { maxGearLevel } from "types/gear";
-import { setupEvents } from "utils";
+import { setupEvents, setupSimpleView, setupSorting } from "utils";
 import Timestamp from "components/timestamp.vue";
 import GearText from "components/gear/gearText.vue";
 import RelicLevelIcon from "components/units/relicLevelIcon.vue";
 import UnitIcon from "components/units/unitIcon.vue";
 
+const storageKey = "unitSection";
+
 export default defineComponent({
   name: "UnitSection",
+  setup() {
+    const { simpleView } = setupSimpleView(storageKey);
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } =
+      setupSorting(storageKey);
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+      simpleView,
+    };
+  },
   components: { Timestamp, GearText, RelicLevelIcon, UnitIcon },
   data() {
     return {
-      sortDir: "asc",
-      sortMethod: "name",
-      searchText: "",
       maxGearLevel,
-      selectedColumns: [],
-      simpleView: JSON.parse(
-        window.localStorage.getItem("unitSection") || "true"
-      ),
+      selectedColumns: [], //todo
     };
   },
   computed: {
@@ -392,28 +402,8 @@ export default defineComponent({
       ].filter((x) => !!x).length;
     },
   },
-  watch: {
-    simpleView(newVal) {
-      window.localStorage.setItem("unitSection", newVal);
-    },
-  },
   methods: {
     ...mapActions("planner", ["removeUnit"]),
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
     remove(unit: Unit & UnitPlannerItem) {
       this.removeUnit(unit.id);
       this.$toast(
@@ -429,7 +419,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    setupEvents(this.$refs.unitSection as HTMLElement, "unitSection");
+    setupEvents(this.$refs.unitSection as HTMLElement, storageKey);
   },
 });
 </script>

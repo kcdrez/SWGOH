@@ -247,6 +247,68 @@ export class Unit {
       id: this.id,
     });
   }
+  public get totalGLTicketsNeeded(): number {
+    if (!this.isGL) {
+      return 0;
+    }
+
+    type tUltMatsMap = {
+      [key: string]: number;
+    };
+
+    const ultMatsMap: tUltMatsMap = {
+      JEDIMASTERKENOBI: 10,
+      GRANDMASTERLUKE: 10,
+      SUPREMELEADERKYLOREN: 10,
+      REY: 10,
+      SITHPALPATINE: 10,
+      LORDVADER: 10,
+      JABBATHEHUTT: 12,
+    };
+
+    const shardsCount = this.stars === 7 ? 330 : this.ownedShards;
+    let tier1 = 8;
+    let tier2 = 4;
+    let tier3 = 3;
+    let tier4 = 1;
+    let tier5 = 1;
+    let tier6 = ultMatsMap[this.id] ?? 0;
+    if (shardsCount <= 80) {
+      tier1 = (80 - shardsCount) / 10;
+    } else if (shardsCount <= 180) {
+      tier1 = 0;
+      tier2 = (180 - shardsCount) / 25;
+    } else if (shardsCount < 330) {
+      tier1 = 0;
+      tier2 = 0;
+      tier3 = (330 - shardsCount) / 50;
+    } else if (!this.glTier4) {
+      tier1 = 0;
+      tier2 = 0;
+      tier3 = 0;
+    } else if (!this.glTier5) {
+      tier1 = 0;
+      tier2 = 0;
+      tier3 = 0;
+      tier4 = 0;
+    } else {
+      tier1 = 0;
+      tier2 = 0;
+      tier3 = 0;
+      tier4 = 0;
+      tier5 = 0;
+      tier6 = -this.glUltMats;
+    }
+
+    return (
+      tier1 * 15 +
+      tier2 * 30 +
+      tier3 * 60 +
+      tier4 * 70 +
+      tier5 * 70 +
+      tier6 * 70
+    );
+  }
   public get capitalShipRefreshes() {
     return store.state.shards.ownedShards[this.id]?.capitalShipRefreshes ?? 0;
   }
@@ -257,7 +319,11 @@ export class Unit {
     });
   }
   public get capitalShipEventFrequency() {
-    const map: any = {
+    type tFrequencyMap = {
+      [key: string]: number;
+    };
+
+    const map: tFrequencyMap = {
       CAPITALFINALIZER: 2,
       CAPITALRADDUS: 2,
       CAPITALMONCALAMARICRUISER: 1,
@@ -266,12 +332,7 @@ export class Unit {
       CAPITALJEDICRUISER: 1,
       CAPITALSTARDESTROYER: 1,
     };
-
-    if (this.id in map) {
-      return map[this.id];
-    } else {
-      return 1;
-    }
+    return map[this.id] ?? 1;
   }
 
   public get hasSpeedSet() {

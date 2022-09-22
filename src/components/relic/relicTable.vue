@@ -167,16 +167,33 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, toRefs } from "vue";
 import { mapState } from "vuex";
 
 import { Relic } from "types/relic";
 import OwnedAmount from "components/relic/relicOwned.vue";
 import RelicIcon from "components/relic/relicIcon.vue";
 import Timestamp from "components/timestamp.vue";
+import { setupColumnEvents, setupSorting } from "utils";
 
 export default defineComponent({
   name: "RelicTable",
+  setup(props) {
+    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+      props.storageKey
+    );
+    const list = toRefs(props).selectedColumns;
+    const { showCol } = setupColumnEvents(list);
+
+    return {
+      sortDir,
+      sortMethod,
+      searchText,
+      sortBy,
+      sortIcon,
+      showCol,
+    };
+  },
   components: { OwnedAmount, RelicIcon, Timestamp },
   props: {
     relicList: {
@@ -197,7 +214,7 @@ export default defineComponent({
       default: false,
     },
     selectedColumns: {
-      type: Array,
+      type: Array as () => string[],
       validator: (arr: string[]) => {
         return arr.every((x) => {
           return typeof x === "string";
@@ -209,13 +226,6 @@ export default defineComponent({
       type: String,
       required: true,
     },
-  },
-  data() {
-    return {
-      sortMethod: "name",
-      sortDir: "asc",
-      searchText: "",
-    };
   },
   computed: {
     ...mapState("relic", ["ownedRelics"]),
@@ -305,50 +315,6 @@ export default defineComponent({
           return name.includes(compare) || id.includes(compare);
         });
     },
-  },
-  watch: {
-    sortDir() {
-      this.saveSortData();
-    },
-    sortMethod() {
-      this.saveSortData();
-    },
-  },
-  methods: {
-    sortBy(type: string): void {
-      if (this.sortMethod === type) {
-        this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      } else {
-        this.sortDir = "asc";
-      }
-      this.sortMethod = type;
-    },
-    sortIcon(type: string): string {
-      if (this.sortMethod === type) {
-        return this.sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
-      } else {
-        return "fa-sort";
-      }
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
-    },
-    saveSortData() {
-      window.localStorage.setItem(
-        this.storageKey,
-        JSON.stringify({
-          sortDir: this.sortDir,
-          sortMethod: this.sortMethod,
-        })
-      );
-    },
-  },
-  created() {
-    const storageData = JSON.parse(
-      window.localStorage.getItem(this.storageKey) || "{}"
-    );
-    this.sortDir = storageData.sortDir ?? "asc";
-    this.sortMethod = storageData.sortMethod ?? "name";
   },
 });
 </script>
