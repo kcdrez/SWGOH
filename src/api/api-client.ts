@@ -26,8 +26,8 @@ class ApiClient {
     const { data } = response;
     return {
       ...data,
-      units: data.units.map((u: IUnit) => new Unit(u)),
-      goalList: data.goalList.map((el: IGoal) => new Goal(el)),
+      units: (data?.units ?? []).map((u: IUnit) => new Unit(u)),
+      goalList: (data?.goalList ?? []).map((el: IGoal) => new Goal(el)),
     };
   }
 
