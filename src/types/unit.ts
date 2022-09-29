@@ -284,12 +284,28 @@ export class Unit {
     };
 
     const shardsCount = this.stars === 7 ? 330 : this.ownedShards;
-    let tier1 = 8;
-    let tier2 = 4;
-    let tier3 = 3;
     let tier4 = 1;
     let tier5 = 1;
     let tier6 = (ultMatsMap[this.id] ?? 10) - this.glUltMats;
+
+    if (!this.glTier4) {
+      tier4 = 1;
+      tier5 = 1;
+    } else if (!this.glTier5) {
+      tier4 = 0;
+      tier5 = 1;
+    } else {
+      tier4 = 0;
+      tier5 = 0;
+    }
+
+    return this.glTicketsForUnlock + tier4 * 70 + tier5 * 70 + tier6 * 70;
+  }
+  public get glTicketsForUnlock(): number {
+    const shardsCount = this.stars === 7 ? 330 : this.ownedShards;
+    let tier1 = 8;
+    let tier2 = 4;
+    let tier3 = 3;
 
     if (shardsCount <= 80) {
       tier1 = (80 - shardsCount) / 10;
@@ -300,32 +316,9 @@ export class Unit {
       tier1 = 0;
       tier2 = 0;
       tier3 = (330 - shardsCount) / 50;
-    } else if (!this.glTier4) {
-      tier1 = 0;
-      tier2 = 0;
-      tier3 = 0;
-    } else if (!this.glTier5) {
-      tier1 = 0;
-      tier2 = 0;
-      tier3 = 0;
-      tier4 = 0;
-    } else {
-      tier1 = 0;
-      tier2 = 0;
-      tier3 = 0;
-      tier4 = 0;
-      tier5 = 0;
     }
 
-    return (
-      tier1 * 15 +
-      tier2 * 30 +
-      tier3 * 60 +
-      tier4 * 70 +
-      tier5 * 70 +
-      tier6 * 70 -
-      this.glOwnedTickets
-    );
+    return tier1 * 15 + tier2 * 30 + tier3 * 60 - this.glOwnedTickets;
   }
   public get capitalShipRefreshes() {
     return store.state.shards.ownedShards[this.id]?.capitalShipRefreshes ?? 0;
