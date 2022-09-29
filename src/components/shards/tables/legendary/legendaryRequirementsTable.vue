@@ -75,9 +75,15 @@
             }}</span>
           </div>
           <div class="input-group input-group-sm mb-1">
+            <span class="input-group-text">Estimated Time to 7 Star:</span>
+            <span class="input-group-text flex-fill">
+              <Timestamp :timeLength="estimatedTimeToUnlock"
+            /></span>
+          </div>
+          <div class="input-group input-group-sm mb-1">
             <span class="input-group-text">Estimated Time to Ultimate:</span>
             <span class="input-group-text flex-fill">
-              <Timestamp :timeLength="estimatedTime"
+              <Timestamp :timeLength="estimatedTimeTotal"
             /></span>
           </div>
         </div>
@@ -109,7 +115,7 @@
         </div>
         <div class="col">
           <Timestamp
-            :timeLength="estimatedTime"
+            :timeLength="estimatedTimeTotal"
             label="Estimated 7 Star Completion:"
           />
         </div>
@@ -432,13 +438,30 @@ export default defineComponent({
     estimatedEnergy() {
       return this.unit.totalGLTicketsNeeded / 0.05; //5% drop rate per energy according to reddit
     },
-    estimatedTime() {
+    estimatedTimeTotal() {
       if (this.unit.isGL) {
         const refreshes = this.$store.state.gear.refreshes.standard ?? 0;
         const energySpent = this.$store.state.gear.energy.standard ?? 0;
         const ticketsPerDay = (375 - energySpent + 120 * refreshes) * 0.05; //5% drop rate per energy according to reddit
 
         return Math.ceil(this.unit.totalGLTicketsNeeded / ticketsPerDay);
+      } else if (this.unit.isCapitalShip) {
+        return Math.ceil(
+          (this.unit.remainingShards /
+            (10 * (this.unit.capitalShipRefreshes + 1))) *
+            (30.5 / this.unit.capitalShipEventFrequency)
+        );
+      } else {
+        return 0;
+      }
+    },
+    estimatedTimeToUnlock() {
+      if (this.unit.isGL) {
+        const refreshes = this.$store.state.gear.refreshes.standard ?? 0;
+        const energySpent = this.$store.state.gear.energy.standard ?? 0;
+        const ticketsPerDay = (375 - energySpent + 120 * refreshes) * 0.05; //5% drop rate per energy according to reddit
+
+        return Math.ceil(this.unit.glTicketsForUnlock / ticketsPerDay);
       } else if (this.unit.isCapitalShip) {
         return Math.ceil(
           (this.unit.remainingShards /
