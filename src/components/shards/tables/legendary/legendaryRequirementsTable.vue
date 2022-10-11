@@ -69,22 +69,20 @@
             }}</span>
           </div>
           <div class="input-group input-group-sm mb-1">
-            <span class="input-group-text">Estimated Energy Spent:</span>
-            <span class="input-group-text flex-fill">{{
-              estimatedEnergy
-            }}</span>
+            <span class="input-group-text">Estimated 7 Star:</span>
+            <span class="input-group-text flex-fill">
+              <Timestamp :timeLength="estimatedUnlock.time" />
+              <span class="mx-1">&bull;</span>
+              {{ estimatedUnlock.energy }} Energy
+            </span>
           </div>
           <div class="input-group input-group-sm mb-1">
-            <span class="input-group-text">Estimated Time to 7 Star:</span>
+            <span class="input-group-text">Estimated Ultimate:</span>
             <span class="input-group-text flex-fill">
-              <Timestamp :timeLength="estimatedTimeToUnlock"
-            /></span>
-          </div>
-          <div class="input-group input-group-sm mb-1">
-            <span class="input-group-text">Estimated Time to Ultimate:</span>
-            <span class="input-group-text flex-fill">
-              <Timestamp :timeLength="estimatedTimeTotal"
-            /></span>
+              <Timestamp :timeLength="estimatedTotal.time" />
+              <span class="mx-1">&bull;</span>
+              {{ estimatedTotal.energy }} Energy
+            </span>
           </div>
         </div>
       </div>
@@ -115,7 +113,7 @@
         </div>
         <div class="col">
           <Timestamp
-            :timeLength="estimatedTimeTotal"
+            :timeLength="estimatedTotal.time"
             label="Estimated 7 Star Completion:"
           />
         </div>
@@ -435,41 +433,57 @@ export default defineComponent({
     showRecommended(): boolean {
       return this.nodeKey === "legendary";
     },
-    estimatedEnergy() {
-      return this.unit.totalGLTicketsNeeded / 0.05; //5% drop rate per energy according to reddit
-    },
-    estimatedTimeTotal() {
+    estimatedUnlock() {
       if (this.unit.isGL) {
+        const energyDropRate = 0.05; //5% drop rate per energy according to reddit
         const refreshes = this.$store.state.gear.refreshes.standard ?? 0;
         const energySpent = this.$store.state.gear.energy.standard ?? 0;
-        const ticketsPerDay = (375 - energySpent + 120 * refreshes) * 0.05; //5% drop rate per energy according to reddit
+        const ticketsPerDay =
+          (375 - energySpent + 120 * refreshes) * energyDropRate;
 
-        return Math.ceil(this.unit.totalGLTicketsNeeded / ticketsPerDay);
+        return {
+          time: Math.ceil(this.unit.glTicketsForUnlock / ticketsPerDay),
+          energy: this.unit.glTicketsForUnlock / energyDropRate,
+        };
       } else if (this.unit.isCapitalShip) {
-        return Math.ceil(
-          (this.unit.remainingShards /
-            (10 * (this.unit.capitalShipRefreshes + 1))) *
-            (30.5 / this.unit.capitalShipEventFrequency)
-        );
+        return {
+          time: Math.ceil(
+            (this.unit.remainingShards /
+              (10 * (this.unit.capitalShipRefreshes + 1))) *
+              (30.5 / this.unit.capitalShipEventFrequency)
+          ),
+          energy: 0,
+        };
       } else {
-        return 0;
+        return { time: 0, energy: 0 };
       }
     },
-    estimatedTimeToUnlock() {
+    estimatedTotal() {
       if (this.unit.isGL) {
+        const energyDropRate = 0.05; //5% drop rate per energy according to reddit
         const refreshes = this.$store.state.gear.refreshes.standard ?? 0;
         const energySpent = this.$store.state.gear.energy.standard ?? 0;
-        const ticketsPerDay = (375 - energySpent + 120 * refreshes) * 0.05; //5% drop rate per energy according to reddit
+        const ticketsPerDay =
+          (375 - energySpent + 120 * refreshes) * energyDropRate;
 
-        return Math.ceil(this.unit.glTicketsForUnlock / ticketsPerDay);
+        return {
+          time: Math.ceil(this.unit.totalGLTicketsNeeded / ticketsPerDay),
+          energy: this.unit.totalGLTicketsNeeded / energyDropRate,
+        };
       } else if (this.unit.isCapitalShip) {
-        return Math.ceil(
-          (this.unit.remainingShards /
-            (10 * (this.unit.capitalShipRefreshes + 1))) *
-            (30.5 / this.unit.capitalShipEventFrequency)
-        );
+        return {
+          time: Math.ceil(
+            (this.unit.remainingShards /
+              (10 * (this.unit.capitalShipRefreshes + 1))) *
+              (30.5 / this.unit.capitalShipEventFrequency)
+          ),
+          energy: 0,
+        };
       } else {
-        return 0;
+        return {
+          time: 0,
+          energy: 0,
+        };
       }
     },
   },

@@ -131,8 +131,9 @@ export class Relic {
     return amount;
   }
 
-  private totalAmountNeeded(target: number) {
+  public totalAmountNeeded(target: number) {
     let amount = 0;
+    // console.log(this.id, target, this.amount);
 
     for (let i = 0; i <= target; i++) {
       if (i in this.amount) {

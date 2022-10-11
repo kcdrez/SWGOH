@@ -13,6 +13,7 @@ import GuildEventsPage from "pages/guildEvents.vue";
 import GuildUnitsPage from "pages/guildUnits.vue";
 import StatCalculatorPage from "pages/statCalculator.vue";
 import GLChecklist from "pages/glChecklist.vue";
+import GLCompare from "pages/glCompare.vue";
 import GoalsPage from "pages/goalsPage.vue";
 import TBStatusPage from "pages/TBStatusPage.vue";
 import WidgetsPage from "pages/widgets.vue";
@@ -185,6 +186,24 @@ const routes = [
         path: "",
         name: "GLChecklist",
         component: GLChecklist,
+      },
+    ],
+  },
+  {
+    path: "/gl-compare",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["unit", "shards", "gear", "relic"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GLCompare",
+        component: GLCompare,
       },
     ],
   },
