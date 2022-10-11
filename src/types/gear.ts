@@ -386,3 +386,9 @@ export type EnergyConfig = {
   energy: EnergyType;
   refreshes: EnergyType;
 };
+
+export function getGear(gearId: string) {
+  return (store.state.gear.gearList as Gear[]).find(
+    (el: Gear) => el.id === gearId
+  );
+}

@@ -76,7 +76,10 @@
           </td>
           <td v-if="showCol('locations')">
             <span class="row-label">Locations:</span>
-            <div v-if="gear.scavenger.nodes.length <= 0" class="text-center">
+            <div
+              v-if="(gear.scavenger.nodes ?? []).length <= 0"
+              class="text-center"
+            >
               No known farmable locations.
             </div>
             <ul class="m-0 no-bullets-sm" v-else>
@@ -103,7 +106,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs } from "vue";
+import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 
 import { Gear, IScavenger } from "types/gear";

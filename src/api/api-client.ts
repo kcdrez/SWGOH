@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 import { Player } from "types/player";
 import { ConfigType, Gear, IGear } from "types/gear";
@@ -16,8 +16,8 @@ import {
 import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3001/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3001/dev";
 
   constructor() {}
 
@@ -230,7 +230,7 @@ class ApiClient {
       unowned: [],
     };
 
-    response.data.forEach((player: any) => {
+    (response?.data ?? []).forEach((player: any) => {
       if (player.unit) {
         const unit = new Unit(player.unit);
         if (unit.gearLevel >= 12) {
@@ -292,6 +292,15 @@ class ApiClient {
     };
 
     return unitMapping;
+  }
+  async fetchGuildUnits(guildId: string, unitIds: string[]) {
+    const response = await axios.post(
+      `${this.baseUrl}/guild/${guildId}/units`,
+      {
+        unitIds,
+      }
+    );
+    return response.data;
   }
   async saveGoals(playerId: string | undefined, goals: Goal[]) {
     if (playerId) {
