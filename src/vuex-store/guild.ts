@@ -220,7 +220,7 @@ const store = {
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     async addTerritoryWarEvent(
-      { commit, dispatch, state }: ActionCtx,
+      { dispatch, state }: ActionCtx,
       event: ITerritoryWarEvent
     ) {
       if (!event.id) {
@@ -275,8 +275,12 @@ const store = {
       );
       commit("SET_EVENTS", response);
     },
-    async fetchGuildUnitData({ state }: ActionCtx, unitId: string) {
-      return await apiClient.fetchGuildUnitData(state.guildId, unitId);
+    async fetchGuildUnitData({ state }: ActionCtx, unitId: string | string[]) {
+      if (Array.isArray(unitId)) {
+        return await apiClient.fetchGuildUnits(state.guildId, unitId);
+      } else {
+        return await apiClient.fetchGuildUnitData(state.guildId, unitId);
+      }
     },
   },
 };

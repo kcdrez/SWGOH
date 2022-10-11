@@ -16,6 +16,7 @@ import GLChecklist from "pages/glChecklist.vue";
 import GLCompare from "pages/glCompare.vue";
 import GoalsPage from "pages/goalsPage.vue";
 import TBStatusPage from "pages/TBStatusPage.vue";
+import TWPlannerPage from "pages/twPlanner.vue";
 import WidgetsPage from "pages/widgets.vue";
 import GearListPage from "pages/gearList.vue";
 // import GearPage from "pages/gearPage.vue";
@@ -243,6 +244,25 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/tw-planner",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["unit", "guild", "teams"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "TWPlannerPage",
+        component: TWPlannerPage,
+      },
+    ],
+  },
+
   {
     path: "/widgets",
     components: {

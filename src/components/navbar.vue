@@ -72,6 +72,13 @@
               <li>
                 <router-link
                   class="dropdown-item"
+                  :to="{ name: 'TWPlannerPage' }"
+                  >TW Planner</router-link
+                >
+              </li>
+              <li>
+                <router-link
+                  class="dropdown-item"
                   :to="{ name: 'GuildEventsPage' }"
                   >Guild Event History</router-link
                 >
