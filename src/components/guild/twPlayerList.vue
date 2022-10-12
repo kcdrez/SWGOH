@@ -30,11 +30,7 @@
             <i class="fas mx-1" :class="sortIcon(unit.id)"></i>
           </th>
         </template>
-        <th
-          v-if="showCol('omicrons')"
-          @click="sortBy('omicrons')"
-          class="c-pointer"
-        >
+        <th @click="sortBy('omicrons')" class="c-pointer">
           <span>TW Omicrons</span>
           <i class="fas mx-1" :class="sortIcon('omicrons')"></i>
         </th>
@@ -68,7 +64,7 @@
             <i class="fa fa-times text-danger" v-else></i>
           </th>
         </template>
-        <td v-if="showCol('omicrons')" class="text-left">
+        <td class="text-left">
           <ul class="m-0">
             <li v-for="unitName in getOmicrons(player)" :key="unitName">
               {{ unitName }}
@@ -81,14 +77,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, toRefs } from "vue";
-import { mapActions, mapState } from "vuex";
+import { defineComponent, toRefs } from "vue";
+import { mapState } from "vuex";
 
-import { Gear } from "types/gear";
-import OwnedAmount from "components/gear/gearOwned.vue";
-import GearIcon from "components/gear/gearIcon.vue";
-import Timestamp from "components/timestamp.vue";
-import GearText from "components/gear/gearText.vue";
 import { setupColumnEvents, setupSorting } from "utils";
 import { Unit } from "types/unit";
 
@@ -213,6 +204,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .sticky-header {
-  top: 397px;
+  top: 396px;
 }
 </style>
