@@ -8,7 +8,7 @@
           size="lg"
           displayText="Please wait...This may take a few minutes."
         >
-          <div class="bg-dark guild-header" v-if="players">
+          <div class="bg-dark guild-header sticky-header" v-if="players">
             <div class="row border-bottom py-2 m-0">
               <div class="col">
                 <div class="h3 m-0">{{ totalGP.toLocaleString() }}</div>
@@ -215,7 +215,6 @@ export default defineComponent({
     const ids: string[] = this.twUnits.map((unit: Unit) => unit.id);
     this.loading = loadingState.loading;
     this.players = await this.fetchGuildUnitData(ids);
-    console.log(this.players);
     this.playersJoined = JSON.parse(
       window.localStorage.getItem(storageKey) || "[]"
     );
@@ -226,9 +225,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .guild-header {
-  position: sticky;
-  top: 57px;
-  z-index: 5;
   text-align: center;
 }
 </style>
