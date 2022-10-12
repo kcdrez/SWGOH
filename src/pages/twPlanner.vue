@@ -8,55 +8,55 @@
           size="lg"
           displayText="Please wait...This may take a few minutes."
         >
-          <div class="bg-dark guild-header sticky-header" v-if="players">
-            <div class="row border-bottom py-2 m-0">
-              <div class="col">
-                <div class="h3 m-0">{{ totalGP.toLocaleString() }}</div>
-                <div class="h4 m-0">Galactic Power</div>
+          <div
+            class="row border-bottom py-2 m-0 text-center bg-dark guild-header"
+          >
+            <div class="col">
+              <div class="h3 m-0">{{ totalGP.toLocaleString() }}</div>
+              <div class="h4 m-0">Galactic Power</div>
+            </div>
+            <div class="col">
+              <div class="h3 m-0">{{ activePlayers.length }}</div>
+              <div class="h4 m-0">Active Members</div>
+            </div>
+          </div>
+          <div class="row py-2 m-0 sticky-header text-center bg-dark gl-header">
+            <div class="col col-header">
+              <div class="h3 m-0">Galactic Legends</div>
+              <MultiSelect
+                class="select-columns"
+                :options="glColumns"
+                :storageKey="storageKey + 'glColumns'"
+                @checked="glSelectedColumns = $event"
+              />
+            </div>
+          </div>
+          <div class="row border-bottom py-2 m-0 text-center bg-dark gl-list">
+            <template v-for="unit in glList" :key="unit.id">
+              <div class="col" v-if="showCol(unit.id)">
+                <div class="h4 m-0">{{ unitCount(unit.id) }}</div>
+                <div class="h5 m-0">{{ unit.name }}</div>
               </div>
-              <div class="col">
-                <div class="h3 m-0">{{ activePlayers.length }}</div>
-                <div class="h4 m-0">Active Members</div>
+            </template>
+          </div>
+          <div class="row py-2 m-0 text-center bg-dark cap-ship-header">
+            <div class="col col-header">
+              <div class="h3 m-0">Capital Ships</div>
+              <MultiSelect
+                class="select-columns"
+                :options="capShipColumns"
+                :storageKey="storageKey + 'capShipColumns'"
+                @checked="capShipSelectedColumns = $event"
+              />
+            </div>
+          </div>
+          <div class="row py-2 m-0 text-center bg-dark cap-ship-list">
+            <template v-for="unit in capShipList" :key="unit.id">
+              <div class="col" v-if="showCol(unit.id)">
+                <div class="h4 m-0">{{ unitCount(unit.id) }}</div>
+                <div class="h5 m-0">{{ unit.name }}</div>
               </div>
-            </div>
-            <div class="row py-2 m-0">
-              <div class="col col-header">
-                <div class="h3 m-0">Galactic Legends</div>
-                <MultiSelect
-                  class="select-columns"
-                  :options="glColumns"
-                  :storageKey="storageKey + 'glColumns'"
-                  @checked="glSelectedColumns = $event"
-                />
-              </div>
-            </div>
-            <div class="row border-bottom py-2 m-0">
-              <template v-for="unit in glList" :key="unit.id">
-                <div class="col" v-if="showCol(unit.id)">
-                  <div class="h4 m-0">{{ unitCount(unit.id) }}</div>
-                  <div class="h5 m-0">{{ unit.name }}</div>
-                </div>
-              </template>
-            </div>
-            <div class="row py-2 m-0">
-              <div class="col col-header">
-                <div class="h3 m-0">Capital Ships</div>
-                <MultiSelect
-                  class="select-columns"
-                  :options="capShipColumns"
-                  :storageKey="storageKey + 'capShipColumns'"
-                  @checked="capShipSelectedColumns = $event"
-                />
-              </div>
-            </div>
-            <div class="row py-2 m-0">
-              <template v-for="unit in capShipList" :key="unit.id">
-                <div class="col" v-if="showCol(unit.id)">
-                  <div class="h4 m-0">{{ unitCount(unit.id) }}</div>
-                  <div class="h5 m-0">{{ unit.name }}</div>
-                </div>
-              </template>
-            </div>
+            </template>
           </div>
           <TWPlayerList
             :storageKey="`${storageKey}_playerList`"
@@ -224,7 +224,22 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.guild-header {
-  text-align: center;
+.gl-header,
+.gl-list,
+.cap-ship-header,
+.cap-ship-list {
+  position: sticky;
+}
+.gl-header {
+  top: 56px;
+}
+.gl-list {
+  top: 105px;
+}
+.cap-ship-header {
+  top: 199px;
+}
+.cap-ship-list {
+  top: 248px;
 }
 </style>

@@ -204,6 +204,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .sticky-header {
-  top: 396px;
+  top: 316px;
 }
 </style>
