@@ -8,7 +8,7 @@
           size="lg"
           displayText="Please wait...This may take a few minutes."
         >
-          <div class="bg-dark text-center mb-2" v-if="players">
+          <div class="bg-dark guild-header" v-if="players">
             <div class="row border-bottom py-2 m-0">
               <div class="col">
                 <div class="h3 m-0">{{ totalGP.toLocaleString() }}</div>
@@ -20,26 +20,42 @@
               </div>
             </div>
             <div class="row py-2 m-0">
-              <div class="col">
+              <div class="col col-header">
                 <div class="h3 m-0">Galactic Legends</div>
+                <MultiSelect
+                  class="select-columns"
+                  :options="glColumns"
+                  :storageKey="storageKey + 'glColumns'"
+                  @checked="glSelectedColumns = $event"
+                />
               </div>
             </div>
             <div class="row border-bottom py-2 m-0">
-              <div class="col" v-for="unit in glList" :key="unit.id">
-                <div class="h4 m-0">{{ unitCount(unit.id) }}</div>
-                <div class="h5 m-0">{{ unit.name }}</div>
-              </div>
+              <template v-for="unit in glList" :key="unit.id">
+                <div class="col" v-if="showCol(unit.id)">
+                  <div class="h4 m-0">{{ unitCount(unit.id) }}</div>
+                  <div class="h5 m-0">{{ unit.name }}</div>
+                </div>
+              </template>
             </div>
             <div class="row py-2 m-0">
-              <div class="col">
+              <div class="col col-header">
                 <div class="h3 m-0">Capital Ships</div>
+                <MultiSelect
+                  class="select-columns"
+                  :options="capShipColumns"
+                  :storageKey="storageKey + 'capShipColumns'"
+                  @checked="capShipSelectedColumns = $event"
+                />
               </div>
             </div>
             <div class="row py-2 m-0">
-              <div class="col" v-for="unit in capShipList" :key="unit.id">
-                <div class="h4 m-0">{{ unitCount(unit.id) }}</div>
-                <div class="h5 m-0">{{ unit.name }}</div>
-              </div>
+              <template v-for="unit in capShipList" :key="unit.id">
+                <div class="col" v-if="showCol(unit.id)">
+                  <div class="h4 m-0">{{ unitCount(unit.id) }}</div>
+                  <div class="h5 m-0">{{ unit.name }}</div>
+                </div>
+              </template>
             </div>
           </div>
           <TWPlayerList
@@ -47,6 +63,7 @@
             :players="players"
             :units="[...glList, ...capShipList]"
             :playersJoined="playersJoined"
+            :selectedColumns="[...glSelectedColumns, ...capShipSelectedColumns]"
             @joined="playersJoined = $event"
           />
         </Loading>
@@ -70,23 +87,14 @@ interface dataModel {
   loading: loadingState;
   playersJoined: string[];
   storageKey: string;
+  glSelectedColumns: string[];
+  capShipSelectedColumns: string[];
 }
 
 const storageKey = "twPlanner";
 
 export default defineComponent({
   name: "TWPlanner",
-  // setup() {
-  //   const { sortDir, sortMethod, searchText, sortBy, sortIcon } =
-  //     setupSorting(storageKey);
-  //   return {
-  //     sortDir,
-  //     sortMethod,
-  //     searchText,
-  //     sortBy,
-  //     sortIcon,
-  //   };
-  // },
   components: { TWPlayerList },
   data() {
     return {
@@ -94,6 +102,8 @@ export default defineComponent({
       players: [],
       playersJoined: [],
       storageKey,
+      glSelectedColumns: [],
+      capShipSelectedColumns: [],
     } as dataModel;
   },
   computed: {
@@ -117,9 +127,26 @@ export default defineComponent({
     glList(): Unit[] {
       return this.unitList.filter((unit: Unit) => unit.isGL);
     },
+    glColumns(): { text: string; value: string }[] {
+      return this.glList.map((x: Unit) => {
+        return {
+          text: x.name,
+          value: x.id,
+        };
+      });
+    },
     capShipList(): Unit[] {
       return this.unitList.filter((unit: Unit) => unit.isCapitalShip);
     },
+    capShipColumns(): { text: string; value: string }[] {
+      return this.capShipList.map((x: Unit) => {
+        return {
+          text: x.name,
+          value: x.id,
+        };
+      });
+    },
+    // selectedColumns() {}
     // unitCount(): any {
     //   return this.twUnits.map((unit: Unit) => {
     //     const { owned, omicronCount } = this.activePlayers.reduce(
@@ -156,6 +183,11 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("guild", ["fetchGuildUnitData"]),
+    showCol(key: string): boolean {
+      return [...this.glSelectedColumns, ...this.capShipSelectedColumns].some(
+        (x) => x === key
+      );
+    },
     hasTWOmicron(unitId: string) {
       if (this.abilityStatsData[unitId]) {
         const { leader, unique }: AbilityStat = this.abilityStatsData[unitId];
@@ -193,21 +225,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "styles/variables.scss";
-
-.search-criterion {
-  cursor: pointer;
-  list-style-type: none;
-
-  &:hover {
-    color: $danger-text-dark;
-  }
-}
-
-.search-input {
-  flex: 1 1 auto;
-}
-select.conditional {
-  max-width: 100px;
+.guild-header {
+  position: sticky;
+  top: 57px;
+  z-index: 5;
+  text-align: center;
 }
 </style>
