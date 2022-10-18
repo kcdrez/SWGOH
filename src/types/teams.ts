@@ -213,9 +213,11 @@ export class Team {
 
     this.units.forEach((member) => {
       if (member.owner === unit.owner) {
-        const uniqueAbilityList = member.uniqueAbility;
+        const uniqueAbilityList = (member.uniqueAbility ?? []).filter(
+          (ability) => ability.type === "speed"
+        );
 
-        (uniqueAbilityList || []).forEach((ability) => {
+        uniqueAbilityList.forEach((ability) => {
           amount += getUniqueFromTeamMembers(
             ability,
             unit,
