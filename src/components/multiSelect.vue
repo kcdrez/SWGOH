@@ -26,11 +26,11 @@
         <li v-for="(option, index) in options" :key="index">
           <input
             type="checkbox"
-            :id="index"
+            :id="index.toString()"
             :value="option.value"
             v-model="selected"
           />
-          <label :for="index">{{ option.text }}</label>
+          <label :for="index.toString()">{{ option.text }}</label>
         </li>
       </ul>
     </div>

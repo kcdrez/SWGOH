@@ -352,7 +352,7 @@ export interface SpeedConfig {
   [key: string]: AbilityStat;
 }
 
-interface AbilityStat {
+export interface AbilityStat {
   leader?: IAbilityStat[];
   unique?: IAbilityStat[];
 }
@@ -383,7 +383,7 @@ export interface IAbilityStat extends IBasicAbilityStat {
 }
 
 interface OmicronAbility extends IAbilityStat {
-  mode: "Territory War" | "Territory Battle" | "Grand Arena";
+  mode: "Territory Wars" | "Territory Battle" | "Grand Arena";
 }
 
 export interface MatchPayload {

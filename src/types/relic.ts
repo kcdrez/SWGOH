@@ -131,7 +131,7 @@ export class Relic {
     return amount;
   }
 
-  private totalAmountNeeded(target: number) {
+  public totalAmountNeeded(target: number) {
     let amount = 0;
 
     for (let i = 0; i <= target; i++) {

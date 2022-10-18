@@ -1,7 +1,7 @@
 import _ from "lodash";
 
 import { maxRelicLevel } from "./relic";
-import { Gear, IIngredient, maxGearLevel } from "./gear";
+import { Gear, IIngredient, maxGearLevel, getGear } from "./gear";
 import store from "vuex-store/store";
 import {
   FarmingNode,
@@ -13,6 +13,7 @@ import {
 import { round2Decimals } from "utils";
 import { CurrencyTypeConfig } from "./currency";
 import { anyTagsMatch } from "./teams";
+import relicMapping from "./relicMapping";
 
 interface IStatMultiplier {
   speed: number;
@@ -201,6 +202,32 @@ export class Unit {
   }
   public get isGL() {
     return this.categories.includes("Galactic Legend");
+  }
+  public get isLegendary() {
+    return [
+      "GRANDMASTERYODA",
+      "EMPERORPALPATINE",
+      "GRANDADMIRALTHRAWN",
+      "R2D2_LEGENDARY",
+      "BB8",
+      "PADMEAMIDALA",
+      "COMMANDERLUKESKYWALKER",
+      "REYJEDITRAINING",
+      "THEMANDALORIANBESKARARMOR",
+      "CAPITALCHIMAERA",
+      "GRANDINQUISITOR",
+      "STARKILLER",
+      "JEDIKNIGHTREVAN",
+      "DARTHREVAN",
+      "CHEWBACCALEGENDARY",
+      "C3POLEGENDARY",
+      "MILLENNIUMFALCON",
+      "DARTHMALAK",
+      "GENERALSKYWALKER",
+      "JEDIKNIGHTLUKE",
+      "CAPITALEXECUTOR",
+      "CAPITALPROFUNDITY",
+    ].includes(this.id);
   }
   public get isCapitalShip() {
     return this.categories.includes("Capital Ship");
@@ -822,13 +849,85 @@ export class Unit {
     }, 0);
   }
 
-  // private get totalRemainingShards() {
-  //   let amount = 0;
-  //   for (let i = this.stars + 1; i <= 7; i++) {
-  //     amount += shardMapping[i];
-  //   }
-  //   return amount;
-  // }
+  public getGearRequiredToUnlock(
+    gearIdToFind: string,
+    alreadyIncluded: string[] = []
+  ) {
+    if (alreadyIncluded.includes(this.id)) {
+      return 0;
+    } else {
+      alreadyIncluded.push(this.id);
+    }
+
+    const subTotal = (this.gearList ?? []).reduce(
+      (totalAmount, unitTier: UnitTier) => {
+        unitTier.gear.forEach((gearId: string) => {
+          const gearMatch = this.gearData(gearId);
+          if (gearMatch) {
+            if (gearIdToFind === gearId) {
+              totalAmount += gearMatch.totalAmount;
+            } else {
+              gearMatch.ingredients.forEach((ingredient) => {
+                if (ingredient.gear === gearIdToFind) {
+                  totalAmount += ingredient.amount;
+                }
+              });
+            }
+          }
+        });
+        return totalAmount;
+      },
+      0
+    );
+    const prerequisitesTotal = getPrerequisites(this.id).reduce(
+      (total, prerequisite) => {
+        const unit = getUnit(prerequisite?.id ?? "");
+        if (unit && !alreadyIncluded.includes(unit.id)) {
+          total += unit.getGearRequiredToUnlock(gearIdToFind, alreadyIncluded);
+        }
+        return total;
+      },
+      0
+    );
+    return subTotal + prerequisitesTotal;
+  }
+
+  public getRelicsRequiredToUnlock(
+    relicId: string,
+    relicLevel: number = 0,
+    alreadyIncluded: string[] = []
+  ) {
+    if (alreadyIncluded.includes(this.id)) {
+      return 0;
+    } else {
+      alreadyIncluded.push(this.id);
+    }
+
+    const mapping = relicMapping[relicId];
+    const amountNeeded = mapping.totalAmountNeeded(relicLevel);
+
+    const prerequisitesTotal = getPrerequisites(this.id).reduce(
+      (total, prerequisite) => {
+        const unit = getUnit(prerequisite?.id ?? "");
+        if (
+          unit &&
+          !alreadyIncluded.includes(unit.id) &&
+          prerequisite.requirement?.type === "Relic"
+        ) {
+          total += unit.getRelicsRequiredToUnlock(
+            relicId,
+            prerequisite.requirement?.value,
+            alreadyIncluded
+          );
+        }
+        return total;
+      },
+      0
+    );
+
+    return amountNeeded + prerequisitesTotal;
+  }
+
   public get ownedShards() {
     return store.state.shards.ownedShards[this.id]?.owned || 0;
   }
@@ -928,9 +1027,7 @@ export class Unit {
   }
 
   public gearData(id: string): Gear | undefined {
-    return (store.state.gear.gearList as Gear[]).find(
-      (el: Gear) => el.id === id
-    );
+    return getGear(id);
   }
 
   public tablePriority(tableNames: string[]) {

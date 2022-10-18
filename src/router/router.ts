@@ -13,8 +13,10 @@ import GuildEventsPage from "pages/guildEvents.vue";
 import GuildUnitsPage from "pages/guildUnits.vue";
 import StatCalculatorPage from "pages/statCalculator.vue";
 import GLChecklist from "pages/glChecklist.vue";
+import GLCompare from "pages/glCompare.vue";
 import GoalsPage from "pages/goalsPage.vue";
 import TBStatusPage from "pages/TBStatusPage.vue";
+import TWPlannerPage from "pages/twPlanner.vue";
 import WidgetsPage from "pages/widgets.vue";
 import GearListPage from "pages/gearList.vue";
 // import GearPage from "pages/gearPage.vue";
@@ -189,6 +191,24 @@ const routes = [
     ],
   },
   {
+    path: "/gl-compare",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["unit", "shards", "gear", "relic"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GLCompare",
+        component: GLCompare,
+      },
+    ],
+  },
+  {
     path: "/goal-list",
     components: {
       default: PlayerLoadingPage,
@@ -224,6 +244,25 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/tw-planner",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["unit", "guild", "teams"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "TWPlannerPage",
+        component: TWPlannerPage,
+      },
+    ],
+  },
+
   {
     path: "/widgets",
     components: {
