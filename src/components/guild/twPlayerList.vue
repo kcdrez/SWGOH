@@ -8,7 +8,7 @@
         <th>
           <div class="c-pointer" @click="sortBy('name')">
             Name
-            <i class="fas mx-1" :class="sortIcon('name')"></i>
+            <i class="fas mx-1 d-inline" :class="sortIcon('name')"></i>
           </div>
           <input
             class="form-control form-control-sm mx-auto my-1 w-75"
@@ -16,9 +16,21 @@
             v-model="searchText"
           />
         </th>
-        <th @click="sortBy('joined')" class="c-pointer">
-          <span>Has Joined?</span>
-          <i class="fas mx-1" :class="sortIcon('joined')"></i>
+        <th>
+          <div @click="sortBy('joined')" class="c-pointer">
+            <span>Has Joined?</span>
+            <i class="fas mx-1" :class="sortIcon('joined')"></i>
+          </div>
+          <div class="d-flex mt-2">
+            <input
+              id="showOnlyJoinedToggle"
+              type="checkbox"
+              v-model="showJoined"
+            />
+            <label for="showOnlyJoinedToggle" class="ms-2 text-small"
+              >Show/Hide Joined</label
+            >
+          </div>
         </th>
         <template v-for="unit in units" :key="unit.id">
           <th
@@ -85,6 +97,7 @@ import { Unit } from "types/unit";
 
 interface dataModel {
   _playersJoined: string[];
+  showJoined: boolean;
 }
 
 export default defineComponent({
@@ -135,6 +148,7 @@ export default defineComponent({
   data() {
     return {
       _playersJoined: this.playersJoined,
+      showJoined: false,
     } as dataModel;
   },
   computed: {
@@ -144,7 +158,14 @@ export default defineComponent({
         .filter((player: any) => {
           const name = player.name.toLowerCase().replace(/\s/g, "");
           const compare = this.searchText.toLowerCase().replace(/\s/g, "");
-          return name.includes(compare);
+          if (this.showJoined) {
+            return (
+              name.includes(compare) &&
+              this._playersJoined.includes(player.allyCode)
+            );
+          } else {
+            return name.includes(compare);
+          }
         })
         .sort((a: any, b: any) => {
           if (this.sortMethod === "name") {
@@ -187,6 +208,9 @@ export default defineComponent({
   watch: {
     _playersJoined(newVal) {
       this.$emit("joined", newVal);
+    },
+    playersJoined(newVal) {
+      this._playersJoined = newVal;
     },
   },
   methods: {
