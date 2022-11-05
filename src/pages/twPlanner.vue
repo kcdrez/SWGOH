@@ -18,6 +18,10 @@
             <div class="col">
               <div class="h3 m-0">{{ activePlayers.length }}</div>
               <div class="h4 m-0">Active Members</div>
+              <input id="addAllToggle" type="checkbox" v-model="addAll" />
+              <label for="addAllToggle" class="ms-2"
+                >Add/Remove all Players</label
+              >
             </div>
           </div>
           <div class="row py-2 m-0 sticky-header text-center bg-dark gl-header">
@@ -73,12 +77,12 @@
 </template>
 
 <script lang="ts">
+import _ from "lodash";
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 
 import { Unit } from "types/unit";
 import { AbilityStat } from "types/teams";
-import { setupSorting } from "utils";
 import { loadingState } from "types/loading";
 import TWPlayerList from "components/guild/twPlayerList.vue";
 
@@ -89,6 +93,7 @@ interface dataModel {
   storageKey: string;
   glSelectedColumns: string[];
   capShipSelectedColumns: string[];
+  addAll: boolean;
 }
 
 const storageKey = "twPlanner";
@@ -104,6 +109,7 @@ export default defineComponent({
       storageKey,
       glSelectedColumns: [],
       capShipSelectedColumns: [],
+      addAll: false,
     } as dataModel;
   },
   computed: {
@@ -146,30 +152,6 @@ export default defineComponent({
         };
       });
     },
-    // selectedColumns() {}
-    // unitCount(): any {
-    //   return this.twUnits.map((unit: Unit) => {
-    //     const { owned, omicronCount } = this.activePlayers.reduce(
-    //       (total: { owned: number; omicronCount: number }, player: any) => {
-    //         const match = player.units.find((x: any) => x.base_id === unit.id);
-    //         if (match) {
-    //           total.owned++;
-    //           if (match.omicron_abilities.length > 0) {
-    //             total.omicronCount++;
-    //           }
-    //         }
-    //         return total;
-    //       },
-    //       { owned: 0, omicronCount: 0 }
-    //     );
-    //     return {
-    //       id: unit.id,
-    //       name: unit.name,
-    //       owned,
-    //       omicronCount,
-    //     };
-    //   });
-    // },
     totalGP(): number {
       return this.activePlayers.reduce((total: number, player: any) => {
         return total + player.totalGP;
@@ -179,6 +161,13 @@ export default defineComponent({
   watch: {
     playersJoined(newVal) {
       window.localStorage.setItem(storageKey, JSON.stringify(newVal));
+    },
+    addAll(val) {
+      if (val) {
+        this.playersJoined = this.players.map((x: any) => x.allyCode);
+      } else {
+        this.playersJoined = [];
+      }
     },
   },
   methods: {
@@ -232,12 +221,14 @@ export default defineComponent({
 }
 .gl-header {
   top: 56px;
+  z-index: 11;
 }
 .gl-list {
   top: 105px;
 }
 .cap-ship-header {
   top: 199px;
+  z-index: 10;
 }
 .cap-ship-list {
   top: 248px;
