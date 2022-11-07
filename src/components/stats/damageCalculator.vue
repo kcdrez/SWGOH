@@ -188,11 +188,9 @@ export default defineComponent({
     },
     averageDamagePerHitUnit(): number {
       if (this.selected) {
-        const type = this.physical ? "physical" : "special";
-
-        const offense = this.selected.offense[type];
-        const critChance = this.selected.critChance[type] / 100;
-        const critDamage = this.selected.critDamage / 100;
+        const offense = this.subject.offense;
+        const critChance = this.subject.critChance / 100;
+        const critDamage = this.subject.critDamage / 100;
         return Math.floor(offense * (critChance * (critDamage - 1) + 1));
       } else {
         return 0;
