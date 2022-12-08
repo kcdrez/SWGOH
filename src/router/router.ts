@@ -17,6 +17,7 @@ import GLCompare from "pages/glCompare.vue";
 import GoalsPage from "pages/goalsPage.vue";
 import TBStatusPage from "pages/TBStatusPage.vue";
 import TWPlannerPage from "pages/twPlanner.vue";
+import GuildStats from "pages/guildStats.vue";
 import WidgetsPage from "pages/widgets.vue";
 import GearListPage from "pages/gearList.vue";
 // import GearPage from "pages/gearPage.vue";
@@ -262,7 +263,24 @@ const routes = [
       },
     ],
   },
-
+  {
+    path: "/guild-stats",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["unit", "guild"],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GuildStats",
+        component: GuildStats,
+      },
+    ],
+  },
   {
     path: "/widgets",
     components: {
