@@ -275,8 +275,11 @@ const store = {
       );
       commit("SET_EVENTS", response);
     },
-    async fetchGuildUnitData({ state }: ActionCtx, unitId: string | string[]) {
-      if (Array.isArray(unitId)) {
+    async fetchGuildUnitData(
+      { state }: ActionCtx,
+      unitId: string | string[] | undefined
+    ) {
+      if (Array.isArray(unitId) || unitId === undefined) {
         return await apiClient.fetchGuildUnits(state.guildId, unitId);
       } else {
         return await apiClient.fetchGuildUnitData(state.guildId, unitId);

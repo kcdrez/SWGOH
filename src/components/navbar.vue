@@ -70,6 +70,11 @@
             </a>
             <ul class="dropdown-menu">
               <li>
+                <router-link class="dropdown-item" :to="{ name: 'GuildStats' }"
+                  >Guild Stats</router-link
+                >
+              </li>
+              <li>
                 <router-link
                   class="dropdown-item"
                   :to="{ name: 'TWPlannerPage' }"

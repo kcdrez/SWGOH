@@ -293,7 +293,7 @@ class ApiClient {
 
     return unitMapping;
   }
-  async fetchGuildUnits(guildId: string, unitIds: string[]) {
+  async fetchGuildUnits(guildId: string, unitIds: string[] | undefined) {
     const response = await axios.post(
       `${this.baseUrl}/guild/${guildId}/units`,
       {
