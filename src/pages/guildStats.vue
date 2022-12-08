@@ -12,7 +12,7 @@
             class="row border-bottom py-2 m-0 text-center bg-dark guild-header"
           >
             <div class="col">
-              <div class="h3 m-0">{{ totalGP.toLocaleString() }}</div>
+              <div class="h3 m-0">{{ gp.total.toLocaleString() }}</div>
               <div class="h4 m-0">Galactic Power</div>
             </div>
           </div>
@@ -62,9 +62,22 @@ import { getUnit } from "types/unit";
 import { AbilityStat } from "types/teams";
 import { loadingState } from "types/loading";
 import TWPlayerList from "components/guild/twPlayerList.vue";
+import { apiClient } from "../api/api-client";
 
 interface dataModel {
-  players: any[];
+  gp: {
+    ships: {
+      lightSide: number;
+      darkSide: number;
+      neutral: number;
+    };
+    characters: {
+      lightSide: number;
+      darkSide: number;
+      neutral: number;
+    };
+    total: number;
+  };
   loading: loadingState;
   storageKey: string;
 }
@@ -76,96 +89,35 @@ export default defineComponent({
   components: { TWPlayerList },
   data() {
     return {
+      gp: {
+        ships: {
+          lightSide: 0,
+          darkSide: 0,
+          neutral: 0,
+        },
+        characters: {
+          lightSide: 0,
+          darkSide: 0,
+          neutral: 0,
+        },
+        total: 0,
+      },
       loading: loadingState.initial,
-      players: [],
       storageKey,
     } as dataModel;
   },
   computed: {
-    ...mapState("unit", ["unitList"]),
-    ...mapState("teams", ["abilityStatsData"]),
-    totalGP(): number {
-      return this.players.reduce((total: number, player: any) => {
-        return total + player.totalGP;
-      }, 0);
-    },
-    gp(): any {
-      return this.players.reduce(
-        (acc, player) => {
-          player.units.forEach((unit: any) => {
-            const match = getUnit(unit.base_id);
-            if (match) {
-              if (match.isShip) {
-                if (match.alignment === "Light Side") {
-                  acc.ships.lightSide += unit.power;
-                } else if (match.alignment === "Dark Side") {
-                  acc.ships.darkSide += unit.power;
-                } else {
-                  acc.ships.neutral += unit.power;
-                }
-              } else {
-                if (match.alignment === "Light Side") {
-                  acc.characters.lightSide += unit.power;
-                } else if (match.alignment === "Dark Side") {
-                  acc.characters.darkSide += unit.power;
-                } else {
-                  acc.characters.neutral += unit.power;
-                }
-              }
-            }
-          });
-          return acc;
-        },
-        {
-          ships: {
-            lightSide: 0,
-            darkSide: 0,
-            neutral: 0,
-          },
-          characters: {
-            lightSide: 0,
-            darkSide: 0,
-            neutral: 0,
-          },
-        }
-      );
-    },
-  },
-  watch: {
-    playersJoined(newVal) {
-      window.localStorage.setItem(storageKey, JSON.stringify(newVal));
-    },
+    ...mapState("guild", ["guildId"]),
   },
   methods: {
     ...mapActions("guild", ["fetchGuildUnitData"]),
   },
   async created() {
     this.loading = loadingState.loading;
-    this.players = await this.fetchGuildUnitData();
+    this.gp = await apiClient.fetchGuildStats(this.guildId);
     this.loading = loadingState.ready;
   },
 });
 </script>
 
-<style lang="scss" scoped>
-.gl-header,
-.gl-list,
-.cap-ship-header,
-.cap-ship-list {
-  position: sticky;
-}
-.gl-header {
-  top: 56px;
-  z-index: 11;
-}
-.gl-list {
-  top: 105px;
-}
-.cap-ship-header {
-  top: 199px;
-  z-index: 10;
-}
-.cap-ship-list {
-  top: 248px;
-}
-</style>
+<style lang="scss" scoped></style>

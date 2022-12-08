@@ -16,8 +16,8 @@ import {
 import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3001/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3001/dev";
 
   constructor() {}
 
@@ -300,6 +300,10 @@ class ApiClient {
         unitIds,
       }
     );
+    return response.data;
+  }
+  async fetchGuildStats(guildId: string) {
+    const response = await axios.post(`${this.baseUrl}/guild/${guildId}/stats`);
     return response.data;
   }
   async saveGoals(playerId: string | undefined, goals: Goal[]) {
