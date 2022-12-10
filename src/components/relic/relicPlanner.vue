@@ -11,7 +11,7 @@
           <div>Current Relic Level:</div>
           <RelicLevelIcon
             :relicLevel="unit.relicLevel"
-            :forceSide="unit.alignment"
+            :alignment="unit.alignment"
           />
         </div>
         <div class="target-level">

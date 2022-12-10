@@ -127,7 +127,7 @@
               <RelicLevelIcon
                 class="d-inline-block"
                 :relicLevel="unit.relicLevel"
-                :forceSide="unit.alignment"
+                :alignment="unit.alignment"
                 v-else
               />
             </td>

@@ -15,11 +15,11 @@
         :key="index"
         :class="`star-level-${index}`"
       ></span>
-      <RelicIcon
+      <RelicLevelIcon
         v-if="unit.relicLevel"
         :relicLevel="unit.relicLevel"
         :size="size"
-        :forceSide="unit.alignment"
+        :alignment="unit.alignment"
       />
       <span class="zetas" v-if="unit.zetas.length > 0">
         <span>{{ unit.zetas.length }}</span>
@@ -40,13 +40,13 @@
 import { defineComponent, PropType } from "vue";
 
 import { Unit } from "types/unit";
-import RelicIcon from "./relicLevelIcon.vue";
+import RelicLevelIcon from "./relicLevelIcon.vue";
 import GearText from "components/gear/gearText.vue";
 import { maxGearLevel } from "types/gear";
 
 export default defineComponent({
   name: "UnitPortrait",
-  components: { RelicIcon, GearText },
+  components: { RelicLevelIcon, GearText },
   props: {
     unit: {
       required: true,

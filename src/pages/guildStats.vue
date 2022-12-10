@@ -93,13 +93,16 @@
                     :key="playerName"
                   >
                     <tr>
-                      <td :rowspan="units.length + 1">{{ playerName }}</td>
+                      <td :rowspan="units.length + 1">
+                        <span>{{ playerName }}</span>
+                      </td>
                     </tr>
                     <tr v-for="unit in units" :key="playerName + unit.id">
                       <td>{{ unit.name }}</td>
                       <td>
                         <RelicLevelIcon
                           :relicLevel="unit.relicLevel"
+                          :alignment="unit.alignment"
                           class="d-inline-block"
                         />
                       </td>
@@ -124,12 +127,15 @@
                     :key="unitName"
                   >
                     <tr>
-                      <td :rowspan="units.length + 1">{{ unitName }}</td>
+                      <td :rowspan="units.length + 1">
+                        <span>{{ unitName }}</span>
+                      </td>
                     </tr>
                     <tr v-for="unit in units" :key="unitName + unit.owner">
                       <td>
                         <RelicLevelIcon
                           :relicLevel="unit.relicLevel"
+                          :alignment="unit.alignment"
                           class="d-inline-block"
                         />
                       </td>
@@ -153,10 +159,12 @@
                   <template v-for="(units, level) in unitsByLevel" :key="level">
                     <tr>
                       <td :rowspan="units.length + 1">
-                        <RelicLevelIcon
-                          :relicLevel="level"
-                          class="d-inline-block"
-                        />
+                        <span>
+                          <RelicLevelIcon
+                            :relicLevel="level"
+                            class="d-inline-block"
+                          />
+                        </span>
                       </td>
                     </tr>
                     <tr
@@ -293,4 +301,14 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+tr {
+  td:first-child {
+    vertical-align: top;
+    span {
+      position: sticky;
+      top: 65px;
+    }
+  }
+}
+</style>

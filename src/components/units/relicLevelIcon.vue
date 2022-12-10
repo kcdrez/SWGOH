@@ -3,8 +3,9 @@
     v-if="relicLevel >= 0"
     class="relic-level"
     :class="{
-      'dark-side': forceSide === 'Dark Side',
-      'light-side': forceSide === 'Light Side',
+      'dark-side': alignment === 'Dark Side',
+      'light-side': alignment === 'Light Side',
+      neutral: alignment === 'Neutral',
       'relic-lg': size === 'lg',
     }"
     >{{ relicLevel }}</span
@@ -12,6 +13,7 @@
 </template>
 
 <script lang="ts">
+import { maxRelicLevel } from "types/relic";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -20,14 +22,23 @@ export default defineComponent({
     relicLevel: {
       type: Number,
       required: true,
+      validator: (val: number) => {
+        return val >= 0 && val <= maxRelicLevel;
+      },
     },
-    forceSide: {
+    alignment: {
       type: String,
-      default: "Light Side",
+      default: "Neutral",
+      validator: (val: string) => {
+        return ["Light Side", "Dark Side", "Neutral"].includes(val);
+      },
     },
     size: {
       type: String,
       default: "md",
+      validator: (val: string) => {
+        return ["md", "lg"].includes(val);
+      },
     },
   },
 });
@@ -37,7 +48,7 @@ export default defineComponent({
 .relic-level {
   background-image: url("../../images/relicAtlas.png");
   background-repeat: no-repeat;
-  background-position: 0 0;
+  background-position: 0 -100px;
   height: 50px;
   width: 50px;
   background-size: 100%;
@@ -52,6 +63,9 @@ export default defineComponent({
   }
   &.light-side {
     background-position: 0 0;
+  }
+  &.neutral {
+    background-position: 0 -100px;
   }
 }
 </style>

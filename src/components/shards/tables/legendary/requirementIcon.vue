@@ -4,7 +4,7 @@
       v-if="shouldDisplayRelicIcon"
       class="m-auto"
       :relicLevel="displayValue"
-      :forceSide="alignment"
+      :alignment="alignment"
     />
     <GearText v-else-if="shouldDisplayGearIcon" :level="displayValue" />
     <div v-else-if="type === 'Stars'" class="d-flex justify-content-center">
