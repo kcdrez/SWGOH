@@ -1,7 +1,7 @@
 <template>
   <div class="container swgoh-page">
     <div class="row">
-      <div class="col-5">
+      <div class="col-lg-6 col-sm-12">
         <div>
           <div>Unit Tag:</div>
           <div class="input-group input-group-sm">
@@ -56,6 +56,39 @@
           </div>
         </div>
         <div>
+          <div>Alignment:</div>
+          <div class="input-group input-group-sm">
+            <select
+              class="form-control search-input"
+              v-model="alignment.value.name"
+            >
+              <option
+                :value="alignment.name"
+                v-for="alignment in alignmentList"
+                :key="alignment.name"
+              >
+                {{ alignment.name }}
+              </option>
+            </select>
+            <select
+              v-model="alignment.condition"
+              class="form-control conditional"
+            >
+              <option value="and">AND</option>
+              <option value="or">OR</option>
+              <option value="not">NOT</option>
+            </select>
+            <button
+              class="btn btn-primary"
+              type="button"
+              @click="add(alignment)"
+              :disabled="!alignment.value.name"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+        <div>
           <div>Unit Type:</div>
           <div class="input-group input-group-sm">
             <select
@@ -84,7 +117,7 @@
           </div>
         </div>
       </div>
-      <div class="col-3">
+      <div class="col-lg-3 col-sm-12">
         <h4>Search Criteria:</h4>
         <ul>
           <li
@@ -140,6 +173,7 @@ interface dataModel {
   tag: tCriteria;
   ability: tCriteria;
   unitType: tCriteria;
+  alignment: tCriteria;
   criteria: tCriteria[];
   results: Unit[];
   showResults: boolean;
@@ -179,6 +213,13 @@ export default defineComponent({
         label: "Unit Type",
         key: "unitType",
       },
+      alignment: {
+        value: { name: "" },
+        condition: "and",
+        type: "alignment",
+        label: "Unit Alignment",
+        key: "alignment",
+      },
       criteria: [],
       results: [],
       showResults: false,
@@ -205,6 +246,17 @@ export default defineComponent({
             list.push({ name: ability });
           }
         });
+        return list;
+      }, []);
+    },
+    alignmentList(): { name: string }[] {
+      return this.unitList.reduce((list: { name: string }[], unit: Unit) => {
+        const exists = list.some(
+          (alignment) => alignment.name === unit.alignment
+        );
+        if (!exists) {
+          list.push({ name: unit.alignment });
+        }
         return list;
       }, []);
     },
@@ -246,6 +298,7 @@ export default defineComponent({
       const tagSearches = queryList.filter((x) => x.type === "tag");
       const unitTypeSearches = queryList.filter((x) => x.type === "unitType");
       const abilitySearches = queryList.filter((x) => x.type === "ability");
+      const alignmentSearches = queryList.filter((x) => x.type === "alignment");
       const query: any = {};
 
       if (tagSearches.length) {
@@ -256,6 +309,9 @@ export default defineComponent({
       }
       if (abilitySearches.length) {
         query.ability = this.getSearchSyntax(abilitySearches);
+      }
+      if (alignmentSearches.length) {
+        query.alignment = this.getSearchSyntax(alignmentSearches);
       }
 
       this.$router.push({ query });
@@ -282,20 +338,22 @@ export default defineComponent({
           );
 
           (searchValues ?? []).forEach((searchValue) => {
-            const condition = (function () {
-              const key = searchValue.charAt(0);
-              if (key === "|") {
-                return "or";
-              } else if (key === "-") {
-                return "not";
-              } else {
-                return "and";
-              }
-            })();
-            const searchTerms = searchValue.match(/\[(.*?)\]/);
-
-            searchTerms?.forEach((searchTerm, index) => {
-              if (index > 0) {
+            const regex = /(?=\+|\-|\|)/g;
+            const searchTerms = searchValue.split(regex);
+            searchTerms?.forEach((searchPhrase) => {
+              const condition = (function () {
+                const key = searchPhrase.charAt(0);
+                if (key === "|") {
+                  return "or";
+                } else if (key === "-") {
+                  return "not";
+                } else {
+                  return "and";
+                }
+              })();
+              const searchTermFull = /\[(.*?)\]/g.exec(searchPhrase);
+              if (searchTermFull) {
+                const searchTerm = searchTermFull[1];
                 searchTerm.split(",").forEach((x) => {
                   this.add({
                     value: { name: x.trim() },
