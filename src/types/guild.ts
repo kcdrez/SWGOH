@@ -15,6 +15,7 @@ export interface ITerritoryWarEvent {
   currencies: {
     get1: number;
     get2: number;
+    get3: number;
     guildStore: number;
     credits: number;
   };
@@ -46,6 +47,7 @@ export interface TerritoryBattleEvent {
     | "Imperial Retaliation";
   get1: number;
   get2: number;
+  get3: number;
   stars: number;
   gear: any[];
   crystals: number;

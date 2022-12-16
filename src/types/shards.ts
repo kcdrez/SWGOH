@@ -92,6 +92,8 @@ export class FarmingNode {
         return "get1";
       case "guild_events_store2":
         return "get2";
+      case "guild_events_store3":
+        return "get3";
       case "cantina_battles_store":
         return "cantinaBattleCurrency";
       case "guild_store":

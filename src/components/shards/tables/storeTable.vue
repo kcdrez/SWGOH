@@ -10,7 +10,7 @@
               <span class="input-group-text">Sort By:</span>
               <select
                 class="form-control"
-                @change="sortMethod = $event.target.value"
+                @change="sortMethod = $event?.target?.value"
               >
                 <option value="name" v-if="showUnitName">Name</option>
                 <option value="location">Location</option>
@@ -22,7 +22,7 @@
               <span class="input-group-text">Sort Direction:</span>
               <select
                 class="form-control"
-                @change="sortDir = $event.target.value"
+                @change="sortDir = $event?.target?.value"
               >
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
@@ -150,7 +150,7 @@
                   <img
                     class="currency-img"
                     :src="`./images/${currency}.png`"
-                    v-if="['get1', 'get2'].includes(currency)"
+                    v-if="['get1', 'get2', 'get3'].includes(currency)"
                   />
                 </span>
                 <Wallet :currencyType="currency" class="wallet-input" />
@@ -166,12 +166,12 @@
                     <img
                       class="currency-img"
                       :src="`./images/${currency}.png`"
-                      v-if="['get1', 'get2'].includes(currency)"
+                      v-if="['get1', 'get2', 'get3'].includes(currency)"
                     />
                   </span>
                   <DailyCurrency
                     :currencyType="currency"
-                    :allowEdit="!['get1', 'get2'].includes(currency)"
+                    :allowEdit="!['get1', 'get2', 'get3'].includes(currency)"
                   />
                 </div>
               </template>
@@ -274,7 +274,7 @@ export default defineComponent({
       default: false,
     },
     currencyTypes: {
-      type: Array,
+      type: Array as PropType<CurrencyTypeConfig[]>,
       required: true,
       validator: (arr: any[]) => {
         return arr.every((x) => {

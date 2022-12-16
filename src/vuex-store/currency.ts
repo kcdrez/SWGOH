@@ -56,6 +56,22 @@ const store = {
         (amount / rootState.guild.territoryBattleEvents.length) * twFrequency;
       return round2Decimals(avgAmount);
     },
+    dailyAvgGET3(_state: State, _getters: any, rootState: RootState) {
+      let amount = 0;
+      let avgAmount = 0;
+      rootState.guild.territoryBattleEvents.forEach((event) => {
+        amount += event.get3;
+      });
+      avgAmount +=
+        (amount / rootState.guild.territoryBattleEvents.length) * tbFrequency;
+      amount = 0;
+      rootState.guild.territoryWarEvents.forEach((event) => {
+        amount += event.currencies.get3;
+      });
+      avgAmount +=
+        (amount / rootState.guild.territoryBattleEvents.length) * twFrequency;
+      return round2Decimals(avgAmount);
+    },
   },
   mutations: {
     SET_REQUEST_STATE(state: State, payload: loadingState) {

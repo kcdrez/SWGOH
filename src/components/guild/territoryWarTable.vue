@@ -28,6 +28,10 @@
             GET2 Currency
             <i class="fas mx-1" :class="sortIcon('get2')"></i>
           </th>
+          <th v-if="showCol('get2')" class="c-pointer" @click="sortBy('get3')">
+            GET3 Currency
+            <i class="fas mx-1" :class="sortIcon('get3')"></i>
+          </th>
           <th
             v-if="showCol('zetas')"
             class="c-pointer"
@@ -59,6 +63,10 @@
           <td v-if="showCol('get2')">
             <span class="row-label">GET2 Currency: </span>
             {{ event.currencies.get2 }}
+          </td>
+          <td v-if="showCol('get3')">
+            <span class="row-label">GET3 Currency: </span>
+            {{ event.currencies.get3 }}
           </td>
           <td v-if="showCol('zetas')">
             <span class="row-label">Zetas: </span>
@@ -95,6 +103,10 @@
           <td v-if="showCol('get2')">
             <span class="row-label">Avg GET2: </span>
             {{ averageGet2 }}
+          </td>
+          <td v-if="showCol('get3')">
+            <span class="row-label">Avg GET3: </span>
+            {{ averageGet3 }}
           </td>
           <td v-if="showCol('zetas')">
             <span class="row-label">Avg Zetas: </span>
@@ -258,6 +270,14 @@ export default defineComponent({
             } else {
               return a.currencies.get2 > b.currencies.get2 ? -1 : 1;
             }
+          } else if (this.sortMethod === "get3") {
+            if (a.currencies.get3 === b.currencies.get3) {
+              return 0;
+            } else if (this.sortDir === "asc") {
+              return a.currencies.get3 > b.currencies.get3 ? 1 : -1;
+            } else {
+              return a.currencies.get3 > b.currencies.get3 ? -1 : 1;
+            }
           } else if (this.sortMethod === "zetas") {
             if (a.abilityMats.zetas === b.abilityMats.zetas) {
               return 0;
@@ -290,6 +310,15 @@ export default defineComponent({
       const total = this.filteredEvents.reduce(
         (total: number, e: ITerritoryWarEvent) => {
           return total + e.currencies.get2;
+        },
+        0
+      );
+      return round2Decimals(total / this.filteredEvents.length);
+    },
+    averageGet3(): number {
+      const total = this.filteredEvents.reduce(
+        (total: number, e: ITerritoryWarEvent) => {
+          return total + e.currencies.get3;
         },
         0
       );

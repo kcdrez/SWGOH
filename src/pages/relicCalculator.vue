@@ -127,6 +127,15 @@
             </tr>
             <tr>
               <td
+                :title="`Total amount of Guild Events Mk 3 needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
+              >
+                Daily Guild Events (II) Currency Spent
+                <img src="../images/get3.png" />
+              </td>
+              <td>{{ currencySpent.guild_events_store3 }}</td>
+            </tr>
+            <tr>
+              <td
                 :title="`Total amount of Shard Shop Currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
                 Daily Shard Shop Currency Spent
@@ -255,6 +264,7 @@ export default defineComponent({
       squad_arena_store: number;
       guild_events_store1: number;
       guild_events_store2: number;
+      guild_events_store3: number;
       shard_store: number;
     } {
       return this.calculator.tableData.reduce(
@@ -269,6 +279,7 @@ export default defineComponent({
           squad_arena_store: 0,
           guild_events_store1: 0,
           guild_events_store2: 0,
+          guild_events_store3: 0,
           shard_store: 0,
         }
       );

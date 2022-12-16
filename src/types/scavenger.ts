@@ -277,6 +277,15 @@ const scavengerFarming = [
     ],
   },
   {
+    id: "guild_events_store3",
+    currency: "get3",
+    gear: [
+      {
+        //todo
+      },
+    ],
+  },
+  {
     id: "fleet_normal_3e",
     gear: [
       {

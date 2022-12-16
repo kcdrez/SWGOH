@@ -28,7 +28,7 @@
       :selectedColumns="selectedColumns"
       showUnitName
       :simpleView="simpleView"
-      :currencyTypes="['get1', 'get2']"
+      :currencyTypes="['get1', 'get2', 'get3']"
       :nodeTableNames="[
         'Guild Events Store (Mk 1)',
         'Guild Events Store (Mk 2)',

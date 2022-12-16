@@ -100,7 +100,7 @@ const store = {
     tbAvgCurrency(state: State, getters: any) {
       return (
         type: "Light" | "Dark",
-        currencyType: "get1" | "get2"
+        currencyType: "get1" | "get2" | "get3"
       ): number => {
         const total = state.territoryBattleEvents.reduce(
           (total: number, e: TerritoryBattleEvent) => {

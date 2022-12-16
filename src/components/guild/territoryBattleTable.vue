@@ -36,6 +36,10 @@
             GET2 Currency
             <i class="fas mx-1" :class="sortIcon('get2')"></i>
           </th>
+          <th v-if="showCol('get3')" class="c-pointer" @click="sortBy('get3')">
+            GET3 Currency
+            <i class="fas mx-1" :class="sortIcon('get3')"></i>
+          </th>
           <th
             v-if="showCol('character')"
             class="c-pointer"
@@ -69,6 +73,9 @@
           </td>
           <td v-if="showCol('get2')">
             <span class="row-label">GET2:</span>{{ event.get2 }}
+          </td>
+          <td v-if="showCol('get2')">
+            <span class="row-label">GET3:</span>{{ event.get3 }}
           </td>
           <td v-if="showCol('character')">
             <span class="row-label character-shards-label"
@@ -117,6 +124,10 @@
               <span class="row-label">GET2:</span>
               {{ tbAvgCurrency("Light", "get2") }}
             </td>
+            <td v-if="showCol('get3')">
+              <span class="row-label">GET3:</span>
+              {{ tbAvgCurrency("Light", "get3") }}
+            </td>
             <td v-if="showCol('character')">
               <span class="row-label character-shards-label">
                 Character Shards:
@@ -141,6 +152,10 @@
           <td v-if="showCol('get2')">
             <span class="row-label">GET2:</span>
             {{ tbAvgCurrency("Dark", "get2") }}
+          </td>
+          <td v-if="showCol('get3')">
+            <span class="row-label">GET3:</span>
+            {{ tbAvgCurrency("Dark", "get3") }}
           </td>
           <td v-if="showCol('character')">
             <span class="row-label character-shards-label">
@@ -196,6 +211,7 @@
               <option value="Republic Offensive">Republic Offensive</option>
               <option value="Rebel Assault">Rebel Assault</option>
               <option value="Imperial Retaliation">Imperial Retaliation</option>
+              <option value="Rise of the Empire">Rise of the Empire</option>
             </select>
           </td>
           <td class="flex-sm">
@@ -303,6 +319,8 @@ export default defineComponent({
           return 45;
         case "Imperial Retaliation":
           return 48;
+        case "Rise of the Empire":
+          return 48;
       }
     },
     filteredEvents(): TerritoryBattleEvent[] {
@@ -349,6 +367,14 @@ export default defineComponent({
               return a.get2 > b.get2 ? 1 : -1;
             } else {
               return a.get2 > b.get2 ? -1 : 1;
+            }
+          } else if (this.sortMethod === "get3") {
+            if (a.get3 === b.get3) {
+              return 0;
+            } else if (this.sortDir === "asc") {
+              return a.get3 > b.get3 ? 1 : -1;
+            } else {
+              return a.get3 > b.get3 ? -1 : 1;
             }
           } else if (this.sortMethod === "stars") {
             if (a.stars === b.stars) {

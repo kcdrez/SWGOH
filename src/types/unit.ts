@@ -968,6 +968,8 @@ export class Unit {
         arr.push("get1");
       } else if (node.id === "guild_events_store2") {
         arr.push("get2");
+      } else if (node.id === "guild_events_store3") {
+        arr.push("get3");
       } else if (node.id === "shard_store") {
         arr.push("shardCurrency");
       } else if (node.id === "cantina_battles_store") {

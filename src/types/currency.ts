@@ -7,6 +7,7 @@ import { Unit, unitsByPriority } from "./unit";
 export const currencyTypeList: CurrencyTypeConfig[] = [
   "get1",
   "get2",
+  "get3",
   "shardCurrency",
   "cantinaBattleCurrency",
   "guildStoreCurrency",
@@ -18,6 +19,7 @@ export const currencyTypeList: CurrencyTypeConfig[] = [
 export type CurrencyTypeConfig =
   | "get1"
   | "get2"
+  | "get3"
   | "shardCurrency"
   | "cantinaBattleCurrency"
   | "guildStoreCurrency"
@@ -27,6 +29,7 @@ export type CurrencyTypeConfig =
 export interface IWallet {
   get1?: number;
   get2?: number;
+  get3?: number;
   shardCurrency?: number;
   cantinaBattleCurrency?: number;
   guildStoreCurrency?: number;
@@ -38,6 +41,7 @@ export interface IWallet {
 export class Wallet {
   private _get1?: number;
   private _get2?: number;
+  private _get3?: number;
   private _shardCurrency?: number;
   private _cantinaBattleCurrency?: number;
   private _guildStoreCurrency?: number;
@@ -48,6 +52,7 @@ export class Wallet {
   constructor(data: IWallet) {
     this._get1 = data?.get1;
     this._get2 = data?.get2;
+    this._get3 = data?.get3;
     this._shardCurrency = data?.shardCurrency;
     this._cantinaBattleCurrency = data?.cantinaBattleCurrency;
     this._guildStoreCurrency = data?.guildStoreCurrency;
@@ -68,6 +73,13 @@ export class Wallet {
   }
   public set get2(val) {
     this._get2 = val;
+    this.save();
+  }
+  public get get3() {
+    return this._get3 || 0;
+  }
+  public set get3(val) {
+    this._get3 = val;
     this.save();
   }
   public get shardCurrency() {
@@ -121,6 +133,7 @@ export class Wallet {
     return {
       get1: this.get1,
       get2: this.get2,
+      get3: this.get3,
       shardCurrency: this.shardCurrency,
       cantinaBattleCurrency: this.cantinaBattleCurrency,
       guildStoreCurrency: this.guildStoreCurrency,
@@ -157,10 +170,13 @@ export class DailyCurrency {
   }
 
   public get get1(): number {
-    return store.getters["currency/dailyAvgGET2"];
+    return store.getters["currency/dailyAvgGET1"];
   }
   public get get2(): number {
-    return store.getters["currency/dailyAvgGET1"];
+    return store.getters["currency/dailyAvgGET2"];
+  }
+  public get get3(): number {
+    return store.getters["currency/dailyAvgGET3"];
   }
   public get shardCurrency() {
     return this._shardCurrency || 0;

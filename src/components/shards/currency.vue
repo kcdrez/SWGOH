@@ -72,7 +72,6 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("currency", ["dailyAvgGET1", "dailyAvgGET2"]),
     ...mapState("currency", ["wallet", "dailyCurrency"]),
   },
   methods: {

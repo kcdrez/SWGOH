@@ -100,6 +100,10 @@ export default defineComponent({
           value: "get2",
         },
         {
+          text: "GET3 Currency",
+          value: "get3",
+        },
+        {
           text: "Character Shards",
           value: "character",
         },
@@ -127,6 +131,10 @@ export default defineComponent({
         {
           text: "GET2 Currency",
           value: "get2",
+        },
+        {
+          text: "GET3 Currency",
+          value: "get3",
         },
         {
           text: "Zetas",
