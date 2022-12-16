@@ -190,7 +190,7 @@ export default defineComponent({
       return scavengerFarming
         .map(({ gear, ...x }) => {
           return {
-            gear: gear.filter((gearEl) => {
+            gear: gear?.filter((gearEl) => {
               return this.filteredRelicMats.some((r) =>
                 (gearEl?.scavenger ?? []).some((x) => x.id === r)
               );
@@ -198,7 +198,7 @@ export default defineComponent({
             ...x,
           };
         })
-        .filter((x) => x.gear.length > 0);
+        .filter((x) => !!x.gear && x.gear?.length > 0);
     },
   },
   methods: {
