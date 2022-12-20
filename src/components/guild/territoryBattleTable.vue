@@ -61,7 +61,9 @@
             <span class="row-label">Date:</span>
             {{ $filters.formatDate(event.date) }}
           </td>
-          <td v-if="showCol('type')">{{ event.type }} Side</td>
+          <td v-if="showCol('type')">
+            {{ event.type ? `${event.type} Side` : "-" }}
+          </td>
           <td v-if="showCol('name')">
             <span class="row-label">Battle Type:</span>{{ event.name }}
           </td>
@@ -320,7 +322,7 @@ export default defineComponent({
         case "Imperial Retaliation":
           return 48;
         case "Rise of the Empire":
-          return 48;
+          return 54;
       }
     },
     filteredEvents(): TerritoryBattleEvent[] {
