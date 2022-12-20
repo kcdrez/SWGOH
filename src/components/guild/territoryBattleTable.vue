@@ -74,7 +74,7 @@
           <td v-if="showCol('get2')">
             <span class="row-label">GET2:</span>{{ event.get2 }}
           </td>
-          <td v-if="showCol('get2')">
+          <td v-if="showCol('get3')">
             <span class="row-label">GET3:</span>{{ event.get3 }}
           </td>
           <td v-if="showCol('character')">

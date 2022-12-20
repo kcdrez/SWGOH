@@ -28,7 +28,7 @@
             GET2 Currency
             <i class="fas mx-1" :class="sortIcon('get2')"></i>
           </th>
-          <th v-if="showCol('get2')" class="c-pointer" @click="sortBy('get3')">
+          <th v-if="showCol('get3')" class="c-pointer" @click="sortBy('get3')">
             GET3 Currency
             <i class="fas mx-1" :class="sortIcon('get3')"></i>
           </th>
