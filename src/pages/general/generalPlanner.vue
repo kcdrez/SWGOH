@@ -21,9 +21,9 @@
       </button>
     </div>
     <template v-if="fullUnitList.length > 0">
-      <UnitSection class="unit-section" />
-      <GearSection class="gear-section" />
-      <RelicSection class="relic-section" />
+      <UnitSection class="unit-section" :units="fullUnitList" />
+      <GearSection class="gear-section" :units="fullUnitList" />
+      <RelicSection class="relic-section" :units="fullUnitList" />
     </template>
     <ShardSection class="shard-section" />
   </div>

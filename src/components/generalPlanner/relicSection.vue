@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapGetters, mapState } from "vuex";
+import { mapState } from "vuex";
 
 import { Unit } from "types/unit";
 import { Relic } from "types/relic";
@@ -44,6 +44,7 @@ export default defineComponent({
   props: {
     units: {
       type: Array as () => Unit[],
+      required: true,
     },
   },
   data() {
@@ -53,7 +54,6 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("planner", ["fullUnitList"]),
     ...mapState("relic", ["relicConfig"]),
     cols(): { text: string; value: any }[] {
       const list = [
@@ -97,9 +97,8 @@ export default defineComponent({
       return list;
     },
     fullRelicList(): Relic[] {
-      const unitList: Unit[] = this.units || this.fullUnitList;
       const list: Relic[] = Object.values(this.relicConfig);
-      unitList.forEach((unit: Unit) => {
+      this.units.forEach((unit: Unit) => {
         if (unit.relicLevel < unit.relicTarget) {
           list.forEach((relic: Relic) => {
             if (relic.amount[unit.relicTarget] > 0) {
@@ -118,7 +117,7 @@ export default defineComponent({
     },
     relicTargetLevels(): any[] {
       const list: any[] = [];
-      this.fullUnitList.forEach((unit: Unit) => {
+      this.units.forEach((unit: Unit) => {
         list.push({ level: unit.relicLevel, target: unit.relicTarget });
       });
       return list;

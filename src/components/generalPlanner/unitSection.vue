@@ -240,10 +240,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions } from "vuex";
 
 import { UnitPlannerItem } from "types/planner";
-import { Unit, getUnit } from "types/unit";
+import { Unit } from "types/unit";
 import { maxGearLevel } from "types/gear";
 import { setupEvents, setupSimpleView, setupSorting } from "utils";
 import Timestamp from "components/timestamp.vue";
@@ -273,6 +273,7 @@ export default defineComponent({
   props: {
     units: {
       type: Array as () => Unit[],
+      required: true,
     },
   },
   data() {
@@ -282,10 +283,8 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("planner", ["fullUnitList"]),
     unitList(): Unit[] {
-      const unitList: Unit[] = this.units || this.fullUnitList;
-      return unitList.sort((a: Unit, b: Unit) => {
+      return this.units.sort((a: Unit, b: Unit) => {
         if (this.sortMethod === "name") {
           const compareA = a.name.toLowerCase();
           const compareB = b.name.toLowerCase();

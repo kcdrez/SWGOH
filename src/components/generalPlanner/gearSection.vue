@@ -28,7 +28,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapGetters } from "vuex";
 
 import { Unit } from "types/unit";
 import { Gear } from "types/gear";
@@ -43,6 +42,7 @@ export default defineComponent({
   props: {
     units: {
       type: Array as () => Unit[],
+      required: true,
     },
   },
   data() {
@@ -52,11 +52,9 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters("planner", ["fullUnitList"]),
     fullGearList(): Gear[] {
-      const unitList: Unit[] = this.units || this.fullUnitList;
       const list: Gear[] = [];
-      unitList.forEach((unit: Unit) => {
+      this.units.forEach((unit: Unit) => {
         unit.fullSalvageList.forEach((gear: Gear) => {
           const match = list.find((x) => x.id === gear.id);
           if (match) {

@@ -1,7 +1,6 @@
 <template>
   <div class="container swgoh-page">
     <template v-if="goalData">
-      <!-- <UnitSection class="unit-section" :units="unitList" /> -->
       <GoalsTable
         :goal="goalData"
         :storageKey="storageKey + goalData.id + 'Table'"
