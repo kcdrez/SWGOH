@@ -235,15 +235,7 @@ const routes = [
     },
     props: {
       default: {
-        dependencyModules: [
-          "unit", //todo
-          "gear",
-          "relic",
-          "shards",
-          "planner",
-          "guild",
-          "currency",
-        ],
+        dependencyModules: ["unit", "gear", "relic"],
       },
     },
     children: [
