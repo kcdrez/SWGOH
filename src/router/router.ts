@@ -1,29 +1,30 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 
-import PlayerLoadingPage from "pages/playerLoadingPage.vue";
-import UnitLoadingPage from "pages/unitLoadingPage.vue";
-import BasicLoadingPage from "pages/basicLoadingPage.vue";
-import HomePage from "pages/homepage.vue";
-import UnitPage from "pages/unitPage.vue";
-import GeneralPlannerPage from "pages/generalPlanner.vue";
-import TeamPage from "pages/team.vue";
-import MatchUpPage from "pages/matchUpPage.vue";
-import CharacterFarmingPage from "pages/characterFarming.vue";
-import GuildEventsPage from "pages/guildEvents.vue";
-import GuildUnitsPage from "pages/guildUnits.vue";
-import StatCalculatorPage from "pages/statCalculator.vue";
-import GLChecklist from "pages/glChecklist.vue";
-import GLCompare from "pages/glCompare.vue";
-import GoalsPage from "pages/goalsPage.vue";
-import TBStatusPage from "pages/TBStatusPage.vue";
-import TWPlannerPage from "pages/twPlanner.vue";
-import GuildStats from "pages/guildStats.vue";
-import WidgetsPage from "pages/widgets.vue";
-import GearListPage from "pages/gearList.vue";
+import PlayerLoadingPage from "pages/loading/playerLoadingPage.vue";
+import UnitLoadingPage from "pages/loading/unitLoadingPage.vue";
+import BasicLoadingPage from "pages/loading/basicLoadingPage.vue";
+import HomePage from "pages/general/homepage.vue";
+import UnitPage from "pages/units/unitPage.vue";
+import GeneralPlannerPage from "pages/general/generalPlanner.vue";
+import TeamPage from "pages/units/team.vue";
+import MatchUpPage from "pages/units/matchUpPage.vue";
+import CharacterFarmingPage from "pages/units/characterFarming.vue";
+import GuildEventsPage from "pages/guild/guildEvents.vue";
+import GuildUnitsPage from "pages/guild/guildUnits.vue";
+import StatCalculatorPage from "pages/units/statCalculator.vue";
+import GLChecklist from "pages/goals/glChecklist.vue";
+import GLCompare from "pages/goals/glCompare.vue";
+import GoalsPage from "pages/goals/goalsPage.vue";
+import GoalDetails from "pages/goals/goalDetailsPage.vue";
+import TBStatusPage from "pages/guild/TBStatusPage.vue";
+import TWPlannerPage from "pages/guild/twPlanner.vue";
+import GuildStats from "pages/guild/guildStats.vue";
+import WidgetsPage from "pages/general/widgets.vue";
+import GearListPage from "pages/gear/gearList.vue";
 // import GearPage from "pages/gearPage.vue";
-import ScavengerPage from "pages/scavenger.vue";
-import UnitSearchPage from "pages/unitSearch.vue";
-import RelicCalculatorPage from "pages/relicCalculator.vue";
+import ScavengerPage from "pages/relic/scavenger.vue";
+import UnitSearchPage from "pages/units/unitSearch.vue";
+import RelicCalculatorPage from "pages/relic/relicCalculator.vue";
 
 const routes = [
   {
@@ -224,6 +225,32 @@ const routes = [
         path: "",
         name: "GoalsPage",
         component: GoalsPage,
+      },
+    ],
+  },
+  {
+    path: "/goal/:goalName",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: [
+          "unit", //todo
+          "gear",
+          "relic",
+          "shards",
+          "planner",
+          "guild",
+          "currency",
+        ],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GoalDetails",
+        component: GoalDetails,
       },
     ],
   },

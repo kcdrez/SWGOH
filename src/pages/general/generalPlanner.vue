@@ -8,14 +8,14 @@
       <button
         class="btn btn-sm btn-primary"
         :disabled="!selected"
-        @click="addToGeneral(selected)"
+        @click="addToGeneral()"
       >
         Add Unit to General Planner
       </button>
       <button
         class="btn btn-sm btn-secondary"
         :disabled="!selected"
-        @click="addToShardPlanner(selected)"
+        @click="addToShardPlanner()"
       >
         Add Unit to Shard Planner
       </button>
@@ -66,32 +66,44 @@ export default defineComponent({
   methods: {
     ...mapActions("planner", { addUnitToGeneral: "addUnit" }),
     ...mapActions("shards", { addUnitToShard: "addUnit" }),
-    addToGeneral(unit: Unit): void {
-      if (this.fullUnitList.find((x: Unit) => x.id === unit.id)) {
-        this.$toast(`${unit.name} is already added to the General Planner`, {
-          positionY: "top",
-          class: "toast-warning",
-        });
+    addToGeneral(): void {
+      if (this.fullUnitList.find((x: Unit) => x.id === this.selected?.id)) {
+        this.$toast(
+          `${this.selected?.name} is already added to the General Planner`,
+          {
+            positionY: "top",
+            class: "toast-warning",
+          }
+        );
       } else {
-        this.addUnitToGeneral(unit.id);
-        this.$toast(`${unit.name} successfully added to the General Planner`, {
-          positionY: "top",
-          class: "toast-success",
-        });
+        this.addUnitToGeneral(this.selected?.id);
+        this.$toast(
+          `${this.selected?.name} successfully added to the General Planner`,
+          {
+            positionY: "top",
+            class: "toast-success",
+          }
+        );
       }
     },
-    addToShardPlanner(unit: Unit): void {
-      if (this.plannerList.find((x: Unit) => x.id === unit.id)) {
-        this.$toast(`${unit.name} is already added to the Shard Planner`, {
-          positionY: "top",
-          class: "toast-warning",
-        });
+    addToShardPlanner(): void {
+      if (this.plannerList.find((x: Unit) => x.id === this.selected?.id)) {
+        this.$toast(
+          `${this.selected?.name} is already added to the Shard Planner`,
+          {
+            positionY: "top",
+            class: "toast-warning",
+          }
+        );
       } else {
-        this.addUnitToShard(unit.id);
-        this.$toast(`${unit.name} successfully added to the Shard Planner`, {
-          positionY: "top",
-          class: "toast-success",
-        });
+        this.addUnitToShard(this.selected?.id);
+        this.$toast(
+          `${this.selected?.name} successfully added to the Shard Planner`,
+          {
+            positionY: "top",
+            class: "toast-success",
+          }
+        );
       }
     },
   },

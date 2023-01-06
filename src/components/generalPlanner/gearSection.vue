@@ -40,6 +40,11 @@ const storageKey = "gearSection";
 export default defineComponent({
   name: "GearSection",
   components: { GearTable },
+  props: {
+    units: {
+      type: Array as () => Unit[],
+    },
+  },
   data() {
     return {
       selectedColumns: [],
@@ -49,8 +54,9 @@ export default defineComponent({
   computed: {
     ...mapGetters("planner", ["fullUnitList"]),
     fullGearList(): Gear[] {
+      const unitList: Unit[] = this.units || this.fullUnitList;
       const list: Gear[] = [];
-      this.fullUnitList.forEach((unit: Unit) => {
+      unitList.forEach((unit: Unit) => {
         unit.fullSalvageList.forEach((gear: Gear) => {
           const match = list.find((x) => x.id === gear.id);
           if (match) {

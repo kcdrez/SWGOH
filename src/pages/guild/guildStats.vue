@@ -195,7 +195,7 @@ import { getUnit } from "types/unit";
 import { AbilityStat } from "types/teams";
 import { loadingState } from "types/loading";
 import TWPlayerList from "components/guild/twPlayerList.vue";
-import { apiClient } from "../api/api-client";
+import { apiClient } from "../../api/api-client";
 import { maxRelicLevel } from "types/relic";
 import RelicLevelIcon from "components/units/relicLevelIcon.vue";
 

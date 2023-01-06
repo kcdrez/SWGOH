@@ -41,6 +41,11 @@ const storageKey = "relicSection";
 export default defineComponent({
   name: "RelicSection",
   components: { RelicTable },
+  props: {
+    units: {
+      type: Array as () => Unit[],
+    },
+  },
   data() {
     return {
       selectedColumns: [],
@@ -92,8 +97,9 @@ export default defineComponent({
       return list;
     },
     fullRelicList(): Relic[] {
+      const unitList: Unit[] = this.units || this.fullUnitList;
       const list: Relic[] = Object.values(this.relicConfig);
-      this.fullUnitList.forEach((unit: Unit) => {
+      unitList.forEach((unit: Unit) => {
         if (unit.relicLevel < unit.relicTarget) {
           list.forEach((relic: Relic) => {
             if (relic.amount[unit.relicTarget] > 0) {

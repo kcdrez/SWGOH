@@ -26,7 +26,15 @@
           <tbody>
             <tr v-for="item in player.goalList" :key="item.id">
               <td class="align-middle text-center">
-                {{ item.name }}
+                <router-link
+                  :to="{
+                    name: 'GoalDetails',
+                    params: {
+                      goalName: item.name.replace(/\s/g, '').toLowerCase(),
+                    },
+                  }"
+                  >{{ item.name }}</router-link
+                >
               </td>
               <td class="align-middle text-center">
                 <ProgressBar

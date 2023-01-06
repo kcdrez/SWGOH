@@ -243,7 +243,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 
 import { UnitPlannerItem } from "types/planner";
-import { Unit } from "types/unit";
+import { Unit, getUnit } from "types/unit";
 import { maxGearLevel } from "types/gear";
 import { setupEvents, setupSimpleView, setupSorting } from "utils";
 import Timestamp from "components/timestamp.vue";
@@ -270,6 +270,11 @@ export default defineComponent({
     };
   },
   components: { Timestamp, GearText, RelicLevelIcon, UnitIcon },
+  props: {
+    units: {
+      type: Array as () => Unit[],
+    },
+  },
   data() {
     return {
       maxGearLevel,
@@ -279,7 +284,8 @@ export default defineComponent({
   computed: {
     ...mapGetters("planner", ["fullUnitList"]),
     unitList(): Unit[] {
-      return this.fullUnitList.sort((a: Unit, b: Unit) => {
+      const unitList: Unit[] = this.units || this.fullUnitList;
+      return unitList.sort((a: Unit, b: Unit) => {
         if (this.sortMethod === "name") {
           const compareA = a.name.toLowerCase();
           const compareB = b.name.toLowerCase();

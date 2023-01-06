@@ -35,7 +35,7 @@
                 :title="`Total amount of standard energy needed to spend each day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
                 Total Daily Standard Energy
-                <img src="../images/standard_energy.png" />
+                <img src="../../images/standard_energy.png" />
               </td>
               <td>{{ totalEnergy }}</td>
             </tr>
@@ -60,7 +60,7 @@
                 :title="`Total amount of fleet energy needed to spend each day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
                 Total Fleet Energy Daily
-                <img src="../images/ship_energy.png" />
+                <img src="../../images/ship_energy.png" />
               </td>
               <td>{{ totalFleetEnergy }}</td>
             </tr>
@@ -85,7 +85,7 @@
                 :title="`Total amount of crystals needed to spend for energy refreshes every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
                 Daily Crystals Spent
-                <img src="../images/crystals.png" />
+                <img src="../../images/crystals.png" />
               </td>
               <td>{{ crystalsSpent }}</td>
             </tr>
@@ -94,7 +94,7 @@
                 :title="`Total amount of guild store currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
                 Daily Guild Store Currency Spent
-                <img src="../images/guildStoreCurrency.png" />
+                <img src="../../images/guildStoreCurrency.png" />
               </td>
               <td>{{ currencySpent.guild_store }}</td>
             </tr>
@@ -103,7 +103,7 @@
                 :title="`Total amount of Squad Arena Store Currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
                 Daily Squad Arena Currency Spent
-                <img src="../images/squadArenaCurrency.png" />
+                <img src="../../images/squadArenaCurrency.png" />
               </td>
               <td>{{ currencySpent.squad_arena_store }}</td>
             </tr>
@@ -112,7 +112,7 @@
                 :title="`Total amount of Guild Events Mk 1 currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
                 Daily Guild Events (I) Currency Spent
-                <img src="../images/get1.png" />
+                <img src="../../images/get1.png" />
               </td>
               <td>{{ currencySpent.guild_events_store1 }}</td>
             </tr>
@@ -121,7 +121,7 @@
                 :title="`Total amount of Guild Events Mk 2 needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
                 Daily Guild Events (II) Currency Spent
-                <img src="../images/get2.png" />
+                <img src="../../images/get2.png" />
               </td>
               <td>{{ currencySpent.guild_events_store2 }}</td>
             </tr>
@@ -130,7 +130,7 @@
                 :title="`Total amount of Guild Events Mk 3 needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
                 Daily Guild Events (II) Currency Spent
-                <img src="../images/get3.png" />
+                <img src="../../images/get3.png" />
               </td>
               <td>{{ currencySpent.guild_events_store3 }}</td>
             </tr>
@@ -139,7 +139,7 @@
                 :title="`Total amount of Shard Shop Currency needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
                 Daily Shard Shop Currency Spent
-                <img src="../images/shardCurrency.png" />
+                <img src="../../images/shardCurrency.png" />
               </td>
               <td>{{ currencySpent.shard_store }}</td>
             </tr>

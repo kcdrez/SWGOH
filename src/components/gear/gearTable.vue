@@ -228,9 +228,9 @@
       </tbody>
     </table>
     <div v-else class="text-center">
-      There are no gear requirements and you can likely immediately upgrade to
-      this level. This is likely due to the fact that all the gear needed is
-      marked as irrelevant.
+      There are no gear requirements for these units. This is either because you
+      already own all the gear and can immediately upgrade to the target level
+      or all the units are already at the target gear level.
     </div>
     <table
       class="table table-bordered table-dark table-sm table-striped"
