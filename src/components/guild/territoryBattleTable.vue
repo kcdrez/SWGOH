@@ -4,17 +4,35 @@
       class="table table-bordered table-dark table-sm table-striped"
       :class="[accessLevel < 3 ? 'mb-3' : 'mb-0']"
     >
-      <thead class="sticky-header">
+      <thead class="sticky-header show-on-mobile">
+        <tr class="sort-methods">
+          <th class="show-on-mobile">
+            <div class="input-group input-group-sm my-2">
+              <span class="input-group-text">Sort By:</span>
+              <select class="form-control" v-model="sortMethod">
+                <option value="date">Date</option>
+                <option value="stars">Stars</option>
+                <option value="get1">GET1</option>
+                <option value="get2">GET2</option>
+                <option value="get3">GET3</option>
+                <option value="character">Character Shards</option>
+              </select>
+            </div>
+            <div class="input-group input-group-sm my-2">
+              <span class="input-group-text">Sort Direction:</span>
+              <select class="form-control" v-model="sortDir">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+          </th>
+        </tr>
         <tr class="text-center align-middle">
           <th v-if="showCol('date')">
             <div class="c-pointer" @click="sortBy('date')">
               Completion Date
               <i class="fas mx-1" :class="sortIcon('date')"></i>
             </div>
-          </th>
-          <th v-if="showCol('type')" class="c-pointer" @click="sortBy('type')">
-            Battle Type
-            <i class="fas mx-1" :class="sortIcon('type')"></i>
           </th>
           <th v-if="showCol('name')" class="c-pointer" @click="sortBy('name')">
             Name
@@ -61,23 +79,25 @@
             <span class="row-label">Date:</span>
             {{ $filters.formatDate(event.date) }}
           </td>
-          <td v-if="showCol('type')">
-            {{ event.type ? `${event.type} Side` : "-" }}
-          </td>
           <td v-if="showCol('name')">
-            <span class="row-label">Battle Type:</span>{{ event.name }}
+            <span class="row-label">Battle Type:</span>
+            {{ event.name }}
           </td>
           <td v-if="showCol('stars')">
-            <span class="row-label">Stars:</span>{{ event.stars }}
+            <span class="row-label">Stars:</span>
+            {{ event.stars }}
           </td>
           <td v-if="showCol('get1')">
-            <span class="row-label">GET1:</span>{{ event.get1 }}
+            <span class="row-label">GET1:</span>
+            {{ event.get1 }}
           </td>
           <td v-if="showCol('get2')">
-            <span class="row-label">GET2:</span>{{ event.get2 }}
+            <span class="row-label">GET2:</span>
+            {{ event.get2 }}
           </td>
           <td v-if="showCol('get3')">
-            <span class="row-label">GET3:</span>{{ event.get3 }}
+            <span class="row-label">GET3:</span>
+            {{ event.get3 }}
           </td>
           <td v-if="showCol('character')">
             <span class="row-label character-shards-label"
@@ -333,16 +353,6 @@ export default defineComponent({
               return moment(a.date).isBefore(b.date) ? 1 : -1;
             } else {
               return moment(b.date).isBefore(a.date) ? 1 : -1;
-            }
-          } else if (this.sortMethod === "type") {
-            const compareA = a.type.toLowerCase();
-            const compareB = b.type.toLowerCase();
-            if (compareA === compareB) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
             }
           } else if (this.sortMethod === "name") {
             const compareA = a.name.toLowerCase();

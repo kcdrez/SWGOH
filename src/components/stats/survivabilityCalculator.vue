@@ -15,7 +15,7 @@
   >
     <div class="container">
       <div class="row mt-2">
-        <div class="col">
+        <div class="col-lg-6 col-md-12">
           <h6>Select a Character to view their stats:</h6>
           <SearchInput
             placeholder="Select a Character"
@@ -151,10 +151,10 @@
             />
           </div>
         </div>
-        <div class="col">
+        <div class="col-lg-6 col-md-12">
           <table class="table table-bordered table-dark table-sm table-striped">
-            <thead>
-              <tr class="text-center align-middle">
+            <thead class="show-on-mobile">
+              <tr class="text-center align-middle sort-methods d-md-table-row">
                 <th>
                   <div class="input-group input-group-sm">
                     <span class="input-group-text">Sort By:</span>
@@ -795,6 +795,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.container {
+  max-width: unset;
+  padding: 0;
+}
 .input-group {
   margin-top: 0.5rem;
 
@@ -805,6 +809,11 @@ export default defineComponent({
     &.value {
       flex: 1 1 auto;
     }
+  }
+}
+table {
+  @media only screen and (max-width: 992px) {
+    margin-top: 0.5rem;
   }
 }
 </style>

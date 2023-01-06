@@ -35,6 +35,7 @@
           </div>
         </td>
         <td class="text-center align-middle" v-if="showCol('current')">
+          <span class="row-label">Current Level:</span>
           <RequirementIcon
             class="justify-content-center"
             :type="item.requirement?.type ?? 'requirement'"
@@ -53,6 +54,7 @@
           </template>
         </td>
         <td class="text-center align-middle" v-if="showCol('requirements')">
+          <span class="row-label">Requirement:</span>
           <RequirementIcon
             class="justify-content-center"
             :value="item.requirement?.value"

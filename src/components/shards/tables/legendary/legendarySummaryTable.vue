@@ -11,7 +11,7 @@
       >
         <thead>
           <tr class="text-center align-middle">
-            <th>
+            <th width="50%">
               <span>Unit Name</span>
             </th>
             <th>Progress</th>

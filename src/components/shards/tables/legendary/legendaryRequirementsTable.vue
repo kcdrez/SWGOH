@@ -13,7 +13,7 @@
       class="container mb-3"
     >
       <div class="row">
-        <div class="col">
+        <div class="col-md-6 col-sm-12">
           <div class="input-group input-group-sm mb-1" v-if="unit.stars < 7">
             <span class="input-group-text">Shards Owned:</span>
             <ShardsOwned :unit="unit" class="form-control" />
@@ -61,7 +61,7 @@
           </div>
           <EnergySpent showStandard />
         </div>
-        <div class="col">
+        <div class="col-md-6 col-sm-12">
           <div class="input-group input-group-sm mb-1">
             <span class="input-group-text">Remaining GL Tickets:</span>
             <span class="input-group-text flex-fill">{{
@@ -96,7 +96,7 @@
       class="container mb-3"
     >
       <div class="row">
-        <div class="col">
+        <div class="col-md-6 col-sm-12">
           <div class="input-group input-group-sm mb-1">
             <span class="input-group-text">Shards Owned:</span>
             <ShardsOwned :unit="unit" class="form-control" />
@@ -111,7 +111,7 @@
             />
           </div>
         </div>
-        <div class="col">
+        <div class="col-md-6 col-sm-12">
           <Timestamp
             :timeLength="estimatedTotal.time"
             label="Estimated 7 Star Completion:"

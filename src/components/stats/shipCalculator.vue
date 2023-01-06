@@ -19,7 +19,7 @@
       </div>
       <template v-if="selected">
         <div class="row mt-2">
-          <div class="col">
+          <div class="col-lg-6 col-md-12">
             <div v-for="(pilot, index) in crew" :key="pilot.id">
               <hr v-if="index > 0" />
               <h3 class="text-center">Crew: {{ pilot.name }}</h3>
@@ -164,7 +164,7 @@
               </div>
             </div>
           </div>
-          <div class="col">
+          <div class="col-lg-6 col-md-12">
             <table
               class="table table-bordered table-dark table-sm table-striped swgoh-table output-table"
             >
@@ -611,6 +611,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "styles/variables.scss";
 
+.container {
+  max-width: unset;
+  padding: 0;
+}
 .input-group {
   margin-top: 0.5rem;
 
@@ -638,5 +642,11 @@ hr {
   height: 2px;
   color: black;
   opacity: 100;
+}
+
+table {
+  @media only screen and (max-width: 992px) {
+    margin-top: 0.5rem;
+  }
 }
 </style>

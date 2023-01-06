@@ -4,7 +4,29 @@
       class="table table-bordered table-dark table-sm table-striped"
       :class="[accessLevel < 3 ? 'mb-3' : 'mb-0']"
     >
-      <thead class="sticky-header">
+      <thead class="sticky-header show-on-mobile">
+        <tr class="sort-methods">
+          <th class="show-on-mobile">
+            <div class="input-group input-group-sm my-2">
+              <span class="input-group-text">Sort By:</span>
+              <select class="form-control" v-model="sortMethod">
+                <option value="date">Date</option>
+                <option value="win_loss">Win/Loss</option>
+                <option value="get1">GET1</option>
+                <option value="get2">GET2</option>
+                <option value="get3">GET3</option>
+                <option value="zetas">Zetas</option>
+              </select>
+            </div>
+            <div class="input-group input-group-sm my-2">
+              <span class="input-group-text">Sort Direction:</span>
+              <select class="form-control" v-model="sortDir">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+          </th>
+        </tr>
         <tr class="text-center align-middle">
           <th v-if="showCol('date')">
             <div class="c-pointer" @click="sortBy('date')">

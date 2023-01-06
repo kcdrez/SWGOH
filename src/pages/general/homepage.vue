@@ -23,7 +23,7 @@
     <Loading :state="requestState" message="Loading Player Data" size="lg">
       <div v-if="!player">
         <div>Enter your ally code:</div>
-        <div class="input-group input-group-sm w-50">
+        <div class="input-group input-group-sm ally-code">
           <span class="input-group-text">Ally Code:</span>
           <input
             class="form-control"
@@ -88,6 +88,12 @@ export default defineComponent({
   color: #57abdb;
   &:hover {
     text-decoration: underline;
+  }
+}
+.ally-code {
+  width: 50%;
+  @media only screen and (max-width: 640px) {
+    width: 100%;
   }
 }
 </style>

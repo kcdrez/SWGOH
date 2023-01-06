@@ -112,6 +112,7 @@
             <UnitIcon :unit="getUnit(item.id)" isLink :hideImage="simpleView" />
           </td>
           <td v-if="showCol('current')">
+            <span class="row-label">Current Level:</span>
             <RequirementIcon
               class="justify-content-center"
               :type="item.requirement?.type"
@@ -120,6 +121,7 @@
             />
           </td>
           <td v-if="showCol('target')">
+            <span class="row-label">Target Level:</span>
             <RequirementIcon
               class="justify-content-center"
               :value="item.requirement?.value"
@@ -343,7 +345,11 @@ export default defineComponent({
   justify-content: center;
 
   .progress {
-    flex-basis: 25%;
+    flex-basis: 33.33%;
+
+    @media only screen and (max-width: 768px) {
+      flex-basis: 100%;
+    }
   }
 }
 </style>

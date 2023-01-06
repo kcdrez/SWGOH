@@ -11,7 +11,7 @@
   >
     <div class="container">
       <div class="row mt-2">
-        <div class="col">
+        <div class="col-md-6 col-sm-12">
           <h6>Select a Character to view their stats:</h6>
           <SearchInput
             placeholder="Select a Character"
@@ -52,8 +52,8 @@
             </div>
           </template>
         </div>
-        <div class="col">
-          <h6>
+        <div class="col-md-6 col-sm-12">
+          <h6 class="select-compare-header">
             Select another Character to apply their mods and/or modify the
             values directly:
           </h6>
@@ -107,7 +107,7 @@
           </div>
         </div>
       </div>
-      <div class="row my-1">
+      <div class="row my-2">
         <div class="col justify-content-center d-flex">
           <Toggle
             v-model="physical"
@@ -286,8 +286,12 @@ export default defineComponent({
   margin-top: 0.5rem;
 }
 .difference-container {
-  margin: 0.5rem 33.33%;
+  margin: 0 33.33%;
   text-align: center;
+
+  @media only screen and (max-width: 768px) {
+    margin: unset;
+  }
 }
 
 ::v-deep(.toggle) {
@@ -303,6 +307,11 @@ export default defineComponent({
     .toggle-label {
       margin-left: 1.5rem;
     }
+  }
+}
+.select-compare-header {
+  @media only screen and (max-width: 768px) {
+    margin-top: 0.5rem;
   }
 }
 </style>

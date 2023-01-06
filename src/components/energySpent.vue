@@ -270,14 +270,26 @@ export default defineComponent({
         border-radius: 0.2rem 0.2rem 0 0 !important;
       }
       .energy-spent-input {
-        border-radius: 0 0 0.2rem 0.2rem !important;
+        border-radius: 0 0 0.2rem 0 !important;
+      }
+      .energy-spent-text {
+        border-radius: 0 0 0 0.2rem !important;
+      }
+      .refresh-text,
+      .energy-spent-text {
+        width: 50%;
+        display: inline-block;
+      }
+      .refresh-input,
+      .energy-spent-input {
+        width: 50%;
+        display: inline-block;
       }
 
       .refresh-text,
       .energy-spent-text,
       .energy-spent-input,
       input {
-        display: block;
         border-top: none;
         text-align: center;
         //everything except the first element is off so the following is used to compensate :shrug:

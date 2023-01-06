@@ -39,7 +39,7 @@ export interface ITerritoryWarEvent {
 export interface TerritoryBattleEvent {
   id: string;
   date: string;
-  type: "Dark" | "Light";
+  type: "Dark" | "Light" | "-" | undefined;
   name:
     | "Separatist Might"
     | "Republic Offensive"
