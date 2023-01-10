@@ -29,176 +29,10 @@
             class="table table-bordered table-dark table-sm table-striped swgoh-table"
           >
             <thead class="sticky-header show-on-mobile">
-              <tr class="text-center align-middle">
-                <th
-                  v-if="showCol('allyCode')"
-                  @click="sortBy('allyCode')"
-                  class="c-pointer"
-                >
-                  <span>Ally Code</span>
-                  <i class="fas mx-2" :class="sortIcon('allyCode')"></i>
-                </th>
-                <th
-                  v-if="showCol('name')"
-                  @click="sortBy('name')"
-                  class="c-pointer"
-                >
-                  <span>Player Name</span>
-                  <i class="fas mx-2" :class="sortIcon('name')"></i>
-                </th>
-                <th
-                  v-if="showCol('stars')"
-                  @click="sortBy('stars')"
-                  class="c-pointer"
-                >
-                  <span>Stars</span>
-                  <i class="fas mx-2" :class="sortIcon('gearstarsLevel')"></i>
-                </th>
-                <th
-                  v-if="showCol('gearLevel')"
-                  @click="sortBy('gearLevel')"
-                  class="c-pointer"
-                >
-                  <span>Gear Level</span>
-                  <i class="fas mx-2" :class="sortIcon('gearLevel')"></i>
-                </th>
-                <th
-                  v-if="showCol('relicLevel')"
-                  @click="sortBy('relicLevel')"
-                  class="c-pointer"
-                >
-                  <span>Relic Level</span>
-                  <i class="fas mx-2" :class="sortIcon('relicLevel')"></i>
-                </th>
-                <th
-                  v-if="showCol('zetas')"
-                  @click="sortBy('zetas')"
-                  class="c-pointer"
-                >
-                  <span>Zetas</span>
-                  <i class="fas mx-2" :class="sortIcon('allyCode')"></i>
-                </th>
-                <th
-                  v-if="showCol('omicrons')"
-                  @click="sortBy('omicrons')"
-                  class="c-pointer"
-                >
-                  <span>Omicrons</span>
-                  <i class="fas mx-2" :class="sortIcon('omicrons')"></i>
-                </th>
-                <th
-                  v-if="showCol('speed')"
-                  @click="sortBy('speed')"
-                  class="c-pointer"
-                >
-                  <span>Speed</span>
-                  <i class="fas mx-2" :class="sortIcon('speed')"></i>
-                </th>
-                <th
-                  v-if="showCol('speed')"
-                  @click="sortBy('speedMod')"
-                  class="c-pointer"
-                >
-                  <span>Speed (Mods)</span>
-                  <i class="fas mx-2" :class="sortIcon('speedMod')"></i>
-                </th>
-                <th
-                  v-if="showCol('physicalOffense')"
-                  @click="sortBy('physicalOffense')"
-                  class="c-pointer"
-                >
-                  <span>Physical Offense</span>
-                  <i class="fas mx-2" :class="sortIcon('physicalOffense')"></i>
-                </th>
-                <th
-                  v-if="showCol('specialOffense')"
-                  @click="sortBy('specialOffense')"
-                  class="c-pointer"
-                >
-                  <span>Special Offense</span>
-                  <i class="fas mx-2" :class="sortIcon('specialOffense')"></i>
-                </th>
-                <th
-                  v-if="showCol('protection')"
-                  @click="sortBy('protection')"
-                  class="c-pointer"
-                >
-                  <span>Protection</span>
-                  <i class="fas mx-2" :class="sortIcon('protection')"></i>
-                </th>
-                <th
-                  v-if="showCol('health')"
-                  @click="sortBy('health')"
-                  class="c-pointer"
-                >
-                  <span>Health</span>
-                  <i class="fas mx-2" :class="sortIcon('health')"></i>
-                </th>
-                <th
-                  v-if="showCol('tenacity')"
-                  @click="sortBy('tenacity')"
-                  class="c-pointer"
-                >
-                  <span>Tenacity</span>
-                  <i class="fas mx-2" :class="sortIcon('tenacity')"></i>
-                </th>
-                <th
-                  v-if="showCol('potency')"
-                  @click="sortBy('potency')"
-                  class="c-pointer"
-                >
-                  <span>Potency</span>
-                  <i class="fas mx-2" :class="sortIcon('potency')"></i>
-                </th>
-                <th
-                  v-if="showCol('physicalCrit')"
-                  @click="sortBy('physicalCrit')"
-                  class="c-pointer"
-                >
-                  <span>Physical Crit Chance</span>
-                  <i class="fas mx-2" :class="sortIcon('physicalCrit')"></i>
-                </th>
-                <th
-                  v-if="showCol('specialCrit')"
-                  @click="sortBy('specialCrit')"
-                  class="c-pointer"
-                >
-                  <span>Special Crit Chance</span>
-                  <i class="fas mx-2" :class="sortIcon('specialCrit')"></i>
-                </th>
-                <th
-                  v-if="showCol('critDamage')"
-                  @click="sortBy('critDamage')"
-                  class="c-pointer"
-                >
-                  <span>Crit Damage</span>
-                  <i class="fas mx-2" :class="sortIcon('critDamage')"></i>
-                </th>
-                <th
-                  v-if="showCol('armor')"
-                  @click="sortBy('armor')"
-                  class="c-pointer"
-                >
-                  <span>Armor</span>
-                  <i class="fas mx-2" :class="sortIcon('armor')"></i>
-                </th>
-                <th
-                  v-if="showCol('resistance')"
-                  @click="sortBy('resistance')"
-                  class="c-pointer"
-                >
-                  <span>Resistance</span>
-                  <i class="fas mx-2" :class="sortIcon('resistance')"></i>
-                </th>
-                <th
-                  v-if="showCol('ultimate')"
-                  @click="sortBy('ultimate')"
-                  class="c-pointer"
-                >
-                  <span>Has Ult?</span>
-                  <i class="fas mx-2" :class="sortIcon('ultimate')"></i>
-                </th>
-              </tr>
+              <ColumnHeaders
+                class="text-center align-middle"
+                :headers="headers"
+              />
             </thead>
             <tbody>
               <tr
@@ -293,7 +127,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import { writeFile, utils } from "xlsx";
 import _ from "lodash";
 
@@ -302,6 +136,7 @@ import { setupEvents, setupSorting, unvue } from "utils";
 import { Unit } from "types/unit";
 import { IGuildUnitMap } from "types/guild";
 import UnitSearch from "components/units/unitSearch.vue";
+import { iHeader } from "types/general";
 
 const storageKey = "guildUnits";
 
@@ -317,13 +152,11 @@ interface dataModel {
 export default defineComponent({
   name: "GuildUnitsPage",
   setup() {
-    const { sortDir, sortMethod, searchText, sortBy, sortIcon } =
-      setupSorting(storageKey);
+    const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(storageKey);
 
     return {
       sortDir,
       sortMethod,
-      searchText,
       sortBy,
       sortIcon,
     };
@@ -341,6 +174,178 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters(["someLoading"]),
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Ally Code",
+          show: this.showCol("allyCode"),
+          icon: this.sortIcon("allyCode"),
+          click: () => {
+            this.sortBy("allyCode");
+          },
+        },
+        {
+          label: "Player Name",
+          show: this.showCol("name"),
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Stars",
+          show: this.showCol("stars"),
+          icon: this.sortIcon("stars"),
+          click: () => {
+            this.sortBy("stars");
+          },
+        },
+        {
+          label: "Gear Level",
+          show: this.showCol("gearLevel"),
+          icon: this.sortIcon("gearLevel"),
+          click: () => {
+            this.sortBy("gearLevel");
+          },
+        },
+        {
+          label: "Relic Level",
+          show: this.showCol("relicLevel"),
+          icon: this.sortIcon("relicLevel"),
+          click: () => {
+            this.sortBy("relicLevel");
+          },
+        },
+        {
+          label: "Zetas",
+          show: this.showCol("zetas"),
+          icon: this.sortIcon("zetas"),
+          click: () => {
+            this.sortBy("zetas");
+          },
+        },
+        {
+          label: "Omicrons",
+          show: this.showCol("omicrons"),
+          icon: this.sortIcon("omicrons"),
+          click: () => {
+            this.sortBy("omicrons");
+          },
+        },
+        {
+          label: "Speed",
+          show: this.showCol("speed"),
+          icon: this.sortIcon("speed"),
+          click: () => {
+            this.sortBy("speed");
+          },
+        },
+        {
+          label: "Speed (Mods)",
+          show: this.showCol("speedMods"),
+          icon: this.sortIcon("speedMods"),
+          click: () => {
+            this.sortBy("speedMods");
+          },
+        },
+        {
+          label: "Physical Offense",
+          show: this.showCol("physicalOffense"),
+          icon: this.sortIcon("physicalOffense"),
+          click: () => {
+            this.sortBy("physicalOffense");
+          },
+        },
+        {
+          label: "Special Offense",
+          show: this.showCol("specialOffense"),
+          icon: this.sortIcon("specialOffense"),
+          click: () => {
+            this.sortBy("specialOffense");
+          },
+        },
+        {
+          label: "Protection",
+          show: this.showCol("protection"),
+          icon: this.sortIcon("protection"),
+          click: () => {
+            this.sortBy("protection");
+          },
+        },
+        {
+          label: "Health",
+          show: this.showCol("health"),
+          icon: this.sortIcon("health"),
+          click: () => {
+            this.sortBy("health");
+          },
+        },
+        {
+          label: "Tenacity",
+          show: this.showCol("tenacity"),
+          icon: this.sortIcon("tenacity"),
+          click: () => {
+            this.sortBy("tenacity");
+          },
+        },
+        {
+          label: "Potency",
+          show: this.showCol("potency"),
+          icon: this.sortIcon("potency"),
+          click: () => {
+            this.sortBy("potency");
+          },
+        },
+        {
+          label: "Physical Crit Chance",
+          show: this.showCol("physicalCrit"),
+          icon: this.sortIcon("physicalCrit"),
+          click: () => {
+            this.sortBy("physicalCrit");
+          },
+        },
+        {
+          label: "Special Crit Chance",
+          show: this.showCol("specialCrit"),
+          icon: this.sortIcon("specialCrit"),
+          click: () => {
+            this.sortBy("specialCrit");
+          },
+        },
+        {
+          label: "Crit Damage",
+          show: this.showCol("critDamage"),
+          icon: this.sortIcon("critDamage"),
+          click: () => {
+            this.sortBy("critDamage");
+          },
+        },
+        {
+          label: "Armor",
+          show: this.showCol("armor"),
+          icon: this.sortIcon("armor"),
+          click: () => {
+            this.sortBy("armor");
+          },
+        },
+        {
+          label: "Resistance",
+          show: this.showCol("resistance"),
+          icon: this.sortIcon("resistance"),
+          click: () => {
+            this.sortBy("resistance");
+          },
+        },
+        {
+          label: "Has Ult?",
+          show: this.showCol("ultimate"),
+          icon: this.sortIcon("ultimate"),
+          click: () => {
+            this.sortBy("ultimate");
+          },
+        },
+      ];
+    },
     players(): any[] {
       return (this.data?.owned ?? []).sort((a, b) => {
         if (this.sortMethod === "name") {

@@ -155,29 +155,26 @@
           <table class="table table-bordered table-dark table-sm table-striped">
             <thead class="show-on-mobile">
               <tr class="text-center align-middle sort-methods d-md-table-row">
-                <th>
-                  <div class="input-group input-group-sm">
-                    <span class="input-group-text">Sort By:</span>
-                    <select class="form-control" v-model="sortMethod">
-                      <option value="total">Total Survivability</option>
-                      <option value="sets">Sets</option>
-                      <option value="primaries">Primaries</option>
-                    </select>
-                  </div>
-                  <div class="input-group input-group-sm my-1">
-                    <span class="input-group-text">Sort Direction:</span>
-                    <select class="form-control" v-model="sortDir">
-                      <option value="asc">Ascending</option>
-                      <option value="desc">Descending</option>
-                    </select>
-                  </div>
-                  <div class="input-group input-group-sm my-1">
-                    <span class="input-group-text">Primary Stat Count:</span>
-                    <select class="form-control" v-model="primaryCount">
-                      <option :value="3">3</option>
-                      <option :value="4">4</option>
-                    </select>
-                  </div>
+                <th class="show-on-mobile">
+                  <SortMethods
+                    :sortByOptions="sortByOptions"
+                    :sortMethod="sortMethod"
+                    :sortDir="sortDir"
+                    @methodChange="sortMethod = $event"
+                    @directionChange="sortDir = $event"
+                  >
+                    <template v-slot:inputs>
+                      <div class="input-group input-group-sm my-1">
+                        <span class="input-group-text"
+                          >Primary Stat Count:</span
+                        >
+                        <select class="form-control" v-model="primaryCount">
+                          <option :value="3">3</option>
+                          <option :value="4">4</option>
+                        </select>
+                      </div>
+                    </template>
+                  </SortMethods>
                 </th>
                 <th>Total Survivability</th>
               </tr>
@@ -240,6 +237,7 @@ interface dataModel {
   sortMethod: "total" | "sets" | "primaries";
   sortDir: "asc" | "desc";
   primaryCount: number;
+  sortByOptions: { label: string; value: string }[];
 }
 
 export default defineComponent({
@@ -266,6 +264,20 @@ export default defineComponent({
       sortDir: "desc",
       primaryCount: 3,
       sixDotMods: 0,
+      sortByOptions: [
+        {
+          value: "total",
+          label: "Total Survivability",
+        },
+        {
+          value: "sets",
+          label: "Sets",
+        },
+        {
+          value: "primaries",
+          label: "Primaries",
+        },
+      ],
     } as dataModel;
   },
   computed: {

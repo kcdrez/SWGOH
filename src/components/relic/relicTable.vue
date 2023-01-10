@@ -5,102 +5,22 @@
     <thead class="sticky-header show-on-mobile">
       <tr class="sort-methods">
         <th class="show-on-mobile">
-          <div class="input-group input-group-sm my-2">
-            <span class="input-group-text">Sort By:</span>
-            <select
-              class="form-control"
-              @change="sortMethod = $event.target.value"
-            >
-              <option value="name">Name</option>
-              <option value="rarity">Rarity</option>
-              <option value="location">Location</option>
-              <option value="owned">Amount Owned</option>
-              <option value="needed">Amount Needed</option>
-              <option value="progress">Progress</option>
-              <option value="time">Time Remaining</option>
-            </select>
-          </div>
-          <div class="input-group input-group-sm my-2">
-            <span class="input-group-text">Sort Direction:</span>
-            <select
-              class="form-control"
-              @change="sortDir = $event.target.value"
-            >
-              <option value="asc">Ascending</option>
-              <option value="desc">Descending</option>
-            </select>
-          </div>
-          <div class="input-group input-group-sm my-2">
-            <span class="input-group-text">Search:</span>
-            <input
-              class="form-control"
-              v-model="searchText"
-              placeholder="Search by name"
-            />
-          </div>
-        </th>
-      </tr>
-      <tr class="text-center align-middle">
-        <th v-if="showCol('icon')">Icon</th>
-        <th v-if="showCol('name')">
-          <div class="c-pointer" @click="sortBy('name')">
-            Mat Name
-            <i class="fas mx-1" :class="sortIcon('name')"></i>
-          </div>
-          <input
-            class="form-control form-control-sm mx-auto my-1 w-75"
-            placeholder="Search"
-            v-model="searchText"
+          <SortMethods
+            :sortByOptions="sortByOptions"
+            :sortMethod="sortMethod"
+            :sortDir="sortDir"
+            showSearch
+            @methodChange="sortMethod = $event"
+            @directionChange="sortDir = $event"
+            @searchChange="searchText = $event"
           />
         </th>
-        <th
-          v-if="showCol('rarity')"
-          class="c-pointer"
-          @click="sortBy('rarity')"
-        >
-          Rarity
-          <i class="fas mx-1" :class="sortIcon('rarity')"></i>
-        </th>
-        <th
-          v-if="showCol('locations')"
-          class="c-pointer"
-          @click="sortBy('location')"
-        >
-          Locations
-          <i class="fas mx-1" :class="sortIcon('location')"></i>
-        </th>
-        <th
-          v-if="showCol('owned')"
-          class="c-pointer"
-          @click="sortBy('owned')"
-          width="160px"
-        >
-          Amount Owned
-          <i class="fas mx-1" :class="sortIcon('owned')"></i>
-        </th>
-        <th
-          v-if="showCol('needed')"
-          class="c-pointer"
-          @click="sortBy('needed')"
-        >
-          Amount Needed
-          <i class="fas mx-1" :class="sortIcon('needed')"></i>
-        </th>
-        <th
-          v-if="showCol('progress')"
-          class="c-pointer"
-          @click="sortBy('progress')"
-          width="145px"
-        >
-          Progress
-          <i class="fas mx-1" :class="sortIcon('progress')"></i>
-        </th>
-        <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
-        <th v-if="showCol('time')" class="c-pointer" @click="sortBy('time')">
-          Est. Time
-          <i class="fas mx-1" :class="sortIcon('time')"></i>
-        </th>
       </tr>
+      <ColumnHeaders
+        class="text-center align-middle"
+        :headers="headers"
+        @searchChange="searchText = $event"
+      />
     </thead>
     <tbody>
       <tr v-for="mat in filteredRelics" :key="mat.id">
@@ -175,6 +95,7 @@ import OwnedAmount from "components/relic/relicOwned.vue";
 import RelicIcon from "components/relic/relicIcon.vue";
 import Timestamp from "components/timestamp.vue";
 import { setupColumnEvents, setupSorting } from "utils";
+import { iHeader } from "types/general";
 
 export default defineComponent({
   name: "RelicTable",
@@ -227,8 +148,117 @@ export default defineComponent({
       required: true,
     },
   },
+  data() {
+    return {
+      sortByOptions: [
+        {
+          value: "name",
+          label: "Name",
+        },
+        {
+          value: "rarity",
+          label: "Rarity",
+        },
+        {
+          value: "location",
+          label: "Location",
+        },
+        {
+          value: "owned",
+          label: "Amount Owned",
+        },
+        {
+          value: "needed",
+          label: "Amount Needed",
+        },
+        {
+          value: "progress",
+          label: "Progress",
+        },
+        {
+          value: "time",
+          label: "Time Remaining",
+        },
+      ],
+    };
+  },
   computed: {
     ...mapState("relic", ["ownedRelics"]),
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Icon",
+          show: this.showCol("icon"),
+        },
+        {
+          label: "Mat Name",
+          show: this.showCol("name"),
+          icon: this.sortIcon("name"),
+          input: {
+            type: "input",
+            classes: "mx-auto my-1 w-75",
+            placeholder: "Search",
+          },
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Rarity",
+          show: this.showCol("rarity"),
+          icon: this.sortIcon("rarity"),
+          click: () => {
+            this.sortBy("rarity");
+          },
+        },
+        {
+          label: "Locations",
+          show: this.showCol("locations"),
+          icon: this.sortIcon("locations"),
+          click: () => {
+            this.sortBy("locations");
+          },
+        },
+        {
+          label: "Amount Owned",
+          show: this.showCol("owned"),
+          icon: this.sortIcon("owned"),
+          maxWidth: "160px",
+          click: () => {
+            this.sortBy("owned");
+          },
+        },
+        {
+          label: "Amount Needed",
+          show: this.showCol("needed"),
+          icon: this.sortIcon("needed"),
+          click: () => {
+            this.sortBy("needed");
+          },
+        },
+        {
+          label: "Progress",
+          show: this.showCol("progress"),
+          icon: this.sortIcon("progress"),
+          maxWidth: "145px",
+          click: () => {
+            this.sortBy("progress");
+          },
+        },
+        {
+          label: "Required By",
+          show: this.showRequiredByUnit && this.showCol("required"),
+        },
+        {
+          label: "Est. Time",
+          show: this.showCol("time"),
+          icon: this.sortIcon("time"),
+          click: () => {
+            this.sortBy("time");
+          },
+        },
+      ];
+    },
     filteredRelics(): Relic[] {
       return (this.relicList as Relic[])
         .sort((a: Relic, b: Relic) => {

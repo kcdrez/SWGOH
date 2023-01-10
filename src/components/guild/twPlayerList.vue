@@ -4,49 +4,11 @@
     class="table table-bordered table-dark table-sm table-striped swgoh-table"
   >
     <thead class="sticky-header show-on-mobile align-middle text-center">
-      <tr>
-        <th>
-          <div class="c-pointer" @click="sortBy('name')">
-            Name
-            <i class="fas mx-1 d-inline" :class="sortIcon('name')"></i>
-          </div>
-          <input
-            class="form-control form-control-sm mx-auto my-1 w-75"
-            placeholder="Search"
-            v-model="searchText"
-          />
-        </th>
-        <th>
-          <div @click="sortBy('joined')" class="c-pointer">
-            <span>Has Joined?</span>
-            <i class="fas mx-1" :class="sortIcon('joined')"></i>
-          </div>
-          <div class="d-flex mt-2">
-            <input
-              id="showOnlyJoinedToggle"
-              type="checkbox"
-              v-model="showJoined"
-            />
-            <label for="showOnlyJoinedToggle" class="ms-2 text-small"
-              >Show/Hide Joined</label
-            >
-          </div>
-        </th>
-        <template v-for="unit in units" :key="unit.id">
-          <th
-            v-if="showCol(unit.id)"
-            @click="sortBy(unit.id)"
-            class="c-pointer"
-          >
-            <span>{{ unit.name }}</span>
-            <i class="fas mx-1" :class="sortIcon(unit.id)"></i>
-          </th>
-        </template>
-        <th @click="sortBy('omicrons')" class="c-pointer">
-          <span>TW Omicrons</span>
-          <i class="fas mx-1" :class="sortIcon('omicrons')"></i>
-        </th>
-      </tr>
+      <ColumnHeaders
+        class="text-center align-middle"
+        :headers="headers"
+        @searchChange="searchText = $event"
+      />
     </thead>
     <tbody class="align-center text-center">
       <tr v-for="player in filteredPlayers" :key="player.allyCode">
@@ -94,6 +56,7 @@ import { mapState } from "vuex";
 
 import { setupColumnEvents, setupSorting } from "utils";
 import { Unit } from "types/unit";
+import { iHeader } from "types/general";
 
 interface dataModel {
   _playersJoined: string[];
@@ -153,6 +116,59 @@ export default defineComponent({
   },
   computed: {
     ...mapState("guild", ["accessLevel"]),
+    headers(): iHeader[] {
+      const unitHeaders: iHeader[] = this.units.map((unit) => {
+        return {
+          label: unit.name,
+          show: this.showCol(unit.id),
+          icon: this.sortIcon(unit.id),
+          click: () => {
+            this.sortBy(unit.id);
+          },
+        };
+      });
+
+      return [
+        {
+          label: "Name",
+          show: true,
+          icon: this.sortIcon("name"),
+          input: {
+            type: "input",
+            classes: "mx-auto my-1 w-75",
+            placeholder: "Search",
+          },
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Has Joined?",
+          show: true,
+          icon: this.sortIcon("joined"),
+          click: () => {
+            this.sortBy("joined");
+          },
+          input: {
+            type: "checkbox",
+            placeholder: "Show/Hide Joined",
+            value: false,
+            click: (val: any) => {
+              this.showJoined = val;
+            },
+          },
+        },
+        ...unitHeaders,
+        {
+          label: "TW Omicrons",
+          show: true,
+          icon: this.sortIcon("omicrons"),
+          click: () => {
+            this.sortBy("omicrons");
+          },
+        },
+      ];
+    },
     filteredPlayers() {
       return this.players
         .filter((player: any) => {

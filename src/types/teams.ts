@@ -92,7 +92,7 @@ export class Team {
           return this.sortDir === "asc" ? 1 : -1;
         }
         return 0;
-      } else if (this.sortMethod === "subtotal") {
+      } else if (this.sortMethod === "subTotal") {
         if (this.sortDir === "asc") {
           return a.speed - b.speed;
         } else {
@@ -347,7 +347,7 @@ export class TeamMember {
   }
 }
 
-export type SortType = "leader" | "name" | "subtotal" | "total" | undefined;
+export type SortType = "leader" | "name" | "subTotal" | "total" | undefined;
 export interface SpeedConfig {
   [key: string]: AbilityStat;
 }

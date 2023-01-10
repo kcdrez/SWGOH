@@ -7,63 +7,16 @@
       <thead class="sticky-header show-on-mobile">
         <tr class="sort-methods">
           <th class="show-on-mobile">
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort By:</span>
-              <select class="form-control" v-model="sortMethod">
-                <option value="date">Date</option>
-                <option value="win_loss">Win/Loss</option>
-                <option value="get1">GET1</option>
-                <option value="get2">GET2</option>
-                <option value="get3">GET3</option>
-                <option value="zetas">Zetas</option>
-              </select>
-            </div>
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort Direction:</span>
-              <select class="form-control" v-model="sortDir">
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </div>
+            <SortMethods
+              :sortByOptions="sortByOptions"
+              :sortMethod="sortMethod"
+              :sortDir="sortDir"
+              @methodChange="sortMethod = $event"
+              @directionChange="sortDir = $event"
+            />
           </th>
         </tr>
-        <tr class="text-center align-middle">
-          <th v-if="showCol('date')">
-            <div class="c-pointer" @click="sortBy('date')">
-              Completion Date
-              <i class="fas mx-1" :class="sortIcon('date')"></i>
-            </div>
-          </th>
-          <th
-            v-if="showCol('win_loss')"
-            class="c-pointer"
-            @click="sortBy('wins')"
-          >
-            Win/Loss
-            <i class="fas mx-1" :class="sortIcon('wins')"></i>
-          </th>
-          <th v-if="showCol('get1')" class="c-pointer" @click="sortBy('get1')">
-            GET1 Currency
-            <i class="fas mx-1" :class="sortIcon('get1')"></i>
-          </th>
-          <th v-if="showCol('get2')" class="c-pointer" @click="sortBy('get2')">
-            GET2 Currency
-            <i class="fas mx-1" :class="sortIcon('get2')"></i>
-          </th>
-          <th v-if="showCol('get3')" class="c-pointer" @click="sortBy('get3')">
-            GET3 Currency
-            <i class="fas mx-1" :class="sortIcon('get3')"></i>
-          </th>
-          <th
-            v-if="showCol('zetas')"
-            class="c-pointer"
-            @click="sortBy('zetas')"
-          >
-            Zetas
-            <i class="fas mx-1" :class="sortIcon('zetas')"></i>
-          </th>
-          <th v-if="showCol('actions')">Actions</th>
-        </tr>
+        <ColumnHeaders class="text-center align-middle" :headers="headers" />
       </thead>
       <tbody>
         <tr
@@ -86,10 +39,10 @@
             <span class="row-label">GET2 Currency: </span>
             {{ event.currencies.get2 }}
           </td>
-          <td v-if="showCol('get3')">
+          <!-- <td v-if="showCol('get3')">
             <span class="row-label">GET3 Currency: </span>
             {{ event.currencies.get3 }}
-          </td>
+          </td> -->
           <td v-if="showCol('zetas')">
             <span class="row-label">Zetas: </span>
             {{ event.abilityMats.zetas }}
@@ -126,10 +79,10 @@
             <span class="row-label">Avg GET2: </span>
             {{ averageGet2 }}
           </td>
-          <td v-if="showCol('get3')">
+          <!-- <td v-if="showCol('get3')">
             <span class="row-label">Avg GET3: </span>
             {{ averageGet3 }}
-          </td>
+          </td> -->
           <td v-if="showCol('zetas')">
             <span class="row-label">Avg Zetas: </span>
             {{ averageZetas }}
@@ -214,6 +167,7 @@ import { mapActions, mapState } from "vuex";
 
 import { ITerritoryWarEvent } from "types/guild";
 import { round2Decimals, setupColumnEvents, setupSorting, unvue } from "utils";
+import { iHeader } from "types/general";
 
 const storageKey = "territoryWarTable";
 
@@ -252,10 +206,92 @@ export default defineComponent({
         win: true,
         guildGP: 200,
       },
+      sortByOptions: [
+        {
+          value: "date",
+          label: "Date",
+        },
+        {
+          value: "stars",
+          label: "Stars",
+        },
+        {
+          value: "get1",
+          label: "GET1",
+        },
+        {
+          value: "get2",
+          label: "GET2",
+        },
+        // {
+        //   value: "get3",
+        //   label: "GET3",
+        // },
+        {
+          value: "zetas",
+          label: "Zetas",
+        },
+      ],
     } as any;
   },
   computed: {
     ...mapState("guild", ["territoryWarEvents", "accessLevel"]),
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Completion Date",
+          show: this.showCol("date"),
+          icon: this.sortIcon("date"),
+          click: () => {
+            this.sortBy("date");
+          },
+        },
+        {
+          label: "Win/Loss",
+          show: this.showCol("win_loss"),
+          icon: this.sortIcon("win_loss"),
+          click: () => {
+            this.sortBy("win_loss");
+          },
+        },
+        {
+          label: "GET1 Currency",
+          show: this.showCol("get1"),
+          icon: this.sortIcon("get1"),
+          click: () => {
+            this.sortBy("get1");
+          },
+        },
+        {
+          label: "GET2 Currency",
+          show: this.showCol("get2"),
+          icon: this.sortIcon("get2"),
+          click: () => {
+            this.sortBy("get2");
+          },
+        },
+        // {
+        //   label: "GET3 Currency",
+        //   show: this.showCol("get3"),
+        //   icon: this.sortIcon("get3"),
+        //   click: () => {
+        //     this.sortBy("get3");
+        //   },
+        // },
+        {
+          label: "Zetas",
+          show: this.showCol("zetas"),
+          icon: this.sortIcon("zetas"),
+          click: () => {
+            this.sortBy("zetas");
+          },
+        },
+        {
+          label: "Actions",
+          show: this.showCol("actions"),
+        },
+      ];
+    },
     filteredEvents(): ITerritoryWarEvent[] {
       return this.territoryWarEvents
         .filter((e: ITerritoryWarEvent) => {
@@ -268,7 +304,7 @@ export default defineComponent({
             } else {
               return moment(b.date).isBefore(a.date) ? 1 : -1;
             }
-          } else if (this.sortMethod === "wins") {
+          } else if (this.sortMethod === "win_loss") {
             if (a.win && b.win) {
               return 0;
             } else if (this.sortDir === "asc") {

@@ -7,67 +7,16 @@
       <thead class="sticky-header show-on-mobile">
         <tr class="sort-methods">
           <th class="show-on-mobile">
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort By:</span>
-              <select class="form-control" v-model="sortMethod">
-                <option value="date">Date</option>
-                <option value="stars">Stars</option>
-                <option value="get1">GET1</option>
-                <option value="get2">GET2</option>
-                <option value="get3">GET3</option>
-                <option value="character">Character Shards</option>
-              </select>
-            </div>
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort Direction:</span>
-              <select class="form-control" v-model="sortDir">
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </div>
+            <SortMethods
+              :sortByOptions="sortByOptions"
+              :sortMethod="sortMethod"
+              :sortDir="sortDir"
+              @methodChange="sortMethod = $event"
+              @directionChange="sortDir = $event"
+            />
           </th>
         </tr>
-        <tr class="text-center align-middle">
-          <th v-if="showCol('date')">
-            <div class="c-pointer" @click="sortBy('date')">
-              Completion Date
-              <i class="fas mx-1" :class="sortIcon('date')"></i>
-            </div>
-          </th>
-          <th v-if="showCol('name')" class="c-pointer" @click="sortBy('name')">
-            Name
-            <i class="fas mx-1" :class="sortIcon('name')"></i>
-          </th>
-          <th
-            v-if="showCol('stars')"
-            class="c-pointer"
-            @click="sortBy('stars')"
-          >
-            Stars
-            <i class="fas mx-1" :class="sortIcon('stars')"></i>
-          </th>
-          <th v-if="showCol('get1')" class="c-pointer" @click="sortBy('get1')">
-            GET1 Currency
-            <i class="fas mx-1" :class="sortIcon('get1')"></i>
-          </th>
-          <th v-if="showCol('get2')" class="c-pointer" @click="sortBy('get2')">
-            GET2 Currency
-            <i class="fas mx-1" :class="sortIcon('get2')"></i>
-          </th>
-          <th v-if="showCol('get3')" class="c-pointer" @click="sortBy('get3')">
-            GET3 Currency
-            <i class="fas mx-1" :class="sortIcon('get3')"></i>
-          </th>
-          <th
-            v-if="showCol('character')"
-            class="c-pointer"
-            @click="sortBy('character')"
-          >
-            Character Shards
-            <i class="fas mx-1" :class="sortIcon('character')"></i>
-          </th>
-          <th v-if="showCol('actions')">Actions</th>
-        </tr>
+        <ColumnHeaders class="text-center align-middle" :headers="headers" />
       </thead>
       <tbody>
         <tr
@@ -280,6 +229,7 @@ import { mapState, mapActions, mapGetters } from "vuex";
 
 import { setupColumnEvents, setupSorting, unvue } from "utils";
 import { TerritoryBattleEvent } from "types/guild";
+import { iHeader } from "types/general";
 
 const storageKey = "territoryBattleTable";
 
@@ -319,6 +269,32 @@ export default defineComponent({
         characterShards: 0,
         name: "",
       },
+      sortByOptions: [
+        {
+          value: "date",
+          label: "Date",
+        },
+        {
+          value: "stars",
+          label: "Stars",
+        },
+        {
+          value: "get1",
+          label: "GET1",
+        },
+        {
+          value: "get2",
+          label: "GET2",
+        },
+        {
+          value: "get3",
+          label: "GET3",
+        },
+        {
+          value: "character",
+          label: "Character Shards",
+        },
+      ],
     } as any;
   },
   computed: {
@@ -330,6 +306,70 @@ export default defineComponent({
       "tbAvgShards",
     ]),
     ...mapGetters("unit", ["unitName"]),
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Completion Date",
+          show: this.showCol("date"),
+          icon: this.sortIcon("date"),
+          click: () => {
+            this.sortBy("date");
+          },
+        },
+        {
+          label: "Name",
+          show: this.showCol("name"),
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Stars",
+          show: this.showCol("stars"),
+          icon: this.sortIcon("stars"),
+          click: () => {
+            this.sortBy("stars");
+          },
+        },
+        {
+          label: "GET1 Currency",
+          show: this.showCol("get1"),
+          icon: this.sortIcon("get1"),
+          click: () => {
+            this.sortBy("get1");
+          },
+        },
+        {
+          label: "GET2 Currency",
+          show: this.showCol("get2"),
+          icon: this.sortIcon("get2"),
+          click: () => {
+            this.sortBy("get2");
+          },
+        },
+        {
+          label: "GET3 Currency",
+          show: this.showCol("get3"),
+          icon: this.sortIcon("get3"),
+          click: () => {
+            this.sortBy("get3");
+          },
+        },
+        {
+          label: "Character Shards",
+          show: this.showCol("character"),
+          icon: this.sortIcon("character"),
+          click: () => {
+            this.sortBy("character");
+          },
+        },
+        {
+          label: "Actions",
+          show: this.showCol("actions"),
+        },
+      ];
+    },
     maxStars(): number {
       switch (this.newEvent.name) {
         case "Republic Offensive":

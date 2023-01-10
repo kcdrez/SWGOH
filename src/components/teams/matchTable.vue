@@ -60,6 +60,7 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <thead>
+        <ColumnHeaders class="text-center align-middle" :headers="headers" />
         <tr class="text-center align-middle">
           <th v-if="showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
@@ -149,10 +150,11 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-import { Match, SortType, TeamMember } from "types/teams";
+import { Match, TeamMember } from "types/teams";
 import MultiSelect from "components/multiSelect.vue";
 import ModIcon from "components/units/modIcon.vue";
 import { setupSorting } from "utils";
+import { iHeader } from "types/general";
 
 type dataModel = {
   selectedColumns: string[];
@@ -187,6 +189,50 @@ export default defineComponent({
     } as dataModel;
   },
   computed: {
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Name",
+          show: this.showCol("name"),
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Is Leader?",
+          show: this.showCol("leader"),
+          icon: this.sortIcon("leader"),
+          click: () => {
+            this.sortBy("leader");
+          },
+        },
+        {
+          label: "Owner",
+          show: this.showCol("owner"),
+        },
+        {
+          label: "Sub Total",
+          show: this.showCol("subTotal"),
+          icon: this.sortIcon("subTotal"),
+          click: () => {
+            this.sortBy("subTotal");
+          },
+        },
+        {
+          label: "Bonuses",
+          show: this.showCol("bonuses"),
+        },
+        {
+          label: "Total",
+          show: this.showCol("total"),
+          icon: this.sortIcon("total"),
+          click: () => {
+            this.sortBy("total");
+          },
+        },
+      ];
+    },
     cols(): { text: string; value: any }[] {
       const list = [
         {
@@ -212,10 +258,6 @@ export default defineComponent({
         {
           text: "Total",
           value: "total",
-        },
-        {
-          text: "Actions",
-          value: "actions",
         },
       ];
       return list;

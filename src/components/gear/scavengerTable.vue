@@ -19,46 +19,7 @@
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table collapse"
     >
       <thead class="text-center sticky-header align-middle">
-        <tr>
-          <th width="100px" v-if="showCol('icon')">Icon</th>
-          <th
-            width="300px"
-            v-if="showCol('name')"
-            @click="sortBy('name')"
-            class="c-pointer"
-          >
-            Name
-            <i class="fas mx-1" :class="sortIcon('name')"></i>
-          </th>
-          <th
-            width="100px"
-            v-if="showCol('amount')"
-            @click="sortBy('amount')"
-            class="c-pointer"
-          >
-            Amount
-            <i class="fas mx-1" :class="sortIcon('amount')"></i>
-          </th>
-          <th
-            width="100px"
-            v-if="showCol('priority')"
-            @click="sortBy('priority')"
-            class="c-pointer"
-          >
-            Efficiency Rating
-            <i class="fas mx-1" :class="sortIcon('priority')"></i>
-          </th>
-          <th
-            width="300px"
-            v-if="showCol('locations')"
-            @click="sortBy('locations')"
-            class="c-pointer"
-          >
-            Best Farming Locations
-            <i class="fas mx-1" :class="sortIcon('locations')"></i>
-          </th>
-          <th width="300px" v-if="showCol('notes')">Notes</th>
-        </tr>
+        <ColumnHeaders :headers="headers" />
       </thead>
       <tbody class="align-middle text-center-sm">
         <tr v-for="gear in list" :key="gear.data.id">
@@ -113,6 +74,7 @@ import { Gear, IScavenger } from "types/gear";
 import GearIcon from "components/gear/gearIcon.vue";
 import { FarmingNode } from "types/shards";
 import { setupEvents, setupSorting } from "utils";
+import { iHeader } from "types/general";
 
 type tScavenger = { data: Gear; scavenger: IScavenger };
 const storageKey = "scavengerTable";
@@ -250,6 +212,56 @@ export default defineComponent({
           return -1;
         }
       }
+    },
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Icon",
+          show: this.showCol("icon"),
+          maxWidth: "100px",
+        },
+        {
+          label: "Name",
+          show: this.showCol("name"),
+          maxWidth: "300px",
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Amount",
+          show: this.showCol("amount"),
+          maxWidth: "100px",
+          icon: this.sortIcon("amount"),
+          click: () => {
+            this.sortBy("amount");
+          },
+        },
+        {
+          label: "Efficiency Rating",
+          show: this.showCol("priority"),
+          maxWidth: "100px",
+          icon: this.sortIcon("priority"),
+          click: () => {
+            this.sortBy("priority");
+          },
+        },
+        {
+          label: "Best Farming Locations",
+          show: this.showCol("locations"),
+          maxWidth: "300px",
+          icon: this.sortIcon("locations"),
+          click: () => {
+            this.sortBy("locations");
+          },
+        },
+        {
+          label: "Notes",
+          show: true,
+          maxWidth: "300px",
+        },
+      ];
     },
     cols(): { text: string; value: any }[] {
       const list = [

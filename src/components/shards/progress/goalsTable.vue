@@ -63,44 +63,18 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <thead class="sticky-header show-on-mobile">
-        <tr class="text-center align-middle">
-          <th v-if="showCol('name')">
-            <div class="c-pointer" @click="sortBy('name')">
-              <span>Unit Name</span>
-              <i class="fas mx-2" :class="sortIcon('name')"></i>
-            </div>
-            <!-- <input
-              class="form-control form-control-sm mx-auto my-1 w-75"
-              placeholder="Search"
-              v-model="searchText"
-            /> -->
+        <tr class="sort-methods">
+          <th class="show-on-mobile">
+            <SortMethods
+              :sortByOptions="sortByOptions"
+              :sortMethod="sortMethod"
+              :sortDir="sortDir"
+              @methodChange="sortMethod = $event"
+              @directionChange="sortDir = $event"
+            />
           </th>
-          <th
-            v-if="showCol('current')"
-            @click="sortBy('current')"
-            class="c-pointer"
-          >
-            <span>Current Level</span>
-            <i class="fas mx-2" :class="sortIcon('current')"></i>
-          </th>
-          <th
-            v-if="showCol('target')"
-            @click="sortBy('target')"
-            class="c-pointer"
-          >
-            <span>Target Level</span>
-            <i class="fas mx-2" :class="sortIcon('target')"></i>
-          </th>
-          <th
-            v-if="showCol('progress')"
-            @click="sortBy('progress')"
-            class="c-pointer"
-          >
-            <span>Progress</span>
-            <i class="fas mx-2" :class="sortIcon('progress')"></i>
-          </th>
-          <th v-if="showCol('actions')">Actions</th>
         </tr>
+        <ColumnHeaders class="text-center align-middle" :headers="headers" />
       </thead>
       <tbody>
         <tr
@@ -215,6 +189,7 @@ import Modal from "components/modal.vue";
 import { getPercent, getUnit, totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import { setupEvents, setupSorting } from "utils";
+import { iHeader } from "types/general";
 
 export default defineComponent({
   name: "GoalsTable",
@@ -259,9 +234,67 @@ export default defineComponent({
       selectedColumns: [],
       showAddUnitModal: false,
       deleteGoalModal: false,
+      sortByOptions: [
+        {
+          value: "name",
+          label: "Unit Name",
+        },
+        {
+          value: "current",
+          label: "Current Level",
+        },
+        {
+          value: "target",
+          label: "Target Level",
+        },
+        {
+          value: "progress",
+          label: "Progress",
+        },
+      ],
     } as any;
   },
   computed: {
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Unit Name",
+          show: this.showCol("name"),
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Current Level",
+          show: this.showCol("current"),
+          icon: this.sortIcon("current"),
+          click: () => {
+            this.sortBy("current");
+          },
+        },
+        {
+          label: "Target Level",
+          show: this.showCol("target"),
+          icon: this.sortIcon("target"),
+          click: () => {
+            this.sortBy("target");
+          },
+        },
+        {
+          label: "Progress",
+          show: this.showCol("progress"),
+          icon: this.sortIcon("progress"),
+          click: () => {
+            this.sortBy("progress");
+          },
+        },
+        {
+          label: "Actions",
+          show: this.showCol("actions"),
+        },
+      ];
+    },
     cols() {
       return [
         {

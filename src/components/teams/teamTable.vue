@@ -106,6 +106,7 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <thead>
+        <!-- <ColumnHeaders class="text-center align-middle" :headers="headers" /> -->
         <tr class="text-center align-middle">
           <th v-if="showCol('name')">
             <div class="c-pointer" @click="sortBy('name')">
@@ -141,9 +142,9 @@
             <th>Has Speed Set?</th>
           </template>
           <th v-if="showCol('subTotal')">
-            <div class="c-pointer" @click="sortBy('subtotal')">
+            <div class="c-pointer" @click="sortBy('subTotal')">
               Sub Total
-              <i class="fas mx-1" :class="sortIcon('subtotal')"></i>
+              <i class="fas mx-1" :class="sortIcon('subTotal')"></i>
             </div>
           </th>
           <th v-if="showCol('bonuses')">Bonuses</th>
@@ -211,7 +212,10 @@
             <span class="row-label">Subtotal:</span>
             {{ unit.speed }}
           </td>
-          <td v-if="showCol('bonuses')" :class="{'hide-sm': !hasBonuses(unit) }">
+          <td
+            v-if="showCol('bonuses')"
+            :class="{ 'hide-sm': !hasBonuses(unit) }"
+          >
             <div v-if="team.leaderSpeedBonus(unit, showGameMode) > 0">
               Leader Bonus:
               {{ team.leaderSpeedBonus(unit, showGameMode) }}
@@ -270,6 +274,7 @@ import { SortType, Team, TeamMember } from "types/teams";
 import { Unit } from "types/unit";
 import ModIcon from "components/units/modIcon.vue";
 import UnitSearch from "components/units/unitSearch.vue";
+import { iHeader } from "types/general";
 
 type dataModel = {
   editTeamName: string;
@@ -314,6 +319,51 @@ export default defineComponent({
     showMods(): boolean {
       return this.size === "lg" && this.showCol("mods");
     },
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Name",
+          show: this.showCol("name"),
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Is Leader?",
+          show: this.showCol("leader"),
+          icon: this.sortIcon("leader"),
+          click: () => {
+            this.sortBy("leader");
+          },
+        },
+        {
+          label: "Sub Total",
+          show: this.showCol("subTotal"),
+          icon: this.sortIcon("subTotal"),
+          click: () => {
+            this.sortBy("subTotal");
+          },
+        },
+        {
+          label: "Bonuses",
+          show: this.showCol("bonuses"),
+        },
+        {
+          label: "Total",
+          show: this.showCol("total"),
+          icon: this.sortIcon("total"),
+          click: () => {
+            this.sortBy("total");
+          },
+        },
+        {
+          label: "Actions",
+          show: this.showCol("actions"),
+        },
+        //todo: mods
+      ];
+    },
     cols(): { text: string; value: any }[] {
       const list = [
         {
@@ -321,7 +371,7 @@ export default defineComponent({
           value: "name",
         },
         {
-          text: "Is Leader",
+          text: "Is Leader?",
           value: "leader",
         },
         {
@@ -396,11 +446,13 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
-    hasBonuses(unit: TeamMember):boolean {
-      return this.team.leaderSpeedBonus(unit, this.showGameMode) > 0 && 
-        this.team.uniqueSpeedBonus(unit, this.showGameMode) > 0 && 
+    hasBonuses(unit: TeamMember): boolean {
+      return (
+        this.team.leaderSpeedBonus(unit, this.showGameMode) > 0 &&
+        this.team.uniqueSpeedBonus(unit, this.showGameMode) > 0 &&
         this.team.speedBonusFromTeamMembers(unit, this.showGameMode) > 0
-    }
+      );
+    },
   },
 });
 </script>

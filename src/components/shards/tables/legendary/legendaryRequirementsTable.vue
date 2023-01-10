@@ -124,51 +124,11 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <thead class="sticky-header show-on-mobile">
-        <tr class="text-center align-middle">
-          <th v-if="showCol('name')" width="750px">
-            <div class="c-pointer" @click="sortBy('name')">
-              <span>Unit Name</span>
-              <i class="fas mx-2" :class="sortIcon('name')"></i>
-            </div>
-            <input
-              class="form-control form-control-sm mx-auto my-1 w-75"
-              placeholder="Search"
-              v-model="searchText"
-            />
-          </th>
-          <th
-            v-if="showCol('current')"
-            @click="sortBy('current')"
-            class="c-pointer"
-          >
-            <span>Current Level</span>
-            <i class="fas mx-2" :class="sortIcon('current')"></i>
-          </th>
-          <th
-            v-if="showCol('requirements')"
-            @click="sortBy('requirements')"
-            class="c-pointer"
-          >
-            <span>Requirements</span>
-            <i class="fas mx-2" :class="sortIcon('requirements')"></i>
-          </th>
-          <th
-            v-if="showCol('recommended') && showRecommended"
-            @click="sortBy('recommended')"
-            class="c-pointer"
-          >
-            <span>Recommended</span>
-            <i class="fas mx-2" :class="sortIcon('recommended')"></i>
-          </th>
-          <th
-            v-if="showCol('progress')"
-            @click="sortBy('progress')"
-            class="c-pointer"
-          >
-            <span>Progress</span>
-            <i class="fas mx-2" :class="sortIcon('progress')"></i>
-          </th>
-        </tr>
+        <ColumnHeaders
+          class="text-center align-middle"
+          :headers="headers"
+          @searchChange="searchText = $event"
+        />
       </thead>
       <tbody>
         <LegendaryRequirementRow
@@ -202,6 +162,7 @@ import {
 import { displayValue, IPrerequisite } from "types/shards";
 import { isGearRequirement, isRelicRequirement } from "types/shards";
 import { setupSorting, setupColumnEvents } from "utils";
+import { iHeader } from "types/general";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
@@ -259,6 +220,56 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapState("unit", ["unitList"]),
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Unit Name",
+          show: this.showCol("name"),
+          maxWidth: "750px",
+          input: {
+            type: "input",
+            classes: "mx-auto my-1 w-75",
+            placeholder: "Search",
+          },
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Current Level",
+          show: this.showCol("current"),
+          icon: this.sortIcon("current"),
+          click: () => {
+            this.sortBy("current");
+          },
+        },
+        {
+          label: "Requirements",
+          show: this.showCol("requirements"),
+          icon: this.sortIcon("requirements"),
+          click: () => {
+            this.sortBy("requirements");
+          },
+        },
+        {
+          label: "Recommended",
+          show: this.showCol("recommended") && this.showRecommended,
+          icon: this.sortIcon("stars"),
+          click: () => {
+            this.sortBy("stars");
+          },
+        },
+        {
+          label: "Progress",
+          show: this.showCol("progress"),
+          icon: this.sortIcon("progress"),
+          click: () => {
+            this.sortBy("progress");
+          },
+        },
+      ];
+    },
     prerequisites(): IPrerequisite[] {
       return getPrerequisites(this.unit.id ?? "")
         .filter((p) => {

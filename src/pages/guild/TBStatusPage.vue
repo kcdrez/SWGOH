@@ -64,12 +64,7 @@
         <tr>
           <th colspan="100%">{{ missionText }}</th>
         </tr>
-        <tr>
-          <th width="20%">Name</th>
-          <th v-if="showStats" width="60%">Stats</th>
-          <th v-if="showLevels" width="20%">Level</th>
-          <th>Zetas</th>
-        </tr>
+        <ColumnHeaders class="text-center align-middle" :headers="headers" />
       </thead>
       <tbody class="align-middle text-center">
         <template v-for="unit in teamUnits" :key="unit.id">
@@ -155,6 +150,7 @@ import { mapGetters, mapState } from "vuex";
 import { Unit } from "types/unit";
 import { tbRecommended } from "types/guild";
 import RequirementIcon from "components/shards/tables/legendary/requirementIcon.vue";
+import { iHeader } from "types/general";
 
 interface dataModel {
   map: "LSRepublicOffensive" | "DSSeparatistMight" | "";
@@ -183,6 +179,29 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapGetters("unit", ["unitName"]),
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Name",
+          show: true,
+          maxWidth: "20%",
+        },
+        {
+          label: "Stats",
+          show: this.showStats,
+          maxWidth: "60%",
+        },
+        {
+          label: "Level",
+          show: this.showLevels,
+          maxWidth: "20%",
+        },
+        {
+          label: "Zetas",
+          show: true,
+        },
+      ];
+    },
     mapOptions() {
       return tbRecommended.map((x) => {
         return {

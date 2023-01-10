@@ -19,6 +19,8 @@ import ProgressBar from "components/progressBar.vue";
 import Loading from "components/loading.vue";
 import Error from "components/error.vue";
 import MultiSelect from "components/multiSelect.vue";
+import SortMethods from "components/general/sortMethods.vue";
+import ColumnHeaders from "components/general/columnHeaders.vue";
 import { formatDate, pluralText, daysFromNow } from "utils";
 
 const app = createApp(App);
@@ -48,6 +50,8 @@ app
   .use(store)
   .use(router)
   .component("Confirm", Confirm)
+  .component("SortMethods", SortMethods)
+  .component("ColumnHeaders", ColumnHeaders)
   .component("SearchInput", SearchInput)
   .component("ProgressBar", ProgressBar)
   .component("Loading", Loading)

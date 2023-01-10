@@ -6,84 +6,22 @@
       <thead class="sticky-header show-on-mobile">
         <tr class="sort-methods" v-if="showUnitName">
           <th class="show-on-mobile">
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort By:</span>
-              <select
-                class="form-control"
-                @change="sortMethod = $event.target.value"
-              >
-                <option value="name" v-if="showUnitName">Name</option>
-                <option value="location">Location</option>
-                <option value="progress">Progress</option>
-                <option value="time">Time Remaining</option>
-              </select>
-            </div>
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort Direction:</span>
-              <select
-                class="form-control"
-                @change="sortDir = $event.target.value"
-              >
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </div>
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Search:</span>
-              <input
-                class="form-control"
-                v-model="searchText"
-                placeholder="Search by name"
-              />
-            </div>
-          </th>
-        </tr>
-        <tr class="text-center align-middle">
-          <th v-if="showUnitName && showCol('name')">
-            <div class="c-pointer" @click="sortBy('name')">
-              <span>Unit Name</span>
-              <i class="fas mx-1" :class="sortIcon('name')"></i>
-            </div>
-            <input
-              class="form-control form-control-sm mx-auto my-1 w-75"
-              placeholder="Search"
-              v-model="searchText"
+            <SortMethods
+              :sortByOptions="sortByOptions"
+              :sortMethod="sortMethod"
+              :sortDir="sortDir"
+              showSearch
+              @methodChange="sortMethod = $event"
+              @directionChange="sortDir = $event"
+              @searchChange="searchText = $event"
             />
           </th>
-          <th v-if="showCol('locations')"><span>Locations</span></th>
-          <th
-            v-if="showCol('owned')"
-            class="c-pointer"
-            @click="sortBy('owned')"
-          >
-            <span>Shards Owned</span>
-            <i class="fas mx-1" :class="sortIcon('owned')"></i>
-          </th>
-          <th
-            v-if="showCol('remaining')"
-            class="c-pointer"
-            @click="sortBy('remaining')"
-          >
-            <span>Shards Remaining</span>
-            <i class="fas mx-2" :class="sortIcon('remaining')"></i>
-          </th>
-          <th
-            v-if="showCol('progress')"
-            class="c-pointer"
-            @click="sortBy('progress')"
-          >
-            <span>Progress</span>
-            <i class="fas mx-1" :class="sortIcon('progress')"></i>
-          </th>
-          <th
-            class="c-pointer"
-            @click="sortBy('time')"
-            v-if="showUnitName && showCol('time')"
-          >
-            <span>Est. Time</span>
-            <i class="fas mx-1" :class="sortIcon('time')"></i>
-          </th>
         </tr>
+        <ColumnHeaders
+          class="text-center align-middle"
+          :headers="headers"
+          @searchChange="searchText = $event"
+        />
       </thead>
       <tbody>
         <tr
@@ -148,6 +86,7 @@ import Timestamp from "components/timestamp.vue";
 import { Unit, unitsByPriority } from "types/unit";
 import { estimatedTime } from "types/guild";
 import { setupColumnEvents, setupSorting } from "utils";
+import { iHeader } from "types/general";
 
 export default defineComponent({
   name: "TerritoryBattleShardTable",
@@ -208,9 +147,81 @@ export default defineComponent({
   data() {
     return {
       loading: true,
+      sortByOptions: [
+        {
+          value: "name",
+          label: "Name",
+          show: this.showUnitName,
+        },
+        {
+          value: "location",
+          label: "Location",
+        },
+        {
+          value: "progress",
+          label: "Progress",
+        },
+        {
+          value: "time",
+          label: "Time Remaining",
+        },
+      ],
     };
   },
   computed: {
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Unit Name",
+          show: this.showUnitName && this.showCol("name"),
+          input: {
+            type: "input",
+            classes: "mx-auto my-1 w-75",
+            placeholder: "Search",
+          },
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Locations",
+          show: this.showCol("locations"),
+        },
+        {
+          label: "Shards Owned",
+          show: this.showCol("owned"),
+          icon: this.sortIcon("owned"),
+          click: () => {
+            this.sortBy("owned");
+          },
+        },
+        {
+          label: "Shards Remaining",
+          show: this.showCol("remaining"),
+          icon: this.sortIcon("remaining"),
+          click: () => {
+            this.sortBy("remaining");
+          },
+        },
+        {
+          label: "Progress",
+          show: this.showCol("progress"),
+          icon: this.sortIcon("progress"),
+          click: () => {
+            this.sortBy("progress");
+          },
+        },
+        {
+          label: "Est. Time",
+          show: this.showUnitName && this.showCol("time"),
+          icon: this.sortIcon("time"),
+          click: () => {
+            this.sortBy("time");
+          },
+        },
+      ];
+    },
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {

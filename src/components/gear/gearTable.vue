@@ -7,119 +7,24 @@
       <thead class="sticky-header show-on-mobile">
         <tr class="sort-methods">
           <th class="show-on-mobile">
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort By:</span>
-              <select class="form-control" v-model="sortMethod">
-                <option value="name">Name</option>
-                <option value="mark">Mark</option>
-                <option value="location">Location</option>
-                <option value="owned">Owned</option>
-                <option value="needed">Needed</option>
-                <option value="progress">Progress</option>
-                <option value="required" v-if="showRequiredByUnit">
-                  Required By
-                </option>
-                <option value="time">Time Remaining</option>
-              </select>
-            </div>
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Sort Direction:</span>
-              <select class="form-control" v-model="sortDir">
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </div>
-            <div class="input-group input-group-sm my-2">
-              <span class="input-group-text">Search:</span>
-              <input
-                class="form-control"
-                v-model="searchText"
-                placeholder="Search by name"
-              />
-            </div>
-            <button
-              class="btn btn-sm btn-primary w-50 mx-auto d-block"
-              @click="showResetConfirm = true"
-            >
-              Reset
-            </button>
-          </th>
-        </tr>
-        <tr class="text-center align-middle">
-          <th v-if="showCol('icon')">Icon</th>
-          <th v-if="showCol('name')" max-width="300px">
-            <div class="c-pointer" @click="sortBy('name')">
-              Name
-              <i class="fas mx-1" :class="sortIcon('name')"></i>
-            </div>
-            <input
-              class="form-control form-control-sm mx-auto my-1 w-75"
-              placeholder="Search"
-              v-model="searchText"
+            <SortMethods
+              :sortByOptions="sortByOptions"
+              :sortMethod="sortMethod"
+              :sortDir="sortDir"
+              showSearch
+              showButton
+              @methodChange="sortMethod = $event"
+              @directionChange="sortDir = $event"
+              @searchChange="searchText = $event"
+              @buttonClick="showResetConfirm = true"
             />
           </th>
-          <th class="c-pointer" @click="sortBy('mark')" v-if="showCol('mark')">
-            Mark
-            <i class="fas mx-1" :class="sortIcon('mark')"></i>
-          </th>
-          <th
-            class="c-pointer"
-            @click="sortBy('location')"
-            min-width="150px"
-            v-if="showCol('locations')"
-          >
-            Locations
-            <i class="fas mx-1" :class="sortIcon('location')"></i>
-          </th>
-          <th
-            v-if="showCol('owned')"
-            class="c-pointer"
-            @click="sortBy('owned')"
-            min-width="125px"
-            title="Amount of gear owned"
-          >
-            <div>
-              Owned
-              <i class="fas mx-1" :class="sortIcon('owned')"></i>
-            </div>
-            <button
-              class="btn btn-sm btn-primary"
-              @click="showResetConfirm = true"
-            >
-              Reset
-            </button>
-          </th>
-          <th
-            v-if="showCol('needed')"
-            class="c-pointer"
-            @click="sortBy('needed')"
-            min-width="125px"
-            title="Amount of gear needed for all characters being tracked"
-          >
-            Needed
-            <i class="fas mx-1" :class="sortIcon('needed')"></i>
-          </th>
-          <th
-            class="c-pointer"
-            @click="sortBy('progress')"
-            v-if="showCol('progress')"
-            min-width="145px"
-          >
-            Progress
-            <i class="fas mx-1" :class="sortIcon('progress')"></i>
-          </th>
-          <th v-if="showRequiredByUnit && showCol('required')">Required By</th>
-          <th
-            class="c-pointer"
-            @click="sortBy('time')"
-            v-if="showCol('time')"
-            min-width="125px"
-          >
-            Est. Time
-            <i class="fas mx-1" :class="sortIcon('time')"></i>
-          </th>
-          <th v-if="showCol('actions')">Actions</th>
         </tr>
+        <ColumnHeaders
+          class="text-center align-middle"
+          :headers="headers"
+          @searchChange="searchText = $event"
+        />
       </thead>
       <tbody>
         <tr v-if="filteredSalvageList.length === 0">
@@ -292,6 +197,7 @@ import GearIcon from "components/gear/gearIcon.vue";
 import Timestamp from "components/timestamp.vue";
 import GearText from "components/gear/gearText.vue";
 import { setupColumnEvents, setupSorting } from "utils";
+import { iHeader } from "types/general";
 
 export default defineComponent({
   name: "GearTable",
@@ -338,6 +244,42 @@ export default defineComponent({
   data() {
     return {
       showResetConfirm: false,
+      sortByOptions: [
+        //todo combine with headers computed somehow
+        {
+          value: "name",
+          label: "Name",
+        },
+        {
+          value: "mark",
+          label: "Mark",
+        },
+        {
+          value: "location",
+          label: "Locations",
+        },
+        {
+          value: "owned",
+          label: "Owned",
+        },
+        {
+          value: "needed",
+          label: "Needed",
+        },
+        {
+          value: "progress",
+          label: "Progress",
+        },
+        {
+          value: "required",
+          label: "Required By",
+          show: this.showRequiredByUnit,
+        },
+        {
+          value: "time",
+          label: "Time Remaining",
+        },
+      ],
     };
   },
   computed: {
@@ -416,6 +358,100 @@ export default defineComponent({
       return this.gearList.filter((gear: Gear) => {
         return gear.irrelevant;
       });
+    },
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Icon",
+          show: this.showCol("icon"),
+        },
+        {
+          label: "Name",
+          show: this.showCol("name"),
+          maxWidth: "300px",
+          input: {
+            type: "input",
+            classes: "mx-auto my-1 w-75",
+            placeholder: "Search",
+          },
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Mark",
+          show: this.showCol("mark"),
+          icon: this.sortIcon("mark"),
+          click: () => {
+            this.sortBy("mark");
+          },
+        },
+        {
+          label: "Locations",
+          maxWidth: "150px",
+          show: this.showCol("locations"),
+          icon: this.sortIcon("locations"),
+          click: () => {
+            this.sortBy("locations");
+          },
+        },
+        {
+          label: "Owned",
+          maxWidth: "125px",
+          show: this.showCol("owned"),
+          icon: this.sortIcon("owned"),
+          title: "Amount of gear owned",
+          input: {
+            type: "button",
+            placeholder: "Reset",
+            classes: "btn btn-sm btn-primary",
+            click: () => {
+              this.showResetConfirm = true;
+            },
+          },
+          click: () => {
+            this.sortBy("owned");
+          },
+        },
+        {
+          label: "Needed",
+          maxWidth: "125px",
+          show: this.showCol("needed"),
+          icon: this.sortIcon("needed"),
+          title: "Amount of gear needed for all characters being tracked",
+          click: () => {
+            this.sortBy("needed");
+          },
+        },
+        {
+          label: "Progress",
+          maxWidth: "145px",
+          show: this.showCol("progress"),
+          icon: this.sortIcon("progress"),
+          click: () => {
+            this.sortBy("progress");
+          },
+        },
+        {
+          label: "Required By",
+          maxWidth: "125px",
+          show: this.showRequiredByUnit && this.showCol("required"),
+        },
+        {
+          label: "Est. Time",
+          maxWidth: "125px",
+          show: this.showCol("time"),
+          icon: this.sortIcon("time"),
+          click: () => {
+            this.sortBy("time");
+          },
+        },
+        {
+          label: "Actions",
+          show: this.showCol("actions"),
+        },
+      ];
     },
   },
   methods: {

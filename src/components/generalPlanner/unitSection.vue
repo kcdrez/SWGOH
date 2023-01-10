@@ -25,94 +25,22 @@
         <thead class="sticky-header show-on-mobile">
           <tr class="sort-methods">
             <th class="show-on-mobile">
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Sort By:</span>
-                <select
-                  class="form-control"
-                  @change="sortMethod = $event.target.value"
-                >
-                  <option value="name">Name</option>
-                  <option value="curLevel">Current Level</option>
-                  <option value="targetLevel">Target Level</option>
-                  <option value="estGear">Estimated Gear Time</option>
-                  <option value="estRelic">Estimated Relic Time</option>
-                  <option value="completed">Estimated Completed</option>
-                </select>
-              </div>
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Sort Direction:</span>
-                <select
-                  class="form-control"
-                  @change="sortDir = $event.target.value"
-                >
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </div>
-              <div class="input-group input-group-sm my-2">
-                <span class="input-group-text">Search:</span>
-                <input
-                  class="form-control"
-                  v-model="searchText"
-                  placeholder="Search by name"
-                />
-              </div>
-            </th>
-          </tr>
-          <tr class="text-center align-middle">
-            <th v-if="showCol('name')">
-              <div class="c-pointer" @click="sortBy('name')">
-                Unit Name
-                <i class="fas mx-1" :class="sortIcon('name')"></i>
-              </div>
-              <input
-                class="form-control form-control-sm mx-auto my-1 w-75"
-                placeholder="Search"
-                v-model="searchText"
+              <SortMethods
+                :sortByOptions="sortByOptions"
+                :sortMethod="sortMethod"
+                :sortDir="sortDir"
+                showSearch
+                @methodChange="sortMethod = $event"
+                @directionChange="sortDir = $event"
+                @searchChange="searchText = $event"
               />
             </th>
-            <th
-              v-if="showCol('curLevel')"
-              class="c-pointer"
-              @click="sortBy('curLevel')"
-            >
-              Current Level
-              <i class="fas mx-1" :class="sortIcon('curLevel')"></i>
-            </th>
-            <th
-              v-if="showCol('targetLevel')"
-              class="c-pointer"
-              @click="sortBy('targetLevel')"
-            >
-              Target Level
-              <i class="fas mx-1" :class="sortIcon('targetLevel')"></i>
-            </th>
-            <th
-              v-if="showCol('gearDate')"
-              class="c-pointer"
-              @click="sortBy('estGear')"
-            >
-              Est. Gear Date
-              <i class="fas mx-1" :class="sortIcon('estGear')"></i>
-            </th>
-            <th
-              v-if="showCol('relicDate')"
-              class="c-pointer"
-              @click="sortBy('estRelic')"
-            >
-              Est. Relic Date
-              <i class="fas mx-1" :class="sortIcon('estRelic')"></i>
-            </th>
-            <th
-              v-if="showCol('totalDate')"
-              class="c-pointer"
-              @click="sortBy('completed')"
-            >
-              Est. Completed Date
-              <i class="fas mx-1" :class="sortIcon('completed')"></i>
-            </th>
-            <th v-if="showCol('actions')">Actions</th>
           </tr>
+          <ColumnHeaders
+            class="text-center align-middle"
+            :headers="headers"
+            @searchChange="searchText = $event"
+          />
         </thead>
         <tbody>
           <tr v-for="unit in unitList" :key="unit.id">
@@ -180,7 +108,7 @@
               :class="{
                 'hidden-sm': unit.relicTotalDays === 0 && !unit.isShip,
               }"
-              v-if="showCol('relicDate')"
+              v-if="showCol('estRelic')"
             >
               <span class="row-label">Est. Relic Date:</span>
               <Timestamp
@@ -188,7 +116,7 @@
                 displayClasses="d-inline"
               />
             </td>
-            <td class="align-middle text-center" v-if="showCol('totalDate')">
+            <td class="align-middle text-center" v-if="showCol('completed')">
               <span class="row-label">Est. Completed Date:</span>
               <Timestamp
                 :timeLength="unit.relicTotalDays + unit.gearTotalDays"
@@ -219,11 +147,11 @@
               <span class="row-label">Est. Gear Date:</span>
               <Timestamp :timeLength="total.gear" displayClasses="d-inline" />
             </td>
-            <td class="text-center align-middle" v-if="showCol('relicDate')">
+            <td class="text-center align-middle" v-if="showCol('estRelic')">
               <span class="row-label">Est. Relic Date:</span>
               <Timestamp :timeLength="total.relic" displayClasses="d-inline" />
             </td>
-            <td class="text-center align-middle" v-if="showCol('totalDate')">
+            <td class="text-center align-middle" v-if="showCol('completed')">
               <span class="row-label">Est. Completed Date:</span>
               <Timestamp
                 :timeLength="total.gear + total.relic"
@@ -250,6 +178,7 @@ import Timestamp from "components/timestamp.vue";
 import GearText from "components/gear/gearText.vue";
 import RelicLevelIcon from "components/units/relicLevelIcon.vue";
 import UnitIcon from "components/units/unitIcon.vue";
+import { iHeader } from "types/general";
 
 const storageKey = "unitSection";
 
@@ -280,6 +209,32 @@ export default defineComponent({
     return {
       maxGearLevel,
       selectedColumns: [], //todo
+      sortByOptions: [
+        {
+          value: "name",
+          label: "Name",
+        },
+        {
+          value: "curLevel",
+          label: "Current Level",
+        },
+        {
+          value: "targetLevel",
+          label: "Target Level",
+        },
+        {
+          value: "estGear",
+          label: "Estimated Gear Time",
+        },
+        {
+          value: "estRelic",
+          label: "Estimated Relic Time",
+        },
+        {
+          value: "completed",
+          label: "Estimated Completed",
+        },
+      ],
     };
   },
   computed: {
@@ -373,11 +328,11 @@ export default defineComponent({
         },
         {
           text: "Est. Relic Date",
-          value: "relicDate",
+          value: "estRelic",
         },
         {
           text: "Est. Total Date",
-          value: "totalDate",
+          value: "completed",
         },
         {
           text: "Actions",
@@ -385,6 +340,62 @@ export default defineComponent({
         },
       ];
       return list;
+    },
+    headers(): iHeader[] {
+      return [
+        {
+          label: "Name",
+          show: this.showCol("name"),
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        {
+          label: "Current Level",
+          show: this.showCol("curLevel"),
+          icon: this.sortIcon("curLevel"),
+          click: () => {
+            this.sortBy("curLevel");
+          },
+        },
+        {
+          label: "Target Level",
+          show: this.showCol("targetLevel"),
+          icon: this.sortIcon("targetLevel"),
+          click: () => {
+            this.sortBy("targetLevel");
+          },
+        },
+        {
+          label: "Est. Gear Date",
+          show: this.showCol("gearDate"),
+          icon: this.sortIcon("gearDate"),
+          click: () => {
+            this.sortBy("gearDate");
+          },
+        },
+        {
+          label: "Est. Relic Date",
+          show: this.showCol("estRelic"),
+          icon: this.sortIcon("estRelic"),
+          click: () => {
+            this.sortBy("estRelic");
+          },
+        },
+        {
+          label: "Est. Completed Date",
+          show: this.showCol("completed"),
+          icon: this.sortIcon("completed"),
+          click: () => {
+            this.sortBy("completed");
+          },
+        },
+        {
+          label: "Actions",
+          show: this.showCol("actions"),
+        },
+      ];
     },
     total(): { gear: number; relic: number } {
       return this.unitList.reduce(

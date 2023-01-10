@@ -14,7 +14,7 @@
     >
       <thead class="text-center sticky-header align-middle show-on-mobile">
         <tr class="sort-methods">
-          <th>
+          <th class="show-on-moblie">
             <MultiSelect
               class="filter-mats"
               label="Filter Relic Mats"
@@ -24,25 +24,7 @@
             />
           </th>
         </tr>
-        <tr>
-          <th class="location-col">
-            <div class="col-container">
-              <div class="w-100">Location</div>
-            </div>
-          </th>
-          <th class="gear-col">
-            <div class="col-container">
-              <div class="w-100">Gear</div>
-              <MultiSelect
-                class="filter-mats"
-                label="Filter Relic Mats"
-                :options="filterRelicMatCols"
-                :storageKey="storageKey + 'Filter'"
-                @checked="filteredRelicMats = $event"
-              />
-            </div>
-          </th>
-        </tr>
+        <ColumnHeaders class="text-center align-middle" :headers="headers" />
       </thead>
       <tbody class="align-middle text-center">
         <tr v-for="location in filteredScavengerData" :key="location.id">
@@ -115,6 +97,7 @@ import { setupEvents } from "utils";
 import { scavengerFarming, scavengerCost } from "types/scavenger";
 import { Relic } from "types/relic";
 import { round2Decimals } from "utils";
+import { iHeader } from "types/general";
 
 const storageKey = "ScavengerFarmingTable";
 
@@ -138,15 +121,28 @@ export default defineComponent({
     ...mapState("shards", ["shardFarming"]),
     ...mapState("gear", ["gearList"]),
     ...mapState("relic", ["relicConfig"]),
-    cols(): { text: string; value: any }[] {
+    headers(): iHeader[] {
       return [
         {
-          text: "Name",
-          value: "name",
+          label: "Location",
+          classes: "location-col",
+          containerClass: "col-container",
+          show: true,
         },
         {
-          text: "Gear",
-          value: "gear",
+          label: "Gear",
+          classes: "gear-col",
+          containerClass: "col-container",
+          show: true,
+          input: {
+            type: "multiselect",
+            classes: "filter-mats",
+            placeholder: "Filter Relic Mats",
+            options: [],
+            click: (data: string[]) => {
+              this.filteredRelicMats = data;
+            },
+          },
         },
       ];
     },
@@ -236,23 +232,25 @@ export default defineComponent({
 .sticky-header {
   top: 106px;
 }
-.gear-col,
-.location-col {
+::v-deep(.gear-col, .location-col) {
   .col-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     @media only screen and (min-width: 1100px) {
       height: 40px;
     }
     @media only screen and (max-width: 1100px) {
       flex-wrap: wrap;
     }
-    display: flex;
-    align-items: center;
+  }
+  &.location-col {
+    width: 300px;
   }
 }
-.location-col {
-  width: 300px;
-}
-.filter-mats {
+
+::v-deep(.filter-mats) {
   @media only screen and (min-width: 1100px) {
     width: 275px;
     position: absolute;

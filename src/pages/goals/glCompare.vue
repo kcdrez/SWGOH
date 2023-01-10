@@ -4,6 +4,7 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <thead>
+        <!-- <ColumnHeaders class="text-center align-middle" :headers="headers" /> -->
         <tr class="text-center align-middle">
           <th @click="sortBy('name')">
             <span>Unit Name</span>
@@ -54,7 +55,7 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import { setupEvents, setupSorting } from "utils";
+import { setupSorting } from "utils";
 import { Unit, getUnit } from "types/unit";
 import { FarmingNode } from "types/shards";
 import UnitIcon from "components/units/unitIcon.vue";
@@ -62,6 +63,7 @@ import RelicIcon from "components/relic/relicIcon.vue";
 import GearIcon from "components/gear/gearIcon.vue";
 import relicMapping from "types/relicMapping";
 import { Gear, getGear } from "types/gear";
+import { iHeader } from "types/general";
 
 const storageKey = "glCompare";
 
@@ -95,6 +97,40 @@ export default defineComponent({
     ...mapState("unit", ["unitList"]),
     ...mapState("player", ["player"]),
     ...mapState("shards", ["shardFarming"]),
+    headers(): iHeader[] {
+      const gearHeaders: iHeader[] = this.gearList.map((gear: Gear) => {
+        return {
+          label: gear.name,
+          show: this.showCol(gear.id),
+          icon: this.sortIcon(gear.id),
+          click: () => {
+            this.sortBy(gear.id);
+          },
+        };
+      });
+      // const relicHeaders: iHeader[] = this.relicMapping.map((relic: Relic) => {
+      //   return {
+      //     label: relic.name,
+      //     show: this.showCol(relic.id),
+      //     icon: this.sortIcon(relic.id),
+      //     click: () => {
+      //       this.sortBy(relic.id);
+      //     },
+      //   };
+      // });
+      return [
+        {
+          label: "Unit Name",
+          show: this.showCol("name"),
+          icon: this.sortIcon("name"),
+          click: () => {
+            this.sortBy("name");
+          },
+        },
+        ...gearHeaders,
+        // ...relicHeaders,
+      ];
+    },
     glUnitList(): Unit[] {
       return this.shardFarming
         .reduce((characterList: Unit[], node: FarmingNode) => {
