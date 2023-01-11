@@ -73,75 +73,75 @@ export default defineComponent({
   },
   computed: {
     ...mapState("player", { playerRequestState: "requestState" }),
-    tbCols(): { text: string; value: any }[] {
+    tbCols(): { label: string; value: any }[] {
       const list = [
         {
-          text: "Date",
+          label: "Date",
           value: "date",
         },
         {
-          text: "Type",
+          label: "Type",
           value: "type",
         },
         {
-          text: "Name",
+          label: "Name",
           value: "name",
         },
         {
-          text: "Stars",
+          label: "Stars",
           value: "stars",
         },
         {
-          text: "GET1 Currency",
+          label: "GET1 Currency",
           value: "get1",
         },
         {
-          text: "GET2 Currency",
+          label: "GET2 Currency",
           value: "get2",
         },
         {
-          text: "GET3 Currency",
+          label: "GET3 Currency",
           value: "get3",
         },
         {
-          text: "Character Shards",
+          label: "Character Shards",
           value: "character",
         },
         {
-          text: "Actions",
+          label: "Actions",
           value: "actions",
         },
       ];
       return list;
     },
-    twCols(): { text: string; value: any }[] {
+    twCols(): { label: string; value: any }[] {
       const list = [
         {
-          text: "Date",
+          label: "Date",
           value: "date",
         },
         {
-          text: "Win/Loss",
+          label: "Win/Loss",
           value: "win_loss",
         },
         {
-          text: "GET1 Currency",
+          label: "GET1 Currency",
           value: "get1",
         },
         {
-          text: "GET2 Currency",
+          label: "GET2 Currency",
           value: "get2",
         },
+        // {
+        //   label: "GET3 Currency",
+        //   value: "get3",
+        // },
         {
-          text: "GET3 Currency",
-          value: "get3",
-        },
-        {
-          text: "Zetas",
+          label: "Zetas",
           value: "zetas",
         },
         {
-          text: "Actions",
+          label: "Actions",
           value: "actions",
         },
       ];

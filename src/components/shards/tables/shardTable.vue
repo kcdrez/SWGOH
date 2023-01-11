@@ -3,26 +3,7 @@
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
-      <thead class="sticky-header show-on-mobile">
-        <tr class="sort-methods" v-if="showUnitName">
-          <th class="show-on-mobile">
-            <SortMethods
-              :sortByOptions="sortByOptions"
-              :sortMethod="sortMethod"
-              :sortDir="sortDir"
-              showSearch
-              @methodChange="sortMethod = $event"
-              @directionChange="sortDir = $event"
-              @searchChange="searchText = $event"
-            />
-          </th>
-        </tr>
-        <ColumnHeaders
-          class="text-center align-middle"
-          :headers="headers"
-          @searchChange="searchText = $event"
-        />
-      </thead>
+      <TableHeader :header="header" />
       <tbody>
         <tr v-for="unit in filteredUnitList" :key="unit.id">
           <td
@@ -121,11 +102,11 @@ import ShardsOwned from "../shardsOwned.vue";
 import UnitIcon from "components/units/unitIcon.vue";
 import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
-import Timestamp from "components/timestamp.vue";
+import Timestamp from "components/general/timestamp.vue";
 import { Unit } from "types/unit";
 import { estimatedTime } from "types/shards";
 import { setupColumnEvents, setupSorting } from "utils";
-import { iHeader } from "types/general";
+import { iTableHead } from "types/general";
 
 export default defineComponent({
   name: "ShardTable",
@@ -203,68 +184,98 @@ export default defineComponent({
     };
   },
   computed: {
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Unit Name",
-          show: this.showUnitName && this.showCol("name"),
-          maxWidth: "750px",
-          input: {
-            type: "input",
-            classes: "mx-auto my-1 w-75",
-            placeholder: "Search",
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Unit Name",
+            show: this.showUnitName && this.showCol("name"),
+            sortMethodShow: this.showUnitName,
+            maxWidth: "750px",
+            input: {
+              type: "input",
+              classes: "mx-auto my-1 w-75",
+              placeholder: "Search",
+              change: (val: string) => {
+                this.searchText = val;
+              },
+              click: () => {
+                this.sortBy("name");
+              },
+            },
+            icon: this.sortIcon("name"),
           },
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
+          {
+            label: "Locations",
+            show: this.showCol("locations"),
+            sortMethodShow: true,
           },
-        },
-        {
-          label: "Locations",
-          show: this.showCol("locations"),
-        },
-        {
-          label: "Shards Owned",
-          show: this.showCol("owned"),
-          icon: this.sortIcon("owned"),
-          click: () => {
-            this.sortBy("owned");
+          {
+            label: "Shards Owned",
+            show: this.showCol("owned"),
+            sortMethodShow: true,
+            icon: this.sortIcon("owned"),
+            click: () => {
+              this.sortBy("owned");
+            },
           },
-        },
-        {
-          label: "Progress",
-          show: this.showCol("progress"),
-          icon: this.sortIcon("progress"),
-          click: () => {
-            this.sortBy("progress");
+          {
+            label: "Shards Remaining",
+            show: this.showCol("remaining"),
+            sortMethodShow: true,
+            icon: this.sortIcon("remaining"),
+            click: () => {
+              this.sortBy("remaining");
+            },
           },
-        },
-        {
-          label: "Node Attempts per Day",
-          show: this.showCol("attempts"),
-        },
-        {
-          label: "Est. Time",
-          show: this.showUnitName && this.showCol("time"),
-          icon: this.sortIcon("time"),
-          click: () => {
-            this.sortBy("time");
+          {
+            label: "Progress",
+            show: this.showCol("progress"),
+            sortMethodShow: true,
+            icon: this.sortIcon("progress"),
+            click: () => {
+              this.sortBy("progress");
+            },
           },
-        },
-        {
-          label: "Priority",
-          show: this.showCol("priority") && this.showPriority,
-          icon: this.sortIcon("priority"),
-          maxWidth: "150px",
-          click: () => {
-            this.sortBy("priority");
+          {
+            label: "Node Attempts per Day",
+            show: this.showCol("attempts"),
+            sortMethodShow: true,
           },
-        },
-        {
-          label: "Actions",
-          show: this.showCol("actions"),
-        },
-      ];
+          {
+            label: "Est. Time",
+            show: this.showUnitName && this.showCol("time"),
+            sortMethodShow: true,
+            icon: this.sortIcon("time"),
+            click: () => {
+              this.sortBy("time");
+            },
+          },
+          {
+            label: "Priority",
+            show: this.showCol("priority") && this.showPriority,
+            sortMethodShow: this.showPriority,
+            icon: this.sortIcon("priority"),
+            maxWidth: "150px",
+            click: () => {
+              this.sortBy("priority");
+            },
+          },
+          {
+            label: "Actions",
+            show: this.showCol("actions"),
+          },
+        ],
+      };
     },
     filteredUnitList(): Unit[] {
       return this.units
@@ -322,41 +333,6 @@ export default defineComponent({
           }
           return 0;
         });
-    },
-    sortByOptions() {
-      return [
-        {
-          value: "name",
-          label: "Name",
-          show: this.showUnitName,
-        },
-        {
-          value: "locations",
-          label: "Locations",
-        },
-        {
-          value: "owned",
-          label: "Shards Owned",
-        },
-        {
-          value: "remaining",
-          label: "Shards Remaining",
-        },
-        {
-          value: "progress",
-          label: "Progress",
-        },
-        {
-          value: "time",
-          label: "Est. Time",
-          show: this.showUnitName,
-        },
-        {
-          value: "priority",
-          label: "Priority",
-          show: this.showPriority,
-        },
-      ];
     },
   },
   methods: {

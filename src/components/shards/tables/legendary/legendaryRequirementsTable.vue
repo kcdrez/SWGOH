@@ -123,13 +123,7 @@
       v-else
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
-      <thead class="sticky-header show-on-mobile">
-        <ColumnHeaders
-          class="text-center align-middle"
-          :headers="headers"
-          @searchChange="searchText = $event"
-        />
-      </thead>
+      <TableHeader :header="header" />
       <tbody>
         <LegendaryRequirementRow
           :prerequisites="prerequisites"
@@ -149,7 +143,7 @@ import { mapState, mapGetters } from "vuex";
 import _ from "lodash";
 
 import ShardsOwned from "components/shards/shardsOwned.vue";
-import Timestamp from "components/timestamp.vue";
+import Timestamp from "components/general/timestamp.vue";
 import EnergySpent from "components/energySpent.vue";
 import LegendaryRequirementRow from "./legendaryRequirementsRow.vue";
 import {
@@ -162,7 +156,7 @@ import {
 import { displayValue, IPrerequisite } from "types/shards";
 import { isGearRequirement, isRelicRequirement } from "types/shards";
 import { setupSorting, setupColumnEvents } from "utils";
-import { iHeader } from "types/general";
+import { iHeader, iTableHead } from "types/general";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
@@ -220,6 +214,76 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapState("unit", ["unitList"]),
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Unit Name",
+            show: this.showCol("name"),
+            sortMethodShow: true,
+            maxWidth: "750px",
+            input: {
+              type: "input",
+              classes: "mx-auto my-1 w-75",
+              placeholder: "Search",
+              value: this.searchText,
+              change: (val: string) => {
+                this.searchText = val;
+              },
+            },
+            icon: this.sortIcon("name"),
+            click: () => {
+              this.sortBy("name");
+            },
+          },
+          {
+            label: "Current Level",
+            show: this.showCol("current"),
+            sortMethodShow: true,
+            icon: this.sortIcon("current"),
+            click: () => {
+              this.sortBy("current");
+            },
+          },
+          {
+            label: "Requirements",
+            show: this.showCol("requirements"),
+            sortMethodShow: true,
+            icon: this.sortIcon("requirements"),
+            click: () => {
+              this.sortBy("requirements");
+            },
+          },
+          {
+            label: "Recommended",
+            show: this.showCol("recommended") && this.showRecommended,
+            sortMethodShow: this.showRecommended,
+            icon: this.sortIcon("stars"),
+            click: () => {
+              this.sortBy("stars");
+            },
+          },
+          {
+            label: "Progress",
+            show: this.showCol("progress"),
+            sortMethodShow: true,
+            icon: this.sortIcon("progress"),
+            click: () => {
+              this.sortBy("progress");
+            },
+          },
+        ],
+      };
+    },
     headers(): iHeader[] {
       return [
         {

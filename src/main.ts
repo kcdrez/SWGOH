@@ -13,14 +13,15 @@ import App from "./App.vue";
 import store from "vuex-store/store";
 import router from "./router/router";
 import "styles/main.scss";
-import Confirm from "components/confirm.vue";
-import SearchInput from "components/search-input.vue";
-import ProgressBar from "components/progressBar.vue";
-import Loading from "components/loading.vue";
-import Error from "components/error.vue";
-import MultiSelect from "components/multiSelect.vue";
+import Confirm from "components/general/confirm.vue";
+import SearchInput from "components/general/search-input.vue";
+import ProgressBar from "components/general/progressBar.vue";
+import Loading from "components/general/loading.vue";
+import Error from "components/general/error.vue";
+import MultiSelect from "components/general/multiSelect.vue";
 import SortMethods from "components/general/sortMethods.vue";
 import ColumnHeaders from "components/general/columnHeaders.vue";
+import TableHeader from "components/general/tableHeader.vue";
 import { formatDate, pluralText, daysFromNow } from "utils";
 
 const app = createApp(App);
@@ -52,6 +53,7 @@ app
   .component("Confirm", Confirm)
   .component("SortMethods", SortMethods)
   .component("ColumnHeaders", ColumnHeaders)
+  .component("TableHeader", TableHeader)
   .component("SearchInput", SearchInput)
   .component("ProgressBar", ProgressBar)
   .component("Loading", Loading)

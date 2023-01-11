@@ -8,7 +8,7 @@
       </h3>
       <MultiSelect
         class="select-columns"
-        :options="cols"
+        :options="header.headers"
         :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
@@ -18,20 +18,7 @@
       :ref="storageKey"
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table collapse"
     >
-      <thead class="text-center sticky-header align-middle show-on-mobile">
-        <tr class="sort-methods">
-          <th class="show-on-mobile">
-            <SortMethods
-              :sortByOptions="sortByOptions"
-              :sortMethod="sortMethod"
-              :sortDir="sortDir"
-              @methodChange="sortMethod = $event"
-              @directionChange="sortDir = $event"
-            />
-          </th>
-        </tr>
-        <ColumnHeaders :headers="headers" />
-      </thead>
+      <TableHeader :header="header" />
       <tbody class="align-middle text-center">
         <tr v-for="(row, index) in plannerData.challengeGear" :key="index">
           <td v-if="showCol('name')">
@@ -146,21 +133,20 @@ import GearIcon from "components/gear/gearIcon.vue";
 import { FarmingNode } from "types/shards";
 import { RelicPlanner } from "types/relicPlanner";
 import { setupEvents, setupSorting } from "utils";
-import { iHeader } from "types/general";
+import { iHeader, iTableHead } from "types/general";
 
 const storageKey = "relicCalculatorTable";
 
 export default defineComponent({
   name: "RelicCalculatorTable",
   setup(props) {
-    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+    const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(
       `${storageKey}-${props.plannerData.id}`
     );
 
     return {
       sortDir,
       sortMethod,
-      searchText,
       sortBy,
       sortIcon,
     };
@@ -175,36 +161,6 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-      sortByOptions: [
-        {
-          value: "name",
-          label: "Name",
-        },
-        {
-          value: "locations",
-          label: "Locations",
-        },
-        {
-          value: "amount",
-          label: "Amount per Day",
-        },
-        {
-          value: "energy",
-          label: "Energy per Day",
-        },
-        {
-          value: "farmed",
-          label: "Total Gear Farmed",
-        },
-        {
-          value: "relicDaily",
-          label: "Relic Mats per Day",
-        },
-        {
-          value: "relicTotal",
-          label: "Relic Mats Total",
-        },
-      ],
     };
   },
   computed: {
@@ -212,105 +168,97 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapState("shards", ["shardFarming"]),
     ...mapGetters("planner", ["fullUnitList"]),
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Gear",
-          show: this.showCol("name"),
-          icon: this.sortIcon("name"),
-          maxWidth: "300px",
-          click: () => {
-            this.sortBy("name");
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Gear",
+            value: "name",
+            show: this.showCol("name"),
+            sortMethodShow: true,
+            icon: this.sortIcon("name"),
+            maxWidth: "300px",
+            click: () => {
+              this.sortBy("name");
+            },
           },
-        },
-        {
-          label: "Locations",
-          show: this.showCol("locations"),
-          icon: this.sortIcon("locations"),
-          maxWidth: "300px",
-          click: () => {
-            this.sortBy("locations");
+          {
+            label: "Locations",
+            value: "locations",
+            show: this.showCol("locations"),
+            sortMethodShow: true,
+            icon: this.sortIcon("locations"),
+            maxWidth: "300px",
+            click: () => {
+              this.sortBy("locations");
+            },
           },
-        },
-        {
-          label: "Amount per Day",
-          show: this.showCol("amount"),
-          icon: this.sortIcon("amount"),
-          maxWidth: "100px",
-          click: () => {
-            this.sortBy("amount");
+          {
+            label: "Amount per Day",
+            value: "amount",
+            show: this.showCol("amount"),
+            sortMethodShow: true,
+            icon: this.sortIcon("amount"),
+            maxWidth: "100px",
+            click: () => {
+              this.sortBy("amount");
+            },
           },
-        },
-        {
-          label: "Energy per Day",
-          show: this.showCol("energy"),
-          icon: this.sortIcon("energy"),
-          maxWidth: "100px",
-          click: () => {
-            this.sortBy("energy");
+          {
+            label: "Energy per Day",
+            value: "energy",
+            show: this.showCol("energy"),
+            sortMethodShow: true,
+            icon: this.sortIcon("energy"),
+            maxWidth: "100px",
+            click: () => {
+              this.sortBy("energy");
+            },
           },
-        },
-        {
-          label: "Total Gear Farmed",
-          show: this.showCol("farmed"),
-          icon: this.sortIcon("farmed"),
-          maxWidth: "100px",
-          click: () => {
-            this.sortBy("farmed");
+          {
+            label: "Total Gear Farmed",
+            value: "farmed",
+            show: this.showCol("farmed"),
+            sortMethodShow: true,
+            icon: this.sortIcon("farmed"),
+            maxWidth: "100px",
+            click: () => {
+              this.sortBy("farmed");
+            },
           },
-        },
-        {
-          label: "Relic Mats per Day",
-          show: this.showCol("relicDaily"),
-          icon: this.sortIcon("relicDaily"),
-          maxWidth: "100px",
-          click: () => {
-            this.sortBy("relicDaily");
+          {
+            label: "Relic Mats per Day",
+            value: "relicDaily",
+            show: this.showCol("relicDaily"),
+            sortMethodShow: true,
+            icon: this.sortIcon("relicDaily"),
+            maxWidth: "100px",
+            click: () => {
+              this.sortBy("relicDaily");
+            },
           },
-        },
-        {
-          label: "Relic Mats Total",
-          show: this.showCol("relicTotal"),
-          icon: this.sortIcon("relicTotal"),
-          maxWidth: "100px",
-          click: () => {
-            this.sortBy("relicTotal");
+          {
+            label: "Relic Mats Total",
+            value: "relicTotal",
+            show: this.showCol("relicTotal"),
+            sortMethodShow: true,
+            icon: this.sortIcon("relicTotal"),
+            maxWidth: "100px",
+            click: () => {
+              this.sortBy("relicTotal");
+            },
           },
-        },
-      ];
-    },
-    cols(): { text: string; value: any }[] {
-      const list = [
-        {
-          text: "Gear",
-          value: "name",
-        },
-        {
-          text: "Locations",
-          value: "locations",
-        },
-        {
-          text: "Amount per Day",
-          value: "amount",
-        },
-        {
-          text: "Energy per Day",
-          value: "energy",
-        },
-        {
-          text: "Total Gear Farmed",
-          value: "farmed",
-        },
-        {
-          text: "Relic Mats per Day",
-          value: "relicDaily",
-        },
-        {
-          text: "Relic Mats Total",
-          value: "relicTotal",
-        },
-      ];
-      return list;
+        ],
+      };
     },
     storageKey() {
       return `${storageKey}-${this.plannerData.id}`;

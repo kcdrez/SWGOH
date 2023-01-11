@@ -1,7 +1,7 @@
 import _ from "lodash";
 
 import store from "vuex-store/store";
-import { Unit } from "./unit";
+import { Mod, Unit } from "./unit";
 
 export class Team {
   private _id: string;
@@ -85,7 +85,7 @@ export class Team {
         } else {
           return a.name.toLowerCase() > b.name.toLowerCase() ? -1 : 1;
         }
-      } else if (this.sortMethod === "leader") {
+      } else if (this.sortMethod === "isLeader") {
         if (a.isLeader) {
           return this.sortDir === "asc" ? -1 : 1;
         } else if (b.isLeader) {
@@ -106,6 +106,73 @@ export class Team {
         } else {
           return compareB - compareA;
         }
+      } else if (this.sortMethod === "square") {
+        const modA = a.mods[0];
+        const modB = b.mods[0];
+        const speedA = speedValueFromMod(modA);
+        const speedB = speedValueFromMod(modB);
+        if (this.sortDir === "asc") {
+          return speedA - speedB;
+        } else {
+          return speedB - speedA;
+        }
+      } else if (this.sortMethod === "diamond") {
+        const modA = a.mods[2];
+        const modB = b.mods[2];
+        const speedA = speedValueFromMod(modA);
+        const speedB = speedValueFromMod(modB);
+        if (this.sortDir === "asc") {
+          return speedA - speedB;
+        } else {
+          return speedB - speedA;
+        }
+      } else if (this.sortMethod === "circle") {
+        const modA = a.mods[4];
+        const modB = b.mods[4];
+        const speedA = speedValueFromMod(modA);
+        const speedB = speedValueFromMod(modB);
+        if (this.sortDir === "asc") {
+          return speedA - speedB;
+        } else {
+          return speedB - speedA;
+        }
+      } else if (this.sortMethod === "arrow") {
+        const modA = a.mods[1];
+        const modB = b.mods[1];
+        const speedA = speedValueFromMod(modA);
+        const speedB = speedValueFromMod(modB);
+        if (this.sortDir === "asc") {
+          return speedA - speedB;
+        } else {
+          return speedB - speedA;
+        }
+      } else if (this.sortMethod === "triangle") {
+        const modA = a.mods[3];
+        const modB = b.mods[3];
+        const speedA = speedValueFromMod(modA);
+        const speedB = speedValueFromMod(modB);
+        if (this.sortDir === "asc") {
+          return speedA - speedB;
+        } else {
+          return speedB - speedA;
+        }
+      } else if (this.sortMethod === "cross") {
+        const modA = a.mods[5];
+        const modB = b.mods[5];
+        const speedA = speedValueFromMod(modA);
+        const speedB = speedValueFromMod(modB);
+        if (this.sortDir === "asc") {
+          return speedA - speedB;
+        } else {
+          return speedB - speedA;
+        }
+      } else if (this.sortMethod === "speedSet") {
+        if (a.hasSpeedSet) {
+          return this.sortDir === "asc" ? -1 : 1;
+        } else if (b.hasSpeedSet) {
+          return this.sortDir === "asc" ? 1 : -1;
+        }
+        return 0;
       }
       return 0;
     });
@@ -301,6 +368,9 @@ export class TeamMember {
   public get categories() {
     return this._unitData.categories;
   }
+  public get mods() {
+    return this._unitData.mods;
+  }
 
   private getUnitData() {
     if (this.isPlayer) {
@@ -347,7 +417,20 @@ export class TeamMember {
   }
 }
 
-export type SortType = "leader" | "name" | "subTotal" | "total" | undefined;
+export type SortType =
+  | "isLeader"
+  | "name"
+  | "subTotal"
+  | "total"
+  | "square"
+  | "triangle"
+  | "circle"
+  | "diamond"
+  | "diamond"
+  | "arrow"
+  | "cross"
+  | "speedSet"
+  | undefined;
 export interface SpeedConfig {
   [key: string]: AbilityStat;
 }
@@ -655,4 +738,18 @@ function getUniqueFromTeamMembers(
     }
   }
   return amount;
+}
+
+export function speedValueFromMod(mod: Mod | undefined): number {
+  if (mod) {
+    if (mod.primaryStat.unitStat === 5) {
+      return mod.primaryStat.value;
+    } else {
+      const match = mod.secondaryStat.find((x) => x.unitStat === 5);
+      if (match) {
+        return match.value;
+      }
+    }
+  }
+  return 0;
 }

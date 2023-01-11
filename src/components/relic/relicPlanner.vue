@@ -52,7 +52,7 @@ import { defineComponent, PropType } from "vue";
 import { mapGetters, mapState } from "vuex";
 
 import RelicTable from "components/relic/relicTable.vue";
-import Timestamp from "components/timestamp.vue";
+import Timestamp from "components/general/timestamp.vue";
 import EnergySpent from "components/energySpent.vue";
 import RelicLevelIcon from "components/units/relicLevelIcon.vue";
 import { loadingState } from "types/loading";
@@ -87,38 +87,38 @@ export default defineComponent({
     relicList(): Relic[] {
       return Object.values(this.relicConfig);
     },
-    cols(): { text: string; value: any }[] {
+    cols(): { label: string; value: any }[] {
       const list = [
         {
-          text: "Icon",
+          label: "Icon",
           value: "icon",
         },
         {
-          text: "Name",
+          label: "Name",
           value: "name",
         },
         {
-          text: "Rarity",
+          label: "Rarity",
           value: "rarity",
         },
         {
-          text: "Locations",
+          label: "Locations",
           value: "locations",
         },
         {
-          text: "Amount Owned",
+          label: "Amount Owned",
           value: "owned",
         },
         {
-          text: "Amount Needed",
+          label: "Amount Needed",
           value: "needed",
         },
         {
-          text: "Progress",
+          label: "Progress",
           value: "progress",
         },
         {
-          text: "Estimated Time",
+          label: "Estimated Time",
           value: "time",
         },
       ];

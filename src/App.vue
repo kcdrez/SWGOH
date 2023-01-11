@@ -8,7 +8,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "vuex";
-import navbar from "./components/navbar.vue";
+import navbar from "./components/general/navbar.vue";
 
 export default defineComponent({
   name: "App",

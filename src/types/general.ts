@@ -1,12 +1,12 @@
 interface iHeader {
   label: any;
   show?: boolean;
+  sortMethodShow?: boolean;
   classes?: string;
   containerClass?: string;
   maxWidth?: string;
-  // isInput?: boolean;
   input?: {
-    type: "button" | "input" | "multiselect" | "checkbox";
+    type: "button" | "input" | "multiselect" | "checkbox" | "list" | "image";
     classes?: string;
     placeholder?: string;
     click?: Function;
@@ -14,19 +14,21 @@ interface iHeader {
     options?: any[];
     storageKey?: string;
     value?: any;
+    change?: Function;
   };
-  // inputClass?: string;
-  // inputPlaceHolder?: string;
   click?: Function;
   icon?: string;
-  // isClickable?: boolean;
   title?: string;
-  // showButton?: boolean;
-  // buttonClass?: string;
-  // buttonText?: string;
-  // buttonClick?: Function;
-  // multiSelect?: boolean;
-  // type?: "button" | "input" | "multiselect";
+  value?: any;
 }
 
-export { iHeader };
+interface iTableHead {
+  headers: iHeader[];
+  sortMethod?: string;
+  sortDir?: "asc" | "desc";
+  classes?: string;
+  methodChange?: Function;
+  directionChange?: Function;
+}
+
+export { iHeader, iTableHead };

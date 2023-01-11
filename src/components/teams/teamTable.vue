@@ -98,65 +98,14 @@
     </div>
     <MultiSelect
       class="select-columns"
-      :options="cols"
+      :options="header.headers"
       storageKey="teamsTable"
       @checked="selectedColumns = $event"
     />
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
-      <thead>
-        <!-- <ColumnHeaders class="text-center align-middle" :headers="headers" /> -->
-        <tr class="text-center align-middle">
-          <th v-if="showCol('name')">
-            <div class="c-pointer" @click="sortBy('name')">
-              Name
-              <i class="fas mx-1" :class="sortIcon('name')"></i>
-            </div>
-          </th>
-          <th v-if="showCol('leader')">
-            <div class="c-pointer" @click="sortBy('leader')">
-              Is Leader?
-              <i class="fas mx-1" :class="sortIcon('leader')"></i>
-            </div>
-          </th>
-          <template v-if="showMods">
-            <th class="mod-col">
-              <img src="images/mod_square.png" />
-            </th>
-            <th class="mod-col">
-              <img src="images/mod_diamond.png" />
-            </th>
-            <th class="mod-col">
-              <img src="images/mod_circle.png" />
-            </th>
-            <th class="mod-col">
-              <img src="images/mod_arrow.png" />
-            </th>
-            <th class="mod-col">
-              <img src="images/mod_triangle.png" />
-            </th>
-            <th class="mod-col">
-              <img src="images/mod_cross.png" />
-            </th>
-            <th>Has Speed Set?</th>
-          </template>
-          <th v-if="showCol('subTotal')">
-            <div class="c-pointer" @click="sortBy('subTotal')">
-              Sub Total
-              <i class="fas mx-1" :class="sortIcon('subTotal')"></i>
-            </div>
-          </th>
-          <th v-if="showCol('bonuses')">Bonuses</th>
-          <th v-if="showCol('total')">
-            <div class="c-pointer" @click="sortBy('total')">
-              Total
-              <i class="fas mx-1" :class="sortIcon('total')"></i>
-            </div>
-          </th>
-          <th v-if="showCol('actions')">Actions</th>
-        </tr>
-      </thead>
+      <TableHeader :header="header" />
       <tbody>
         <tr
           v-for="unit in team.fullUnitList"
@@ -172,7 +121,7 @@
               >{{ unit.name }}</router-link
             >
           </td>
-          <td v-if="showCol('leader')" class="text-left text-center-sm">
+          <td v-if="showCol('isLeader')" class="text-left text-center-sm">
             <span class="row-label">Is Leader?</span>
             <div class="form-check is-leader">
               <input
@@ -268,13 +217,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, ref, Ref, toRefs } from "vue";
 
 import { SortType, Team, TeamMember } from "types/teams";
 import { Unit } from "types/unit";
 import ModIcon from "components/units/modIcon.vue";
 import UnitSearch from "components/units/unitSearch.vue";
-import { iHeader } from "types/general";
+import { iTableHead } from "types/general";
+import { setupColumnEvents, setupSorting } from "utils";
 
 type dataModel = {
   editTeamName: string;
@@ -283,8 +233,21 @@ type dataModel = {
   selectedColumns: string[];
 };
 
+const storageKey = "teamTable";
+
 export default defineComponent({
   name: "TeamTable",
+  setup() {
+    const { sortDir } = setupSorting(storageKey);
+    const selectedColumns: Ref<string[]> = ref([]);
+    const { showCol } = setupColumnEvents(selectedColumns);
+
+    return {
+      sortDir,
+      showCol,
+      selectedColumns,
+    };
+  },
   components: { ModIcon, UnitSearch },
   props: {
     team: {
@@ -312,109 +275,162 @@ export default defineComponent({
       editTeamName: this.team.name || "",
       isEditing: false,
       selected: null,
-      selectedColumns: [],
     } as dataModel;
   },
   computed: {
     showMods(): boolean {
       return this.size === "lg" && this.showCol("mods");
     },
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Name",
-          show: this.showCol("name"),
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        headers: [
+          {
+            label: "Name",
+            value: "name",
+            show: this.showCol("name"),
+            sortMethodShow: true,
+            icon: this.sortIcon("name"),
+            click: () => {
+              this.sortBy("name");
+            },
           },
-        },
-        {
-          label: "Is Leader?",
-          show: this.showCol("leader"),
-          icon: this.sortIcon("leader"),
-          click: () => {
-            this.sortBy("leader");
+          {
+            label: "Is Leader?",
+            value: "isLeader",
+            show: this.showCol("isLeader"),
+            sortMethodShow: true,
+            icon: this.sortIcon("isLeader"),
+            click: () => {
+              this.sortBy("isLeader");
+            },
           },
-        },
-        {
-          label: "Sub Total",
-          show: this.showCol("subTotal"),
-          icon: this.sortIcon("subTotal"),
-          click: () => {
-            this.sortBy("subTotal");
+          {
+            label: "images/mod_square.png",
+            classes: "mod-col",
+            sortMethodShow: this.size === "lg",
+            show: this.showMods,
+            icon: this.sortIcon("square"),
+            click: () => {
+              this.sortBy("square");
+            },
+            input: {
+              type: "image",
+            },
           },
-        },
-        {
-          label: "Bonuses",
-          show: this.showCol("bonuses"),
-        },
-        {
-          label: "Total",
-          show: this.showCol("total"),
-          icon: this.sortIcon("total"),
-          click: () => {
-            this.sortBy("total");
+          {
+            label: "images/mod_diamond.png",
+            classes: "mod-col",
+            sortMethodShow: this.size === "lg",
+            show: this.showMods,
+            icon: this.sortIcon("diamond"),
+            click: () => {
+              this.sortBy("diamond");
+            },
+            input: {
+              type: "image",
+            },
           },
-        },
-        {
-          label: "Actions",
-          show: this.showCol("actions"),
-        },
-        //todo: mods
-      ];
-    },
-    cols(): { text: string; value: any }[] {
-      const list = [
-        {
-          text: "Name",
-          value: "name",
-        },
-        {
-          text: "Is Leader?",
-          value: "leader",
-        },
-        {
-          text: "Sub Total",
-          value: "subTotal",
-        },
-        {
-          text: "Bonuses",
-          value: "bonuses",
-        },
-        {
-          text: "Total",
-          value: "total",
-        },
-        {
-          text: "Actions",
-          value: "actions",
-        },
-      ];
-      if (this.size === "lg") {
-        list.splice(2, 0, {
-          text: "Mods",
-          value: "mods",
-        });
-      }
-      return list;
+          {
+            label: "images/mod_circle.png",
+            classes: "mod-col",
+            sortMethodShow: this.size === "lg",
+            show: this.showMods,
+            icon: this.sortIcon("circle"),
+            click: () => {
+              this.sortBy("circle");
+            },
+            input: {
+              type: "image",
+            },
+          },
+          {
+            label: "images/mod_arrow.png",
+            classes: "mod-col",
+            sortMethodShow: this.size === "lg",
+            show: this.showMods,
+            icon: this.sortIcon("arrow"),
+            click: () => {
+              this.sortBy("arrow");
+            },
+            input: {
+              type: "image",
+            },
+          },
+          {
+            label: "images/mod_triangle.png",
+            classes: "mod-col",
+            sortMethodShow: this.size === "lg",
+            show: this.showMods,
+            icon: this.sortIcon("triangle"),
+            click: () => {
+              this.sortBy("triangle");
+            },
+            input: {
+              type: "image",
+            },
+          },
+          {
+            label: "images/mod_cross.png",
+            classes: "mod-col",
+            sortMethodShow: this.size === "lg",
+            show: this.showMods,
+            icon: this.sortIcon("cross"),
+            click: () => {
+              this.sortBy("cross");
+            },
+            input: {
+              type: "image",
+            },
+          },
+          {
+            label: "Has Speed Set?",
+            sortMethodShow: this.size === "lg",
+            show: this.showMods,
+            icon: this.sortIcon("speedSet"),
+            click: () => {
+              this.sortBy("speedSet");
+            },
+          },
+          {
+            label: "Mods",
+            value: this.showMods ? "mods" : null,
+          },
+          {
+            label: "Sub Total",
+            value: "subTotal",
+            show: this.showCol("subTotal"),
+            sortMethodShow: true,
+            icon: this.sortIcon("subTotal"),
+            click: () => {
+              this.sortBy("subTotal");
+            },
+          },
+          {
+            label: "Bonuses",
+            value: "bonuses",
+            show: this.showCol("bonuses"),
+            sortMethodShow: true,
+          },
+          {
+            label: "Total",
+            value: "total",
+            show: this.showCol("total"),
+            sortMethodShow: true,
+            icon: this.sortIcon("total"),
+            click: () => {
+              this.sortBy("total");
+            },
+          },
+          {
+            label: "Actions",
+            show: this.showCol("actions"),
+          },
+        ],
+      };
     },
   },
   methods: {
-    saveTeamName() {
-      if (this.isEditing) {
-        this.team.name = this.editTeamName;
-        this.isEditing = false;
-      }
-    },
-    editTeam() {
-      this.isEditing = true;
-      this.$nextTick(() => {
-        if (this.$refs.teamName) {
-          (this.$refs.teamName as HTMLElement).focus();
-        }
-      });
-    },
     sortIcon(type: SortType): string {
       if (
         this.team.sortMethod === type ||
@@ -433,6 +449,20 @@ export default defineComponent({
       }
       this.team.sortMethod = type;
     },
+    saveTeamName() {
+      if (this.isEditing) {
+        this.team.name = this.editTeamName;
+        this.isEditing = false;
+      }
+    },
+    editTeam() {
+      this.isEditing = true;
+      this.$nextTick(() => {
+        if (this.$refs.teamName) {
+          (this.$refs.teamName as HTMLElement).focus();
+        }
+      });
+    },
     disableLeader(unitId: string) {
       return this.team.units.some((unit) => {
         if (unit.isLeader) {
@@ -442,9 +472,6 @@ export default defineComponent({
         }
         return false;
       });
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
     },
     hasBonuses(unit: TeamMember): boolean {
       return (
@@ -460,7 +487,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "styles/variables.scss";
 
-th {
+::v-deep(th) {
   &.mod-col {
     padding: 0.15rem;
 

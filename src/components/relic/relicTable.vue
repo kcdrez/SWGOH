@@ -2,26 +2,7 @@
   <table
     class="table table-bordered table-dark table-sm table-striped swgoh-table"
   >
-    <thead class="sticky-header show-on-mobile">
-      <tr class="sort-methods">
-        <th class="show-on-mobile">
-          <SortMethods
-            :sortByOptions="sortByOptions"
-            :sortMethod="sortMethod"
-            :sortDir="sortDir"
-            showSearch
-            @methodChange="sortMethod = $event"
-            @directionChange="sortDir = $event"
-            @searchChange="searchText = $event"
-          />
-        </th>
-      </tr>
-      <ColumnHeaders
-        class="text-center align-middle"
-        :headers="headers"
-        @searchChange="searchText = $event"
-      />
-    </thead>
+    <TableHeader :header="header" />
     <tbody>
       <tr v-for="mat in filteredRelics" :key="mat.id">
         <td class="text-center align-middle" v-if="showCol('icon')">
@@ -93,9 +74,9 @@ import { mapState } from "vuex";
 import { Relic } from "types/relic";
 import OwnedAmount from "components/relic/relicOwned.vue";
 import RelicIcon from "components/relic/relicIcon.vue";
-import Timestamp from "components/timestamp.vue";
+import Timestamp from "components/general/timestamp.vue";
 import { setupColumnEvents, setupSorting } from "utils";
-import { iHeader } from "types/general";
+import { iHeader, iTableHead } from "types/general";
 
 export default defineComponent({
   name: "RelicTable",
@@ -148,116 +129,105 @@ export default defineComponent({
       required: true,
     },
   },
-  data() {
-    return {
-      sortByOptions: [
-        {
-          value: "name",
-          label: "Name",
-        },
-        {
-          value: "rarity",
-          label: "Rarity",
-        },
-        {
-          value: "location",
-          label: "Location",
-        },
-        {
-          value: "owned",
-          label: "Amount Owned",
-        },
-        {
-          value: "needed",
-          label: "Amount Needed",
-        },
-        {
-          value: "progress",
-          label: "Progress",
-        },
-        {
-          value: "time",
-          label: "Time Remaining",
-        },
-      ],
-    };
-  },
   computed: {
     ...mapState("relic", ["ownedRelics"]),
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Icon",
-          show: this.showCol("icon"),
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
         },
-        {
-          label: "Mat Name",
-          show: this.showCol("name"),
-          icon: this.sortIcon("name"),
-          input: {
-            type: "input",
-            classes: "mx-auto my-1 w-75",
-            placeholder: "Search",
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+
+        headers: [
+          {
+            label: "Icon",
+            show: this.showCol("icon"),
           },
-          click: () => {
-            this.sortBy("name");
+          {
+            label: "Mat Name",
+            show: this.showCol("name"),
+            icon: this.sortIcon("name"),
+            sortMethodShow: true,
+            input: {
+              type: "input",
+              classes: "mx-auto my-1 w-75",
+              placeholder: "Search",
+              value: this.searchText,
+              change: (val: string) => {
+                this.searchText = val;
+              },
+              click: () => {
+                this.sortBy("name");
+              },
+            },
           },
-        },
-        {
-          label: "Rarity",
-          show: this.showCol("rarity"),
-          icon: this.sortIcon("rarity"),
-          click: () => {
-            this.sortBy("rarity");
+          {
+            label: "Rarity",
+            show: this.showCol("rarity"),
+            sortMethodShow: true,
+            icon: this.sortIcon("rarity"),
+            click: () => {
+              this.sortBy("rarity");
+            },
           },
-        },
-        {
-          label: "Locations",
-          show: this.showCol("locations"),
-          icon: this.sortIcon("locations"),
-          click: () => {
-            this.sortBy("locations");
+          {
+            label: "Locations",
+            show: this.showCol("locations"),
+            sortMethodShow: true,
+            icon: this.sortIcon("locations"),
+            click: () => {
+              this.sortBy("locations");
+            },
           },
-        },
-        {
-          label: "Amount Owned",
-          show: this.showCol("owned"),
-          icon: this.sortIcon("owned"),
-          maxWidth: "160px",
-          click: () => {
-            this.sortBy("owned");
+          {
+            label: "Amount Owned",
+            show: this.showCol("owned"),
+            sortMethodShow: true,
+            icon: this.sortIcon("owned"),
+            maxWidth: "160px",
+            click: () => {
+              this.sortBy("owned");
+            },
           },
-        },
-        {
-          label: "Amount Needed",
-          show: this.showCol("needed"),
-          icon: this.sortIcon("needed"),
-          click: () => {
-            this.sortBy("needed");
+          {
+            label: "Amount Needed",
+            show: this.showCol("needed"),
+            sortMethodShow: true,
+            icon: this.sortIcon("needed"),
+            click: () => {
+              this.sortBy("needed");
+            },
           },
-        },
-        {
-          label: "Progress",
-          show: this.showCol("progress"),
-          icon: this.sortIcon("progress"),
-          maxWidth: "145px",
-          click: () => {
-            this.sortBy("progress");
+          {
+            label: "Progress",
+            show: this.showCol("progress"),
+            sortMethodShow: true,
+            icon: this.sortIcon("progress"),
+            maxWidth: "145px",
+            click: () => {
+              this.sortBy("progress");
+            },
           },
-        },
-        {
-          label: "Required By",
-          show: this.showRequiredByUnit && this.showCol("required"),
-        },
-        {
-          label: "Est. Time",
-          show: this.showCol("time"),
-          icon: this.sortIcon("time"),
-          click: () => {
-            this.sortBy("time");
+          {
+            label: "Required By",
+            show: this.showRequiredByUnit && this.showCol("required"),
           },
-        },
-      ];
+          {
+            label: "Est. Time",
+            show: this.showCol("time"),
+            sortMethodShow: true,
+            icon: this.sortIcon("time"),
+            click: () => {
+              this.sortBy("time");
+            },
+          },
+        ],
+      };
     },
     filteredRelics(): Relic[] {
       return (this.relicList as Relic[])
@@ -270,7 +240,7 @@ export default defineComponent({
             } else {
               return compareA > compareB ? -1 : 1;
             }
-          } else if (this.sortMethod === "location") {
+          } else if (this.sortMethod === "locations") {
             const compareA = a.location.node.toLowerCase();
             const compareB = b.location.node.toLowerCase();
             if (this.sortDir === "asc") {

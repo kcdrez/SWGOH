@@ -49,7 +49,7 @@
     <div class="toggles-container">
       <MultiSelect
         class="select-columns"
-        :options="cols"
+        :options="header.headers"
         :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
@@ -62,20 +62,7 @@
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
-      <thead class="sticky-header show-on-mobile">
-        <tr class="sort-methods">
-          <th class="show-on-mobile">
-            <SortMethods
-              :sortByOptions="sortByOptions"
-              :sortMethod="sortMethod"
-              :sortDir="sortDir"
-              @methodChange="sortMethod = $event"
-              @directionChange="sortDir = $event"
-            />
-          </th>
-        </tr>
-        <ColumnHeaders class="text-center align-middle" :headers="headers" />
-      </thead>
+      <TableHeader :header="header" />
       <tbody>
         <tr
           v-for="item in goal.list"
@@ -185,11 +172,11 @@ import _ from "lodash";
 import UnitSearch from "components/units/unitSearch.vue";
 import RequirementIcon from "components/shards/tables/legendary/requirementIcon.vue";
 import UnitIcon from "components/units/unitIcon.vue";
-import Modal from "components/modal.vue";
+import Modal from "components/general/modal.vue";
 import { getPercent, getUnit, totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import { setupEvents, setupSorting } from "utils";
-import { iHeader } from "types/general";
+import { iTableHead } from "types/general";
 
 export default defineComponent({
   name: "GoalsTable",
@@ -234,90 +221,68 @@ export default defineComponent({
       selectedColumns: [],
       showAddUnitModal: false,
       deleteGoalModal: false,
-      sortByOptions: [
-        {
-          value: "name",
-          label: "Unit Name",
-        },
-        {
-          value: "current",
-          label: "Current Level",
-        },
-        {
-          value: "target",
-          label: "Target Level",
-        },
-        {
-          value: "progress",
-          label: "Progress",
-        },
-      ],
     } as any;
   },
   computed: {
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Unit Name",
-          show: this.showCol("name"),
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Unit Name",
+            show: this.showCol("name"),
+            sortMethodShow: true,
+            icon: this.sortIcon("name"),
+            value: "name",
+            click: () => {
+              this.sortBy("name");
+            },
           },
-        },
-        {
-          label: "Current Level",
-          show: this.showCol("current"),
-          icon: this.sortIcon("current"),
-          click: () => {
-            this.sortBy("current");
+          {
+            label: "Current Level",
+            show: this.showCol("current"),
+            sortMethodShow: true,
+            icon: this.sortIcon("current"),
+            value: "current",
+            click: () => {
+              this.sortBy("current");
+            },
           },
-        },
-        {
-          label: "Target Level",
-          show: this.showCol("target"),
-          icon: this.sortIcon("target"),
-          click: () => {
-            this.sortBy("target");
+          {
+            label: "Target Level",
+            show: this.showCol("target"),
+            sortMethodShow: true,
+            icon: this.sortIcon("target"),
+            value: "target",
+            click: () => {
+              this.sortBy("target");
+            },
           },
-        },
-        {
-          label: "Progress",
-          show: this.showCol("progress"),
-          icon: this.sortIcon("progress"),
-          click: () => {
-            this.sortBy("progress");
+          {
+            label: "Progress",
+            show: this.showCol("progress"),
+            sortMethodShow: true,
+            icon: this.sortIcon("progress"),
+            value: "progress",
+            click: () => {
+              this.sortBy("progress");
+            },
           },
-        },
-        {
-          label: "Actions",
-          show: this.showCol("actions"),
-        },
-      ];
-    },
-    cols() {
-      return [
-        {
-          text: "Name",
-          value: "name",
-        },
-        {
-          text: "Current Level",
-          value: "current",
-        },
-        {
-          text: "Target Level",
-          value: "target",
-        },
-        {
-          text: "Progress",
-          value: "progress",
-        },
-        {
-          text: "Actions",
-          value: "actions",
-        },
-      ];
+          {
+            label: "Actions",
+            value: "actions",
+            show: this.showCol("actions"),
+          },
+        ],
+      };
     },
   },
   methods: {

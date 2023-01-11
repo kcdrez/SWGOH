@@ -80,13 +80,7 @@
                 class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table text-center"
                 v-if="viewMode === 'Player'"
               >
-                <thead>
-                  <tr>
-                    <th>Player</th>
-                    <th>Unit</th>
-                    <th>Relic Level</th>
-                  </tr>
-                </thead>
+                <TableHeader :header="header" />
                 <tbody class="align-middle">
                   <template
                     v-for="(units, playerName) in unitsByPlayer"
@@ -114,13 +108,7 @@
                 class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table text-center"
                 v-if="viewMode === 'Unit'"
               >
-                <thead>
-                  <tr>
-                    <th>Unit</th>
-                    <th>Relic Level</th>
-                    <th>Player</th>
-                  </tr>
-                </thead>
+                <TableHeader :header="header" />
                 <tbody class="align-middle">
                   <template
                     v-for="(units, unitName) in unitsByName"
@@ -148,13 +136,7 @@
                 class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table text-center"
                 v-if="viewMode === 'Level'"
               >
-                <thead>
-                  <tr>
-                    <th>Relic Level</th>
-                    <th>Unit</th>
-                    <th>Player</th>
-                  </tr>
-                </thead>
+                <TableHeader :header="header" />
                 <tbody class="align-middle">
                   <template v-for="(units, level) in unitsByLevel" :key="level">
                     <tr>
@@ -198,6 +180,7 @@ import TWPlayerList from "components/guild/twPlayerList.vue";
 import { apiClient } from "../../api/api-client";
 import { maxRelicLevel } from "types/relic";
 import RelicLevelIcon from "components/units/relicLevelIcon.vue";
+import { iHeader, iTableHead } from "types/general";
 
 interface dataModel {
   maxRelicLevel: number;
@@ -253,6 +236,41 @@ export default defineComponent({
   },
   computed: {
     ...mapState("guild", ["guildId"]),
+    header(): iTableHead {
+      const relicLevelHeader: iHeader = {
+        label: "Relic Level",
+        show: true,
+        sortMethodShow: true,
+      };
+      const unitHeader: iHeader = {
+        label: "Unit",
+        show: true,
+        sortMethodShow: true,
+      };
+      const playerHeader: iHeader = {
+        label: "Player",
+        show: true,
+        sortMethodShow: true,
+      };
+
+      if (this.viewMode === "Level") {
+        return {
+          headers: [relicLevelHeader, unitHeader, playerHeader],
+        };
+      } else if (this.viewMode === "Player") {
+        return {
+          headers: [playerHeader, unitHeader, relicLevelHeader],
+        };
+      } else if (this.viewMode === "Unit") {
+        return {
+          headers: [unitHeader, relicLevelHeader, playerHeader],
+        };
+      } else {
+        return {
+          headers: [],
+        };
+      }
+    },
     unitsByPlayer() {
       return this.gp.units.reduce((acc, unit) => {
         if (unit.relicLevel >= this.minimumLevel) {

@@ -55,42 +55,42 @@ export default defineComponent({
   },
   computed: {
     ...mapState("relic", ["relicConfig"]),
-    cols(): { text: string; value: any }[] {
+    cols(): { label: string; value: any }[] {
       const list = [
         {
-          text: "Icon",
+          label: "Icon",
           value: "icon",
         },
         {
-          text: "Name",
+          label: "Name",
           value: "name",
         },
         {
-          text: "Rarity",
+          label: "Rarity",
           value: "rarity",
         },
         {
-          text: "Locations",
+          label: "Locations",
           value: "locations",
         },
         {
-          text: "Amount Owned",
+          label: "Amount Owned",
           value: "owned",
         },
         {
-          text: "Amount Needed",
+          label: "Amount Needed",
           value: "needed",
         },
         {
-          text: "Progress",
+          label: "Progress",
           value: "progress",
         },
         {
-          text: "Required By",
+          label: "Required By",
           value: "required",
         },
         {
-          text: "Estimated Time",
+          label: "Estimated Time",
           value: "time",
         },
       ];

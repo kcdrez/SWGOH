@@ -11,7 +11,6 @@
         <table
           class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
         >
-          <!-- <thead></thead> -->
           <tbody class="align-middle">
             <tr>
               <td>ID:</td>

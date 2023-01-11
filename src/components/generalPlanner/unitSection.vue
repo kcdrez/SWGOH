@@ -12,7 +12,7 @@
         </div>
         <MultiSelect
           class="select-columns"
-          :options="cols"
+          :options="header.headers"
           storageKey="unitTable"
           @checked="selectedColumns = $event"
         />
@@ -22,26 +22,7 @@
       <table
         class="table table-bordered table-dark table-sm table-striped m-0 swgoh-table"
       >
-        <thead class="sticky-header show-on-mobile">
-          <tr class="sort-methods">
-            <th class="show-on-mobile">
-              <SortMethods
-                :sortByOptions="sortByOptions"
-                :sortMethod="sortMethod"
-                :sortDir="sortDir"
-                showSearch
-                @methodChange="sortMethod = $event"
-                @directionChange="sortDir = $event"
-                @searchChange="searchText = $event"
-              />
-            </th>
-          </tr>
-          <ColumnHeaders
-            class="text-center align-middle"
-            :headers="headers"
-            @searchChange="searchText = $event"
-          />
-        </thead>
+        <TableHeader :header="header" />
         <tbody>
           <tr v-for="unit in unitList" :key="unit.id">
             <td class="align-middle text-center" v-if="showCol('name')">
@@ -174,11 +155,11 @@ import { UnitPlannerItem } from "types/planner";
 import { Unit } from "types/unit";
 import { maxGearLevel } from "types/gear";
 import { setupEvents, setupSimpleView, setupSorting } from "utils";
-import Timestamp from "components/timestamp.vue";
+import Timestamp from "components/general/timestamp.vue";
 import GearText from "components/gear/gearText.vue";
 import RelicLevelIcon from "components/units/relicLevelIcon.vue";
 import UnitIcon from "components/units/unitIcon.vue";
-import { iHeader } from "types/general";
+import { iHeader, iTableHead } from "types/general";
 
 const storageKey = "unitSection";
 
@@ -186,13 +167,11 @@ export default defineComponent({
   name: "UnitSection",
   setup() {
     const { simpleView } = setupSimpleView(storageKey);
-    const { sortDir, sortMethod, searchText, sortBy, sortIcon } =
-      setupSorting(storageKey);
+    const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(storageKey);
 
     return {
       sortDir,
       sortMethod,
-      searchText,
       sortBy,
       sortIcon,
       simpleView,
@@ -209,32 +188,6 @@ export default defineComponent({
     return {
       maxGearLevel,
       selectedColumns: [], //todo
-      sortByOptions: [
-        {
-          value: "name",
-          label: "Name",
-        },
-        {
-          value: "curLevel",
-          label: "Current Level",
-        },
-        {
-          value: "targetLevel",
-          label: "Target Level",
-        },
-        {
-          value: "estGear",
-          label: "Estimated Gear Time",
-        },
-        {
-          value: "estRelic",
-          label: "Estimated Relic Time",
-        },
-        {
-          value: "completed",
-          label: "Estimated Completed",
-        },
-      ],
     };
   },
   computed: {
@@ -276,7 +229,7 @@ export default defineComponent({
           } else {
             return compareA > compareB ? -1 : 1;
           }
-        } else if (this.sortMethod === "estGear") {
+        } else if (this.sortMethod === "gearDate") {
           const compareA = a.gearTotalDays === 0 ? Infinity : a.gearTotalDays;
           const compareB = b.gearTotalDays === 0 ? Infinity : b.gearTotalDays;
           if (this.sortDir === "asc") {
@@ -308,94 +261,86 @@ export default defineComponent({
         return 0;
       });
     },
-    cols(): { text: string; value: any }[] {
-      const list = [
-        {
-          text: "Name",
-          value: "name",
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
         },
-        {
-          text: "Current Level",
-          value: "curLevel",
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
         },
-        {
-          text: "Target Level",
-          value: "targetLevel",
-        },
-        {
-          text: "Est. Gear Date",
-          value: "gearDate",
-        },
-        {
-          text: "Est. Relic Date",
-          value: "estRelic",
-        },
-        {
-          text: "Est. Total Date",
-          value: "completed",
-        },
-        {
-          text: "Actions",
-          value: "actions",
-        },
-      ];
-      return list;
-    },
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Name",
-          show: this.showCol("name"),
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
+        headers: [
+          {
+            label: "Name",
+            show: this.showCol("name"),
+            sortMethodShow: true,
+            icon: this.sortIcon("name"),
+            value: "name",
+            click: () => {
+              this.sortBy("name");
+            },
           },
-        },
-        {
-          label: "Current Level",
-          show: this.showCol("curLevel"),
-          icon: this.sortIcon("curLevel"),
-          click: () => {
-            this.sortBy("curLevel");
+          {
+            label: "Current Level",
+            show: this.showCol("curLevel"),
+            sortMethodShow: true,
+            icon: this.sortIcon("curLevel"),
+            value: "curLevel",
+            click: () => {
+              this.sortBy("curLevel");
+            },
           },
-        },
-        {
-          label: "Target Level",
-          show: this.showCol("targetLevel"),
-          icon: this.sortIcon("targetLevel"),
-          click: () => {
-            this.sortBy("targetLevel");
+          {
+            label: "Target Level",
+            show: this.showCol("targetLevel"),
+            sortMethodShow: true,
+            icon: this.sortIcon("targetLevel"),
+            value: "targetLevel",
+            click: () => {
+              this.sortBy("targetLevel");
+            },
           },
-        },
-        {
-          label: "Est. Gear Date",
-          show: this.showCol("gearDate"),
-          icon: this.sortIcon("gearDate"),
-          click: () => {
-            this.sortBy("gearDate");
+          {
+            label: "Est. Gear Date",
+            show: this.showCol("gearDate"),
+            sortMethodShow: true,
+            icon: this.sortIcon("gearDate"),
+            value: "gearDate",
+            click: () => {
+              this.sortBy("gearDate");
+            },
           },
-        },
-        {
-          label: "Est. Relic Date",
-          show: this.showCol("estRelic"),
-          icon: this.sortIcon("estRelic"),
-          click: () => {
-            this.sortBy("estRelic");
+          {
+            label: "Est. Relic Date",
+            show: this.showCol("estRelic"),
+            sortMethodShow: true,
+            icon: this.sortIcon("estRelic"),
+            value: "estRelic",
+            click: () => {
+              this.sortBy("estRelic");
+            },
           },
-        },
-        {
-          label: "Est. Completed Date",
-          show: this.showCol("completed"),
-          icon: this.sortIcon("completed"),
-          click: () => {
-            this.sortBy("completed");
+          {
+            label: "Est. Completed Date",
+            show: this.showCol("completed"),
+            sortMethodShow: true,
+            icon: this.sortIcon("completed"),
+            value: "completed",
+            click: () => {
+              this.sortBy("completed");
+            },
           },
-        },
-        {
-          label: "Actions",
-          show: this.showCol("actions"),
-        },
-      ];
+          {
+            label: "Actions",
+            show: this.showCol("actions"),
+            sortMethodShow: true,
+            value: "actions",
+          },
+        ],
+      };
     },
     total(): { gear: number; relic: number } {
       return this.unitList.reduce(

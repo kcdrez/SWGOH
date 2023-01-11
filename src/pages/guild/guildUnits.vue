@@ -28,12 +28,7 @@
           <table
             class="table table-bordered table-dark table-sm table-striped swgoh-table"
           >
-            <thead class="sticky-header show-on-mobile">
-              <ColumnHeaders
-                class="text-center align-middle"
-                :headers="headers"
-              />
-            </thead>
+            <TableHeader :header="header" />
             <tbody>
               <tr
                 class="text-center align-middle"
@@ -136,7 +131,7 @@ import { setupEvents, setupSorting, unvue } from "utils";
 import { Unit } from "types/unit";
 import { IGuildUnitMap } from "types/guild";
 import UnitSearch from "components/units/unitSearch.vue";
-import { iHeader } from "types/general";
+import { iHeader, iTableHead } from "types/general";
 
 const storageKey = "guildUnits";
 
@@ -174,177 +169,188 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters(["someLoading"]),
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Ally Code",
-          show: this.showCol("allyCode"),
-          icon: this.sortIcon("allyCode"),
-          click: () => {
-            this.sortBy("allyCode");
-          },
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
         },
-        {
-          label: "Player Name",
-          show: this.showCol("name"),
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
-          },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
         },
-        {
-          label: "Stars",
-          show: this.showCol("stars"),
-          icon: this.sortIcon("stars"),
-          click: () => {
-            this.sortBy("stars");
+        headers: [
+          {
+            label: "Ally Code",
+            show: this.showCol("allyCode"),
+            icon: this.sortIcon("allyCode"),
+            click: () => {
+              this.sortBy("allyCode");
+            },
           },
-        },
-        {
-          label: "Gear Level",
-          show: this.showCol("gearLevel"),
-          icon: this.sortIcon("gearLevel"),
-          click: () => {
-            this.sortBy("gearLevel");
+          {
+            label: "Player Name",
+            show: this.showCol("name"),
+            icon: this.sortIcon("name"),
+            click: () => {
+              this.sortBy("name");
+            },
           },
-        },
-        {
-          label: "Relic Level",
-          show: this.showCol("relicLevel"),
-          icon: this.sortIcon("relicLevel"),
-          click: () => {
-            this.sortBy("relicLevel");
+          {
+            label: "Stars",
+            show: this.showCol("stars"),
+            icon: this.sortIcon("stars"),
+            click: () => {
+              this.sortBy("stars");
+            },
           },
-        },
-        {
-          label: "Zetas",
-          show: this.showCol("zetas"),
-          icon: this.sortIcon("zetas"),
-          click: () => {
-            this.sortBy("zetas");
+          {
+            label: "Gear Level",
+            show: this.showCol("gearLevel"),
+            icon: this.sortIcon("gearLevel"),
+            click: () => {
+              this.sortBy("gearLevel");
+            },
           },
-        },
-        {
-          label: "Omicrons",
-          show: this.showCol("omicrons"),
-          icon: this.sortIcon("omicrons"),
-          click: () => {
-            this.sortBy("omicrons");
+          {
+            label: "Relic Level",
+            show: this.showCol("relicLevel"),
+            icon: this.sortIcon("relicLevel"),
+            click: () => {
+              this.sortBy("relicLevel");
+            },
           },
-        },
-        {
-          label: "Speed",
-          show: this.showCol("speed"),
-          icon: this.sortIcon("speed"),
-          click: () => {
-            this.sortBy("speed");
+          {
+            label: "Zetas",
+            show: this.showCol("zetas"),
+            icon: this.sortIcon("zetas"),
+            click: () => {
+              this.sortBy("zetas");
+            },
           },
-        },
-        {
-          label: "Speed (Mods)",
-          show: this.showCol("speedMods"),
-          icon: this.sortIcon("speedMods"),
-          click: () => {
-            this.sortBy("speedMods");
+          {
+            label: "Omicrons",
+            show: this.showCol("omicrons"),
+            icon: this.sortIcon("omicrons"),
+            click: () => {
+              this.sortBy("omicrons");
+            },
           },
-        },
-        {
-          label: "Physical Offense",
-          show: this.showCol("physicalOffense"),
-          icon: this.sortIcon("physicalOffense"),
-          click: () => {
-            this.sortBy("physicalOffense");
+          {
+            label: "Speed",
+            show: this.showCol("speed"),
+            icon: this.sortIcon("speed"),
+            click: () => {
+              this.sortBy("speed");
+            },
           },
-        },
-        {
-          label: "Special Offense",
-          show: this.showCol("specialOffense"),
-          icon: this.sortIcon("specialOffense"),
-          click: () => {
-            this.sortBy("specialOffense");
+          {
+            label: "Speed (Mods)",
+            show: this.showCol("speedMods"),
+            icon: this.sortIcon("speedMods"),
+            click: () => {
+              this.sortBy("speedMods");
+            },
           },
-        },
-        {
-          label: "Protection",
-          show: this.showCol("protection"),
-          icon: this.sortIcon("protection"),
-          click: () => {
-            this.sortBy("protection");
+          {
+            label: "Physical Offense",
+            show: this.showCol("physicalOffense"),
+            icon: this.sortIcon("physicalOffense"),
+            click: () => {
+              this.sortBy("physicalOffense");
+            },
           },
-        },
-        {
-          label: "Health",
-          show: this.showCol("health"),
-          icon: this.sortIcon("health"),
-          click: () => {
-            this.sortBy("health");
+          {
+            label: "Special Offense",
+            show: this.showCol("specialOffense"),
+            icon: this.sortIcon("specialOffense"),
+            click: () => {
+              this.sortBy("specialOffense");
+            },
           },
-        },
-        {
-          label: "Tenacity",
-          show: this.showCol("tenacity"),
-          icon: this.sortIcon("tenacity"),
-          click: () => {
-            this.sortBy("tenacity");
+          {
+            label: "Protection",
+            show: this.showCol("protection"),
+            icon: this.sortIcon("protection"),
+            click: () => {
+              this.sortBy("protection");
+            },
           },
-        },
-        {
-          label: "Potency",
-          show: this.showCol("potency"),
-          icon: this.sortIcon("potency"),
-          click: () => {
-            this.sortBy("potency");
+          {
+            label: "Health",
+            show: this.showCol("health"),
+            icon: this.sortIcon("health"),
+            click: () => {
+              this.sortBy("health");
+            },
           },
-        },
-        {
-          label: "Physical Crit Chance",
-          show: this.showCol("physicalCrit"),
-          icon: this.sortIcon("physicalCrit"),
-          click: () => {
-            this.sortBy("physicalCrit");
+          {
+            label: "Tenacity",
+            show: this.showCol("tenacity"),
+            icon: this.sortIcon("tenacity"),
+            click: () => {
+              this.sortBy("tenacity");
+            },
           },
-        },
-        {
-          label: "Special Crit Chance",
-          show: this.showCol("specialCrit"),
-          icon: this.sortIcon("specialCrit"),
-          click: () => {
-            this.sortBy("specialCrit");
+          {
+            label: "Potency",
+            show: this.showCol("potency"),
+            icon: this.sortIcon("potency"),
+            click: () => {
+              this.sortBy("potency");
+            },
           },
-        },
-        {
-          label: "Crit Damage",
-          show: this.showCol("critDamage"),
-          icon: this.sortIcon("critDamage"),
-          click: () => {
-            this.sortBy("critDamage");
+          {
+            label: "Physical Crit Chance",
+            show: this.showCol("physicalCrit"),
+            icon: this.sortIcon("physicalCrit"),
+            click: () => {
+              this.sortBy("physicalCrit");
+            },
           },
-        },
-        {
-          label: "Armor",
-          show: this.showCol("armor"),
-          icon: this.sortIcon("armor"),
-          click: () => {
-            this.sortBy("armor");
+          {
+            label: "Special Crit Chance",
+            show: this.showCol("specialCrit"),
+            icon: this.sortIcon("specialCrit"),
+            click: () => {
+              this.sortBy("specialCrit");
+            },
           },
-        },
-        {
-          label: "Resistance",
-          show: this.showCol("resistance"),
-          icon: this.sortIcon("resistance"),
-          click: () => {
-            this.sortBy("resistance");
+          {
+            label: "Crit Damage",
+            show: this.showCol("critDamage"),
+            icon: this.sortIcon("critDamage"),
+            click: () => {
+              this.sortBy("critDamage");
+            },
           },
-        },
-        {
-          label: "Has Ult?",
-          show: this.showCol("ultimate"),
-          icon: this.sortIcon("ultimate"),
-          click: () => {
-            this.sortBy("ultimate");
+          {
+            label: "Armor",
+            show: this.showCol("armor"),
+            icon: this.sortIcon("armor"),
+            click: () => {
+              this.sortBy("armor");
+            },
           },
-        },
-      ];
+          {
+            label: "Resistance",
+            show: this.showCol("resistance"),
+            icon: this.sortIcon("resistance"),
+            click: () => {
+              this.sortBy("resistance");
+            },
+          },
+          {
+            label: "Has Ult?",
+            show: this.showCol("ultimate"),
+            icon: this.sortIcon("ultimate"),
+            click: () => {
+              this.sortBy("ultimate");
+            },
+          },
+        ],
+      };
     },
     players(): any[] {
       return (this.data?.owned ?? []).sort((a, b) => {
@@ -370,86 +376,86 @@ export default defineComponent({
     loadingUnitState(): loadingState {
       return this.loading ? loadingState.loading : loadingState.ready;
     },
-    playerCols(): { text: string; value: any }[] {
+    playerCols(): { label: string; value: any }[] {
       const list = [
         {
-          text: "Ally Code",
+          label: "Ally Code",
           value: "allyCode",
         },
         {
-          text: "Player Name",
+          label: "Player Name",
           value: "name",
         },
         {
-          text: "Stars",
+          label: "Stars",
           value: "stars",
         },
         {
-          text: "Gear Level",
+          label: "Gear Level",
           value: "gearLevel",
         },
         {
-          text: "Relic Level",
+          label: "Relic Level",
           value: "relicLevel",
         },
         {
-          text: "Zetas",
+          label: "Zetas",
           value: "zetas",
         },
         {
-          text: "Omicrons",
+          label: "Omicrons",
           value: "omicrons",
         },
         {
-          text: "Speed",
+          label: "Speed",
           value: "speed",
         },
         {
-          text: "Physical Offense",
+          label: "Physical Offense",
           value: "physicalOffense",
         },
         {
-          text: "Special Offense",
+          label: "Special Offense",
           value: "specialOffense",
         },
         {
-          text: "Protection",
+          label: "Protection",
           value: "protection",
         },
         {
-          text: "Health",
+          label: "Health",
           value: "health",
         },
         {
-          text: "Tenacity",
+          label: "Tenacity",
           value: "tenacity",
         },
         {
-          text: "potency",
+          label: "potency",
           value: "potency",
         },
         {
-          text: "Physical Crit Chance",
+          label: "Physical Crit Chance",
           value: "physicalCrit",
         },
         {
-          text: "Special Crit Chance",
+          label: "Special Crit Chance",
           value: "specialCrit",
         },
         {
-          text: "Crit Damage",
+          label: "Crit Damage",
           value: "critDamage",
         },
         {
-          text: "Armor",
+          label: "Armor",
           value: "armor",
         },
         {
-          text: "Resistance",
+          label: "Resistance",
           value: "resistance",
         },
         {
-          text: "Has Ult?",
+          label: "Has Ult?",
           value: "ultimate",
         },
       ];

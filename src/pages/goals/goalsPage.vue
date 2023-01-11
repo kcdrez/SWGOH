@@ -15,14 +15,7 @@
         <table
           class="table table-bordered table-dark table-sm table-striped swgoh-table"
         >
-          <thead>
-            <tr class="text-center align-middle">
-              <th>
-                <span>Goal Name</span>
-              </th>
-              <th>Progress</th>
-            </tr>
-          </thead>
+          <TableHeader :header="header" />
           <tbody>
             <tr v-for="item in player.goalList" :key="item.id">
               <td class="align-middle text-center">
@@ -100,7 +93,8 @@ import { setupEvents } from "utils";
 import { totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import GoalsTable from "components/shards/progress/goalsTable.vue";
-import Modal from "components/modal.vue";
+import Modal from "components/general/modal.vue";
+import { iTableHead } from "types/general";
 
 const storageKey = "goalListPage";
 
@@ -119,6 +113,31 @@ export default defineComponent({
   },
   computed: {
     ...mapState("player", ["player"]),
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Goal Name",
+            show: true,
+            sortMethodShow: true,
+          },
+          {
+            label: "Progress",
+            show: true,
+            sortMethodShow: true,
+          },
+        ],
+      };
+    },
   },
   methods: {
     ...mapActions("player", ["addGoal"]),

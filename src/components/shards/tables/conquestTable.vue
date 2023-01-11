@@ -54,38 +54,38 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters("shards", ["unitFarmingList"]),
-    cols(): { text: string; value: any }[] {
+    cols(): { label: string; value: any }[] {
       const list = [
         {
-          text: "Name",
+          label: "Name",
           value: "name",
         },
         {
-          text: "Locations",
+          label: "Locations",
           value: "locations",
         },
         {
-          text: "Owned Shards",
+          label: "Owned Shards",
           value: "owned",
         },
         {
-          text: "Shards Remaining",
+          label: "Shards Remaining",
           value: "remaining",
         },
         {
-          text: "Progress",
+          label: "Progress",
           value: "progress",
         },
         {
-          text: "Attempts",
+          label: "Attempts",
           value: "attempts",
         },
         {
-          text: "Estimated Time",
+          label: "Estimated Time",
           value: "time",
         },
         {
-          text: "Priority",
+          label: "Priority",
           value: "priority",
         },
       ];

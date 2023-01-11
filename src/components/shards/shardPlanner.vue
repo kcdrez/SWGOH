@@ -156,13 +156,7 @@
           <table
             class="table table-bordered table-dark table-sm table-striped swgoh-table"
           >
-            <thead class="align-middle text-center">
-              <tr>
-                <th>Unit Name</th>
-                <th>Requirement</th>
-                <th>Progress</th>
-              </tr>
-            </thead>
+            <TableHeader :header="header" />
             <tbody class="align-middle text-center">
               <tr v-for="item in unitUsages" :key="item.requirementId">
                 <td>
@@ -226,7 +220,7 @@ import EnergySpent from "../energySpent.vue";
 import UnitIcon from "components/units/unitIcon.vue";
 import { loadingState } from "types/loading";
 import { setupEvents, setupSimpleView } from "utils";
-import Timestamp from "../timestamp.vue";
+import Timestamp from "../general/timestamp.vue";
 import {
   FarmingNode,
   estimatedTime as nodeEstimatedTime,
@@ -235,6 +229,7 @@ import {
 import { estimatedTime as shopEstimatedTime } from "types/currency";
 import { Unit, getUnit, getPercent } from "types/unit";
 import { estimatedTime as tbEstimatedTime } from "types/guild";
+import { iTableHead } from "types/general";
 
 const storageKey = "shardPlanner";
 
@@ -284,115 +279,136 @@ export default defineComponent({
     requestState(): loadingState {
       return this.someLoading(["unit"]);
     },
+    header(): iTableHead {
+      return {
+        headers: [
+          {
+            label: "Unit Name",
+            show: true,
+            sortMethodShow: true,
+          },
+          {
+            label: "Requirement",
+            show: true,
+            sortMethodShow: true,
+          },
+          {
+            label: "Progress",
+            show: true,
+            sortMethodShow: true,
+          },
+        ],
+      };
+    },
     cols(): any {
       return {
         shards: [
           {
-            text: "Locations",
+            label: "Locations",
             value: "locations",
           },
           {
-            text: "Owned Shards",
+            label: "Owned Shards",
             value: "owned",
           },
           {
-            text: "Shards Remaining",
+            label: "Shards Remaining",
             value: "remaining",
           },
           {
-            text: "Progress",
+            label: "Progress",
             value: "progress",
           },
           {
-            text: "Attempts",
+            label: "Attempts",
             value: "attempts",
           },
           {
-            text: "Actions",
+            label: "Actions",
             value: "actions",
           },
         ],
         store: [
           {
-            text: "Owned Shards",
+            label: "Owned Shards",
             value: "owned",
           },
           {
-            text: "Shards Remaining",
+            label: "Shards Remaining",
             value: "remaining",
           },
           {
-            text: "Progress",
+            label: "Progress",
             value: "progress",
           },
           {
-            text: "Currency Owned",
+            label: "Currency Owned",
             value: "wallet",
           },
           {
-            text: "Daily Currency",
+            label: "Daily Currency",
             value: "dailyCurrency",
           },
           {
-            text: "Remaining Currency",
+            label: "Remaining Currency",
             value: "remainingCurrency",
           },
         ],
         tb: [
           {
-            text: "Locations",
+            label: "Locations",
             value: "locations",
           },
           {
-            text: "Owned Shards",
+            label: "Owned Shards",
             value: "owned",
           },
           {
-            text: "Shards Remaining",
+            label: "Shards Remaining",
             value: "remaining",
           },
           {
-            text: "Progress",
+            label: "Progress",
             value: "progress",
           },
         ],
         legendary: [
           {
-            text: "Name",
+            label: "Name",
             value: "name",
           },
           {
-            text: "Current Level",
+            label: "Current Level",
             value: "current",
           },
           {
-            text: "Requirements",
+            label: "Requirements",
             value: "requirements",
           },
           {
-            text: "Recommended",
+            label: "Recommended",
             value: "recommended",
           },
           {
-            text: "Progress",
+            label: "Progress",
             value: "progress",
           },
         ],
         gl: [
           {
-            text: "Name",
+            label: "Name",
             value: "name",
           },
           {
-            text: "Current Level",
+            label: "Current Level",
             value: "current",
           },
           {
-            text: "Requirements",
+            label: "Requirements",
             value: "requirements",
           },
           {
-            text: "Progress",
+            label: "Progress",
             value: "progress",
           },
         ],

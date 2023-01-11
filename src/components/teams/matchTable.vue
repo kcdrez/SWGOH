@@ -51,7 +51,7 @@
     </div>
     <MultiSelect
       class="select-columns"
-      :options="cols"
+      :options="header.headers"
       storageKey="matchTable"
       label="Show/Hide Columns"
       @checked="selectedColumns = $event"
@@ -59,37 +59,7 @@
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
-      <thead>
-        <ColumnHeaders class="text-center align-middle" :headers="headers" />
-        <tr class="text-center align-middle">
-          <th v-if="showCol('name')">
-            <div class="c-pointer" @click="sortBy('name')">
-              Name
-              <i class="fas mx-1" :class="sortIcon('name')"></i>
-            </div>
-          </th>
-          <th v-if="showCol('leader')">
-            <div class="c-pointer" @click="sortBy('leader')">
-              Is Leader?
-              <i class="fas mx-1" :class="sortIcon('leader')"></i>
-            </div>
-          </th>
-          <th v-if="showCol('owner')">Owner</th>
-          <th v-if="showCol('subTotal')">
-            <div class="c-pointer" @click="sortBy('subtotal')">
-              Sub Total
-              <i class="fas mx-1" :class="sortIcon('subtotal')"></i>
-            </div>
-          </th>
-          <th v-if="showCol('bonuses')">Bonuses</th>
-          <th v-if="showCol('total')">
-            <div class="c-pointer" @click="sortBy('total')">
-              Total
-              <i class="fas mx-1" :class="sortIcon('total')"></i>
-            </div>
-          </th>
-        </tr>
-      </thead>
+      <TableHeader :header="header" />
       <tbody>
         <tr
           v-for="unit in match.fullUnitList"
@@ -151,10 +121,10 @@
 import { defineComponent, PropType } from "vue";
 
 import { Match, TeamMember } from "types/teams";
-import MultiSelect from "components/multiSelect.vue";
+import MultiSelect from "components/general/multiSelect.vue";
 import ModIcon from "components/units/modIcon.vue";
 import { setupSorting } from "utils";
-import { iHeader } from "types/general";
+import { iHeader, iTableHead } from "types/general";
 
 type dataModel = {
   selectedColumns: string[];
@@ -189,78 +159,71 @@ export default defineComponent({
     } as dataModel;
   },
   computed: {
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Name",
-          show: this.showCol("name"),
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
+    header(): iTableHead {
+      return {
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Name",
+            show: this.showCol("name"),
+            sortMethodShow: true,
+            icon: this.sortIcon("name"),
+            value: "name",
+            click: () => {
+              this.sortBy("name");
+            },
           },
-        },
-        {
-          label: "Is Leader?",
-          show: this.showCol("leader"),
-          icon: this.sortIcon("leader"),
-          click: () => {
-            this.sortBy("leader");
+          {
+            label: "Is Leader?",
+            show: this.showCol("leader"),
+            sortMethodShow: true,
+            icon: this.sortIcon("leader"),
+            value: "leader",
+            click: () => {
+              this.sortBy("leader");
+            },
           },
-        },
-        {
-          label: "Owner",
-          show: this.showCol("owner"),
-        },
-        {
-          label: "Sub Total",
-          show: this.showCol("subTotal"),
-          icon: this.sortIcon("subTotal"),
-          click: () => {
-            this.sortBy("subTotal");
+          {
+            label: "Owner",
+            show: this.showCol("owner"),
+            sortMethodShow: true,
+            value: "owner",
           },
-        },
-        {
-          label: "Bonuses",
-          show: this.showCol("bonuses"),
-        },
-        {
-          label: "Total",
-          show: this.showCol("total"),
-          icon: this.sortIcon("total"),
-          click: () => {
-            this.sortBy("total");
+          {
+            label: "Sub Total",
+            show: this.showCol("subTotal"),
+            icon: this.sortIcon("subTotal"),
+            value: "subTotal",
+            sortMethodShow: true,
+            click: () => {
+              this.sortBy("subTotal");
+            },
           },
-        },
-      ];
-    },
-    cols(): { text: string; value: any }[] {
-      const list = [
-        {
-          text: "Name",
-          value: "name",
-        },
-        {
-          text: "Is Leader",
-          value: "leader",
-        },
-        {
-          text: "Owner",
-          value: "owner",
-        },
-        {
-          text: "Sub Total",
-          value: "subTotal",
-        },
-        {
-          text: "Bonuses",
-          value: "bonuses",
-        },
-        {
-          text: "Total",
-          value: "total",
-        },
-      ];
-      return list;
+          {
+            label: "Bonuses",
+            show: this.showCol("bonuses"),
+            value: "bonuses",
+            sortMethodShow: true,
+          },
+          {
+            label: "Total",
+            show: this.showCol("total"),
+            icon: this.sortIcon("total"),
+            value: "total",
+            sortMethodShow: true,
+            click: () => {
+              this.sortBy("total");
+            },
+          },
+        ],
+      };
     },
   },
   methods: {

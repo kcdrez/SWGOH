@@ -101,22 +101,22 @@ export default defineComponent({
         []
       );
     },
-    cols() {
+    cols(): { label: string; value: any }[] {
       return [
         {
-          text: "Name",
+          label: "Name",
           value: "name",
         },
         {
-          text: "Current Level",
+          label: "Current Level",
           value: "current",
         },
         {
-          text: "Requirements",
+          label: "Requirements",
           value: "requirements",
         },
         {
-          text: "Progress",
+          label: "Progress",
           value: "progress",
         },
       ];

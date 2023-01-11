@@ -146,38 +146,38 @@ export default defineComponent({
         },
       ];
     },
-    filterRelicMatCols(): { text: string; value: any }[] {
+    filterRelicMatCols(): { label: string; value: any }[] {
       return [
         {
-          text: "Carbonite Circuit Board",
+          label: "Carbonite Circuit Board",
           value: "carbonite_circuit_board",
         },
         {
-          text: "Bronzium Wiring",
+          label: "Bronzium Wiring",
           value: "bronzium_wiring",
         },
         {
-          text: "Chromium Transistor",
+          label: "Chromium Transistor",
           value: "chromium_transistor",
         },
         {
-          text: "Aurodium Heatsink",
+          label: "Aurodium Heatsink",
           value: "aurodium_heatsink",
         },
         {
-          text: "Electrium Conductor",
+          label: "Electrium Conductor",
           value: "electrium_conductor",
         },
         {
-          text: "Zinbiddle Card",
+          label: "Zinbiddle Card",
           value: "zinbiddle_card",
         },
         {
-          text: "Impulse Detector",
+          label: "Impulse Detector",
           value: "impulse_detector",
         },
         {
-          text: "Gyrda Keypad",
+          label: "Gyrda Keypad",
           value: "gyrda_keypad",
         },
       ];

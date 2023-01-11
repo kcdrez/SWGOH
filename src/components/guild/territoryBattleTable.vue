@@ -4,20 +4,7 @@
       class="table table-bordered table-dark table-sm table-striped"
       :class="[accessLevel < 3 ? 'mb-3' : 'mb-0']"
     >
-      <thead class="sticky-header show-on-mobile">
-        <tr class="sort-methods">
-          <th class="show-on-mobile">
-            <SortMethods
-              :sortByOptions="sortByOptions"
-              :sortMethod="sortMethod"
-              :sortDir="sortDir"
-              @methodChange="sortMethod = $event"
-              @directionChange="sortDir = $event"
-            />
-          </th>
-        </tr>
-        <ColumnHeaders class="text-center align-middle" :headers="headers" />
-      </thead>
+      <TableHeader :headers="headers" />
       <tbody>
         <tr
           v-for="event in filteredEvents"
@@ -229,22 +216,20 @@ import { mapState, mapActions, mapGetters } from "vuex";
 
 import { setupColumnEvents, setupSorting, unvue } from "utils";
 import { TerritoryBattleEvent } from "types/guild";
-import { iHeader } from "types/general";
+import { iTableHead } from "types/general";
 
 const storageKey = "territoryBattleTable";
 
 export default defineComponent({
   name: "TerritoryBattleTable",
   setup(props) {
-    const { sortDir, sortMethod, searchText, sortBy, sortIcon } =
-      setupSorting(storageKey);
+    const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(storageKey);
     const list = toRefs(props).selectedColumns;
     const { showCol } = setupColumnEvents(list);
 
     return {
       sortDir,
       sortMethod,
-      searchText,
       sortBy,
       sortIcon,
       showCol,
@@ -269,32 +254,6 @@ export default defineComponent({
         characterShards: 0,
         name: "",
       },
-      sortByOptions: [
-        {
-          value: "date",
-          label: "Date",
-        },
-        {
-          value: "stars",
-          label: "Stars",
-        },
-        {
-          value: "get1",
-          label: "GET1",
-        },
-        {
-          value: "get2",
-          label: "GET2",
-        },
-        {
-          value: "get3",
-          label: "GET3",
-        },
-        {
-          value: "character",
-          label: "Character Shards",
-        },
-      ],
     } as any;
   },
   computed: {
@@ -306,69 +265,87 @@ export default defineComponent({
       "tbAvgShards",
     ]),
     ...mapGetters("unit", ["unitName"]),
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Completion Date",
-          show: this.showCol("date"),
-          icon: this.sortIcon("date"),
-          click: () => {
-            this.sortBy("date");
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Completion Date",
+            show: this.showCol("date"),
+            sortMethodShow: true,
+            icon: this.sortIcon("date"),
+            click: () => {
+              this.sortBy("date");
+            },
           },
-        },
-        {
-          label: "Name",
-          show: this.showCol("name"),
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
+          {
+            label: "Name",
+            show: this.showCol("name"),
+            sortMethodShow: true,
+            icon: this.sortIcon("name"),
+            click: () => {
+              this.sortBy("name");
+            },
           },
-        },
-        {
-          label: "Stars",
-          show: this.showCol("stars"),
-          icon: this.sortIcon("stars"),
-          click: () => {
-            this.sortBy("stars");
+          {
+            label: "Stars",
+            show: this.showCol("stars"),
+            sortMethodShow: true,
+            icon: this.sortIcon("stars"),
+            click: () => {
+              this.sortBy("stars");
+            },
           },
-        },
-        {
-          label: "GET1 Currency",
-          show: this.showCol("get1"),
-          icon: this.sortIcon("get1"),
-          click: () => {
-            this.sortBy("get1");
+          {
+            label: "GET1 Currency",
+            show: this.showCol("get1"),
+            sortMethodShow: true,
+            icon: this.sortIcon("get1"),
+            click: () => {
+              this.sortBy("get1");
+            },
           },
-        },
-        {
-          label: "GET2 Currency",
-          show: this.showCol("get2"),
-          icon: this.sortIcon("get2"),
-          click: () => {
-            this.sortBy("get2");
+          {
+            label: "GET2 Currency",
+            show: this.showCol("get2"),
+            sortMethodShow: true,
+            icon: this.sortIcon("get2"),
+            click: () => {
+              this.sortBy("get2");
+            },
           },
-        },
-        {
-          label: "GET3 Currency",
-          show: this.showCol("get3"),
-          icon: this.sortIcon("get3"),
-          click: () => {
-            this.sortBy("get3");
+          {
+            label: "GET3 Currency",
+            show: this.showCol("get3"),
+            sortMethodShow: true,
+            icon: this.sortIcon("get3"),
+            click: () => {
+              this.sortBy("get3");
+            },
           },
-        },
-        {
-          label: "Character Shards",
-          show: this.showCol("character"),
-          icon: this.sortIcon("character"),
-          click: () => {
-            this.sortBy("character");
+          {
+            label: "Character Shards",
+            show: this.showCol("character"),
+            sortMethodShow: true,
+            icon: this.sortIcon("character"),
+            click: () => {
+              this.sortBy("character");
+            },
           },
-        },
-        {
-          label: "Actions",
-          show: this.showCol("actions"),
-        },
-      ];
+          {
+            label: "Actions",
+            show: this.showCol("actions"),
+          },
+        ],
+      };
     },
     maxStars(): number {
       switch (this.newEvent.name) {

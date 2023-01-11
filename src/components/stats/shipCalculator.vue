@@ -168,14 +168,7 @@
             <table
               class="table table-bordered table-dark table-sm table-striped swgoh-table output-table"
             >
-              <thead class="text-center align-middle">
-                <tr>
-                  <th></th>
-                  <th>Current</th>
-                  <th>Projected</th>
-                  <th>Difference</th>
-                </tr>
-              </thead>
+              <TableHeader :header="header" />
               <tbody class="text-center align-middle">
                 <tr v-for="stat in stats" :key="stat.label">
                   <td>{{ stat.label }}</td>
@@ -226,6 +219,7 @@ import {
   multiplierMap,
   relicLevelMap,
 } from "types/pilots";
+import { iTableHead } from "types/general";
 
 interface Crew {
   stars: number;
@@ -270,6 +264,28 @@ export default defineComponent({
   computed: {
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData", "shipsList"]),
+    header(): iTableHead {
+      return {
+        headers: [
+          {
+            label: "",
+            show: true,
+          },
+          {
+            label: "Current",
+            show: true,
+          },
+          {
+            label: "Projected",
+            show: true,
+          },
+          {
+            label: "Difference",
+            show: true,
+          },
+        ],
+      };
+    },
     stats(): any {
       const baseSpeed = this.selected?.statMultipliers?.baseSpeed ?? 0;
       const baseProtection =

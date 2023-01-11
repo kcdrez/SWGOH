@@ -4,20 +4,7 @@
       class="table table-bordered table-dark table-sm table-striped"
       :class="[accessLevel < 3 ? 'mb-3' : 'mb-0']"
     >
-      <thead class="sticky-header show-on-mobile">
-        <tr class="sort-methods">
-          <th class="show-on-mobile">
-            <SortMethods
-              :sortByOptions="sortByOptions"
-              :sortMethod="sortMethod"
-              :sortDir="sortDir"
-              @methodChange="sortMethod = $event"
-              @directionChange="sortDir = $event"
-            />
-          </th>
-        </tr>
-        <ColumnHeaders class="text-center align-middle" :headers="headers" />
-      </thead>
+      <TableHeader :headers="headers" />
       <tbody>
         <tr
           v-for="event in filteredEvents"
@@ -167,22 +154,20 @@ import { mapActions, mapState } from "vuex";
 
 import { ITerritoryWarEvent } from "types/guild";
 import { round2Decimals, setupColumnEvents, setupSorting, unvue } from "utils";
-import { iHeader } from "types/general";
+import { iTableHead } from "types/general";
 
 const storageKey = "territoryWarTable";
 
 export default defineComponent({
   name: "TerritoryWarTable",
   setup(props) {
-    const { sortDir, sortMethod, searchText, sortBy, sortIcon } =
-      setupSorting(storageKey);
+    const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(storageKey);
     const list = toRefs(props).selectedColumns;
     const { showCol } = setupColumnEvents(list);
 
     return {
       sortDir,
       sortMethod,
-      searchText,
       sortBy,
       sortIcon,
       showCol,
@@ -206,91 +191,82 @@ export default defineComponent({
         win: true,
         guildGP: 200,
       },
-      sortByOptions: [
-        {
-          value: "date",
-          label: "Date",
-        },
-        {
-          value: "stars",
-          label: "Stars",
-        },
-        {
-          value: "get1",
-          label: "GET1",
-        },
-        {
-          value: "get2",
-          label: "GET2",
-        },
-        // {
-        //   value: "get3",
-        //   label: "GET3",
-        // },
-        {
-          value: "zetas",
-          label: "Zetas",
-        },
-      ],
     } as any;
   },
   computed: {
     ...mapState("guild", ["territoryWarEvents", "accessLevel"]),
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Completion Date",
-          show: this.showCol("date"),
-          icon: this.sortIcon("date"),
-          click: () => {
-            this.sortBy("date");
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Completion Date",
+            show: this.showCol("date"),
+            sortMethodShow: true,
+            icon: this.sortIcon("date"),
+            click: () => {
+              this.sortBy("date");
+            },
           },
-        },
-        {
-          label: "Win/Loss",
-          show: this.showCol("win_loss"),
-          icon: this.sortIcon("win_loss"),
-          click: () => {
-            this.sortBy("win_loss");
+          {
+            label: "Win/Loss",
+            show: this.showCol("win_loss"),
+            sortMethodShow: true,
+            icon: this.sortIcon("win_loss"),
+            click: () => {
+              this.sortBy("win_loss");
+            },
           },
-        },
-        {
-          label: "GET1 Currency",
-          show: this.showCol("get1"),
-          icon: this.sortIcon("get1"),
-          click: () => {
-            this.sortBy("get1");
+          {
+            label: "GET1 Currency",
+            show: this.showCol("get1"),
+            sortMethodShow: true,
+            icon: this.sortIcon("get1"),
+            click: () => {
+              this.sortBy("get1");
+            },
           },
-        },
-        {
-          label: "GET2 Currency",
-          show: this.showCol("get2"),
-          icon: this.sortIcon("get2"),
-          click: () => {
-            this.sortBy("get2");
+          {
+            label: "GET2 Currency",
+            show: this.showCol("get2"),
+            sortMethodShow: true,
+            icon: this.sortIcon("get2"),
+            click: () => {
+              this.sortBy("get2");
+            },
           },
-        },
-        // {
-        //   label: "GET3 Currency",
-        //   show: this.showCol("get3"),
-        //   icon: this.sortIcon("get3"),
-        //   click: () => {
-        //     this.sortBy("get3");
-        //   },
-        // },
-        {
-          label: "Zetas",
-          show: this.showCol("zetas"),
-          icon: this.sortIcon("zetas"),
-          click: () => {
-            this.sortBy("zetas");
+          {
+            label: "GET3 Currency",
+            show: false, //this.showCol("get3"),
+            sortMethodShow: false,
+            icon: this.sortIcon("get3"),
+            click: () => {
+              this.sortBy("get3");
+            },
           },
-        },
-        {
-          label: "Actions",
-          show: this.showCol("actions"),
-        },
-      ];
+          {
+            label: "Zetas",
+            show: this.showCol("zetas"),
+            sortMethodShow: true,
+            icon: this.sortIcon("zetas"),
+            click: () => {
+              this.sortBy("zetas");
+            },
+          },
+          {
+            label: "Actions",
+            show: this.showCol("actions"),
+          },
+        ],
+      };
     },
     filteredEvents(): ITerritoryWarEvent[] {
       return this.territoryWarEvents

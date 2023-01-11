@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 
 import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
-import { ITeam, SpeedConfig, Team } from "types/teams";
+import { ITeam, SpeedConfig, speedValueFromMod, Team } from "types/teams";
 import { Mod } from "types/unit";
 import { apiClient } from "../api/api-client";
 
@@ -24,18 +24,8 @@ const store = {
   },
   getters: {
     speedValueFromMod(_state: State) {
-      return (mod: Mod | undefined): string => {
-        if (mod) {
-          if (mod.primaryStat.unitStat === 5) {
-            return mod.primaryStat.value.toString();
-          } else {
-            const match = mod.secondaryStat.find((x) => x.unitStat === 5);
-            if (match) {
-              return match.value.toString();
-            }
-          }
-        }
-        return "-";
+      return (mod: Mod | undefined): number => {
+        return speedValueFromMod(mod);
       };
     },
   },

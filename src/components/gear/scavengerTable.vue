@@ -263,30 +263,30 @@ export default defineComponent({
         },
       ];
     },
-    cols(): { text: string; value: any }[] {
+    cols(): { label: string; value: any }[] {
       const list = [
         {
-          text: "Icon",
+          label: "Icon",
           value: "icon",
         },
         {
-          text: "Name",
+          label: "Name",
           value: "name",
         },
         {
-          text: "Amount",
+          label: "Amount",
           value: "amount",
         },
         {
-          text: "Efficiency Rating",
+          label: "Efficiency Rating",
           value: "priority",
         },
         {
-          text: "Best Locations",
+          label: "Best Locations",
           value: "locations",
         },
         {
-          text: "Notes",
+          label: "Notes",
           value: "notes",
         },
       ];

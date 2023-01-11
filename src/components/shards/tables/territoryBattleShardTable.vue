@@ -3,26 +3,7 @@
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
-      <thead class="sticky-header show-on-mobile">
-        <tr class="sort-methods" v-if="showUnitName">
-          <th class="show-on-mobile">
-            <SortMethods
-              :sortByOptions="sortByOptions"
-              :sortMethod="sortMethod"
-              :sortDir="sortDir"
-              showSearch
-              @methodChange="sortMethod = $event"
-              @directionChange="sortDir = $event"
-              @searchChange="searchText = $event"
-            />
-          </th>
-        </tr>
-        <ColumnHeaders
-          class="text-center align-middle"
-          :headers="headers"
-          @searchChange="searchText = $event"
-        />
-      </thead>
+      <TableHeader :header="header" />
       <tbody>
         <tr
           v-for="unit in filteredUnitList"
@@ -82,11 +63,11 @@ import ShardsOwned from "../shardsOwned.vue";
 import UnitIcon from "components/units/unitIcon.vue";
 import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
-import Timestamp from "components/timestamp.vue";
+import Timestamp from "components/general/timestamp.vue";
 import { Unit, unitsByPriority } from "types/unit";
 import { estimatedTime } from "types/guild";
 import { setupColumnEvents, setupSorting } from "utils";
-import { iHeader } from "types/general";
+import { iHeader, iTableHead } from "types/general";
 
 export default defineComponent({
   name: "TerritoryBattleShardTable",
@@ -147,80 +128,82 @@ export default defineComponent({
   data() {
     return {
       loading: true,
-      sortByOptions: [
-        {
-          value: "name",
-          label: "Name",
-          show: this.showUnitName,
-        },
-        {
-          value: "location",
-          label: "Location",
-        },
-        {
-          value: "progress",
-          label: "Progress",
-        },
-        {
-          value: "time",
-          label: "Time Remaining",
-        },
-      ],
     };
   },
   computed: {
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Unit Name",
-          show: this.showUnitName && this.showCol("name"),
-          input: {
-            type: "input",
-            classes: "mx-auto my-1 w-75",
-            placeholder: "Search",
-          },
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
-          },
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
         },
-        {
-          label: "Locations",
-          show: this.showCol("locations"),
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
         },
-        {
-          label: "Shards Owned",
-          show: this.showCol("owned"),
-          icon: this.sortIcon("owned"),
-          click: () => {
-            this.sortBy("owned");
+        headers: [
+          {
+            label: "Unit Name",
+            show: this.showUnitName && this.showCol("name"),
+            sortMethodShow: this.showUnitName,
+            input: {
+              type: "input",
+              classes: "mx-auto my-1 w-75",
+              placeholder: "Search",
+              value: this.searchText,
+              change: (val: string) => {
+                this.searchText = val;
+              },
+            },
+            icon: this.sortIcon("name"),
+            click: () => {
+              this.sortBy("name");
+            },
           },
-        },
-        {
-          label: "Shards Remaining",
-          show: this.showCol("remaining"),
-          icon: this.sortIcon("remaining"),
-          click: () => {
-            this.sortBy("remaining");
+          {
+            label: "Locations",
+            show: this.showCol("locations"),
+            sortMethodShow: true,
           },
-        },
-        {
-          label: "Progress",
-          show: this.showCol("progress"),
-          icon: this.sortIcon("progress"),
-          click: () => {
-            this.sortBy("progress");
+          {
+            label: "Shards Owned",
+            show: this.showCol("owned"),
+            sortMethodShow: true,
+            icon: this.sortIcon("owned"),
+            click: () => {
+              this.sortBy("owned");
+            },
           },
-        },
-        {
-          label: "Est. Time",
-          show: this.showUnitName && this.showCol("time"),
-          icon: this.sortIcon("time"),
-          click: () => {
-            this.sortBy("time");
+          {
+            label: "Shards Remaining",
+            show: this.showCol("remaining"),
+            sortMethodShow: true,
+            icon: this.sortIcon("remaining"),
+            click: () => {
+              this.sortBy("remaining");
+            },
           },
-        },
-      ];
+          {
+            label: "Progress",
+            show: this.showCol("progress"),
+            sortMethodShow: true,
+            icon: this.sortIcon("progress"),
+            click: () => {
+              this.sortBy("progress");
+            },
+          },
+          {
+            label: "Est. Time",
+            show: this.showUnitName && this.showCol("time"),
+            sortMethodShow: this.showUnitName,
+            icon: this.sortIcon("time"),
+            click: () => {
+              this.sortBy("time");
+            },
+          },
+        ],
+      };
     },
     filteredUnitList(): Unit[] {
       return this.units

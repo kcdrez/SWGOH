@@ -3,13 +3,7 @@
     v-if="players"
     class="table table-bordered table-dark table-sm table-striped swgoh-table"
   >
-    <thead class="sticky-header show-on-mobile align-middle text-center">
-      <ColumnHeaders
-        class="text-center align-middle"
-        :headers="headers"
-        @searchChange="searchText = $event"
-      />
-    </thead>
+    <TableHeader :headers="headers" />
     <tbody class="align-center text-center">
       <tr v-for="player in filteredPlayers" :key="player.allyCode">
         <td>{{ player.name }}</td>
@@ -56,7 +50,7 @@ import { mapState } from "vuex";
 
 import { setupColumnEvents, setupSorting } from "utils";
 import { Unit } from "types/unit";
-import { iHeader } from "types/general";
+import { iHeader, iTableHead } from "types/general";
 
 interface dataModel {
   _playersJoined: string[];
@@ -116,7 +110,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState("guild", ["accessLevel"]),
-    headers(): iHeader[] {
+    header(): iTableHead {
       const unitHeaders: iHeader[] = this.units.map((unit) => {
         return {
           label: unit.name,
@@ -128,10 +122,80 @@ export default defineComponent({
         };
       });
 
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Name",
+            show: true,
+            icon: this.sortIcon("name"),
+            input: {
+              type: "input",
+              classes: "mx-auto my-1 w-75",
+              placeholder: "Search",
+              change: (val: string) => {
+                this.searchText = val;
+              },
+              value: this.searchText,
+            },
+            click: () => {
+              this.sortBy("name");
+            },
+          },
+          {
+            label: "Has Joined?",
+            show: true,
+            icon: this.sortIcon("joined"),
+            click: () => {
+              this.sortBy("joined");
+            },
+            input: {
+              type: "checkbox",
+              placeholder: "Show/Hide Joined",
+              value: false,
+              click: (val: any) => {
+                this.showJoined = val;
+              },
+            },
+          },
+          ...unitHeaders,
+          {
+            label: "TW Omicrons",
+            show: true,
+            icon: this.sortIcon("omicrons"),
+            click: () => {
+              this.sortBy("omicrons");
+            },
+          },
+        ],
+      };
+    },
+    headers(): iHeader[] {
+      const unitHeaders: iHeader[] = this.units.map((unit) => {
+        return {
+          label: unit.name,
+          show: this.showCol(unit.id),
+          sortMethodShow: true,
+          icon: this.sortIcon(unit.id),
+          click: () => {
+            this.sortBy(unit.id);
+          },
+        };
+      });
+
       return [
         {
           label: "Name",
           show: true,
+          sortMethodShow: true,
           icon: this.sortIcon("name"),
           input: {
             type: "input",
@@ -145,6 +209,7 @@ export default defineComponent({
         {
           label: "Has Joined?",
           show: true,
+          sortMethodShow: true,
           icon: this.sortIcon("joined"),
           click: () => {
             this.sortBy("joined");
@@ -162,6 +227,7 @@ export default defineComponent({
         {
           label: "TW Omicrons",
           show: true,
+          sortMethodShow: true,
           icon: this.sortIcon("omicrons"),
           click: () => {
             this.sortBy("omicrons");

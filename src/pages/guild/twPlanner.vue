@@ -133,10 +133,10 @@ export default defineComponent({
     glList(): Unit[] {
       return this.unitList.filter((unit: Unit) => unit.isGL);
     },
-    glColumns(): { text: string; value: string }[] {
+    glColumns(): { label: string; value: string }[] {
       return this.glList.map((x: Unit) => {
         return {
-          text: x.name,
+          label: x.name,
           value: x.id,
         };
       });
@@ -144,10 +144,10 @@ export default defineComponent({
     capShipList(): Unit[] {
       return this.unitList.filter((unit: Unit) => unit.isCapitalShip);
     },
-    capShipColumns(): { text: string; value: string }[] {
+    capShipColumns(): { label: string; value: string }[] {
       return this.capShipList.map((x: Unit) => {
         return {
-          text: x.name,
+          label: x.name,
           value: x.id,
         };
       });

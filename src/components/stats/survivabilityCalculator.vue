@@ -153,32 +153,7 @@
         </div>
         <div class="col-lg-6 col-md-12">
           <table class="table table-bordered table-dark table-sm table-striped">
-            <thead class="show-on-mobile">
-              <tr class="text-center align-middle sort-methods d-md-table-row">
-                <th class="show-on-mobile">
-                  <SortMethods
-                    :sortByOptions="sortByOptions"
-                    :sortMethod="sortMethod"
-                    :sortDir="sortDir"
-                    @methodChange="sortMethod = $event"
-                    @directionChange="sortDir = $event"
-                  >
-                    <template v-slot:inputs>
-                      <div class="input-group input-group-sm my-1">
-                        <span class="input-group-text"
-                          >Primary Stat Count:</span
-                        >
-                        <select class="form-control" v-model="primaryCount">
-                          <option :value="3">3</option>
-                          <option :value="4">4</option>
-                        </select>
-                      </div>
-                    </template>
-                  </SortMethods>
-                </th>
-                <th>Total Survivability</th>
-              </tr>
-            </thead>
+            <TableHeader :header="header" />
             <tbody>
               <tr
                 v-for="(row, index) in rows"
@@ -216,6 +191,7 @@ import { mapGetters, mapState } from "vuex";
 
 import { setupEvents } from "utils";
 import { Unit } from "types/unit";
+import { iTableHead } from "types/general";
 
 interface dataModel {
   selected: null | Unit;
@@ -237,7 +213,6 @@ interface dataModel {
   sortMethod: "total" | "sets" | "primaries";
   sortDir: "asc" | "desc";
   primaryCount: number;
-  sortByOptions: { label: string; value: string }[];
 }
 
 export default defineComponent({
@@ -264,25 +239,61 @@ export default defineComponent({
       sortDir: "desc",
       primaryCount: 3,
       sixDotMods: 0,
-      sortByOptions: [
-        {
-          value: "total",
-          label: "Total Survivability",
-        },
-        {
-          value: "sets",
-          label: "Sets",
-        },
-        {
-          value: "primaries",
-          label: "Primaries",
-        },
-      ],
     } as dataModel;
   },
   computed: {
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
+    header(): iTableHead {
+      return {
+        classes: "show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: "total" | "sets" | "primaries") => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Sets",
+            sortMethodShow: true,
+            value: "sets",
+          },
+          {
+            label: "Primaries",
+            show: true,
+            sortMethodShow: true,
+            value: "primaries",
+            input: {
+              type: "list",
+              label: "Primary Stat Count",
+              value: this.primaryCount,
+              change: (val: any) => {
+                this.primaryCount = val;
+              },
+              options: [
+                {
+                  label: "3",
+                  value: 3,
+                },
+                {
+                  label: "4",
+                  value: 4,
+                },
+              ],
+            },
+          },
+          {
+            label: "Total Survivability",
+            show: true,
+            sortMethodShow: true,
+            value: "total",
+          },
+        ],
+      };
+    },
     rows(): {
       value: number;
       maximum?: boolean;

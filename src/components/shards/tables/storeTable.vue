@@ -3,26 +3,7 @@
     <table
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
-      <thead class="sticky-header show-on-mobile">
-        <tr class="sort-methods" v-if="showUnitName">
-          <th class="show-on-mobile">
-            <SortMethods
-              :sortByOptions="sortByOptions"
-              :sortMethod="sortMethod"
-              :sortDir="sortDir"
-              showSearch
-              @methodChange="sortMethod = $event"
-              @directionChange="sortDir = $event"
-              @searchChange="searchText = $event"
-            />
-          </th>
-        </tr>
-        <ColumnHeaders
-          class="text-center align-middle"
-          :headers="headers"
-          @searchChange="searchText = $event"
-        />
-      </thead>
+      <TableHeader :header="header" />
       <tbody>
         <tr
           v-for="unit in filteredUnitList"
@@ -122,14 +103,14 @@ import ShardsOwned from "../shardsOwned.vue";
 import UnitIcon from "components/units/unitIcon.vue";
 import NodesPerDay from "../nodesPerDay.vue";
 import ShardPriority from "../shardPriority.vue";
-import Timestamp from "components/timestamp.vue";
+import Timestamp from "components/general/timestamp.vue";
 import Wallet from "../wallet.vue";
 import DailyCurrency from "../dailyCurrency.vue";
 import { Unit, unitsByPriority } from "types/unit";
 import { mapState } from "vuex";
 import { CurrencyTypeConfig, estimatedTime } from "types/currency";
 import { setupColumnEvents, setupSorting } from "utils";
-import { iHeader } from "types/general";
+import { iTableHead } from "types/general";
 
 export default defineComponent({
   name: "StoreTable",
@@ -207,110 +188,115 @@ export default defineComponent({
   data() {
     return {
       loading: true,
-      sortByOptions: [
-        {
-          value: "name",
-          label: "Name",
-          show: this.showUnitName,
-        },
-        {
-          value: "location",
-          label: "Location",
-        },
-        {
-          value: "progress",
-          label: "Progress",
-        },
-        {
-          value: "time",
-          label: "Time Remaining",
-        },
-      ],
     };
   },
   computed: {
     ...mapState("currency", ["wallet", "dailyCurrency"]),
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Unit Name",
-          show: this.showUnitName && this.showCol("name"),
-          input: {
-            type: "input",
-            classes: "mx-auto my-1 w-75",
-            placeholder: "Search",
-          },
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
-          },
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
         },
-        {
-          label: "Shards Owned",
-          show: this.showCol("owned"),
-          icon: this.sortIcon("owned"),
-          click: () => {
-            this.sortBy("owned");
-          },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
         },
-        {
-          label: "Shards Remaining",
-          show: this.showCol("remaining"),
-          icon: this.sortIcon("remaining"),
-          click: () => {
-            this.sortBy("remaining");
+        headers: [
+          {
+            label: "Unit Name",
+            show: this.showUnitName && this.showCol("name"),
+            sortMethodShow: this.showUnitName,
+            input: {
+              type: "input",
+              classes: "mx-auto my-1 w-75",
+              placeholder: "Search",
+              value: this.searchText,
+              change: (val: string) => {
+                this.searchText = val;
+              },
+            },
+            icon: this.sortIcon("name"),
+            click: () => {
+              this.sortBy("name");
+            },
           },
-        },
-        {
-          label: "Progress",
-          show: this.showCol("progress"),
-          icon: this.sortIcon("progress"),
-          click: () => {
-            this.sortBy("progress");
+          {
+            label: "Shards Owned",
+            show: this.showCol("owned"),
+            sortMethodShow: true,
+            icon: this.sortIcon("owned"),
+            click: () => {
+              this.sortBy("owned");
+            },
           },
-        },
-        {
-          label: "Currency Owned",
-          show: this.showCol("wallet"),
-          icon: this.sortIcon("wallet"),
-          click: () => {
-            this.sortBy("wallet");
+          {
+            label: "Shards Remaining",
+            show: this.showCol("remaining"),
+            sortMethodShow: true,
+            icon: this.sortIcon("remaining"),
+            click: () => {
+              this.sortBy("remaining");
+            },
           },
-        },
-        {
-          label: "Daily Currency Obtained",
-          show: this.showUnitName && this.showCol("dailyCurrency"),
-          icon: this.sortIcon("dailyCurrency"),
-          click: () => {
-            this.sortBy("dailyCurrency");
+          {
+            label: "Progress",
+            show: this.showCol("progress"),
+            sortMethodShow: true,
+            icon: this.sortIcon("progress"),
+            click: () => {
+              this.sortBy("progress");
+            },
           },
-        },
-        {
-          label: "Remaining Currency",
-          show: this.showCol("remainingCurreny"),
-          icon: this.sortIcon("remainingCurreny"),
-          click: () => {
-            this.sortBy("remainingCurreny");
+          {
+            label: "Currency Owned",
+            show: this.showCol("wallet"),
+            sortMethodShow: true,
+            icon: this.sortIcon("wallet"),
+            click: () => {
+              this.sortBy("wallet");
+            },
           },
-        },
-        {
-          label: "Est. Time",
-          show: this.showCol("time"),
-          icon: this.sortIcon("time"),
-          click: () => {
-            this.sortBy("time");
+          {
+            label: "Daily Currency Obtained",
+            show: this.showUnitName && this.showCol("dailyCurrency"),
+            sortMethodShow: this.showUnitName,
+            icon: this.sortIcon("dailyCurrency"),
+            click: () => {
+              this.sortBy("dailyCurrency");
+            },
           },
-        },
-        {
-          label: "Priority",
-          show: this.showCol("priority"),
-          icon: this.sortIcon("priority"),
-          maxWidth: "150px",
-          click: () => {
-            this.sortBy("priority");
+          {
+            label: "Remaining Currency",
+            show: this.showCol("remainingCurrency"),
+            sortMethodShow: true,
+            icon: this.sortIcon("remainingCurrency"),
+            click: () => {
+              this.sortBy("remainingCurrency");
+            },
           },
-        },
-      ];
+          {
+            label: "Est. Time",
+            show: this.showCol("time"),
+            sortMethodShow: true,
+            icon: this.sortIcon("time"),
+            click: () => {
+              this.sortBy("time");
+            },
+          },
+          {
+            label: "Priority",
+            show: this.showCol("priority"),
+            sortMethodShow: true,
+            icon: this.sortIcon("priority"),
+            maxWidth: "150px",
+            click: () => {
+              this.sortBy("priority");
+            },
+          },
+        ],
+      };
     },
     filteredUnitList(): Unit[] {
       return this.units

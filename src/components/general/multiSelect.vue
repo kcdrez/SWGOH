@@ -24,13 +24,15 @@
           >
         </li>
         <li v-for="(option, index) in options" :key="index">
-          <input
-            type="checkbox"
-            :id="index.toString()"
-            :value="option.value"
-            v-model="selected"
-          />
-          <label :for="index.toString()">{{ option.text }}</label>
+          <template v-if="option.value">
+            <input
+              type="checkbox"
+              :id="index.toString()"
+              :value="option.value"
+              v-model="selected"
+            />
+            <label :for="index.toString()">{{ option.label }}</label>
+          </template>
         </li>
       </ul>
     </div>
@@ -44,12 +46,7 @@ export default defineComponent({
   name: "MultiSelect",
   props: {
     options: {
-      type: Array,
-      validator: (arr: any[]) => {
-        return arr.every((x) => {
-          return !!x.text && !!x.value;
-        });
-      },
+      type: Array as () => { label: string; value: any }[],
       required: true,
     },
     label: {

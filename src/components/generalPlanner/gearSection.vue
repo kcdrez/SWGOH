@@ -67,46 +67,46 @@ export default defineComponent({
       });
       return list;
     },
-    cols(): { text: string; value: any }[] {
+    cols(): { label: string; value: any }[] {
       const list = [
         {
-          text: "Icon",
+          label: "Icon",
           value: "icon",
         },
         {
-          text: "Name",
+          label: "Name",
           value: "name",
         },
         {
-          text: "Mark",
+          label: "Mark",
           value: "mark",
         },
         {
-          text: "Locations",
+          label: "Locations",
           value: "locations",
         },
         {
-          text: "Amount Owned",
+          label: "Amount Owned",
           value: "owned",
         },
         {
-          text: "Amount Needed",
+          label: "Amount Needed",
           value: "needed",
         },
         {
-          text: "Progress",
+          label: "Progress",
           value: "progress",
         },
         {
-          text: "Estimated Time",
+          label: "Estimated Time",
           value: "time",
         },
         {
-          text: "Required By",
+          label: "Required By",
           value: "required",
         },
         {
-          text: "Actions",
+          label: "Actions",
           value: "actions",
         },
       ];

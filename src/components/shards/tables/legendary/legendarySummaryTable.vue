@@ -9,14 +9,7 @@
       <table
         class="table table-bordered table-dark table-sm table-striped swgoh-table"
       >
-        <thead>
-          <tr class="text-center align-middle">
-            <th width="50%">
-              <span>Unit Name</span>
-            </th>
-            <th>Progress</th>
-          </tr>
-        </thead>
+        <TableHeader :header="headerData" />
         <tbody>
           <tr v-for="unit in unitList" :key="unit.id">
             <td class="align-middle text-center">
@@ -42,6 +35,7 @@ import { setupEvents } from "utils";
 import { totalProgress, getPrerequisites, Unit } from "types/unit";
 import { NodeCharacter } from "types/shards";
 import UnitIcon from "components/units/unitIcon.vue";
+import { iTableHead } from "types/general";
 
 export default defineComponent({
   name: "GLChecklistPage",
@@ -66,6 +60,22 @@ export default defineComponent({
   },
   computed: {
     ...mapState("shards", ["shardFarming"]),
+    headerData(): iTableHead {
+      return {
+        headers: [
+          {
+            label: "Unit Name",
+            show: true,
+            maxWidth: "50%",
+          },
+          {
+            label: "Progress",
+            show: true,
+            maxWidth: "50%",
+          },
+        ],
+      };
+    },
   },
   methods: {
     totalProgress(

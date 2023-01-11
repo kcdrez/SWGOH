@@ -60,12 +60,11 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
       v-if="teamUnits.length > 0"
     >
-      <thead class="align-middle text-center">
-        <tr>
+      <TableHeader :header="header">
+        <template v-slot:firstRow>
           <th colspan="100%">{{ missionText }}</th>
-        </tr>
-        <ColumnHeaders class="text-center align-middle" :headers="headers" />
-      </thead>
+        </template>
+      </TableHeader>
       <tbody class="align-middle text-center">
         <template v-for="unit in teamUnits" :key="unit.id">
           <tr>
@@ -150,7 +149,7 @@ import { mapGetters, mapState } from "vuex";
 import { Unit } from "types/unit";
 import { tbRecommended } from "types/guild";
 import RequirementIcon from "components/shards/tables/legendary/requirementIcon.vue";
-import { iHeader } from "types/general";
+import { iHeader, iTableHead } from "types/general";
 
 interface dataModel {
   map: "LSRepublicOffensive" | "DSSeparatistMight" | "";
@@ -179,28 +178,30 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapGetters("player", ["unitData"]),
     ...mapGetters("unit", ["unitName"]),
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Name",
-          show: true,
-          maxWidth: "20%",
-        },
-        {
-          label: "Stats",
-          show: this.showStats,
-          maxWidth: "60%",
-        },
-        {
-          label: "Level",
-          show: this.showLevels,
-          maxWidth: "20%",
-        },
-        {
-          label: "Zetas",
-          show: true,
-        },
-      ];
+    header(): iTableHead {
+      return {
+        headers: [
+          {
+            label: "Name",
+            show: true,
+            maxWidth: "20%",
+          },
+          {
+            label: "Stats",
+            show: this.showStats,
+            maxWidth: "60%",
+          },
+          {
+            label: "Level",
+            show: this.showLevels,
+            maxWidth: "20%",
+          },
+          {
+            label: "Zetas",
+            show: true,
+          },
+        ],
+      };
     },
     mapOptions() {
       return tbRecommended.map((x) => {

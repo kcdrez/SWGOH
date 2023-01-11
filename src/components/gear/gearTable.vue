@@ -4,28 +4,7 @@
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
       v-if="gearList.length > 0"
     >
-      <thead class="sticky-header show-on-mobile">
-        <tr class="sort-methods">
-          <th class="show-on-mobile">
-            <SortMethods
-              :sortByOptions="sortByOptions"
-              :sortMethod="sortMethod"
-              :sortDir="sortDir"
-              showSearch
-              showButton
-              @methodChange="sortMethod = $event"
-              @directionChange="sortDir = $event"
-              @searchChange="searchText = $event"
-              @buttonClick="showResetConfirm = true"
-            />
-          </th>
-        </tr>
-        <ColumnHeaders
-          class="text-center align-middle"
-          :headers="headers"
-          @searchChange="searchText = $event"
-        />
-      </thead>
+      <TableHeader :header="header" />
       <tbody>
         <tr v-if="filteredSalvageList.length === 0">
           <td colspan="100%" class="empty-search">
@@ -194,10 +173,10 @@ import { mapActions, mapState } from "vuex";
 import { Gear } from "types/gear";
 import OwnedAmount from "components/gear/gearOwned.vue";
 import GearIcon from "components/gear/gearIcon.vue";
-import Timestamp from "components/timestamp.vue";
+import Timestamp from "components/general/timestamp.vue";
 import GearText from "components/gear/gearText.vue";
 import { setupColumnEvents, setupSorting } from "utils";
-import { iHeader } from "types/general";
+import { iTableHead } from "types/general";
 
 export default defineComponent({
   name: "GearTable",
@@ -244,42 +223,6 @@ export default defineComponent({
   data() {
     return {
       showResetConfirm: false,
-      sortByOptions: [
-        //todo combine with headers computed somehow
-        {
-          value: "name",
-          label: "Name",
-        },
-        {
-          value: "mark",
-          label: "Mark",
-        },
-        {
-          value: "location",
-          label: "Locations",
-        },
-        {
-          value: "owned",
-          label: "Owned",
-        },
-        {
-          value: "needed",
-          label: "Needed",
-        },
-        {
-          value: "progress",
-          label: "Progress",
-        },
-        {
-          value: "required",
-          label: "Required By",
-          show: this.showRequiredByUnit,
-        },
-        {
-          value: "time",
-          label: "Time Remaining",
-        },
-      ],
     };
   },
   computed: {
@@ -359,99 +302,123 @@ export default defineComponent({
         return gear.irrelevant;
       });
     },
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Icon",
-          show: this.showCol("icon"),
+    header(): iTableHead {
+      return {
+        classes: "sticky-header show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
         },
-        {
-          label: "Name",
-          show: this.showCol("name"),
-          maxWidth: "300px",
-          input: {
-            type: "input",
-            classes: "mx-auto my-1 w-75",
-            placeholder: "Search",
-          },
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
-          },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
         },
-        {
-          label: "Mark",
-          show: this.showCol("mark"),
-          icon: this.sortIcon("mark"),
-          click: () => {
-            this.sortBy("mark");
+        headers: [
+          {
+            label: "Icon",
+            show: this.showCol("icon"),
           },
-        },
-        {
-          label: "Locations",
-          maxWidth: "150px",
-          show: this.showCol("locations"),
-          icon: this.sortIcon("locations"),
-          click: () => {
-            this.sortBy("locations");
+          {
+            label: "Name",
+            show: this.showCol("name"),
+            sortMethodShow: true,
+            maxWidth: "300px",
+            input: {
+              type: "input",
+              classes: "mx-auto my-1 w-75",
+              placeholder: "Search by Name",
+              label: "Search",
+              value: this.searchText,
+              change: (val: string) => {
+                this.searchText = val;
+              },
+              click: () => {
+                this.sortBy("name");
+              },
+            },
+            icon: this.sortIcon("name"),
           },
-        },
-        {
-          label: "Owned",
-          maxWidth: "125px",
-          show: this.showCol("owned"),
-          icon: this.sortIcon("owned"),
-          title: "Amount of gear owned",
-          input: {
-            type: "button",
-            placeholder: "Reset",
-            classes: "btn btn-sm btn-primary",
+          {
+            label: "Mark",
+            show: this.showCol("mark"),
+            sortMethodShow: true,
+            icon: this.sortIcon("mark"),
             click: () => {
-              this.showResetConfirm = true;
+              this.sortBy("mark");
             },
           },
-          click: () => {
-            this.sortBy("owned");
+          {
+            label: "Locations",
+            maxWidth: "150px",
+            show: this.showCol("locations"),
+            sortMethodShow: true,
+            icon: this.sortIcon("locations"),
+            click: () => {
+              this.sortBy("locations");
+            },
           },
-        },
-        {
-          label: "Needed",
-          maxWidth: "125px",
-          show: this.showCol("needed"),
-          icon: this.sortIcon("needed"),
-          title: "Amount of gear needed for all characters being tracked",
-          click: () => {
-            this.sortBy("needed");
+          {
+            label: "Owned",
+            maxWidth: "125px",
+            show: this.showCol("owned"),
+            sortMethodShow: true,
+            icon: this.sortIcon("owned"),
+            title: "Amount of gear owned",
+            input: {
+              type: "button",
+              placeholder: "Reset",
+              classes: "btn btn-sm btn-primary",
+              click: () => {
+                this.showResetConfirm = true;
+              },
+            },
+            click: () => {
+              this.sortBy("owned");
+            },
           },
-        },
-        {
-          label: "Progress",
-          maxWidth: "145px",
-          show: this.showCol("progress"),
-          icon: this.sortIcon("progress"),
-          click: () => {
-            this.sortBy("progress");
+          {
+            label: "Needed",
+            maxWidth: "125px",
+            show: this.showCol("needed"),
+            sortMethodShow: true,
+            icon: this.sortIcon("needed"),
+            title: "Amount of gear needed for all characters being tracked",
+            click: () => {
+              this.sortBy("needed");
+            },
           },
-        },
-        {
-          label: "Required By",
-          maxWidth: "125px",
-          show: this.showRequiredByUnit && this.showCol("required"),
-        },
-        {
-          label: "Est. Time",
-          maxWidth: "125px",
-          show: this.showCol("time"),
-          icon: this.sortIcon("time"),
-          click: () => {
-            this.sortBy("time");
+          {
+            label: "Progress",
+            maxWidth: "145px",
+            show: this.showCol("progress"),
+            sortMethodShow: true,
+            icon: this.sortIcon("progress"),
+            click: () => {
+              this.sortBy("progress");
+            },
           },
-        },
-        {
-          label: "Actions",
-          show: this.showCol("actions"),
-        },
-      ];
+          {
+            label: "Required By",
+            maxWidth: "125px",
+            show: this.showRequiredByUnit && this.showCol("required"),
+            sortMethodShow: this.showRequiredByUnit,
+          },
+          {
+            label: "Est. Time",
+            maxWidth: "125px",
+            show: this.showCol("time"),
+            sortMethodShow: true,
+            icon: this.sortIcon("time"),
+            click: () => {
+              this.sortBy("time");
+            },
+          },
+          {
+            label: "Actions",
+            show: this.showCol("actions"),
+          },
+        ],
+      };
     },
   },
   methods: {

@@ -4,24 +4,28 @@
       <th
         v-if="header.show"
         :max-width="header?.maxWidth ?? 'auto'"
-        :class="[header.click ? 'c-pointer' : '', header.classes]"
+        :class="[
+          header.click && !header.input ? 'c-pointer' : '',
+          header.classes,
+        ]"
         :title="header.title"
-        @click="handleClick(header, !!header.click)"
+        @click="handleClick(header, !header.input)"
       >
         <div :class="header.containerClass">
           <template v-if="header.input?.type === 'input'">
             <div
               :class="header.input?.click ? 'c-pointer' : ''"
-              @click="handleClick(header, true)"
+              @click="handleInputClick(header)"
             >
               {{ header.label }}
               <i class="fas mx-1" :class="header.icon" v-if="header.icon"></i>
             </div>
             <input
+              type="text"
               class="form-control form-control-sm"
               :class="header.input.classes"
               :placeholder="header.input.placeholder"
-              v-model="searchText"
+              @keyup="handleChange(header, $event)"
           /></template>
           <template v-else-if="header.input?.type === 'button'">
             <div
@@ -74,6 +78,15 @@
               }}</label>
             </div>
           </template>
+          <template v-else-if="header.input?.type === 'image'">
+            <div
+              :class="header.click ? 'c-pointer' : ''"
+              @click="handleClick(header, true)"
+            >
+              <img :src="header.label" />
+              <i class="fas mx-1" :class="header.icon" v-if="header.icon"></i>
+            </div>
+          </template>
           <template v-else>
             {{ header.label }}
             <i class="fas mx-1" :class="header.icon" v-if="header.icon"></i>
@@ -100,13 +113,14 @@ export default defineComponent({
   emits: ["searchChange"],
   data() {
     return {
-      searchText: "",
       value: null,
     };
   },
   watch: {
-    searchText: _.debounce(function (this: any, newVal: String) {
-      this.$emit("searchChange", newVal);
+    searchText: _.debounce(function (this: any, newVal: string) {
+      if (!!newVal) {
+        this.$emit("searchChange", newVal);
+      }
     }, 500),
   },
   methods: {
@@ -114,17 +128,24 @@ export default defineComponent({
       if (header.click) {
         if (checkClickable) {
           header.click();
-        } else if (header.click) {
-          // header.click();
         }
       }
     },
     handleInputClick(header: iHeader, data?: any) {
-      console.log(data);
       if (header.input?.click) {
         header.input.click(data);
       }
     },
+    handleChange: _.debounce(function (
+      this: any,
+      header: iHeader,
+      event: KeyboardEvent
+    ) {
+      if (header.input?.change && event) {
+        header.input.change((event.target as HTMLInputElement).value);
+      }
+    },
+    500),
   },
 });
 </script>
