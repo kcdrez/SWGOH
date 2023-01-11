@@ -17,21 +17,21 @@
         >
           <TableHeader :header="header" />
           <tbody>
-            <tr v-for="item in player.goalList" :key="item.id">
+            <tr v-for="goal in filteredGoalList" :key="goal.id">
               <td class="align-middle text-center">
                 <router-link
                   :to="{
                     name: 'GoalDetails',
                     params: {
-                      goalName: item.name.replace(/\s/g, '').toLowerCase(),
+                      goalName: goal.name.replace(/\s/g, '').toLowerCase(),
                     },
                   }"
-                  >{{ item.name }}</router-link
+                  >{{ goal.name }}</router-link
                 >
               </td>
               <td class="align-middle text-center">
                 <ProgressBar
-                  :percent="totalProgress(item.list, 'requirement')"
+                  :percent="totalProgress(goal.list, 'requirement')"
                 />
               </td>
             </tr>
@@ -89,7 +89,7 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 
-import { setupEvents } from "utils";
+import { setupEvents, setupSorting } from "utils";
 import { totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import GoalsTable from "components/shards/progress/goalsTable.vue";
@@ -100,6 +100,18 @@ const storageKey = "goalListPage";
 
 export default defineComponent({
   name: "GoalsPage",
+  setup() {
+    const { sortDir, sortMethod, sortBy, sortIcon, searchText } =
+      setupSorting(storageKey);
+
+    return {
+      sortDir,
+      sortMethod,
+      sortBy,
+      sortIcon,
+      searchText,
+    };
+  },
   components: {
     GoalsTable,
     Modal,
@@ -115,7 +127,7 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     header(): iTableHead {
       return {
-        classes: "sticky-header show-on-mobile",
+        classes: "show-on-mobile",
         sortMethod: this.sortMethod,
         sortDir: this.sortDir,
         methodChange: (val: string) => {
@@ -129,14 +141,60 @@ export default defineComponent({
             label: "Goal Name",
             show: true,
             sortMethodShow: true,
+            icon: this.sortIcon("name"),
+            input: {
+              type: "input",
+              classes: "mx-auto my-1 w-75",
+              placeholder: "Search by Name",
+              label: "Search",
+              value: this.searchText,
+              change: (val: string) => {
+                this.searchText = val;
+              },
+              click: () => {
+                this.sortBy("name");
+              },
+            },
           },
           {
             label: "Progress",
             show: true,
             sortMethodShow: true,
+            icon: this.sortIcon("progress"),
+            click: () => {
+              this.sortBy("progress");
+            },
           },
         ],
       };
+    },
+    filteredGoalList() {
+      return this.player.goalList
+        .filter((goal: Goal) => {
+          const name = goal.name.toLowerCase().replace(/\s/g, "");
+          const compare = this.searchText.toLowerCase().replace(/\s/g, "");
+          return name.includes(compare);
+        })
+        .sort((a: Goal, b: Goal) => {
+          if (this.sortMethod === "name") {
+            const compareA = a.name.toLowerCase().replace(/\s/g, "");
+            const compareB = b.name.toLowerCase().replace(/\s/g, "");
+            if (this.sortDir === "asc") {
+              return compareA > compareB ? 1 : -1;
+            } else {
+              return compareA > compareB ? -1 : 1;
+            }
+          } else if (this.sortMethod === "progress") {
+            const progressA = this.totalProgress(a.list);
+            const progressB = this.totalProgress(b.list);
+            if (this.sortDir === "asc") {
+              return progressA - progressB;
+            } else {
+              return progressB - progressA;
+            }
+          }
+          return 0;
+        });
     },
   },
   methods: {

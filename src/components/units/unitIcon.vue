@@ -1,6 +1,6 @@
 <template>
   <div v-if="unit">
-    <Popper hover arrow placement="right" v-if="'name' in unit && unit">
+    <Popper hover arrow placement="right" v-if="'name' in unit">
       <template #content v-if="hideImage">
         <UnitPortrait :unit="unit" :size="size" showGearLevel />
       </template>
