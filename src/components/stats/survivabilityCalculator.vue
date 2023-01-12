@@ -154,30 +154,7 @@
         <div class="col-lg-6 col-md-12">
           <table class="table table-bordered table-dark table-sm table-striped">
             <TableHeader :header="header" />
-            <tbody>
-              <tr
-                v-for="(row, index) in rows"
-                :key="index"
-                class="align-middle text-center"
-              >
-                <td>
-                  <div>{{ row.sets.label }}</div>
-                  <div>{{ row.primaries.label }}</div>
-                </td>
-                <td>
-                  <div
-                    class="rounded text-dark"
-                    :class="{
-                      'bg-danger': row.minimum,
-                      'bg-success': row.maximum,
-                      'bg-info': !row.minimum && !row.maximum,
-                    }"
-                  >
-                    {{ row.value }}
-                  </div>
-                </td>
-              </tr>
-            </tbody>
+            <TableBody :body="body" />
           </table>
         </div>
       </div>
@@ -191,7 +168,7 @@ import { mapGetters, mapState } from "vuex";
 
 import { setupEvents } from "utils";
 import { Unit } from "types/unit";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 interface dataModel {
   selected: null | Unit;
@@ -292,6 +269,33 @@ export default defineComponent({
             value: "total",
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.rows.map((row) => {
+          let classes = "rounded text-dark";
+          classes += row.minimum ? " bg-danger" : "";
+          classes += row.maximum ? " bg-success" : "";
+          classes += !row.minimum && !row.maximum ? " bg-info" : "";
+
+          return {
+            cells: [
+              {
+                show: true,
+                data: `${row.sets.label}&#13;${row.primaries.label}`,
+              },
+              {
+                show: true,
+                type: "html",
+                data: `<div class="${classes}">
+                    ${row.value}
+                  </div>`,
+              },
+            ],
+          };
+        }),
       };
     },
     rows(): {

@@ -16,26 +16,7 @@
           class="table table-bordered table-dark table-sm table-striped swgoh-table"
         >
           <TableHeader :header="header" />
-          <tbody>
-            <tr v-for="goal in filteredGoalList" :key="goal.id">
-              <td class="align-middle text-center">
-                <router-link
-                  :to="{
-                    name: 'GoalDetails',
-                    params: {
-                      goalName: goal.name.replace(/\s/g, '').toLowerCase(),
-                    },
-                  }"
-                  >{{ goal.name }}</router-link
-                >
-              </td>
-              <td class="align-middle text-center">
-                <ProgressBar
-                  :percent="totalProgress(goal.list, 'requirement')"
-                />
-              </td>
-            </tr>
-          </tbody>
+          <TableBody :body="body" />
         </table>
       </div>
     </div>
@@ -94,7 +75,7 @@ import { totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import GoalsTable from "components/shards/progress/goalsTable.vue";
 import Modal from "components/general/modal.vue";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 const storageKey = "goalListPage";
 
@@ -166,6 +147,33 @@ export default defineComponent({
             },
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.filteredGoalList.map((goal: Goal) => {
+          return {
+            cells: [
+              {
+                type: "link",
+                data: {
+                  name: "GoalDetails",
+                  params: {
+                    goalName: goal.name.replace(/\s/g, "").toLowerCase(),
+                  },
+                },
+                value: goal.name,
+                show: true,
+              },
+              {
+                show: true,
+                type: "progress",
+                data: this.totalProgress(goal.list, "requirement"),
+              },
+            ],
+          };
+        }),
       };
     },
     filteredGoalList() {

@@ -8,7 +8,7 @@
       </h3>
       <MultiSelect
         class="select-columns"
-        :options="cols"
+        :options="header.headers"
         :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
@@ -18,50 +18,8 @@
       :ref="storageKey"
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table collapse"
     >
-      <thead class="text-center sticky-header align-middle">
-        <ColumnHeaders :headers="headers" />
-      </thead>
-      <tbody class="align-middle text-center-sm">
-        <tr v-for="gear in list" :key="gear.data.id">
-          <td v-if="showCol('icon')">
-            <GearIcon :gear="gear.data" />
-          </td>
-          <td v-if="showCol('name')">{{ gear.data.name }}</td>
-          <td v-if="showCol('amount')">
-            <span class="row-label">Amount:</span>
-            {{ gear.scavenger.count }}
-          </td>
-          <td v-if="showCol('priority')">
-            <span class="row-label">Efficiency Rating:</span>
-            {{ gear.scavenger.priority }}
-          </td>
-          <td v-if="showCol('locations')">
-            <span class="row-label">Locations:</span>
-            <div
-              v-if="(gear.scavenger.nodes ?? []).length <= 0"
-              class="text-center"
-            >
-              No known farmable locations.
-            </div>
-            <ul class="m-0 no-bullets-sm" v-else>
-              <li
-                v-for="(l, index) in locationLabels(
-                  gear?.scavenger?.nodes ?? []
-                )"
-                :key="index"
-              >
-                {{ l }}
-              </li>
-            </ul>
-          </td>
-          <td
-            v-if="showCol('notes')"
-            :class="{ 'hidden-sm': !gear.scavenger.notes }"
-          >
-            {{ gear.scavenger.notes }}
-          </td>
-        </tr>
-      </tbody>
+      <TableHeader :header="header" />
+      <TableBody :body="body" />
     </table>
   </div>
 </template>
@@ -71,10 +29,9 @@ import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 
 import { Gear, IScavenger } from "types/gear";
-import GearIcon from "components/gear/gearIcon.vue";
 import { FarmingNode } from "types/shards";
 import { setupEvents, setupSorting } from "utils";
-import { iHeader } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 type tScavenger = { data: Gear; scavenger: IScavenger };
 const storageKey = "scavengerTable";
@@ -94,7 +51,6 @@ export default defineComponent({
       sortIcon,
     };
   },
-  components: { GearIcon },
   props: {
     scavengerId: {
       type: String,
@@ -115,6 +71,128 @@ export default defineComponent({
     ...mapState("player", ["player"]),
     ...mapState("shards", ["shardFarming"]),
     ...mapGetters("planner", ["fullUnitList"]),
+    header(): iTableHead {
+      return {
+        classes: "text-center sticky-header align-middle show-on-mobile",
+        sortMethod: this.sortMethod,
+        sortDir: this.sortDir,
+        methodChange: (val: string) => {
+          this.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.sortDir = val;
+        },
+        headers: [
+          {
+            label: "Icon",
+            show: this.showCol("icon"),
+            maxWidth: "100px",
+            value: "icon",
+          },
+          {
+            label: "Name",
+            show: this.showCol("name"),
+            maxWidth: "300px",
+            icon: this.sortIcon("name"),
+            value: "name",
+            click: () => {
+              this.sortBy("name");
+            },
+          },
+          {
+            label: "Amount",
+            show: this.showCol("amount"),
+            maxWidth: "100px",
+            icon: this.sortIcon("amount"),
+            value: "amount",
+            click: () => {
+              this.sortBy("amount");
+            },
+          },
+          {
+            label: "Efficiency Rating",
+            show: this.showCol("priority"),
+            maxWidth: "100px",
+            icon: this.sortIcon("priority"),
+            value: "priority",
+            click: () => {
+              this.sortBy("priority");
+            },
+          },
+          {
+            label: "Best Farming Locations",
+            show: this.showCol("locations"),
+            maxWidth: "300px",
+            icon: this.sortIcon("locations"),
+            value: "locations",
+            click: () => {
+              this.sortBy("locations");
+            },
+          },
+          {
+            label: "Notes",
+            value: "notes",
+            show: this.showCol("notes"),
+            maxWidth: "300px",
+          },
+        ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.list.map((gear: tScavenger) => {
+          return {
+            cells: [
+              {
+                show: this.showCol("icon"),
+                type: "gear",
+                data: gear.data,
+              },
+              {
+                show: this.showCol("name"),
+                data: gear.data.name,
+              },
+              {
+                show: this.showCol("amount"),
+                label: "Amount:",
+                data: gear.scavenger.count,
+              },
+              {
+                show: this.showCol("priority"),
+                label: "Efficiency Rating:",
+                data: gear.scavenger.priority,
+              },
+              {
+                show: this.showCol("locations"),
+                label: "Locations:",
+                type: "list",
+                zeroState: {
+                  show: (gear.scavenger.nodes ?? []).length <= 0,
+                  message: "No known farmable locations.",
+                },
+                data: {
+                  classes: "m-0 no-bullets-sm",
+                  list: this.locationLabels(gear.scavenger.nodes ?? []).map(
+                    (x) => {
+                      return {
+                        id: x,
+                        message: x,
+                      };
+                    }
+                  ),
+                },
+              },
+              {
+                show: this.showCol("notes"),
+                classes: gear.scavenger.notes ? "" : "hidden-sm",
+                data: gear.scavenger.notes,
+              },
+            ],
+          };
+        }),
+      };
+    },
     list(): tScavenger[] {
       return this.gearList
         .reduce((acc: any[], gear: Gear) => {
@@ -212,85 +290,6 @@ export default defineComponent({
           return -1;
         }
       }
-    },
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Icon",
-          show: this.showCol("icon"),
-          maxWidth: "100px",
-        },
-        {
-          label: "Name",
-          show: this.showCol("name"),
-          maxWidth: "300px",
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
-          },
-        },
-        {
-          label: "Amount",
-          show: this.showCol("amount"),
-          maxWidth: "100px",
-          icon: this.sortIcon("amount"),
-          click: () => {
-            this.sortBy("amount");
-          },
-        },
-        {
-          label: "Efficiency Rating",
-          show: this.showCol("priority"),
-          maxWidth: "100px",
-          icon: this.sortIcon("priority"),
-          click: () => {
-            this.sortBy("priority");
-          },
-        },
-        {
-          label: "Best Farming Locations",
-          show: this.showCol("locations"),
-          maxWidth: "300px",
-          icon: this.sortIcon("locations"),
-          click: () => {
-            this.sortBy("locations");
-          },
-        },
-        {
-          label: "Notes",
-          show: true,
-          maxWidth: "300px",
-        },
-      ];
-    },
-    cols(): { label: string; value: any }[] {
-      const list = [
-        {
-          label: "Icon",
-          value: "icon",
-        },
-        {
-          label: "Name",
-          value: "name",
-        },
-        {
-          label: "Amount",
-          value: "amount",
-        },
-        {
-          label: "Efficiency Rating",
-          value: "priority",
-        },
-        {
-          label: "Best Locations",
-          value: "locations",
-        },
-        {
-          label: "Notes",
-          value: "notes",
-        },
-      ];
-      return list;
     },
     storageKey() {
       return `${storageKey}-${this.scavengerId}`;

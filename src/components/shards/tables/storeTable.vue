@@ -4,94 +4,7 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <TableHeader :header="header" />
-      <tbody>
-        <tr
-          v-for="unit in filteredUnitList"
-          :key="unit.id"
-          class="text-center align-middle"
-        >
-          <td v-if="showUnitName && showCol('name')">
-            <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
-          </td>
-          <td v-if="showCol('owned')">
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Shards Owned:</span>
-              <ShardsOwned :unit="unit" class="shards-owned" />
-            </div>
-          </td>
-          <td v-if="showCol('remaining')">
-            <span class="row-label">Shards Remaining:</span>
-            {{ unit.remainingShards }}
-          </td>
-          <td v-if="showCol('progress')">
-            <ProgressBar :percent="unit.shardPercent" />
-          </td>
-          <td v-if="showCol('wallet')">
-            <template v-for="currency in currencyTypes" :key="currency">
-              <div
-                class="input-group input-group-sm"
-                v-if="unit.currencyTypes.includes(currency)"
-              >
-                <span class="input-group-text row-label flex">
-                  Wallet
-                  <img
-                    class="currency-img"
-                    :src="`./images/${currency}.png`"
-                    v-if="['get1', 'get2', 'get3'].includes(currency)"
-                  />
-                </span>
-                <Wallet :currencyType="currency" class="wallet-input" />
-              </div>
-            </template>
-          </td>
-          <td v-if="showCol('dailyCurrency')">
-            <template v-for="currency in currencyTypes" :key="currency">
-              <template v-if="unit.currencyTypes.includes(currency)">
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text row-label">
-                    Daily Currency:
-                    <img
-                      class="currency-img"
-                      :src="`./images/${currency}.png`"
-                      v-if="['get1', 'get2', 'get3'].includes(currency)"
-                    />
-                  </span>
-                  <DailyCurrency
-                    :currencyType="currency"
-                    :allowEdit="!['get1', 'get2', 'get3'].includes(currency)"
-                  />
-                </div>
-              </template>
-            </template>
-          </td>
-          <td v-if="showCol('remainingCurrency')">
-            <template v-for="currency in currencyTypes" :key="currency">
-              <template v-if="unit.currencyTypes.includes(currency)">
-                <span class="row-label me-1">Remaining Currency:</span>
-                <img class="currency-img" :src="`./images/${currency}.png`" />
-                {{ remainingCurrency(unit, currency) }}
-              </template>
-            </template>
-          </td>
-          <td v-if="showUnitName && showCol('time')">
-            <span class="row-label">Completion Date: </span>
-            <Timestamp
-              :timeLength="unit.estimatedTime"
-              displayClasses="d-inline"
-            />
-          </td>
-          <td v-if="showCol('priority')">
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Priority:</span>
-              <ShardPriority
-                :unit="unit"
-                :nodeTableNames="nodeTableNames"
-                class="priority-input"
-              />
-            </div>
-          </td>
-        </tr>
-      </tbody>
+      <TableBody :body="body" />
     </table>
   </Loading>
 </template>
@@ -99,18 +12,11 @@
 <script lang="ts">
 import { defineComponent, PropType, toRefs } from "vue";
 
-import ShardsOwned from "../shardsOwned.vue";
-import UnitIcon from "components/units/unitIcon.vue";
-import NodesPerDay from "../nodesPerDay.vue";
-import ShardPriority from "../shardPriority.vue";
-import Timestamp from "components/general/timestamp.vue";
-import Wallet from "../wallet.vue";
-import DailyCurrency from "../dailyCurrency.vue";
 import { Unit, unitsByPriority } from "types/unit";
 import { mapState } from "vuex";
 import { CurrencyTypeConfig, estimatedTime } from "types/currency";
 import { setupColumnEvents, setupSorting } from "utils";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
   name: "StoreTable",
@@ -129,15 +35,6 @@ export default defineComponent({
       sortIcon,
       showCol,
     };
-  },
-  components: {
-    ShardsOwned,
-    UnitIcon,
-    NodesPerDay,
-    Timestamp,
-    ShardPriority,
-    Wallet,
-    DailyCurrency,
   },
   props: {
     units: {
@@ -298,6 +195,84 @@ export default defineComponent({
         ],
       };
     },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.filteredUnitList.map((unit: Unit) => {
+          return {
+            cells: [
+              {
+                show: this.showUnitName && this.showCol("name"),
+                type: "unit",
+                data: {
+                  isLink: true,
+                  unit,
+                  hideImage: this.simpleView,
+                },
+              },
+              {
+                show: this.showCol("owned"),
+                type: "shardsOwned",
+                data: { unit },
+              },
+              {
+                show: this.showCol("remaining"),
+                label: "Shards Remaining",
+                data: unit.remainingShards,
+              },
+              {
+                show: this.showCol("progress"),
+                type: "progress",
+                data: unit.shardPercent,
+              },
+              {
+                show: this.showCol("wallet"),
+                type: "currencyList",
+                data: {
+                  currencyTypes: this.currencyTypes,
+                  unit,
+                },
+              },
+              {
+                show: this.showCol("dailyCurrency"),
+                type: "dailyCurrency",
+                data: {
+                  unit,
+                  currencyTypes: this.currencyTypes,
+                },
+              },
+              {
+                show: this.showCol("remainingCurrency"),
+                type: "remainingCurrency",
+                data: {
+                  currencyTypes: this.currencyTypes,
+                  unit,
+                },
+              },
+              {
+                show: this.showUnitName && this.showCol("time"),
+                type: "time",
+                label: "Completion Date:",
+                data: {
+                  timestamp: unit.estimatedTime,
+                  classes: "d-inline",
+                },
+              },
+              {
+                show: this.showCol("priority"),
+                type: "priority",
+                label: "Priority:",
+                data: {
+                  unit,
+                  nodeTableNames: this.nodeTableNames,
+                  classes: "priority-input",
+                },
+              },
+            ],
+          };
+        }),
+      };
+    },
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -453,8 +428,5 @@ export default defineComponent({
   width: 200px;
   margin-left: auto;
   margin-bottom: 0.25rem;
-}
-.currency-img {
-  max-width: 30px;
 }
 </style>

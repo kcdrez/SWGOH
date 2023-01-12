@@ -149,7 +149,7 @@ import { mapGetters, mapState } from "vuex";
 import { Unit } from "types/unit";
 import { tbRecommended } from "types/guild";
 import RequirementIcon from "components/shards/tables/legendary/requirementIcon.vue";
-import { iHeader, iTableHead } from "types/general";
+import { iTableHead } from "types/general";
 
 interface dataModel {
   map: "LSRepublicOffensive" | "DSSeparatistMight" | "";
@@ -203,6 +203,39 @@ export default defineComponent({
         ],
       };
     },
+    // body(): iTableBody {
+    //   return {
+    //     classes: "align-middle text-center",
+    //     rows: this.teamUnits.map((unit: any) => {
+    //       const statsHtml = unit.stats.map((stat: any) => {
+    //         return `<div>
+    //           <b class="text-capitalize">${stat.label}</b>
+    //           <div>${this.getStat(unit, stat.key)}</div>
+    //           <div class="${this.statClass(unit, stat.key)}">
+    //             Actual: ${
+    //               this.unitMap[unit.id] ? this.unitMap[unit.id][stat.key] : 0
+    //             }
+    //           </div>
+    //         </div>`;
+    //       });
+
+    //       return {
+    //         cells: [
+    //           {
+    //             show: true,
+    //             data: this.unitName(unit.id),
+    //           },
+    //           {
+    //             show: this.showStats,
+    //             label: "Stats:",
+    //             type: "html",
+    //             data: `<div class="stat-container">${statsHtml}</div>`,
+    //           },
+    //         ],
+    //       };
+    //     }),
+    //   };
+    // },
     mapOptions() {
       return tbRecommended.map((x) => {
         return {

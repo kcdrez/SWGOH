@@ -4,59 +4,8 @@
       class="table table-bordered table-dark table-sm table-striped"
       :class="[accessLevel < 3 ? 'mb-3' : 'mb-0']"
     >
-      <TableHeader :headers="headers" />
-      <tbody>
-        <tr
-          v-for="event in filteredEvents"
-          :key="event.id"
-          class="text-center align-middle"
-        >
-          <td v-if="showCol('date')">
-            <span class="row-label">Date:</span>
-            {{ $filters.formatDate(event.date) }}
-          </td>
-          <td v-if="showCol('name')">
-            <span class="row-label">Battle Type:</span>
-            {{ event.name }}
-          </td>
-          <td v-if="showCol('stars')">
-            <span class="row-label">Stars:</span>
-            {{ event.stars }}
-          </td>
-          <td v-if="showCol('get1')">
-            <span class="row-label">GET1:</span>
-            {{ event.get1 }}
-          </td>
-          <td v-if="showCol('get2')">
-            <span class="row-label">GET2:</span>
-            {{ event.get2 }}
-          </td>
-          <td v-if="showCol('get3')">
-            <span class="row-label">GET3:</span>
-            {{ event.get3 }}
-          </td>
-          <td v-if="showCol('character')">
-            <span class="row-label character-shards-label"
-              >Character Shards:</span
-            >
-            {{ event.characterShards.count }} ({{
-              unitName(event.characterShards.id)
-            }})
-          </td>
-          <td v-if="showCol('actions')">
-            <div class="btn-group btn-group-sm">
-              <button
-                type="button"
-                class="btn btn-danger"
-                title="Remove event"
-                @click="removeEvent(event.id)"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
+      <TableHeader :header="header" />
+      <TableBody :body="body" />
       <tfoot>
         <tr class="text-center align-middle">
           <td
@@ -216,7 +165,7 @@ import { mapState, mapActions, mapGetters } from "vuex";
 
 import { setupColumnEvents, setupSorting, unvue } from "utils";
 import { TerritoryBattleEvent } from "types/guild";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 const storageKey = "territoryBattleTable";
 
@@ -345,6 +294,69 @@ export default defineComponent({
             show: this.showCol("actions"),
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.filteredEvents.map((event: TerritoryBattleEvent) => {
+          return {
+            cells: [
+              {
+                show: this.showCol("date"),
+                label: "Date:",
+                data: this.$filters.formatDate(event.date),
+              },
+              {
+                show: this.showCol("name"),
+                label: "Battle Type:",
+                data: event.name,
+              },
+              {
+                show: this.showCol("stars"),
+                label: "Stars:",
+                data: event.stars,
+              },
+              {
+                show: this.showCol("get1"),
+                label: "GET1:",
+                data: event.get1,
+              },
+              {
+                show: this.showCol("get2"),
+                label: "GET2:",
+                data: event.get2,
+              },
+              {
+                show: this.showCol("get3"),
+                label: "GET3:",
+                data: event.get3,
+              },
+              {
+                show: this.showCol("character"),
+                label: "Character Shards:",
+                data: `${event.characterShards.count} (${this.unitName(
+                  event.characterShards.id
+                )})`,
+                labelClasses: "character-shards-label",
+              },
+              {
+                show: this.showCol("actions"),
+                type: "buttons",
+                data: [
+                  {
+                    click: () => {
+                      this.removeEvent(event.id);
+                    },
+                    icon: "fas fa-trash",
+                    classes: "btn btn-danger",
+                    title: "Remove Event",
+                  },
+                ],
+              },
+            ],
+          };
+        }),
       };
     },
     maxStars(): number {
@@ -484,7 +496,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.character-shards-label {
+::v-deep(.character-shards-label) {
   @media only screen and (max-width: 768px) {
     display: block;
   }

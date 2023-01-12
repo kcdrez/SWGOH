@@ -19,108 +19,7 @@
       class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table collapse"
     >
       <TableHeader :header="header" />
-      <tbody class="align-middle text-center">
-        <tr v-for="(row, index) in plannerData.challengeGear" :key="index">
-          <td v-if="showCol('name')">
-            <GearIcon v-for="id in row.ids" :key="id" :gearId="id" showName />
-          </td>
-          <td v-if="showCol('locations')">
-            <span class="row-label">Location(s):</span>
-            {{ locationLabel(row.location) }}
-          </td>
-          <td v-if="showCol('amount')">
-            <span class="row-label">Amount per Day:</span>
-            {{ row.gearPerDay }}
-          </td>
-          <td v-if="showCol('energy')">
-            <span class="row-label">Energy per Day:</span>
-            -
-          </td>
-          <td v-if="showCol('farmed')">
-            <span class="row-label">Total Gear Farmed:</span>
-            <input
-              v-model.number="row.totalGear"
-              class="form-control form-control-sm"
-              type="number"
-            />
-          </td>
-          <td v-if="showCol('relicDaily')">
-            <span class="row-label">Relic Mats per Day:</span>
-            {{ row.relicPiecesPerDay }}
-          </td>
-          <td v-if="showCol('relicTotal')">
-            <span class="row-label">Relic Mats Total:</span>
-            {{ row.relicPiecesTotal }}
-          </td>
-        </tr>
-        <tr v-for="(row, index) in plannerData.storeGear" :key="index">
-          <td v-if="showCol('name')">
-            <GearIcon v-for="id in row.ids" :key="id" :gearId="id" showName />
-          </td>
-          <td v-if="showCol('locations')">
-            <span class="row-label">Location(s):</span>
-            {{ locationLabel(row.location) }}
-          </td>
-          <td v-if="showCol('amount')">
-            <span class="row-label">Amount per Day:</span>
-            <input
-              v-model.number="row.purchases"
-              class="form-control form-control-sm"
-              type="number"
-            />
-          </td>
-          <td v-if="showCol('energy')">
-            <span class="row-label">Energy per Day:</span>
-            {{ row.totalCurrency }}
-          </td>
-          <td v-if="showCol('farmed')">
-            <span class="row-label">Total Gear Farmed:</span>
-            {{ row.totalGear }}
-          </td>
-          <td v-if="showCol('relicDaily')">
-            <span class="row-label">Relic Mats per Day:</span>
-            {{ row.relicPiecesPerDay }}
-          </td>
-          <td v-if="showCol('relicTotal')">
-            <span class="row-label">Relic Mats Total:</span>
-            {{ row.relicPiecesTotal }}
-          </td>
-        </tr>
-        <tr>
-          <td v-if="showCol('name')">
-            <GearIcon
-              v-for="id in plannerData.farmingNodeData.ids"
-              :key="id"
-              :gearId="id"
-              showName
-            />
-          </td>
-          <td v-if="showCol('locations')">
-            <span class="row-label">Location(s):</span>
-            {{ locationLabel(plannerData.farmingNodeData.location) }}
-          </td>
-          <td v-if="showCol('amount')">
-            <span class="row-label">Amount per Day:</span>
-            {{ plannerData.remainingGearPerDay }}
-          </td>
-          <td v-if="showCol('energy')">
-            <span class="row-label">Energy per Day:</span>
-            {{ plannerData.totalEnergy }}
-          </td>
-          <td v-if="showCol('farmed')">
-            <span class="row-label">Total Gear Farmed:</span>
-            {{ plannerData.remainingGear }}
-          </td>
-          <td v-if="showCol('relicDaily')">
-            <span class="row-label">Relic Mats per Day:</span>
-            {{ plannerData.relicPiecesPerDay }}
-          </td>
-          <td v-if="showCol('relicTotal')">
-            <span class="row-label">Relic Mats Total:</span>
-            {{ plannerData.remainingRelicPieces }}
-          </td>
-        </tr>
-      </tbody>
+      <TableBody :body="body" />
     </table>
   </div>
 </template>
@@ -129,11 +28,10 @@
 import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 
-import GearIcon from "components/gear/gearIcon.vue";
 import { FarmingNode } from "types/shards";
 import { RelicPlanner } from "types/relicPlanner";
 import { setupEvents, setupSorting } from "utils";
-import { iHeader, iTableHead } from "types/general";
+import { iTableBody, iTableHead, iTableRow } from "types/general";
 
 const storageKey = "relicCalculatorTable";
 
@@ -151,7 +49,6 @@ export default defineComponent({
       sortIcon,
     };
   },
-  components: { GearIcon },
   props: {
     plannerData: {
       type: Object as () => RelicPlanner,
@@ -256,6 +153,164 @@ export default defineComponent({
             click: () => {
               this.sortBy("relicTotal");
             },
+          },
+        ],
+      };
+    },
+    body(): iTableBody {
+      const challengeGearRows: iTableRow[] = this.plannerData.challengeGear.map(
+        (gear) => {
+          return {
+            cells: [
+              {
+                show: this.showCol("name"),
+                type: "gearList",
+                data: {
+                  ids: gear.ids,
+                  showName: true,
+                },
+              },
+              {
+                show: this.showCol("locations"),
+                label: "Location(s):",
+                data: this.locationLabel(gear.location),
+              },
+              {
+                show: this.showCol("amount"),
+                label: "Amount per Day:",
+                data: gear.gearPerDay,
+              },
+              {
+                show: this.showCol("energy"),
+                label: "Energy per Day:",
+                data: "-",
+              },
+              {
+                show: this.showCol("farmed"),
+                label: "Total Gear Farmed:",
+                type: "number",
+                data: {
+                  value: gear.totalGear,
+                },
+                change: (val: number) => {
+                  gear.totalGear = val;
+                },
+              },
+              {
+                show: this.showCol("relicDaily"),
+                label: "Relic Mats per Day:",
+                data: gear.relicPiecesPerDay,
+              },
+              {
+                show: this.showCol("relicTotal"),
+                label: "Relic Mats Total:",
+                data: gear.relicPiecesTotal,
+              },
+            ],
+          };
+        }
+      );
+      const storeGearRows: iTableRow[] = this.plannerData.storeGear.map(
+        (gear) => {
+          return {
+            cells: [
+              {
+                show: this.showCol("name"),
+                type: "gearList",
+                data: {
+                  ids: gear.ids,
+                  showName: true,
+                },
+              },
+              {
+                show: this.showCol("locations"),
+                label: "Location(s):",
+                data: this.locationLabel(gear.location),
+              },
+              {
+                show: this.showCol("amount"),
+                label: "Amount per Day:",
+                type: "number",
+                data: {
+                  value: gear.purchases,
+                },
+                change: (val: number) => {
+                  gear.purchases = val;
+                },
+              },
+              {
+                show: this.showCol("energy"),
+                label: "Energy per Day:",
+                data: gear.totalCurrency,
+              },
+              {
+                show: this.showCol("farmed"),
+                label: "Total Gear Farmed:",
+                data: gear.totalGear,
+              },
+              {
+                show: this.showCol("relicDaily"),
+                label: "Relic Mats per Day:",
+                data: gear.relicPiecesPerDay,
+              },
+              {
+                show: this.showCol("relicTotal"),
+                label: "Relic Mats Total:",
+                data: gear.relicPiecesTotal,
+              },
+            ],
+          };
+        }
+      );
+
+      return {
+        classes: "align-middle text-center",
+        rows: [
+          ...challengeGearRows,
+          ...storeGearRows,
+          {
+            cells: [
+              {
+                show: this.showCol("name"),
+                type: "gearList",
+                data: {
+                  ids: this.plannerData.farmingNodeData.ids,
+                  showName: true,
+                },
+              },
+              {
+                show: this.showCol("locations"),
+                label: "Location(s):",
+                data: this.locationLabel(
+                  this.plannerData.farmingNodeData.location
+                ),
+              },
+              {
+                show: this.showCol("amount"),
+                label: "Amount per Day:",
+                data: this.plannerData.remainingGearPerDay,
+              },
+              {
+                show: this.showCol("energy"),
+                label: "Energy per Day:",
+                data: this.plannerData.totalEnergy,
+              },
+              {
+                show: this.showCol("farmed"),
+                label: "Total Gear Farmed:",
+                data: this.plannerData.remainingGear,
+              },
+              {
+                show: this.showCol("relicDaily"),
+                label: "Relic Mats per Day:",
+                data: this.plannerData.relicPiecesPerDay,
+              },
+              {
+                show: this.showCol("relicTotal"),
+                label: "Relic Mats Total:",
+                data: this.plannerData.remainingRelicPieces,
+              },
+            ],
           },
         ],
       };

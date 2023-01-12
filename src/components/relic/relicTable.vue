@@ -3,67 +3,7 @@
     class="table table-bordered table-dark table-sm table-striped swgoh-table"
   >
     <TableHeader :header="header" />
-    <tbody>
-      <tr v-for="mat in filteredRelics" :key="mat.id">
-        <td class="text-center align-middle" v-if="showCol('icon')">
-          <RelicIcon :item="mat" />
-        </td>
-        <td class="align-middle text-center" v-if="showCol('name')">
-          {{ mat.name }}
-        </td>
-        <td class="align-middle text-center" v-if="showCol('rarity')">
-          <span class="row-label">Rarity:</span>
-          {{ mat.rarity }}
-        </td>
-        <td class="text-center align-middle" v-if="showCol('locations')">
-          <span class="row-label">Location:</span>
-          {{ mat.location.node }}
-        </td>
-        <td class="text-center align-middle" v-if="showCol('owned')">
-          <OwnedAmount :item="mat" :needed="mat.amountNeeded(targetLevels)" />
-        </td>
-        <td class="align-middle text-center" v-if="showCol('needed')">
-          <span class="row-label">Amount Needed:</span>
-          {{ mat.amountNeeded(targetLevels) }}
-        </td>
-        <td class="align-middle" v-if="showCol('progress')">
-          <ProgressBar :percent="mat.percent(targetLevels)" class="mt-2" />
-        </td>
-        <td
-          class="align-middle text-center-sm"
-          v-if="showRequiredByUnit && showCol('required')"
-        >
-          <span class="row-label">Required By:</span>
-          <ul class="mb-0 no-bullets-sm">
-            <li v-for="unit in mat.neededBy" :key="unit.id">
-              <Popper hover arrow placement="left">
-                <router-link
-                  :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-                  >{{ unit.name }}</router-link
-                >
-                <template #content>
-                  <div class="border-bottom mb-1">{{ unit.name }}</div>
-                  <div>
-                    {{ unit.amount }}
-                  </div>
-                </template>
-              </Popper>
-            </li>
-          </ul>
-        </td>
-        <td class="text-center align-middle" v-if="showCol('time')">
-          <span class="row-label">Completion Date:</span>
-          <Timestamp
-            :timeLength="mat.timeEstimation(targetLevels)"
-            :displayText="
-              $filters.pluralText(mat.timeEstimation(targetLevels), 'day')
-            "
-            :title="$filters.daysFromNow(mat.timeEstimation(targetLevels))"
-            displayClasses="d-inline"
-          />
-        </td>
-      </tr>
-    </tbody>
+    <TableBody :body="body" />
   </table>
 </template>
 
@@ -72,11 +12,13 @@ import { defineComponent, PropType, toRefs } from "vue";
 import { mapState } from "vuex";
 
 import { Relic } from "types/relic";
-import OwnedAmount from "components/relic/relicOwned.vue";
-import RelicIcon from "components/relic/relicIcon.vue";
-import Timestamp from "components/general/timestamp.vue";
-import { setupColumnEvents, setupSorting } from "utils";
-import { iHeader, iTableHead } from "types/general";
+import {
+  daysFromNow,
+  pluralText,
+  setupColumnEvents,
+  setupSorting,
+} from "utils";
+import { iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
   name: "RelicTable",
@@ -96,7 +38,6 @@ export default defineComponent({
       showCol,
     };
   },
-  components: { OwnedAmount, RelicIcon, Timestamp },
   props: {
     relicList: {
       required: true,
@@ -227,6 +168,98 @@ export default defineComponent({
             },
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.filteredRelics.map((relic: Relic) => {
+          return {
+            cells: [
+              {
+                show: this.showCol("icon"),
+                type: "relic",
+                data: relic,
+              },
+              {
+                show: this.showCol("name"),
+                data: relic.name,
+              },
+              {
+                show: this.showCol("rarity"),
+                data: relic.rarity,
+                label: "Rarity:",
+              },
+              {
+                show: this.showCol("locations"),
+                data: relic.location.node,
+                label: "Location:",
+              },
+              {
+                show: this.showCol("owned"),
+                type: "relicOwned",
+                data: {
+                  item: relic,
+                  needed: relic.amountNeeded(this.targetLevels),
+                },
+              },
+              {
+                show: this.showCol("needed"),
+                data: relic.amountNeeded(this.targetLevels),
+                label: "Amount Needed:",
+              },
+              {
+                show: this.showCol("progress"),
+                data: relic.percent(this.targetLevels),
+                type: "progress",
+              },
+              {
+                show: this.showRequiredByUnit && this.showCol("required"),
+                type: "list",
+                classes: "text-center-sm",
+                label: "Required By:",
+                data: {
+                  classes: "mb-0 no-bulles-sm text-left",
+                  list: relic.neededBy?.map((unit) => {
+                    return {
+                      id: unit.id,
+                      popover: {
+                        hover: true,
+                        arrow: true,
+                        placement: "left",
+                        header: {
+                          classes: "border-bottom mb-1",
+                          message: unit.name,
+                        },
+                        body: {
+                          message: unit.amount,
+                          classes: "text-left",
+                        },
+                      },
+                      type: "link",
+                      data: { name: "UnitPage", params: { unitId: unit.id } },
+                      message: unit.name,
+                    };
+                  }),
+                },
+              },
+              {
+                show: this.showCol("time"),
+                label: "Completion Date:",
+                type: "time",
+                data: {
+                  timestamp: relic.timeEstimation(this.targetLevels),
+                  display: pluralText(
+                    relic.timeEstimation(this.targetLevels),
+                    "day"
+                  ),
+                  title: daysFromNow(relic.timeEstimation(this.targetLevels)),
+                  classes: "d-inline",
+                },
+              },
+            ],
+          };
+        }),
       };
     },
     filteredRelics(): Relic[] {

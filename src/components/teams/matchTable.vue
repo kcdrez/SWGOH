@@ -60,59 +60,7 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <TableHeader :header="header" />
-      <tbody>
-        <tr
-          v-for="unit in match.fullUnitList"
-          :key="unit.id"
-          class="text-center align-middle"
-        >
-          <td v-if="showCol('name')">
-            <router-link
-              :to="{
-                name: 'UnitPage',
-                params: { unitId: unit.id },
-              }"
-              >{{ unit.name }}</router-link
-            >
-          </td>
-          <td v-if="showCol('leader')" class="text-center">
-            <span class="row-label mx-1">Is Leader?</span>
-            <div :class="{ 'text-success': unit.isLeader }" class="d-inline">
-              {{ unit.isLeader ? "Yes" : "No" }}
-            </div>
-          </td>
-          <td v-if="showCol('owner')">
-            <span class="row-label">Owner: </span>
-            {{ unit.owner }}
-          </td>
-          <td v-if="showCol('subTotal')">
-            <span class="row-label">Subtotal:</span>
-            {{ unit.speed }}
-          </td>
-          <td
-            v-if="showCol('bonuses')"
-            :class="{ 'hide-sm': !hasBonuses(unit) }"
-          >
-            <span class="row-label">Bonuses:</span>
-            <div v-if="match.leaderSpeedBonus(unit, true) > 0">
-              Leader Bonus:
-              {{ match.leaderSpeedBonus(unit, true) }}
-            </div>
-            <div v-if="match.uniqueSpeedBonus(unit, true) > 0">
-              Unique Bonus:
-              {{ match.uniqueSpeedBonus(unit, true) }}
-            </div>
-            <div v-if="match.speedBonusFromTeamMembers(unit, true) > 0">
-              Other Bonuses:
-              {{ match.speedBonusFromTeamMembers(unit, true) }}
-            </div>
-          </td>
-          <td v-if="showCol('total')">
-            <span class="row-label">Grand Total:</span>
-            {{ match.grandTotal(unit, true) }}
-          </td>
-        </tr>
-      </tbody>
+      <TableBody :body="body" />
     </table>
   </div>
 </template>
@@ -122,9 +70,8 @@ import { defineComponent, PropType } from "vue";
 
 import { Match, TeamMember } from "types/teams";
 import MultiSelect from "components/general/multiSelect.vue";
-import ModIcon from "components/units/modIcon.vue";
 import { setupSorting } from "utils";
-import { iHeader, iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 type dataModel = {
   selectedColumns: string[];
@@ -146,7 +93,7 @@ export default defineComponent({
       sortIcon,
     };
   },
-  components: { MultiSelect, ModIcon },
+  components: { MultiSelect },
   props: {
     match: {
       required: true,
@@ -223,6 +170,78 @@ export default defineComponent({
             },
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.match.fullUnitList.map((unit: TeamMember) => {
+          let bonuses = "";
+          const leaderBonus = this.match.leaderSpeedBonus(unit, true);
+          const uniqueBonus = this.match.uniqueSpeedBonus(unit, true);
+          const otherBonus = this.match.speedBonusFromTeamMembers(unit, true);
+          bonuses +=
+            leaderBonus > 0
+              ? `
+            <div>Leader Bonus: ${leaderBonus}</div>
+          `
+              : "";
+          bonuses +=
+            uniqueBonus > 0
+              ? `
+            <div>Unique Bonus: ${uniqueBonus}</div>
+          `
+              : "";
+          bonuses +=
+            otherBonus > 0
+              ? `
+            <div>Other Bonus: ${otherBonus}</div>
+          `
+              : "";
+
+          return {
+            cells: [
+              {
+                show: this.showCol("name"),
+                type: "link",
+                data: { name: "UnitPage", params: { unitId: unit.id } },
+                value: unit.name,
+              },
+              {
+                show: this.showCol("leader"),
+                label: "Is Leader?",
+                data: `<div class="d-inline ${
+                  unit.isLeader ? "text-success" : ""
+                }">
+                  ${unit.isLeader ? "Yes" : "No"}
+                  </div>`,
+                type: "html",
+              },
+              {
+                show: this.showCol("owner"),
+                data: unit.owner,
+                label: "Owner:",
+              },
+              {
+                show: this.showCol("subTotal"),
+                data: unit.speed,
+                label: "Subtotal:",
+              },
+              {
+                show: this.showCol("bonuses"),
+                classes: this.hasBonuses(unit) ? "" : "hide-sm",
+                label: "Bonuses:",
+                data: bonuses,
+                type: "html",
+              },
+              {
+                show: this.showCol("total"),
+                data: this.match.grandTotal(unit, true),
+                label: "Grand Total:",
+              },
+            ],
+          };
+        }),
       };
     },
   },

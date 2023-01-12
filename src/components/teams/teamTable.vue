@@ -106,112 +106,7 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <TableHeader :header="header" />
-      <tbody>
-        <tr
-          v-for="unit in team.fullUnitList"
-          :key="unit.id"
-          class="text-center align-middle"
-        >
-          <td v-if="showCol('name')">
-            <router-link
-              :to="{
-                name: 'UnitPage',
-                params: { unitId: unit.id },
-              }"
-              >{{ unit.name }}</router-link
-            >
-          </td>
-          <td v-if="showCol('isLeader')" class="text-left text-center-sm">
-            <span class="row-label">Is Leader?</span>
-            <div class="form-check is-leader">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                v-model="unit.isLeader"
-                :disabled="disableLeader(unit.id)"
-              />
-            </div>
-          </td>
-          <template v-if="showMods">
-            <td>
-              <ModIcon :unitId="unit.id" shape="square" />
-            </td>
-            <td>
-              <ModIcon :unitId="unit.id" shape="diamond" />
-            </td>
-            <td>
-              <ModIcon :unitId="unit.id" shape="circle" />
-            </td>
-            <td>
-              <ModIcon :unitId="unit.id" shape="arrow" />
-            </td>
-            <td>
-              <ModIcon :unitId="unit.id" shape="triangle" />
-            </td>
-            <td>
-              <ModIcon :unitId="unit.id" shape="cross" />
-            </td>
-            <td>
-              <span class="row-label mx-1">Has Speed Set?</span>
-              <span class="text-success" v-if="unit.hasSpeedSet">Yes</span>
-              <span class="text-white-50" v-else>No</span>
-            </td>
-          </template>
-          <td v-if="showCol('subTotal')">
-            <span class="row-label">Subtotal:</span>
-            {{ unit.speed }}
-          </td>
-          <td
-            v-if="showCol('bonuses')"
-            :class="{ 'hide-sm': !hasBonuses(unit) }"
-          >
-            <div v-if="team.leaderSpeedBonus(unit, showGameMode) > 0">
-              Leader Bonus:
-              {{ team.leaderSpeedBonus(unit, showGameMode) }}
-            </div>
-            <div v-if="team.uniqueSpeedBonus(unit, showGameMode) > 0">
-              Unique Bonus:
-              {{ team.uniqueSpeedBonus(unit, showGameMode) }}
-            </div>
-            <div v-if="team.speedBonusFromTeamMembers(unit, showGameMode) > 0">
-              Other Bonuses:
-              {{ team.speedBonusFromTeamMembers(unit, showGameMode) }}
-            </div>
-          </td>
-          <td v-if="showCol('total')">
-            <span class="row-label">Grand Total:</span>
-            {{ team.grandTotal(unit, showGameMode) }}
-          </td>
-          <td v-if="showCol('actions')" class="py-0">
-            <button
-              type="button"
-              class="btn btn-danger btn-sm"
-              title="Remove from this team"
-              @click="team.removeUnit(unit)"
-            >
-              <i class="fas fa-trash"></i>
-            </button>
-          </td>
-        </tr>
-        <tr v-if="team.units.length < 5">
-          <td colspan="100%" class="text-center">
-            <div class="input-group input-group-sm add-unit-container">
-              <UnitSearch
-                :list="unitList"
-                @select="selected = $event"
-                @enterPress="team.addUnit($event)"
-              />
-              <button
-                class="btn btn-sm btn-primary"
-                :disabled="!selected"
-                @click="team.addUnit(selected)"
-              >
-                Add Unit
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
+      <TableBody :body="body" />
     </table>
   </div>
 </template>
@@ -221,9 +116,7 @@ import { defineComponent, PropType, ref, Ref, toRefs } from "vue";
 
 import { SortType, Team, TeamMember } from "types/teams";
 import { Unit } from "types/unit";
-import ModIcon from "components/units/modIcon.vue";
-import UnitSearch from "components/units/unitSearch.vue";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead, iTableRow } from "types/general";
 import { setupColumnEvents, setupSorting } from "utils";
 
 type dataModel = {
@@ -248,7 +141,6 @@ export default defineComponent({
       selectedColumns,
     };
   },
-  components: { ModIcon, UnitSearch },
   props: {
     team: {
       required: true,
@@ -427,6 +319,177 @@ export default defineComponent({
             show: this.showCol("actions"),
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      const rows: iTableRow[] = this.team.fullUnitList.map(
+        (unit: TeamMember) => {
+          let bonuses = "";
+          const leaderBonus = this.team.leaderSpeedBonus(
+            unit,
+            this.showGameMode
+          );
+          const uniqueBonus = this.team.uniqueSpeedBonus(
+            unit,
+            this.showGameMode
+          );
+          const otherBonus = this.team.speedBonusFromTeamMembers(
+            unit,
+            this.showGameMode
+          );
+          bonuses +=
+            leaderBonus > 0
+              ? `
+            <div>Leader Bonus: ${leaderBonus}</div>
+          `
+              : "";
+          bonuses +=
+            uniqueBonus > 0
+              ? `
+            <div>Unique Bonus: ${uniqueBonus}</div>
+          `
+              : "";
+          bonuses +=
+            otherBonus > 0
+              ? `
+            <div>Other Bonus: ${otherBonus}</div>
+          `
+              : "";
+
+          return {
+            cells: [
+              {
+                show: this.showCol("name"),
+                type: "link",
+                data: { name: "UnitPage", params: { unitId: unit.id } },
+                value: unit.name,
+              },
+              {
+                show: this.showCol("isLeader"),
+                classes: "text-left text-center-sm",
+                type: "checkbox",
+                label: "Is Leader?",
+                data: {
+                  value: unit.id,
+                  checked: unit.isLeader,
+                  disabled: this.disableLeader(unit.id),
+                },
+                change: (unitId: any) => {
+                  unit.isLeader = !unit.isLeader;
+                },
+              },
+              {
+                show: this.showMods,
+                type: "mod",
+                data: {
+                  id: unit.id,
+                  shape: "square",
+                },
+              },
+              {
+                show: this.showMods,
+                type: "mod",
+                data: {
+                  id: unit.id,
+                  shape: "diamond",
+                },
+              },
+              {
+                show: this.showMods,
+                type: "mod",
+                data: {
+                  id: unit.id,
+                  shape: "circle",
+                },
+              },
+              {
+                show: this.showMods,
+                type: "mod",
+                data: {
+                  id: unit.id,
+                  shape: "arrow",
+                },
+              },
+              {
+                show: this.showMods,
+                type: "mod",
+                data: {
+                  id: unit.id,
+                  shape: "triangle",
+                },
+              },
+              {
+                show: this.showMods,
+                type: "mod",
+                data: {
+                  id: unit.id,
+                  shape: "cross",
+                },
+              },
+              {
+                show: this.showMods,
+                label: "Has Speed Set?",
+                type: "html",
+                data: unit.hasSpeedSet
+                  ? `<span class="text-success">Yes</span>`
+                  : `<span class="text-white-50">No</span>`,
+              },
+              {
+                show: this.showCol("subTotal"),
+                data: unit.speed,
+                label: "Subtotal:",
+              },
+              {
+                show: this.showCol("bonuses"),
+                classes: this.hasBonuses(unit) ? "" : "hide-sm",
+                label: "Bonuses:",
+                data: bonuses,
+                type: "html",
+              },
+              {
+                show: this.showCol("total"),
+                data: this.team.grandTotal(unit, true),
+                label: "Grand Total:",
+              },
+              {
+                show: this.showCol("actions"),
+                type: "buttons",
+                data: [
+                  {
+                    click: () => {
+                      this.team.removeUnit(unit);
+                    },
+                    icon: "fas fa-trash",
+                    classes: "btn btn-danger btn-sm",
+                    title: "Remove this unit from this team",
+                  },
+                ],
+              },
+            ],
+          };
+        }
+      );
+      if (this.team.units.length < 5) {
+        rows.push({
+          cells: [
+            {
+              colspan: "100%",
+              show: true,
+              type: "unitSearch",
+              click: (unit: any) => {
+                this.team.addUnit(unit);
+              },
+              data: {
+                list: this.unitList,
+              },
+            },
+          ],
+        });
+      }
+
+      return {
+        classes: "align-middle text-center",
+        rows,
       };
     },
   },

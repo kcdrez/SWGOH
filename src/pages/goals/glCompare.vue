@@ -69,7 +69,7 @@ const storageKey = "glCompare";
 
 export default defineComponent({
   name: "GLCompare",
-  setup(props) {
+  setup() {
     const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(
       `${storageKey}`
     );

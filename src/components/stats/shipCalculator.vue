@@ -169,31 +169,7 @@
               class="table table-bordered table-dark table-sm table-striped swgoh-table output-table"
             >
               <TableHeader :header="header" />
-              <tbody class="text-center align-middle">
-                <tr v-for="stat in stats" :key="stat.label">
-                  <td>{{ stat.label }}</td>
-                  <td>{{ stat.current }}</td>
-                  <td>{{ stat.projected }}</td>
-                  <td
-                    :class="{
-                      'text-danger': stat.projected - stat.current < 0,
-                      'text-success': stat.projected - stat.current > 0,
-                    }"
-                  >
-                    <span v-if="stat.projected - stat.current > 0">+</span>
-                    <span>{{ stat.projected - stat.current }}</span>
-                    <span
-                      v-if="stat.projected - stat.current !== 0"
-                      class="mx-1"
-                      >({{
-                        round2Decimals(
-                          ((stat.projected - stat.current) / stat.current) * 100
-                        )
-                      }}%)</span
-                    >
-                  </td>
-                </tr>
-              </tbody>
+              <TableBody :body="body" />
             </table>
           </div>
         </div>
@@ -219,7 +195,7 @@ import {
   multiplierMap,
   relicLevelMap,
 } from "types/pilots";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 interface Crew {
   stars: number;
@@ -284,6 +260,47 @@ export default defineComponent({
             show: true,
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.stats.map((stat: any) => {
+          let statText = "";
+          statText += stat.projected - stat.current > 0 ? "+" : "";
+          statText += stat.projected + stat.current;
+          statText +=
+            stat.projected - stat.current !== 0
+              ? ` ${round2Decimals(
+                  ((stat.projected - stat.current) / stat.current) * 100
+                )} `
+              : "";
+
+          return {
+            cells: [
+              {
+                show: true,
+                data: stat.label,
+              },
+              {
+                show: true,
+                data: stat.current,
+              },
+              {
+                show: true,
+                data: stat.projected,
+              },
+              {
+                show: true,
+                classes: {
+                  "text-danger": stat.projected - stat.current < 0,
+                  "text-success": stat.projected - stat.current > 0,
+                },
+                data: statText,
+              },
+            ],
+          };
+        }),
       };
     },
     stats(): any {

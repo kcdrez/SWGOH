@@ -1,17 +1,36 @@
 <template>
   <div class="d-flex">
-    <RelicLevelIcon
-      v-if="shouldDisplayRelicIcon"
-      class="m-auto"
-      :relicLevel="displayValue"
-      :alignment="alignment"
-    />
-    <GearText v-else-if="shouldDisplayGearIcon" :level="displayValue" />
-    <div v-else-if="type === 'Stars'" class="d-flex justify-content-center">
-      <span>{{ displayValue }}</span>
-      <img src="images/star.png" class="mx-1" />
-    </div>
-    <div v-else>{{ type }}: {{ displayValue }}</div>
+    <template v-if="unit?.isShip">-</template>
+    <template v-else-if="edit && unit">
+      <select
+        class="form-control form-control-sm me-1"
+        v-model="unit.gearTarget"
+        v-if="(unit.gearLevel ?? 0) < maxGearLevel"
+      >
+        <option v-for="num in unit.gearOptions" :value="num" :key="num">
+          Gear {{ num }}
+        </option>
+      </select>
+      <select v-model="unit.relicTarget" class="form-control form-control-sm">
+        <option v-for="num in unit.relicOptions" :value="num" :key="num">
+          Relic {{ num }}
+        </option>
+      </select>
+    </template>
+    <template v-else>
+      <RelicLevelIcon
+        v-if="shouldDisplayRelicIcon"
+        class="m-auto"
+        :relicLevel="displayValue"
+        :alignment="alignment"
+      />
+      <GearText v-else-if="shouldDisplayGearIcon" :level="displayValue" />
+      <div v-else-if="type === 'Stars'" class="d-flex justify-content-center">
+        <span>{{ displayValue }}</span>
+        <img src="images/star.png" class="mx-1" />
+      </div>
+      <div v-else>{{ type }}: {{ displayValue }}</div>
+    </template>
   </div>
 </template>
 
@@ -26,6 +45,7 @@ import {
   isGearRequirement,
   isRelicRequirement,
 } from "types/shards";
+import { maxGearLevel } from "types/gear";
 
 export default defineComponent({
   name: "RequirementIcon",
@@ -46,6 +66,15 @@ export default defineComponent({
       type: String,
       // required: true,
     },
+    edit: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      maxGearLevel,
+    };
   },
   computed: {
     defaultText(): string {
@@ -55,7 +84,7 @@ export default defineComponent({
       return getUnit(this.unitId ?? "");
     },
     alignment(): string {
-      return this.unit?.alignment || "Light Side";
+      return this.unit?.alignment || "Neutral";
     },
     displayValue(): number {
       return displayValue(

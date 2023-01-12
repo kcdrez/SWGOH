@@ -63,45 +63,7 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <TableHeader :header="header" />
-      <tbody>
-        <tr
-          v-for="item in goal.list"
-          :key="goal.id"
-          class="text-center align-middle"
-        >
-          <td v-if="showCol('name')">
-            <UnitIcon :unit="getUnit(item.id)" isLink :hideImage="simpleView" />
-          </td>
-          <td v-if="showCol('current')">
-            <span class="row-label">Current Level:</span>
-            <RequirementIcon
-              class="justify-content-center"
-              :type="item.requirement?.type"
-              :unitId="item.id"
-              currentLevel
-            />
-          </td>
-          <td v-if="showCol('target')">
-            <span class="row-label">Target Level:</span>
-            <RequirementIcon
-              class="justify-content-center"
-              :value="item.requirement?.value"
-              :type="item.requirement?.type"
-              :unitId="item.id"
-            />
-          </td>
-          <td v-if="showCol('progress')">
-            <ProgressBar :percent="getPercent(item, 'recommended')" />
-          </td>
-          <td v-if="showCol('actions')">
-            <div class="btn-group btn-group-sm text-center" role="group">
-              <button class="btn btn-danger" @click="goal.remove(item.id)">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
+      <TableBody :body="body" />
     </table>
   </div>
   <Modal :isOpen="showAddUnitModal">
@@ -170,13 +132,12 @@ import { mapActions } from "vuex";
 import _ from "lodash";
 
 import UnitSearch from "components/units/unitSearch.vue";
-import RequirementIcon from "components/shards/tables/legendary/requirementIcon.vue";
-import UnitIcon from "components/units/unitIcon.vue";
 import Modal from "components/general/modal.vue";
 import { getPercent, getUnit, totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import { setupEvents, setupSorting } from "utils";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
+import { IPrerequisite } from "types/shards";
 
 export default defineComponent({
   name: "GoalsTable",
@@ -195,8 +156,6 @@ export default defineComponent({
   },
   components: {
     UnitSearch,
-    RequirementIcon,
-    UnitIcon,
     Modal,
   },
   props: {
@@ -282,6 +241,65 @@ export default defineComponent({
             show: this.showCol("actions"),
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.goal.list.map((unit: IPrerequisite) => {
+          return {
+            cells: [
+              {
+                type: "unit",
+                data: {
+                  unit,
+                  isLink: true,
+                  hideImage: this.simpleView,
+                },
+                show: this.showCol("name"),
+              },
+              {
+                show: this.showCol("current"),
+                label: "Current Level:",
+                type: "unitLevel",
+                data: {
+                  classes: "justify-content-center",
+                  type: unit.requirement?.type,
+                  unitId: unit.id,
+                },
+              },
+              {
+                show: this.showCol("target"),
+                label: "Target Level:",
+                type: "unitLevel",
+                data: {
+                  classes: "d-flex justify-content-center",
+                  type: unit.requirement?.type,
+                  unitId: unit.id,
+                  value: unit.requirement?.value,
+                },
+              },
+              {
+                show: this.showCol("progress"),
+                type: "progress",
+                data: this.getPercent(unit, "recommended"),
+              },
+              {
+                show: this.showCol("actions"),
+                type: "buttons",
+                data: [
+                  {
+                    click: () => {
+                      this.goal.remove(unit.id);
+                    },
+                    icon: "fas fa-trash",
+                    classes: "btn btn-danger",
+                  },
+                ],
+              },
+            ],
+          };
+        }),
       };
     },
   },

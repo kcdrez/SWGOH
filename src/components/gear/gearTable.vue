@@ -5,111 +5,7 @@
       v-if="gearList.length > 0"
     >
       <TableHeader :header="header" />
-      <tbody>
-        <tr v-if="filteredSalvageList.length === 0">
-          <td colspan="100%" class="empty-search">
-            There are no gear pieces that meet that search criteria.
-          </td>
-        </tr>
-        <tr
-          class="align-middle text-center"
-          v-for="salvage in filteredSalvageList"
-          :key="salvage.id"
-        >
-          <td v-if="showCol('icon')">
-            <GearIcon :gear="salvage" />
-          </td>
-          <td v-if="showCol('name')">
-            {{ salvage.name }}
-          </td>
-          <td v-if="showCol('mark')" :class="{ 'hidden-sm': !!salvage.mark }">
-            {{ salvage.mark }}
-          </td>
-          <td v-if="showCol('locations')">
-            <div v-if="salvage.locations.length <= 0" class="text-center">
-              No known farmable locations.
-            </div>
-            <template v-else>
-              <button
-                class="btn btn-sm btn-info m-auto d-block"
-                data-bs-toggle="collapse"
-                :href="`#locations-${salvage.id}`"
-              >
-                Show/Hide Locations
-              </button>
-              <ul
-                class="m-0 collapse text-left text-center-sm no-bullets-sm"
-                :id="`locations-${salvage.id}`"
-              >
-                <li v-for="(l, index) in salvage.locationLabels" :key="index">
-                  {{ l }}
-                </li>
-              </ul>
-            </template>
-          </td>
-          <td v-if="showCol('owned')">
-            <OwnedAmount :salvage="salvage" />
-          </td>
-          <td v-if="showCol('needed')">
-            <span class="row-label">Amount Needed:</span>
-            {{ salvage.totalAmount }}
-          </td>
-          <td v-if="showCol('progress')">
-            <ProgressBar :percent="salvage.percent" />
-          </td>
-          <td
-            v-if="showRequiredByUnit && showCol('required')"
-            class="text-left text-center-sm"
-          >
-            <span class="row-label">Needed By:</span>
-            <ul class="mb-0 no-bullets-sm">
-              <li v-for="unit in salvage.neededBy" :key="unit.id">
-                <Popper hover arrow placement="left">
-                  <router-link
-                    :to="{ name: 'UnitPage', params: { unitId: unit.id } }"
-                    >{{ unit.name }}</router-link
-                  >
-                  <template #content>
-                    <div class="border-bottom mb-1">{{ unit.name }}</div>
-                    <div v-for="tier in unit.gearLevels" :key="tier.level">
-                      <GearText :level="tier.level" />:
-                      <span class="ml-1">{{ tier.amount }}</span>
-                    </div>
-                    <div
-                      class="border-top mt-1"
-                      v-if="unit.gearLevels.length > 1"
-                    >
-                      Total: {{ unit.totalAmount }}
-                    </div>
-                  </template>
-                </Popper>
-              </li>
-            </ul>
-          </td>
-          <td v-if="showCol('time')">
-            <span class="row-label">Completion Date:</span>
-            <Timestamp
-              :timeLength="salvage.timeEstimation"
-              displayClasses="d-inline"
-            />
-          </td>
-          <td v-if="showCol('actions')">
-            <div
-              class="btn-group btn-group-sm d-block text-center"
-              role="group"
-            >
-              <button
-                type="button"
-                class="btn btn-warning text-dark"
-                title="Mark this salvage as irrelevant, removing it from the planner estimation"
-                @click="salvage.irrelevant = true"
-              >
-                <i class="fas fa-toilet"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
+      <TableBody :body="body" />
     </table>
     <div v-else class="text-center">
       There are no gear requirements for these units. This is either because you
@@ -171,12 +67,9 @@ import { defineComponent, PropType, toRefs } from "vue";
 import { mapActions, mapState } from "vuex";
 
 import { Gear } from "types/gear";
-import OwnedAmount from "components/gear/gearOwned.vue";
 import GearIcon from "components/gear/gearIcon.vue";
-import Timestamp from "components/general/timestamp.vue";
-import GearText from "components/gear/gearText.vue";
 import { setupColumnEvents, setupSorting } from "utils";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
   name: "GearTable",
@@ -196,7 +89,7 @@ export default defineComponent({
       showCol,
     };
   },
-  components: { OwnedAmount, GearIcon, GearText, Timestamp },
+  components: { GearIcon },
   props: {
     gearList: {
       required: true,
@@ -418,6 +311,131 @@ export default defineComponent({
             show: this.showCol("actions"),
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        zeroState: {
+          message: "There are no gear pieces that meet that search criteria.",
+          show: this.filteredSalvageList.length === 0,
+        },
+        rows: this.filteredSalvageList.map((gear: Gear) => {
+          return {
+            cells: [
+              {
+                type: "gear",
+                data: gear,
+                show: this.showCol("icon"),
+              },
+              {
+                data: gear.name,
+                show: this.showCol("name"),
+              },
+              {
+                show: this.showCol("mark"),
+                data: gear.mark,
+                classes: !!gear.mark ? "hidden-sm" : "",
+              },
+              {
+                show: this.showCol("locations"),
+                zeroState: {
+                  message: "No known farmable locations.",
+                  show: gear.locations.length <= 0,
+                  // classes: 'text-center'
+                },
+                type: "buttonToggle",
+                data: {
+                  buttonClasses: "btn btn-sm btn-info m-auto d-block",
+                  message: "Show/Hide Locations",
+                  type: "list",
+                  id: `locations-${gear.id}`,
+                  listData: {
+                    classes: "m-0 text-left text-center-sm no-bullets-sm",
+                    elements: gear.locationLabels,
+                  },
+                },
+              },
+              {
+                show: this.showCol("owned"),
+                type: "gearOwned",
+                data: gear,
+              },
+              {
+                show: this.showCol("needed"),
+                label: "Amount Needed:",
+                data: gear.totalAmount,
+              },
+              {
+                type: "progress",
+                show: this.showCol("progress"),
+                data: gear.percent,
+              },
+              {
+                show: this.showRequiredByUnit && this.showCol("required"),
+                classes: "text-left text-center-sm",
+                label: "Needed By:",
+                type: "list",
+                data: {
+                  classes: "mb-0 no-bullets-sm",
+                  list: gear.neededBy.map((unit) => {
+                    return {
+                      id: unit.id,
+                      popover: {
+                        header: {
+                          message: unit.name,
+                          classes: "border-bottom mb-1",
+                        },
+                        hover: true,
+                        arrow: true,
+                        placement: "left",
+                        list: unit.gearLevels.map((tier) => {
+                          return {
+                            type: "gearText",
+                            level: tier.level,
+                            amount: tier.amount,
+                            id: tier.level,
+                          };
+                        }),
+                        footer: {
+                          classes: "border-top mt-1",
+                          show: unit.gearLevels.length > 1,
+                          message: `Total: ${unit.totalAmount}`,
+                        },
+                      },
+                      type: "link",
+                      data: { name: "UnitPage", params: { unitId: unit.id } },
+                      message: unit.name,
+                    };
+                  }),
+                },
+              },
+              {
+                type: "time",
+                label: "Completion Date:",
+                data: {
+                  timestamp: gear.timeEstimation,
+                },
+                show: this.showCol("time"),
+              },
+              {
+                show: this.showCol("actions"),
+                type: "buttons",
+                data: [
+                  {
+                    click: () => {
+                      gear.irrelevant = true;
+                    },
+                    icon: "fas fa-toilet",
+                    classes: "btn btn-warning text-dark",
+                    title:
+                      "Mark this salvage as irrelevant, removing it from the planner estimation",
+                  },
+                ],
+              },
+            ],
+          };
+        }),
       };
     },
   },

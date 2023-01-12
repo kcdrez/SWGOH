@@ -47,7 +47,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapGetters, mapState } from "vuex";
+import { mapState } from "vuex";
 
 export default defineComponent({
   name: "Currency",

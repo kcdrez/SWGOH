@@ -78,86 +78,9 @@
             <div class="col">
               <table
                 class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table text-center"
-                v-if="viewMode === 'Player'"
               >
                 <TableHeader :header="header" />
-                <tbody class="align-middle">
-                  <template
-                    v-for="(units, playerName) in unitsByPlayer"
-                    :key="playerName"
-                  >
-                    <tr>
-                      <td :rowspan="units.length + 1">
-                        <span>{{ playerName }}</span>
-                      </td>
-                    </tr>
-                    <tr v-for="unit in units" :key="playerName + unit.id">
-                      <td>{{ unit.name }}</td>
-                      <td>
-                        <RelicLevelIcon
-                          :relicLevel="unit.relicLevel"
-                          :alignment="unit.alignment"
-                          class="d-inline-block"
-                        />
-                      </td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-              <table
-                class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table text-center"
-                v-if="viewMode === 'Unit'"
-              >
-                <TableHeader :header="header" />
-                <tbody class="align-middle">
-                  <template
-                    v-for="(units, unitName) in unitsByName"
-                    :key="unitName"
-                  >
-                    <tr>
-                      <td :rowspan="units.length + 1">
-                        <span>{{ unitName }}</span>
-                      </td>
-                    </tr>
-                    <tr v-for="unit in units" :key="unitName + unit.owner">
-                      <td>
-                        <RelicLevelIcon
-                          :relicLevel="unit.relicLevel"
-                          :alignment="unit.alignment"
-                          class="d-inline-block"
-                        />
-                      </td>
-                      <td>{{ unit.owner }}</td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-              <table
-                class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table text-center"
-                v-if="viewMode === 'Level'"
-              >
-                <TableHeader :header="header" />
-                <tbody class="align-middle">
-                  <template v-for="(units, level) in unitsByLevel" :key="level">
-                    <tr>
-                      <td :rowspan="units.length + 1">
-                        <span>
-                          <RelicLevelIcon
-                            :relicLevel="level"
-                            class="d-inline-block"
-                          />
-                        </span>
-                      </td>
-                    </tr>
-                    <tr
-                      v-for="unit in units"
-                      :key="level + unit.owner + unit.id"
-                    >
-                      <td>{{ unit.name }}</td>
-                      <td>{{ unit.owner }}</td>
-                    </tr>
-                  </template>
-                </tbody>
+                <TableBody :body="body" />
               </table>
             </div>
           </div>
@@ -172,15 +95,10 @@ import _ from "lodash";
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 
-import { Unit } from "types/unit";
-import { getUnit } from "types/unit";
-import { AbilityStat } from "types/teams";
 import { loadingState } from "types/loading";
-import TWPlayerList from "components/guild/twPlayerList.vue";
 import { apiClient } from "../../api/api-client";
 import { maxRelicLevel } from "types/relic";
-import RelicLevelIcon from "components/units/relicLevelIcon.vue";
-import { iHeader, iTableHead } from "types/general";
+import { iHeader, iTableBody, iTableHead } from "types/general";
 
 interface dataModel {
   maxRelicLevel: number;
@@ -209,7 +127,6 @@ const storageKey = "GuildStats";
 
 export default defineComponent({
   name: "GuildStats",
-  components: { RelicLevelIcon },
   data() {
     return {
       maxRelicLevel,
@@ -240,17 +157,14 @@ export default defineComponent({
       const relicLevelHeader: iHeader = {
         label: "Relic Level",
         show: true,
-        sortMethodShow: true,
       };
       const unitHeader: iHeader = {
         label: "Unit",
         show: true,
-        sortMethodShow: true,
       };
       const playerHeader: iHeader = {
         label: "Player",
         show: true,
-        sortMethodShow: true,
       };
 
       if (this.viewMode === "Level") {
@@ -268,6 +182,140 @@ export default defineComponent({
       } else {
         return {
           headers: [],
+        };
+      }
+    },
+    body(): iTableBody {
+      if (this.viewMode === "Player") {
+        return Object.entries(this.unitsByPlayer).reduce(
+          (acc: any, val: any) => {
+            const [playerName, units] = val;
+
+            acc.rows.push({
+              cells: [
+                {
+                  rowspan: units.length + 1,
+                  show: true,
+                  data: {
+                    message: playerName,
+                    classes: "sticky-name",
+                  },
+                },
+              ],
+            });
+            units.forEach((unit: any) => {
+              acc.rows.push({
+                cells: [
+                  {
+                    show: true,
+                    data: unit.name,
+                  },
+                  {
+                    show: true,
+                    type: "unitLevel",
+                    data: {
+                      type: "Relic",
+                      unitId: unit.id,
+                      value: unit.relicLevel,
+                      classes: "d-inline-block",
+                    },
+                  },
+                ],
+              });
+            });
+            return acc;
+          },
+          {
+            classes: "align-middle text-center",
+            rows: [],
+          }
+        );
+      } else if (this.viewMode === "Unit") {
+        return Object.entries(this.unitsByName).reduce(
+          (acc: any, val: any) => {
+            const [unitName, units] = val;
+
+            acc.rows.push({
+              cells: [
+                {
+                  rowspan: units.length + 1,
+                  show: true,
+                  data: {
+                    message: unitName,
+                    classes: "sticky-name",
+                  },
+                },
+              ],
+            });
+            units.forEach((unit: any) => {
+              acc.rows.push({
+                cells: [
+                  {
+                    show: true,
+                    data: unit.owner,
+                  },
+                  {
+                    show: true,
+                    type: "unitLevel",
+                    data: {
+                      type: "Relic",
+                      unitId: unit.id,
+                      value: unit.relicLevel,
+                      classes: "d-inline-block",
+                    },
+                  },
+                ],
+              });
+            });
+            return acc;
+          },
+          {
+            classes: "align-middle text-center",
+            rows: [],
+          }
+        );
+      } else if (this.viewMode === "Level") {
+        return Object.entries(this.unitsByLevel).reduce(
+          (acc: any, val: any) => {
+            const [level, units] = val;
+
+            acc.rows.push({
+              cells: [
+                {
+                  show: true,
+                  type: "unitLevel",
+                  data: {
+                    type: "Relic",
+                    value: level,
+                    classes: "sticky-name",
+                  },
+                },
+              ],
+            });
+            units.forEach((unit: any) => {
+              acc.rows.push({
+                cells: [
+                  {
+                    show: true,
+                    data: unit.name,
+                  },
+                  {
+                    show: true,
+                    data: unit.owner,
+                  },
+                ],
+              });
+            });
+            return acc;
+          },
+          {
+            classes: "align-middle text-center",
+            rows: [],
+          }
+        );
+      } else {
+        return {
+          rows: [],
         };
       }
     },
@@ -320,10 +368,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-tr {
+::v-deep(tr) {
   td:first-child {
     vertical-align: top;
-    span {
+    .sticky-name {
       position: sticky;
       top: 65px;
     }

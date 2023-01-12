@@ -3,44 +3,8 @@
     v-if="players"
     class="table table-bordered table-dark table-sm table-striped swgoh-table"
   >
-    <TableHeader :headers="headers" />
-    <tbody class="align-center text-center">
-      <tr v-for="player in filteredPlayers" :key="player.allyCode">
-        <td>{{ player.name }}</td>
-        <td>
-          <template v-if="accessLevel >= 3">
-            <input
-              type="checkbox"
-              v-model="_playersJoined"
-              :value="player.allyCode"
-            />
-          </template>
-          <template v-else>
-            <i
-              class="fa fa-check text-success"
-              v-if="_playersJoined.includes(player.allyCode)"
-            ></i>
-            <i class="fa fa-times text-danger" v-else></i>
-          </template>
-        </td>
-        <template v-for="unit in units" :key="unit.id">
-          <th v-if="showCol(unit.id)">
-            <i
-              class="fa fa-check text-success"
-              v-if="player.units.some((x) => x.base_id === unit.id)"
-            ></i>
-            <i class="fa fa-times text-danger" v-else></i>
-          </th>
-        </template>
-        <td class="text-left">
-          <ul class="m-0">
-            <li v-for="unitName in getOmicrons(player)" :key="unitName">
-              {{ unitName }}
-            </li>
-          </ul>
-        </td>
-      </tr>
-    </tbody>
+    <TableHeader :header="header" />
+    <TableBody :body="body" />
   </table>
 </template>
 
@@ -50,7 +14,7 @@ import { mapState } from "vuex";
 
 import { setupColumnEvents, setupSorting } from "utils";
 import { Unit } from "types/unit";
-import { iHeader, iTableHead } from "types/general";
+import { iHeader, iTableBody, iTableCell, iTableHead } from "types/general";
 
 interface dataModel {
   _playersJoined: string[];
@@ -178,62 +142,76 @@ export default defineComponent({
         ],
       };
     },
-    headers(): iHeader[] {
-      const unitHeaders: iHeader[] = this.units.map((unit) => {
-        return {
-          label: unit.name,
-          show: this.showCol(unit.id),
-          sortMethodShow: true,
-          icon: this.sortIcon(unit.id),
-          click: () => {
-            this.sortBy(unit.id);
-          },
-        };
-      });
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.filteredPlayers.map((player: any) => {
+          const unitCells: iTableCell[] = this.units.map((unit: Unit) => {
+            return {
+              show: this.showCol(unit.id),
+              type: "checkmark",
+              data: {
+                classes: player.units.some((x: any) => x.base_id === unit.id)
+                  ? "text-success"
+                  : "text-danger",
+                checked: player.units.some((x: any) => x.base_id === unit.id),
+              },
+            };
+          });
 
-      return [
-        {
-          label: "Name",
-          show: true,
-          sortMethodShow: true,
-          icon: this.sortIcon("name"),
-          input: {
-            type: "input",
-            classes: "mx-auto my-1 w-75",
-            placeholder: "Search",
-          },
-          click: () => {
-            this.sortBy("name");
-          },
-        },
-        {
-          label: "Has Joined?",
-          show: true,
-          sortMethodShow: true,
-          icon: this.sortIcon("joined"),
-          click: () => {
-            this.sortBy("joined");
-          },
-          input: {
-            type: "checkbox",
-            placeholder: "Show/Hide Joined",
-            value: false,
-            click: (val: any) => {
-              this.showJoined = val;
-            },
-          },
-        },
-        ...unitHeaders,
-        {
-          label: "TW Omicrons",
-          show: true,
-          sortMethodShow: true,
-          icon: this.sortIcon("omicrons"),
-          click: () => {
-            this.sortBy("omicrons");
-          },
-        },
-      ];
+          return {
+            cells: [
+              {
+                show: true,
+                data: player.name,
+              },
+              {
+                type: "checkbox",
+                show: this.accessLevel >= 3,
+                data: {
+                  value: player.allyCode,
+                  checked: this._playersJoined.includes(player.allyCode),
+                },
+                change: (allyCode: any) => {
+                  const index = this._playersJoined.findIndex(
+                    (x) => x === allyCode
+                  );
+                  if (index >= 0) {
+                    this._playersJoined.splice(index, 1);
+                  } else {
+                    this._playersJoined.push(allyCode);
+                  }
+                },
+              },
+              {
+                type: "checkmark",
+                show: this.accessLevel < 3,
+                data: {
+                  checked: this._playersJoined.includes(player.allyCode),
+                  classes: this._playersJoined.includes(player.allyCode)
+                    ? "text-success"
+                    : "text-danger",
+                },
+              },
+              ...unitCells,
+              {
+                show: true,
+                classes: "text-left",
+                data: {
+                  classes: "m-0",
+                  list: this.getOmicrons(player).map((unit) => {
+                    return {
+                      id: unit,
+                      message: unit,
+                    };
+                  }),
+                },
+                type: "list",
+              },
+            ],
+          };
+        }),
+      };
     },
     filteredPlayers() {
       return this.players

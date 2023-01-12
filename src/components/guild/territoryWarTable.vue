@@ -4,50 +4,8 @@
       class="table table-bordered table-dark table-sm table-striped"
       :class="[accessLevel < 3 ? 'mb-3' : 'mb-0']"
     >
-      <TableHeader :headers="headers" />
-      <tbody>
-        <tr
-          v-for="event in filteredEvents"
-          :key="event.id"
-          class="text-center align-middle"
-        >
-          <td v-if="showCol('date')">
-            <span class="row-label">Date: </span>
-            {{ $filters.formatDate(event.date) }}
-          </td>
-          <td v-if="showCol('win_loss')">
-            {{ event.win ? "Win" : "Loss" }}
-          </td>
-          <td v-if="showCol('get1')">
-            <span class="row-label">GET1 Currency: </span>
-            {{ event.currencies.get1 }}
-          </td>
-          <td v-if="showCol('get2')">
-            <span class="row-label">GET2 Currency: </span>
-            {{ event.currencies.get2 }}
-          </td>
-          <!-- <td v-if="showCol('get3')">
-            <span class="row-label">GET3 Currency: </span>
-            {{ event.currencies.get3 }}
-          </td> -->
-          <td v-if="showCol('zetas')">
-            <span class="row-label">Zetas: </span>
-            {{ event.abilityMats.zetas }}
-          </td>
-          <td v-if="showCol('actions')">
-            <div class="btn-group btn-group-sm">
-              <button
-                type="button"
-                class="btn btn-danger"
-                title="Remove event"
-                @click="removeEvent(event.id)"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
+      <TableHeader :header="header" />
+      <TableBody :body="body" />
       <tfoot>
         <tr
           class="text-center align-middle"
@@ -154,7 +112,7 @@ import { mapActions, mapState } from "vuex";
 
 import { ITerritoryWarEvent } from "types/guild";
 import { round2Decimals, setupColumnEvents, setupSorting, unvue } from "utils";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 const storageKey = "territoryWarTable";
 
@@ -266,6 +224,60 @@ export default defineComponent({
             show: this.showCol("actions"),
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.filteredEvents.map((event: ITerritoryWarEvent) => {
+          return {
+            cells: [
+              {
+                show: this.showCol("date"),
+                label: "Date:",
+                data: this.$filters.formatDate(event.date),
+              },
+              {
+                show: this.showCol("win_loss"),
+                data: event.win ? "Win" : "Loss",
+              },
+              {
+                show: this.showCol("get1"),
+                label: "GET1:",
+                data: event.currencies.get1,
+              },
+              {
+                show: this.showCol("get2"),
+                label: "GET2:",
+                data: event.currencies.get2,
+              },
+              {
+                show: false,
+                label: "GET3:",
+                data: event.currencies.get3,
+              },
+              {
+                show: this.showCol("zetas"),
+                label: "Zetas:",
+                data: event.abilityMats.zetas,
+              },
+              {
+                show: this.showCol("actions"),
+                type: "buttons",
+                data: [
+                  {
+                    click: () => {
+                      this.removeEvent(event.id);
+                    },
+                    icon: "fas fa-trash",
+                    classes: "btn btn-danger",
+                    title: "Remove Event",
+                  },
+                ],
+              },
+            ],
+          };
+        }),
       };
     },
     filteredEvents(): ITerritoryWarEvent[] {

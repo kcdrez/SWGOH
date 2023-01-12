@@ -4,93 +4,7 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <TableHeader :header="header" />
-      <tbody>
-        <tr v-for="unit in filteredUnitList" :key="unit.id">
-          <td
-            class="text-center align-middle"
-            v-if="showUnitName && showCol('name')"
-          >
-            <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
-          </td>
-          <td
-            class="align-middle text-left text-center-sm farming-locations"
-            v-if="showCol('locations')"
-          >
-            <div v-if="unit.locations.length <= 0" class="text-center">
-              No known farmable locations.
-            </div>
-            <template v-else>
-              <span class="row-label">Farming Locations:</span>
-              <ul class="m-0">
-                <li v-for="(l, index) in unit.locations" :key="index">
-                  {{ l }}
-                </li>
-              </ul>
-            </template>
-          </td>
-          <td class="align-middle" v-if="showCol('owned')">
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Shards Owned:</span>
-              <ShardsOwned :unit="unit" class="shards-owned" />
-            </div>
-          </td>
-          <td class="align-middle text-center" v-if="showCol('remaining')">
-            <span class="row-label">Shards Remaining:</span>
-            {{ unit.remainingShards }}
-          </td>
-          <td class="align-middle progress-cell" v-if="showCol('progress')">
-            <ProgressBar :percent="unit.shardPercent" />
-          </td>
-          <td class="align-middle nodes-per-day" v-if="showCol('attempts')">
-            <span class="row-label">Node Attempts per Day:</span>
-            <NodesPerDay :unit="unit" v-if="unit.showNodesPerDay" />
-          </td>
-          <td
-            class="text-center align-middle"
-            v-if="showUnitName && showCol('time')"
-          >
-            <span class="row-label">Completion Date:</span>
-            <Timestamp
-              :timeLength="unit.estimatedTime"
-              displayClasses="d-inline"
-            />
-          </td>
-          <td class="align-middle" v-if="showCol('priority') && showPriority">
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Priority:</span>
-              <ShardPriority
-                :unit="unit"
-                :nodeTableNames="nodeTableNames"
-                class="priority-input"
-              />
-            </div>
-          </td>
-          <td class="align-middle" v-if="showCol('actions') && showActions">
-            <div
-              class="btn-group btn-group-sm d-block text-center"
-              role="group"
-            >
-              <button
-                type="button"
-                class="btn btn-success"
-                title="Add to active farming list"
-                v-if="unit.tracking"
-                @click="unit.tracking = true"
-              >
-                <i class="fas fa-heart"></i>
-              </button>
-              <button
-                type="button"
-                class="btn btn-danger"
-                title="Remove from active farming list"
-                @click="unit.tracking = false"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
+      <TableBody :body="body" />
     </table>
   </Loading>
 </template>
@@ -98,15 +12,10 @@
 <script lang="ts">
 import { defineComponent, toRefs } from "vue";
 
-import ShardsOwned from "../shardsOwned.vue";
-import UnitIcon from "components/units/unitIcon.vue";
-import NodesPerDay from "../nodesPerDay.vue";
-import ShardPriority from "../shardPriority.vue";
-import Timestamp from "components/general/timestamp.vue";
 import { Unit } from "types/unit";
 import { estimatedTime } from "types/shards";
 import { setupColumnEvents, setupSorting } from "utils";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
   name: "ShardTable",
@@ -125,13 +34,6 @@ export default defineComponent({
       sortIcon,
       showCol,
     };
-  },
-  components: {
-    ShardsOwned,
-    UnitIcon,
-    NodesPerDay,
-    Timestamp,
-    ShardPriority,
   },
   props: {
     units: {
@@ -277,6 +179,112 @@ export default defineComponent({
         ],
       };
     },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.filteredUnitList.map((unit: Unit) => {
+          return {
+            cells: [
+              {
+                show: this.showUnitName && this.showCol("name"),
+                type: "unit",
+                data: {
+                  unit,
+                  isLink: true,
+                  hideImage: this.simpleView,
+                },
+              },
+              {
+                show: this.showCol("locations"),
+                classes: "text-left text-center-sm farming-locations",
+                zeroState: {
+                  show: unit.locations.length <= 0,
+                  message: "No known farmable locations.",
+                },
+                label: "Farming Locations:",
+                type: "list",
+                data: {
+                  list: unit.locations.map((location, index) => {
+                    return {
+                      id: index,
+                      message: location,
+                    };
+                  }),
+                  listData: {
+                    classes: "m-0",
+                  },
+                },
+              },
+              {
+                show: this.showCol("owned"),
+                type: "shardsOwned",
+                data: { unit },
+              },
+              {
+                show: this.showCol("remaining"),
+                label: "Shards Remaining:",
+                data: unit.remainingShards,
+              },
+              {
+                show: this.showCol("progress"),
+                type: "progress",
+                data: unit.shardPercent,
+                classes: "progress-cell",
+              },
+              {
+                classes: "nodes-per-day",
+                show: this.showCol("attempts"),
+                label: "Node Attempts per Day:",
+                type: "nodes",
+                data: { unit },
+              },
+              {
+                show: this.showUnitName && this.showCol("time"),
+                label: "Completion Date:",
+                type: "time",
+                data: {
+                  timestamp: unit.estimatedTime,
+                  classes: "d-inline",
+                },
+              },
+              {
+                show: this.showPriority && this.showCol("priority"),
+                type: "priority",
+                data: {
+                  unit,
+                  nodeTableNames: this.nodeTableNames,
+                  classes: "priority-input",
+                },
+              },
+              {
+                show: this.showCol("actions") && this.showActions,
+                type: "buttons",
+                data: [
+                  {
+                    click: () => {
+                      unit.tracking = true;
+                    },
+                    icon: "fas fa-heart",
+                    classes: "btn btn-success",
+                    hide: !unit.tracking,
+                    title: "Add to active farming list",
+                  },
+                  {
+                    click: () => {
+                      unit.tracking = false;
+                    },
+                    icon: "fas fa-trash",
+                    classes: "btn btn-danger",
+                    hide: !unit.tracking,
+                    title: "Remove from active farming list",
+                  },
+                ],
+              },
+            ],
+          };
+        }),
+      };
+    },
     filteredUnitList(): Unit[] {
       return this.units
         .filter((unit: Unit) => {
@@ -351,7 +359,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.progress-cell {
+::v-deep(.progress-cell) {
   min-width: 125px;
 }
 </style>

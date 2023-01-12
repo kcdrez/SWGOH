@@ -10,32 +10,20 @@
         class="table table-bordered table-dark table-sm table-striped swgoh-table"
       >
         <TableHeader :header="headerData" />
-        <tbody>
-          <tr v-for="unit in filteredUnitList" :key="unit.id">
-            <td class="align-middle text-center">
-              <UnitIcon :unit="unit" isLink hideImage />
-            </td>
-            <td class="align-middle text-center">
-              <ProgressBar
-                :percent="totalProgress(unit.id ?? '', 'requirement')"
-              />
-            </td>
-          </tr>
-        </tbody>
+        <TableBody :body="body" />
       </table>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, toRefs } from "vue";
+import { defineComponent, PropType } from "vue";
 import { mapState } from "vuex";
 
 import { setupEvents, setupSorting } from "utils";
 import { totalProgress, getPrerequisites, Unit } from "types/unit";
 import { NodeCharacter } from "types/shards";
-import UnitIcon from "components/units/unitIcon.vue";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 const storageKey = "LegendarySummaryTable";
 export default defineComponent({
@@ -52,7 +40,6 @@ export default defineComponent({
       searchText,
     };
   },
-  components: { UnitIcon },
   props: {
     unitList: {
       type: Array as PropType<(Unit | NodeCharacter)[]>,
@@ -115,6 +102,31 @@ export default defineComponent({
             },
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.filteredUnitList.map((unit: Unit | NodeCharacter) => {
+          return {
+            cells: [
+              {
+                type: "unit",
+                show: true,
+                data: {
+                  unit,
+                  isLink: true,
+                  hideImage: true,
+                },
+              },
+              {
+                type: "progress",
+                data: this.totalProgress(unit.id ?? "", "requirement"),
+                show: true,
+              },
+            ],
+          };
+        }),
       };
     },
     filteredUnitList() {

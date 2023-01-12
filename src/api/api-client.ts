@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 
 import { Player } from "types/player";
 import { ConfigType, Gear, IGear } from "types/gear";

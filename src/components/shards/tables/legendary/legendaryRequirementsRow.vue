@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, toRefs } from "vue";
+import { defineComponent, toRefs } from "vue";
 
 import { IPrerequisite } from "types/shards";
 import { getPercent, getUnitsByTag, getUnit } from "types/unit";

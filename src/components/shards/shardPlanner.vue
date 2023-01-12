@@ -157,49 +157,7 @@
             class="table table-bordered table-dark table-sm table-striped swgoh-table"
           >
             <TableHeader :header="header" />
-            <tbody class="align-middle text-center">
-              <tr v-for="item in unitUsages" :key="item.requirementId">
-                <td>
-                  <div class="requirement-container">
-                    <template v-if="item.id && item.id !== unit.id">
-                      <UnitIcon :unit="getUnit(item.id)" isLink hideImage />
-                      <i class="fa fa-arrow-right"></i>
-                    </template>
-                    <UnitIcon
-                      :unit="getUnit(item.requirementId)"
-                      isLink
-                      hideImage
-                    />
-                  </div>
-                </td>
-                <td>
-                  <RequirementIcon
-                    class="justify-content-center"
-                    v-if="item.requirement"
-                    :type="item.requirement.type"
-                    :unitId="unit.id"
-                    :value="item.requirement.value"
-                  />
-                  <RequirementIcon
-                    class="justify-content-center"
-                    v-else
-                    :type="item.recommended.type"
-                    :unitId="unit.id"
-                    :value="item.recommended.value"
-                  />
-                </td>
-                <td>
-                  <ProgressBar
-                    v-if="item.requirement"
-                    :percent="getPercent(item, 'requirement')"
-                  />
-                  <ProgressBar
-                    v-else
-                    :percent="getPercent(item, 'recommended')"
-                  />
-                </td>
-              </tr>
-            </tbody>
+            <TableBody :body="body" />
           </table>
         </div>
       </template>
@@ -215,9 +173,6 @@ import ShardTable from "./tables/shardTable.vue";
 import StoreTable from "./tables/storeTable.vue";
 import TerritoryBattleShardTable from "./tables/territoryBattleShardTable.vue";
 import LegendaryRequirementsTable from "./tables/legendary/legendaryRequirementsTable.vue";
-import RequirementIcon from "./tables/legendary/requirementIcon.vue";
-import EnergySpent from "../energySpent.vue";
-import UnitIcon from "components/units/unitIcon.vue";
 import { loadingState } from "types/loading";
 import { setupEvents, setupSimpleView } from "utils";
 import Timestamp from "../general/timestamp.vue";
@@ -229,7 +184,7 @@ import {
 import { estimatedTime as shopEstimatedTime } from "types/currency";
 import { Unit, getUnit, getPercent } from "types/unit";
 import { estimatedTime as tbEstimatedTime } from "types/guild";
-import { iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 const storageKey = "shardPlanner";
 
@@ -248,9 +203,6 @@ export default defineComponent({
     TerritoryBattleShardTable,
     LegendaryRequirementsTable,
     Timestamp,
-    EnergySpent,
-    RequirementIcon,
-    UnitIcon,
   },
   props: {
     unit: {
@@ -298,6 +250,48 @@ export default defineComponent({
             sortMethodShow: true,
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.unitUsages.map((unit: any) => {
+          return {
+            cells: [
+              {
+                show: true,
+                type: "unitRequirement",
+                data: {
+                  parentUnit: this.unit,
+                  childUnit: unit,
+                  isLink: true,
+                  hideImage: true,
+                },
+              },
+              {
+                show: true,
+                type: "unitLevel",
+                data: {
+                  classes: "justify-content-center",
+                  type: !!unit.requirement
+                    ? unit.requirement.type
+                    : unit.recommended.type,
+                  unitId: unit.id,
+                  value: !!unit.requirement
+                    ? unit.requirement.value
+                    : unit.recommended.value,
+                },
+              },
+              {
+                show: true,
+                type: "progress",
+                data: !!unit.requirement
+                  ? getPercent(unit, "requirement")
+                  : getPercent(unit, "recommended"),
+              },
+            ],
+          };
+        }),
       };
     },
     cols(): any {

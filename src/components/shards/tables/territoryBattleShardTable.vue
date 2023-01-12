@@ -4,53 +4,7 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
     >
       <TableHeader :header="header" />
-      <tbody>
-        <tr
-          v-for="unit in filteredUnitList"
-          :key="unit.id"
-          class="align-middle text-center"
-        >
-          <td v-if="showUnitName && showCol('name')">
-            <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
-          </td>
-          <td
-            class="farming-locations text-left text-center-sm"
-            v-if="showCol('locations')"
-          >
-            <div v-if="unit.locations.length <= 0" class="text-center">
-              No known farmable locations.
-            </div>
-            <template v-else>
-              <span class="row-label">Farming Locations:</span>
-              <ul class="m-0">
-                <li v-for="(l, index) in unit.locations" :key="index">
-                  {{ l }}
-                </li>
-              </ul>
-            </template>
-          </td>
-          <td v-if="showCol('owned')">
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Shards Owned:</span>
-              <ShardsOwned :unit="unit" class="shards-owned" />
-            </div>
-          </td>
-          <td v-if="showCol('remaining')">
-            <span class="row-label">Remaining Shards:</span>
-            {{ unit.remainingShards }}
-          </td>
-          <td v-if="showCol('progress')">
-            <ProgressBar :percent="unit.shardPercent" />
-          </td>
-          <td v-if="showUnitName && showCol('time')">
-            <span class="row-label">Completion Date: </span>
-            <Timestamp
-              :timeLength="estimatedTime(unit)"
-              displayClasses="d-inline"
-            />
-          </td>
-        </tr>
-      </tbody>
+      <TableBody :body="body" />
     </table>
   </Loading>
 </template>
@@ -59,15 +13,10 @@
 import { defineComponent, PropType, toRefs } from "vue";
 import { mapActions } from "vuex";
 
-import ShardsOwned from "../shardsOwned.vue";
-import UnitIcon from "components/units/unitIcon.vue";
-import NodesPerDay from "../nodesPerDay.vue";
-import ShardPriority from "../shardPriority.vue";
-import Timestamp from "components/general/timestamp.vue";
 import { Unit, unitsByPriority } from "types/unit";
 import { estimatedTime } from "types/guild";
 import { setupColumnEvents, setupSorting } from "utils";
-import { iHeader, iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
   name: "TerritoryBattleShardTable",
@@ -86,13 +35,6 @@ export default defineComponent({
       sortIcon,
       showCol,
     };
-  },
-  components: {
-    ShardsOwned,
-    UnitIcon,
-    NodesPerDay,
-    Timestamp,
-    ShardPriority,
   },
   props: {
     units: {
@@ -203,6 +145,65 @@ export default defineComponent({
             },
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.filteredUnitList.map((unit: Unit) => {
+          return {
+            cells: [
+              {
+                show: this.showUnitName && this.showCol("name"),
+                type: "unit",
+                data: {
+                  unit,
+                  isLink: true,
+                  hideImage: this.simpleView,
+                },
+              },
+              {
+                show: this.showCol("locations"),
+                classes: "farming-locations text-left text-center-sm",
+                type: "list",
+                zeroState: {
+                  message: "No known farmable locations.",
+                  show: unit.locations.length <= 0,
+                },
+                data: {
+                  classes: "m-0",
+                  list: unit.locations.map((l) => {
+                    return { id: l, message: l };
+                  }),
+                },
+                label: "Farming Locations:",
+              },
+              {
+                show: this.showCol("owned"),
+                type: "shardsOwned",
+                data: { unit },
+              },
+              {
+                show: this.showCol("remaining"),
+                label: "Remaining Shards:",
+                data: unit.remainingShards,
+              },
+              {
+                show: this.showCol("progress"),
+                type: "progress",
+                data: unit.shardPercent,
+              },
+              {
+                show: this.showUnitName && this.showCol("time"),
+                type: "time",
+                data: {
+                  timestamp: estimatedTime(unit),
+                  classes: "d-inline",
+                },
+              },
+            ],
+          };
+        }),
       };
     },
     filteredUnitList(): Unit[] {

@@ -23,125 +23,7 @@
         class="table table-bordered table-dark table-sm table-striped m-0 swgoh-table"
       >
         <TableHeader :header="header" />
-        <tbody>
-          <tr v-for="unit in unitList" :key="unit.id">
-            <td class="align-middle text-center" v-if="showCol('name')">
-              <UnitIcon :unit="unit" isLink :hideImage="simpleView" />
-            </td>
-            <td class="align-middle text-center" v-if="showCol('curLevel')">
-              <GearText
-                :level="unit.gearLevel"
-                v-if="unit.gearLevel < maxGearLevel"
-              />
-              <RelicLevelIcon
-                class="d-inline-block"
-                :relicLevel="unit.relicLevel"
-                :alignment="unit.alignment"
-                v-else
-              />
-            </td>
-            <td class="align-middle text-center" v-if="showCol('targetLevel')">
-              <span class="row-label">Target Level:</span>
-              <div v-if="unit.isShip">-</div>
-              <div class="d-flex" v-else>
-                <select
-                  class="form-control form-control-sm me-1"
-                  v-model="unit.gearTarget"
-                  v-if="unit.gearLevel < maxGearLevel"
-                >
-                  <option
-                    v-for="num in unit.gearOptions"
-                    :value="num"
-                    :key="num"
-                  >
-                    Gear {{ num }}
-                  </option>
-                </select>
-                <select
-                  v-model="unit.relicTarget"
-                  class="form-control form-control-sm"
-                >
-                  <option
-                    v-for="num in unit.relicOptions"
-                    :value="num"
-                    :key="num"
-                  >
-                    Relic {{ num }}
-                  </option>
-                </select>
-              </div>
-            </td>
-            <td
-              class="align-middle text-center"
-              :class="{
-                'hidden-sm': unit.gearTotalDays === 0 && !unit.isShip,
-              }"
-              v-if="showCol('gearDate')"
-            >
-              <span class="row-label">Est. Gear Date:</span>
-              <Timestamp
-                :timeLength="unit.gearTotalDays"
-                displayClasses="d-inline"
-              />
-            </td>
-            <td
-              class="align-middle text-center"
-              :class="{
-                'hidden-sm': unit.relicTotalDays === 0 && !unit.isShip,
-              }"
-              v-if="showCol('estRelic')"
-            >
-              <span class="row-label">Est. Relic Date:</span>
-              <Timestamp
-                :timeLength="unit.relicTotalDays"
-                displayClasses="d-inline"
-              />
-            </td>
-            <td class="align-middle text-center" v-if="showCol('completed')">
-              <span class="row-label">Est. Completed Date:</span>
-              <Timestamp
-                :timeLength="unit.relicTotalDays + unit.gearTotalDays"
-                displayClasses="d-inline"
-              />
-            </td>
-            <td class="align-middle" v-if="showCol('actions')">
-              <div
-                class="btn-group btn-group-sm d-block text-center"
-                role="group"
-              >
-                <button
-                  type="button"
-                  class="btn btn-danger"
-                  title="Remove from general planner"
-                  @click="remove(unit)"
-                >
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td :colspan="totalColSpan" class="text-center align-middle">
-              Total
-            </td>
-            <td class="text-center align-middle" v-if="showCol('gearDate')">
-              <span class="row-label">Est. Gear Date:</span>
-              <Timestamp :timeLength="total.gear" displayClasses="d-inline" />
-            </td>
-            <td class="text-center align-middle" v-if="showCol('estRelic')">
-              <span class="row-label">Est. Relic Date:</span>
-              <Timestamp :timeLength="total.relic" displayClasses="d-inline" />
-            </td>
-            <td class="text-center align-middle" v-if="showCol('completed')">
-              <span class="row-label">Est. Completed Date:</span>
-              <Timestamp
-                :timeLength="total.gear + total.relic"
-                displayClasses="d-inline"
-              />
-            </td>
-            <td v-if="showCol('actions')" class="hidden-sm"></td>
-          </tr>
-        </tbody>
+        <TableBody :body="body" />
       </table>
     </div>
   </div>
@@ -155,11 +37,7 @@ import { UnitPlannerItem } from "types/planner";
 import { Unit } from "types/unit";
 import { maxGearLevel } from "types/gear";
 import { setupEvents, setupSimpleView, setupSorting } from "utils";
-import Timestamp from "components/general/timestamp.vue";
-import GearText from "components/gear/gearText.vue";
-import RelicLevelIcon from "components/units/relicLevelIcon.vue";
-import UnitIcon from "components/units/unitIcon.vue";
-import { iHeader, iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 const storageKey = "unitSection";
 
@@ -177,7 +55,6 @@ export default defineComponent({
       simpleView,
     };
   },
-  components: { Timestamp, GearText, RelicLevelIcon, UnitIcon },
   props: {
     units: {
       type: Array as () => Unit[],
@@ -340,6 +217,92 @@ export default defineComponent({
             value: "actions",
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.unitList.map((unit: Unit) => {
+          return {
+            cells: [
+              {
+                type: "unit",
+                data: {
+                  unit,
+                  isLink: true,
+                  hideImage: this.simpleView,
+                },
+                show: this.showCol("name"),
+              },
+              {
+                show: this.showCol("curLevel"),
+                type: "unitLevel",
+                data: {
+                  classes: "justify-content-center",
+                  type: "Relic",
+                  unitId: unit.id,
+                },
+              },
+              {
+                show: this.showCol("targetLevel"),
+                type: "unitLevel",
+                edit: true,
+                label: "Target Level:",
+                data: {
+                  unitId: unit.id,
+                  type: "Relic",
+                },
+              },
+              {
+                show: this.showCol("gearDate"),
+                type: "time",
+                label: "Est. Gear Date:",
+                classes:
+                  unit.gearTotalDays === 0 && !unit.isShip ? "hidden-sm" : "",
+                data: {
+                  timestamp: unit.gearTotalDays,
+                  classes: "d-inline",
+                },
+              },
+              {
+                show: this.showCol("estRelic"),
+                type: "time",
+                label: "Est. Gear Date:",
+                classes:
+                  unit.relicTotalDays === 0 && !unit.isShip ? "hidden-sm" : "",
+                data: {
+                  timestamp: unit.relicTotalDays,
+                  classes: "d-inline",
+                },
+              },
+              {
+                show: this.showCol("completed"),
+                type: "time",
+                label: "Est. Completed Date:",
+                classes:
+                  unit.relicTotalDays === 0 && !unit.isShip ? "hidden-sm" : "",
+                data: {
+                  timestamp: unit.relicTotalDays + unit.gearTotalDays,
+                  classes: "d-inline",
+                },
+              },
+              {
+                show: this.showCol("actions"),
+                type: "buttons",
+                data: [
+                  {
+                    click: () => {
+                      this.remove(unit);
+                    },
+                    icon: "fas fa-trash",
+                    classes: "btn btn-danger",
+                    title: "Remove unit from General Planner",
+                  },
+                ],
+              },
+            ],
+          };
+        }),
       };
     },
     total(): { gear: number; relic: number } {

@@ -18,7 +18,7 @@
           <div class="toggles-container">
             <MultiSelect
               class="select-columns"
-              :options="playerCols"
+              :options="header.headers"
               :storageKey="storageKey + 'PlayerColumns'"
               @checked="selectedColumns = $event"
             />
@@ -29,90 +29,7 @@
             class="table table-bordered table-dark table-sm table-striped swgoh-table"
           >
             <TableHeader :header="header" />
-            <tbody>
-              <tr
-                class="text-center align-middle"
-                v-for="player in players"
-                :key="player.allyCode"
-              >
-                <td v-if="showCol('allyCode')">
-                  <span class="row-label">Ally Code:</span>
-                  {{ player.allyCode }}
-                </td>
-                <td v-if="showCol('name')">
-                  <span class="row-label">Player Name:</span> {{ player.name }}
-                </td>
-                <td v-if="showCol('stars')">
-                  <span class="row-label">Stars:</span> {{ player.stars }}
-                </td>
-                <td v-if="showCol('gearLevel')">
-                  <span class="row-label">Gear Level:</span>
-                  {{ player.gearLevel }}
-                </td>
-                <td v-if="showCol('relicLevel')">
-                  <span class="row-label">Relic Level:</span>
-                  {{ player.relicLevel }}
-                </td>
-                <td v-if="showCol('zetas')">
-                  <span class="row-label">Zetas:</span> {{ player.zetas }}
-                </td>
-                <td v-if="showCol('omicrons')">
-                  <span class="row-label">Omicrons:</span> {{ player.omicrons }}
-                </td>
-                <td v-if="showCol('speed')">
-                  <span class="row-label">Speed:</span> {{ player.speed }}
-                </td>
-                <td v-if="showCol('speed')">
-                  <span class="row-label">Speed (Mods):</span>
-                  {{ player.speedMod }}
-                </td>
-                <td v-if="showCol('physicalOffense')">
-                  <span class="row-label">Physical Offense:</span>
-                  {{ player.physicalOffense }}
-                </td>
-                <td v-if="showCol('specialOffense')">
-                  <span class="row-label">Special Offense:</span>
-                  {{ player.specialOffense }}
-                </td>
-                <td v-if="showCol('protection')">
-                  <span class="row-label">Protection:</span>
-                  {{ player.protection }}
-                </td>
-                <td v-if="showCol('health')">
-                  <span class="row-label">Health:</span> {{ player.health }}
-                </td>
-                <td v-if="showCol('tenacity')">
-                  <span class="row-label">Tenacity:</span>
-                  {{ player.tenacity }}%
-                </td>
-                <td v-if="showCol('potency')">
-                  <span class="row-label">Potency:</span> {{ player.potency }}%
-                </td>
-                <td v-if="showCol('physicalCrit')">
-                  <span class="row-label">Physical Crit Chance:</span>
-                  {{ player.physicalCrit }}%
-                </td>
-                <td v-if="showCol('specialCrit')">
-                  <span class="row-label">Special Crit Chance:</span>
-                  {{ player.specialCrit }}%
-                </td>
-                <td v-if="showCol('critDamage')">
-                  <span class="row-label">Crit Damage:</span>
-                  {{ player.critDamage }}
-                </td>
-                <td v-if="showCol('armor')">
-                  <span class="row-label">Armor:</span> {{ player.armor }}
-                </td>
-                <td v-if="showCol('resistance')">
-                  <span class="row-label">Resistance:</span>
-                  {{ player.resistance }}
-                </td>
-                <td v-if="showCol('ultimate')">
-                  <span class="row-label">Has Ult?:</span>
-                  {{ player.ultimate ? "Yes" : "No" }}
-                </td>
-              </tr>
-            </tbody>
+            <TableBody :body="body" />
           </table>
         </div>
       </template>
@@ -131,7 +48,7 @@ import { setupEvents, setupSorting, unvue } from "utils";
 import { Unit } from "types/unit";
 import { IGuildUnitMap } from "types/guild";
 import UnitSearch from "components/units/unitSearch.vue";
-import { iHeader, iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 const storageKey = "guildUnits";
 
@@ -185,6 +102,7 @@ export default defineComponent({
             label: "Ally Code",
             show: this.showCol("allyCode"),
             icon: this.sortIcon("allyCode"),
+            value: "allyCode",
             click: () => {
               this.sortBy("allyCode");
             },
@@ -193,6 +111,7 @@ export default defineComponent({
             label: "Player Name",
             show: this.showCol("name"),
             icon: this.sortIcon("name"),
+            value: "name",
             click: () => {
               this.sortBy("name");
             },
@@ -201,6 +120,7 @@ export default defineComponent({
             label: "Stars",
             show: this.showCol("stars"),
             icon: this.sortIcon("stars"),
+            value: "stars",
             click: () => {
               this.sortBy("stars");
             },
@@ -209,6 +129,7 @@ export default defineComponent({
             label: "Gear Level",
             show: this.showCol("gearLevel"),
             icon: this.sortIcon("gearLevel"),
+            value: "gearLevel",
             click: () => {
               this.sortBy("gearLevel");
             },
@@ -217,6 +138,7 @@ export default defineComponent({
             label: "Relic Level",
             show: this.showCol("relicLevel"),
             icon: this.sortIcon("relicLevel"),
+            value: "relicLevel",
             click: () => {
               this.sortBy("relicLevel");
             },
@@ -225,6 +147,7 @@ export default defineComponent({
             label: "Zetas",
             show: this.showCol("zetas"),
             icon: this.sortIcon("zetas"),
+            value: "zetas",
             click: () => {
               this.sortBy("zetas");
             },
@@ -233,6 +156,7 @@ export default defineComponent({
             label: "Omicrons",
             show: this.showCol("omicrons"),
             icon: this.sortIcon("omicrons"),
+            value: "omicrons",
             click: () => {
               this.sortBy("omicrons");
             },
@@ -241,6 +165,7 @@ export default defineComponent({
             label: "Speed",
             show: this.showCol("speed"),
             icon: this.sortIcon("speed"),
+            value: "speed",
             click: () => {
               this.sortBy("speed");
             },
@@ -249,6 +174,7 @@ export default defineComponent({
             label: "Speed (Mods)",
             show: this.showCol("speedMods"),
             icon: this.sortIcon("speedMods"),
+            value: "speedMods",
             click: () => {
               this.sortBy("speedMods");
             },
@@ -257,6 +183,7 @@ export default defineComponent({
             label: "Physical Offense",
             show: this.showCol("physicalOffense"),
             icon: this.sortIcon("physicalOffense"),
+            value: "physicalOffense",
             click: () => {
               this.sortBy("physicalOffense");
             },
@@ -265,6 +192,7 @@ export default defineComponent({
             label: "Special Offense",
             show: this.showCol("specialOffense"),
             icon: this.sortIcon("specialOffense"),
+            value: "specialOffense",
             click: () => {
               this.sortBy("specialOffense");
             },
@@ -273,6 +201,7 @@ export default defineComponent({
             label: "Protection",
             show: this.showCol("protection"),
             icon: this.sortIcon("protection"),
+            value: "protection",
             click: () => {
               this.sortBy("protection");
             },
@@ -281,6 +210,7 @@ export default defineComponent({
             label: "Health",
             show: this.showCol("health"),
             icon: this.sortIcon("health"),
+            value: "health",
             click: () => {
               this.sortBy("health");
             },
@@ -289,6 +219,7 @@ export default defineComponent({
             label: "Tenacity",
             show: this.showCol("tenacity"),
             icon: this.sortIcon("tenacity"),
+            value: "tenacity",
             click: () => {
               this.sortBy("tenacity");
             },
@@ -297,6 +228,7 @@ export default defineComponent({
             label: "Potency",
             show: this.showCol("potency"),
             icon: this.sortIcon("potency"),
+            value: "potency",
             click: () => {
               this.sortBy("potency");
             },
@@ -305,6 +237,7 @@ export default defineComponent({
             label: "Physical Crit Chance",
             show: this.showCol("physicalCrit"),
             icon: this.sortIcon("physicalCrit"),
+            value: "physicalCrit",
             click: () => {
               this.sortBy("physicalCrit");
             },
@@ -313,6 +246,7 @@ export default defineComponent({
             label: "Special Crit Chance",
             show: this.showCol("specialCrit"),
             icon: this.sortIcon("specialCrit"),
+            value: "specialCrit",
             click: () => {
               this.sortBy("specialCrit");
             },
@@ -321,6 +255,7 @@ export default defineComponent({
             label: "Crit Damage",
             show: this.showCol("critDamage"),
             icon: this.sortIcon("critDamage"),
+            value: "critDamage",
             click: () => {
               this.sortBy("critDamage");
             },
@@ -329,6 +264,7 @@ export default defineComponent({
             label: "Armor",
             show: this.showCol("armor"),
             icon: this.sortIcon("armor"),
+            value: "armor",
             click: () => {
               this.sortBy("armor");
             },
@@ -337,6 +273,7 @@ export default defineComponent({
             label: "Resistance",
             show: this.showCol("resistance"),
             icon: this.sortIcon("resistance"),
+            value: "resistance",
             click: () => {
               this.sortBy("resistance");
             },
@@ -345,11 +282,128 @@ export default defineComponent({
             label: "Has Ult?",
             show: this.showCol("ultimate"),
             icon: this.sortIcon("ultimate"),
+            value: "ultimate",
             click: () => {
               this.sortBy("ultimate");
             },
           },
         ],
+      };
+    },
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.players.map((player: any) => {
+          return {
+            cells: [
+              {
+                show: this.showCol("allyCode"),
+                data: player.allyCode,
+                label: "Ally Code:",
+              },
+              {
+                show: this.showCol("name"),
+                data: player.name,
+                label: "Player Name:",
+              },
+              {
+                show: this.showCol("stars"),
+                data: player.stars,
+                label: "Stars:",
+              },
+              {
+                show: this.showCol("gearLevel"),
+                data: player.gearLevel,
+                label: "Gear Level:",
+              },
+              {
+                show: this.showCol("relicLevel"),
+                data: player.relicLevel,
+                label: "Relic Level:",
+              },
+              {
+                show: this.showCol("zetas"),
+                data: player.zetas,
+                label: "Zetas:",
+              },
+              {
+                show: this.showCol("omicrons"),
+                data: player.omicrons,
+                label: "Omicrons:",
+              },
+              {
+                show: this.showCol("speed"),
+                data: player.speed,
+                label: "Speed:",
+              },
+              {
+                show: this.showCol("speedMods"),
+                data: player.speedMod,
+                label: "Speed (Mods):",
+              },
+              {
+                show: this.showCol("physicalOffense"),
+                data: player.physicalOffense,
+                label: "Physical Offense:",
+              },
+              {
+                show: this.showCol("specialOffense"),
+                data: player.specialOffense,
+                label: "Special Offense:",
+              },
+              {
+                show: this.showCol("protection"),
+                data: player.protection,
+                label: "Protection:",
+              },
+              {
+                show: this.showCol("health"),
+                data: player.health,
+                label: "Health:",
+              },
+              {
+                show: this.showCol("tenacity"),
+                data: player.tenacity,
+                label: "Tenacity:",
+              },
+              {
+                show: this.showCol("potency"),
+                data: player.potency,
+                label: "Potency:",
+              },
+              {
+                show: this.showCol("physicalCrit"),
+                data: player.physicalCrit,
+                label: "Physical Crit Chance:",
+              },
+              {
+                show: this.showCol("specialCrit"),
+                data: player.specialCrit,
+                label: "Special Crit Chance:",
+              },
+              {
+                show: this.showCol("critDamage"),
+                data: player.critDamage,
+                label: "Crit Damage:",
+              },
+              {
+                show: this.showCol("armor"),
+                data: player.armor,
+                label: "Armor:",
+              },
+              {
+                show: this.showCol("resistance"),
+                data: player.resistance,
+                label: "Resistance:",
+              },
+              {
+                show: this.showCol("ultimate"),
+                data: player.ultimate ? "Yes" : "No",
+                label: "Has Ult:",
+              },
+            ],
+          };
+        }),
       };
     },
     players(): any[] {
@@ -375,91 +429,6 @@ export default defineComponent({
     },
     loadingUnitState(): loadingState {
       return this.loading ? loadingState.loading : loadingState.ready;
-    },
-    playerCols(): { label: string; value: any }[] {
-      const list = [
-        {
-          label: "Ally Code",
-          value: "allyCode",
-        },
-        {
-          label: "Player Name",
-          value: "name",
-        },
-        {
-          label: "Stars",
-          value: "stars",
-        },
-        {
-          label: "Gear Level",
-          value: "gearLevel",
-        },
-        {
-          label: "Relic Level",
-          value: "relicLevel",
-        },
-        {
-          label: "Zetas",
-          value: "zetas",
-        },
-        {
-          label: "Omicrons",
-          value: "omicrons",
-        },
-        {
-          label: "Speed",
-          value: "speed",
-        },
-        {
-          label: "Physical Offense",
-          value: "physicalOffense",
-        },
-        {
-          label: "Special Offense",
-          value: "specialOffense",
-        },
-        {
-          label: "Protection",
-          value: "protection",
-        },
-        {
-          label: "Health",
-          value: "health",
-        },
-        {
-          label: "Tenacity",
-          value: "tenacity",
-        },
-        {
-          label: "potency",
-          value: "potency",
-        },
-        {
-          label: "Physical Crit Chance",
-          value: "physicalCrit",
-        },
-        {
-          label: "Special Crit Chance",
-          value: "specialCrit",
-        },
-        {
-          label: "Crit Damage",
-          value: "critDamage",
-        },
-        {
-          label: "Armor",
-          value: "armor",
-        },
-        {
-          label: "Resistance",
-          value: "resistance",
-        },
-        {
-          label: "Has Ult?",
-          value: "ultimate",
-        },
-      ];
-      return list;
     },
   },
   watch: {

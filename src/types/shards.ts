@@ -264,7 +264,7 @@ export function displayValue(
   stars: any,
   power?: any
 ) {
-  if (value === null) {
+  if (value === null || value === undefined) {
     if (type === "Relic" && relicLevel) {
       return relicLevel ?? 0;
     } else if (type === "Relic" || type === "Gear") {

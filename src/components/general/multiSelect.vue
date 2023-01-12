@@ -70,7 +70,7 @@ export default defineComponent({
       this.$emit("checked", val);
       window.localStorage.setItem(this.storageKey, JSON.stringify(val));
     },
-    selectAll(newVal, oldVal): void {
+    selectAll(newVal): void {
       this.selected = newVal ? this.options.map((x: any) => x.value) : [];
     },
   },
