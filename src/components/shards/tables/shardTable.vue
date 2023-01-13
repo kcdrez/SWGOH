@@ -210,9 +210,7 @@ export default defineComponent({
                       message: location,
                     };
                   }),
-                  listData: {
-                    classes: "m-0",
-                  },
+                  classes: "m-0",
                 },
               },
               {

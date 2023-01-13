@@ -284,56 +284,6 @@ export default defineComponent({
         ],
       };
     },
-    headers(): iHeader[] {
-      return [
-        {
-          label: "Unit Name",
-          show: this.showCol("name"),
-          maxWidth: "750px",
-          input: {
-            type: "input",
-            classes: "mx-auto my-1 w-75",
-            placeholder: "Search",
-          },
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
-          },
-        },
-        {
-          label: "Current Level",
-          show: this.showCol("current"),
-          icon: this.sortIcon("current"),
-          click: () => {
-            this.sortBy("current");
-          },
-        },
-        {
-          label: "Requirements",
-          show: this.showCol("requirements"),
-          icon: this.sortIcon("requirements"),
-          click: () => {
-            this.sortBy("requirements");
-          },
-        },
-        {
-          label: "Recommended",
-          show: this.showCol("recommended") && this.showRecommended,
-          icon: this.sortIcon("stars"),
-          click: () => {
-            this.sortBy("stars");
-          },
-        },
-        {
-          label: "Progress",
-          show: this.showCol("progress"),
-          icon: this.sortIcon("progress"),
-          click: () => {
-            this.sortBy("progress");
-          },
-        },
-      ];
-    },
     prerequisites(): IPrerequisite[] {
       return getPrerequisites(this.unit.id ?? "")
         .filter((p) => {

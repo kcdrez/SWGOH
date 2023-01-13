@@ -1,11 +1,11 @@
 <template>
   <div class="d-flex">
-    <template v-if="unit?.isShip">-</template>
-    <template v-else-if="edit && unit">
+    <template v-if="edit && unit">
+      <template v-if="unit?.isShip">-</template>
       <select
         class="form-control form-control-sm me-1"
         v-model="unit.gearTarget"
-        v-if="(unit.gearLevel ?? 0) < maxGearLevel"
+        v-else-if="(unit.gearLevel ?? 0) < maxGearLevel"
       >
         <option v-for="num in unit.gearOptions" :value="num" :key="num">
           Gear {{ num }}
