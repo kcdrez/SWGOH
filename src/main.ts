@@ -22,7 +22,7 @@ import MultiSelect from "components/general/multiSelect.vue";
 import SortMethods from "components/general/sortMethods.vue";
 import ColumnHeaders from "components/general/columnHeaders.vue";
 import TableHeader from "components/general/tableHeader.vue";
-import TableBody from "components/general/TableBody.vue";
+import TableBody from "components/general/tableBody.vue";
 import { formatDate, pluralText, daysFromNow } from "utils";
 
 const app = createApp(App);

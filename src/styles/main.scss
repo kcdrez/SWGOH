@@ -16,6 +16,14 @@ body {
     &:hover {
       color: $primary-light-1;
     }
+    &.link-shadow {
+      text-shadow: 2px 2px 2px black;
+      text-decoration: none;
+      color: #57abdb;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
   .sticky-header {

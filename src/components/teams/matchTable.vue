@@ -66,31 +66,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, ref, Ref } from "vue";
 
 import { Match, TeamMember } from "types/teams";
 import MultiSelect from "components/general/multiSelect.vue";
-import { setupSorting } from "utils";
+import { setupColumnEvents } from "utils";
 import { iTableBody, iTableHead } from "types/general";
-
-type dataModel = {
-  selectedColumns: string[];
-};
-
-const storageKey = "matchTable";
 
 export default defineComponent({
   name: "MatchTable",
   setup() {
-    const { sortDir, sortMethod, searchText, sortBy, sortIcon } =
-      setupSorting(storageKey);
+    const selectedColumns: Ref<string[]> = ref([]);
+    const { showCol } = setupColumnEvents(selectedColumns);
 
     return {
-      sortDir,
-      sortMethod,
-      searchText,
-      sortBy,
-      sortIcon,
+      selectedColumns,
+      showCol,
     };
   },
   components: { MultiSelect },
@@ -100,41 +91,37 @@ export default defineComponent({
       type: Object as PropType<Match>,
     },
   },
-  data() {
-    return {
-      selectedColumns: [],
-    } as dataModel;
-  },
   computed: {
     header(): iTableHead {
       return {
-        sortMethod: this.sortMethod,
-        sortDir: this.sortDir,
-        methodChange: (val: string) => {
-          this.sortMethod = val;
+        classes: "show-on-mobile",
+        sortMethod: this.match.sortMethod,
+        sortDir: this.match.sortDir,
+        methodChange: (val: any) => {
+          this.match.sortMethod = val;
         },
         directionChange: (val: "asc" | "desc") => {
-          this.sortDir = val;
+          this.match.sortDir = val;
         },
         headers: [
           {
             label: "Name",
             show: this.showCol("name"),
             sortMethodShow: true,
-            icon: this.sortIcon("name"),
+            icon: this.match.sortIcon("name"),
             value: "name",
             click: () => {
-              this.sortBy("name");
+              this.match.sortMethod = "name";
             },
           },
           {
             label: "Is Leader?",
-            show: this.showCol("leader"),
+            show: this.showCol("isLeader"),
             sortMethodShow: true,
-            icon: this.sortIcon("leader"),
-            value: "leader",
+            icon: this.match.sortIcon("isLeader"),
+            value: "isLeader",
             click: () => {
-              this.sortBy("leader");
+              this.match.sortMethod = "isLeader";
             },
           },
           {
@@ -146,11 +133,11 @@ export default defineComponent({
           {
             label: "Sub Total",
             show: this.showCol("subTotal"),
-            icon: this.sortIcon("subTotal"),
+            icon: this.match.sortIcon("subTotal"),
             value: "subTotal",
             sortMethodShow: true,
             click: () => {
-              this.sortBy("subTotal");
+              this.match.sortMethod = "subTotal";
             },
           },
           {
@@ -162,11 +149,11 @@ export default defineComponent({
           {
             label: "Total",
             show: this.showCol("total"),
-            icon: this.sortIcon("total"),
+            icon: this.match.sortIcon("total"),
             value: "total",
             sortMethodShow: true,
             click: () => {
-              this.sortBy("total");
+              this.match.sortMethod = "total";
             },
           },
         ],
@@ -208,7 +195,7 @@ export default defineComponent({
                 value: unit.name,
               },
               {
-                show: this.showCol("leader"),
+                show: this.showCol("isLeader"),
                 label: "Is Leader?",
                 data: `<div class="d-inline ${
                   unit.isLeader ? "text-success" : ""
@@ -219,7 +206,7 @@ export default defineComponent({
               },
               {
                 show: this.showCol("owner"),
-                data: unit.owner,
+                data: unit.ownerName,
                 label: "Owner:",
               },
               {
@@ -246,9 +233,6 @@ export default defineComponent({
     },
   },
   methods: {
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
-    },
     hasBonuses(unit: TeamMember): boolean {
       return (
         this.match.leaderSpeedBonus(unit, true) > 0 &&

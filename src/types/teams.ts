@@ -66,6 +66,9 @@ export class Team {
     if (val !== this._sortMethod) {
       this._sortMethod = val;
       this.save();
+    } else {
+      const newDir = this.sortDir === "asc" ? "desc" : "asc";
+      this.sortDir = newDir;
     }
   }
   public get searchName() {
@@ -182,6 +185,14 @@ export class Team {
   }
   private get isOpponent() {
     return store.state.opponents.player?.id === this._owner;
+  }
+
+  public sortIcon(type: SortType): string {
+    if (this._sortMethod === type) {
+      return this._sortDir === "asc" ? "fa-sort-down" : "fa-sort-up";
+    } else {
+      return "fa-sort";
+    }
   }
 
   public addUnit(unit: Unit) {
@@ -362,7 +373,13 @@ export class TeamMember {
     return this._owner;
   }
   public get ownerName() {
-    return this._owner; //todo
+    if (store.state.player.player?.id === this._owner) {
+      return store.state.player.player?.name;
+    } else if (store.state.opponents.player?.id === this._owner) {
+      return store.state.opponents.player?.name;
+    } else {
+      return this._owner;
+    }
   }
   public get name() {
     return this._unitData.name;

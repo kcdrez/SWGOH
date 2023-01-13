@@ -5,7 +5,9 @@
       <div>
         These tools are designed to help players and guilds maximize their
         potential while playing the game
-        <a href="https://www.ea.com/games/starwars/galaxy-of-heroes"
+        <a
+          href="https://www.ea.com/games/starwars/galaxy-of-heroes"
+          class="link-shadow"
           >Star Wars: Galaxy of Heroes</a
         >. The tools are most useful for players that are at the
         semi-competative to competative players (GP of 2mil or more) and may be
@@ -13,10 +15,14 @@
       </div>
       If you have any feedback, bug reports, or tools suggestions, send an email
       to
-      <a href="mailto:drezzinator@gmail.com?subject=SWGoH Tools Suggestion"
+      <a
+        href="mailto:drezzinator@gmail.com?subject=SWGoH Tools Suggestion"
+        class="link-shadow"
         >drezzinator@gmail.com</a
       >, or contact me on discord via
-      <a href="https://discord.com/channels/@me/drezzinator#6175"
+      <a
+        href="https://discord.com/channels/@me/drezzinator#6175"
+        class="link-shadow"
         >drezzinator#6175</a
       >.
     </div>
@@ -42,10 +48,13 @@
         <div class="text-danger shadow-text" v-if="requestState === 'ERROR'">
           An error occured retrieving the player data with that ally code.
           Please make sure you are registered on
-          <a href="www.swgoh.gg">SWGOH.GG</a> in order to use the tools. If you
-          have already registered, please verify that the ally code is correct
-          and try again. If the issue persists, contact the author via email
-          <a href="mailto:drezzinator@gmail.com?subject=SWGoH Tools Suggestion"
+          <a href="www.swgoh.gg" class="link-shadow">SWGOH.GG</a> in order to
+          use the tools. If you have already registered, please verify that the
+          ally code is correct and try again. If the issue persists, contact the
+          author via email
+          <a
+            href="mailto:drezzinator@gmail.com?subject=SWGoH Tools Suggestion"
+            class="link-shadow"
             >drezzinator@gmail.com</a
           >
         </div>
@@ -82,14 +91,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-::v-deep(a) {
-  text-shadow: 2px 2px 2px black;
-  text-decoration: none;
-  color: #57abdb;
-  &:hover {
-    text-decoration: underline;
-  }
-}
 .ally-code {
   width: 50%;
   @media only screen and (max-width: 640px) {

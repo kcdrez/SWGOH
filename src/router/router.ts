@@ -105,6 +105,7 @@ const routes = [
     props: {
       default: {
         dependencyModules: ["teams", "opponents"],
+        errorLoading: "no loading",
       },
     },
     children: [

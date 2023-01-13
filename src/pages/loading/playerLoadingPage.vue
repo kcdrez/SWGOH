@@ -1,5 +1,6 @@
 <template>
   <Loading :state="loadingState" size="lg">
+    <template v-slot:error>{{ errorLoading }}</template>
     <router-view />
   </Loading>
 </template>
@@ -22,12 +23,18 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    errorLoading: {
+      type: String,
+      default: "Error loading data",
+    },
   },
   computed: {
     ...mapState("player", ["requestState"]),
     ...mapGetters(["someLoading"]),
     loadingState() {
-      if (this.requestState !== loadingState.ready) {
+      if (this.requestState === loadingState.error) {
+        return loadingState.error;
+      } else if (this.requestState !== loadingState.ready) {
         return loadingState.loading;
       } else {
         return this.someLoading(this.dependencyModules);

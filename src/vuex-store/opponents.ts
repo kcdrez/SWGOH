@@ -180,6 +180,7 @@ const store = {
         } catch (err) {
           console.error(err);
           commit("SET_REQUEST_STATE", loadingState.error);
+          // commit("SET_REQUEST_STATE", loadingState.error, { root: true });
         }
       }
     },

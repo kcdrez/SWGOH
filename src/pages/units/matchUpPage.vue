@@ -1,8 +1,19 @@
 <template>
   <div class="container teams-page swgoh-page">
     <div class="opponent-container">
-      <div v-if="opponent">
-        Your opponent is: {{ opponent.name }}
+      <div v-if="requestState === 'ERROR'" class="text-warning mt-2">
+        An error occurred retrieving the opponent. Please check the ally code
+        and try again. If the issue persists, it may be because your opponent
+        does not have a swgoh.gg account and thus this tool cannot be used.
+      </div>
+      <div v-if="opponent" class="mt-3">
+        Your opponent is:
+        <a
+          class="me-2 link-shadow"
+          :href="`https://swgoh.gg/p/${opponent.allyCode}`"
+          target="_blank"
+          >{{ opponent.name }}</a
+        >
         <button
           class="btn btn-sm btn-danger"
           title="Remove this opponent to add another one"
@@ -107,7 +118,7 @@
           </div>
           <div class="col">
             <h5 class="text-center">Opponent's Teams</h5>
-            <div class="input-group input-group-sm new-team">
+            <div v-if="opponent" class="input-group input-group-sm new-team">
               <input
                 type="text"
                 class="form-control"
@@ -123,6 +134,9 @@
               >
                 Add New Team
               </button>
+            </div>
+            <div v-else>
+              Please enter an opponent's ally code before adding any teams.
             </div>
             <TeamTable
               v-for="team in opponentTeams"
@@ -265,6 +279,7 @@ export default defineComponent({
       opponent: "player",
       opponentTeams: "teams",
       matches: "matches",
+      requestState: "requestState",
     }),
     ...mapState("teams", {
       playerTeams: "teams",

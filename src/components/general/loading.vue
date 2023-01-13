@@ -4,6 +4,7 @@
       <i class="fas fa-spinner fa-spin" :class="sizeClass" :title="message" />
       <div v-if="displayText">{{ displayText }}</div>
     </div>
+    <slot name="error" v-else-if="state === 'ERROR'" />
     <slot v-else />
   </div>
 </template>

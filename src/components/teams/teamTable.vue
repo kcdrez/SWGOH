@@ -355,7 +355,6 @@ export default defineComponent({
             <div>Other Bonus: ${otherBonus}</div>
           `
               : "";
-
           return {
             cells: [
               {
@@ -366,7 +365,6 @@ export default defineComponent({
               },
               {
                 show: this.showCol("isLeader"),
-                classes: "text-left text-center-sm",
                 type: "checkbox",
                 label: "Is Leader?",
                 data: {

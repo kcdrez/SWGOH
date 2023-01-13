@@ -1,29 +1,43 @@
 <template>
   <tbody :class="body.classes">
-    <tr v-if="body.zeroState?.show">
-      <td colspan="100%" :class="body.zeroState.classes">
-        {{ body.zeroState.message }}
-      </td>
-    </tr>
-    <tr v-for="(row, index) in body.rows" :key="index" :class="row.classes">
-      <TableCell :cells="row.cells" />
-    </tr>
+    <TableRow :rows="zeroStateRows" />
+    <TableRow :rows="body.rows" />
   </tbody>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import _ from "lodash";
-import { iTableBody } from "types/general";
-import TableCell from "./tableCell.vue";
+import { iTableBody, iTableRow } from "types/general";
+import TableRow from "./tableRow.vue";
 
 export default defineComponent({
   name: "TableBody",
-  components: { TableCell },
+  components: { TableRow },
   props: {
     body: {
       type: Object as () => iTableBody,
       required: true,
+    },
+  },
+  computed: {
+    zeroStateRows(): iTableRow[] {
+      if (this.body?.zeroState?.show) {
+        return [
+          {
+            cells: [
+              {
+                colspan: "100%",
+                classes: this.body.zeroState?.classes,
+                data: this.body.zeroState?.message,
+                show: true,
+              },
+            ],
+          },
+        ];
+      } else {
+        return [];
+      }
     },
   },
 });
