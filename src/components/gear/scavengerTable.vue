@@ -25,12 +25,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref, Ref } from "vue";
 import { mapState, mapGetters } from "vuex";
 
 import { Gear, IScavenger } from "types/gear";
 import { FarmingNode } from "types/shards";
-import { setupEvents, setupSorting } from "utils";
+import { setupColumnEvents, setupEvents, setupSorting } from "utils";
 import { iTableBody, iTableHead } from "types/general";
 
 type tScavenger = { data: Gear; scavenger: IScavenger };
@@ -42,6 +42,8 @@ export default defineComponent({
     const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
       `${storageKey}-${props.scavengerId}`
     );
+    const selectedColumns: Ref<string[]> = ref([]);
+    const { showCol } = setupColumnEvents(selectedColumns);
 
     return {
       sortDir,
@@ -49,6 +51,8 @@ export default defineComponent({
       searchText,
       sortBy,
       sortIcon,
+      showCol,
+      selectedColumns,
     };
   },
   props: {
@@ -60,11 +64,6 @@ export default defineComponent({
       type: String,
       required: true,
     },
-  },
-  data() {
-    return {
-      selectedColumns: [], //todo: figure out how to use utils function
-    };
   },
   computed: {
     ...mapState("gear", ["gearList"]),
@@ -314,9 +313,6 @@ export default defineComponent({
         }
         return label;
       });
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
     },
   },
   mounted() {

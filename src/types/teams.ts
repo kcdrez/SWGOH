@@ -198,8 +198,8 @@ export class Team {
       this.save();
     }
   }
+
   protected save() {
-    //todo debounce
     if (this.isPlayer) {
       store.dispatch("teams/saveTeams");
     } else if (this.isOpponent) {
@@ -208,6 +208,17 @@ export class Team {
       console.warn("Team does not belong to either player nor opponent");
     }
   }
+
+  protected save2 = _.debounce(() => {
+    //todo: test if this works and can replace the above function
+    if (this.isPlayer) {
+      store.dispatch("teams/saveTeams");
+    } else if (this.isOpponent) {
+      store.dispatch("opponents/saveTeams");
+    } else {
+      console.warn("Team does not belong to either player nor opponent");
+    }
+  }, 500);
 
   public sanitize(): ITeam {
     return {

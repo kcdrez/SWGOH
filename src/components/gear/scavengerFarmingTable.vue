@@ -102,7 +102,6 @@ import { iHeader } from "types/general";
 const storageKey = "ScavengerFarmingTable";
 
 interface dataModel {
-  selectedColumns: string[];
   filteredRelicMats: string[];
   storageKey: string;
 }
@@ -112,7 +111,6 @@ export default defineComponent({
   components: { GearIcon, RelicIcon },
   data() {
     return {
-      selectedColumns: [], //todo: figure out how to use the utils function
       filteredRelicMats: [],
       storageKey,
     } as dataModel;
@@ -198,9 +196,6 @@ export default defineComponent({
     },
   },
   methods: {
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
-    },
     locationName(id: string): string {
       const match: FarmingNode | undefined = this.shardFarming.find(
         (x: FarmingNode) => x.id === id

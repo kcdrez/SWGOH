@@ -30,13 +30,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref, Ref } from "vue";
 import { mapActions } from "vuex";
 
 import { UnitPlannerItem } from "types/planner";
 import { Unit } from "types/unit";
 import { maxGearLevel } from "types/gear";
-import { setupEvents, setupSimpleView, setupSorting } from "utils";
+import {
+  setupColumnEvents,
+  setupEvents,
+  setupSimpleView,
+  setupSorting,
+} from "utils";
 import { iTableBody, iTableHead } from "types/general";
 
 const storageKey = "unitSection";
@@ -46,6 +51,8 @@ export default defineComponent({
   setup() {
     const { simpleView } = setupSimpleView(storageKey);
     const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(storageKey);
+    const selectedColumns: Ref<string[]> = ref([]);
+    const { showCol } = setupColumnEvents(selectedColumns);
 
     return {
       sortDir,
@@ -53,6 +60,8 @@ export default defineComponent({
       sortBy,
       sortIcon,
       simpleView,
+      selectedColumns,
+      showCol,
     };
   },
   props: {
@@ -64,7 +73,6 @@ export default defineComponent({
   data() {
     return {
       maxGearLevel,
-      selectedColumns: [], //todo
     };
   },
   computed: {
@@ -337,9 +345,6 @@ export default defineComponent({
           class: "toast-success",
         }
       );
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
     },
   },
   mounted() {
