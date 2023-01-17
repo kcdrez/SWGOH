@@ -112,7 +112,12 @@
               nodeKey="legendary"
             />
           </div>
-          <GearSection class="gear-section" :units="prerequisites" />
+          <GearSection class="gear-section" :units="prerequisites.list" />
+          <RelicSection
+            class="relic-section"
+            :units="prerequisites.list"
+            :relicTargets="prerequisites.relicTargets"
+          />
         </div>
         <div class="gl-container" v-if="showGLTable">
           <div class="collapse-header section-header">
@@ -149,7 +154,12 @@
               nodeKey="galactic_legends"
             />
           </div>
-          <GearSection class="gear-section" :units="prerequisites" />
+          <GearSection class="gear-section" :units="prerequisites.list" />
+          <RelicSection
+            class="relic-section"
+            :units="prerequisites.list"
+            :relicTargets="prerequisites.relicTargets"
+          />
         </div>
         <div v-if="unitUsages.length > 0">
           <h5 class="text-center">
@@ -176,6 +186,7 @@ import StoreTable from "./tables/storeTable.vue";
 import TerritoryBattleShardTable from "./tables/territoryBattleShardTable.vue";
 import LegendaryRequirementsTable from "./tables/legendary/legendaryRequirementsTable.vue";
 import GearSection from "components/generalPlanner/gearSection.vue";
+import RelicSection from "components/generalPlanner/relicSection.vue";
 import { loadingState } from "types/loading";
 import { setupEvents, setupSimpleView } from "utils";
 import Timestamp from "../general/timestamp.vue";
@@ -208,6 +219,7 @@ export default defineComponent({
     LegendaryRequirementsTable,
     Timestamp,
     GearSection,
+    RelicSection,
   },
   props: {
     unit: {
@@ -480,16 +492,22 @@ export default defineComponent({
         return match ? match.stars < 7 : true;
       });
     },
-    prerequisites(): Unit[] {
+    prerequisites(): { list: Unit[]; relicTargets: any } {
       return getPrerequisites(this.unit.id).reduce(
-        (acc: Unit[], x: IPrerequisite) => {
+        (acc: { list: Unit[]; relicTargets: any }, x: IPrerequisite) => {
           const match = getUnit(x?.id ?? "");
-          if (match) {
-            acc.push(match);
+          if (match && !match.isShip) {
+            match.relicTarget = x.requirement?.value ?? 0;
+            acc.list.push(match);
+            if (x.requirement?.type === "Relic") {
+              acc.relicTargets[match.id] = x.requirement.value;
+            } else {
+              acc.relicTargets[match.id] = 0;
+            }
           }
           return acc;
         },
-        []
+        { list: [], relicTargets: {} }
       );
     },
   },
