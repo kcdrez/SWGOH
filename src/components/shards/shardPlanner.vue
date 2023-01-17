@@ -7,7 +7,7 @@
         </div>
       </h3>
     </div>
-    <div id="shardSection" class="collapse" ref="shardSection">
+    <div id="shardSection" class="collapse mx-3" ref="shardSection">
       <h5 v-if="unit.whereToFarm.length === 0" class="my-1 text-center">
         This unit is not currently farmable.
       </h5>
@@ -112,6 +112,12 @@
               nodeKey="legendary"
             />
           </div>
+          <GearSection class="gear-section" :units="prerequisites.list" />
+          <RelicSection
+            class="relic-section"
+            :units="prerequisites.list"
+            :relicTargets="prerequisites.relicTargets"
+          />
         </div>
         <div class="gl-container" v-if="showGLTable">
           <div class="collapse-header section-header">
@@ -148,6 +154,12 @@
               nodeKey="galactic_legends"
             />
           </div>
+          <GearSection class="gear-section" :units="prerequisites.list" />
+          <RelicSection
+            class="relic-section"
+            :units="prerequisites.list"
+            :relicTargets="prerequisites.relicTargets"
+          />
         </div>
         <div v-if="unitUsages.length > 0">
           <h5 class="text-center">
@@ -173,6 +185,8 @@ import ShardTable from "./tables/shardTable.vue";
 import StoreTable from "./tables/storeTable.vue";
 import TerritoryBattleShardTable from "./tables/territoryBattleShardTable.vue";
 import LegendaryRequirementsTable from "./tables/legendary/legendaryRequirementsTable.vue";
+import GearSection from "components/generalPlanner/gearSection.vue";
+import RelicSection from "components/generalPlanner/relicSection.vue";
 import { loadingState } from "types/loading";
 import { setupEvents, setupSimpleView } from "utils";
 import Timestamp from "../general/timestamp.vue";
@@ -180,9 +194,10 @@ import {
   FarmingNode,
   estimatedTime as nodeEstimatedTime,
   isRequired,
+  IPrerequisite,
 } from "types/shards";
 import { estimatedTime as shopEstimatedTime } from "types/currency";
-import { Unit, getUnit, getPercent } from "types/unit";
+import { Unit, getUnit, getPercent, getPrerequisites } from "types/unit";
 import { estimatedTime as tbEstimatedTime } from "types/guild";
 import { iTableBody, iTableHead } from "types/general";
 
@@ -203,6 +218,8 @@ export default defineComponent({
     TerritoryBattleShardTable,
     LegendaryRequirementsTable,
     Timestamp,
+    GearSection,
+    RelicSection,
   },
   props: {
     unit: {
@@ -475,6 +492,24 @@ export default defineComponent({
         return match ? match.stars < 7 : true;
       });
     },
+    prerequisites(): { list: Unit[]; relicTargets: any } {
+      return getPrerequisites(this.unit.id).reduce(
+        (acc: { list: Unit[]; relicTargets: any }, x: IPrerequisite) => {
+          const match = getUnit(x?.id ?? "");
+          if (match && !match.isShip) {
+            match.relicTarget = x.requirement?.value ?? 0;
+            acc.list.push(match);
+            if (x.requirement?.type === "Relic") {
+              acc.relicTargets[match.id] = x.requirement.value;
+            } else {
+              acc.relicTargets[match.id] = 0;
+            }
+          }
+          return acc;
+        },
+        { list: [], relicTargets: {} }
+      );
+    },
   },
   methods: {
     getUnit,
@@ -602,29 +637,20 @@ export default defineComponent({
   }
 }
 
-// .section-header.shard-section-header {
-//   text-shadow: 2px 2px 2px black;
-//   display: flex;
-//   align-items: center;
-
-//   a {
-//     text-decoration: none;
-//     &:hover {
-//       text-decoration: underline;
-//     }
-//   }
-// }
-
 .legendary-container,
 .gl-container {
-  .section-header {
+  ::v-deep(.section-header) {
     display: flex;
     align-items: center;
-    border-bottom: 1px solid $light;
+    border-bottom: 1px solid #f2f2f2;
     position: sticky;
     top: 56px;
     height: 50px;
     z-index: 5;
+    h3 {
+      width: 100%;
+      font-size: 1.25rem;
+    }
   }
 }
 

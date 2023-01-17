@@ -252,7 +252,7 @@ export default defineComponent({
               {
                 type: "unit",
                 data: {
-                  unit,
+                  id: unit.id,
                   isLink: true,
                   hideImage: this.simpleView,
                 },

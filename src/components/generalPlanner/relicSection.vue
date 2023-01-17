@@ -46,6 +46,12 @@ export default defineComponent({
       type: Array as () => Unit[],
       required: true,
     },
+    relicTargets: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
   },
   data() {
     return {
@@ -98,18 +104,16 @@ export default defineComponent({
     },
     fullRelicList(): Relic[] {
       const list: Relic[] = Object.values(this.relicConfig);
+      list.forEach((relic) => relic.resetNeeded());
       this.units.forEach((unit: Unit) => {
         if (unit.relicLevel < unit.relicTarget) {
           list.forEach((relic: Relic) => {
-            if (relic.amount[unit.relicTarget] > 0) {
-              relic.addNeededBy({
-                name: unit.name,
-                id: unit.id,
-                amount: relic.amountNeeded([
-                  { target: unit.relicTarget, level: unit.relicLevel },
-                ]),
-              });
-            }
+            const target = this.relicTargets[unit.id] ?? unit.relicTarget;
+            relic.addNeededBy({
+              name: unit.name,
+              id: unit.id,
+              amount: relic.amountNeeded([{ target, level: unit.relicLevel }]),
+            });
           });
         }
       });
@@ -118,7 +122,8 @@ export default defineComponent({
     relicTargetLevels(): any[] {
       const list: any[] = [];
       this.units.forEach((unit: Unit) => {
-        list.push({ level: unit.relicLevel, target: unit.relicTarget });
+        const target = this.relicTargets[unit.id] ?? unit.relicTarget;
+        list.push({ level: unit.relicLevel, target });
       });
       return list;
     },

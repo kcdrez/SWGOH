@@ -74,9 +74,13 @@ export class Relic {
 
   public addNeededBy(unit: { id: string; name: string; amount: number }) {
     const match = this._neededBy?.find((x) => x.id === unit.id);
-    if (!match) {
+    if (!match && unit.amount > 0) {
       this._neededBy?.push(unit);
     }
+  }
+
+  public resetNeeded() {
+    this._neededBy = [];
   }
 
   public progress(arr: ITargetRange[]) {
