@@ -44,6 +44,12 @@ export default defineComponent({
       type: Array as () => Unit[],
       required: true,
     },
+    gearTargets: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
   },
   data() {
     return {
@@ -55,7 +61,8 @@ export default defineComponent({
     fullGearList(): Gear[] {
       const list: Gear[] = [];
       this.units.forEach((unit: Unit) => {
-        unit.fullSalvageList.forEach((gear: Gear) => {
+        const gearTarget: number = this.gearTargets[unit.id] ?? unit.gearTarget;
+        unit.fullSalvageList(gearTarget).forEach((gear: Gear) => {
           const match = list.find((x) => x.id === gear.id);
           if (match) {
             match.neededBy.push(...gear.neededBy);

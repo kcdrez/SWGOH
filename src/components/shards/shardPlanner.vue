@@ -112,7 +112,11 @@
               nodeKey="legendary"
             />
           </div>
-          <GearSection class="gear-section" :units="prerequisites.list" />
+          <GearSection
+            class="gear-section"
+            :units="prerequisites.list"
+            :gearTargets="prerequisites.gearTargets"
+          />
           <RelicSection
             class="relic-section"
             :units="prerequisites.list"
@@ -154,7 +158,11 @@
               nodeKey="galactic_legends"
             />
           </div>
-          <GearSection class="gear-section" :units="prerequisites.list" />
+          <GearSection
+            class="gear-section"
+            :units="prerequisites.list"
+            :gearTargets="prerequisites.gearTargets"
+          />
           <RelicSection
             class="relic-section"
             :units="prerequisites.list"
@@ -200,6 +208,7 @@ import { estimatedTime as shopEstimatedTime } from "types/currency";
 import { Unit, getUnit, getPercent, getPrerequisites } from "types/unit";
 import { estimatedTime as tbEstimatedTime } from "types/guild";
 import { iTableBody, iTableHead } from "types/general";
+import { maxGearLevel } from "types/gear";
 
 const storageKey = "shardPlanner";
 
@@ -492,22 +501,29 @@ export default defineComponent({
         return match ? match.stars < 7 : true;
       });
     },
-    prerequisites(): { list: Unit[]; relicTargets: any } {
+    prerequisites(): { list: Unit[]; relicTargets: any; gearTargets: any } {
       return getPrerequisites(this.unit.id).reduce(
-        (acc: { list: Unit[]; relicTargets: any }, x: IPrerequisite) => {
+        (
+          acc: { list: Unit[]; relicTargets: any; gearTargets: any },
+          x: IPrerequisite
+        ) => {
           const match = getUnit(x?.id ?? "");
           if (match && !match.isShip) {
             match.relicTarget = x.requirement?.value ?? 0;
             acc.list.push(match);
             if (x.requirement?.type === "Relic") {
               acc.relicTargets[match.id] = x.requirement.value;
+              acc.gearTargets[match.id] = maxGearLevel;
+            } else if (x.requirement?.type === "Gear") {
+              acc.gearTargets[match.id] = x.requirement.value;
             } else {
               acc.relicTargets[match.id] = 0;
+              acc.gearTargets[match.id] = 0;
             }
           }
           return acc;
         },
-        { list: [], relicTargets: {} }
+        { list: [], relicTargets: {}, gearTargets: {} }
       );
     },
   },

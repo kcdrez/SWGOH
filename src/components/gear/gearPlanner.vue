@@ -34,7 +34,7 @@
         @checked="selectedColumns = $event"
       />
       <GearTable
-        :gearList="unit.fullSalvageList"
+        :gearList="unit.fullSalvageList()"
         :selectedColumns="selectedColumns"
         :storageKey="storageKey + 'Table'"
       />

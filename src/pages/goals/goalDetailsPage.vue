@@ -6,8 +6,16 @@
         :storageKey="storageKey + goalData.id + 'Table'"
         :simpleView="true"
       />
-      <GearSection class="gear-section" :units="unitList" />
-      <RelicSection class="relic-section" :units="unitList" />
+      <GearSection
+        class="gear-section"
+        :units="prerequisites.list"
+        :gearTargets="prerequisites.gearTargets"
+      />
+      <RelicSection
+        class="relic-section"
+        :units="prerequisites.list"
+        :relicTargets="prerequisites.relicTargets"
+      />
     </template>
     <div v-else>Could not find a matching Goal</div>
   </div>
@@ -23,6 +31,7 @@ import GoalsTable from "components/shards/progress/goalsTable.vue";
 import { Unit, getUnit } from "types/unit";
 import { Goal } from "types/goals";
 import { maxGearLevel } from "types/gear";
+import { IPrerequisite } from "types/shards";
 
 const storageKey = "goalDetailsPage";
 
@@ -40,7 +49,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState("player", ["player"]),
-    goalData() {
+    goalData(): Goal {
       return this.player.goalList.find((goal: Goal) => {
         return (
           goal.name.replace(/\s/g, "").toLowerCase() ===
@@ -50,20 +59,30 @@ export default defineComponent({
         );
       });
     },
-    unitList(): Unit[] {
-      return this.goalData.list.reduce((acc: Unit[], unit: any) => {
-        const match = getUnit(unit.id);
-        if (match) {
-          if (unit.requirement.type === "Relic") {
-            match.gearTarget = maxGearLevel;
-            match.relicTarget = unit.requirement.value;
-          } else if (unit.requirement.type === "Gear") {
-            match.gearTarget = unit.requirement.value;
+    prerequisites(): { list: Unit[]; relicTargets: any; gearTargets: any } {
+      return this.goalData.list.reduce(
+        (
+          acc: { list: Unit[]; relicTargets: any; gearTargets: any },
+          x: IPrerequisite
+        ) => {
+          const match = getUnit(x?.id ?? "");
+          if (match && !match.isShip) {
+            match.relicTarget = x.requirement?.value ?? 0;
+            acc.list.push(match);
+            if (x.requirement?.type === "Relic") {
+              acc.relicTargets[match.id] = x.requirement.value;
+              acc.gearTargets[match.id] = maxGearLevel;
+            } else if (x.requirement?.type === "Gear") {
+              acc.gearTargets[match.id] = x.requirement.value;
+            } else {
+              acc.relicTargets[match.id] = 0;
+              acc.gearTargets[match.id] = 0;
+            }
           }
-          acc.push(match);
-        }
-        return acc;
-      }, []);
+          return acc;
+        },
+        { list: [], relicTargets: {}, gearTargets: {} }
+      );
     },
   },
   methods: {},

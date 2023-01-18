@@ -118,7 +118,7 @@ export default defineComponent({
       if (this.selected) {
         const list: INeededBy[] = [];
         this.fullUnitList.forEach((unit: Unit) => {
-          unit.fullSalvageList.forEach((gear: Gear) => {
+          unit.fullSalvageList().forEach((gear: Gear) => {
             if (gear.id === this.selected?.id) {
               list.push(...gear.neededBy);
               this.selected.totalAmount += gear.totalAmount;

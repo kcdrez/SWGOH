@@ -748,7 +748,6 @@ export class Unit {
     const futureGear = (this.gearList ?? []).filter(
       ({ tier }: UnitTier) => tier >= this.gearLevel
     );
-
     return futureGear.map(({ gear, tier }: UnitTier) => {
       return {
         tier,
@@ -770,10 +769,10 @@ export class Unit {
     });
   }
 
-  public get fullSalvageList() {
+  public fullSalvageList(gearTarget?: number) {
     let list: Gear[] = [];
     this.fullGearListByLevel.forEach(({ tier, gear: gearList }: any) => {
-      if (tier + 1 <= this.gearTarget) {
+      if (tier + 1 <= (gearTarget ?? this.gearTarget)) {
         gearList.forEach((gearPiece: Gear) => {
           gearPiece.ingredients.forEach(
             ({ gear: salvageId, amount }: IIngredient) => {
@@ -820,7 +819,7 @@ export class Unit {
     let totalFleet = 0;
     let totalChallenges = 0;
 
-    this.fullSalvageList.forEach((gear: Gear) => {
+    this.fullSalvageList().forEach((gear: Gear) => {
       const isChallenge = gear.locations.some(
         (x) => x.nodeData?.table === "Challenge"
       );
@@ -1227,13 +1226,11 @@ export function totalProgress(
   prerequisites: IPrerequisite[],
   prerequisiteType: "requirement" | "recommended"
 ) {
-  // let list: number[] = [];
   let progress = 0;
   const typeList = prerequisites.map((x) => x.requirement?.type);
   (prerequisites ?? []).forEach((item) => {
     const scale = getTypeScale(item.requirement?.type, typeList);
     progress += getPercent(item, prerequisiteType) * scale;
-    // list.push(getPercent(item, prerequisiteType) * scale);
   });
   return round2Decimals(progress);
 }
