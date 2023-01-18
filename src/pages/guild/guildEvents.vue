@@ -80,10 +80,6 @@ export default defineComponent({
           value: "date",
         },
         {
-          label: "Type",
-          value: "type",
-        },
-        {
           label: "Name",
           value: "name",
         },

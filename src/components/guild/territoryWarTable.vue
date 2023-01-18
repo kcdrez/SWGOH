@@ -264,16 +264,18 @@ export default defineComponent({
               {
                 show: this.showCol("actions"),
                 type: "buttons",
-                data: [
-                  {
-                    click: () => {
-                      this.removeEvent(event.id);
+                data: {
+                  buttons: [
+                    {
+                      click: () => {
+                        this.removeEvent(event.id);
+                      },
+                      icon: "fas fa-trash",
+                      classes: "btn btn-danger",
+                      title: "Remove Event",
                     },
-                    icon: "fas fa-trash",
-                    classes: "btn btn-danger",
-                    title: "Remove Event",
-                  },
-                ],
+                  ],
+                },
               },
             ],
           };

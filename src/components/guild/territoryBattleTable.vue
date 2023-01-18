@@ -6,154 +6,18 @@
     >
       <TableHeader :header="header" />
       <TableBody :body="body" />
-      <tfoot>
-        <tr class="text-center align-middle">
-          <td
-            rowspan="2"
-            v-if="territoryBattleEvents.length > 0"
-            class="category-header"
-            :class="{ 'd-none': avgColSpan <= -1 }"
-          >
-            Average
-          </td>
-          <template v-if="tbEvents('Light').length > 0">
-            <td :colspan="avgColSpan" :class="{ 'd-none': avgColSpan <= 0 }">
-              Light Side<span class="hide-lg"> Averages</span>
-            </td>
-            <td v-if="showCol('stars')">
-              <span class="row-label">Stars: </span>{{ tbAvgStars("Light") }}
-            </td>
-            <td v-if="showCol('get1')">
-              <span class="row-label">GET1:</span>
-              {{ tbAvgCurrency("Light", "get1") }}
-            </td>
-            <td v-if="showCol('get2')">
-              <span class="row-label">GET2:</span>
-              {{ tbAvgCurrency("Light", "get2") }}
-            </td>
-            <td v-if="showCol('get3')">
-              <span class="row-label">GET3:</span>
-              {{ tbAvgCurrency("Light", "get3") }}
-            </td>
-            <td v-if="showCol('character')">
-              <span class="row-label character-shards-label">
-                Character Shards:
-              </span>
-              {{ tbAvgShards("Light") }}
-            </td>
-            <td class="hidden-sm" v-if="showCol('actions')"></td>
-          </template>
-        </tr>
-        <tr class="text-center align-middle" v-if="tbEvents('Dark').length > 0">
-          <td :colspan="avgColSpan" :class="{ 'd-none': avgColSpan <= 0 }">
-            Dark Side<span class="hide-lg"> Averages</span>
-          </td>
-          <td v-if="showCol('stars')">
-            <span class="row-label">Stars:</span>
-            {{ tbAvgStars("Dark") }}
-          </td>
-          <td v-if="showCol('get1')">
-            <span class="row-label">GET1:</span>
-            {{ tbAvgCurrency("Dark", "get1") }}
-          </td>
-          <td v-if="showCol('get2')">
-            <span class="row-label">GET2:</span>
-            {{ tbAvgCurrency("Dark", "get2") }}
-          </td>
-          <td v-if="showCol('get3')">
-            <span class="row-label">GET3:</span>
-            {{ tbAvgCurrency("Dark", "get3") }}
-          </td>
-          <td v-if="showCol('character')">
-            <span class="row-label character-shards-label">
-              Character Shards:
-            </span>
-            {{ tbAvgShards("Dark") }}
-          </td>
-          <td class="hidden-sm" v-if="showCol('actions')"></td>
-        </tr>
-        <tr v-if="territoryBattleEvents.length === 0">
-          <td colspan="100%" class="text-center">
-            There are no events recorded for this guild.
-          </td>
-        </tr>
-      </tfoot>
+      <TableFooter :footer="footer" />
     </table>
     <table
       class="table table-bordered table-dark table-sm table-striped"
       v-if="accessLevel >= 3"
     >
-      <thead class="text-center align-middle">
-        <tr>
-          <th colspan="5">Add New Event</th>
-        </tr>
-        <tr>
-          <th width="20%">Date</th>
-          <th width="20%">Type</th>
-          <th width="20%">Stars</th>
-          <th width="20%">Character Shards</th>
-          <th width="20%">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="row-label text-center">Add New Event</td>
-          <td class="flex-sm">
-            <span class="row-label">Date:</span>
-            <input
-              class="form-control form-control-sm"
-              type="date"
-              v-model="newEvent.date"
-              @keypress.enter="addNewEvent"
-            />
-          </td>
-          <td class="flex-sm">
-            <span class="row-label">Type:</span>
-            <select
-              class="form-control form-control-sm"
-              v-model="newEvent.name"
-              @keypress.enter="addNewEvent"
-            >
-              <option value="Separatist Might">Separatist Might</option>
-              <option value="Republic Offensive">Republic Offensive</option>
-              <option value="Rebel Assault">Rebel Assault</option>
-              <option value="Imperial Retaliation">Imperial Retaliation</option>
-              <option value="Rise of the Empire">Rise of the Empire</option>
-            </select>
-          </td>
-          <td class="flex-sm">
-            <span class="row-label">Stars:</span>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              v-model="newEvent.stars"
-              @keypress.enter="addNewEvent"
-              min="0"
-              :max="maxStars"
-            />
-          </td>
-          <td class="flex-sm">
-            <span class="row-label">Character Shards:</span>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              v-model="newEvent.characterShards"
-              @keypress.enter="addNewEvent"
-              min="0"
-              max="50"
-            />
-          </td>
-          <td>
-            <button
-              class="btn btn-sm btn-primary w-100"
-              @click="addNewEvent"
-              :disabled="addNewDisabled"
-            >
-              Add New Event
-            </button>
-          </td>
-        </tr>
-      </tbody>
+      <TableHeader :header="addNewHeader">
+        <template v-slot:firstRow>
+          <th class="text-center" colspan="5">Add New Event</th>
+        </template>
+      </TableHeader>
+      <TableBody :body="addNewBody" />
     </table>
   </div>
 </template>
@@ -234,6 +98,11 @@ export default defineComponent({
             click: () => {
               this.sortBy("date");
             },
+            colspan: this.showCol("name") ? "1" : "2",
+          },
+          {
+            show: !this.showCol("date") && !this.showCol("name"),
+            label: "",
           },
           {
             label: "Name",
@@ -243,6 +112,7 @@ export default defineComponent({
             click: () => {
               this.sortBy("name");
             },
+            colspan: this.showCol("date") ? "1" : "2",
           },
           {
             label: "Stars",
@@ -252,6 +122,7 @@ export default defineComponent({
             click: () => {
               this.sortBy("stars");
             },
+            colspan: this.showCol("date") || this.showCol("name") ? "1" : "2",
           },
           {
             label: "GET1 Currency",
@@ -306,16 +177,24 @@ export default defineComponent({
                 show: this.showCol("date"),
                 label: "Date:",
                 data: this.$filters.formatDate(event.date),
+                colspan: this.showCol("name") ? "1" : "2",
+              },
+              {
+                show: !this.showCol("date") && !this.showCol("name"),
+                data: "",
               },
               {
                 show: this.showCol("name"),
                 label: "Battle Type:",
                 data: event.name,
+                colspan: this.showCol("date") ? "1" : "2",
               },
               {
                 show: this.showCol("stars"),
                 label: "Stars:",
                 data: event.stars,
+                colspan:
+                  this.showCol("date") || this.showCol("name") ? "1" : "2",
               },
               {
                 show: this.showCol("get1"),
@@ -343,20 +222,316 @@ export default defineComponent({
               {
                 show: this.showCol("actions"),
                 type: "buttons",
-                data: [
-                  {
-                    click: () => {
-                      this.removeEvent(event.id);
+                data: {
+                  buttons: [
+                    {
+                      click: () => {
+                        this.removeEvent(event.id);
+                      },
+                      icon: "fas fa-trash",
+                      classes: "btn btn-danger",
+                      title: "Remove Event",
                     },
-                    icon: "fas fa-trash",
-                    classes: "btn btn-danger",
-                    title: "Remove Event",
-                  },
-                ],
+                  ],
+                },
               },
             ],
           };
         }),
+      };
+    },
+    footer(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        zeroState: {
+          show: this.territoryBattleEvents.length === 0,
+          message: "There are no events recorded for this guild.",
+        },
+        rows: [
+          {
+            cells: [
+              {
+                data: "Average",
+                show: this.territoryBattleEvents.length > 0,
+                classes: `category-header ${
+                  this.avgColSpan <= -1 ? "d-none" : ""
+                }`,
+                rowspan: "3",
+              },
+              {
+                data: 'Light Side<span class="hide-lg"> Averages</span>',
+                type: "html",
+                show: true,
+              },
+              {
+                label: "Stars:",
+                data: this.tbAvgStars("Light"),
+                show: this.showCol("stars"),
+              },
+              {
+                show: this.showCol("get1"),
+                data: this.tbAvgCurrency("Light", "get1"),
+                label: "GET1:",
+              },
+              {
+                show: this.showCol("get2"),
+                data: this.tbAvgCurrency("Light", "get2"),
+                label: "GET2:",
+              },
+              {
+                show: this.showCol("get3"),
+                data: this.tbAvgCurrency("Light", "get3"),
+                label: "GET3:",
+              },
+              {
+                show: this.showCol("character"),
+                data: this.tbAvgShards("Light"),
+                label: "Character Shards:",
+                labelClasses: "character-shards-label",
+                colspan: this.showCol("actions") ? "2" : "1",
+              },
+              {
+                show: !this.showCol("character"),
+                data: "",
+              },
+            ],
+          },
+          {
+            cells: [
+              {
+                data: 'Dark Side<span class="hide-lg"> Averages</span>',
+                type: "html",
+                show: true,
+              },
+              {
+                label: "Stars:",
+                data: this.tbAvgStars("Dark"),
+                show: this.showCol("stars"),
+              },
+              {
+                show: this.showCol("get1"),
+                data: this.tbAvgCurrency("Dark", "get1"),
+                label: "GET1:",
+              },
+              {
+                show: this.showCol("get2"),
+                data: this.tbAvgCurrency("Dark", "get2"),
+                label: "GET2:",
+              },
+              {
+                show: this.showCol("get3"),
+                data: this.tbAvgCurrency("Dark", "get3"),
+                label: "GET3:",
+              },
+              {
+                show: this.showCol("character"),
+                data: this.tbAvgShards("Dark"),
+                label: "Character Shards:",
+                labelClasses: "character-shards-label",
+                colspan: this.showCol("actions") ? "2" : "1",
+              },
+              {
+                show: !this.showCol("character"),
+                data: "",
+              },
+            ],
+          },
+          {
+            cells: [
+              {
+                data: 'Rise of the Empire<span class="hide-lg"> Averages</span>',
+                type: "html",
+                show: true,
+              },
+              {
+                label: "Stars:",
+                data: this.tbAvgStars("ROTE"),
+                show: this.showCol("stars"),
+              },
+              {
+                show: this.showCol("get1"),
+                data: this.tbAvgCurrency("ROTE", "get1"),
+                label: "GET1:",
+              },
+              {
+                show: this.showCol("get2"),
+                data: this.tbAvgCurrency("ROTE", "get2"),
+                label: "GET2:",
+              },
+              {
+                show: this.showCol("get3"),
+                data: this.tbAvgCurrency("ROTE", "get3"),
+                label: "GET3:",
+              },
+              {
+                show: this.showCol("character"),
+                data: this.tbAvgShards("ROTE"),
+                label: "Character Shards:",
+                labelClasses: "character-shards-label",
+                colspan: this.showCol("actions") ? "2" : "1",
+              },
+              {
+                show: !this.showCol("character"),
+                data: "",
+              },
+            ],
+          },
+        ],
+      };
+    },
+    addNewHeader(): iTableHead {
+      return {
+        headers: [
+          {
+            show: true,
+            label: "Date",
+            maxWidth: "20%",
+          },
+          {
+            show: true,
+            label: "Type",
+            maxWidth: "20%",
+          },
+          {
+            show: true,
+            label: "Stars",
+            maxWidth: "20%",
+          },
+          {
+            show: true,
+            label: "Character Shards",
+            maxWidth: "20%",
+          },
+          {
+            show: true,
+            label: "Actions",
+            maxWidth: "20%",
+          },
+        ],
+      };
+    },
+    addNewBody(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: [
+          {
+            cells: [
+              {
+                classes: "row-label",
+                show: true,
+                label: "Add New Event",
+                data: "",
+              },
+              {
+                show: true,
+                classes: "flex-sm",
+                label: "Date:",
+                type: "date",
+                data: {
+                  value: this.newEvent.date,
+                },
+                enter: (val: any) => {
+                  this.newEvent.date = val;
+                  this.addNewEvent();
+                },
+                change: (val: any) => {
+                  this.newEvent.date = val;
+                },
+              },
+              {
+                show: true,
+                classes: "flex-sm",
+                label: "Type:",
+                type: "select",
+                data: {
+                  value: this.newEvent.name,
+                  options: [
+                    {
+                      value: "Separatist Might",
+                      label: "Separatist Might",
+                    },
+                    {
+                      value: "Republic Offensive",
+                      label: "Republic Offensive",
+                    },
+                    {
+                      value: "Rebel Assault",
+                      label: "Rebel Assault",
+                    },
+                    {
+                      value: "Imperial Retaliation",
+                      label: "Imperial Retaliation",
+                    },
+                    {
+                      value: "Rise of the Empire",
+                      label: "Rise of the Empire",
+                    },
+                  ],
+                },
+                enter: (val: any) => {
+                  this.newEvent.name = val;
+                  this.addNewEvent();
+                },
+                change: (val: any) => {
+                  this.newEvent.name = val;
+                },
+              },
+              {
+                show: true,
+                classes: "flex-sm",
+                label: "Stars:",
+                type: "number",
+                data: {
+                  value: this.newEvent.stars,
+                  min: 0,
+                  max: this.maxStars,
+                },
+                enter: (val: any) => {
+                  this.newEvent.stars = val;
+                  this.addNewEvent();
+                },
+                change: (val: any) => {
+                  this.newEvent.stars = val;
+                },
+              },
+              {
+                show: true,
+                classes: "flex-sm",
+                label: "Character Shards:",
+                type: "number",
+                enter: (val: any) => {
+                  this.newEvent.characterShards = val;
+                  this.addNewEvent();
+                },
+                change: (val: any) => {
+                  this.newEvent.characterShards = val;
+                },
+                data: {
+                  min: 0,
+                  max: 50,
+                  value: this.newEvent.characterShards,
+                },
+              },
+              {
+                type: "buttons",
+                show: true,
+                data: {
+                  buttons: [
+                    {
+                      click: () => {
+                        this.addNewEvent();
+                      },
+                      disabled: this.addNewDisabled,
+                      classes: "btn btn-sm btn-primary w-100",
+                      label: "Add New Event",
+                    },
+                  ],
+                  groupClasses: "w-100",
+                },
+              },
+            ],
+          },
+        ],
       };
     },
     maxStars(): number {
@@ -471,11 +646,11 @@ export default defineComponent({
     async addNewEvent() {
       if (!this.addNewDisabled) {
         await this.addTerritoryBattleEvent(unvue(this.newEvent));
+        this.$toast(`Territory Battle event added successfully`, {
+          positionY: "top",
+          class: "toast-success",
+        });
       }
-      this.$toast(`Territory Battle event added successfully`, {
-        positionY: "top",
-        class: "toast-success",
-      });
     },
     async removeEvent(id: string) {
       await this.removeTerritoryBattleEvent(id);

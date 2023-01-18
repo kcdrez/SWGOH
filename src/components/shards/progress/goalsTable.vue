@@ -287,15 +287,17 @@ export default defineComponent({
               {
                 show: this.showCol("actions"),
                 type: "buttons",
-                data: [
-                  {
-                    click: () => {
-                      this.goal.remove(unit.id);
+                data: {
+                  buttons: [
+                    {
+                      click: () => {
+                        this.goal.remove(unit.id);
+                      },
+                      icon: "fas fa-trash",
+                      classes: "btn btn-danger",
                     },
-                    icon: "fas fa-trash",
-                    classes: "btn btn-danger",
-                  },
-                ],
+                  ],
+                },
               },
             ],
           };

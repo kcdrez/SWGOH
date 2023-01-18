@@ -10,6 +10,7 @@
         ]"
         :title="header.title"
         @click="handleClick(header, !header.input)"
+        :colspan="header.colspan"
       >
         <div :class="header.containerClass">
           <template v-if="header.input?.type === 'input'">

@@ -257,26 +257,28 @@ export default defineComponent({
               {
                 show: this.showCol("actions") && this.showActions,
                 type: "buttons",
-                data: [
-                  {
-                    click: () => {
-                      unit.tracking = true;
+                data: {
+                  buttons: [
+                    {
+                      click: () => {
+                        unit.tracking = true;
+                      },
+                      icon: "fas fa-heart",
+                      classes: "btn btn-success",
+                      hide: !unit.tracking,
+                      title: "Add to active farming list",
                     },
-                    icon: "fas fa-heart",
-                    classes: "btn btn-success",
-                    hide: !unit.tracking,
-                    title: "Add to active farming list",
-                  },
-                  {
-                    click: () => {
-                      unit.tracking = false;
+                    {
+                      click: () => {
+                        unit.tracking = false;
+                      },
+                      icon: "fas fa-trash",
+                      classes: "btn btn-danger",
+                      hide: !unit.tracking,
+                      title: "Remove from active farming list",
                     },
-                    icon: "fas fa-trash",
-                    classes: "btn btn-danger",
-                    hide: !unit.tracking,
-                    title: "Remove from active farming list",
-                  },
-                ],
+                  ],
+                },
               },
             ],
           };

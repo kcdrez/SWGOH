@@ -39,13 +39,18 @@
         />
       </template>
       <template v-else-if="cell.type === 'buttons'">
-        <div class="btn-group btn-group-sm text-center" role="group">
-          <template v-for="button in cell.data">
+        <div
+          class="btn-group btn-group-sm text-center"
+          role="group"
+          :class="cell.data.groupClasses"
+        >
+          <template v-for="button in cell.data.buttons">
             <button
               v-if="!button.hide"
               @click="button.click"
               :class="button.classes"
               :title="button.title"
+              :disabled="button.disabled"
             >
               <i v-if="button.icon" :class="button.icon"></i>
               <span v-if="button.label">{{ button.label }}</span>
@@ -175,8 +180,11 @@
         <input
           type="number"
           class="form-control form-control-sm"
-          :value="cell.data.value"
+          v-model.number="_value"
+          :min="cell.data.min"
+          :max="cell.data.max"
           @change="handleChange($event)"
+          @keypress.enter="handleEnter(_value)"
         />
       </template>
       <template v-else-if="cell.type === 'shardsOwned'">
@@ -292,6 +300,27 @@
           </button>
         </div>
       </template>
+      <template v-else-if="cell.type === 'date'">
+        <input
+          class="form-control form-control-sm"
+          type="date"
+          v-model="_value"
+          @keypress.enter="handleEnter(_value)"
+          @change="handleChange($event)"
+        />
+      </template>
+      <template v-else-if="cell.type === 'select'">
+        <select
+          class="form-control form-control-sm"
+          v-model="_value"
+          @keypress.enter="handleEnter(_value)"
+          @change="handleChange($event)"
+        >
+          <option v-for="option in cell.data.options" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </template>
       <template v-else>
         <span v-if="cell.data.message" :class="cell.data.classes">{{
           cell.data.message
@@ -370,16 +399,23 @@ export default defineComponent({
     getUnit,
     handleChange: _.debounce(function (this: any, event?: Event) {
       if (this.cell.change) {
-        if (event) {
-          this.cell.change((event.target as HTMLInputElement).value);
-        } else {
-          this.cell.change(this.cell.data.value);
+        let value = event
+          ? (event.target as HTMLInputElement).value
+          : this.cell.data.value;
+        if (this.cell.type === "number") {
+          value = Number(value);
         }
+        this.cell.change(value);
       }
     }, 500),
     handleClick: _.debounce(function (this: any, data: any) {
       if (this.cell.click) {
         this.cell.click(data);
+      }
+    }, 500),
+    handleEnter: _.debounce(function (this: any, data: any) {
+      if (this.cell.enter) {
+        this.cell.enter(data);
       }
     }, 500),
     remainingCurrency(unit: Unit, currencyType: CurrencyTypeConfig) {

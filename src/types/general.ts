@@ -20,6 +20,7 @@ interface iHeader {
   icon?: string;
   title?: string;
   value?: any;
+  colspan?: string;
 }
 
 interface iTableHead {
@@ -75,7 +76,9 @@ interface iTableCell {
     | "unitRequirement"
     | "html"
     | "mod"
-    | "unitSearch";
+    | "unitSearch"
+    | "date"
+    | "select";
   edit?: boolean;
   data: any;
   labelClasses?: string;
@@ -91,6 +94,7 @@ interface iTableCell {
   };
   change?: Function;
   click?: Function;
+  enter?: Function;
   colspan?: string;
   rowspan?: string;
 }

@@ -421,17 +421,19 @@ export default defineComponent({
               {
                 show: this.showCol("actions"),
                 type: "buttons",
-                data: [
-                  {
-                    click: () => {
-                      gear.irrelevant = true;
+                data: {
+                  buttons: [
+                    {
+                      click: () => {
+                        gear.irrelevant = true;
+                      },
+                      icon: "fas fa-toilet",
+                      classes: "btn btn-warning text-dark",
+                      title:
+                        "Mark this salvage as irrelevant, removing it from the planner estimation",
                     },
-                    icon: "fas fa-toilet",
-                    classes: "btn btn-warning text-dark",
-                    title:
-                      "Mark this salvage as irrelevant, removing it from the planner estimation",
-                  },
-                ],
+                  ],
+                },
               },
             ],
           };

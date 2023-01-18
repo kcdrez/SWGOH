@@ -23,6 +23,7 @@ import SortMethods from "components/general/sortMethods.vue";
 import ColumnHeaders from "components/general/columnHeaders.vue";
 import TableHeader from "components/general/tableHeader.vue";
 import TableBody from "components/general/tableBody.vue";
+import TableFooter from "components/general/tableFooter.vue";
 import { formatDate, pluralText, daysFromNow } from "utils";
 
 const app = createApp(App);
@@ -56,6 +57,7 @@ app
   .component("ColumnHeaders", ColumnHeaders)
   .component("TableHeader", TableHeader)
   .component("TableBody", TableBody)
+  .component("TableFooter", TableFooter)
   .component("SearchInput", SearchInput)
   .component("ProgressBar", ProgressBar)
   .component("Loading", Loading)

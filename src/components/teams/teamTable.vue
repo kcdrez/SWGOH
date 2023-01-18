@@ -452,16 +452,18 @@ export default defineComponent({
               {
                 show: this.showCol("actions"),
                 type: "buttons",
-                data: [
-                  {
-                    click: () => {
-                      this.team.removeUnit(unit);
+                data: {
+                  buttons: [
+                    {
+                      click: () => {
+                        this.team.removeUnit(unit);
+                      },
+                      icon: "fas fa-trash",
+                      classes: "btn btn-danger btn-sm",
+                      title: "Remove this unit from this team",
                     },
-                    icon: "fas fa-trash",
-                    classes: "btn btn-danger btn-sm",
-                    title: "Remove this unit from this team",
-                  },
-                ],
+                  ],
+                },
               },
             ],
           };

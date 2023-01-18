@@ -73,24 +73,31 @@ const store = {
   },
   getters: {
     tbEvents(state: State) {
-      return (type: "Light" | "Dark" | undefined): TerritoryBattleEvent[] => {
+      return (
+        type: "Light" | "Dark" | "ROTE" | undefined
+      ): TerritoryBattleEvent[] => {
         return state.territoryBattleEvents.filter((event) => {
-          return (
-            (type ? event.type === type : true) &&
-            moment(event.date).isAfter(moment().subtract(6, "months"))
-          );
+          if (
+            (event.type === "-" && type === "ROTE") ||
+            (type ? event.type === type : true)
+          ) {
+            return moment(event.date).isAfter(moment().subtract(6, "months"));
+          } else {
+            return false;
+          }
         });
       };
     },
     tbAvgStars(state: State, getters: any) {
-      return (type: "Light" | "Dark"): number => {
+      return (type: "Light" | "Dark" | "ROTE"): number => {
         const total = state.territoryBattleEvents.reduce(
           (total: number, e: TerritoryBattleEvent) => {
             if (moment(e.date).isAfter(moment().subtract(6, "months"))) {
-              return e.type === type ? total + e.stars : total;
-            } else {
-              return total;
+              if ((type === "ROTE" && e.type === "-") || e.type === type) {
+                return total + e.stars;
+              }
             }
+            return total;
           },
           0
         );
@@ -99,16 +106,17 @@ const store = {
     },
     tbAvgCurrency(state: State, getters: any) {
       return (
-        type: "Light" | "Dark",
+        type: "Light" | "Dark" | "ROTE",
         currencyType: "get1" | "get2" | "get3"
       ): number => {
         const total = state.territoryBattleEvents.reduce(
           (total: number, e: TerritoryBattleEvent) => {
             if (moment(e.date).isAfter(moment().subtract(6, "months"))) {
-              return e.type === type ? total + e[currencyType] : total;
-            } else {
-              return total;
+              if ((type === "ROTE" && e.type === "-") || e.type === type) {
+                return total + e[currencyType];
+              }
             }
+            return total;
           },
           0
         );
@@ -116,24 +124,25 @@ const store = {
       };
     },
     tbAvgShards(state: State, getters: any) {
-      return (type: "Light" | "Dark", unitId?: string): number => {
+      return (type: "Light" | "Dark" | "ROTE", unitId?: string): number => {
         const total = state.territoryBattleEvents.reduce(
           (total: number, e: TerritoryBattleEvent) => {
             if (moment(e.date).isAfter(moment().subtract(6, "months"))) {
               if (unitId) {
-                if (e.type === type && e.characterShards.id === unitId) {
+                if (
+                  ((type === "ROTE" && e.type === "-") || e.type === type) &&
+                  e.characterShards.id === unitId
+                ) {
                   return total + e.characterShards.count;
-                } else {
-                  return total;
                 }
-              } else {
-                return e.type === type
-                  ? total + e.characterShards.count
-                  : total;
+              } else if (
+                (type === "ROTE" && e.type === "-") ||
+                e.type === type
+              ) {
+                return total + e.characterShards.count;
               }
-            } else {
-              return total;
             }
+            return total;
           },
           0
         );

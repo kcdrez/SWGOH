@@ -297,16 +297,18 @@ export default defineComponent({
               {
                 show: this.showCol("actions"),
                 type: "buttons",
-                data: [
-                  {
-                    click: () => {
-                      this.remove(unit);
+                data: {
+                  buttons: [
+                    {
+                      click: () => {
+                        this.remove(unit);
+                      },
+                      icon: "fas fa-trash",
+                      classes: "btn btn-danger",
+                      title: "Remove unit from General Planner",
                     },
-                    icon: "fas fa-trash",
-                    classes: "btn btn-danger",
-                    title: "Remove unit from General Planner",
-                  },
-                ],
+                  ],
+                },
               },
             ],
           };
