@@ -105,9 +105,9 @@ export default defineComponent({
                     this.searchText = val;
                   },
                   value: this.searchText,
-                },
-                click: () => {
-                  this.sortBy("name");
+                  click: () => {
+                    this.sortBy("name");
+                  },
                 },
               },
               {
