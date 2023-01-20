@@ -165,12 +165,7 @@
             </div>
           </div>
           <div class="col-lg-6 col-md-12">
-            <table
-              class="table table-bordered table-dark table-sm table-striped swgoh-table output-table"
-            >
-              <TableHeader :header="header" />
-              <TableBody :body="body" />
-            </table>
+            <SwgohTable :table="{ header, body }" />
           </div>
         </div>
       </template>
@@ -244,20 +239,24 @@ export default defineComponent({
       return {
         headers: [
           {
-            label: "",
-            show: true,
-          },
-          {
-            label: "Current",
-            show: true,
-          },
-          {
-            label: "Projected",
-            show: true,
-          },
-          {
-            label: "Difference",
-            show: true,
+            cells: [
+              {
+                label: "",
+                show: true,
+              },
+              {
+                label: "Current",
+                show: true,
+              },
+              {
+                label: "Projected",
+                show: true,
+              },
+              {
+                label: "Difference",
+                show: true,
+              },
+            ],
           },
         ],
       };

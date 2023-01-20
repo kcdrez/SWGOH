@@ -152,10 +152,7 @@
           </div>
         </div>
         <div class="col-lg-6 col-md-12">
-          <table class="table table-bordered table-dark table-sm table-striped">
-            <TableHeader :header="header" />
-            <TableBody :body="body" />
-          </table>
+          <SwgohTable :table="{ header, body }" />
         </div>
       </div>
     </div>
@@ -234,39 +231,43 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Sets",
-            sortMethodShow: true,
-            value: "sets",
-          },
-          {
-            label: "Primaries",
-            show: true,
-            sortMethodShow: true,
-            value: "primaries",
-            input: {
-              type: "list",
-              label: "Primary Stat Count",
-              value: this.primaryCount,
-              change: (val: any) => {
-                this.primaryCount = val;
+            cells: [
+              {
+                label: "Sets",
+                sortMethodShow: true,
+                value: "sets",
               },
-              options: [
-                {
-                  label: "3",
-                  value: 3,
+              {
+                label: "Primaries",
+                show: true,
+                sortMethodShow: true,
+                value: "primaries",
+                input: {
+                  type: "list",
+                  label: "Primary Stat Count",
+                  value: this.primaryCount,
+                  change: (val: any) => {
+                    this.primaryCount = val;
+                  },
+                  options: [
+                    {
+                      label: "3",
+                      value: 3,
+                    },
+                    {
+                      label: "4",
+                      value: 4,
+                    },
+                  ],
                 },
-                {
-                  label: "4",
-                  value: 4,
-                },
-              ],
-            },
-          },
-          {
-            label: "Total Survivability",
-            show: true,
-            sortMethodShow: true,
-            value: "total",
+              },
+              {
+                label: "Total Survivability",
+                show: true,
+                sortMethodShow: true,
+                value: "total",
+              },
+            ],
           },
         ],
       };

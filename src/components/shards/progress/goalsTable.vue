@@ -59,12 +59,7 @@
     <div class="total-progress-bar">
       <ProgressBar :percent="totalProgress(goal.list, 'requirement')" />
     </div>
-    <table
-      class="table table-bordered table-dark table-sm table-striped swgoh-table"
-    >
-      <TableHeader :header="header" />
-      <TableBody :body="body" />
-    </table>
+    <SwgohTable :table="{ header, body }" />
   </div>
   <Modal :isOpen="showAddUnitModal">
     <template v-slot:header>Add New Unit</template>
@@ -196,49 +191,53 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Unit Name",
-            show: this.showCol("name"),
-            sortMethodShow: true,
-            icon: this.sortIcon("name"),
-            value: "name",
-            click: () => {
-              this.sortBy("name");
-            },
-          },
-          {
-            label: "Current Level",
-            show: this.showCol("current"),
-            sortMethodShow: true,
-            icon: this.sortIcon("current"),
-            value: "current",
-            click: () => {
-              this.sortBy("current");
-            },
-          },
-          {
-            label: "Target Level",
-            show: this.showCol("target"),
-            sortMethodShow: true,
-            icon: this.sortIcon("target"),
-            value: "target",
-            click: () => {
-              this.sortBy("target");
-            },
-          },
-          {
-            label: "Progress",
-            show: this.showCol("progress"),
-            sortMethodShow: true,
-            icon: this.sortIcon("progress"),
-            value: "progress",
-            click: () => {
-              this.sortBy("progress");
-            },
-          },
-          {
-            label: "Actions",
-            value: "actions",
-            show: this.showCol("actions"),
+            cells: [
+              {
+                label: "Unit Name",
+                show: this.showCol("name"),
+                sortMethodShow: true,
+                icon: this.sortIcon("name"),
+                value: "name",
+                click: () => {
+                  this.sortBy("name");
+                },
+              },
+              {
+                label: "Current Level",
+                show: this.showCol("current"),
+                sortMethodShow: true,
+                icon: this.sortIcon("current"),
+                value: "current",
+                click: () => {
+                  this.sortBy("current");
+                },
+              },
+              {
+                label: "Target Level",
+                show: this.showCol("target"),
+                sortMethodShow: true,
+                icon: this.sortIcon("target"),
+                value: "target",
+                click: () => {
+                  this.sortBy("target");
+                },
+              },
+              {
+                label: "Progress",
+                show: this.showCol("progress"),
+                sortMethodShow: true,
+                icon: this.sortIcon("progress"),
+                value: "progress",
+                click: () => {
+                  this.sortBy("progress");
+                },
+              },
+              {
+                label: "Actions",
+                value: "actions",
+                show: this.showCol("actions"),
+              },
+            ],
           },
         ],
       };

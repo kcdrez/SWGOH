@@ -97,7 +97,7 @@ import { setupEvents } from "utils";
 import { scavengerFarming, scavengerCost } from "types/scavenger";
 import { Relic } from "types/relic";
 import { round2Decimals } from "utils";
-import { iHeader } from "types/general";
+import { iTableHead } from "types/general";
 
 const storageKey = "ScavengerFarmingTable";
 
@@ -119,28 +119,36 @@ export default defineComponent({
     ...mapState("shards", ["shardFarming"]),
     ...mapState("gear", ["gearList"]),
     ...mapState("relic", ["relicConfig"]),
-    headers(): iHeader[] {
+    headers(): iTableHead[] {
       return [
         {
-          label: "Location",
-          classes: "location-col",
-          containerClass: "col-container",
-          show: true,
-        },
-        {
-          label: "Gear",
-          classes: "gear-col",
-          containerClass: "col-container",
-          show: true,
-          input: {
-            type: "multiselect",
-            classes: "filter-mats",
-            placeholder: "Filter Relic Mats",
-            options: [],
-            click: (data: string[]) => {
-              this.filteredRelicMats = data;
+          headers: [
+            {
+              cells: [
+                {
+                  label: "Location",
+                  classes: "location-col",
+                  containerClass: "col-container",
+                  show: true,
+                },
+                {
+                  label: "Gear",
+                  classes: "gear-col",
+                  containerClass: "col-container",
+                  show: true,
+                  input: {
+                    type: "multiselect",
+                    classes: "filter-mats",
+                    placeholder: "Filter Relic Mats",
+                    options: [],
+                    click: (data: string[]) => {
+                      this.filteredRelicMats = data;
+                    },
+                  },
+                },
+              ],
             },
-          },
+          ],
         },
       ];
     },

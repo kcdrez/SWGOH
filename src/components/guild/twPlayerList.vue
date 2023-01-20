@@ -1,11 +1,5 @@
 <template>
-  <table
-    v-if="players"
-    class="table table-bordered table-dark table-sm table-striped swgoh-table"
-  >
-    <TableHeader :header="header" />
-    <TableBody :body="body" />
-  </table>
+  <SwgohTable :table="{ header, body }" v-if="players" />
 </template>
 
 <script lang="ts">
@@ -14,7 +8,7 @@ import { mapState } from "vuex";
 
 import { setupColumnEvents, setupSorting } from "utils";
 import { Unit } from "types/unit";
-import { iHeader, iTableBody, iTableCell, iTableHead } from "types/general";
+import { iHeaderCell, iTableBody, iTableCell, iTableHead } from "types/general";
 
 interface dataModel {
   _playersJoined: string[];
@@ -75,7 +69,7 @@ export default defineComponent({
   computed: {
     ...mapState("guild", ["accessLevel"]),
     header(): iTableHead {
-      const unitHeaders: iHeader[] = this.units.map((unit) => {
+      const unitHeaders: iHeaderCell[] = this.units.map((unit) => {
         return {
           label: unit.name,
           show: this.showCol(unit.id),
@@ -98,46 +92,50 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Name",
-            show: true,
-            icon: this.sortIcon("name"),
-            input: {
-              type: "input",
-              classes: "mx-auto my-1 w-75",
-              placeholder: "Search",
-              change: (val: string) => {
-                this.searchText = val;
+            cells: [
+              {
+                label: "Name",
+                show: true,
+                icon: this.sortIcon("name"),
+                input: {
+                  type: "input",
+                  classes: "mx-auto my-1 w-75",
+                  placeholder: "Search",
+                  change: (val: string) => {
+                    this.searchText = val;
+                  },
+                  value: this.searchText,
+                },
+                click: () => {
+                  this.sortBy("name");
+                },
               },
-              value: this.searchText,
-            },
-            click: () => {
-              this.sortBy("name");
-            },
-          },
-          {
-            label: "Has Joined?",
-            show: true,
-            icon: this.sortIcon("joined"),
-            click: () => {
-              this.sortBy("joined");
-            },
-            input: {
-              type: "checkbox",
-              placeholder: "Show/Hide Joined",
-              value: false,
-              click: (val: any) => {
-                this.showJoined = val;
+              {
+                label: "Has Joined?",
+                show: true,
+                icon: this.sortIcon("joined"),
+                click: () => {
+                  this.sortBy("joined");
+                },
+                input: {
+                  type: "checkbox",
+                  placeholder: "Show/Hide Joined",
+                  value: false,
+                  click: (val: any) => {
+                    this.showJoined = val;
+                  },
+                },
               },
-            },
-          },
-          ...unitHeaders,
-          {
-            label: "TW Omicrons",
-            show: true,
-            icon: this.sortIcon("omicrons"),
-            click: () => {
-              this.sortBy("omicrons");
-            },
+              ...unitHeaders,
+              {
+                label: "TW Omicrons",
+                show: true,
+                icon: this.sortIcon("omicrons"),
+                click: () => {
+                  this.sortBy("omicrons");
+                },
+              },
+            ],
           },
         ],
       };

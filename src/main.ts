@@ -24,6 +24,7 @@ import ColumnHeaders from "components/general/columnHeaders.vue";
 import TableHeader from "components/general/tableHeader.vue";
 import TableBody from "components/general/tableBody.vue";
 import TableFooter from "components/general/tableFooter.vue";
+import SwgohTable from "components/general/swgohTable.vue";
 import { formatDate, pluralText, daysFromNow } from "utils";
 
 const app = createApp(App);
@@ -53,11 +54,12 @@ app
   .use(store)
   .use(router)
   .component("Confirm", Confirm)
-  .component("SortMethods", SortMethods)
-  .component("ColumnHeaders", ColumnHeaders)
-  .component("TableHeader", TableHeader)
-  .component("TableBody", TableBody)
-  .component("TableFooter", TableFooter)
+  // .component("SortMethods", SortMethods)
+  // .component("ColumnHeaders", ColumnHeaders)
+  // .component("TableHeader", TableHeader)
+  // .component("TableBody", TableBody)
+  // .component("TableFooter", TableFooter)
+  .component("SwgohTable", SwgohTable)
   .component("SearchInput", SearchInput)
   .component("ProgressBar", ProgressBar)
   .component("Loading", Loading)

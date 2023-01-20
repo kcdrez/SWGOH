@@ -19,12 +19,7 @@
       </div>
     </div>
     <div id="unit-section-table" class="collapse" ref="unitSection">
-      <table
-        class="table table-bordered table-dark table-sm table-striped m-0 swgoh-table"
-      >
-        <TableHeader :header="header" />
-        <TableBody :body="body" />
-      </table>
+      <SwgohTable :table="{ header, body }" />
     </div>
   </div>
 </template>
@@ -159,70 +154,74 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Name",
-            show: this.showCol("name"),
-            sortMethodShow: true,
-            icon: this.sortIcon("name"),
-            value: "name",
-            click: () => {
-              this.sortBy("name");
-            },
-          },
-          {
-            label: "Current Level",
-            show: this.showCol("curLevel"),
-            sortMethodShow: true,
-            icon: this.sortIcon("curLevel"),
-            value: "curLevel",
-            click: () => {
-              this.sortBy("curLevel");
-            },
-          },
-          {
-            label: "Target Level",
-            show: this.showCol("targetLevel"),
-            sortMethodShow: true,
-            icon: this.sortIcon("targetLevel"),
-            value: "targetLevel",
-            click: () => {
-              this.sortBy("targetLevel");
-            },
-          },
-          {
-            label: "Est. Gear Date",
-            show: this.showCol("gearDate"),
-            sortMethodShow: true,
-            icon: this.sortIcon("gearDate"),
-            value: "gearDate",
-            click: () => {
-              this.sortBy("gearDate");
-            },
-          },
-          {
-            label: "Est. Relic Date",
-            show: this.showCol("estRelic"),
-            sortMethodShow: true,
-            icon: this.sortIcon("estRelic"),
-            value: "estRelic",
-            click: () => {
-              this.sortBy("estRelic");
-            },
-          },
-          {
-            label: "Est. Completed Date",
-            show: this.showCol("completed"),
-            sortMethodShow: true,
-            icon: this.sortIcon("completed"),
-            value: "completed",
-            click: () => {
-              this.sortBy("completed");
-            },
-          },
-          {
-            label: "Actions",
-            show: this.showCol("actions"),
-            sortMethodShow: true,
-            value: "actions",
+            cells: [
+              {
+                label: "Name",
+                show: this.showCol("name"),
+                sortMethodShow: true,
+                icon: this.sortIcon("name"),
+                value: "name",
+                click: () => {
+                  this.sortBy("name");
+                },
+              },
+              {
+                label: "Current Level",
+                show: this.showCol("curLevel"),
+                sortMethodShow: true,
+                icon: this.sortIcon("curLevel"),
+                value: "curLevel",
+                click: () => {
+                  this.sortBy("curLevel");
+                },
+              },
+              {
+                label: "Target Level",
+                show: this.showCol("targetLevel"),
+                sortMethodShow: true,
+                icon: this.sortIcon("targetLevel"),
+                value: "targetLevel",
+                click: () => {
+                  this.sortBy("targetLevel");
+                },
+              },
+              {
+                label: "Est. Gear Date",
+                show: this.showCol("gearDate"),
+                sortMethodShow: true,
+                icon: this.sortIcon("gearDate"),
+                value: "gearDate",
+                click: () => {
+                  this.sortBy("gearDate");
+                },
+              },
+              {
+                label: "Est. Relic Date",
+                show: this.showCol("estRelic"),
+                sortMethodShow: true,
+                icon: this.sortIcon("estRelic"),
+                value: "estRelic",
+                click: () => {
+                  this.sortBy("estRelic");
+                },
+              },
+              {
+                label: "Est. Completed Date",
+                show: this.showCol("completed"),
+                sortMethodShow: true,
+                icon: this.sortIcon("completed"),
+                value: "completed",
+                click: () => {
+                  this.sortBy("completed");
+                },
+              },
+              {
+                label: "Actions",
+                show: this.showCol("actions"),
+                sortMethodShow: true,
+                value: "actions",
+              },
+            ],
           },
         ],
       };

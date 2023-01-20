@@ -83,56 +83,60 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Icon",
-            show: this.showCol("icon"),
-            maxWidth: "100px",
-            value: "icon",
-          },
-          {
-            label: "Name",
-            show: this.showCol("name"),
-            maxWidth: "300px",
-            icon: this.sortIcon("name"),
-            value: "name",
-            click: () => {
-              this.sortBy("name");
-            },
-          },
-          {
-            label: "Amount",
-            show: this.showCol("amount"),
-            maxWidth: "100px",
-            icon: this.sortIcon("amount"),
-            value: "amount",
-            click: () => {
-              this.sortBy("amount");
-            },
-          },
-          {
-            label: "Efficiency Rating",
-            show: this.showCol("priority"),
-            maxWidth: "100px",
-            icon: this.sortIcon("priority"),
-            value: "priority",
-            click: () => {
-              this.sortBy("priority");
-            },
-          },
-          {
-            label: "Best Farming Locations",
-            show: this.showCol("locations"),
-            maxWidth: "300px",
-            icon: this.sortIcon("locations"),
-            value: "locations",
-            click: () => {
-              this.sortBy("locations");
-            },
-          },
-          {
-            label: "Notes",
-            value: "notes",
-            show: this.showCol("notes"),
-            maxWidth: "300px",
+            cells: [
+              {
+                label: "Icon",
+                show: this.showCol("icon"),
+                maxWidth: "100px",
+                value: "icon",
+              },
+              {
+                label: "Name",
+                show: this.showCol("name"),
+                maxWidth: "300px",
+                icon: this.sortIcon("name"),
+                value: "name",
+                click: () => {
+                  this.sortBy("name");
+                },
+              },
+              {
+                label: "Amount",
+                show: this.showCol("amount"),
+                maxWidth: "100px",
+                icon: this.sortIcon("amount"),
+                value: "amount",
+                click: () => {
+                  this.sortBy("amount");
+                },
+              },
+              {
+                label: "Efficiency Rating",
+                show: this.showCol("priority"),
+                maxWidth: "100px",
+                icon: this.sortIcon("priority"),
+                value: "priority",
+                click: () => {
+                  this.sortBy("priority");
+                },
+              },
+              {
+                label: "Best Farming Locations",
+                show: this.showCol("locations"),
+                maxWidth: "300px",
+                icon: this.sortIcon("locations"),
+                value: "locations",
+                click: () => {
+                  this.sortBy("locations");
+                },
+              },
+              {
+                label: "Notes",
+                value: "notes",
+                show: this.showCol("notes"),
+                maxWidth: "300px",
+              },
+            ],
           },
         ],
       };

@@ -56,12 +56,7 @@
       label="Show/Hide Columns"
       @checked="selectedColumns = $event"
     />
-    <table
-      class="table table-bordered table-dark table-sm table-striped swgoh-table"
-    >
-      <TableHeader :header="header" />
-      <TableBody :body="body" />
-    </table>
+    <SwgohTable :table="{ header, body }" />
   </div>
 </template>
 
@@ -105,56 +100,60 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Name",
-            show: this.showCol("name"),
-            sortMethodShow: true,
-            icon: this.match.sortIcon("name"),
-            value: "name",
-            click: () => {
-              this.match.sortMethod = "name";
-            },
-          },
-          {
-            label: "Is Leader?",
-            show: this.showCol("isLeader"),
-            sortMethodShow: true,
-            icon: this.match.sortIcon("isLeader"),
-            value: "isLeader",
-            click: () => {
-              this.match.sortMethod = "isLeader";
-            },
-          },
-          {
-            label: "Owner",
-            show: this.showCol("owner"),
-            sortMethodShow: true,
-            value: "owner",
-          },
-          {
-            label: "Sub Total",
-            show: this.showCol("subTotal"),
-            icon: this.match.sortIcon("subTotal"),
-            value: "subTotal",
-            sortMethodShow: true,
-            click: () => {
-              this.match.sortMethod = "subTotal";
-            },
-          },
-          {
-            label: "Bonuses",
-            show: this.showCol("bonuses"),
-            value: "bonuses",
-            sortMethodShow: true,
-          },
-          {
-            label: "Total",
-            show: this.showCol("total"),
-            icon: this.match.sortIcon("total"),
-            value: "total",
-            sortMethodShow: true,
-            click: () => {
-              this.match.sortMethod = "total";
-            },
+            cells: [
+              {
+                label: "Name",
+                show: this.showCol("name"),
+                sortMethodShow: true,
+                icon: this.match.sortIcon("name"),
+                value: "name",
+                click: () => {
+                  this.match.sortMethod = "name";
+                },
+              },
+              {
+                label: "Is Leader?",
+                show: this.showCol("isLeader"),
+                sortMethodShow: true,
+                icon: this.match.sortIcon("isLeader"),
+                value: "isLeader",
+                click: () => {
+                  this.match.sortMethod = "isLeader";
+                },
+              },
+              {
+                label: "Owner",
+                show: this.showCol("owner"),
+                sortMethodShow: true,
+                value: "owner",
+              },
+              {
+                label: "Sub Total",
+                show: this.showCol("subTotal"),
+                icon: this.match.sortIcon("subTotal"),
+                value: "subTotal",
+                sortMethodShow: true,
+                click: () => {
+                  this.match.sortMethod = "subTotal";
+                },
+              },
+              {
+                label: "Bonuses",
+                show: this.showCol("bonuses"),
+                value: "bonuses",
+                sortMethodShow: true,
+              },
+              {
+                label: "Total",
+                show: this.showCol("total"),
+                icon: this.match.sortIcon("total"),
+                value: "total",
+                sortMethodShow: true,
+                click: () => {
+                  this.match.sortMethod = "total";
+                },
+              },
+            ],
           },
         ],
       };

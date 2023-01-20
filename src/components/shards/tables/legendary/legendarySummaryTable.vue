@@ -6,12 +6,7 @@
       </h3>
     </div>
     <div :id="`${storageKey}`" class="collapse" :ref="`${storageKey}`">
-      <table
-        class="table table-bordered table-dark table-sm table-striped swgoh-table"
-      >
-        <TableHeader :header="headerData" />
-        <TableBody :body="body" />
-      </table>
+      <SwgohTable :table="{ header, body }" />
     </div>
   </div>
 </template>
@@ -73,33 +68,37 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Unit Name",
-            show: true,
-            sortMethodShow: true,
-            maxWidth: "50%",
-            icon: this.sortIcon("name"),
-            input: {
-              type: "input",
-              classes: "mx-auto my-1 w-75",
-              placeholder: "Search by Name",
-              label: "Search",
-              value: this.searchText,
-              change: (val: string) => {
-                this.searchText = val;
+            cells: [
+              {
+                label: "Unit Name",
+                show: true,
+                sortMethodShow: true,
+                maxWidth: "50%",
+                icon: this.sortIcon("name"),
+                input: {
+                  type: "input",
+                  classes: "mx-auto my-1 w-75",
+                  placeholder: "Search by Name",
+                  label: "Search",
+                  value: this.searchText,
+                  change: (val: string) => {
+                    this.searchText = val;
+                  },
+                  click: () => {
+                    this.sortBy("name");
+                  },
+                },
               },
-              click: () => {
-                this.sortBy("name");
+              {
+                label: "Progress",
+                show: true,
+                maxWidth: "50%",
+                icon: this.sortIcon("progress"),
+                click: () => {
+                  this.sortBy("progress");
+                },
               },
-            },
-          },
-          {
-            label: "Progress",
-            show: true,
-            maxWidth: "50%",
-            icon: this.sortIcon("progress"),
-            click: () => {
-              this.sortBy("progress");
-            },
+            ],
           },
         ],
       };

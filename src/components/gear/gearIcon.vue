@@ -8,7 +8,7 @@
       <div class="mark-level">{{ gearData.mark }}</div>
       <img :src="gearData.image" />
     </div>
-    <div v-if="showName" class="text-small">{{ gearData.name }}</div>
+    <div v-if="showName">{{ gearData.name }}</div>
   </div>
 </template>
 

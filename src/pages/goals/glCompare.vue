@@ -1,53 +1,6 @@
 <template>
   <div class="container swgoh-page">
-    <table
-      class="table table-bordered table-dark table-sm table-striped swgoh-table"
-    >
-      <thead>
-        <!-- <ColumnHeaders class="text-center align-middle" :headers="headers" /> -->
-        <tr class="text-center align-middle">
-          <th @click="sortBy('name')">
-            <span>Unit Name</span>
-            <i class="fas mx-1" :class="sortIcon('name')"></i>
-          </th>
-          <th v-for="gear in gearList" :key="gear.id" @click="sortBy(gear.id)">
-            <GearIcon :gear="gear" class="d-inline-block" />
-            <i class="fas mx-1" :class="sortIcon(gear.id)"></i>
-          </th>
-          <th
-            v-for="relic in relicMapping"
-            :key="relic.id"
-            @click="sortBy(relic.id)"
-          >
-            <RelicIcon :item="relic" class="d-inline-block" />
-            <i class="fas mx-1" :class="sortIcon(relic.id)"></i>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="unit in glUnitList" :key="unit.id">
-          <td class="align-middle text-center">
-            <UnitIcon :unit="unit" isLink hideImage />
-          </td>
-          <td
-            class="align-middle text-center"
-            v-for="gear in gearList"
-            :key="gear.id"
-          >
-            {{ unit.getGearRequiredToUnlock(gear.id) }}
-          </td>
-          <td
-            class="align-middle text-center"
-            v-for="relic in relicMapping"
-            :key="relic.id"
-          >
-            <div>
-              {{ unit.getRelicsRequiredToUnlock(relic.id) }}
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <SwgohTable :table="table" />
   </div>
 </template>
 
@@ -58,12 +11,10 @@ import { mapState } from "vuex";
 import { setupSorting } from "utils";
 import { Unit, getUnit } from "types/unit";
 import { FarmingNode } from "types/shards";
-import UnitIcon from "components/units/unitIcon.vue";
-import RelicIcon from "components/relic/relicIcon.vue";
-import GearIcon from "components/gear/gearIcon.vue";
 import relicMapping from "types/relicMapping";
 import { Gear, getGear } from "types/gear";
-import { iHeader } from "types/general";
+import { iHeaderCell, iTable, iTableCell } from "types/general";
+import { Relic } from "types/relic";
 
 const storageKey = "glCompare";
 
@@ -81,11 +32,6 @@ export default defineComponent({
       sortIcon,
     };
   },
-  components: {
-    UnitIcon,
-    RelicIcon,
-    GearIcon,
-  },
   data() {
     return {
       storageKey,
@@ -97,39 +43,105 @@ export default defineComponent({
     ...mapState("unit", ["unitList"]),
     ...mapState("player", ["player"]),
     ...mapState("shards", ["shardFarming"]),
-    headers(): iHeader[] {
-      const gearHeaders: iHeader[] = this.gearList.map((gear: Gear) => {
+    table(): iTable {
+      const gearHeaderColumns: iHeaderCell[] = this.gearList.map(
+        (gear: Gear | string) => {
+          if (typeof gear === "string") {
+            return {
+              click: () => {
+                this.sortBy(gear);
+              },
+              icon: this.sortIcon(gear),
+              value: gear,
+              show: true,
+              label: gear,
+            };
+          } else {
+            return {
+              click: () => {
+                this.sortBy(gear.id);
+              },
+              input: { type: "gear" },
+              data: { gear },
+              icon: this.sortIcon(gear.id),
+              value: gear.id,
+              show: true,
+            };
+          }
+        }
+      );
+      const relicList = Object.values(this.relicMapping) as Relic[];
+      const relicHeaders: iHeaderCell[] = relicList.map((relic: Relic) => {
         return {
-          label: gear.name,
-          show: this.showCol(gear.id),
-          icon: this.sortIcon(gear.id),
+          input: { type: "relic" },
+          data: { relic },
+          show: true,
+          icon: this.sortIcon(relic.id),
           click: () => {
-            this.sortBy(gear.id);
+            this.sortBy(relic.id);
           },
         };
       });
-      // const relicHeaders: iHeader[] = this.relicMapping.map((relic: Relic) => {
-      //   return {
-      //     label: relic.name,
-      //     show: this.showCol(relic.id),
-      //     icon: this.sortIcon(relic.id),
-      //     click: () => {
-      //       this.sortBy(relic.id);
-      //     },
-      //   };
-      // });
-      return [
-        {
-          label: "Unit Name",
-          show: this.showCol("name"),
-          icon: this.sortIcon("name"),
-          click: () => {
-            this.sortBy("name");
+
+      return {
+        header: {
+          classes: "sticky-header show-on-mobile",
+          sortMethod: this.sortMethod,
+          sortDir: this.sortDir,
+          methodChange: (val: string) => {
+            this.sortMethod = val;
           },
+          directionChange: (val: "asc" | "desc") => {
+            this.sortDir = val;
+          },
+          headers: [
+            {
+              cells: [
+                {
+                  label: "Unit Name",
+                  show: true,
+                  icon: this.sortIcon("name"),
+                  value: "name",
+                  click: () => {
+                    this.sortBy("name");
+                  },
+                },
+                ...gearHeaderColumns,
+                ...relicHeaders,
+              ],
+            },
+          ],
         },
-        ...gearHeaders,
-        // ...relicHeaders,
-      ];
+        body: {
+          classes: "text-center align-middle",
+          rows: this.glUnitList.map((unit: Unit) => {
+            const gearCells: iTableCell[] = this.gearList.map((gear: Gear) => {
+              return {
+                show: true,
+                data: unit.getGearRequiredToUnlock(gear.id),
+              };
+            });
+            const relicCells: iTableCell[] = relicList.map((relic: Relic) => {
+              return {
+                show: true,
+                data: unit.getRelicsRequiredToUnlock(relic.id),
+              };
+            });
+
+            return {
+              cells: [
+                {
+                  data: unit,
+                  type: "unit",
+                  show: true,
+                },
+                ...gearCells,
+                ...relicCells,
+              ],
+            };
+          }),
+        },
+      };
     },
     glUnitList(): Unit[] {
       return this.shardFarming
@@ -178,7 +190,7 @@ export default defineComponent({
     },
     gearList(): Gear[] {
       return this.gearIds.map((x: string) => {
-        return getGear(x);
+        return getGear(x) ?? x;
       });
     },
   },

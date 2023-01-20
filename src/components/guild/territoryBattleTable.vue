@@ -1,24 +1,13 @@
 <template>
   <div>
-    <table
-      class="table table-bordered table-dark table-sm table-striped"
+    <SwgohTable
+      :table="{ header, body, footer }"
       :class="[accessLevel < 3 ? 'mb-3' : 'mb-0']"
-    >
-      <TableHeader :header="header" />
-      <TableBody :body="body" />
-      <TableFooter :footer="footer" />
-    </table>
-    <table
-      class="table table-bordered table-dark table-sm table-striped"
+    />
+    <SwgohTable
+      :table="{ header: addNewHeader, body: addNewBody }"
       v-if="accessLevel >= 3"
-    >
-      <TableHeader :header="addNewHeader">
-        <template v-slot:firstRow>
-          <th class="text-center" colspan="5">Add New Event</th>
-        </template>
-      </TableHeader>
-      <TableBody :body="addNewBody" />
-    </table>
+    />
   </div>
 </template>
 
@@ -91,78 +80,83 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Completion Date",
-            show: this.showCol("date"),
-            sortMethodShow: true,
-            icon: this.sortIcon("date"),
-            click: () => {
-              this.sortBy("date");
-            },
-            colspan: this.showCol("name") ? "1" : "2",
-          },
-          {
-            show: !this.showCol("date") && !this.showCol("name"),
-            label: "",
-          },
-          {
-            label: "Name",
-            show: this.showCol("name"),
-            sortMethodShow: true,
-            icon: this.sortIcon("name"),
-            click: () => {
-              this.sortBy("name");
-            },
-            colspan: this.showCol("date") ? "1" : "2",
-          },
-          {
-            label: "Stars",
-            show: this.showCol("stars"),
-            sortMethodShow: true,
-            icon: this.sortIcon("stars"),
-            click: () => {
-              this.sortBy("stars");
-            },
-            colspan: this.showCol("date") || this.showCol("name") ? "1" : "2",
-          },
-          {
-            label: "GET1 Currency",
-            show: this.showCol("get1"),
-            sortMethodShow: true,
-            icon: this.sortIcon("get1"),
-            click: () => {
-              this.sortBy("get1");
-            },
-          },
-          {
-            label: "GET2 Currency",
-            show: this.showCol("get2"),
-            sortMethodShow: true,
-            icon: this.sortIcon("get2"),
-            click: () => {
-              this.sortBy("get2");
-            },
-          },
-          {
-            label: "GET3 Currency",
-            show: this.showCol("get3"),
-            sortMethodShow: true,
-            icon: this.sortIcon("get3"),
-            click: () => {
-              this.sortBy("get3");
-            },
-          },
-          {
-            label: "Character Shards",
-            show: this.showCol("character"),
-            sortMethodShow: true,
-            icon: this.sortIcon("character"),
-            click: () => {
-              this.sortBy("character");
-            },
-          },
-          {
-            label: "Actions",
-            show: this.showCol("actions"),
+            cells: [
+              {
+                label: "Completion Date",
+                show: this.showCol("date"),
+                sortMethodShow: true,
+                icon: this.sortIcon("date"),
+                click: () => {
+                  this.sortBy("date");
+                },
+                colspan: this.showCol("name") ? "1" : "2",
+              },
+              {
+                show: !this.showCol("date") && !this.showCol("name"),
+                label: "",
+              },
+              {
+                label: "Name",
+                show: this.showCol("name"),
+                sortMethodShow: true,
+                icon: this.sortIcon("name"),
+                click: () => {
+                  this.sortBy("name");
+                },
+                colspan: this.showCol("date") ? "1" : "2",
+              },
+              {
+                label: "Stars",
+                show: this.showCol("stars"),
+                sortMethodShow: true,
+                icon: this.sortIcon("stars"),
+                click: () => {
+                  this.sortBy("stars");
+                },
+                colspan:
+                  this.showCol("date") || this.showCol("name") ? "1" : "2",
+              },
+              {
+                label: "GET1 Currency",
+                show: this.showCol("get1"),
+                sortMethodShow: true,
+                icon: this.sortIcon("get1"),
+                click: () => {
+                  this.sortBy("get1");
+                },
+              },
+              {
+                label: "GET2 Currency",
+                show: this.showCol("get2"),
+                sortMethodShow: true,
+                icon: this.sortIcon("get2"),
+                click: () => {
+                  this.sortBy("get2");
+                },
+              },
+              {
+                label: "GET3 Currency",
+                show: this.showCol("get3"),
+                sortMethodShow: true,
+                icon: this.sortIcon("get3"),
+                click: () => {
+                  this.sortBy("get3");
+                },
+              },
+              {
+                label: "Character Shards",
+                show: this.showCol("character"),
+                sortMethodShow: true,
+                icon: this.sortIcon("character"),
+                click: () => {
+                  this.sortBy("character");
+                },
+              },
+              {
+                label: "Actions",
+                show: this.showCol("actions"),
+              },
+            ],
           },
         ],
       };
@@ -383,29 +377,41 @@ export default defineComponent({
       return {
         headers: [
           {
-            show: true,
-            label: "Date",
-            maxWidth: "20%",
+            cells: [
+              {
+                label: "Add New Event",
+                colspan: "5",
+              },
+            ],
           },
           {
-            show: true,
-            label: "Type",
-            maxWidth: "20%",
-          },
-          {
-            show: true,
-            label: "Stars",
-            maxWidth: "20%",
-          },
-          {
-            show: true,
-            label: "Character Shards",
-            maxWidth: "20%",
-          },
-          {
-            show: true,
-            label: "Actions",
-            maxWidth: "20%",
+            cells: [
+              {
+                show: true,
+                label: "Date",
+                maxWidth: "20%",
+              },
+              {
+                show: true,
+                label: "Type",
+                maxWidth: "20%",
+              },
+              {
+                show: true,
+                label: "Stars",
+                maxWidth: "20%",
+              },
+              {
+                show: true,
+                label: "Character Shards",
+                maxWidth: "20%",
+              },
+              {
+                show: true,
+                label: "Actions",
+                maxWidth: "20%",
+              },
+            ],
           },
         ],
       };

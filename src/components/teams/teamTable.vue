@@ -102,12 +102,7 @@
       storageKey="teamsTable"
       @checked="selectedColumns = $event"
     />
-    <table
-      class="table table-bordered table-dark table-sm table-striped swgoh-table"
-    >
-      <TableHeader :header="header" />
-      <TableBody :body="body" />
-    </table>
+    <SwgohTable :table="{ header, body }" />
   </div>
 </template>
 
@@ -178,145 +173,149 @@ export default defineComponent({
         classes: "sticky-header show-on-mobile",
         headers: [
           {
-            label: "Name",
-            value: "name",
-            show: this.showCol("name"),
-            sortMethodShow: true,
-            icon: this.sortIcon("name"),
-            click: () => {
-              this.sortBy("name");
-            },
-          },
-          {
-            label: "Is Leader?",
-            value: "isLeader",
-            show: this.showCol("isLeader"),
-            sortMethodShow: true,
-            icon: this.sortIcon("isLeader"),
-            click: () => {
-              this.sortBy("isLeader");
-            },
-          },
-          {
-            label: "images/mod_square.png",
-            classes: "mod-col",
-            sortMethodShow: this.size === "lg",
-            show: this.showMods,
-            icon: this.sortIcon("square"),
-            click: () => {
-              this.sortBy("square");
-            },
-            input: {
-              type: "image",
-            },
-          },
-          {
-            label: "images/mod_diamond.png",
-            classes: "mod-col",
-            sortMethodShow: this.size === "lg",
-            show: this.showMods,
-            icon: this.sortIcon("diamond"),
-            click: () => {
-              this.sortBy("diamond");
-            },
-            input: {
-              type: "image",
-            },
-          },
-          {
-            label: "images/mod_circle.png",
-            classes: "mod-col",
-            sortMethodShow: this.size === "lg",
-            show: this.showMods,
-            icon: this.sortIcon("circle"),
-            click: () => {
-              this.sortBy("circle");
-            },
-            input: {
-              type: "image",
-            },
-          },
-          {
-            label: "images/mod_arrow.png",
-            classes: "mod-col",
-            sortMethodShow: this.size === "lg",
-            show: this.showMods,
-            icon: this.sortIcon("arrow"),
-            click: () => {
-              this.sortBy("arrow");
-            },
-            input: {
-              type: "image",
-            },
-          },
-          {
-            label: "images/mod_triangle.png",
-            classes: "mod-col",
-            sortMethodShow: this.size === "lg",
-            show: this.showMods,
-            icon: this.sortIcon("triangle"),
-            click: () => {
-              this.sortBy("triangle");
-            },
-            input: {
-              type: "image",
-            },
-          },
-          {
-            label: "images/mod_cross.png",
-            classes: "mod-col",
-            sortMethodShow: this.size === "lg",
-            show: this.showMods,
-            icon: this.sortIcon("cross"),
-            click: () => {
-              this.sortBy("cross");
-            },
-            input: {
-              type: "image",
-            },
-          },
-          {
-            label: "Has Speed Set?",
-            sortMethodShow: this.size === "lg",
-            show: this.showMods,
-            icon: this.sortIcon("speedSet"),
-            click: () => {
-              this.sortBy("speedSet");
-            },
-          },
-          {
-            label: "Mods",
-            value: this.showMods ? "mods" : null,
-          },
-          {
-            label: "Sub Total",
-            value: "subTotal",
-            show: this.showCol("subTotal"),
-            sortMethodShow: true,
-            icon: this.sortIcon("subTotal"),
-            click: () => {
-              this.sortBy("subTotal");
-            },
-          },
-          {
-            label: "Bonuses",
-            value: "bonuses",
-            show: this.showCol("bonuses"),
-            sortMethodShow: true,
-          },
-          {
-            label: "Total",
-            value: "total",
-            show: this.showCol("total"),
-            sortMethodShow: true,
-            icon: this.sortIcon("total"),
-            click: () => {
-              this.sortBy("total");
-            },
-          },
-          {
-            label: "Actions",
-            show: this.showCol("actions"),
+            cells: [
+              {
+                label: "Name",
+                value: "name",
+                show: this.showCol("name"),
+                sortMethodShow: true,
+                icon: this.sortIcon("name"),
+                click: () => {
+                  this.sortBy("name");
+                },
+              },
+              {
+                label: "Is Leader?",
+                value: "isLeader",
+                show: this.showCol("isLeader"),
+                sortMethodShow: true,
+                icon: this.sortIcon("isLeader"),
+                click: () => {
+                  this.sortBy("isLeader");
+                },
+              },
+              {
+                label: "images/mod_square.png",
+                classes: "mod-col",
+                sortMethodShow: this.size === "lg",
+                show: this.showMods,
+                icon: this.sortIcon("square"),
+                click: () => {
+                  this.sortBy("square");
+                },
+                input: {
+                  type: "image",
+                },
+              },
+              {
+                label: "images/mod_diamond.png",
+                classes: "mod-col",
+                sortMethodShow: this.size === "lg",
+                show: this.showMods,
+                icon: this.sortIcon("diamond"),
+                click: () => {
+                  this.sortBy("diamond");
+                },
+                input: {
+                  type: "image",
+                },
+              },
+              {
+                label: "images/mod_circle.png",
+                classes: "mod-col",
+                sortMethodShow: this.size === "lg",
+                show: this.showMods,
+                icon: this.sortIcon("circle"),
+                click: () => {
+                  this.sortBy("circle");
+                },
+                input: {
+                  type: "image",
+                },
+              },
+              {
+                label: "images/mod_arrow.png",
+                classes: "mod-col",
+                sortMethodShow: this.size === "lg",
+                show: this.showMods,
+                icon: this.sortIcon("arrow"),
+                click: () => {
+                  this.sortBy("arrow");
+                },
+                input: {
+                  type: "image",
+                },
+              },
+              {
+                label: "images/mod_triangle.png",
+                classes: "mod-col",
+                sortMethodShow: this.size === "lg",
+                show: this.showMods,
+                icon: this.sortIcon("triangle"),
+                click: () => {
+                  this.sortBy("triangle");
+                },
+                input: {
+                  type: "image",
+                },
+              },
+              {
+                label: "images/mod_cross.png",
+                classes: "mod-col",
+                sortMethodShow: this.size === "lg",
+                show: this.showMods,
+                icon: this.sortIcon("cross"),
+                click: () => {
+                  this.sortBy("cross");
+                },
+                input: {
+                  type: "image",
+                },
+              },
+              {
+                label: "Has Speed Set?",
+                sortMethodShow: this.size === "lg",
+                show: this.showMods,
+                icon: this.sortIcon("speedSet"),
+                click: () => {
+                  this.sortBy("speedSet");
+                },
+              },
+              {
+                label: "Mods",
+                value: this.showMods ? "mods" : null,
+              },
+              {
+                label: "Sub Total",
+                value: "subTotal",
+                show: this.showCol("subTotal"),
+                sortMethodShow: true,
+                icon: this.sortIcon("subTotal"),
+                click: () => {
+                  this.sortBy("subTotal");
+                },
+              },
+              {
+                label: "Bonuses",
+                value: "bonuses",
+                show: this.showCol("bonuses"),
+                sortMethodShow: true,
+              },
+              {
+                label: "Total",
+                value: "total",
+                show: this.showCol("total"),
+                sortMethodShow: true,
+                icon: this.sortIcon("total"),
+                click: () => {
+                  this.sortBy("total");
+                },
+              },
+              {
+                label: "Actions",
+                show: this.showCol("actions"),
+              },
+            ],
           },
         ],
       };

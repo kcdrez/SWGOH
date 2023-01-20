@@ -1,107 +1,13 @@
 <template>
   <div>
-    <table
-      class="table table-bordered table-dark table-sm table-striped"
+    <SwgohTable
+      :table="{ header, body, footer }"
       :class="[accessLevel < 3 ? 'mb-3' : 'mb-0']"
-    >
-      <TableHeader :header="header" />
-      <TableBody :body="body" />
-      <tfoot>
-        <tr
-          class="text-center align-middle"
-          v-if="territoryWarEvents.length > 0"
-        >
-          <td class="category-header" v-if="showCol('date')">Average</td>
-          <td v-if="showCol('win_loss')">
-            <span class="row-label">Win Rate: </span>
-            {{ averageWinRate }}%
-          </td>
-          <td v-if="showCol('get1')">
-            <span class="row-label">Avg GET1: </span>
-            {{ averageGet1 }}
-          </td>
-          <td v-if="showCol('get2')">
-            <span class="row-label">Avg GET2: </span>
-            {{ averageGet2 }}
-          </td>
-          <!-- <td v-if="showCol('get3')">
-            <span class="row-label">Avg GET3: </span>
-            {{ averageGet3 }}
-          </td> -->
-          <td v-if="showCol('zetas')">
-            <span class="row-label">Avg Zetas: </span>
-            {{ averageZetas }}
-          </td>
-          <td class="hidden-sm" v-if="showCol('actions')"></td>
-        </tr>
-        <tr v-else>
-          <td colspan="100%" class="text-center">
-            There are no events recorded for this guild.
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-    <table
-      class="table table-bordered table-dark table-sm table-striped"
+    />
+    <SwgohTable
+      :table="{ header: addNewHeader, body: addNewBody }"
       v-if="accessLevel >= 3"
-    >
-      <thead class="text-center align-middle">
-        <tr>
-          <th colspan="6">Add New Event</th>
-        </tr>
-        <tr>
-          <th width="25%">Date</th>
-          <th width="25%">Win/Loss</th>
-          <th width="25%">Event GP Range</th>
-          <th width="25%">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="row-label text-center">Add New Event</td>
-          <td class="flex-sm">
-            <span class="row-label">Date:</span>
-            <input
-              class="form-control form-control-sm"
-              type="date"
-              v-model="newEvent.date"
-              @keypress.enter="addNewEvent"
-            />
-          </td>
-          <td class="flex-sm">
-            <span class="row-label">Win/Loss:</span>
-            <select
-              class="form-control form-control-sm"
-              v-model="newEvent.win"
-              @keypress.enter="addNewEvent"
-            >
-              <option :value="true">Win</option>
-              <option :value="false">Loss</option>
-            </select>
-          </td>
-          <td class="flex-sm">
-            <select
-              class="form-control form-control-sm"
-              v-model="newEvent.guildGP"
-              @keypress.enter="addNewEvent"
-            >
-              <option v-for="option in gpOptions" :value="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-          </td>
-          <td>
-            <button
-              class="btn btn-sm btn-primary w-100"
-              @click="addNewEvent"
-              :disabled="addNewDisabled"
-            >
-              Add New Event
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    />
   </div>
 </template>
 
@@ -166,62 +72,72 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Completion Date",
-            show: this.showCol("date"),
-            sortMethodShow: true,
-            icon: this.sortIcon("date"),
-            click: () => {
-              this.sortBy("date");
-            },
-          },
-          {
-            label: "Win/Loss",
-            show: this.showCol("win_loss"),
-            sortMethodShow: true,
-            icon: this.sortIcon("win_loss"),
-            click: () => {
-              this.sortBy("win_loss");
-            },
-          },
-          {
-            label: "GET1 Currency",
-            show: this.showCol("get1"),
-            sortMethodShow: true,
-            icon: this.sortIcon("get1"),
-            click: () => {
-              this.sortBy("get1");
-            },
-          },
-          {
-            label: "GET2 Currency",
-            show: this.showCol("get2"),
-            sortMethodShow: true,
-            icon: this.sortIcon("get2"),
-            click: () => {
-              this.sortBy("get2");
-            },
-          },
-          {
-            label: "GET3 Currency",
-            show: false, //this.showCol("get3"),
-            sortMethodShow: false,
-            icon: this.sortIcon("get3"),
-            click: () => {
-              this.sortBy("get3");
-            },
-          },
-          {
-            label: "Zetas",
-            show: this.showCol("zetas"),
-            sortMethodShow: true,
-            icon: this.sortIcon("zetas"),
-            click: () => {
-              this.sortBy("zetas");
-            },
-          },
-          {
-            label: "Actions",
-            show: this.showCol("actions"),
+            cells: [
+              {
+                label: "Completion Date",
+                show: this.showCol("date"),
+                sortMethodShow: true,
+                icon: this.sortIcon("date"),
+                value: "date",
+                click: () => {
+                  this.sortBy("date");
+                },
+              },
+              {
+                label: "Win/Loss",
+                show: this.showCol("win_loss"),
+                sortMethodShow: true,
+                icon: this.sortIcon("win_loss"),
+                value: "win_loss",
+                click: () => {
+                  this.sortBy("win_loss");
+                },
+              },
+              {
+                label: "GET1 Currency",
+                show: this.showCol("get1"),
+                sortMethodShow: true,
+                icon: this.sortIcon("get1"),
+                value: "get1",
+                click: () => {
+                  this.sortBy("get1");
+                },
+              },
+              {
+                label: "GET2 Currency",
+                show: this.showCol("get2"),
+                sortMethodShow: true,
+                icon: this.sortIcon("get2"),
+                value: "get2",
+                click: () => {
+                  this.sortBy("get2");
+                },
+              },
+              {
+                label: "GET3 Currency",
+                show: false, //this.showCol("get3"),
+                sortMethodShow: false,
+                icon: this.sortIcon("get3"),
+                value: "get3",
+                click: () => {
+                  this.sortBy("get3");
+                },
+              },
+              {
+                label: "Zetas",
+                show: this.showCol("zetas"),
+                sortMethodShow: true,
+                icon: this.sortIcon("zetas"),
+                value: "zetas",
+                click: () => {
+                  this.sortBy("zetas");
+                },
+              },
+              {
+                label: "Actions",
+                show: this.showCol("actions"),
+              },
+            ],
           },
         ],
       };
@@ -280,6 +196,183 @@ export default defineComponent({
             ],
           };
         }),
+      };
+    },
+    footer(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        zeroState: {
+          show: !(this.territoryWarEvents.length > 0),
+          message: "There are no events recorded for this guild.",
+        },
+        rows: [
+          {
+            hide: !(this.territoryWarEvents.length > 0),
+            cells: [
+              {
+                show: this.showCol("date"),
+                data: "Average",
+                classes: "category-header",
+              },
+              {
+                show: this.showCol("win_loss"),
+                label: "Win Rate:",
+                data: `${this.averageWinRate}%`,
+              },
+              {
+                show: this.showCol("get1"),
+                label: "Avg GET1:",
+                data: this.averageGet1,
+              },
+              {
+                show: this.showCol("get2"),
+                label: "Avg GET2:",
+                data: this.averageGet2,
+              },
+              {
+                show: false,
+                label: "Avg GET3:",
+                data: this.averageGet3,
+              },
+              {
+                show: this.showCol("zetas"),
+                label: "Avg Zetas:",
+                data: this.averageZetas,
+              },
+              {
+                show: this.showCol("actions"),
+                data: "",
+                classes: "hidden-sm",
+              },
+            ],
+          },
+        ],
+      };
+    },
+    addNewHeader(): iTableHead {
+      return {
+        headers: [
+          {
+            cells: [
+              {
+                label: "Add New Event",
+                colspan: "4",
+              },
+            ],
+          },
+          {
+            cells: [
+              {
+                label: "Date",
+                maxWidth: "25%",
+              },
+              {
+                label: "Win/Loss",
+                maxWidth: "25%",
+              },
+              {
+                label: "Event GP Range",
+                maxWidth: "25%",
+              },
+              {
+                label: "Actions",
+                maxWidth: "25%",
+              },
+            ],
+          },
+        ],
+      };
+    },
+    addNewBody(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: [
+          {
+            cells: [
+              {
+                classes: "row-label",
+                show: true,
+                label: "Add New Event",
+                data: "",
+              },
+              {
+                show: true,
+                classes: "flex-sm",
+                label: "Date:",
+                type: "date",
+                data: {
+                  value: this.newEvent.date,
+                },
+                enter: (val: any) => {
+                  this.newEvent.date = val;
+                  this.addNewEvent();
+                },
+                change: (val: any) => {
+                  this.newEvent.date = val;
+                },
+              },
+              {
+                show: true,
+                classes: "flex-sm",
+                label: "Win/Loss:",
+                type: "select",
+                data: {
+                  value: this.newEvent.win,
+                  options: [
+                    {
+                      value: true,
+                      label: "Win",
+                    },
+                    {
+                      value: false,
+                      label: "Loss",
+                    },
+                  ],
+                },
+                enter: (val: any) => {
+                  this.newEvent.win = val;
+                  this.addNewEvent();
+                },
+                change: (val: any) => {
+                  this.newEvent.win = val;
+                },
+              },
+              {
+                show: true,
+                classes: "flex-sm",
+                type: "select",
+                data: {
+                  options: this.gpOptions,
+                  value: this.newEvent.guildGP,
+                },
+                enter: (val: any) => {
+                  this.newEvent.guildGP = val;
+                  this.addNewEvent();
+                },
+                change: (val: any) => {
+                  this.newEvent.guildGP = val;
+                },
+              },
+              {
+                type: "buttons",
+                show: true,
+                data: {
+                  buttons: [
+                    {
+                      click: () => {
+                        this.addNewEvent();
+                      },
+                      disabled: this.addNewDisabled,
+                      classes: "btn btn-sm btn-primary w-100",
+                      label: "Add New Event",
+                    },
+                  ],
+                  groupClasses: "w-100",
+                },
+              },
+            ],
+          },
+        ],
       };
     },
     filteredEvents(): ITerritoryWarEvent[] {

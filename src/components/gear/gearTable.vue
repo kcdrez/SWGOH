@@ -1,57 +1,16 @@
 <template>
   <div>
-    <table
-      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
+    <SwgohTable
+      :table="{ header, body }"
       v-if="gearList.length > 0"
-    >
-      <TableHeader :header="header" />
-      <TableBody :body="body" />
-    </table>
+      class="mb-0"
+    />
     <div v-else class="text-center">
       There are no gear requirements for these units. This is either because you
       already own all the gear and can immediately upgrade to the target level
       or all the units are already at the target gear level.
     </div>
-    <table
-      class="table table-bordered table-dark table-sm table-striped"
-      v-if="irrelevantGear.length > 0"
-    >
-      <thead
-        class="c-pointer sticky-header"
-        data-bs-toggle="collapse"
-        href="#irrelevantSection"
-        title="Show/Hide irrelevant pieces"
-      >
-        <tr>
-          <th :colspan="showRequiredByUnit ? '6' : '5'" class="text-center">
-            Irrelevant Pieces
-          </th>
-        </tr>
-      </thead>
-      <tbody id="irrelevantSection" class="collapse">
-        <tr v-for="salvage in irrelevantGear" :key="salvage.id">
-          <td :colspan="showRequiredByUnit ? '5' : '4'" class="text-center">
-            <GearIcon :gear="salvage" />
-            {{ salvage.name }}
-          </td>
-          <td class="align-middle">
-            <div
-              class="btn-group btn-group-sm d-block text-center"
-              role="group"
-            >
-              <button
-                type="button"
-                class="btn btn-success"
-                title="Mark this salvage as relevant, moving it back into the planner estimation"
-                @click="salvage.irrelevant = false"
-              >
-                <i class="fas fa-heart"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <SwgohTable :table="irrelevantTable" v-if="irrelevantGear.length > 0" />
     <Confirm
       :isOpen="showResetConfirm"
       title="Are you sure?"
@@ -69,7 +28,7 @@ import { mapActions, mapState } from "vuex";
 import { Gear } from "types/gear";
 import GearIcon from "components/gear/gearIcon.vue";
 import { setupColumnEvents, setupSorting } from "utils";
-import { iTableBody, iTableHead } from "types/general";
+import { iTable, iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
   name: "GearTable",
@@ -208,107 +167,111 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Icon",
-            show: this.showCol("icon"),
-          },
-          {
-            label: "Name",
-            show: this.showCol("name"),
-            sortMethodShow: true,
-            maxWidth: "300px",
-            input: {
-              type: "input",
-              classes: "mx-auto my-1 w-75",
-              placeholder: "Search by Name",
-              label: "Search",
-              value: this.searchText,
-              change: (val: string) => {
-                this.searchText = val;
+            cells: [
+              {
+                label: "Icon",
+                show: this.showCol("icon"),
               },
-              click: () => {
-                this.sortBy("name");
+              {
+                label: "Name",
+                show: this.showCol("name"),
+                sortMethodShow: true,
+                maxWidth: "300px",
+                input: {
+                  type: "input",
+                  classes: "mx-auto my-1 w-75",
+                  placeholder: "Search by Name",
+                  label: "Search",
+                  value: this.searchText,
+                  change: (val: string) => {
+                    this.searchText = val;
+                  },
+                  click: () => {
+                    this.sortBy("name");
+                  },
+                },
+                icon: this.sortIcon("name"),
               },
-            },
-            icon: this.sortIcon("name"),
-          },
-          {
-            label: "Mark",
-            show: this.showCol("mark"),
-            sortMethodShow: true,
-            icon: this.sortIcon("mark"),
-            click: () => {
-              this.sortBy("mark");
-            },
-          },
-          {
-            label: "Locations",
-            maxWidth: "150px",
-            show: this.showCol("locations"),
-            sortMethodShow: true,
-            icon: this.sortIcon("locations"),
-            click: () => {
-              this.sortBy("locations");
-            },
-          },
-          {
-            label: "Owned",
-            maxWidth: "125px",
-            show: this.showCol("owned"),
-            sortMethodShow: true,
-            icon: this.sortIcon("owned"),
-            title: "Amount of gear owned",
-            input: {
-              type: "button",
-              placeholder: "Reset",
-              classes: "btn btn-sm btn-primary",
-              click: () => {
-                this.showResetConfirm = true;
+              {
+                label: "Mark",
+                show: this.showCol("mark"),
+                sortMethodShow: true,
+                icon: this.sortIcon("mark"),
+                click: () => {
+                  this.sortBy("mark");
+                },
               },
-            },
-            click: () => {
-              this.sortBy("owned");
-            },
-          },
-          {
-            label: "Needed",
-            maxWidth: "125px",
-            show: this.showCol("needed"),
-            sortMethodShow: true,
-            icon: this.sortIcon("needed"),
-            title: "Amount of gear needed for all characters being tracked",
-            click: () => {
-              this.sortBy("needed");
-            },
-          },
-          {
-            label: "Progress",
-            maxWidth: "145px",
-            show: this.showCol("progress"),
-            sortMethodShow: true,
-            icon: this.sortIcon("progress"),
-            click: () => {
-              this.sortBy("progress");
-            },
-          },
-          {
-            label: "Required By",
-            maxWidth: "125px",
-            show: this.showRequiredByUnit && this.showCol("required"),
-            sortMethodShow: this.showRequiredByUnit,
-          },
-          {
-            label: "Est. Time",
-            maxWidth: "125px",
-            show: this.showCol("time"),
-            sortMethodShow: true,
-            icon: this.sortIcon("time"),
-            click: () => {
-              this.sortBy("time");
-            },
-          },
-          {
-            label: "Actions",
-            show: this.showCol("actions"),
+              {
+                label: "Locations",
+                maxWidth: "150px",
+                show: this.showCol("locations"),
+                sortMethodShow: true,
+                icon: this.sortIcon("locations"),
+                click: () => {
+                  this.sortBy("locations");
+                },
+              },
+              {
+                label: "Owned",
+                maxWidth: "125px",
+                show: this.showCol("owned"),
+                sortMethodShow: true,
+                icon: this.sortIcon("owned"),
+                title: "Amount of gear owned",
+                input: {
+                  type: "button",
+                  placeholder: "Reset",
+                  classes: "btn btn-sm btn-primary",
+                  click: () => {
+                    this.showResetConfirm = true;
+                  },
+                },
+                click: () => {
+                  this.sortBy("owned");
+                },
+              },
+              {
+                label: "Needed",
+                maxWidth: "125px",
+                show: this.showCol("needed"),
+                sortMethodShow: true,
+                icon: this.sortIcon("needed"),
+                title: "Amount of gear needed for all characters being tracked",
+                click: () => {
+                  this.sortBy("needed");
+                },
+              },
+              {
+                label: "Progress",
+                maxWidth: "145px",
+                show: this.showCol("progress"),
+                sortMethodShow: true,
+                icon: this.sortIcon("progress"),
+                click: () => {
+                  this.sortBy("progress");
+                },
+              },
+              {
+                label: "Required By",
+                maxWidth: "125px",
+                show: this.showRequiredByUnit && this.showCol("required"),
+                sortMethodShow: this.showRequiredByUnit,
+              },
+              {
+                label: "Est. Time",
+                maxWidth: "125px",
+                show: this.showCol("time"),
+                sortMethodShow: true,
+                icon: this.sortIcon("time"),
+                click: () => {
+                  this.sortBy("time");
+                },
+              },
+              {
+                label: "Actions",
+                show: this.showCol("actions"),
+              },
+            ],
           },
         ],
       };
@@ -325,7 +288,9 @@ export default defineComponent({
             cells: [
               {
                 type: "gear",
-                data: gear,
+                data: {
+                  gear,
+                },
                 show: this.showCol("icon"),
               },
               {
@@ -438,6 +403,59 @@ export default defineComponent({
             ],
           };
         }),
+      };
+    },
+    irrelevantTable(): iTable {
+      return {
+        header: {
+          classes: "c-pointer sticky-header",
+          title: "Show/Hide irrelevant pieces",
+          headers: [
+            {
+              cells: [
+                {
+                  colspan: this.showRequiredByUnit ? "6" : "5",
+                  label: "Irrelevant Pieces",
+                  show: true,
+                },
+              ],
+            },
+          ],
+          collapseTarget: "irrelevantSection",
+        },
+        body: {
+          id: "irrelevantSection",
+          classes: "collapse text-center align-middle",
+          rows: this.irrelevantGear.map((gear) => {
+            return {
+              cells: [
+                {
+                  colspan: this.showRequiredByUnit ? "5" : "4",
+                  type: "gear",
+                  data: { gear, showName: true },
+                  show: true,
+                },
+                {
+                  type: "buttons",
+                  data: {
+                    buttons: [
+                      {
+                        classes: "btn btn-success",
+                        title:
+                          "Mark this salvage as relevant, moving it back into the planner estimation",
+                        icon: "fas fa-heart",
+                        click: () => {
+                          gear.irrelevant = false;
+                        },
+                      },
+                    ],
+                  },
+                  show: true,
+                },
+              ],
+            };
+          }),
+        },
       };
     },
   },

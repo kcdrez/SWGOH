@@ -1,12 +1,20 @@
-interface iHeader {
-  label: any;
+interface iHeaderCell {
+  label?: any;
   show?: boolean;
   sortMethodShow?: boolean;
   classes?: string;
   containerClass?: string;
   maxWidth?: string;
   input?: {
-    type: "button" | "input" | "multiselect" | "checkbox" | "list" | "image";
+    type:
+      | "button"
+      | "input"
+      | "multiselect"
+      | "checkbox"
+      | "list"
+      | "image"
+      | "gear"
+      | "relic";
     classes?: string;
     placeholder?: string;
     click?: Function;
@@ -21,15 +29,27 @@ interface iHeader {
   title?: string;
   value?: any;
   colspan?: string;
+  data?: any;
+}
+
+interface iHeaderRow {
+  classes?: string;
+  cells: iHeaderCell[];
+  show?: boolean;
 }
 
 interface iTableHead {
-  headers: iHeader[];
+  headers: iHeaderRow[];
+  classes?: string;
   sortMethod?: string;
   sortDir?: "asc" | "desc";
-  classes?: string;
   methodChange?: Function;
   directionChange?: Function;
+  collapseTarget?: string;
+  title?: string;
+  multiOptions?: { label: string; value: string }[];
+  storageKey?: string;
+  select?: Function;
 }
 
 interface iTableBody {
@@ -40,12 +60,13 @@ interface iTableBody {
     show: boolean;
     classes?: string;
   };
-  // key: string;
+  id?: string;
 }
 
 interface iTableRow {
   cells: iTableCell[];
   classes?: string;
+  hide?: boolean;
 }
 
 interface iTableCell {
@@ -78,7 +99,8 @@ interface iTableCell {
     | "mod"
     | "unitSearch"
     | "date"
-    | "select";
+    | "select"
+    | "relicFarm";
   edit?: boolean;
   data: any;
   labelClasses?: string;
@@ -99,4 +121,20 @@ interface iTableCell {
   rowspan?: string;
 }
 
-export { iHeader, iTableHead, iTableBody, iTableRow, iTableCell };
+interface iTable {
+  header?: iTableHead;
+  body?: iTableBody;
+  footer?: iTableBody;
+  show?: boolean;
+  classes?: string;
+}
+
+export {
+  iHeaderCell,
+  iHeaderRow,
+  iTableHead,
+  iTableBody,
+  iTableRow,
+  iTableCell,
+  iTable,
+};

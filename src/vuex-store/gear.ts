@@ -60,6 +60,7 @@ const store = {
   },
   actions: {
     async initialize({ commit, state, rootState }: ActionCtx) {
+      console.log("init gear module");
       if (state.requestState === loadingState.initial) {
         commit("SET_REQUEST_STATE", loadingState.loading);
         commit("SET_GEAR_OWNED", rootState.player.player?.gear);
@@ -91,6 +92,7 @@ const store = {
         commit("SET_GEAR", gearList);
 
         commit("SET_REQUEST_STATE", loadingState.ready);
+        console.log("init gear module end");
       }
     },
     saveOwnedCount({ commit, state, rootState }: ActionCtx, data: OwnedCount) {

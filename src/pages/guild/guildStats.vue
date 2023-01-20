@@ -76,12 +76,7 @@
           </div>
           <div class="row mt-2">
             <div class="col">
-              <table
-                class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table text-center"
-              >
-                <TableHeader :header="header" />
-                <TableBody :body="body" />
-              </table>
+              <SwgohTable :table="{ header, body }" />
             </div>
           </div>
         </Loading>
@@ -98,7 +93,7 @@ import { mapActions, mapState } from "vuex";
 import { loadingState } from "types/loading";
 import { apiClient } from "../../api/api-client";
 import { maxRelicLevel } from "types/relic";
-import { iHeader, iTableBody, iTableHead } from "types/general";
+import { iHeaderCell, iTableBody, iTableHead } from "types/general";
 
 interface dataModel {
   maxRelicLevel: number;
@@ -154,30 +149,42 @@ export default defineComponent({
   computed: {
     ...mapState("guild", ["guildId"]),
     header(): iTableHead {
-      const relicLevelHeader: iHeader = {
+      const relicLevelHeader: iHeaderCell = {
         label: "Relic Level",
         show: true,
       };
-      const unitHeader: iHeader = {
+      const unitHeader: iHeaderCell = {
         label: "Unit",
         show: true,
       };
-      const playerHeader: iHeader = {
+      const playerHeader: iHeaderCell = {
         label: "Player",
         show: true,
       };
 
       if (this.viewMode === "Level") {
         return {
-          headers: [relicLevelHeader, unitHeader, playerHeader],
+          headers: [
+            {
+              cells: [relicLevelHeader, unitHeader, playerHeader],
+            },
+          ],
         };
       } else if (this.viewMode === "Player") {
         return {
-          headers: [playerHeader, unitHeader, relicLevelHeader],
+          headers: [
+            {
+              cells: [playerHeader, unitHeader, relicLevelHeader],
+            },
+          ],
         };
       } else if (this.viewMode === "Unit") {
         return {
-          headers: [unitHeader, relicLevelHeader, playerHeader],
+          headers: [
+            {
+              cells: [unitHeader, relicLevelHeader, playerHeader],
+            },
+          ],
         };
       } else {
         return {

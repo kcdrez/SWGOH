@@ -1,5 +1,5 @@
 <template>
-  <tbody :class="body.classes">
+  <tbody :class="body.classes" :id="body.id">
     <TableRow :rows="zeroStateRows" />
     <TableRow :rows="body.rows" />
   </tbody>

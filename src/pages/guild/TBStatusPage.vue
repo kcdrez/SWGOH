@@ -60,11 +60,7 @@
       class="table table-bordered table-dark table-sm table-striped swgoh-table"
       v-if="teamUnits.length > 0"
     >
-      <TableHeader :header="header">
-        <template v-slot:firstRow>
-          <th colspan="100%">{{ missionText }}</th>
-        </template>
-      </TableHeader>
+      <TableHeader :header="header" />
       <tbody class="align-middle text-center">
         <template v-for="unit in teamUnits" :key="unit.id">
           <tr>
@@ -150,6 +146,7 @@ import { Unit } from "types/unit";
 import { tbRecommended } from "types/guild";
 import RequirementIcon from "components/shards/tables/legendary/requirementIcon.vue";
 import { iTableHead } from "types/general";
+import TableHeader from "components/general/tableHeader.vue";
 
 interface dataModel {
   map: "LSRepublicOffensive" | "DSSeparatistMight" | "";
@@ -163,7 +160,7 @@ const storageKey = "TBStatusPage";
 
 export default defineComponent({
   name: "TBStatusPage",
-  components: { RequirementIcon },
+  components: { RequirementIcon, TableHeader },
   data() {
     return {
       map: "",
@@ -182,23 +179,35 @@ export default defineComponent({
       return {
         headers: [
           {
-            label: "Name",
-            show: true,
-            maxWidth: "20%",
+            cells: [
+              {
+                label: this.missionText,
+                colspan: "100%",
+              },
+            ],
           },
           {
-            label: "Stats",
-            show: this.showStats,
-            maxWidth: "60%",
-          },
-          {
-            label: "Level",
-            show: this.showLevels,
-            maxWidth: "20%",
-          },
-          {
-            label: "Zetas",
-            show: true,
+            cells: [
+              {
+                label: "Name",
+                show: true,
+                maxWidth: "20%",
+              },
+              {
+                label: "Stats",
+                show: this.showStats,
+                maxWidth: "60%",
+              },
+              {
+                label: "Level",
+                show: this.showLevels,
+                maxWidth: "20%",
+              },
+              {
+                label: "Zetas",
+                show: true,
+              },
+            ],
           },
         ],
       };

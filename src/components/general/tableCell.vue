@@ -5,7 +5,7 @@
     :colspan="cell.colspan"
     :rowspan="cell.rowspan"
   >
-    <span class="row-label" :class="cell.labelClasses" v-if="cell.label">{{
+    <span class="row-label mx-1" :class="cell.labelClasses" v-if="cell.label">{{
       cell.label
     }}</span>
     <div
@@ -59,7 +59,7 @@
         </div>
       </template>
       <template v-else-if="cell.type === 'gear'">
-        <GearIcon :gear="cell.data" />
+        <GearIcon :gear="cell.data.gear" :showName="cell.data.showName" />
       </template>
       <template v-else-if="cell.type === 'gearList'">
         <GearIcon
@@ -321,6 +321,47 @@
           </option>
         </select>
       </template>
+      <template v-else-if="cell.type === 'relicFarm'">
+        <div class="container gear-container">
+          <div class="row py-1" v-for="gear in cell.data.location.gear" :key="gear.id">
+            <div class="col-lg-2 col-md-5 align-self-center">
+              <GearIcon :gear="gearData(gear.id)" showName />
+            </div>
+            <div class="col-lg-1 col-md-3 align-self-center">
+              <div
+                class="d-flex justify-content-center align-items-center"
+                v-if="gear.cost"
+              >
+                <img
+                  class="currency-img"
+                  :src="`./images/${cell.data.location.currency}.png`"
+                />
+                <div class="text-small">{{ gear.cost }}</div>
+              </div>
+            </div>
+            <div
+              class="col-lg-2 col-md-4 d-flex justify-content-center align-items-center"
+            >
+              <div v-if="gear.scavenger">
+                <div v-for="scavenger in gear.scavenger" :key="scavenger.id">
+                  <RelicIcon :item="relicConfig[scavenger.id]" />
+                  <div v-if="gear.cost && gear.amount">
+                    <div class="text-small">
+                      Amount Per Purchase:
+                      {{ cell.data.getAmount(scavenger, gear) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="col-lg-7 col-md-12 text-center-md text-center-sm text-left align-self-center"
+            >
+              {{ gear.notes }}
+            </div>
+          </div>
+        </div>
+      </template>
       <template v-else>
         <span v-if="cell.data.message" :class="cell.data.classes">{{
           cell.data.message
@@ -356,6 +397,7 @@ import DailyCurrency from "components/shards/dailyCurrency.vue";
 import Wallet from "components/shards/wallet.vue";
 import ModIcon from "components/units/modIcon.vue";
 import UnitSearch from "components/units/unitSearch.vue";
+import { Gear } from "types/gear";
 
 export default defineComponent({
   name: "TableCell",
@@ -389,6 +431,8 @@ export default defineComponent({
   },
   computed: {
     ...mapState("currency", ["wallet"]),
+    ...mapState("gear", ["gearList"]),
+    ...mapState("relic", ["relicConfig"]),
   },
   watch: {
     _value(newVal) {
@@ -434,6 +478,9 @@ export default defineComponent({
       } else {
         return 0;
       }
+    },
+    gearData(id: string): Gear | undefined {
+      return this.gearList.find((gear: Gear) => gear.id === id);
     },
   },
 });

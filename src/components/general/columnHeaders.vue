@@ -1,96 +1,96 @@
 <template>
-  <tr>
-    <template v-for="header in headers">
+  <tr v-if="header.show ?? true" :class="header.classes">
+    <template v-for="cell in header.cells">
       <th
-        v-if="header.show"
-        :max-width="header?.maxWidth ?? 'auto'"
-        :class="[
-          header.click && !header.input ? 'c-pointer' : '',
-          header.classes,
-        ]"
-        :title="header.title"
-        @click="handleClick(header, !header.input)"
-        :colspan="header.colspan"
+        v-if="cell.show"
+        :max-width="cell?.maxWidth ?? 'auto'"
+        :class="[cell.click && !cell.input ? 'c-pointer' : '', cell.classes]"
+        :title="cell.title"
+        @click="handleClick(cell, !cell.input)"
+        :colspan="cell.colspan"
       >
-        <div :class="header.containerClass">
-          <template v-if="header.input?.type === 'input'">
+        <div :class="cell.containerClass">
+          <template v-if="cell.input?.type === 'input'">
             <div
-              :class="header.input?.click ? 'c-pointer' : ''"
-              @click="handleInputClick(header)"
+              :class="cell.input?.click ? 'c-pointer' : ''"
+              @click="handleInputClick(cell)"
             >
-              {{ header.label }}
-              <i class="fas mx-1" :class="header.icon" v-if="header.icon"></i>
+              {{ cell.label }}
+              <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
             </div>
             <input
               type="text"
               class="form-control form-control-sm"
-              :class="header.input.classes"
-              :placeholder="header.input.placeholder"
-              @keyup="handleChange(header, $event)"
+              :class="cell.input.classes"
+              :placeholder="cell.input.placeholder"
+              @keyup="handleChange(cell, $event)"
           /></template>
-          <template v-else-if="header.input?.type === 'button'">
+          <template v-else-if="cell.input?.type === 'button'">
             <div
-              :class="header.input?.click ? 'c-pointer' : ''"
-              @click="handleClick(header, true)"
+              :class="cell.input?.click ? 'c-pointer' : ''"
+              @click="handleClick(cell, true)"
             >
-              {{ header.label }}
-              <i class="fas mx-1" :class="header.icon" v-if="header.icon"></i>
+              {{ cell.label }}
+              <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
             </div>
-            <button
-              :class="header.input.classes"
-              @click="handleInputClick(header)"
-            >
-              {{ header.input.placeholder }}
+            <button :class="cell.input.classes" @click="handleInputClick(cell)">
+              {{ cell.input.placeholder }}
             </button>
           </template>
-          <template v-else-if="header.input?.type === 'multiselect'">
+          <template v-else-if="cell.input?.type === 'multiselect'">
             <div
-              :class="header.click ? 'c-pointer' : ''"
-              @click="handleClick(header, true)"
+              :class="cell.click ? 'c-pointer' : ''"
+              @click="handleClick(cell, true)"
             >
-              {{ header.label }}
-              <i class="fas mx-1" :class="header.icon" v-if="header.icon"></i>
+              {{ cell.label }}
+              <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
             </div>
             <MultiSelect
-              :class="header.input.classes"
-              :label="header.input.placeholder"
-              :options="header.input.options"
-              :storageKey="header.input.storageKey"
-              @checked="handleInputClick(header, $event)"
+              :class="cell.input.classes"
+              :label="cell.input.placeholder"
+              :options="cell.input.options"
+              :storageKey="cell.input.storageKey"
+              @checked="handleInputClick(cell, $event)"
             />
           </template>
-          <template v-else-if="header.input?.type === 'checkbox'">
+          <template v-else-if="cell.input?.type === 'checkbox'">
             <div
-              :class="header.click ? 'c-pointer' : ''"
-              @click="handleClick(header, true)"
+              :class="cell.click ? 'c-pointer' : ''"
+              @click="handleClick(cell, true)"
             >
-              {{ header.label }}
-              <i class="fas mx-1" :class="header.icon" v-if="header.icon"></i>
+              {{ cell.label }}
+              <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
             </div>
             <div class="d-flex mt-2">
               <input
                 id="toggle"
                 type="checkbox"
-                v-model="header.input.value"
-                @change="handleInputClick(header, header.input?.value)"
+                v-model="cell.input.value"
+                @change="handleInputClick(cell, cell.input?.value)"
               />
               <label for="toggle" class="ms-2 text-small">{{
-                header.input.placeholder || "Click Me"
+                cell.input.placeholder || "Click Me"
               }}</label>
             </div>
           </template>
-          <template v-else-if="header.input?.type === 'image'">
+          <template v-else-if="cell.input?.type === 'image'">
             <div
-              :class="header.click ? 'c-pointer' : ''"
-              @click="handleClick(header, true)"
+              :class="cell.click ? 'c-pointer' : ''"
+              @click="handleClick(cell, true)"
             >
-              <img :src="header.label" />
-              <i class="fas mx-1" :class="header.icon" v-if="header.icon"></i>
+              <img :src="cell.label" />
+              <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
             </div>
           </template>
+          <template v-else-if="cell.input?.type === 'gear'">
+            <GearIcon :gear="cell.data.gear" :showName="cell.data.showName" />
+          </template>
+          <template v-else-if="cell.input?.type === 'relic'">
+            <RelicIcon :item="cell.data.relic" />
+          </template>
           <template v-else>
-            {{ header.label }}
-            <i class="fas mx-1" :class="header.icon" v-if="header.icon"></i>
+            {{ cell.label }}
+            <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
           </template>
         </div>
       </th>
@@ -101,13 +101,17 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import _ from "lodash";
-import { iHeader } from "types/general";
+
+import { iHeaderRow, iHeaderCell } from "types/general";
+import GearIcon from "components/gear/gearIcon.vue";
+import RelicIcon from "components/relic/relicIcon.vue";
 
 export default defineComponent({
   name: "ColumnHeaders",
+  components: { GearIcon, RelicIcon },
   props: {
-    headers: {
-      type: Array as () => iHeader[],
+    header: {
+      type: Object as () => iHeaderRow,
       required: true,
     },
   },
@@ -125,25 +129,25 @@ export default defineComponent({
     }, 500),
   },
   methods: {
-    handleClick(header: iHeader, checkClickable?: boolean) {
-      if (header.click) {
+    handleClick(cell: iHeaderCell, checkClickable?: boolean) {
+      if (cell.click) {
         if (checkClickable) {
-          header.click();
+          cell.click();
         }
       }
     },
-    handleInputClick(header: iHeader, data?: any) {
-      if (header.input?.click) {
-        header.input.click(data);
+    handleInputClick(cell: iHeaderCell, data?: any) {
+      if (cell.input?.click) {
+        cell.input.click(data);
       }
     },
     handleChange: _.debounce(function (
       this: any,
-      header: iHeader,
+      cell: iHeaderCell,
       event: KeyboardEvent
     ) {
-      if (header.input?.change && event) {
-        header.input.change((event.target as HTMLInputElement).value);
+      if (cell.input?.change && event) {
+        cell.input.change((event.target as HTMLInputElement).value);
       }
     },
     500),

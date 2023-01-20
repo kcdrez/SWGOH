@@ -156,7 +156,8 @@ import {
 import { displayValue, IPrerequisite } from "types/shards";
 import { isGearRequirement, isRelicRequirement } from "types/shards";
 import { setupSorting, setupColumnEvents } from "utils";
-import { iHeader, iTableHead } from "types/general";
+import { iTableHead } from "types/general";
+import TableHeader from "components/general/tableHeader.vue";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",
@@ -165,6 +166,7 @@ export default defineComponent({
     Timestamp,
     EnergySpent,
     LegendaryRequirementRow,
+    TableHeader,
   },
   setup(props) {
     const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
@@ -227,59 +229,63 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Unit Name",
-            show: this.showCol("name"),
-            sortMethodShow: true,
-            maxWidth: "750px",
-            input: {
-              type: "input",
-              classes: "mx-auto my-1 w-75",
-              placeholder: "Search",
-              value: this.searchText,
-              change: (val: string) => {
-                this.searchText = val;
+            cells: [
+              {
+                label: "Unit Name",
+                show: this.showCol("name"),
+                sortMethodShow: true,
+                maxWidth: "750px",
+                input: {
+                  type: "input",
+                  classes: "mx-auto my-1 w-75",
+                  placeholder: "Search",
+                  value: this.searchText,
+                  change: (val: string) => {
+                    this.searchText = val;
+                  },
+                },
+                icon: this.sortIcon("name"),
+                click: () => {
+                  this.sortBy("name");
+                },
               },
-            },
-            icon: this.sortIcon("name"),
-            click: () => {
-              this.sortBy("name");
-            },
-          },
-          {
-            label: "Current Level",
-            show: this.showCol("current"),
-            sortMethodShow: true,
-            icon: this.sortIcon("current"),
-            click: () => {
-              this.sortBy("current");
-            },
-          },
-          {
-            label: "Requirements",
-            show: this.showCol("requirements"),
-            sortMethodShow: true,
-            icon: this.sortIcon("requirements"),
-            click: () => {
-              this.sortBy("requirements");
-            },
-          },
-          {
-            label: "Recommended",
-            show: this.showCol("recommended") && this.showRecommended,
-            sortMethodShow: this.showRecommended,
-            icon: this.sortIcon("stars"),
-            click: () => {
-              this.sortBy("stars");
-            },
-          },
-          {
-            label: "Progress",
-            show: this.showCol("progress"),
-            sortMethodShow: true,
-            icon: this.sortIcon("progress"),
-            click: () => {
-              this.sortBy("progress");
-            },
+              {
+                label: "Current Level",
+                show: this.showCol("current"),
+                sortMethodShow: true,
+                icon: this.sortIcon("current"),
+                click: () => {
+                  this.sortBy("current");
+                },
+              },
+              {
+                label: "Requirements",
+                show: this.showCol("requirements"),
+                sortMethodShow: true,
+                icon: this.sortIcon("requirements"),
+                click: () => {
+                  this.sortBy("requirements");
+                },
+              },
+              {
+                label: "Recommended",
+                show: this.showCol("recommended") && this.showRecommended,
+                sortMethodShow: this.showRecommended,
+                icon: this.sortIcon("stars"),
+                click: () => {
+                  this.sortBy("stars");
+                },
+              },
+              {
+                label: "Progress",
+                show: this.showCol("progress"),
+                sortMethodShow: true,
+                icon: this.sortIcon("progress"),
+                click: () => {
+                  this.sortBy("progress");
+                },
+              },
+            ],
           },
         ],
       };

@@ -173,12 +173,7 @@
           <h5 class="text-center">
             This unit is required for the following Legendary/GL events:
           </h5>
-          <table
-            class="table table-bordered table-dark table-sm table-striped swgoh-table"
-          >
-            <TableHeader :header="header" />
-            <TableBody :body="body" />
-          </table>
+          <SwgohTable :table="{ header, body }" />
         </div>
       </template>
     </div>
@@ -261,19 +256,23 @@ export default defineComponent({
       return {
         headers: [
           {
-            label: "Unit Name",
-            show: true,
-            sortMethodShow: true,
-          },
-          {
-            label: "Requirement",
-            show: true,
-            sortMethodShow: true,
-          },
-          {
-            label: "Progress",
-            show: true,
-            sortMethodShow: true,
+            cells: [
+              {
+                label: "Unit Name",
+                show: true,
+                sortMethodShow: true,
+              },
+              {
+                label: "Requirement",
+                show: true,
+                sortMethodShow: true,
+              },
+              {
+                label: "Progress",
+                show: true,
+                sortMethodShow: true,
+              },
+            ],
           },
         ],
       };

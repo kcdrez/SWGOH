@@ -1,7 +1,9 @@
 <template>
-  <tr v-for="(row, index) in rows" :key="index" :class="row?.classes">
-    <TableCell v-for="cell in row.cells" :cell="cell" />
-  </tr>
+  <template v-for="(row, index) in rows">
+    <tr :key="index" :class="row?.classes" v-if="!row.hide">
+      <TableCell v-for="cell in row.cells" :cell="cell" />
+    </tr>
+  </template>
 </template>
 
 <script lang="ts">

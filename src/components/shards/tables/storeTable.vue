@@ -1,11 +1,6 @@
 <template>
   <Loading :state="loading ? 'LOADING' : 'READY'" size="md">
-    <table
-      class="table table-bordered table-dark table-sm table-striped swgoh-table"
-    >
-      <TableHeader :header="header" />
-      <TableBody :body="body" />
-    </table>
+    <SwgohTable :table="{ header, body }" />
   </Loading>
 </template>
 
@@ -102,95 +97,99 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Unit Name",
-            show: this.showUnitName && this.showCol("name"),
-            sortMethodShow: this.showUnitName,
-            input: {
-              type: "input",
-              classes: "mx-auto my-1 w-75",
-              placeholder: "Search",
-              value: this.searchText,
-              change: (val: string) => {
-                this.searchText = val;
+            cells: [
+              {
+                label: "Unit Name",
+                show: this.showUnitName && this.showCol("name"),
+                sortMethodShow: this.showUnitName,
+                input: {
+                  type: "input",
+                  classes: "mx-auto my-1 w-75",
+                  placeholder: "Search",
+                  value: this.searchText,
+                  change: (val: string) => {
+                    this.searchText = val;
+                  },
+                },
+                icon: this.sortIcon("name"),
+                click: () => {
+                  this.sortBy("name");
+                },
               },
-            },
-            icon: this.sortIcon("name"),
-            click: () => {
-              this.sortBy("name");
-            },
-          },
-          {
-            label: "Shards Owned",
-            show: this.showCol("owned"),
-            sortMethodShow: true,
-            icon: this.sortIcon("owned"),
-            click: () => {
-              this.sortBy("owned");
-            },
-          },
-          {
-            label: "Shards Remaining",
-            show: this.showCol("remaining"),
-            sortMethodShow: true,
-            icon: this.sortIcon("remaining"),
-            click: () => {
-              this.sortBy("remaining");
-            },
-          },
-          {
-            label: "Progress",
-            show: this.showCol("progress"),
-            sortMethodShow: true,
-            icon: this.sortIcon("progress"),
-            click: () => {
-              this.sortBy("progress");
-            },
-          },
-          {
-            label: "Currency Owned",
-            show: this.showCol("wallet"),
-            sortMethodShow: true,
-            icon: this.sortIcon("wallet"),
-            click: () => {
-              this.sortBy("wallet");
-            },
-          },
-          {
-            label: "Daily Currency Obtained",
-            show: this.showUnitName && this.showCol("dailyCurrency"),
-            sortMethodShow: this.showUnitName,
-            icon: this.sortIcon("dailyCurrency"),
-            click: () => {
-              this.sortBy("dailyCurrency");
-            },
-          },
-          {
-            label: "Remaining Currency",
-            show: this.showCol("remainingCurrency"),
-            sortMethodShow: true,
-            icon: this.sortIcon("remainingCurrency"),
-            click: () => {
-              this.sortBy("remainingCurrency");
-            },
-          },
-          {
-            label: "Est. Time",
-            show: this.showCol("time"),
-            sortMethodShow: true,
-            icon: this.sortIcon("time"),
-            click: () => {
-              this.sortBy("time");
-            },
-          },
-          {
-            label: "Priority",
-            show: this.showCol("priority"),
-            sortMethodShow: true,
-            icon: this.sortIcon("priority"),
-            maxWidth: "150px",
-            click: () => {
-              this.sortBy("priority");
-            },
+              {
+                label: "Shards Owned",
+                show: this.showCol("owned"),
+                sortMethodShow: true,
+                icon: this.sortIcon("owned"),
+                click: () => {
+                  this.sortBy("owned");
+                },
+              },
+              {
+                label: "Shards Remaining",
+                show: this.showCol("remaining"),
+                sortMethodShow: true,
+                icon: this.sortIcon("remaining"),
+                click: () => {
+                  this.sortBy("remaining");
+                },
+              },
+              {
+                label: "Progress",
+                show: this.showCol("progress"),
+                sortMethodShow: true,
+                icon: this.sortIcon("progress"),
+                click: () => {
+                  this.sortBy("progress");
+                },
+              },
+              {
+                label: "Currency Owned",
+                show: this.showCol("wallet"),
+                sortMethodShow: true,
+                icon: this.sortIcon("wallet"),
+                click: () => {
+                  this.sortBy("wallet");
+                },
+              },
+              {
+                label: "Daily Currency Obtained",
+                show: this.showUnitName && this.showCol("dailyCurrency"),
+                sortMethodShow: this.showUnitName,
+                icon: this.sortIcon("dailyCurrency"),
+                click: () => {
+                  this.sortBy("dailyCurrency");
+                },
+              },
+              {
+                label: "Remaining Currency",
+                show: this.showCol("remainingCurrency"),
+                sortMethodShow: true,
+                icon: this.sortIcon("remainingCurrency"),
+                click: () => {
+                  this.sortBy("remainingCurrency");
+                },
+              },
+              {
+                label: "Est. Time",
+                show: this.showCol("time"),
+                sortMethodShow: true,
+                icon: this.sortIcon("time"),
+                click: () => {
+                  this.sortBy("time");
+                },
+              },
+              {
+                label: "Priority",
+                show: this.showCol("priority"),
+                sortMethodShow: true,
+                icon: this.sortIcon("priority"),
+                maxWidth: "150px",
+                click: () => {
+                  this.sortBy("priority");
+                },
+              },
+            ],
           },
         ],
       };

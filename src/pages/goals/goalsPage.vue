@@ -12,12 +12,7 @@
         ></i>
       </div>
       <div :id="`${storageKey}`" class="collapse" :ref="`${storageKey}`">
-        <table
-          class="table table-bordered table-dark table-sm table-striped swgoh-table"
-        >
-          <TableHeader :header="header" />
-          <TableBody :body="body" />
-        </table>
+        <SwgohTable :table="{ header, body }" />
       </div>
     </div>
     <div class="mb-2">
@@ -119,32 +114,36 @@ export default defineComponent({
         },
         headers: [
           {
-            label: "Goal Name",
-            show: true,
-            sortMethodShow: true,
-            icon: this.sortIcon("name"),
-            input: {
-              type: "input",
-              classes: "mx-auto my-1 w-75",
-              placeholder: "Search by Name",
-              label: "Search",
-              value: this.searchText,
-              change: (val: string) => {
-                this.searchText = val;
+            cells: [
+              {
+                label: "Goal Name",
+                show: true,
+                sortMethodShow: true,
+                icon: this.sortIcon("name"),
+                input: {
+                  type: "input",
+                  classes: "mx-auto my-1 w-75",
+                  placeholder: "Search by Name",
+                  label: "Search",
+                  value: this.searchText,
+                  change: (val: string) => {
+                    this.searchText = val;
+                  },
+                  click: () => {
+                    this.sortBy("name");
+                  },
+                },
               },
-              click: () => {
-                this.sortBy("name");
+              {
+                label: "Progress",
+                show: true,
+                sortMethodShow: true,
+                icon: this.sortIcon("progress"),
+                click: () => {
+                  this.sortBy("progress");
+                },
               },
-            },
-          },
-          {
-            label: "Progress",
-            show: true,
-            sortMethodShow: true,
-            icon: this.sortIcon("progress"),
-            click: () => {
-              this.sortBy("progress");
-            },
+            ],
           },
         ],
       };

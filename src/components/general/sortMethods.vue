@@ -2,7 +2,7 @@
   <div class="input-group input-group-sm my-2">
     <span class="input-group-text">Sort By:</span>
     <select class="form-control" v-model="_sortMethod">
-      <template v-for="option in header.headers">
+      <template v-for="option in headerRow.cells">
         <option
           :value="option.value"
           v-if="option?.sortMethodShow ? option.sortMethodShow : false"
@@ -56,36 +56,52 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { iHeader, iTableHead } from "types/general";
+import { iHeaderCell, iTableHead, iHeaderRow } from "types/general";
 
 export default defineComponent({
   name: "SortMethods",
   props: {
+    headerRow: {
+      type: Object as () => iHeaderRow,
+      required: true,
+    },
     header: {
       type: Object as () => iTableHead,
       required: true,
     },
   },
   computed: {
-    buttons(): iHeader[] {
-      return this.header.headers.filter((header) => {
-        return header.input?.type === "button";
-      });
+    buttons(): iHeaderCell[] {
+      return this.headerRow.cells.reduce((acc: iHeaderCell[], cell) => {
+        if (cell.input?.type === "button") {
+          acc.push(cell);
+        }
+        return acc;
+      }, []);
     },
-    inputs(): iHeader[] {
-      return this.header.headers.filter((header) => {
-        return header.input?.type === "input";
-      });
+    inputs(): iHeaderCell[] {
+      return this.headerRow.cells.reduce((acc: iHeaderCell[], cell) => {
+        if (cell.input?.type === "input") {
+          acc.push(cell);
+        }
+        return acc;
+      }, []);
     },
-    lists(): iHeader[] {
-      return this.header.headers.filter((header) => {
-        return header.input?.type === "list";
-      });
+    lists(): iHeaderCell[] {
+      return this.headerRow.cells.reduce((acc: iHeaderCell[], cell) => {
+        if (cell.input?.type === "list") {
+          acc.push(cell);
+        }
+        return acc;
+      }, []);
     },
-    images(): iHeader[] {
-      return this.header.headers.filter((header) => {
-        return header.input?.type === "image";
-      });
+    images(): iHeaderCell[] {
+      return this.headerRow.cells.reduce((acc: iHeaderCell[], cell) => {
+        if (cell.input?.type === "image") {
+          acc.push(cell);
+        }
+        return acc;
+      }, []);
     },
   },
   data() {
@@ -107,12 +123,12 @@ export default defineComponent({
     },
   },
   methods: {
-    buttonClick(header: iHeader) {
+    buttonClick(header: iHeaderCell) {
       if (header.input?.click) {
         header.input.click();
       }
     },
-    handleChange(header: iHeader) {
+    handleChange(header: iHeaderCell) {
       if (header.input?.change) {
         header.input.change(header.input.value);
       }

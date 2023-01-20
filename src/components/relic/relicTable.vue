@@ -1,10 +1,5 @@
 <template>
-  <table
-    class="table table-bordered table-dark table-sm table-striped swgoh-table"
-  >
-    <TableHeader :header="header" />
-    <TableBody :body="body" />
-  </table>
+  <SwgohTable :table="{ header, body }" />
 </template>
 
 <script lang="ts">
@@ -83,89 +78,92 @@ export default defineComponent({
         directionChange: (val: "asc" | "desc") => {
           this.sortDir = val;
         },
-
         headers: [
           {
-            label: "Icon",
-            show: this.showCol("icon"),
-          },
-          {
-            label: "Mat Name",
-            show: this.showCol("name"),
-            icon: this.sortIcon("name"),
-            sortMethodShow: true,
-            input: {
-              type: "input",
-              classes: "mx-auto my-1 w-75",
-              placeholder: "Search",
-              value: this.searchText,
-              change: (val: string) => {
-                this.searchText = val;
+            cells: [
+              {
+                label: "Icon",
+                show: this.showCol("icon"),
               },
-              click: () => {
-                this.sortBy("name");
+              {
+                label: "Mat Name",
+                show: this.showCol("name"),
+                icon: this.sortIcon("name"),
+                sortMethodShow: true,
+                input: {
+                  type: "input",
+                  classes: "mx-auto my-1 w-75",
+                  placeholder: "Search",
+                  value: this.searchText,
+                  change: (val: string) => {
+                    this.searchText = val;
+                  },
+                  click: () => {
+                    this.sortBy("name");
+                  },
+                },
               },
-            },
-          },
-          {
-            label: "Rarity",
-            show: this.showCol("rarity"),
-            sortMethodShow: true,
-            icon: this.sortIcon("rarity"),
-            click: () => {
-              this.sortBy("rarity");
-            },
-          },
-          {
-            label: "Locations",
-            show: this.showCol("locations"),
-            sortMethodShow: true,
-            icon: this.sortIcon("locations"),
-            click: () => {
-              this.sortBy("locations");
-            },
-          },
-          {
-            label: "Amount Owned",
-            show: this.showCol("owned"),
-            sortMethodShow: true,
-            icon: this.sortIcon("owned"),
-            maxWidth: "160px",
-            click: () => {
-              this.sortBy("owned");
-            },
-          },
-          {
-            label: "Amount Needed",
-            show: this.showCol("needed"),
-            sortMethodShow: true,
-            icon: this.sortIcon("needed"),
-            click: () => {
-              this.sortBy("needed");
-            },
-          },
-          {
-            label: "Progress",
-            show: this.showCol("progress"),
-            sortMethodShow: true,
-            icon: this.sortIcon("progress"),
-            maxWidth: "145px",
-            click: () => {
-              this.sortBy("progress");
-            },
-          },
-          {
-            label: "Required By",
-            show: this.showRequiredByUnit && this.showCol("required"),
-          },
-          {
-            label: "Est. Time",
-            show: this.showCol("time"),
-            sortMethodShow: true,
-            icon: this.sortIcon("time"),
-            click: () => {
-              this.sortBy("time");
-            },
+              {
+                label: "Rarity",
+                show: this.showCol("rarity"),
+                sortMethodShow: true,
+                icon: this.sortIcon("rarity"),
+                click: () => {
+                  this.sortBy("rarity");
+                },
+              },
+              {
+                label: "Locations",
+                show: this.showCol("locations"),
+                sortMethodShow: true,
+                icon: this.sortIcon("locations"),
+                click: () => {
+                  this.sortBy("locations");
+                },
+              },
+              {
+                label: "Amount Owned",
+                show: this.showCol("owned"),
+                sortMethodShow: true,
+                icon: this.sortIcon("owned"),
+                maxWidth: "160px",
+                click: () => {
+                  this.sortBy("owned");
+                },
+              },
+              {
+                label: "Amount Needed",
+                show: this.showCol("needed"),
+                sortMethodShow: true,
+                icon: this.sortIcon("needed"),
+                click: () => {
+                  this.sortBy("needed");
+                },
+              },
+              {
+                label: "Progress",
+                show: this.showCol("progress"),
+                sortMethodShow: true,
+                icon: this.sortIcon("progress"),
+                maxWidth: "145px",
+                click: () => {
+                  this.sortBy("progress");
+                },
+              },
+              {
+                label: "Required By",
+                show: this.showRequiredByUnit && this.showCol("required"),
+              },
+              {
+                label: "Est. Time",
+                show: this.showCol("time"),
+                sortMethodShow: true,
+                icon: this.sortIcon("time"),
+                click: () => {
+                  this.sortBy("time");
+                },
+              },
+            ],
           },
         ],
       };
