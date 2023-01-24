@@ -32,12 +32,18 @@ import { Gear, IScavenger } from "types/gear";
 import { FarmingNode } from "types/shards";
 import { setupColumnEvents, setupEvents, setupSorting } from "utils";
 import { iHeaderCell, iTableBody, iTableHead } from "types/general";
+import TableHeader from "./tableHeader.vue";
+import TableBody from "./tableBody.vue";
 
 type tScavenger = { data: Gear; scavenger: IScavenger };
 const storageKey = "scavengerTable";
 
 export default defineComponent({
   name: "ScavengerTable",
+  components: {
+    TableHeader,
+    TableBody,
+  },
   setup(props) {
     const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
       `${storageKey}-${props.scavengerId}`
