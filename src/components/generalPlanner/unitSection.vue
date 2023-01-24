@@ -12,7 +12,7 @@
         </div>
         <MultiSelect
           class="select-columns"
-          :options="header.headers"
+          :options="cols"
           storageKey="unitTable"
           @checked="selectedColumns = $event"
         />
@@ -37,7 +37,7 @@ import {
   setupSimpleView,
   setupSorting,
 } from "utils";
-import { iTableBody, iTableHead } from "types/general";
+import { iHeaderCell, iTableBody, iTableHead } from "types/general";
 
 const storageKey = "unitSection";
 
@@ -218,7 +218,6 @@ export default defineComponent({
               {
                 label: "Actions",
                 show: this.showCol("actions"),
-                sortMethodShow: true,
                 value: "actions",
               },
             ],
@@ -313,6 +312,12 @@ export default defineComponent({
           };
         }),
       };
+    },
+    cols(): iHeaderCell[] {
+      return this.header.headers.reduce((acc: iHeaderCell[], row) => {
+        row.cells.forEach((cell) => acc.push(cell));
+        return acc;
+      }, []);
     },
     total(): { gear: number; relic: number } {
       return this.unitList.reduce(

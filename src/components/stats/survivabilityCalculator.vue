@@ -285,7 +285,8 @@ export default defineComponent({
             cells: [
               {
                 show: true,
-                data: `${row.sets.label}&#13;${row.primaries.label}`,
+                data: `${row.sets.label}<br>${row.primaries.label}`,
+                type: "html",
               },
               {
                 show: true,

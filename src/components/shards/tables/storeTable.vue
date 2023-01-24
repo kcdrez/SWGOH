@@ -102,6 +102,7 @@ export default defineComponent({
                 label: "Unit Name",
                 show: this.showUnitName && this.showCol("name"),
                 sortMethodShow: this.showUnitName,
+                value: "name",
                 input: {
                   type: "input",
                   classes: "mx-auto my-1 w-75",
@@ -110,17 +111,18 @@ export default defineComponent({
                   change: (val: string) => {
                     this.searchText = val;
                   },
+                  click: () => {
+                    this.sortBy("name");
+                  },
                 },
                 icon: this.sortIcon("name"),
-                click: () => {
-                  this.sortBy("name");
-                },
               },
               {
                 label: "Shards Owned",
                 show: this.showCol("owned"),
                 sortMethodShow: true,
                 icon: this.sortIcon("owned"),
+                value: "owned",
                 click: () => {
                   this.sortBy("owned");
                 },
@@ -130,6 +132,7 @@ export default defineComponent({
                 show: this.showCol("remaining"),
                 sortMethodShow: true,
                 icon: this.sortIcon("remaining"),
+                value: "remaining",
                 click: () => {
                   this.sortBy("remaining");
                 },
@@ -139,6 +142,7 @@ export default defineComponent({
                 show: this.showCol("progress"),
                 sortMethodShow: true,
                 icon: this.sortIcon("progress"),
+                value: "progress",
                 click: () => {
                   this.sortBy("progress");
                 },
@@ -148,6 +152,7 @@ export default defineComponent({
                 show: this.showCol("wallet"),
                 sortMethodShow: true,
                 icon: this.sortIcon("wallet"),
+                value: "wallet",
                 click: () => {
                   this.sortBy("wallet");
                 },
@@ -157,6 +162,7 @@ export default defineComponent({
                 show: this.showUnitName && this.showCol("dailyCurrency"),
                 sortMethodShow: this.showUnitName,
                 icon: this.sortIcon("dailyCurrency"),
+                value: "dailyCurrency",
                 click: () => {
                   this.sortBy("dailyCurrency");
                 },
@@ -166,6 +172,7 @@ export default defineComponent({
                 show: this.showCol("remainingCurrency"),
                 sortMethodShow: true,
                 icon: this.sortIcon("remainingCurrency"),
+                value: "remainingCurrency",
                 click: () => {
                   this.sortBy("remainingCurrency");
                 },
@@ -175,6 +182,7 @@ export default defineComponent({
                 show: this.showCol("time"),
                 sortMethodShow: true,
                 icon: this.sortIcon("time"),
+                value: "time",
                 click: () => {
                   this.sortBy("time");
                 },
@@ -185,6 +193,7 @@ export default defineComponent({
                 sortMethodShow: true,
                 icon: this.sortIcon("priority"),
                 maxWidth: "150px",
+                value: "priority",
                 click: () => {
                   this.sortBy("priority");
                 },

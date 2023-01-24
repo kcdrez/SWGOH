@@ -8,7 +8,7 @@
       </h3>
       <MultiSelect
         class="select-columns"
-        :options="header.headers"
+        :options="cols"
         :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
@@ -29,7 +29,7 @@ import { mapState, mapGetters } from "vuex";
 import { FarmingNode } from "types/shards";
 import { RelicPlanner } from "types/relicPlanner";
 import { setupEvents, setupSorting } from "utils";
-import { iTableBody, iTableHead, iTableRow } from "types/general";
+import { iHeaderCell, iTableBody, iTableHead, iTableRow } from "types/general";
 
 const storageKey = "relicCalculatorTable";
 
@@ -316,6 +316,12 @@ export default defineComponent({
           },
         ],
       };
+    },
+    cols(): iHeaderCell[] {
+      return this.header.headers.reduce((acc: iHeaderCell[], row) => {
+        row.cells.forEach((cell) => acc.push(cell));
+        return acc;
+      }, []);
     },
     storageKey() {
       return `${storageKey}-${this.plannerData.id}`;

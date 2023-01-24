@@ -148,6 +148,8 @@ export default defineComponent({
             return {
               show: this.showCol(unit.id),
               type: "checkmark",
+              label: unit.name,
+              labelClasses: "mx-2",
               data: {
                 classes: player.units.some((x: any) => x.base_id === unit.id)
                   ? "text-success"
@@ -166,6 +168,7 @@ export default defineComponent({
               {
                 type: "checkbox",
                 show: this.accessLevel >= 3,
+                label: "Has Joined?",
                 data: {
                   value: player.allyCode,
                   checked: this._playersJoined.includes(player.allyCode),
@@ -194,9 +197,11 @@ export default defineComponent({
               ...unitCells,
               {
                 show: true,
-                classes: "text-left",
+                classes: "text-left text-center-sm",
+                label: "Omicrons:",
+                // labelClasses: "text-center-sm",
                 data: {
-                  classes: "m-0",
+                  classes: "m-0 no-bullets-sm text-center-sm",
                   list: this.getOmicrons(player).map((unit) => {
                     return {
                       id: unit,

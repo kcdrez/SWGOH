@@ -49,7 +49,7 @@
     <div class="toggles-container">
       <MultiSelect
         class="select-columns"
-        :options="header.headers"
+        :options="cols"
         :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
@@ -131,7 +131,7 @@ import Modal from "components/general/modal.vue";
 import { getPercent, getUnit, totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import { setupEvents, setupSorting } from "utils";
-import { iTableBody, iTableHead } from "types/general";
+import { iHeaderCell, iHeaderRow, iTableBody, iTableHead } from "types/general";
 import { IPrerequisite } from "types/shards";
 
 export default defineComponent({
@@ -302,6 +302,15 @@ export default defineComponent({
           };
         }),
       };
+    },
+    cols(): iHeaderCell[] {
+      return this.header.headers.reduce(
+        (acc: iHeaderCell[], row: iHeaderRow) => {
+          row.cells.forEach((cell) => acc.push(cell));
+          return acc;
+        },
+        []
+      );
     },
   },
   methods: {

@@ -90,11 +90,13 @@ export default defineComponent({
                 show: this.showCol("name"),
                 icon: this.sortIcon("name"),
                 sortMethodShow: true,
+                value: "name",
                 input: {
                   type: "input",
                   classes: "mx-auto my-1 w-75",
                   placeholder: "Search",
                   value: this.searchText,
+                  label: "Search by Name",
                   change: (val: string) => {
                     this.searchText = val;
                   },
@@ -108,6 +110,7 @@ export default defineComponent({
                 show: this.showCol("rarity"),
                 sortMethodShow: true,
                 icon: this.sortIcon("rarity"),
+                value: "rarity",
                 click: () => {
                   this.sortBy("rarity");
                 },
@@ -117,6 +120,7 @@ export default defineComponent({
                 show: this.showCol("locations"),
                 sortMethodShow: true,
                 icon: this.sortIcon("locations"),
+                value: "locations",
                 click: () => {
                   this.sortBy("locations");
                 },
@@ -127,6 +131,7 @@ export default defineComponent({
                 sortMethodShow: true,
                 icon: this.sortIcon("owned"),
                 maxWidth: "160px",
+                value: "owned",
                 click: () => {
                   this.sortBy("owned");
                 },
@@ -136,6 +141,7 @@ export default defineComponent({
                 show: this.showCol("needed"),
                 sortMethodShow: true,
                 icon: this.sortIcon("needed"),
+                value: "needed",
                 click: () => {
                   this.sortBy("needed");
                 },
@@ -146,6 +152,7 @@ export default defineComponent({
                 sortMethodShow: true,
                 icon: this.sortIcon("progress"),
                 maxWidth: "145px",
+                value: "progress",
                 click: () => {
                   this.sortBy("progress");
                 },
@@ -159,6 +166,7 @@ export default defineComponent({
                 show: this.showCol("time"),
                 sortMethodShow: true,
                 icon: this.sortIcon("time"),
+                value: "time",
                 click: () => {
                   this.sortBy("time");
                 },
@@ -217,7 +225,7 @@ export default defineComponent({
                 classes: "text-center-sm",
                 label: "Required By:",
                 data: {
-                  classes: "mb-0 no-bulles-sm text-left",
+                  classes: "mb-0 no-bullets-sm text-left text-center-sm",
                   list: relic.neededBy?.map((unit) => {
                     return {
                       id: unit.id,

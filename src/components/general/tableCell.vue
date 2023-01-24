@@ -99,7 +99,7 @@
         <template v-else> Unknown sub type for buttonToggle </template>
       </template>
       <template v-else-if="cell.type === 'list'">
-        <td v-if="cell.show" :class="cell.classes">
+        <div v-if="cell.show">
           <ul :class="cell.data.classes">
             <li v-for="el in cell.data.list" :key="el.id">
               <Popper
@@ -148,7 +148,7 @@
               <template v-else>{{ el.message }}</template>
             </li>
           </ul>
-        </td>
+        </div>
       </template>
       <template v-else-if="cell.type === 'time'">
         <Timestamp
@@ -323,7 +323,11 @@
       </template>
       <template v-else-if="cell.type === 'relicFarm'">
         <div class="container gear-container">
-          <div class="row py-1" v-for="gear in cell.data.location.gear" :key="gear.id">
+          <div
+            class="row py-1"
+            v-for="gear in cell.data.location.gear"
+            :key="gear.id"
+          >
             <div class="col-lg-2 col-md-5 align-self-center">
               <GearIcon :gear="gearData(gear.id)" showName />
             </div>

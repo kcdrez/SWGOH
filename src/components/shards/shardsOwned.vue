@@ -35,6 +35,9 @@ export default defineComponent({
         this.save();
       }
     },
+    unit(newVal) {
+      this.owned = unvue(newVal.ownedShards);
+    },
   },
   methods: {
     save: _.debounce(function (this: any) {

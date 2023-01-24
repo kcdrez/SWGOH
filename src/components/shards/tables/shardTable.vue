@@ -100,10 +100,12 @@ export default defineComponent({
                 show: this.showUnitName && this.showCol("name"),
                 sortMethodShow: this.showUnitName,
                 maxWidth: "750px",
+                value: "name",
                 input: {
+                  label: "Search",
                   type: "input",
                   classes: "mx-auto my-1 w-75",
-                  placeholder: "Search",
+                  placeholder: "Search by Name",
                   change: (val: string) => {
                     this.searchText = val;
                   },
@@ -116,13 +118,15 @@ export default defineComponent({
               {
                 label: "Locations",
                 show: this.showCol("locations"),
-                sortMethodShow: true,
+                sortMethodShow: false,
+                value: "locations",
               },
               {
                 label: "Shards Owned",
                 show: this.showCol("owned"),
                 sortMethodShow: true,
                 icon: this.sortIcon("owned"),
+                value: "owned",
                 click: () => {
                   this.sortBy("owned");
                 },
@@ -132,6 +136,7 @@ export default defineComponent({
                 show: this.showCol("remaining"),
                 sortMethodShow: true,
                 icon: this.sortIcon("remaining"),
+                value: "remaining",
                 click: () => {
                   this.sortBy("remaining");
                 },
@@ -141,6 +146,7 @@ export default defineComponent({
                 show: this.showCol("progress"),
                 sortMethodShow: true,
                 icon: this.sortIcon("progress"),
+                value: "progress",
                 click: () => {
                   this.sortBy("progress");
                 },
@@ -148,13 +154,13 @@ export default defineComponent({
               {
                 label: "Node Attempts per Day",
                 show: this.showCol("attempts"),
-                sortMethodShow: true,
               },
               {
                 label: "Est. Time",
                 show: this.showUnitName && this.showCol("time"),
                 sortMethodShow: true,
                 icon: this.sortIcon("time"),
+                value: "time",
                 click: () => {
                   this.sortBy("time");
                 },
@@ -165,6 +171,7 @@ export default defineComponent({
                 sortMethodShow: this.showPriority,
                 icon: this.sortIcon("priority"),
                 maxWidth: "150px",
+                value: "priority",
                 click: () => {
                   this.sortBy("priority");
                 },

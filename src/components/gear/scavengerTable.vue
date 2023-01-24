@@ -8,7 +8,7 @@
       </h3>
       <MultiSelect
         class="select-columns"
-        :options="header.headers"
+        :options="cols"
         :storageKey="storageKey + 'Columns'"
         @checked="selectedColumns = $event"
       />
@@ -31,7 +31,7 @@ import { mapState, mapGetters } from "vuex";
 import { Gear, IScavenger } from "types/gear";
 import { FarmingNode } from "types/shards";
 import { setupColumnEvents, setupEvents, setupSorting } from "utils";
-import { iTableBody, iTableHead } from "types/general";
+import { iHeaderCell, iTableBody, iTableHead } from "types/general";
 
 type tScavenger = { data: Gear; scavenger: IScavenger };
 const storageKey = "scavengerTable";
@@ -195,6 +195,12 @@ export default defineComponent({
           };
         }),
       };
+    },
+    cols(): iHeaderCell[] {
+      return this.header.headers.reduce((acc: iHeaderCell[], row) => {
+        row.cells.forEach((cell) => acc.push(cell));
+        return acc;
+      }, []);
     },
     list(): tScavenger[] {
       return this.gearList

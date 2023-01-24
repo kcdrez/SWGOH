@@ -6,7 +6,7 @@
       </h3>
     </div>
     <div :id="`${storageKey}`" class="collapse" :ref="`${storageKey}`">
-      <SwgohTable :table="{ header, body }" />
+      <SwgohTable :table="table" />
     </div>
   </div>
 </template>
@@ -18,7 +18,7 @@ import { mapState } from "vuex";
 import { setupEvents, setupSorting } from "utils";
 import { totalProgress, getPrerequisites, Unit } from "types/unit";
 import { NodeCharacter } from "types/shards";
-import { iTableBody, iTableHead } from "types/general";
+import { iTable } from "types/general";
 
 const storageKey = "LegendarySummaryTable";
 export default defineComponent({
@@ -55,77 +55,80 @@ export default defineComponent({
   },
   computed: {
     ...mapState("shards", ["shardFarming"]),
-    headerData(): iTableHead {
+    table(): iTable {
       return {
-        classes: "show-on-mobile",
-        sortMethod: this.sortMethod,
-        sortDir: this.sortDir,
-        methodChange: (val: string) => {
-          this.sortMethod = val;
-        },
-        directionChange: (val: "asc" | "desc") => {
-          this.sortDir = val;
-        },
-        headers: [
-          {
-            cells: [
-              {
-                label: "Unit Name",
-                show: true,
-                sortMethodShow: true,
-                maxWidth: "50%",
-                icon: this.sortIcon("name"),
-                input: {
-                  type: "input",
-                  classes: "mx-auto my-1 w-75",
-                  placeholder: "Search by Name",
-                  label: "Search",
-                  value: this.searchText,
-                  change: (val: string) => {
-                    this.searchText = val;
-                  },
-                  click: () => {
-                    this.sortBy("name");
-                  },
-                },
-              },
-              {
-                label: "Progress",
-                show: true,
-                maxWidth: "50%",
-                icon: this.sortIcon("progress"),
-                click: () => {
-                  this.sortBy("progress");
-                },
-              },
-            ],
+        header: {
+          classes: "show-on-mobile",
+          sortMethod: this.sortMethod,
+          sortDir: this.sortDir,
+          methodChange: (val: string) => {
+            this.sortMethod = val;
           },
-        ],
-      };
-    },
-    body(): iTableBody {
-      return {
-        classes: "align-middle text-center",
-        rows: this.filteredUnitList.map((unit: Unit | NodeCharacter) => {
-          return {
-            cells: [
-              {
-                type: "unit",
-                show: true,
-                data: {
-                  unit,
-                  isLink: true,
-                  hideImage: true,
+          directionChange: (val: "asc" | "desc") => {
+            this.sortDir = val;
+          },
+          headers: [
+            {
+              cells: [
+                {
+                  label: "Unit Name",
+                  show: true,
+                  sortMethodShow: true,
+                  maxWidth: "50%",
+                  icon: this.sortIcon("name"),
+                  value: "name",
+                  input: {
+                    type: "input",
+                    classes: "mx-auto my-1 w-75",
+                    placeholder: "Search by Name",
+                    label: "Search",
+                    value: this.searchText,
+                    change: (val: string) => {
+                      this.searchText = val;
+                    },
+                    click: () => {
+                      this.sortBy("name");
+                    },
+                  },
                 },
-              },
-              {
-                type: "progress",
-                data: this.totalProgress(unit.id ?? "", "requirement"),
-                show: true,
-              },
-            ],
-          };
-        }),
+                {
+                  label: "Progress",
+                  show: true,
+                  maxWidth: "50%",
+                  icon: this.sortIcon("progress"),
+                  sortMethodShow: true,
+                  value: "progress",
+                  click: () => {
+                    this.sortBy("progress");
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        body: {
+          classes: "align-middle text-center",
+          rows: this.filteredUnitList.map((unit: Unit | NodeCharacter) => {
+            return {
+              cells: [
+                {
+                  type: "unit",
+                  show: true,
+                  data: {
+                    unit,
+                    isLink: true,
+                    hideImage: true,
+                  },
+                },
+                {
+                  type: "progress",
+                  data: this.totalProgress(unit.id ?? "", "requirement"),
+                  show: true,
+                },
+              ],
+            };
+          }),
+        },
       };
     },
     filteredUnitList() {

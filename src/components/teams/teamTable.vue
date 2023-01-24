@@ -98,7 +98,7 @@
     </div>
     <MultiSelect
       class="select-columns"
-      :options="header.headers"
+      :options="cols"
       storageKey="teamsTable"
       @checked="selectedColumns = $event"
     />
@@ -111,7 +111,7 @@ import { defineComponent, PropType, ref, Ref, toRefs } from "vue";
 
 import { SortType, Team, TeamMember } from "types/teams";
 import { Unit } from "types/unit";
-import { iTableBody, iTableHead, iTableRow } from "types/general";
+import { iHeaderCell, iTableBody, iTableHead, iTableRow } from "types/general";
 import { setupColumnEvents, setupSorting } from "utils";
 
 type dataModel = {
@@ -490,6 +490,12 @@ export default defineComponent({
         classes: "align-middle text-center",
         rows,
       };
+    },
+    cols(): iHeaderCell[] {
+      return this.header.headers.reduce((acc: iHeaderCell[], row) => {
+        row.cells.forEach((cell) => acc.push(cell));
+        return acc;
+      }, []);
     },
   },
   methods: {

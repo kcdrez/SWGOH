@@ -190,7 +190,7 @@ import {
   multiplierMap,
   relicLevelMap,
 } from "types/pilots";
-import { iTableBody, iTableHead } from "types/general";
+import { iTableBody, iTableHead, iTableRow } from "types/general";
 
 interface Crew {
   stars: number;
@@ -264,15 +264,16 @@ export default defineComponent({
     body(): iTableBody {
       return {
         classes: "align-middle text-center",
-        rows: this.stats.map((stat: any) => {
+        rows: Object.keys(this.stats).map((statKey: string) => {
+          const stat = this.stats[statKey];
           let statText = "";
           statText += stat.projected - stat.current > 0 ? "+" : "";
-          statText += stat.projected + stat.current;
+          statText += stat.projected - stat.current;
           statText +=
             stat.projected - stat.current !== 0
-              ? ` ${round2Decimals(
+              ? ` (${round2Decimals(
                   ((stat.projected - stat.current) / stat.current) * 100
-                )} `
+                )}%)`
               : "";
 
           return {
@@ -280,22 +281,25 @@ export default defineComponent({
               {
                 show: true,
                 data: stat.label,
+                classes: "hidden-sm",
               },
               {
                 show: true,
                 data: stat.current,
+                label: `Current ${stat.label}:`,
               },
               {
                 show: true,
                 data: stat.projected,
+                label: `Projected ${stat.label}:`,
               },
               {
                 show: true,
-                classes: {
-                  "text-danger": stat.projected - stat.current < 0,
-                  "text-success": stat.projected - stat.current > 0,
-                },
+                classes: `${
+                  stat.projected - stat.current < 0 ? "text-danger" : ""
+                } ${stat.projected - stat.current > 0 ? "text-success" : ""}`,
                 data: statText,
+                label: `Difference:`,
               },
             ],
           };

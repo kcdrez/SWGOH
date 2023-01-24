@@ -18,7 +18,7 @@
           <div class="toggles-container">
             <MultiSelect
               class="select-columns"
-              :options="header.headers"
+              :options="cols"
               :storageKey="storageKey + 'PlayerColumns'"
               @checked="selectedColumns = $event"
             />
@@ -43,7 +43,7 @@ import { setupEvents, setupSorting, unvue } from "utils";
 import { Unit } from "types/unit";
 import { IGuildUnitMap } from "types/guild";
 import UnitSearch from "components/units/unitSearch.vue";
-import { iTableBody, iTableHead } from "types/general";
+import { iHeaderCell, iHeaderRow, iTableBody, iTableHead } from "types/general";
 
 const storageKey = "guildUnits";
 
@@ -404,6 +404,15 @@ export default defineComponent({
           };
         }),
       };
+    },
+    cols(): iHeaderCell[] {
+      return this.header.headers.reduce(
+        (acc: iHeaderCell[], row: iHeaderRow) => {
+          row.cells.forEach((cell: iHeaderCell) => acc.push(cell));
+          return acc;
+        },
+        []
+      );
     },
     players(): any[] {
       return (this.data?.owned ?? []).sort((a, b) => {

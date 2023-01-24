@@ -86,30 +86,32 @@ export default defineComponent({
                 label: "Unit Name",
                 show: this.showUnitName && this.showCol("name"),
                 sortMethodShow: this.showUnitName,
+                value: "name",
                 input: {
                   type: "input",
                   classes: "mx-auto my-1 w-75",
-                  placeholder: "Search",
+                  placeholder: "Search by Name",
                   value: this.searchText,
+                  label: "Search",
                   change: (val: string) => {
                     this.searchText = val;
                   },
+                  click: () => {
+                    this.sortBy("name");
+                  },
                 },
                 icon: this.sortIcon("name"),
-                click: () => {
-                  this.sortBy("name");
-                },
               },
               {
                 label: "Locations",
                 show: this.showCol("locations"),
-                sortMethodShow: true,
               },
               {
                 label: "Shards Owned",
                 show: this.showCol("owned"),
                 sortMethodShow: true,
                 icon: this.sortIcon("owned"),
+                value: "owned",
                 click: () => {
                   this.sortBy("owned");
                 },
@@ -119,6 +121,7 @@ export default defineComponent({
                 show: this.showCol("remaining"),
                 sortMethodShow: true,
                 icon: this.sortIcon("remaining"),
+                value: "remaining",
                 click: () => {
                   this.sortBy("remaining");
                 },
@@ -128,6 +131,7 @@ export default defineComponent({
                 show: this.showCol("progress"),
                 sortMethodShow: true,
                 icon: this.sortIcon("progress"),
+                value: "progress",
                 click: () => {
                   this.sortBy("progress");
                 },
@@ -137,6 +141,7 @@ export default defineComponent({
                 show: this.showUnitName && this.showCol("time"),
                 sortMethodShow: this.showUnitName,
                 icon: this.sortIcon("time"),
+                value: "time",
                 click: () => {
                   this.sortBy("time");
                 },

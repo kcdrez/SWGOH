@@ -114,7 +114,8 @@ export default defineComponent({
         return unit.whereToFarm.some(
           (node) =>
             node.table === "Guild Events Store (Mk 1)" ||
-            node.table === "Guild Events Store (Mk 2)"
+            node.table === "Guild Events Store (Mk 2)" ||
+            node.table === "Guild Events Store (Mk 3)"
         );
       });
     },

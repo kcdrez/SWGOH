@@ -51,7 +51,7 @@
     </div>
     <MultiSelect
       class="select-columns"
-      :options="header.headers"
+      :options="cols"
       storageKey="matchTable"
       label="Show/Hide Columns"
       @checked="selectedColumns = $event"
@@ -66,7 +66,7 @@ import { defineComponent, PropType, ref, Ref } from "vue";
 import { Match, TeamMember } from "types/teams";
 import MultiSelect from "components/general/multiSelect.vue";
 import { setupColumnEvents } from "utils";
-import { iTableBody, iTableHead } from "types/general";
+import { iHeaderCell, iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
   name: "MatchTable",
@@ -229,6 +229,12 @@ export default defineComponent({
           };
         }),
       };
+    },
+    cols(): iHeaderCell[] {
+      return this.header.headers.reduce((acc: iHeaderCell[], row) => {
+        row.cells.forEach((cell) => acc.push(cell));
+        return acc;
+      }, []);
     },
   },
   methods: {

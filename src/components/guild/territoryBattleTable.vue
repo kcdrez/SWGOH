@@ -86,6 +86,7 @@ export default defineComponent({
                 show: this.showCol("date"),
                 sortMethodShow: true,
                 icon: this.sortIcon("date"),
+                value: "date",
                 click: () => {
                   this.sortBy("date");
                 },
@@ -93,13 +94,13 @@ export default defineComponent({
               },
               {
                 show: !this.showCol("date") && !this.showCol("name"),
-                label: "",
               },
               {
                 label: "Name",
                 show: this.showCol("name"),
                 sortMethodShow: true,
                 icon: this.sortIcon("name"),
+                value: "name",
                 click: () => {
                   this.sortBy("name");
                 },
@@ -110,6 +111,7 @@ export default defineComponent({
                 show: this.showCol("stars"),
                 sortMethodShow: true,
                 icon: this.sortIcon("stars"),
+                value: "stars",
                 click: () => {
                   this.sortBy("stars");
                 },
@@ -121,6 +123,7 @@ export default defineComponent({
                 show: this.showCol("get1"),
                 sortMethodShow: true,
                 icon: this.sortIcon("get1"),
+                value: "get1",
                 click: () => {
                   this.sortBy("get1");
                 },
@@ -130,6 +133,7 @@ export default defineComponent({
                 show: this.showCol("get2"),
                 sortMethodShow: true,
                 icon: this.sortIcon("get2"),
+                value: "get2",
                 click: () => {
                   this.sortBy("get2");
                 },
@@ -139,6 +143,7 @@ export default defineComponent({
                 show: this.showCol("get3"),
                 sortMethodShow: true,
                 icon: this.sortIcon("get3"),
+                value: "get3",
                 click: () => {
                   this.sortBy("get3");
                 },
@@ -148,6 +153,7 @@ export default defineComponent({
                 show: this.showCol("character"),
                 sortMethodShow: true,
                 icon: this.sortIcon("character"),
+                value: "character",
                 click: () => {
                   this.sortBy("character");
                 },

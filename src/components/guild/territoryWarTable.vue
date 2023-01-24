@@ -341,6 +341,7 @@ export default defineComponent({
                 show: true,
                 classes: "flex-sm",
                 type: "select",
+                label: "Guild GP Range:",
                 data: {
                   options: this.gpOptions,
                   value: this.newEvent.guildGP,

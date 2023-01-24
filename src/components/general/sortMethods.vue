@@ -3,10 +3,7 @@
     <span class="input-group-text">Sort By:</span>
     <select class="form-control" v-model="_sortMethod">
       <template v-for="option in headerRow.cells">
-        <option
-          :value="option.value"
-          v-if="option?.sortMethodShow ? option.sortMethodShow : false"
-        >
+        <option :value="option.value" v-if="option?.sortMethodShow ?? false">
           {{ option.label }}
         </option>
       </template>
@@ -24,9 +21,8 @@
       <span class="input-group-text">{{ input.input?.label }}</span>
       <input
         class="form-control"
-        v-model="input.value"
         :placeholder="input.input?.placeholder"
-        @change="handleChange(input)"
+        @keyup="handleChange(input, $event)"
       />
     </div>
   </template>
@@ -35,11 +31,7 @@
       <span class="input-group-text">{{
         list.input?.label || "List Label"
       }}</span>
-      <select
-        class="form-control"
-        v-model="list.value"
-        @change="handleChange(list)"
-      >
+      <select class="form-control" @change="handleChange(list, $event)">
         <option v-for="option in list.input?.options" :value="option.value">
           {{ option.label }}
         </option>
@@ -55,6 +47,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import _ from "lodash";
 
 import { iHeaderCell, iTableHead, iHeaderRow } from "types/general";
 
@@ -128,11 +121,16 @@ export default defineComponent({
         header.input.click();
       }
     },
-    handleChange(header: iHeaderCell) {
-      if (header.input?.change) {
-        header.input.change(header.input.value);
+    handleChange: _.debounce(function (
+      this: any,
+      cell: iHeaderCell,
+      event: Event
+    ) {
+      if (cell.input?.change) {
+        cell.input.change((event.target as HTMLInputElement).value);
       }
     },
+    200),
   },
 });
 </script>
