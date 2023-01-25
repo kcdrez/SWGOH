@@ -1,14 +1,3 @@
-/*
-scavenger: [
-  {
-    id: "carbonite_circuit_board",
-    count: 6,
-    priority: 1,
-    nodes: ["guild_events_store1"],
-  },
-],
-*/
-
 const scavengerFarming: IScavenger[] = [
   {
     id: "guild_store",
