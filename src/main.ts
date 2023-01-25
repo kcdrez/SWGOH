@@ -19,11 +19,11 @@ import ProgressBar from "components/general/progressBar.vue";
 import Loading from "components/general/loading.vue";
 import Error from "components/general/error.vue";
 import MultiSelect from "components/general/multiSelect.vue";
-import SortMethods from "components/general/sortMethods.vue";
-import ColumnHeaders from "components/general/columnHeaders.vue";
-import TableHeader from "components/general/tableHeader.vue";
-import TableBody from "components/general/tableBody.vue";
-import TableFooter from "components/general/tableFooter.vue";
+// import SortMethods from "components/general/sortMethods.vue";
+// import ColumnHeaders from "components/general/columnHeaders.vue";
+// import TableHeader from "components/general/tableHeader.vue";
+// import TableBody from "components/general/tableBody.vue";
+// import TableFooter from "components/general/tableFooter.vue";
 import SwgohTable from "components/general/swgohTable.vue";
 import { formatDate, pluralText, daysFromNow } from "utils";
 

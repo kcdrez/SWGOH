@@ -32,8 +32,8 @@ import { Gear, IScavenger } from "types/gear";
 import { FarmingNode } from "types/shards";
 import { setupColumnEvents, setupEvents, setupSorting } from "utils";
 import { iHeaderCell, iTableBody, iTableHead } from "types/general";
-import TableHeader from "./tableHeader.vue";
-import TableBody from "./tableBody.vue";
+import TableHeader from "components/general/tableHeader.vue";
+import TableBody from "components/general/tableBody.vue";
 
 type tScavenger = { data: Gear; scavenger: IScavenger };
 const storageKey = "scavengerTable";
@@ -194,8 +194,8 @@ export default defineComponent({
               },
               {
                 show: this.showCol("notes"),
-                classes: gear.scavenger.notes ? "" : "hidden-sm",
-                data: gear.scavenger.notes,
+                classes: gear.scavenger?.notes ? "" : "hidden-sm",
+                data: gear.scavenger?.notes ?? "",
               },
             ],
           };

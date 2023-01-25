@@ -24,7 +24,9 @@
             />
           </th>
         </tr>
-        <ColumnHeaders class="text-center align-middle" :headers="headers" />
+        <template v-for="h in header.headers">
+          <ColumnHeaders class="text-center align-middle" :header="h" />
+        </template>
       </thead>
       <tbody class="align-middle text-center">
         <tr v-for="location in filteredScavengerData" :key="location.id">
@@ -98,6 +100,7 @@ import { scavengerFarming, scavengerCost } from "types/scavenger";
 import { Relic } from "types/relic";
 import { round2Decimals } from "utils";
 import { iTableHead } from "types/general";
+import ColumnHeaders from "components/general/columnHeaders.vue";
 
 const storageKey = "ScavengerFarmingTable";
 
@@ -108,7 +111,7 @@ interface dataModel {
 
 export default defineComponent({
   name: "ScavengerFarmingTable",
-  components: { GearIcon, RelicIcon },
+  components: { GearIcon, RelicIcon, ColumnHeaders },
   data() {
     return {
       filteredRelicMats: [],
@@ -119,38 +122,37 @@ export default defineComponent({
     ...mapState("shards", ["shardFarming"]),
     ...mapState("gear", ["gearList"]),
     ...mapState("relic", ["relicConfig"]),
-    headers(): iTableHead[] {
-      return [
-        {
-          headers: [
-            {
-              cells: [
-                {
-                  label: "Location",
-                  classes: "location-col",
-                  containerClass: "col-container",
-                  show: true,
-                },
-                {
-                  label: "Gear",
-                  classes: "gear-col",
-                  containerClass: "col-container",
-                  show: true,
-                  input: {
-                    type: "multiselect",
-                    classes: "filter-mats",
-                    placeholder: "Filter Relic Mats",
-                    options: [],
-                    click: (data: string[]) => {
-                      this.filteredRelicMats = data;
-                    },
+    header(): iTableHead {
+      return {
+        headers: [
+          {
+            cells: [
+              {
+                label: "Location",
+                classes: "location-col",
+                containerClass: "col-container",
+                show: true,
+              },
+              {
+                label: "Gear",
+                classes: "gear-col",
+                containerClass: "col-container",
+                show: true,
+                input: {
+                  type: "multiselect",
+                  classes: "filter-mats",
+                  placeholder: "Filter Relic Mats",
+                  options: [],
+                  storageKey: storageKey + "FilterRelicMats",
+                  click: (data: string[]) => {
+                    this.filteredRelicMats = data;
                   },
                 },
-              ],
-            },
-          ],
-        },
-      ];
+              },
+            ],
+          },
+        ],
+      };
     },
     filterRelicMatCols(): { label: string; value: any }[] {
       return [
