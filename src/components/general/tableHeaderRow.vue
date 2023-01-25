@@ -9,7 +9,12 @@
         @click="handleClick(cell, !cell.input)"
         :colspan="cell.colspan"
       >
-        <div :class="cell.containerClass">
+        <div
+          :class="[
+            cell.containerClass,
+            cell.input?.type === 'multiselect' ? 'd-flex ' : '',
+          ]"
+        >
           <template v-if="cell.input?.type === 'input'">
             <div
               :class="cell.input?.click ? 'c-pointer' : ''"
@@ -40,6 +45,7 @@
           <template v-else-if="cell.input?.type === 'multiselect'">
             <div
               :class="cell.click ? 'c-pointer' : ''"
+              class="w-100 align-self-center"
               @click="handleClick(cell, true)"
             >
               {{ cell.label }}
@@ -47,6 +53,7 @@
             </div>
             <MultiSelect
               :class="cell.input.classes"
+              class="multi-select-container"
               :label="cell.input.placeholder"
               :options="cell.input.options"
               :storageKey="cell.input.storageKey"
@@ -154,3 +161,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped lang="scss">
+.multi-select-container {
+  width: 305px;
+  margin-left: auto;
+  margin-right: 12px;
+}
+</style>

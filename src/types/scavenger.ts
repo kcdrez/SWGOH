@@ -9,7 +9,7 @@ scavenger: [
 ],
 */
 
-const scavengerFarming = [
+const scavengerFarming: IScavenger[] = [
   {
     id: "guild_store",
     currency: "guildStoreCurrency",
@@ -575,6 +575,25 @@ const scavengerFarming = [
     ],
   },
 ];
+
+export interface IScavenger {
+  id: string;
+  gear?: IScavengerGear[];
+  currency?:
+    | "get1"
+    | "get2"
+    | "get3"
+    | "guildStoreCurrency"
+    | "squadArenaCurrency";
+}
+
+interface IScavengerGear {
+  id: string;
+  scavenger?: any[];
+  notes?: string;
+  cost?: number;
+  amount?: number;
+}
 
 const scavengerCost = {
   carbonite_circuit_board: 35,

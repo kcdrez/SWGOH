@@ -8,7 +8,11 @@
     <template v-for="h in header.headers">
       <tr class="sort-methods" v-if="showSortMethods">
         <th colspan="100%">
-          <SortMethods :headerRow="h" :header="header" />
+          <SortMethods
+            :headerRow="h"
+            :header="header"
+            :showSorting="!!header.sortDir && !!header.sortMethod"
+          />
         </th>
       </tr>
       <tr class="sort-methods" v-if="header.multiOptions">
@@ -22,7 +26,7 @@
           />
         </th>
       </tr>
-      <ColumnHeaders
+      <TableHeaderRow
         v-if="showHeaders"
         class="text-center align-middle"
         :header="h"
@@ -37,12 +41,12 @@ import { defineComponent } from "vue";
 import _ from "lodash";
 
 import { iTableHead } from "types/general";
-import ColumnHeaders from "./columnHeaders.vue";
+import TableHeaderRow from "./tableHeaderRow.vue";
 import SortMethods from "./sortMethods.vue";
 
 export default defineComponent({
   name: "TableHeader",
-  components: { ColumnHeaders, SortMethods },
+  components: { TableHeaderRow, SortMethods },
   props: {
     header: {
       type: Object as () => iTableHead,

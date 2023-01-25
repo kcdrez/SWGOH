@@ -156,7 +156,9 @@ export default defineComponent({
               {
                 show: this.showCol("icon"),
                 type: "gear",
-                data: gear.data,
+                data: {
+                  gear: gear.data,
+                },
               },
               {
                 show: this.showCol("name"),
@@ -181,7 +183,7 @@ export default defineComponent({
                   message: "No known farmable locations.",
                 },
                 data: {
-                  classes: "m-0 no-bullets-sm",
+                  classes: "m-0 no-bullets-sm text-left text-center-sm",
                   list: this.locationLabels(gear.scavenger.nodes ?? []).map(
                     (x) => {
                       return {
