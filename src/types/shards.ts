@@ -153,10 +153,12 @@ export type OwnedShardsMap = {
 interface ShardData extends UnitNodeData {
   owned: number;
   glFarming?: {
-    tier4: boolean;
-    tier5: boolean;
-    ultMats: number;
-    ownedTickets: number;
+    tier1: number;
+    tier2: number;
+    tier3: number;
+    tier4: number;
+    tier5: number;
+    tier6: number;
   };
   capitalShipRefreshes?: number;
 }
@@ -164,7 +166,6 @@ interface ShardData extends UnitNodeData {
 type UnitNodeData = {
   nodes?: Node[];
   tracking?: boolean;
-  // priority?: number;
 };
 
 export type Node = {

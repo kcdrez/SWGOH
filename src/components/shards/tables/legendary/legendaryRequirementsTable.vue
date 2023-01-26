@@ -14,49 +14,91 @@
     >
       <div class="row">
         <div class="col-md-6 col-sm-12">
-          <div class="input-group input-group-sm mb-1" v-if="unit.stars < 7">
-            <span class="input-group-text">Shards Owned:</span>
-            <ShardsOwned :unit="unit" class="form-control" />
-          </div>
-          <template v-else>
-            <div class="input-group input-group-sm mb-1">
-              <span class="input-group-text">Tier 4 Completed:</span>
-              <span class="input-group-text tier-toggle">
-                <Toggle
-                  class="toggle-gl-tier"
-                  v-model="unit.glTier4"
-                  onLabel="Complete"
-                  offLabel="Incomplete"
-                />
-              </span>
-            </div>
-            <div class="input-group input-group-sm mb-1">
-              <span class="input-group-text">Tier 5 Completed:</span>
-              <span class="input-group-text tier-toggle">
-                <Toggle
-                  class="toggle-gl-tier"
-                  v-model="unit.glTier5"
-                  onLabel="Complete"
-                  offLabel="Incomplete"
-                />
-              </span>
-            </div>
-          </template>
           <div class="input-group input-group-sm mb-1">
-            <span class="input-group-text">Ultimate Ability Mats:</span>
+            <span
+              class="input-group-text c-help"
+              title="Enter the amount of times you have completed tier 1 of the GL Journey Guide"
+              >Tier 1 Completion:</span
+            >
             <input
-              class="form-control"
-              v-model.number="unit.glUltMats"
               type="number"
+              class="form-control"
+              :max="unit?.glTiers.tier1?.count ?? 0"
+              min="0"
+              v-model="unit.glTier1"
             />
           </div>
           <div class="input-group input-group-sm mb-1">
-            <span class="input-group-text">Owned Tickets:</span>
+            <span
+              class="input-group-text c-help"
+              title="Enter the amount of times you have completed tier 2 of the GL Journey Guide"
+              >Tier 2 Completion:</span
+            >
             <input
-              class="form-control"
               type="number"
-              v-model.number="unit.glOwnedTickets"
+              class="form-control"
+              :max="unit?.glTiers.tier2?.count ?? 0"
               min="0"
+              v-model="unit.glTier2"
+            />
+          </div>
+          <div class="input-group input-group-sm mb-1">
+            <span
+              class="input-group-text c-help"
+              title="Enter the amount of times you have completed tier 3 of the GL Journey Guide"
+              >Tier 3 Completion:</span
+            >
+            <input
+              type="number"
+              class="form-control"
+              :max="unit?.glTiers.tier3?.count ?? 0"
+              min="0"
+              v-model="unit.glTier3"
+            />
+          </div>
+          <div class="input-group input-group-sm mb-1">
+            <span
+              class="input-group-text c-help"
+              title="Enter the amount of times you have completed tier 4 of the GL Journey Guide"
+              >Tier 4 Completion:</span
+            >
+            <input
+              type="number"
+              class="form-control"
+              :max="unit?.glTiers.tier4?.count ?? 0"
+              min="0"
+              v-model="unit.glTier4"
+            />
+          </div>
+          <div class="input-group input-group-sm mb-1">
+            <span
+              class="input-group-text c-help"
+              title="Enter the amount of times you have completed tier 5 of the GL Journey Guide"
+              >Tier 5 Completion:</span
+            >
+            <input
+              type="number"
+              class="form-control"
+              :max="unit?.glTiers.tier5?.count ?? 0"
+              min="0"
+              v-model="unit.glTier5"
+            />
+          </div>
+          <div
+            class="input-group input-group-sm mb-1"
+            v-if="unit.glTiers.tier6.tickets > 0"
+          >
+            <span
+              class="input-group-text c-help"
+              title="Enter the amount of times you have completed tier 6 of the GL Journey Guide"
+              >Tier 6 Completion:</span
+            >
+            <input
+              type="number"
+              class="form-control"
+              :max="unit?.glTiers.tier6?.count ?? 0"
+              min="0"
+              v-model="unit.glTier6"
             />
           </div>
           <EnergySpent showStandard />
@@ -65,7 +107,9 @@
           <div class="input-group input-group-sm mb-1">
             <span class="input-group-text">Remaining GL Tickets:</span>
             <span class="input-group-text flex-fill">{{
-              unit.totalGLTicketsNeeded
+              unit.glTicketsForUnlock +
+              unit.glTicketsForUlt +
+              unit.glTicketsForOther
             }}</span>
           </div>
           <div class="input-group input-group-sm mb-1">
@@ -502,10 +546,17 @@ export default defineComponent({
         const energySpent = this.$store.state.gear.energy.standard ?? 0;
         const ticketsPerDay =
           (375 - energySpent + 120 * refreshes) * energyDropRate;
+        const { glTicketsForUnlock, glTicketsForUlt, glTicketsForOther } =
+          this.unit;
 
         return {
-          time: Math.ceil(this.unit.totalGLTicketsNeeded / ticketsPerDay),
-          energy: this.unit.totalGLTicketsNeeded / energyDropRate,
+          time: Math.ceil(
+            (glTicketsForUnlock + glTicketsForUlt + glTicketsForOther) /
+              ticketsPerDay
+          ),
+          energy:
+            (glTicketsForUnlock + glTicketsForUlt + glTicketsForOther) /
+            energyDropRate,
         };
       } else if (this.unit.isCapitalShip) {
         return {

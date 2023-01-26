@@ -107,24 +107,28 @@ const store = {
     },
     UPSERT_GL_STATUS(
       state: State,
-      { id, tier4, tier5, ultMats, ownedTickets }: any
+      { id, tier1, tier2, tier3, tier4, tier5, tier6 }: any
     ) {
       const match = state.ownedShards[id];
       if (match) {
         match.glFarming = {
+          tier1,
+          tier2,
+          tier3,
           tier4,
           tier5,
-          ultMats,
-          ownedTickets,
+          tier6,
         };
       } else {
         state.ownedShards[id] = {
           owned: 0,
           glFarming: {
+            tier1,
+            tier2,
+            tier3,
             tier4,
             tier5,
-            ultMats,
-            ownedTickets,
+            tier6,
           },
         };
       }
@@ -184,10 +188,12 @@ const store = {
       { commit, dispatch }: ActionCtx,
       payload: {
         id: string;
-        tier4: boolean;
-        tier5: boolean;
-        ultMats: number;
-        ownedTickets: number;
+        tier1: number;
+        tier2: number;
+        tier3: number;
+        tier4: number;
+        tier5: number;
+        tier6: number;
       }
     ) {
       commit("UPSERT_GL_STATUS", payload);

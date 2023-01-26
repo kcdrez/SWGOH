@@ -223,6 +223,6 @@ export default defineComponent({
 }
 .sticky-name {
   position: sticky;
-  top: 120px;
+  top: 155px;
 }
 </style>

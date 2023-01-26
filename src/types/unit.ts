@@ -241,121 +241,490 @@ export class Unit {
   public get abilityClasses() {
     return this._ability_classes ?? [];
   }
+  public get glTier1() {
+    return store.state.shards.ownedShards[this.id]?.glFarming?.tier1 ?? 0;
+  }
+  public set glTier1(val) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier1: val,
+      tier2: this.glTier2,
+      tier3: this.glTier3,
+      tier4: this.glTier4,
+      tier5: this.glTier5,
+      tier6: this.glTier6,
+      id: this.id,
+    });
+  }
+  public get glTier2() {
+    return store.state.shards.ownedShards[this.id]?.glFarming?.tier2 ?? 0;
+  }
+  public set glTier2(val) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier1: this.glTier1,
+      tier2: val,
+      tier3: this.glTier3,
+      tier4: this.glTier4,
+      tier5: this.glTier5,
+      tier6: this.glTier6,
+      id: this.id,
+    });
+  }
+  public get glTier3() {
+    return store.state.shards.ownedShards[this.id]?.glFarming?.tier3 ?? 0;
+  }
+  public set glTier3(val) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier1: this.glTier1,
+      tier2: this.glTier2,
+      tier3: val,
+      tier4: this.glTier4,
+      tier5: this.glTier5,
+      tier6: this.glTier6,
+      id: this.id,
+    });
+  }
   public get glTier4() {
-    return store.state.shards.ownedShards[this.id]?.glFarming?.tier4 || false;
+    return store.state.shards.ownedShards[this.id]?.glFarming?.tier4 ?? 0;
   }
   public set glTier4(val) {
     store.dispatch("shards/glProgressUpdate", {
+      tier1: this.glTier1,
+      tier2: this.glTier2,
+      tier3: this.glTier3,
       tier4: val,
-      tier5: !val ? false : this.glTier5,
-      ultMats: this.glUltMats,
+      tier5: this.glTier5,
+      tier6: this.glTier6,
       id: this.id,
-      ownedTickets: this.glOwnedTickets,
     });
   }
   public get glTier5() {
-    return store.state.shards.ownedShards[this.id]?.glFarming?.tier5 || false;
+    return store.state.shards.ownedShards[this.id]?.glFarming?.tier5 ?? 0;
   }
   public set glTier5(val) {
     store.dispatch("shards/glProgressUpdate", {
-      tier4: val ? true : this.glTier4,
+      tier1: this.glTier1,
+      tier2: this.glTier2,
+      tier3: this.glTier3,
+      tier4: this.glTier4,
       tier5: val,
-      ultMats: this.glUltMats,
+      tier6: this.glTier6,
       id: this.id,
-      ownedTickets: this.glOwnedTickets,
     });
   }
-  public get glOwnedTickets() {
+  public get glTier6() {
+    return store.state.shards.ownedShards[this.id]?.glFarming?.tier6 ?? 0;
+  }
+  public set glTier6(val) {
+    store.dispatch("shards/glProgressUpdate", {
+      tier1: this.glTier1,
+      tier2: this.glTier2,
+      tier3: this.glTier3,
+      tier4: this.glTier4,
+      tier5: this.glTier5,
+      tier6: val,
+      id: this.id,
+    });
+  }
+
+  public get glTiers() {
+    type tGLUnlockMap = {
+      [key: string]: {
+        [key: string]: {
+          tickets: number;
+          count: number;
+          shards?: number;
+          ultMats?: number;
+        };
+      };
+    };
+    const glShardsTiers: tGLUnlockMap = {
+      JABBATHEHUTT: {
+        tier1: {
+          tickets: 15,
+          count: 6,
+          shards: 10,
+          ultMats: 0,
+        },
+        tier2: {
+          tickets: 30,
+          count: 3,
+          shards: 20,
+          ultMats: 0,
+        },
+        tier3: {
+          tickets: 50, //unknown
+          count: 2,
+          shards: 50,
+          ultMats: 0,
+        },
+        tier4: {
+          tickets: 100, //unknown
+          count: 2,
+          shards: 55,
+          ultMats: 0,
+        },
+        tier5: {
+          tickets: 100, //unknown
+          count: 12,
+          ultMats: 1,
+        },
+        tier6: {
+          tickets: 0,
+          count: 0,
+          shards: 0,
+          ultMats: 0,
+        },
+      },
+      JEDIMASTERKENOBI: {
+        tier1: {
+          tickets: 15,
+          count: 8,
+          shards: 10,
+        },
+        tier2: {
+          tickets: 30,
+          count: 4,
+          shards: 25,
+        },
+        tier3: {
+          tickets: 50, //unknown
+          count: 3,
+          shards: 50,
+        },
+        tier4: {
+          tickets: 100, //unknown
+          count: 2,
+          shards: 55,
+          ultMats: 4,
+        },
+        tier5: {
+          tickets: 100, //unknown
+          count: 4,
+          shards: 0,
+          ultMats: 4,
+        },
+        tier6: {
+          tickets: 100, //unknown
+          count: 4,
+          ultMats: 4,
+        },
+      },
+      LORDVADER: {
+        tier1: {
+          tickets: 15,
+          count: 8,
+          shards: 10,
+        },
+        tier2: {
+          tickets: 30,
+          count: 4,
+          shards: 25,
+        },
+        tier3: {
+          tickets: 50, //unknown
+          count: 3,
+          shards: 50,
+        },
+        tier4: {
+          tickets: 100, //unknown
+          count: 2,
+          shards: 55,
+          ultMats: 4,
+        },
+        tier5: {
+          tickets: 100, //unknown
+          count: 4,
+          shards: 0,
+          ultMats: 4,
+        },
+        tier6: {
+          tickets: 100, //unknown
+          count: 4,
+          ultMats: 4,
+        },
+      },
+      GRANDMASTERLUKE: {
+        1: {
+          tickets: 15,
+          count: 8,
+          shards: 10,
+          ultMats: 0,
+        },
+        tier2: {
+          tickets: 30,
+          count: 4,
+          shards: 25,
+          ultMats: 0,
+        },
+        tier3: {
+          tickets: 60,
+          count: 3,
+          shards: 50,
+          ultMats: 0,
+        },
+        tier4: {
+          tickets: 70,
+          count: 1,
+          shards: 0,
+          ultMats: 0,
+        },
+        tier5: {
+          tickets: 70,
+          count: 1,
+          shards: 0,
+          ultMats: 0,
+        },
+        tier6: {
+          tickets: 70,
+          count: 10,
+          shards: 0,
+          ultMats: 1,
+        },
+      },
+      SUPREMELEADERKYLOREN: {
+        tier1: {
+          tickets: 15,
+          count: 8,
+          shards: 10,
+          ultMats: 0,
+        },
+        tier2: {
+          tickets: 30,
+          count: 4,
+          shards: 25,
+          ultMats: 0,
+        },
+        tier3: {
+          tickets: 60,
+          count: 3,
+          shards: 50,
+          ultMats: 0,
+        },
+        tier4: {
+          tickets: 70,
+          count: 1,
+          shards: 0,
+          ultMats: 0,
+        },
+        tier5: {
+          tickets: 70,
+          count: 1,
+          shards: 0,
+          ultMats: 0,
+        },
+        tier6: {
+          tickets: 70,
+          count: 10,
+          shards: 0,
+          ultMats: 1,
+        },
+      },
+      REY: {
+        tier1: {
+          tickets: 15,
+          count: 8,
+          shards: 10,
+          ultMats: 0,
+        },
+        tier2: {
+          tickets: 30,
+          count: 4,
+          shards: 25,
+          ultMats: 0,
+        },
+        tier3: {
+          tickets: 60,
+          count: 3,
+          shards: 50,
+          ultMats: 0,
+        },
+        tier4: {
+          tickets: 70,
+          count: 1,
+          shards: 0,
+          ultMats: 0,
+        },
+        tier5: {
+          tickets: 70,
+          count: 1,
+          shards: 0,
+          ultMats: 0,
+        },
+        tier6: {
+          tickets: 70,
+          count: 10,
+          shards: 0,
+          ultMats: 1,
+        },
+      },
+      SITHPALPATINE: {
+        tier1: {
+          tickets: 15,
+          count: 8,
+          shards: 10,
+          ultMats: 0,
+        },
+        tier2: {
+          tickets: 30,
+          count: 4,
+          shards: 25,
+          ultMats: 0,
+        },
+        tier3: {
+          tickets: 60,
+          count: 3,
+          shards: 50,
+          ultMats: 0,
+        },
+        tier4: {
+          tickets: 70,
+          count: 1,
+          shards: 0,
+          ultMats: 0,
+        },
+        tier5: {
+          tickets: 70,
+          count: 1,
+          shards: 0,
+          ultMats: 0,
+        },
+        tier6: {
+          tickets: 70,
+          count: 10,
+          shards: 0,
+          ultMats: 1,
+        },
+      },
+    };
+    return glShardsTiers[this.id];
+  }
+
+  // public get totalGLTicketsNeeded(): number {
+  //   if (!this.isGL) {
+  //     return 0;
+  //   }
+  //   const { tier1, tier2, tier3, tier4, tier5, tier6 } = this.glTiers;
+
+  //   return (
+  //     tier1.count * tier1.tickets +
+  //     tier2.count * tier2.tickets +
+  //     tier3.count * tier3.tickets +
+  //     tier4.count * tier4.tickets +
+  //     tier5.count * tier5.tickets +
+  //     tier6.count * tier6.tickets
+  //   );
+  // }
+
+  public get glTicketsForUnlock(): number {
+    const { tier1, tier2, tier3, tier4, tier5, tier6 } = this.glTiers;
+    const tier1Tickets = tier1.shards
+      ? tier1.count * tier1.tickets - this.glTier1 * tier1.tickets
+      : 0;
+    const tier2Tickets = tier2.shards
+      ? tier2.count * tier2.tickets - this.glTier2 * tier2.tickets
+      : 0;
+    const tier3Tickets = tier3.shards
+      ? tier3.count * tier3.tickets - this.glTier3 * tier3.tickets
+      : 0;
+    const tier4Tickets = tier4.shards
+      ? tier4.count * tier4.tickets - this.glTier4 * tier4.tickets
+      : 0;
+    const tier5Tickets = tier5.shards
+      ? tier5.count * tier5.tickets - this.glTier5 * tier5.tickets
+      : 0;
+    const tier6Tickets = tier6.shards
+      ? tier6.count * tier6.tickets - this.glTier6 * tier6.tickets
+      : 0;
+
     return (
-      store.state.shards.ownedShards[this.id]?.glFarming?.ownedTickets ?? 0
+      tier1Tickets +
+      tier2Tickets +
+      tier3Tickets +
+      tier4Tickets +
+      tier5Tickets +
+      tier6Tickets
     );
   }
-  public set glOwnedTickets(val: number) {
-    store.dispatch("shards/glProgressUpdate", {
-      tier4: this.glTier4,
-      tier5: this.glTier5,
-      ultMats: this.glUltMats,
-      id: this.id,
-      ownedTickets: val,
-    });
+
+  public get glTicketsForUlt(): number {
+    const { tier1, tier2, tier3, tier4, tier5, tier6 } = this.glTiers;
+    const tier1Tickets = tier1.ultMats
+      ? tier1.count * tier1.tickets - this.glTier1 * tier1.tickets
+      : 0;
+    const tier2Tickets = tier2.ultMats
+      ? tier2.count * tier2.tickets - this.glTier2 * tier2.tickets
+      : 0;
+    const tier3Tickets = tier3.ultMats
+      ? tier3.count * tier3.tickets - this.glTier3 * tier3.tickets
+      : 0;
+    const tier4Tickets = tier4.ultMats
+      ? tier4.count * tier4.tickets - this.glTier4 * tier4.tickets
+      : 0;
+    const tier5Tickets = tier5.ultMats
+      ? tier5.count * tier5.tickets - this.glTier5 * tier5.tickets
+      : 0;
+    const tier6Tickets = tier6.ultMats
+      ? tier6.count * tier6.tickets - this.glTier6 * tier6.tickets
+      : 0;
+
+    return (
+      tier1Tickets +
+      tier2Tickets +
+      tier3Tickets +
+      tier4Tickets +
+      tier5Tickets +
+      tier6Tickets
+    );
   }
-  public get glUltMats() {
-    return store.state.shards.ownedShards[this.id]?.glFarming?.ultMats ?? 0;
+
+  public get glTicketsForOther(): number {
+    const { tier1, tier2, tier3, tier4, tier5, tier6 } = this.glTiers;
+    const tier1Tickets =
+      !tier1.ultMats && !tier1.shards
+        ? tier1.count * tier1.tickets - this.glTier1 * tier1.tickets
+        : 0;
+    const tier2Tickets =
+      !tier2.ultMats && !tier2.shards
+        ? tier2.count * tier2.tickets - this.glTier2 * tier2.tickets
+        : 0;
+    const tier3Tickets =
+      !tier3.ultMats && !tier3.shards
+        ? tier3.count * tier3.tickets - this.glTier3 * tier3.tickets
+        : 0;
+    const tier4Tickets =
+      !tier4.ultMats && !tier4.shards
+        ? tier4.count * tier4.tickets - this.glTier4 * tier4.tickets
+        : 0;
+    const tier5Tickets =
+      !tier5.ultMats && !tier5.shards
+        ? tier5.count * tier5.tickets - this.glTier5 * tier5.tickets
+        : 0;
+    const tier6Tickets =
+      !tier6.ultMats && !tier6.shards
+        ? tier6.count * tier6.tickets - this.glTier6 * tier6.tickets
+        : 0;
+
+    return (
+      tier1Tickets +
+      tier2Tickets +
+      tier3Tickets +
+      tier4Tickets +
+      tier5Tickets +
+      tier6Tickets
+    );
   }
-  public set glUltMats(val) {
-    store.dispatch("shards/glProgressUpdate", {
-      tier4: this.glTier4,
-      tier5: this.glTier5,
-      ultMats: val,
-      id: this.id,
-      ownedTickets: this.glOwnedTickets,
-    });
-  }
-  public get totalGLTicketsNeeded(): number {
-    if (!this.isGL) {
-      return 0;
-    }
 
-    type tUltMatsMap = {
-      [key: string]: number;
-    };
-
-    const ultMatsMap: tUltMatsMap = {
-      JEDIMASTERKENOBI: 10,
-      GRANDMASTERLUKE: 10,
-      SUPREMELEADERKYLOREN: 10,
-      REY: 10,
-      SITHPALPATINE: 10,
-      LORDVADER: 10,
-      JABBATHEHUTT: 12,
-    };
-
-    const shardsCount = this.stars === 7 ? 330 : this.ownedShards;
-    let tier4 = 1;
-    let tier5 = 1;
-    let tier6 = (ultMatsMap[this.id] ?? 10) - this.glUltMats;
-
-    if (!this.glTier4) {
-      tier4 = 1;
-      tier5 = 1;
-    } else if (!this.glTier5) {
-      tier4 = 0;
-      tier5 = 1;
-    } else {
-      tier4 = 0;
-      tier5 = 0;
-    }
-
-    return this.glTicketsForUnlock + tier4 * 70 + tier5 * 70 + tier6 * 70;
-  }
-  public get glTicketsForUnlock(): number {
-    const shardsCount = this.stars === 7 ? 330 : this.ownedShards;
-    let tier1 = 8;
-    let tier2 = 4;
-    let tier3 = 3;
-
-    if (shardsCount <= 80) {
-      tier1 = (80 - shardsCount) / 10;
-    } else if (shardsCount <= 180) {
-      tier1 = 0;
-      tier2 = (180 - shardsCount) / 25;
-    } else if (shardsCount < 330) {
-      tier1 = 0;
-      tier2 = 0;
-      tier3 = (330 - shardsCount) / 50;
-    }
-
-    return tier1 * 15 + tier2 * 30 + tier3 * 60 - this.glOwnedTickets;
-  }
   public get capitalShipRefreshes() {
     return store.state.shards.ownedShards[this.id]?.capitalShipRefreshes ?? 0;
   }
+
   public set capitalShipRefreshes(val) {
     store.dispatch("shards/capitalShipUpdate", {
       refreshes: val,
       id: this.id,
     });
   }
+
   public get capitalShipEventFrequency() {
     type tFrequencyMap = {
       [key: string]: number;
