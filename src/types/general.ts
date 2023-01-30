@@ -23,6 +23,7 @@ interface iHeaderCell {
     storageKey?: string;
     value?: any;
     change?: Function;
+    src?: string;
   };
   click?: Function;
   icon?: string;

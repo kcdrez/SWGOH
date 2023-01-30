@@ -66,9 +66,6 @@ export class Team {
     if (val !== this._sortMethod) {
       this._sortMethod = val;
       this.save();
-    } else {
-      const newDir = this.sortDir === "asc" ? "desc" : "asc";
-      this.sortDir = newDir;
     }
   }
   public get searchName() {

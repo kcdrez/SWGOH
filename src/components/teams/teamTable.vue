@@ -126,12 +126,13 @@ const storageKey = "teamTable";
 export default defineComponent({
   name: "TeamTable",
   setup() {
-    const { sortDir } = setupSorting(storageKey);
+    const { sortDir, sortMethod } = setupSorting(storageKey);
     const selectedColumns: Ref<string[]> = ref([]);
     const { showCol } = setupColumnEvents(selectedColumns);
 
     return {
       sortDir,
+      sortMethod,
       showCol,
       selectedColumns,
     };
@@ -166,11 +167,19 @@ export default defineComponent({
   },
   computed: {
     showMods(): boolean {
-      return this.size === "lg" && this.showCol("mods");
+      return this.size === "lg";
     },
     header(): iTableHead {
       return {
         classes: "sticky-header show-on-mobile",
+        sortMethod: this.team.sortMethod ?? "name",
+        sortDir: this.team.sortDir ?? "asc",
+        methodChange: (val: SortType) => {
+          this.team.sortMethod = val;
+        },
+        directionChange: (val: "asc" | "desc") => {
+          this.team.sortDir = val;
+        },
         headers: [
           {
             cells: [
@@ -195,95 +204,110 @@ export default defineComponent({
                 },
               },
               {
-                label: "images/mod_square.png",
+                label: "Square",
                 classes: "mod-col",
-                sortMethodShow: this.size === "lg",
-                show: this.showMods,
+                sortMethodShow: this.showMods,
+                show: this.showMods && this.showCol("square"),
                 icon: this.sortIcon("square"),
+                value: "square",
                 click: () => {
                   this.sortBy("square");
                 },
                 input: {
                   type: "image",
+                  src: "images/mod_square.png",
+                  label: "Square",
                 },
               },
               {
-                label: "images/mod_diamond.png",
+                label: "Diamond",
                 classes: "mod-col",
-                sortMethodShow: this.size === "lg",
-                show: this.showMods,
+                sortMethodShow: this.showMods,
+                show: this.showMods && this.showCol("diamond"),
                 icon: this.sortIcon("diamond"),
+                value: "diamond",
                 click: () => {
                   this.sortBy("diamond");
                 },
                 input: {
                   type: "image",
+                  src: "images/mod_diamond.png",
+                  label: "Diamond",
                 },
               },
               {
-                label: "images/mod_circle.png",
+                label: "Circle",
                 classes: "mod-col",
-                sortMethodShow: this.size === "lg",
-                show: this.showMods,
+                sortMethodShow: this.showMods,
+                show: this.showMods && this.showCol("circle"),
                 icon: this.sortIcon("circle"),
+                value: "circle",
                 click: () => {
                   this.sortBy("circle");
                 },
                 input: {
                   type: "image",
+                  src: "images/mod_circle.png",
+                  label: "Circle",
                 },
               },
               {
-                label: "images/mod_arrow.png",
+                label: "Arrow",
                 classes: "mod-col",
-                sortMethodShow: this.size === "lg",
-                show: this.showMods,
+                sortMethodShow: this.showMods,
+                show: this.showMods && this.showCol("arrow"),
                 icon: this.sortIcon("arrow"),
+                value: "arrow",
                 click: () => {
                   this.sortBy("arrow");
                 },
                 input: {
                   type: "image",
+                  src: "images/mod_arrow.png",
+                  label: "Arrow",
                 },
               },
               {
-                label: "images/mod_triangle.png",
+                label: "Triangle",
                 classes: "mod-col",
-                sortMethodShow: this.size === "lg",
-                show: this.showMods,
+                sortMethodShow: this.showMods,
+                show: this.showMods && this.showCol("triangle"),
                 icon: this.sortIcon("triangle"),
+                value: "triangle",
                 click: () => {
                   this.sortBy("triangle");
                 },
                 input: {
                   type: "image",
+                  src: "images/mod_triangle.png",
+                  label: "Triangle",
                 },
               },
               {
-                label: "images/mod_cross.png",
+                label: "Cross",
                 classes: "mod-col",
-                sortMethodShow: this.size === "lg",
-                show: this.showMods,
+                sortMethodShow: this.showMods,
+                show: this.showMods && this.showCol("cross"),
                 icon: this.sortIcon("cross"),
+                value: "cross",
                 click: () => {
                   this.sortBy("cross");
                 },
                 input: {
                   type: "image",
+                  src: "images/mod_cross.png",
+                  label: "Cross",
                 },
               },
               {
                 label: "Has Speed Set?",
-                sortMethodShow: this.size === "lg",
-                show: this.showMods,
+                sortMethodShow: this.showMods,
+                show: this.showMods && this.showCol("speedSet"),
                 icon: this.sortIcon("speedSet"),
+                value: "speedSet",
                 click: () => {
                   this.sortBy("speedSet");
                 },
-              },
-              {
-                label: "Mods",
-                value: this.showMods ? "mods" : null,
               },
               {
                 label: "Sub Total",
@@ -314,6 +338,7 @@ export default defineComponent({
               {
                 label: "Actions",
                 show: this.showCol("actions"),
+                value: "actions",
               },
             ],
           },
@@ -376,7 +401,7 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showMods,
+                show: this.showMods && this.showCol("square"),
                 type: "mod",
                 data: {
                   id: unit.id,
@@ -384,7 +409,7 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showMods,
+                show: this.showMods && this.showCol("diamond"),
                 type: "mod",
                 data: {
                   id: unit.id,
@@ -392,7 +417,7 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showMods,
+                show: this.showMods && this.showCol("circle"),
                 type: "mod",
                 data: {
                   id: unit.id,
@@ -400,7 +425,7 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showMods,
+                show: this.showMods && this.showCol("arrow"),
                 type: "mod",
                 data: {
                   id: unit.id,
@@ -408,7 +433,7 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showMods,
+                show: this.showMods && this.showCol("triangle"),
                 type: "mod",
                 data: {
                   id: unit.id,
@@ -416,7 +441,7 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showMods,
+                show: this.showMods && this.showCol("cross"),
                 type: "mod",
                 data: {
                   id: unit.id,
@@ -424,7 +449,7 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showMods,
+                show: this.showMods && this.showCol("speedSet"),
                 label: "Has Speed Set?",
                 type: "html",
                 data: unit.hasSpeedSet
@@ -493,7 +518,25 @@ export default defineComponent({
     },
     cols(): iHeaderCell[] {
       return this.header.headers.reduce((acc: iHeaderCell[], row) => {
-        row.cells.forEach((cell) => acc.push(cell));
+        const modRows = [
+          "circle",
+          "square",
+          "diamond",
+          "cross",
+          "arrow",
+          "triangle",
+          "speedSet",
+        ];
+        row.cells.forEach((cell) => {
+          if (this.showMods) {
+            acc.push(cell);
+          } else {
+            const isModRow = modRows.some((r) => r === cell.value);
+            if (!isModRow) {
+              acc.push(cell);
+            }
+          }
+        });
         return acc;
       }, []);
     },

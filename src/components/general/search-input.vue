@@ -156,6 +156,8 @@ export default defineComponent({
   position: absolute;
   width: 100%;
   z-index: 100;
+  margin: 0;
+  padding: 0;
 
   li {
     padding: 3px 10px;

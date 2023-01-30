@@ -39,7 +39,7 @@
               <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
             </div>
             <button :class="cell.input.classes" @click="handleInputClick(cell)">
-              {{ cell.input.placeholder }}
+              {{ cell.input?.label ?? "Click Me" }}
             </button>
           </template>
           <template v-else-if="cell.input?.type === 'multiselect'">
@@ -85,7 +85,7 @@
               :class="cell.click ? 'c-pointer' : ''"
               @click="handleClick(cell, true)"
             >
-              <img :src="cell.label" />
+              <img :src="cell.input?.src" :alt="cell.input?.label" />
               <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
             </div>
           </template>

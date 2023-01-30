@@ -10,7 +10,7 @@
         <option value="">{{ label }}</option>
       </select>
       <i
-        v-if="options.length > selected.length"
+        v-if="showWarning"
         class="fas fa-exclamation-circle text-warning missing-column-warning"
         title="Some columns are currently hidden"
       ></i>
@@ -64,6 +64,13 @@ export default defineComponent({
       selected: [],
       selectAll: null,
     } as any;
+  },
+  computed: {
+    showWarning(): boolean {
+      return !this.options.every((option: { label: string; value: any }) => {
+        return this.selected.some((select: string) => option.value === select);
+      });
+    },
   },
   watch: {
     selected(val): void {

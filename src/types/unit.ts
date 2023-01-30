@@ -352,19 +352,19 @@ export class Unit {
           ultMats: 0,
         },
         tier3: {
-          tickets: 50, //unknown
+          tickets: 60,
           count: 2,
           shards: 50,
           ultMats: 0,
         },
         tier4: {
-          tickets: 100, //unknown
+          tickets: 70,
           count: 2,
           shards: 55,
           ultMats: 0,
         },
         tier5: {
-          tickets: 100, //unknown
+          tickets: 90, //unknown
           count: 12,
           ultMats: 1,
         },
@@ -598,22 +598,6 @@ export class Unit {
     };
     return glShardsTiers[this.id];
   }
-
-  // public get totalGLTicketsNeeded(): number {
-  //   if (!this.isGL) {
-  //     return 0;
-  //   }
-  //   const { tier1, tier2, tier3, tier4, tier5, tier6 } = this.glTiers;
-
-  //   return (
-  //     tier1.count * tier1.tickets +
-  //     tier2.count * tier2.tickets +
-  //     tier3.count * tier3.tickets +
-  //     tier4.count * tier4.tickets +
-  //     tier5.count * tier5.tickets +
-  //     tier6.count * tier6.tickets
-  //   );
-  // }
 
   public get glTicketsForUnlock(): number {
     const { tier1, tier2, tier3, tier4, tier5, tier6 } = this.glTiers;

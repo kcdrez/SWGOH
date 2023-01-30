@@ -1,6 +1,6 @@
 <template>
   <div class="mod-icon">
-    <img :src="`/images/mod_${shape}.png`" class="hide-lg" />
+    <img :src="`images/mod_${shape}.png`" class="hide-lg" />
     <span class="mod-text">{{ value }}</span>
   </div>
 </template>
