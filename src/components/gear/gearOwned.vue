@@ -31,6 +31,13 @@ export default defineComponent({
       owned: unvue(this.salvage.owned),
     };
   },
+  watch: {
+    salvage(newVal: Gear) {
+      if (newVal.owned !== this.owned) {
+        this.owned = unvue(newVal.owned);
+      }
+    },
+  },
   methods: {
     save: _.debounce(function (this: any) {
       this.salvage.owned = this.owned;

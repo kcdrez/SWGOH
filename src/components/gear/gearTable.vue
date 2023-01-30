@@ -313,7 +313,6 @@ export default defineComponent({
                 zeroState: {
                   message: "No known farmable locations.",
                   show: gear.locations.length <= 0,
-                  // classes: 'text-center'
                 },
                 type: "buttonToggle",
                 data: {
