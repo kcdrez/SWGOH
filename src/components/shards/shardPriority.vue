@@ -46,6 +46,11 @@ export default defineComponent({
       });
     },
   },
+  watch: {
+    unit(newVal: Unit) {
+      this.priority = newVal.tablePriority(this.nodeTableNames);
+    },
+  },
   methods: {
     save: _.debounce(function (this: any) {
       this.unit.shardNodes = this.nodeData;

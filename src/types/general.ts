@@ -31,6 +31,7 @@ interface iHeaderCell {
   value?: any;
   colspan?: string;
   data?: any;
+  showOption?: boolean;
 }
 
 interface iHeaderRow {

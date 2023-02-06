@@ -490,8 +490,13 @@ export interface IAbilityStat extends IBasicAbilityStat {
   omicron?: OmicronAbility;
 }
 
+export type tOmicronMode =
+  | "Territory Wars"
+  | "Territory Battle"
+  | "Grand Arena";
+
 interface OmicronAbility extends IAbilityStat {
-  mode: "Territory Wars" | "Territory Battle" | "Grand Arena";
+  mode: tOmicronMode;
 }
 
 export interface MatchPayload {

@@ -12,7 +12,7 @@ import {
 } from "./shards";
 import { round2Decimals } from "utils";
 import { CurrencyTypeConfig } from "./currency";
-import { anyTagsMatch } from "./teams";
+import { anyTagsMatch, tOmicronMode } from "./teams";
 import relicMapping from "./relicMapping";
 
 interface IStatMultiplier {
@@ -238,6 +238,24 @@ export class Unit {
   public get omicrons() {
     return this._omicron_abilities ?? [];
   }
+  public hasOmicronAbilities(mode?: tOmicronMode) {
+    const abilityData = store.state.teams.abilityStatsData[this.id] ?? {};
+    const leader = abilityData.leader?.some((ability) => {
+      if (mode) {
+        return ability.omicron?.mode === mode;
+      } else {
+        return !!ability.omicron;
+      }
+    });
+    const unique = abilityData.unique?.some((ability) => {
+      if (mode) {
+        return ability.omicron?.mode === mode;
+      } else {
+        return !!ability.omicron;
+      }
+    });
+    return leader || unique;
+  }
   public get abilityClasses() {
     return this._ability_classes ?? [];
   }
@@ -364,7 +382,7 @@ export class Unit {
           ultMats: 0,
         },
         tier5: {
-          tickets: 90, //unknown
+          tickets: 70,
           count: 12,
           ultMats: 1,
         },

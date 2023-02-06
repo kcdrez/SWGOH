@@ -54,6 +54,7 @@ interface dataModel {
   selectedColumns: string[];
   storageKey: string;
   initialize: boolean;
+  unit: null | Unit;
 }
 
 export default defineComponent({
@@ -77,6 +78,7 @@ export default defineComponent({
       selectedColumns: [],
       storageKey,
       initialize: false,
+      unit: null,
     } as dataModel;
   },
   computed: {
@@ -124,36 +126,42 @@ export default defineComponent({
               },
               {
                 label: "Gear Level",
-                show: this.showCol("gearLevel"),
+                show: this.showCol("gearLevel") && !this.unit?.isShip,
                 icon: this.sortIcon("gearLevel"),
                 value: "gearLevel",
+                showOption: !this.unit?.isShip,
                 click: () => {
                   this.sortBy("gearLevel");
                 },
               },
               {
                 label: "Relic Level",
-                show: this.showCol("relicLevel"),
+                show: this.showCol("relicLevel") && !this.unit?.isShip,
                 icon: this.sortIcon("relicLevel"),
                 value: "relicLevel",
+                showOption: !this.unit?.isShip,
                 click: () => {
                   this.sortBy("relicLevel");
                 },
               },
               {
                 label: "Zetas",
-                show: this.showCol("zetas"),
+                show: this.showCol("zetas") && !this.unit?.isShip,
                 icon: this.sortIcon("zetas"),
                 value: "zetas",
+                showOption: !this.unit?.isShip,
                 click: () => {
                   this.sortBy("zetas");
                 },
               },
               {
                 label: "Omicrons",
-                show: this.showCol("omicrons"),
+                show:
+                  this.showCol("omicrons") &&
+                  this.unit?.hasOmicronAbilities("Territory Wars"),
                 icon: this.sortIcon("omicrons"),
                 value: "omicrons",
+                showOption: this.unit?.hasOmicronAbilities("Territory Wars"),
                 click: () => {
                   this.sortBy("omicrons");
                 },
@@ -169,7 +177,8 @@ export default defineComponent({
               },
               {
                 label: "Speed (Mods)",
-                show: this.showCol("speedMods"),
+                show: this.showCol("speedMods") && !this.unit?.isShip,
+                showOption: !this.unit?.isShip,
                 icon: this.sortIcon("speedMods"),
                 value: "speedMods",
                 click: () => {
@@ -277,7 +286,8 @@ export default defineComponent({
               },
               {
                 label: "Has Ult?",
-                show: this.showCol("ultimate"),
+                show: this.showCol("ultimate") && (this.unit?.isGL ?? false),
+                showOption: this.unit?.isGL,
                 icon: this.sortIcon("ultimate"),
                 value: "ultimate",
                 click: () => {
@@ -311,22 +321,25 @@ export default defineComponent({
                 label: "Stars:",
               },
               {
-                show: this.showCol("gearLevel"),
+                show: this.showCol("gearLevel") && (!this.unit?.isShip ?? true),
                 data: player.gearLevel,
                 label: "Gear Level:",
               },
               {
-                show: this.showCol("relicLevel"),
+                show:
+                  this.showCol("relicLevel") && (!this.unit?.isShip ?? true),
                 data: player.relicLevel,
                 label: "Relic Level:",
               },
               {
-                show: this.showCol("zetas"),
+                show: this.showCol("zetas") && (!this.unit?.isShip ?? true),
                 data: player.zetas,
                 label: "Zetas:",
               },
               {
-                show: this.showCol("omicrons"),
+                show:
+                  this.showCol("omicrons") &&
+                  (this.unit?.hasOmicronAbilities("Territory Wars") ?? false),
                 data: player.omicrons,
                 label: "Omicrons:",
               },
@@ -336,7 +349,7 @@ export default defineComponent({
                 label: "Speed:",
               },
               {
-                show: this.showCol("speedMods"),
+                show: this.showCol("speedMods") && (!this.unit?.isShip ?? true),
                 data: player.speedMod,
                 label: "Speed (Mods):",
               },
@@ -396,7 +409,7 @@ export default defineComponent({
                 label: "Resistance:",
               },
               {
-                show: this.showCol("ultimate"),
+                show: this.showCol("ultimate") && (this.unit?.isGL ?? false),
                 data: player.ultimate ? "Yes" : "No",
                 label: "Has Ult:",
               },
@@ -457,6 +470,7 @@ export default defineComponent({
     selectUnit: _.debounce(async function (this: any, unit: null | Unit) {
       if (unit && unit.id) {
         this.loading = loadingState.loading;
+        this.unit = unit;
         this.data = await this.fetchGuildUnitData(unit.id);
         this.loading = loadingState.ready;
         this.initialize = true;

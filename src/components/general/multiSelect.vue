@@ -24,7 +24,7 @@
           >
         </li>
         <li v-for="(option, index) in options" :key="index">
-          <template v-if="option.value">
+          <template v-if="option.value && (option.showOption ?? true)">
             <input
               type="checkbox"
               :id="index.toString()"
@@ -46,7 +46,11 @@ export default defineComponent({
   name: "MultiSelect",
   props: {
     options: {
-      type: Array as () => { label: string; value: any }[],
+      type: Array as () => {
+        label: string;
+        value: any;
+        showOption?: boolean;
+      }[],
       required: true,
     },
     label: {
