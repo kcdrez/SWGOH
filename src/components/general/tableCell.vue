@@ -452,6 +452,8 @@ export default defineComponent({
           : this.cell.data.value;
         if (this.cell.type === "number") {
           value = Number(value);
+        } else if (value === "true" || value === "false") {
+          value = value === "true";
         }
         this.cell.change(value);
       }
