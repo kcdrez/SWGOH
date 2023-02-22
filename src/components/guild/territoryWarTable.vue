@@ -329,11 +329,11 @@ export default defineComponent({
                     },
                   ],
                 },
-                enter: (val: any) => {
+                enter: (val: boolean) => {
                   this.newEvent.win = val;
                   this.addNewEvent();
                 },
-                change: (val: any) => {
+                change: (val: boolean) => {
                   this.newEvent.win = val;
                 },
               },
