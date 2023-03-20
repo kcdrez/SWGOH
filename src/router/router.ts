@@ -141,12 +141,12 @@ const routes = [
     },
     props: {
       default: {
-        dependencyModules: ["guild", "teams"],
+        dependencyModules: ["guild", "teams", "unit"],
       },
     },
     children: [
       {
-        path: "",
+        path: "events",
         name: "GuildEventsPage",
         component: GuildEventsPage,
       },
@@ -154,6 +154,34 @@ const routes = [
         path: "units",
         name: "GuildUnitsPage",
         component: GuildUnitsPage,
+      },
+    ],
+  },
+  {
+    path: "/guild/:guildId?",
+    components: {
+      default: BasicLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["guild", "teams", "unit"],
+      },
+    },
+    children: [
+      {
+        path: "events",
+        name: "GuildEventsPage",
+        component: GuildEventsPage,
+      },
+      {
+        path: "units",
+        name: "GuildUnitsPage",
+        component: GuildUnitsPage,
+      },
+      {
+        path: "stats",
+        name: "GuildStats",
+        component: GuildStats,
       },
     ],
   },
@@ -280,24 +308,6 @@ const routes = [
         path: "",
         name: "TWPlannerPage",
         component: TWPlannerPage,
-      },
-    ],
-  },
-  {
-    path: "/guild-stats",
-    components: {
-      default: PlayerLoadingPage,
-    },
-    props: {
-      default: {
-        dependencyModules: ["unit", "guild"],
-      },
-    },
-    children: [
-      {
-        path: "",
-        name: "GuildStats",
-        component: GuildStats,
       },
     ],
   },

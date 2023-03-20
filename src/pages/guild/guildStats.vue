@@ -1,6 +1,6 @@
 <template>
   <div class="container swgoh-page">
-    <div class="row">
+    <div class="row" v-if="fetchGuildId">
       <div class="col">
         <Loading
           :state="loading"
@@ -82,6 +82,27 @@
         </Loading>
       </div>
     </div>
+    <div class="row" v-else>
+      <div class="col">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text">Enter a Guild Id:</span>
+          <input class="form-control refresh-input" v-model="guildIdInput" />
+          <button
+            class="btn btn-primary"
+            type="button"
+            @click="
+              $router.push({
+                name: 'GuildStats',
+                params: { guildId: guildIdInput },
+              })
+            "
+            :disabled="!guildIdInput"
+          >
+            Search
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -116,6 +137,7 @@ interface dataModel {
   };
   loading: loadingState;
   storageKey: string;
+  guildIdInput: string;
 }
 
 const storageKey = "GuildStats";
@@ -144,10 +166,14 @@ export default defineComponent({
       },
       loading: loadingState.initial,
       storageKey,
+      guildIdInput: "",
     } as dataModel;
   },
   computed: {
     ...mapState("guild", ["guildId"]),
+    fetchGuildId() {
+      return this.guildId || this.$route.params.guildId;
+    },
     header(): iTableHead {
       const relicLevelHeader: iHeaderCell = {
         label: "Relic Level",
@@ -367,9 +393,11 @@ export default defineComponent({
     ...mapActions("guild", ["fetchGuildUnitData"]),
   },
   async created() {
-    this.loading = loadingState.loading;
-    this.gp = await apiClient.fetchGuildStats(this.guildId);
-    this.loading = loadingState.ready;
+    if (this.fetchGuildId) {
+      this.loading = loadingState.loading;
+      this.gp = await apiClient.fetchGuildStats(this.fetchGuildId);
+      this.loading = loadingState.ready;
+    }
   },
 });
 </script>

@@ -1,6 +1,6 @@
 <template>
   <Loading :state="loadingState" size="lg">
-    <router-view />
+    <router-view :key="$route.fullPath" />
   </Loading>
 </template>
 
@@ -32,7 +32,11 @@ export default defineComponent({
   methods: {
     refresh() {
       this.$nextTick(() => {
-        initializeModules(this.dependencyModules, !this.loadAsync);
+        initializeModules(
+          this.dependencyModules,
+          !this.loadAsync,
+          this.$route.params
+        );
       });
     },
   },

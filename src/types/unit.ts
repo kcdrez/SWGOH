@@ -1588,8 +1588,10 @@ export function getUnitsByTag(
 }
 
 export function getUnit(unitId: string) {
-  const playerUnits = store.state.player.player?.units ?? [];
-  const otherUnits = store.state.unit.unitList;
+  const playerUnits = store.state.player.player
+    ? store.state.player.player?.units
+    : [];
+  const otherUnits = store.state.unit.unitList ?? [];
   return [...playerUnits, ...otherUnits].find((x) => x.id === unitId);
 }
 

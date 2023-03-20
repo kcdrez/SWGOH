@@ -1,6 +1,6 @@
 <template>
   <Loading :state="loadingState" size="lg">
-    <router-view />
+    <router-view :key="$route.fullPath" />
   </Loading>
 </template>
 

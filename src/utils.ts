@@ -58,18 +58,19 @@ export function round2Decimals(num: number) {
 
 export async function initializeModules(
   modulesList: string[],
-  synchronously: boolean = false
+  synchronously: boolean = false,
+  params: any = {}
 ) {
   if (synchronously) {
     for (let i = 0; i < modulesList.length; i++) {
       const moduleName = modulesList[i];
       //this doesnt fucking work for player module
-      await store.dispatch(`${moduleName}/initialize`);
+      await store.dispatch(`${moduleName}/initialize`, params);
     }
   } else {
     await Promise.all(
       modulesList.map((moduleName) =>
-        store.dispatch(`${moduleName}/initialize`)
+        store.dispatch(`${moduleName}/initialize`, params)
       )
     );
   }

@@ -129,7 +129,7 @@
               <td
                 :title="`Total amount of Guild Events Mk 3 needed to spend on gear every day to achieve a Relic ${calculator.relicTarget} every ${calculator.timeline} days`"
               >
-                Daily Guild Events (II) Currency Spent
+                Daily Guild Events (III) Currency Spent
                 <img src="../../images/get3.png" />
               </td>
               <td>{{ currencySpent.guild_events_store3 }}</td>

@@ -203,7 +203,7 @@ export default defineComponent({
   async created() {
     const ids: string[] = this.twUnits.map((unit: Unit) => unit.id);
     this.loading = loadingState.loading;
-    this.players = await this.fetchGuildUnitData(ids);
+    this.players = await this.fetchGuildUnitData({ unitId: ids });
     this.playersJoined = JSON.parse(
       window.localStorage.getItem(storageKey) || "[]"
     );

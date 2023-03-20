@@ -1,7 +1,7 @@
 <template>
   <Loading :state="loadingState" size="lg">
     <template v-slot:error>{{ errorLoading }}</template>
-    <router-view />
+    <router-view :key="$route.fullPath" />
   </Loading>
 </template>
 
