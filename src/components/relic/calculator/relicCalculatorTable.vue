@@ -13,12 +13,9 @@
         @checked="selectedColumns = $event"
       />
     </div>
-    <SwgohTable
-      :table="{ header, body }"
-      :id="plannerData.id"
-      :ref="storageKey"
-      class="collapse"
-    />
+    <div :ref="storageKey" class="collapse">
+      <SwgohTable :table="{ header, body }" :id="plannerData.id" />
+    </div>
   </div>
 </template>
 

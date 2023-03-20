@@ -1,34 +1,62 @@
 <template>
   <div class="container swgoh-page mb-3">
-    <UnitSearch @select="selectUnit($event)" />
-    <Loading
-      :state="loading"
-      message="Loading Guild's Unit Data"
-      size="lg"
-      displayText="Please wait...This may take a few minutes."
-    >
-      <template v-if="data">
-        <button class="btn btn-sm btn-primary my-3" @click="downloadXlsx()">
-          Download as XLSX
-        </button>
-        <div class="collapse-header section-header extended-1">
-          <h3>
-            <div data-bs-toggle="collapse" href="#player-data">Player Data</div>
-          </h3>
-          <div class="toggles-container">
-            <MultiSelect
-              class="select-columns"
-              :options="cols"
-              :storageKey="storageKey + 'PlayerColumns'"
-              @checked="selectedColumns = $event"
-            />
+    <template v-if="$route.params.guildId">
+      <div class="input-group input-group-sm">
+        <span class="input-group-text">Select a Unit to view Guild Data:</span>
+        <UnitSearch @select="selectUnit($event)" />
+      </div>
+      <Loading
+        :state="loading"
+        message="Loading Guild's Unit Data"
+        size="lg"
+        displayText="Please wait...This may take a few minutes."
+      >
+        <template v-if="data">
+          <button class="btn btn-sm btn-primary my-3" @click="downloadXlsx()">
+            Download as XLSX
+          </button>
+          <div class="collapse-header section-header extended-1">
+            <h3>
+              <div data-bs-toggle="collapse" href="#player-data">
+                Player Data
+              </div>
+            </h3>
+            <div class="toggles-container">
+              <MultiSelect
+                class="select-columns"
+                :options="cols"
+                :storageKey="storageKey + 'PlayerColumns'"
+                @checked="selectedColumns = $event"
+              />
+            </div>
           </div>
+          <div id="player-data" class="collapse" ref="playerData">
+            <SwgohTable :table="{ header, body }" />
+          </div>
+        </template>
+      </Loading>
+    </template>
+    <div class="row" v-else>
+      <div class="col">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text">Enter a Guild Id:</span>
+          <input class="form-control refresh-input" v-model="guildIdInput" />
+          <button
+            class="btn btn-primary"
+            type="button"
+            @click="
+              $router.push({
+                name: 'GuildUnitsPage',
+                params: { guildId: guildIdInput },
+              })
+            "
+            :disabled="!guildIdInput"
+          >
+            Search
+          </button>
         </div>
-        <div id="player-data" class="collapse" ref="playerData">
-          <SwgohTable :table="{ header, body }" />
-        </div>
-      </template>
-    </Loading>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -55,6 +83,7 @@ interface dataModel {
   storageKey: string;
   initialize: boolean;
   unit: null | Unit;
+  guildIdInput: string;
 }
 
 export default defineComponent({
@@ -79,6 +108,7 @@ export default defineComponent({
       storageKey,
       initialize: false,
       unit: null,
+      guildIdInput: "",
     } as dataModel;
   },
   computed: {
@@ -471,7 +501,10 @@ export default defineComponent({
       if (unit && unit.id) {
         this.loading = loadingState.loading;
         this.unit = unit;
-        this.data = await this.fetchGuildUnitData(unit.id);
+        this.data = await this.fetchGuildUnitData({
+          unitId: unit.id,
+          guildId: this.$route.params.guildId,
+        });
         this.loading = loadingState.ready;
         this.initialize = true;
       }

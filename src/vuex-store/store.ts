@@ -71,7 +71,10 @@ const store = createStore<State>({
         const someLoading = moduleNames.some((name) => {
           if (name in state) {
             const { requestState } = state[name];
-            return requestState === loadingState.loading;
+            return (
+              requestState === loadingState.loading ||
+              requestState === loadingState.initial
+            );
           } else {
             return false;
           }

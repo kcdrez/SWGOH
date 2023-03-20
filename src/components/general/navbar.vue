@@ -13,156 +13,27 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbar-toggler">
-        <ul class="navbar-nav me-auto" v-if="player">
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              role="button"
-              data-bs-toggle="dropdown"
-            >
-              Character Progression
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'CharacterFarmingPage' }"
-                  >Character Farming</router-link
-                >
-              </li>
-              <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'GeneralPlannerPage' }"
-                  >General Planner</router-link
-                >
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              role="button"
-              data-bs-toggle="dropdown"
-            >
-              Team Building
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <router-link class="dropdown-item" :to="{ name: 'TeamPage' }"
-                  >Team Management</router-link
-                >
-              </li>
-              <li>
-                <router-link class="dropdown-item" :to="{ name: 'MatchUpPage' }"
-                  >Versus</router-link
-                >
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              role="button"
-              data-bs-toggle="dropdown"
-            >
-              Guild
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <router-link class="dropdown-item" :to="{ name: 'GuildStats' }"
-                  >Guild Stats</router-link
-                >
-              </li>
-              <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'TWPlannerPage' }"
-                  >TW Planner</router-link
-                >
-              </li>
-              <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'GuildEventsPage' }"
-                  >Guild Event History</router-link
-                >
-              </li>
-              <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'GuildUnitsPage' }"
-                  >Guild Units Status</router-link
-                >
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              role="button"
-              data-bs-toggle="dropdown"
-            >
-              Misc. Tools
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'StatCalculatorPage' }"
-                  >Stat Calculator</router-link
-                >
-              </li>
-              <li>
-                <router-link class="dropdown-item" :to="{ name: 'GLChecklist' }"
-                  >GL/Legendary Checklist</router-link
-                >
-              </li>
-              <li>
-                <router-link class="dropdown-item" :to="{ name: 'GoalsPage' }"
-                  >Goals List</router-link
-                >
-              </li>
-              <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'TBStatusPage' }"
-                  >TB Status</router-link
-                >
-              </li>
-              <!-- <li>
-                <router-link class="dropdown-item" :to="{ name: 'GearList' }"
-                  >Gear List</router-link
-                >
-              </li> -->
-              <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'ScavengerPage' }"
-                  >Scavenger</router-link
-                >
-              </li>
-              <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'RelicCalculator' }"
-                  >Relic Planner</router-link
-                >
-              </li>
-              <li>
-                <router-link
-                  class="dropdown-item"
-                  :to="{ name: 'UnitSearchPage' }"
-                  >Unit Search</router-link
-                >
-              </li>
-              <!-- <li>
-                <router-link class="dropdown-item" :to="{ name: 'Widgets' }"
-                  >Widgets</router-link
-                >
-              </li> -->
-            </ul>
-          </li>
+        <ul class="navbar-nav me-auto">
+          <template v-for="item in navItems">
+            <li class="nav-item dropdown" v-if="item.show">
+              <a
+                class="nav-link dropdown-toggle"
+                role="button"
+                data-bs-toggle="dropdown"
+              >
+                {{ item.label }}
+              </a>
+              <ul class="dropdown-menu">
+                <template v-for="child in item.children">
+                  <li v-if="child.show">
+                    <router-link class="dropdown-item" :to="child.to">{{
+                      child.label
+                    }}</router-link>
+                  </li>
+                </template>
+              </ul>
+            </li>
+          </template>
         </ul>
         <div class="d-flex">
           <div class="input-group input-group-sm">
@@ -230,6 +101,109 @@ export default defineComponent({
   },
   computed: {
     ...mapState("player", ["player"]),
+    navItems(): any[] {
+      const characterMenu = [
+        {
+          label: "Character Farming",
+          to: { name: "CharacterFarmingPage" },
+          show: !!this.player,
+        },
+        {
+          label: "General Planner",
+          to: { name: "GeneralPlannerPage" },
+          show: !!this.player,
+        },
+      ];
+      const teamMenu = [
+        {
+          label: "Team Management",
+          to: { name: "TeamPage" },
+          show: !!this.player,
+        },
+        {
+          label: "Versus",
+          to: { name: "MatchUpPage" },
+          show: !!this.player,
+        },
+      ];
+      const guildMenu = [
+        {
+          label: "Guild Stats",
+          to: { name: "GuildStats" },
+          show: true,
+        },
+        {
+          label: "TW Planner",
+          to: { name: "TWPlannerPage" },
+          show: !!this.player,
+        },
+        {
+          label: "Guild Event History",
+          to: { name: "GuildEventsPage" },
+          show: true,
+        },
+        {
+          label: "Guild Unit Stats",
+          to: { name: "GuildUnitsPage" },
+          show: true,
+        },
+      ];
+      const miscMenu = [
+        {
+          label: "Stat Calculator",
+          to: { name: "StatCalculatorPage" },
+          show: !!this.player,
+        },
+        {
+          label: "GL/Legendary Checklist",
+          to: { name: "GLChecklist" },
+          show: !!this.player,
+        },
+        {
+          label: "TB Status",
+          to: { name: "TBStatusPage" },
+          show: !!this.player,
+        },
+        {
+          label: "Relic Scavenger",
+          to: { name: "ScavengerPage" },
+          show: true,
+        },
+        {
+          label: "Relic Planner",
+          to: { name: "RelicCalculator" },
+          show: true,
+        },
+        {
+          label: "Unit Search",
+          to: { name: "UnitSearchPage" },
+          show: true,
+        },
+      ];
+
+      return [
+        {
+          label: "Character Progression",
+          children: characterMenu,
+          show: this.showMenu(characterMenu),
+        },
+        {
+          label: "Team Building",
+          children: teamMenu,
+          show: this.showMenu(teamMenu),
+        },
+        {
+          label: "Guild",
+          children: guildMenu,
+          show: this.showMenu(guildMenu),
+        },
+        {
+          label: "Misc. Tools",
+          children: miscMenu,
+          show: this.showMenu(miscMenu),
+        },
+      ];
+    },
   },
   methods: {
     ...mapActions("player", ["resetPlayer"]),
@@ -240,6 +214,9 @@ export default defineComponent({
           params: { unitId: this.searchUnit?.id },
         });
       }
+    },
+    showMenu(arr: any[]): boolean {
+      return arr.some((x) => x.show);
     },
   },
 });

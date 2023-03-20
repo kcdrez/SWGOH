@@ -1,5 +1,6 @@
 import { ActionContext } from "vuex";
 import { v4 as uuid } from "uuid";
+import moment from "moment";
 
 import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
@@ -10,7 +11,6 @@ import {
   ITerritoryWarEvent,
 } from "types/guild";
 import { round2Decimals } from "utils";
-import moment from "moment";
 
 interface State {
   requestState: loadingState;
@@ -200,8 +200,12 @@ const store = {
     },
   },
   actions: {
-    async initialize({ commit, state, rootState }: ActionCtx) {
-      const guildId = rootState.player.player?.guild_id || "";
+    async initialize(
+      { commit, state, rootState }: ActionCtx,
+      routeParams: any = {}
+    ) {
+      const guildId =
+        routeParams?.guildId || rootState.player.player?.guild_id || "";
       const allyCode = rootState.player.allyCode;
 
       if (state.requestState !== loadingState.initial) {
@@ -216,16 +220,23 @@ const store = {
       commit("SET_REQUEST_STATE", loadingState.loading);
       commit("SET_GUILD_ID", guildId);
 
-      const [guildData, accessLevel] = await Promise.all([
-        apiClient.fetchGuild(guildId),
-        apiClient.fetchAccessLevel(guildId, allyCode),
-      ]);
-      if (guildData) {
-        commit("SET_EVENTS", guildData);
+      if (allyCode) {
+        const [guildData, accessLevel] = await Promise.all([
+          apiClient.fetchGuild(guildId),
+          apiClient.fetchAccessLevel(guildId, allyCode),
+        ]);
+
+        if (guildData) {
+          commit("SET_EVENTS", guildData);
+        } else {
+          await apiClient.createGuild(guildId);
+        }
+        commit("SET_ACCESS_LEVEL", accessLevel.role);
       } else {
-        await apiClient.createGuild(guildId);
+        const guildData = await apiClient.fetchGuild(guildId);
+        commit("SET_EVENTS", guildData);
       }
-      commit("SET_ACCESS_LEVEL", accessLevel.role);
+
       commit("SET_REQUEST_STATE", loadingState.ready);
     },
     async addTerritoryWarEvent(
@@ -286,12 +297,16 @@ const store = {
     },
     async fetchGuildUnitData(
       { state }: ActionCtx,
-      unitId: string | string[] | undefined
+      data: {
+        unitId: string | string[] | undefined;
+        guildId: string | undefined;
+      }
     ) {
-      if (Array.isArray(unitId) || unitId === undefined) {
-        return await apiClient.fetchGuildUnits(state.guildId, unitId);
+      const guildId = data.guildId ?? state.guildId;
+      if (Array.isArray(data.unitId) || data.unitId === undefined) {
+        return await apiClient.fetchGuildUnits(guildId, data.unitId);
       } else {
-        return await apiClient.fetchGuildUnitData(state.guildId, unitId);
+        return await apiClient.fetchGuildUnitData(guildId, data.unitId);
       }
     },
   },
