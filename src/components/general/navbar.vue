@@ -53,7 +53,7 @@
               {{ player?.name || "Profile" }}
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li @click="resetPlayer" v-if="player">
+              <li @click="resetPlayer" v-if="isLoggedIn" class="c-pointer">
                 <div class="dropdown-item">Logout</div>
               </li>
               <li>
@@ -63,8 +63,8 @@
                   <!-- <div>S: server version</div> -->
                 </div>
               </li>
-              <li v-if="player">
-                <div class="dropdown-item">
+              <li v-if="isLoggedIn">
+                <div class="dropdown-item last-updated-container">
                   <LastUpdated class="p-0 navbar-text" />
                 </div>
               </li>
@@ -101,50 +101,62 @@ export default defineComponent({
   },
   computed: {
     ...mapState("player", ["player"]),
+    isLoggedIn(): boolean {
+      return !!this.player;
+    },
     navItems(): any[] {
       const characterMenu = [
         {
           label: "Character Farming",
           to: { name: "CharacterFarmingPage" },
-          show: !!this.player,
+          show: this.isLoggedIn,
         },
         {
           label: "General Planner",
           to: { name: "GeneralPlannerPage" },
-          show: !!this.player,
+          show: this.isLoggedIn,
         },
       ];
       const teamMenu = [
         {
           label: "Team Management",
           to: { name: "TeamPage" },
-          show: !!this.player,
+          show: this.isLoggedIn,
         },
         {
           label: "Versus",
           to: { name: "MatchUpPage" },
-          show: !!this.player,
+          show: this.isLoggedIn,
         },
       ];
       const guildMenu = [
         {
           label: "Guild Stats",
-          to: { name: "GuildStats" },
+          to: {
+            name: "GuildStats",
+            params: this.isLoggedIn ? { guildId: this.player.guild_id } : {},
+          },
           show: true,
         },
         {
           label: "TW Planner",
           to: { name: "TWPlannerPage" },
-          show: !!this.player,
+          show: this.isLoggedIn,
         },
         {
           label: "Guild Event History",
-          to: { name: "GuildEventsPage" },
+          to: {
+            name: "GuildEventsPage",
+            params: this.isLoggedIn ? { guildId: this.player.guild_id } : {},
+          },
           show: true,
         },
         {
           label: "Guild Unit Stats",
-          to: { name: "GuildUnitsPage" },
+          to: {
+            name: "GuildUnitsPage",
+            params: this.isLoggedIn ? { guildId: this.player.guild_id } : {},
+          },
           show: true,
         },
       ];
@@ -152,17 +164,17 @@ export default defineComponent({
         {
           label: "Stat Calculator",
           to: { name: "StatCalculatorPage" },
-          show: !!this.player,
+          show: this.isLoggedIn,
         },
         {
           label: "GL/Legendary Checklist",
           to: { name: "GLChecklist" },
-          show: !!this.player,
+          show: this.isLoggedIn,
         },
         {
           label: "TB Status",
           to: { name: "TBStatusPage" },
-          show: !!this.player,
+          show: this.isLoggedIn,
         },
         {
           label: "Relic Scavenger",
@@ -233,9 +245,11 @@ nav {
   @media only screen and (min-width: 990px) {
     display: flex;
   }
-  .versions {
+  .versions,
+  .last-updated-container {
     &:hover {
       background: none !important;
+      cursor: default;
     }
     .client,
     .server {

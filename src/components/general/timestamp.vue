@@ -78,7 +78,7 @@ export default defineComponent({
   .display-container {
     &:not(.completed):not(.unknown) {
       border-bottom: 1px dashed #d4d4d4;
-      cursor: pointer;
+      cursor: help;
     }
   }
   .display-text {
