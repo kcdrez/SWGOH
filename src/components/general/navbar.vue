@@ -116,6 +116,16 @@ export default defineComponent({
           to: { name: "GeneralPlannerPage" },
           show: this.isLoggedIn,
         },
+        {
+          label: "GL/Legendary Checklist",
+          to: { name: "GLChecklist" },
+          show: this.isLoggedIn,
+        },
+        {
+          label: "Goals List",
+          to: { name: "GoalsPage" },
+          show: this.isLoggedIn,
+        },
       ];
       const teamMenu = [
         {
@@ -164,11 +174,6 @@ export default defineComponent({
         {
           label: "Stat Calculator",
           to: { name: "StatCalculatorPage" },
-          show: this.isLoggedIn,
-        },
-        {
-          label: "GL/Legendary Checklist",
-          to: { name: "GLChecklist" },
           show: this.isLoggedIn,
         },
         {
