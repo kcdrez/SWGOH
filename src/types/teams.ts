@@ -772,10 +772,10 @@ function getUniqueFromTeamMembers(
 
 export function speedValueFromMod(mod: Mod | undefined): number {
   if (mod) {
-    if (mod.primaryStat.unitStat === 5) {
-      return mod.primaryStat.value;
+    if (mod.primary_stat.stat_id === 5) {
+      return mod.primary_stat.value;
     } else {
-      const match = mod.secondaryStat.find((x) => x.unitStat === 5);
+      const match = mod.secondary_stats.find((x) => x.stat_id === 5);
       if (match) {
         return match.value;
       }

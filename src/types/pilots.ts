@@ -255,7 +255,7 @@ export const abilityMap: tMap = {
   9: 663,
 };
 
-//top level is the mod level, secondary is the pips count
+//top level is the mod level, secondary is the rarity/pips count
 export const modsMap: tModsMap = {
   1: {
     1: 1,

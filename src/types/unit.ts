@@ -59,7 +59,7 @@ export interface IUnit {
   has_ultimate?: boolean;
   xp?: number;
   mods?: Mod[];
-  crew?: ICrew[];
+  crew?: string[];
   stars?: number;
   is_ship?: boolean;
   zeta_abilities: string[];
@@ -94,7 +94,7 @@ export class Unit {
   private _zeta_abilities?: string[];
   private _omicron_abilities?: string[];
   private _has_ultimate?: boolean;
-  private _crew?: ICrew[];
+  private _crew?: string[];
   private _stat_multipliers?: IStatMultiplier;
 
   private _estimatedTime: number = 0;
@@ -783,15 +783,15 @@ export class Unit {
       let amount = 0;
       let percent = 0;
       this._mods.forEach((mod) => {
-        if (mod.primaryStat.unitStat === 56) {
-          percent += mod.primaryStat.value;
+        if (mod.primary_stat.stat_id === 56) {
+          percent += mod.primary_stat.value / 100;
         }
 
-        mod.secondaryStat.forEach((stat) => {
-          if (stat.unitStat === 28) {
-            amount += stat.value;
-          } else if (stat.unitStat === 56) {
-            percent += stat.value;
+        mod.secondary_stats.forEach((stat) => {
+          if (stat.stat_id === 28) {
+            amount += stat.value / 10000;
+          } else if (stat.stat_id === 56) {
+            percent += stat.value / 100;
           }
         });
       });
@@ -815,16 +815,16 @@ export class Unit {
       percent += this.healthSetsCount * 10;
 
       this._mods.forEach((mod) => {
-        if (mod.primaryStat.unitStat === 55) {
-          percent += mod.primaryStat.value;
+        if (mod.primary_stat.stat_id === 55) {
+          percent += mod.primary_stat.value / 100;
         }
 
-        mod.secondaryStat.forEach((stat) => {
-          if (stat.unitStat === 1) {
-            amount += stat.value;
+        mod.secondary_stats.forEach((stat) => {
+          if (stat.stat_id === 1) {
+            amount += stat.value / 10000;
           }
-          if (stat.unitStat === 55) {
-            percent += stat.value;
+          if (stat.stat_id === 55) {
+            percent += stat.value / 100;
           }
         });
       });
@@ -894,16 +894,16 @@ export class Unit {
       percent += this.defenseSetsCount * 25;
 
       this._mods.forEach((mod) => {
-        if (mod.primaryStat.unitStat === 49) {
-          percent += mod.primaryStat.value;
+        if (mod.primary_stat.stat_id === 49) {
+          percent += mod.primary_stat.value / 100;
         }
 
-        mod.secondaryStat.forEach((stat) => {
-          if (stat.unitStat === 42) {
-            amount += stat.value;
+        mod.secondary_stats.forEach((stat) => {
+          if (stat.stat_id === 42) {
+            amount += stat.value / 10000;
           }
-          if (stat.unitStat === 49) {
-            percent += stat.value;
+          if (stat.stat_id === 49) {
+            percent += stat.value / 100;
           }
         });
       });
@@ -939,12 +939,12 @@ export class Unit {
         percent += modSet.every((mod) => mod.level === 15) ? 10 : 5;
       }
       this._mods.forEach((mod) => {
-        if (mod.primaryStat.unitStat === 5) {
-          amount += mod.primaryStat.value;
+        if (mod.primary_stat.stat_id === 5) {
+          amount += mod.primary_stat.value;
         }
 
-        mod.secondaryStat.forEach((stat) => {
-          if (stat.unitStat === 5) {
+        mod.secondary_stats.forEach((stat) => {
+          if (stat.stat_id === 5) {
             amount += stat.value;
           }
         });
@@ -984,15 +984,15 @@ export class Unit {
     }
 
     this._mods.forEach((mod) => {
-      if (mod.primaryStat.unitStat === 48) {
-        percent += mod.primaryStat.value;
+      if (mod.primary_stat.stat_id === 48) {
+        percent += mod.primary_stat.value;
       }
 
-      mod.secondaryStat.forEach((stat) => {
-        if (stat.unitStat === 41) {
+      mod.secondary_stats.forEach((stat) => {
+        if (stat.stat_id === 41) {
           //41 = flat offense, 53 = crit chance, 48 offense percent
           amount += stat.value;
-        } else if (stat.unitStat === 48) {
+        } else if (stat.stat_id === 48) {
           percent += stat.value;
         }
       });
@@ -1050,8 +1050,8 @@ export class Unit {
     });
 
     this._mods.forEach((mod) => {
-      mod.secondaryStat.forEach((stat) => {
-        if (stat.unitStat === 53) {
+      mod.secondary_stats.forEach((stat) => {
+        if (stat.stat_id === 53) {
           //41 = flat offense, 53 = crit chance, 48 offense percent
           amount += stat.value;
         }
@@ -1077,8 +1077,8 @@ export class Unit {
     }
 
     this._mods.forEach((mod) => {
-      if (mod.primaryStat.unitStat === 56) {
-        amount += mod.primaryStat.value;
+      if (mod.primary_stat.stat_id === 56) {
+        amount += mod.primary_stat.value;
       }
     });
     return round2Decimals(amount);
@@ -1434,30 +1434,31 @@ export interface Mod {
   tier: number;
   slot: number;
   set: number;
-  pips: number;
-  primaryStat: { unitStat: number; value: number };
-  secondaryStat: { unitStat: number; value: number; roll: number }[];
+  rarity: number; //pips
+  character: number;
+  reroll_count: number;
+  primary_stat: iModPrimaryStat;
+  secondary_stats: iModSecondaryStat[];
+}
+
+interface iModPrimaryStat {
+  stat_id: number;
+  value: number;
+  name: string;
+  display_value: string;
+}
+
+interface iModSecondaryStat extends iModPrimaryStat {
+  roll: number;
+  unscaled_roll_values: number;
+  stat_max: number;
+  stat_min: number;
+  stat_rolls: string[];
 }
 
 export interface UnitTier {
   tier: number;
   gear: string[];
-}
-
-interface ICrew {
-  unitId: string;
-  slot: number;
-  skillReferenceList: ICrewSkill[];
-  skilllessCrewAbilityId: string;
-  gp: number;
-  cp: number;
-}
-
-interface ICrewSkill {
-  skillId: string;
-  requiredTier: number;
-  requiredRarity: number;
-  requiredRelicTier: number;
 }
 
 export function unitsByPriority(

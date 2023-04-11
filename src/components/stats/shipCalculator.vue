@@ -110,7 +110,7 @@
                     <span class="input-group-text">Current Pips:</span>
                     <select
                       class="form-control"
-                      v-model.number="mod.pips.current"
+                      v-model.number="mod.rarity.current"
                     >
                       <option v-for="index in 6" :key="index" :value="index">
                         {{ index }}
@@ -119,7 +119,7 @@
                     <span class="input-group-text">Projected Pips:</span>
                     <select
                       class="form-control"
-                      v-model.number="mod.pips.projected"
+                      v-model.number="mod.rarity.projected"
                     >
                       <option v-for="index in 6" :key="index" :value="index">
                         {{ index }}
@@ -373,10 +373,10 @@ export default defineComponent({
           const modsRating = pilot.mods.reduce(
             (acc, mod) => {
               acc.current += (modsMap as any)[mod.level.current][
-                mod.pips.current
+                mod.rarity.current
               ];
               acc.projected += (modsMap as any)[mod.level.projected][
-                mod.pips.projected
+                mod.rarity.projected
               ];
               return acc;
             },
@@ -556,8 +556,8 @@ export default defineComponent({
         this.stars.current = newVal.stars ?? 1;
         this.stars.projected = newVal.stars ?? 1;
 
-        this.crew = newVal.crew.map((crewMember) => {
-          const unit: Unit = this.unitData(crewMember.unitId);
+        this.crew = newVal.crew.map((crewId) => {
+          const unit: Unit = this.unitData(crewId);
           const gearLevel = unit?.gearLevel ?? 0;
           const relicLevel =
             gearLevel < maxGearLevel ? 0 : unit?.relicLevel ?? 0;
@@ -600,9 +600,9 @@ export default defineComponent({
                   current: mod.level,
                   projected: mod.level,
                 },
-                pips: {
-                  current: mod.pips,
-                  projected: mod.pips,
+                rarity: {
+                  current: mod.rarity,
+                  projected: mod.rarity,
                 },
                 slot: mod.slot,
               };
