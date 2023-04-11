@@ -116,4 +116,14 @@ const store = createStore<State>({
   },
 });
 
+store.watch(
+  (state) => state.player.player,
+  (player) => {
+    store.dispatch("guild/fetchAccessCode", {
+      guildId: player?.guild_id,
+      allyCode: player?.allyCode,
+    });
+  }
+);
+
 export default store;

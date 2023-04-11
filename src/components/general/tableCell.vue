@@ -448,7 +448,7 @@ export default defineComponent({
     handleChange: _.debounce(function (this: any, event?: Event) {
       if (this.cell.change) {
         let value = event
-          ? (event.target as HTMLInputElement).value
+          ? (event.target as HTMLInputElement)?.value
           : this.cell.data.value;
         if (this.cell.type === "number") {
           value = Number(value);

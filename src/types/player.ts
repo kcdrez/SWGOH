@@ -8,7 +8,7 @@ import { IUnit, Unit } from "./unit";
 import { Goal } from "types/goals";
 
 export interface Player {
-  ally_code: number;
+  allyCode: number;
   name: string;
   units: Unit[];
   id?: string;

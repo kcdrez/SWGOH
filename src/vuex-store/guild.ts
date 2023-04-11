@@ -201,7 +201,7 @@ const store = {
   },
   actions: {
     async initialize(
-      { commit, state, rootState }: ActionCtx,
+      { commit, state, rootState, dispatch }: ActionCtx,
       routeParams: any = {}
     ) {
       const guildId =
@@ -221,23 +221,26 @@ const store = {
       commit("SET_GUILD_ID", guildId);
 
       if (allyCode) {
-        const [guildData, accessLevel] = await Promise.all([
-          apiClient.fetchGuild(guildId),
-          apiClient.fetchAccessLevel(guildId, allyCode),
-        ]);
-
+        const guildData = await apiClient.fetchGuild(guildId);
         if (guildData) {
           commit("SET_EVENTS", guildData);
         } else {
           await apiClient.createGuild(guildId);
         }
-        commit("SET_ACCESS_LEVEL", accessLevel.role);
+        await dispatch("fetchAccessCode", { guildId, allyCode });
       } else {
         const guildData = await apiClient.fetchGuild(guildId);
         commit("SET_EVENTS", guildData);
       }
 
       commit("SET_REQUEST_STATE", loadingState.ready);
+    },
+    async fetchAccessCode(
+      { commit }: ActionCtx,
+      { guildId, allyCode }: { guildId: string; allyCode: string }
+    ) {
+      const accessLevel = await apiClient.fetchAccessLevel(guildId, allyCode);
+      commit("SET_ACCESS_LEVEL", accessLevel.role);
     },
     async addTerritoryWarEvent(
       { dispatch, state }: ActionCtx,
