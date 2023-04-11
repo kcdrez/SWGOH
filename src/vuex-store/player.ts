@@ -85,7 +85,7 @@ const store = {
       commit("SET_REQUEST_STATE", loadingState.loading);
       try {
         let player = await apiClient.fetchPlayer(allyCode);
-        if (!player.id) {
+        if (!player) {
           player = await apiClient.createPlayer(allyCode);
         }
         commit("SET_PLAYER", player);

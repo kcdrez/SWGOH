@@ -40,10 +40,14 @@ const store = {
       state.gearList = payload;
     },
     SET_GEAR_LOCATIONS(state: State, payload: any) {
-      state.gearLocations = payload;
+      if (payload) {
+        state.gearLocations = payload;
+      }
     },
     SET_GEAR_OWNED(state: State, payload: any) {
-      state.gearConfig = payload;
+      if (payload) {
+        state.gearConfig = payload;
+      }
     },
     UPSERT_OWNED_GEAR(state: State, payload: OwnedCount) {
       state.gearConfig[payload.id] = {
