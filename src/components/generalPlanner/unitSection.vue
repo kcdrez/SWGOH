@@ -1,27 +1,11 @@
 <template>
-  <div>
-    <div class="collapse-header section-header extended-2">
-      <h3>
-        <div data-bs-toggle="collapse" href="#unit-section-table">
-          Unit Summary
-        </div>
-      </h3>
-      <div class="toggles-container">
-        <div class="simple-view-container">
-          <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
-        </div>
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          storageKey="unitTable"
-          @checked="selectedColumns = $event"
-        />
-      </div>
-    </div>
-    <div id="unit-section-table" class="collapse" ref="unitSection">
-      <SwgohTable :table="{ header, body }" />
-    </div>
-  </div>
+  <ExpandableSection
+    title="Unit Summary"
+    :idRef="refName"
+    :options="expandOptions"
+  >
+    <SwgohTable :table="{ header, body }" />
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
@@ -31,12 +15,7 @@ import { mapActions } from "vuex";
 import { UnitPlannerItem } from "types/planner";
 import { Unit } from "types/unit";
 import { maxGearLevel } from "types/gear";
-import {
-  setupColumnEvents,
-  setupEvents,
-  setupSimpleView,
-  setupSorting,
-} from "utils";
+import { setupColumnEvents, setupSimpleView, setupSorting } from "utils";
 import { iHeaderCell, iTableBody, iTableHead } from "types/general";
 
 const storageKey = "unitSection";
@@ -68,6 +47,7 @@ export default defineComponent({
   data() {
     return {
       maxGearLevel,
+      refName: storageKey + "Table",
     };
   },
   computed: {
@@ -339,6 +319,28 @@ export default defineComponent({
         this.showCol("targetLevel"),
       ].filter((x) => !!x).length;
     },
+    expandOptions(): any {
+      return {
+        toggle: {
+          change: (val: boolean) => {
+            this.simpleView = val;
+          },
+          value: this.simpleView,
+          onLabel: "Simple",
+          offLabel: "Advanced",
+        },
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+        onShow: () => {
+          const tableComponent = this.$refs[this.refName] as any;
+          tableComponent?.refresh();
+        },
+      };
+    },
   },
   methods: {
     ...mapActions("planner", ["removeUnit"]),
@@ -353,35 +355,7 @@ export default defineComponent({
       );
     },
   },
-  mounted() {
-    setupEvents(this.$refs.unitSection as HTMLElement, storageKey);
-  },
 });
 </script>
 
-<style lang="scss" scoped>
-@import "styles/variables.scss";
-
-.swgoh-row {
-  .target-container {
-    select {
-      margin: 0.5rem 0;
-    }
-    .target-level {
-      text-align: center;
-    }
-
-    @media only screen and (min-width: 640px) {
-      display: flex;
-      align-items: center;
-
-      select {
-        margin: 0 0.5rem;
-      }
-      .target-level {
-        min-width: 125px;
-      }
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

@@ -1,9 +1,6 @@
 <template>
   <div>
-    <div
-      class="collapse-header section-header"
-      :class="showToggles ? 'expanded-2' : ''"
-    >
+    <div class="collapse-header section-header" :class="containerClass">
       <h3
         class="w-100"
         data-bs-toggle="collapse"
@@ -17,8 +14,8 @@
         ></i>
         <div class="d-inline">{{ title }}</div>
       </h3>
-      <div class="toggles-container" v-if="showToggles">
-        <div class="simple-view-container">
+      <div class="toggles-container" v-if="showOptionsContainer">
+        <div class="simple-view-container" v-if="options?.toggle">
           <Toggle
             v-model="_toggleValue"
             :onLabel="options?.toggle?.onLabel ?? 'Enabled'"
@@ -26,6 +23,7 @@
           />
         </div>
         <MultiSelect
+          v-if="options?.multiSelect"
           class="select-columns"
           :options="options?.multiSelect?.options ?? []"
           :storageKey="idRef + 'Columns'"
@@ -89,9 +87,16 @@ export default defineComponent({
     };
   },
   computed: {
-    showToggles() {
-      if (this.options?.toggle || this.options?.multiSelect) {
-        return true;
+    showOptionsContainer(): boolean {
+      return this.options?.toggle || this.options?.multiSelect;
+    },
+    containerClass(): string {
+      if (this.options?.toggle && this.options?.multiSelect) {
+        return "extended-2";
+      } else if (this.options?.multiSelect) {
+        return "extended-1";
+      } else {
+        return "";
       }
     },
   },

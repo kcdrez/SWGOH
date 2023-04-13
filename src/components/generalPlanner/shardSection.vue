@@ -1,35 +1,20 @@
 <template>
-  <div class="mb-3">
-    <div class="collapse-header section-header mt-3 extended-2">
-      <h3>
-        <div data-bs-toggle="collapse" href="#shard-section-table">
-          Shard Summary
-        </div>
-      </h3>
-      <div class="toggles-container">
-        <div class="simple-view-container">
-          <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
-        </div>
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          :storageKey="storageKey + 'Columns'"
-          @checked="selectedColumns = $event"
-        />
-      </div>
-    </div>
+  <ExpandableSection
+    title="Shard Summary"
+    :idRef="refName"
+    :options="expandOptions"
+    class="mt-3"
+  >
     <ShardTable
-      id="shard-section-table"
-      class="collapse"
-      ref="shardSection"
+      :ref="refName"
       :units="plannerList"
       showUnitName
       showActions
       :selectedColumns="selectedColumns"
       :simpleView="simpleView"
-      :storageKey="storageKey + 'Table'"
+      :storageKey="refName"
     />
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
@@ -40,6 +25,10 @@ import { setupEvents, setupSimpleView } from "utils";
 import ShardTable from "components/shards/tables/shardTable.vue";
 
 const storageKey = "shardSection";
+interface dataModel {
+  selectedColumns: string[];
+  refName: string;
+}
 
 export default defineComponent({
   name: "ShardSection",
@@ -51,8 +40,8 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-      storageKey,
-    };
+      refName: storageKey + "Table",
+    } as dataModel;
   },
   computed: {
     ...mapGetters("planner", ["fullUnitList"]),
@@ -95,12 +84,28 @@ export default defineComponent({
       ];
       return list;
     },
-  },
-  mounted() {
-    const tableComponent = this.$refs?.shardSection as any;
-    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
-      tableComponent?.refresh();
-    });
+    expandOptions(): any {
+      return {
+        toggle: {
+          change: (val: boolean) => {
+            this.simpleView = val;
+          },
+          value: this.simpleView,
+          onLabel: "Simple",
+          offLabel: "Advanced",
+        },
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+        onShow: () => {
+          const tableComponent = this.$refs[this.refName] as any;
+          tableComponent?.refresh();
+        },
+      };
+    },
   },
 });
 </script>

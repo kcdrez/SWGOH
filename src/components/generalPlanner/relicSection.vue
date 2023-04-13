@@ -1,30 +1,18 @@
 <template>
-  <div>
-    <div class="collapse-header section-header mt-3 extended-1">
-      <h3>
-        <div data-bs-toggle="collapse" href="#relic-section-table">
-          Relic Summary
-        </div>
-      </h3>
-      <div class="toggles-container">
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          :storageKey="storageKey + 'Columns'"
-          @checked="selectedColumns = $event"
-        />
-      </div>
-    </div>
-    <div id="relic-section-table" class="collapse" ref="relicSection">
-      <RelicTable
-        :relicList="fullRelicList"
-        :targetLevels="relicTargetLevels"
-        :selectedColumns="selectedColumns"
-        showRequiredByUnit
-        :storageKey="storageKey + 'Table'"
-      />
-    </div>
-  </div>
+  <ExpandableSection
+    title="Relic Summary"
+    :idRef="refName"
+    :options="expandOptions"
+    class="mt-3"
+  >
+    <RelicTable
+      :relicList="fullRelicList"
+      :targetLevels="relicTargetLevels"
+      :selectedColumns="selectedColumns"
+      showRequiredByUnit
+      :storageKey="refName"
+    />
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
@@ -37,6 +25,10 @@ import { setupEvents } from "utils";
 import RelicTable from "components/relic/relicTable.vue";
 
 const storageKey = "relicSection";
+interface dataModel {
+  selectedColumns: string[];
+  refName: string;
+}
 
 export default defineComponent({
   name: "RelicSection",
@@ -56,8 +48,8 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-      storageKey,
-    };
+      refName: storageKey + "Table",
+    } as dataModel;
   },
   computed: {
     ...mapState("relic", ["relicConfig"]),
@@ -127,11 +119,21 @@ export default defineComponent({
       });
       return list;
     },
+    expandOptions(): any {
+      return {
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+        onShow: () => {
+          const tableComponent = this.$refs[this.refName] as any;
+          tableComponent?.refresh();
+        },
+      };
+    },
   },
-  mounted() {
-    setupEvents(this.$refs.relicSection as HTMLElement, storageKey);
-  },
-  created() {},
 });
 </script>
 

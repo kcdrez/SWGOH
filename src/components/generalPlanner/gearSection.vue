@@ -1,29 +1,16 @@
 <template>
-  <div>
-    <div class="collapse-header section-header mt-3 extended-1">
-      <h3>
-        <div data-bs-toggle="collapse" href="#gear-section-table">
-          Gear Summary
-        </div>
-      </h3>
-      <div class="toggles-container">
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          :storageKey="storageKey + 'Columns'"
-          @checked="selectedColumns = $event"
-        />
-      </div>
-    </div>
-    <div id="gear-section-table" ref="gearSection" class="collapse">
-      <GearTable
-        :gearList="fullGearList"
-        showRequiredByUnit
-        :selectedColumns="selectedColumns"
-        :storageKey="storageKey + 'Table'"
-      />
-    </div>
-  </div>
+  <ExpandableSection
+    title="Gear Summary"
+    :idRef="refName"
+    :options="expandOptions"
+  >
+    <GearTable
+      :gearList="fullGearList"
+      showRequiredByUnit
+      :selectedColumns="selectedColumns"
+      :storageKey="refName"
+    />
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
@@ -31,10 +18,13 @@ import { defineComponent } from "vue";
 
 import { Unit } from "types/unit";
 import { Gear } from "types/gear";
-import { setupEvents } from "utils";
 import GearTable from "components/gear/gearTable.vue";
 
 const storageKey = "gearSection";
+interface dataModel {
+  selectedColumns: string[];
+  refName: string;
+}
 
 export default defineComponent({
   name: "GearSection",
@@ -54,8 +44,8 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-      storageKey,
-    };
+      refName: storageKey + "Table",
+    } as dataModel;
   },
   computed: {
     fullGearList(): Gear[] {
@@ -119,9 +109,20 @@ export default defineComponent({
       ];
       return list;
     },
-  },
-  mounted() {
-    setupEvents(this.$refs.gearSection as HTMLElement, storageKey);
+    expandOptions(): any {
+      return {
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+        onShow: () => {
+          const tableComponent = this.$refs[this.refName] as any;
+          tableComponent?.refresh();
+        },
+      };
+    },
   },
 });
 </script>
