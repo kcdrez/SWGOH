@@ -1,14 +1,7 @@
 <template>
-  <div class="mb-2">
-    <div class="collapse-header section-header">
-      <h3 class="w-100" data-bs-toggle="collapse" :href="`#${storageKey}`">
-        <div class="d-inline">{{ header }}</div>
-      </h3>
-    </div>
-    <div :id="`${storageKey}`" class="collapse" :ref="`${storageKey}`">
-      <SwgohTable :table="table" />
-    </div>
-  </div>
+  <ExpandableSection :title="header" :idRef="storageKey">
+    <SwgohTable :table="table" />
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
@@ -21,6 +14,7 @@ import { NodeCharacter } from "types/shards";
 import { iTable } from "types/general";
 
 const storageKey = "LegendarySummaryTable";
+
 export default defineComponent({
   name: "LegendarySummaryTable",
   setup() {
@@ -170,14 +164,6 @@ export default defineComponent({
     ): number {
       return totalProgress(getPrerequisites(unitId), prerequisiteType);
     },
-  },
-  mounted() {
-    this.$nextTick(() => {
-      setupEvents(
-        this.$refs[`${this.storageKey}`] as HTMLElement,
-        `${this.storageKey}`
-      );
-    });
   },
 });
 </script>

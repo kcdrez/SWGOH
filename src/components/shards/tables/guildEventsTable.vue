@@ -1,29 +1,12 @@
 <template>
-  <div v-if="unitList.length > 0">
-    <div class="collapse-header section-header extended-2">
-      <h3
-        class="w-100"
-        data-bs-toggle="collapse"
-        href="#guildEventsStoreSection"
-      >
-        <div class="d-inline">Guild Events Store</div>
-      </h3>
-      <div class="toggles-container">
-        <div class="simple-view-container">
-          <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
-        </div>
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          :storageKey="storageKey + 'Columns'"
-          @checked="selectedColumns = $event"
-        />
-      </div>
-    </div>
+  <ExpandableSection
+    v-if="unitList.length > 0"
+    title="Guild Events Store"
+    :idRef="refName"
+    :options="expandOptions"
+  >
     <StoreTable
-      id="guildEventsStoreSection"
-      class="collapse"
-      ref="guildEventsStoreSection"
+      :ref="refName"
       :units="unitList"
       :selectedColumns="selectedColumns"
       showUnitName
@@ -34,9 +17,9 @@
         'Guild Events Store (Mk 2)',
         'Guild Events Store (Mk 3)',
       ]"
-      :storageKey="storageKey + 'Table'"
+      :storageKey="refName"
     />
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
@@ -48,6 +31,10 @@ import { Unit } from "types/unit";
 import StoreTable from "./storeTable.vue";
 
 const storageKey = "cantinaStore";
+interface dataModel {
+  selectedColumns: string[];
+  refName: string;
+}
 
 export default defineComponent({
   name: "GuildEventsTable",
@@ -59,8 +46,8 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-      storageKey,
-    };
+      refName: storageKey + "Table",
+    } as dataModel;
   },
   computed: {
     ...mapGetters("shards", ["unitFarmingList"]),
@@ -119,12 +106,28 @@ export default defineComponent({
         );
       });
     },
-  },
-  mounted() {
-    const tableComponent = this.$refs?.guildEventsStoreSection as any;
-    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
-      tableComponent?.refresh();
-    });
+    expandOptions(): any {
+      return {
+        toggle: {
+          change: (val: boolean) => {
+            this.simpleView = val;
+          },
+          value: this.simpleView,
+          onLabel: "Simple",
+          offLabel: "Advanced",
+        },
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+        onShow: () => {
+          const tableComponent = this.$refs[this.refName] as any;
+          tableComponent?.refresh();
+        },
+      };
+    },
   },
 });
 </script>

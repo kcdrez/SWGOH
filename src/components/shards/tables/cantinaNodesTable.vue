@@ -1,45 +1,37 @@
 <template>
-  <div v-if="unitList.length > 0">
-    <div class="collapse-header section-header extended-2">
-      <h3 class="w-100" data-bs-toggle="collapse" href="#cantinaNodesTable">
-        <div class="d-inline">Cantina Battles</div>
-      </h3>
-      <div class="toggles-container">
-        <div class="simple-view-container">
-          <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
-        </div>
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          :storageKey="storageKey + 'Columns'"
-          @checked="selectedColumns = $event"
-        />
-      </div>
-    </div>
+  <ExpandableSection
+    v-if="unitList.length > 0"
+    title="Cantina Battles"
+    :idRef="refName"
+    :options="expandOptions"
+  >
     <ShardTable
-      id="cantinaNodesTable"
-      class="collapse"
-      ref="cantinaNodesTable"
+      :ref="refName"
       :units="unitList"
       :nodeTableNames="['Cantina']"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
       :simpleView="simpleView"
-      :storageKey="storageKey + 'Table'"
+      :storageKey="refName"
     />
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents, setupSimpleView } from "utils";
+import { setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import ShardTable from "./shardTable.vue";
 
 const storageKey = "cantinaNodes";
+
+interface dataModel {
+  selectedColumns: string[];
+  refName: string;
+}
 
 export default defineComponent({
   name: "CantinaNodesTable",
@@ -51,8 +43,8 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-      storageKey,
-    };
+      refName: storageKey + "Table",
+    } as dataModel;
   },
   computed: {
     ...mapGetters("shards", ["unitFarmingList"]),
@@ -98,12 +90,28 @@ export default defineComponent({
         return unit.whereToFarm.some((node) => node.table === "Cantina");
       });
     },
-  },
-  mounted() {
-    const tableComponent = this.$refs?.cantinaNodesTable as any;
-    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
-      tableComponent?.refresh();
-    });
+    expandOptions(): any {
+      return {
+        toggle: {
+          change: (val: boolean) => {
+            this.simpleView = val;
+          },
+          value: this.simpleView,
+          onLabel: "Simple",
+          offLabel: "Advanced",
+        },
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+        onShow: () => {
+          const tableComponent = this.$refs[this.refName] as any;
+          tableComponent?.refresh();
+        },
+      };
+    },
   },
 });
 </script>

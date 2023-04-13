@@ -1,45 +1,37 @@
 <template>
-  <div v-if="unitList.length > 0">
-    <div class="collapse-header section-header extended-2">
-      <h3 class="w-100" data-bs-toggle="collapse" href="#standardNodesTable">
-        <div class="d-inline">Light & Dark Side Battles</div>
-      </h3>
-      <div class="toggles-container">
-        <div class="simple-view-container">
-          <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
-        </div>
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          :storageKey="storageKey + 'Columns'"
-          @checked="selectedColumns = $event"
-        />
-      </div>
-    </div>
+  <ExpandableSection
+    v-if="unitList.length > 0"
+    title="Light & Dark Side Battles"
+    :idRef="refName"
+    :options="expandOptions"
+  >
     <ShardTable
-      id="standardNodesTable"
-      class="collapse"
-      ref="standardNodesTable"
+      :ref="refName"
       :units="unitList"
       :nodeTableNames="['Light Side', 'Dark Side']"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
       :simpleView="simpleView"
-      :storageKey="storageKey + 'Table'"
+      :storageKey="refName"
     />
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents, setupSimpleView } from "utils";
+import { setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import ShardTable from "./shardTable.vue";
 
 const storageKey = "standardNodes";
+
+interface dataModel {
+  selectedColumns: string[];
+  refName: string;
+}
 
 export default defineComponent({
   name: "StandardNodesTable",
@@ -51,9 +43,8 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-      storageKey,
-      loading: true,
-    };
+      refName: storageKey + "Table",
+    } as dataModel;
   },
   computed: {
     ...mapGetters("shards", ["unitFarmingList"]),
@@ -101,12 +92,28 @@ export default defineComponent({
         );
       });
     },
-  },
-  mounted() {
-    const tableComponent = this.$refs?.standardNodesTable as any;
-    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
-      tableComponent?.refresh();
-    });
+    expandOptions(): any {
+      return {
+        toggle: {
+          change: (val: boolean) => {
+            this.simpleView = val;
+          },
+          value: this.simpleView,
+          onLabel: "Simple",
+          offLabel: "Advanced",
+        },
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+        onShow: () => {
+          const tableComponent = this.$refs[this.refName] as any;
+          tableComponent?.refresh();
+        },
+      };
+    },
   },
 });
 </script>

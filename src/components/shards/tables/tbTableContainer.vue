@@ -1,47 +1,35 @@
 <template>
-  <div v-if="unitList.length > 0">
-    <div class="collapse-header section-header extended-2">
-      <h3
-        class="w-100"
-        data-bs-toggle="collapse"
-        href="#territoryBattlesSection"
-      >
-        <div class="d-inline">Territory Battle Units</div>
-      </h3>
-      <div class="toggles-container">
-        <div class="simple-view-container">
-          <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
-        </div>
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          :storageKey="storageKey + 'Columns'"
-          @checked="selectedColumns = $event"
-        />
-      </div>
-    </div>
+  <ExpandableSection
+    v-if="unitList.length > 0"
+    title="Territory Battle Units"
+    :idRef="refName"
+    :options="expandOptions"
+  >
     <TerritoryBattleShardTable
-      id="territoryBattlesSection"
-      class="collapse"
-      ref="territoryBattlesSection"
+      :ref="refName"
       :units="unitList"
       :selectedColumns="selectedColumns"
       showUnitName
       :simpleView="simpleView"
-      :storageKey="storageKey + 'Table'"
+      :storageKey="refName"
     />
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents, setupSimpleView } from "utils";
+import { setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import TerritoryBattleShardTable from "./territoryBattleShardTable.vue";
 
 const storageKey = "territoryBattles";
+
+interface dataModel {
+  selectedColumns: string[];
+  refName: string;
+}
 
 export default defineComponent({
   name: "TbTableContainer",
@@ -53,8 +41,8 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-      storageKey,
-    };
+      refName: storageKey + "Table",
+    } as dataModel;
   },
   computed: {
     ...mapGetters("shards", ["unitFarmingList"]),
@@ -94,12 +82,28 @@ export default defineComponent({
         );
       });
     },
-  },
-  mounted() {
-    const tableComponent = this.$refs?.territoryBattlesSection as any;
-    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
-      tableComponent?.refresh();
-    });
+    expandOptions(): any {
+      return {
+        toggle: {
+          change: (val: boolean) => {
+            this.simpleView = val;
+          },
+          value: this.simpleView,
+          onLabel: "Simple",
+          offLabel: "Advanced",
+        },
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+        onShow: () => {
+          const tableComponent = this.$refs[this.refName] as any;
+          tableComponent?.refresh();
+        },
+      };
+    },
   },
 });
 </script>

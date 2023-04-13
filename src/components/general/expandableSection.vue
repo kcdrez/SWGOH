@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div class="collapse-header section-header mt-3">
+    <div
+      class="collapse-header section-header"
+      :class="showToggles ? 'expanded-2' : ''"
+    >
       <h3
         class="w-100"
         data-bs-toggle="collapse"
@@ -14,6 +17,21 @@
         ></i>
         <div class="d-inline">{{ title }}</div>
       </h3>
+      <div class="toggles-container" v-if="showToggles">
+        <div class="simple-view-container">
+          <Toggle
+            v-model="_toggleValue"
+            :onLabel="options?.toggle?.onLabel ?? 'Enabled'"
+            :offLabel="options?.toggle?.offLabel ?? 'Disabled'"
+          />
+        </div>
+        <MultiSelect
+          class="select-columns"
+          :options="options?.multiSelect?.options ?? []"
+          :storageKey="idRef + 'Columns'"
+          @checked="_selected = $event"
+        />
+      </div>
     </div>
     <div :id="idRef" :ref="idRef" class="collapse">
       <slot />
@@ -41,11 +59,49 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    options: {
+      type: Object,
+      default: () => {
+        // const options = {
+        //   toggle: {
+        //     change: () => {},
+        //     value: null,
+        //     onLabel: "",
+        //     offLabel: "",
+        //   },
+        //   multiSelect: {
+        //     options: [],
+        //     change: () => {},
+        //     value: null,
+        //   },
+        //   onShow: () => {},
+        //   onHide: () => {},
+        // };
+        return null;
+      },
+    },
   },
   data() {
     return {
       showing: false,
+      _toggleValue: this.options?.toggle?.value ?? false,
+      _selected: this.options?.multiSelect?.value ?? [],
     };
+  },
+  computed: {
+    showToggles() {
+      if (this.options?.toggle || this.options?.multiSelect) {
+        return true;
+      }
+    },
+  },
+  watch: {
+    _toggleValue(newVal) {
+      this.options?.toggle?.change(newVal);
+    },
+    _selected(newVal) {
+      this.options?.multiSelect?.change(newVal);
+    },
   },
   mounted() {
     const el = this.$refs[this.idRef] as HTMLElement;
@@ -56,9 +112,17 @@ export default defineComponent({
         this.defaultExpand,
         () => {
           this.showing = true;
+
+          if (this.options?.onShow) {
+            this.options.onShow();
+          }
         },
         () => {
           this.showing = false;
+
+          if (this.options?.onHide) {
+            this.options.onHide();
+          }
         }
       );
     } else {

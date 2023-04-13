@@ -1,34 +1,21 @@
 <template>
-  <div v-if="unitList.length > 0">
-    <div class="collapse-header section-header extended-2">
-      <h3 class="w-100" data-bs-toggle="collapse" href="#specialEventsTable">
-        <div class="d-inline">Special Events</div>
-      </h3>
-      <div class="toggles-container">
-        <div class="simple-view-container">
-          <Toggle v-model="simpleView" onLabel="Simple" offLabel="Advanced" />
-        </div>
-        <MultiSelect
-          class="select-columns"
-          :options="cols"
-          :storageKey="storageKey + 'Columns'"
-          @checked="selectedColumns = $event"
-        />
-      </div>
-    </div>
+  <ExpandableSection
+    v-if="unitList.length > 0"
+    title="Special Events"
+    :idRef="refName"
+    :options="expandOptions"
+  >
     <ShardTable
-      id="specialEventsTable"
-      class="collapse"
-      ref="specialEventsTable"
+      :ref="refName"
       :units="unitList"
       :nodeTableNames="tableNames"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
       :simpleView="simpleView"
-      :storageKey="storageKey + 'Table'"
+      :storageKey="refName"
     />
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
@@ -40,6 +27,12 @@ import { Unit } from "types/unit";
 import ShardTable from "./shardTable.vue";
 
 const storageKey = "specialEvents";
+interface dataModel {
+  selectedColumns: string[];
+  refName: string;
+  tableNames: string[];
+  loading: boolean;
+}
 
 export default defineComponent({
   name: "specialEventsTable",
@@ -51,15 +44,15 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-      storageKey,
       loading: true,
+      refName: storageKey + "Table",
       tableNames: [
         "Proving Grounds",
         "Galactic Bounties I",
         "Galactic Bounties II",
         "Assault Battles",
       ],
-    };
+    } as dataModel;
   },
   computed: {
     ...mapGetters("shards", ["unitFarmingList"]),
@@ -99,12 +92,28 @@ export default defineComponent({
         });
       });
     },
-  },
-  mounted() {
-    const tableComponent = this.$refs?.specialEventsTable as any;
-    setupEvents(tableComponent?.$el, storageKey + "Collapse", false, () => {
-      tableComponent?.refresh();
-    });
+    expandOptions(): any {
+      return {
+        toggle: {
+          change: (val: boolean) => {
+            this.simpleView = val;
+          },
+          value: this.simpleView,
+          onLabel: "Simple",
+          offLabel: "Advanced",
+        },
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+        onShow: () => {
+          const tableComponent = this.$refs[this.refName] as any;
+          tableComponent?.refresh();
+        },
+      };
+    },
   },
 });
 </script>
