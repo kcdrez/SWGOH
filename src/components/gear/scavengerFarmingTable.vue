@@ -95,7 +95,7 @@ import { scavengerFarming, scavengerCost } from "types/scavenger";
 import { Relic } from "types/relic";
 import { round2Decimals } from "utils";
 import { iTableHead } from "types/general";
-import TableHeader from "components/general/tableHeader.vue";
+import TableHeader from "components/general/table/tableHeader.vue";
 import relicMapping from "types/relicMapping";
 
 const storageKey = "ScavengerFarmingTable";

@@ -1,14 +1,5 @@
 <template>
-  <div class="collapse-header section-header mt-3">
-    <h3 class="w-100" data-bs-toggle="collapse" href="#damageCalculatorSection">
-      <div class="d-inline">Damage Calculator</div>
-    </h3>
-  </div>
-  <div
-    id="damageCalculatorSection"
-    ref="damageCalculatorSection"
-    class="collapse"
-  >
+  <ExpandableSection title="Damage Calculator" idRef="damageCalculatorSection">
     <div class="container">
       <div class="row mt-2">
         <div class="col-md-6 col-sm-12">
@@ -132,14 +123,14 @@
         </div>
       </div>
     </div>
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { round2Decimals, setupEvents } from "utils";
+import { round2Decimals } from "utils";
 import { Unit } from "types/unit";
 
 interface dataModel {
@@ -251,12 +242,6 @@ export default defineComponent({
     if (unitId) {
       this.selected = this.unitData(unitId) ?? null;
     }
-  },
-  mounted() {
-    setupEvents(
-      this.$refs?.damageCalculatorSection as any as HTMLElement,
-      "damageCalculatorSection"
-    );
   },
 });
 </script>

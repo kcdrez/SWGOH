@@ -9,7 +9,7 @@
 import { defineComponent } from "vue";
 import _ from "lodash";
 import { iTableBody, iTableRow } from "types/general";
-import TableRow from "./tableRow.vue";
+import TableRow from "../table/tableRow.vue";
 
 export default defineComponent({
   name: "TableFooter",

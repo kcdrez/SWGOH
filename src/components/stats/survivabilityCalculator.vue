@@ -1,17 +1,7 @@
 <template>
-  <div class="collapse-header section-header mt-3">
-    <h3
-      class="w-100"
-      data-bs-toggle="collapse"
-      href="#survivabilityCalculatorSection"
-    >
-      <div class="d-inline">Survivability Calculator</div>
-    </h3>
-  </div>
-  <div
-    id="survivabilityCalculatorSection"
-    ref="survivabilityCalculatorSection"
-    class="collapse"
+  <ExpandableSection
+    title="Survivability Calculator"
+    idRef="survivabilityCalculatorSection"
   >
     <div class="container">
       <div class="row mt-2">
@@ -156,14 +146,13 @@
         </div>
       </div>
     </div>
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { setupEvents } from "utils";
 import { Unit } from "types/unit";
 import { iTableBody, iTableHead } from "types/general";
 
@@ -813,12 +802,6 @@ export default defineComponent({
     if (unitId) {
       this.selected = this.unitData(unitId) ?? null;
     }
-  },
-  mounted() {
-    setupEvents(
-      this.$refs?.survivabilityCalculatorSection as any as HTMLElement,
-      "survivabilityCalculatorSection"
-    );
   },
 });
 </script>

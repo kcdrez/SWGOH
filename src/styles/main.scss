@@ -370,31 +370,30 @@ button:disabled {
     }
   }
 }
-.section-header {
-  
-  background-color: black;
-  text-align: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid $light;
-  position: sticky;
-  top: 56px;
-  height: 50px;
-  z-index: 10;
+// .section-header {
+//   background-color: black;
+//   text-align: center;
+//   padding: 0.5rem 0;
+//   border-bottom: 1px solid $light;
+//   position: sticky;
+//   top: 56px;
+//   height: 50px;
+//   z-index: 10;
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    cursor: pointer;
-    margin: 0;
-  }
-  .simple-view-container {
-    top: 12.5px;
-    right: 280px;
-  }
-}
+//   h1,
+//   h2,
+//   h3,
+//   h4,
+//   h5,
+//   h6 {
+//     cursor: pointer;
+//     margin: 0;
+//   }
+//   .simple-view-container {
+//     top: 12.5px;
+//     right: 280px;
+//   }
+// }
 
 .select-columns {
   width: 200px;

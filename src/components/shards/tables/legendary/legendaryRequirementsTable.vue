@@ -201,7 +201,7 @@ import { displayValue, IPrerequisite } from "types/shards";
 import { isGearRequirement, isRelicRequirement } from "types/shards";
 import { setupSorting, setupColumnEvents } from "utils";
 import { iTableHead } from "types/general";
-import TableHeader from "components/general/tableHeader.vue";
+import TableHeader from "components/general/table/tableHeader.vue";
 
 export default defineComponent({
   name: "LegendaryRequirementsTable",

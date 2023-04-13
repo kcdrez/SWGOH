@@ -32,8 +32,8 @@ import { Gear, IScavenger } from "types/gear";
 import { FarmingNode } from "types/shards";
 import { setupColumnEvents, setupEvents, setupSorting } from "utils";
 import { iHeaderCell, iTableBody, iTableHead } from "types/general";
-import TableHeader from "components/general/tableHeader.vue";
-import TableBody from "components/general/tableBody.vue";
+import TableHeader from "components/general/table/tableHeader.vue";
+import TableBody from "components/general/table/tableBody.vue";
 
 type tScavenger = { data: Gear; scavenger: IScavenger };
 const storageKey = "scavengerTable";

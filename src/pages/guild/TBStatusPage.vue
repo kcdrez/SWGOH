@@ -146,7 +146,7 @@ import { Unit } from "types/unit";
 import { tbRecommended } from "types/guild";
 import RequirementIcon from "components/shards/tables/legendary/requirementIcon.vue";
 import { iTableHead } from "types/general";
-import TableHeader from "components/general/tableHeader.vue";
+import TableHeader from "components/general/table/tableHeader.vue";
 
 interface dataModel {
   map: "LSRepublicOffensive" | "DSSeparatistMight" | "";

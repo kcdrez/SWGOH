@@ -1,10 +1,5 @@
 <template>
-  <div class="collapse-header section-header mt-3">
-    <h3 class="w-100" data-bs-toggle="collapse" href="#shipCalculatorSection">
-      <div class="d-inline">Ship Stat Calculator</div>
-    </h3>
-  </div>
-  <div id="shipCalculatorSection" ref="shipCalculatorSection" class="collapse">
+  <ExpandableSection title="Ship Stat Calculator" idRef="shipCalculatorSection">
     <div class="container">
       <div class="row mt-2">
         <div class="col">
@@ -170,14 +165,14 @@
         </div>
       </template>
     </div>
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { round2Decimals, setupEvents } from "utils";
+import { round2Decimals } from "utils";
 import { Mod, Unit } from "types/unit";
 import { maxGearLevel } from "types/gear";
 import { maxRelicLevel } from "types/relic";
@@ -190,7 +185,7 @@ import {
   multiplierMap,
   relicLevelMap,
 } from "types/pilots";
-import { iTableBody, iTableHead, iTableRow } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 
 interface Crew {
   stars: number;
@@ -634,12 +629,6 @@ export default defineComponent({
     if (unitId) {
       this.selected = this.unitData(unitId) ?? null;
     }
-  },
-  mounted() {
-    setupEvents(
-      this.$refs?.shipCalculatorSection as any as HTMLElement,
-      "shipCalculatorSection"
-    );
   },
 });
 </script>
