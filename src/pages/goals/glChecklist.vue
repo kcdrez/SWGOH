@@ -3,43 +3,25 @@
     <LegendarySummaryTable
       :unitList="glUnitList"
       :storageKey="storageKey + 'Summary'"
+      class="mb-2"
     />
-    <div v-for="unit in glUnitList" :key="unit.id" class="mb-2">
-      <div class="collapse-header section-header extended-2">
-        <h3
-          class="w-100"
-          data-bs-toggle="collapse"
-          :href="`#${storageKey}Collapse${unit.id}`"
-        >
-          <div class="d-inline">{{ unit.name ?? unit.id }}</div>
-        </h3>
-        <div class="toggles-container">
-          <div class="simple-view-container">
-            <Toggle
-              v-model="simpleView[unit.id]"
-              onLabel="Simple"
-              offLabel="Advanced"
-            />
-          </div>
-          <MultiSelect
-            class="select-columns"
-            :options="cols"
-            :storageKey="storageKey + unit.id + 'Columns'"
-            @checked="selectedColumns[unit.id] = $event"
-          />
-        </div>
-      </div>
+    <ExpandableSection
+      v-for="unit in glUnitList"
+      :key="unit.id"
+      class="mb-2"
+      :title="unit.name ?? unit.id"
+      :idRef="getIdRef(unit.id)"
+      :options="expandOptions[unit.id]"
+    >
       <LegendaryRequirementsTable
-        :id="`${storageKey}Collapse${unit.id}`"
-        class="collapse mt-1"
-        :ref="`${storageKey}Collapse${unit.id}`"
+        class="mt-1"
         :unit="unit"
         :selectedColumns="selectedColumns[unit.id] ?? []"
-        :storageKey="storageKey + unit.id + 'Table'"
+        :storageKey="getIdRef(unit.id) + 'Table'"
         :simpleView="simpleView[unit.id]"
         :nodeKey="unit.isGL ? 'galactic_legends' : 'legendary'"
       />
-    </div>
+    </ExpandableSection>
   </div>
 </template>
 
@@ -47,7 +29,6 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import { setupEvents } from "utils";
 import { Unit } from "types/unit";
 import { NodeCharacter, FarmingNode } from "types/shards";
 import LegendaryRequirementsTable from "components/shards/tables/legendary/legendaryRequirementsTable.vue";
@@ -121,6 +102,32 @@ export default defineComponent({
         },
       ];
     },
+    expandOptions(): any {
+      return this.glUnitList.reduce((acc: any, unit: Unit) => {
+        acc[unit.id] = {
+          toggle: {
+            change: (val: boolean) => {
+              this.simpleView[unit.id] = val;
+            },
+            value: this.simpleView[unit.id],
+            onLabel: "Simple",
+            offLabel: "Advanced",
+          },
+          multiSelect: {
+            options: this.cols,
+            change: (newVal: string[]) => {
+              this.selectedColumns[unit.id] = newVal;
+            },
+          },
+        };
+        return acc;
+      }, {});
+    },
+  },
+  methods: {
+    getIdRef(unitId: string): string {
+      return `${storageKey}${unitId}`;
+    },
   },
   watch: {
     simpleView: {
@@ -138,12 +145,6 @@ export default defineComponent({
         (this.selectedColumns as any)[unit.id].filter(
           (x: string) => x !== "recommended"
         ) ?? [];
-
-      setupEvents(
-        (this.$refs[`${storageKey}Collapse${unit.id}`] as any[])[0]
-          ?.$el as HTMLElement,
-        `${storageKey}Collapse${unit.id}`
-      );
     });
   },
 });

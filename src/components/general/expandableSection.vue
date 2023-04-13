@@ -102,10 +102,10 @@ export default defineComponent({
   },
   watch: {
     _toggleValue(newVal) {
-      this.options?.toggle?.change(newVal);
+      this.options?.toggle?.change(newVal, this.idRef);
     },
     _selected(newVal) {
-      this.options?.multiSelect?.change(newVal);
+      this.options?.multiSelect?.change(newVal, this.idRef);
     },
   },
   mounted() {
