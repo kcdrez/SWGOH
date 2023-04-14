@@ -355,12 +355,7 @@ export default defineComponent({
   top: 105px;
 }
 
-.section-header {
-  input {
-    max-width: 200px;
-  }
-}
-::v-deep(i) {
+::v-deep(i.text-small) {
   cursor: pointer;
 
   &:hover {

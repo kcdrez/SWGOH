@@ -1,27 +1,16 @@
 <template>
-  <div>
-    <div class="collapse-header section-header extended-1">
-      <h3>
-        <div data-bs-toggle="collapse" :href="`#${scavengerId}`">
-          {{ label }}
-        </div>
-      </h3>
-      <MultiSelect
-        class="select-columns"
-        :options="cols"
-        :storageKey="storageKey + 'Columns'"
-        @checked="selectedColumns = $event"
-      />
-    </div>
+  <ExpandableSection
+    :title="label"
+    :idRef="storageKey"
+    :options="expandOptions"
+  >
     <table
-      :id="scavengerId"
-      :ref="storageKey"
-      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table collapse"
+      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
     >
       <TableHeader :header="header" />
       <TableBody :body="body" />
     </table>
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
@@ -30,8 +19,14 @@ import { mapState, mapGetters } from "vuex";
 
 import { Gear, IScavenger } from "types/gear";
 import { FarmingNode } from "types/shards";
-import { setupColumnEvents, setupEvents, setupSorting } from "utils";
-import { iHeaderCell, iTableBody, iTableHead } from "types/general";
+import { setupColumnEvents, setupSorting } from "utils";
+import {
+  iExpandOptions,
+  iHeaderCell,
+  iHeaderRow,
+  iTableBody,
+  iTableHead,
+} from "types/general";
 import TableHeader from "components/general/table/tableHeader.vue";
 import TableBody from "components/general/table/tableBody.vue";
 
@@ -204,11 +199,16 @@ export default defineComponent({
         }),
       };
     },
-    cols(): iHeaderCell[] {
-      return this.header.headers.reduce((acc: iHeaderCell[], row) => {
-        row.cells.forEach((cell) => acc.push(cell));
-        return acc;
-      }, []);
+    cols(): { label: string; value: string }[] {
+      return this.header.headers.reduce(
+        (acc: { label: string; value: string }[], row: iHeaderRow) => {
+          row.cells.forEach((cell: iHeaderCell) =>
+            acc.push({ label: cell.label, value: cell.value })
+          );
+          return acc;
+        },
+        []
+      );
     },
     list(): tScavenger[] {
       return this.gearList
@@ -311,6 +311,16 @@ export default defineComponent({
     storageKey() {
       return `${storageKey}-${this.scavengerId}`;
     },
+    expandOptions(): iExpandOptions {
+      return {
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+      };
+    },
   },
   methods: {
     locationLabels(locationIds: string[]) {
@@ -332,9 +342,6 @@ export default defineComponent({
         return label;
       });
     },
-  },
-  mounted() {
-    setupEvents(this.$refs[this.storageKey] as HTMLElement, this.storageKey);
   },
 });
 </script>

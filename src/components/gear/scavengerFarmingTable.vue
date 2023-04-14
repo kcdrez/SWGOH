@@ -1,16 +1,7 @@
 <template>
-  <div>
-    <div class="collapse-header section-header">
-      <h3>
-        <div data-bs-toggle="collapse" :href="`#${storageKey}`">
-          Farming Locations
-        </div>
-      </h3>
-    </div>
+  <ExpandableSection title="Farming Locations" :idRef="storageKey">
     <table
-      :id="storageKey"
-      :ref="storageKey"
-      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table collapse"
+      class="table table-bordered table-dark table-sm table-striped mb-0 swgoh-table"
     >
       <TableHeader :header="header" />
       <tbody class="align-middle text-center">
@@ -78,7 +69,7 @@
         </tr>
       </tbody>
     </table>
-  </div>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
@@ -90,7 +81,6 @@ import { IScavenger } from "types/scavenger";
 import GearIcon from "components/gear/gearIcon.vue";
 import RelicIcon from "components/relic/relicIcon.vue";
 import { FarmingNode } from "types/shards";
-import { setupEvents } from "utils";
 import { scavengerFarming, scavengerCost } from "types/scavenger";
 import { Relic } from "types/relic";
 import { round2Decimals } from "utils";
@@ -193,9 +183,6 @@ export default defineComponent({
           (scavengerCost as any)[scavengerData.id]
       );
     },
-  },
-  mounted() {
-    setupEvents(this.$refs[this.storageKey] as HTMLElement, this.storageKey);
   },
 });
 </script>

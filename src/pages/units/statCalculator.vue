@@ -1,7 +1,7 @@
 <template>
   <div class="swgoh-page container my-2">
-    <DamageCalculator />
-    <SurvivabilityCalculator />
+    <DamageCalculator class="mb-3" />
+    <SurvivabilityCalculator class="mb-3" />
     <ShipCalculator />
   </div>
 </template>

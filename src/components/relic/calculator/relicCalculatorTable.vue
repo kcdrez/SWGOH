@@ -1,5 +1,12 @@
 <template>
-  <div>
+  <ExpandableSection
+    :title="plannerData.label"
+    :idRef="plannerData.id"
+    :options="expandOptions"
+  >
+    <SwgohTable :table="{ header, body }" />
+  </ExpandableSection>
+  <!-- <div>
     <div class="collapse-header section-header extended-1">
       <h3>
         <div data-bs-toggle="collapse" :href="`#${plannerData.id}`">
@@ -16,7 +23,7 @@
     <div :ref="storageKey" class="collapse">
       <SwgohTable :table="{ header, body }" :id="plannerData.id" />
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script lang="ts">
@@ -25,8 +32,15 @@ import { mapState, mapGetters } from "vuex";
 
 import { FarmingNode } from "types/shards";
 import { RelicPlanner } from "types/relicPlanner";
-import { setupEvents, setupSorting } from "utils";
-import { iHeaderCell, iTableBody, iTableHead, iTableRow } from "types/general";
+import { setupSorting } from "utils";
+import {
+  iExpandOptions,
+  iHeaderCell,
+  iHeaderRow,
+  iTableBody,
+  iTableHead,
+  iTableRow,
+} from "types/general";
 
 const storageKey = "relicCalculatorTable";
 
@@ -53,7 +67,7 @@ export default defineComponent({
   data() {
     return {
       selectedColumns: [],
-    };
+    } as any;
   },
   computed: {
     ...mapState("gear", ["gearList"]),
@@ -314,14 +328,29 @@ export default defineComponent({
         ],
       };
     },
-    cols(): iHeaderCell[] {
-      return this.header.headers.reduce((acc: iHeaderCell[], row) => {
-        row.cells.forEach((cell) => acc.push(cell));
-        return acc;
-      }, []);
+    cols(): { label: string; value: string }[] {
+      return this.header.headers.reduce(
+        (acc: { label: string; value: string }[], row: iHeaderRow) => {
+          row.cells.forEach((cell: iHeaderCell) =>
+            acc.push({ label: cell.label, value: cell.value })
+          );
+          return acc;
+        },
+        []
+      );
     },
     storageKey() {
       return `${storageKey}-${this.plannerData.id}`;
+    },
+    expandOptions(): iExpandOptions {
+      return {
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+      };
     },
   },
   methods: {
@@ -334,9 +363,6 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x) => x === key);
     },
-  },
-  mounted() {
-    setupEvents(this.$refs[this.storageKey] as HTMLElement, this.storageKey);
   },
 });
 </script>

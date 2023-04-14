@@ -15,24 +15,13 @@
           <button class="btn btn-sm btn-primary my-3" @click="downloadXlsx()">
             Download as XLSX
           </button>
-          <div class="collapse-header section-header extended-1">
-            <h3>
-              <div data-bs-toggle="collapse" href="#player-data">
-                Player Data
-              </div>
-            </h3>
-            <div class="toggles-container">
-              <MultiSelect
-                class="select-columns"
-                :options="cols"
-                :storageKey="storageKey + 'PlayerColumns'"
-                @checked="selectedColumns = $event"
-              />
-            </div>
-          </div>
-          <div id="player-data" class="collapse" ref="playerData">
+          <ExpandableSection
+            title="Player Data"
+            idRef="guildPlayerData"
+            :options="expandOptions"
+          >
             <SwgohTable :table="{ header, body }" />
-          </div>
+          </ExpandableSection>
         </template>
       </Loading>
     </template>
@@ -61,17 +50,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { Ref, defineComponent, ref } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import { writeFile, utils } from "xlsx";
 import _ from "lodash";
 
 import { loadingState } from "types/loading";
-import { setupEvents, setupSorting, unvue } from "utils";
+import { setupColumnEvents, setupSorting, unvue } from "utils";
 import { Unit } from "types/unit";
 import { IGuildUnitMap } from "types/guild";
 import UnitSearch from "components/units/unitSearch.vue";
 import { iHeaderCell, iHeaderRow, iTableBody, iTableHead } from "types/general";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "guildUnits";
 
@@ -81,7 +71,6 @@ interface dataModel {
   loading: loadingState;
   selectedColumns: string[];
   storageKey: string;
-  initialize: boolean;
   unit: null | Unit;
   guildIdInput: string;
 }
@@ -91,11 +80,16 @@ export default defineComponent({
   setup() {
     const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(storageKey);
 
+    const selectedColumns: Ref<string[]> = ref([]);
+    const { showCol } = setupColumnEvents(selectedColumns);
+
     return {
       sortDir,
       sortMethod,
       sortBy,
       sortIcon,
+      showCol,
+      selectedColumns,
     };
   },
   components: { UnitSearch },
@@ -106,7 +100,6 @@ export default defineComponent({
       loading: loadingState.initial,
       selectedColumns: [],
       storageKey,
-      initialize: false,
       unit: null,
       guildIdInput: "",
     } as dataModel;
@@ -448,10 +441,12 @@ export default defineComponent({
         }),
       };
     },
-    cols(): iHeaderCell[] {
+    cols(): { label: string; value: string }[] {
       return this.header.headers.reduce(
-        (acc: iHeaderCell[], row: iHeaderRow) => {
-          row.cells.forEach((cell: iHeaderCell) => acc.push(cell));
+        (acc: { label: string; value: string }[], row: iHeaderRow) => {
+          row.cells.forEach((cell: iHeaderCell) =>
+            acc.push({ label: cell.label, value: cell.value })
+          );
           return acc;
         },
         []
@@ -481,18 +476,15 @@ export default defineComponent({
     loadingUnitState(): loadingState {
       return this.loading ? loadingState.loading : loadingState.ready;
     },
-  },
-  watch: {
-    initialize(newVal, oldVal) {
-      if (newVal && !oldVal) {
-        this.$nextTick(() => {
-          setupEvents(
-            this.$refs.playerData as HTMLElement,
-            storageKey + "Collapse",
-            true
-          );
-        });
-      }
+    expandOptions(): iExpandOptions {
+      return {
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+      };
     },
   },
   methods: {
@@ -506,7 +498,6 @@ export default defineComponent({
           guildId: this.$route.params.guildId,
         });
         this.loading = loadingState.ready;
-        this.initialize = true;
       }
     }, 500),
     downloadXlsx(): void {
@@ -527,9 +518,6 @@ export default defineComponent({
 
       const fileName = this.selected?.id;
       writeFile(wb, fileName + ".xlsx");
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
     },
   },
 });
