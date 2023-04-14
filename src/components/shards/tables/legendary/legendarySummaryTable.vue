@@ -1,25 +1,22 @@
 <template>
-  <ExpandableSection :title="header" :idRef="storageKey">
-    <SwgohTable :table="table" />
-  </ExpandableSection>
+  <SwgohTable :table="table" />
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { mapState } from "vuex";
 
-import { setupEvents, setupSorting } from "utils";
+import { setupSorting } from "utils";
 import { totalProgress, getPrerequisites, Unit } from "types/unit";
 import { NodeCharacter } from "types/shards";
 import { iTable } from "types/general";
 
-const storageKey = "LegendarySummaryTable";
-
 export default defineComponent({
   name: "LegendarySummaryTable",
-  setup() {
-    const { sortDir, sortMethod, sortBy, sortIcon, searchText } =
-      setupSorting(storageKey);
+  setup(props) {
+    const { sortDir, sortMethod, sortBy, sortIcon, searchText } = setupSorting(
+      props.storageKey
+    );
 
     return {
       sortDir,
@@ -34,17 +31,9 @@ export default defineComponent({
       type: Array as PropType<(Unit | NodeCharacter)[]>,
       required: true,
     },
-    header: {
-      type: String,
-      default: "Summary",
-    },
     storageKey: {
       type: String,
       required: true,
-    },
-    nodeKey: {
-      type: String,
-      default: null,
     },
   },
   computed: {

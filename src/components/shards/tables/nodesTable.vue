@@ -5,7 +5,33 @@
     :idRef="refName"
     :options="expandOptions"
   >
+    <TerritoryBattleShardTable
+      v-if="type === 'TB'"
+      :ref="refName"
+      :units="unitList"
+      :selectedColumns="selectedColumns"
+      showUnitName
+      :simpleView="simpleView"
+      :storageKey="refName"
+    />
+    <StoreTable
+      v-else-if="type === 'store'"
+      :ref="refName"
+      :units="unitList"
+      :selectedColumns="selectedColumns"
+      showUnitName
+      :simpleView="simpleView"
+      :currencyTypes="currencyTypes"
+      :nodeTableNames="nodeTableNames"
+      :storageKey="refName"
+    />
+    <LegendarySummaryTable
+      v-else-if="type === 'legendary' || type === 'gl'"
+      :unitList="unitList"
+      :storageKey="refName"
+    />
     <ShardTable
+      v-else
       :ref="refName"
       :units="unitList"
       :nodeTableNames="nodeTableNames"
@@ -20,12 +46,16 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapGetters } from "vuex";
+import { mapGetters, mapState } from "vuex";
 
 import { setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import ShardTable from "./shardTable.vue";
 import { iExpandOptions } from "types/general";
+import TerritoryBattleShardTable from "./territoryBattleShardTable.vue";
+import StoreTable from "./storeTable.vue";
+import { CurrencyTypeConfig } from "types/currency";
+import LegendarySummaryTable from "./legendary/legendarySummaryTable.vue";
 
 interface dataModel {
   selectedColumns: string[];
@@ -33,7 +63,12 @@ interface dataModel {
 
 export default defineComponent({
   name: "NodesTable",
-  components: { ShardTable },
+  components: {
+    ShardTable,
+    TerritoryBattleShardTable,
+    StoreTable,
+    LegendarySummaryTable,
+  },
   setup(props) {
     const { simpleView } = setupSimpleView(props.idRef);
     return { simpleView, refName: props.idRef + "Table" };
@@ -45,11 +80,23 @@ export default defineComponent({
     },
     nodeTableNames: {
       type: Array as () => string[],
-      required: true,
+      default: () => {
+        return [];
+      },
     },
     idRef: {
       type: String,
       required: true,
+    },
+    type: {
+      type: String,
+      default: null,
+    },
+    currencyTypes: {
+      type: Array as () => CurrencyTypeConfig[],
+      default: () => {
+        return [];
+      },
     },
   },
   data() {
@@ -59,6 +106,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters("shards", ["unitFarmingList"]),
+    ...mapState("shards", ["shardFarming"]),
+    ...mapState("player", ["player"]),
     unitList(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
         return unit.whereToFarm.some((node) =>
@@ -67,6 +116,66 @@ export default defineComponent({
       });
     },
     expandOptions(): iExpandOptions {
+      const cols = [
+        {
+          label: "Name",
+          value: "name",
+        },
+        {
+          label: "Locations",
+          value: "locations",
+        },
+        {
+          label: "Owned Shards",
+          value: "owned",
+        },
+        {
+          label: "Shards Remaining",
+          value: "remaining",
+        },
+        {
+          label: "Progress",
+          value: "progress",
+        },
+        {
+          label: "Attempts",
+          value: "attempts",
+          showOption: this.type === "standard",
+        },
+        {
+          label: "Currency Owned",
+          value: "wallet",
+          showOption: this.type === "store",
+        },
+        {
+          label: "Daily Currency Obtained",
+          value: "dailyCurrency",
+          showOption: this.type === "store",
+        },
+        {
+          label: "Remaining Currency",
+          value: "remainingCurrency",
+          showOption: this.type === "store",
+        },
+        {
+          label: "Remaining Currency",
+          value: "remainingCurrency",
+          showOption: this.type === "store",
+        },
+        {
+          label: "Estimated Time",
+          value: "time",
+        },
+        {
+          label: "Priority",
+          value: "priority",
+          showOption:
+            this.type === "standard" ||
+            this.type === "store" ||
+            this.type === "raid",
+        },
+      ];
+
       return {
         toggle: {
           change: (val: boolean) => {
@@ -77,40 +186,7 @@ export default defineComponent({
           offLabel: "Advanced",
         },
         multiSelect: {
-          options: [
-            {
-              label: "Name",
-              value: "name",
-            },
-            {
-              label: "Locations",
-              value: "locations",
-            },
-            {
-              label: "Owned Shards",
-              value: "owned",
-            },
-            {
-              label: "Shards Remaining",
-              value: "remaining",
-            },
-            {
-              label: "Progress",
-              value: "progress",
-            },
-            {
-              label: "Attempts",
-              value: "attempts",
-            },
-            {
-              label: "Estimated Time",
-              value: "time",
-            },
-            {
-              label: "Priority",
-              value: "priority",
-            },
-          ],
+          options: cols,
           change: (newVal: string[]) => {
             this.selectedColumns = newVal;
           },

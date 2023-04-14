@@ -5,31 +5,129 @@
       :nodeTableNames="['Light Side', 'Dark Side']"
       label="Light & Dark Side Battles"
       idRef="standardNodes"
+      type="standard"
     />
     <NodesTable
       class="my-2 fleet-nodes"
       :nodeTableNames="['Fleet']"
       label="Fleet Battles"
       idRef="fleetNodes"
+      type="standard"
     />
     <NodesTable
       class="my-2 cantina-nodes"
       :nodeTableNames="['Cantina']"
       label="Cantina Battles"
       idRef="cantinaNodes"
+      type="standard"
     />
-    <TbTableContainer class="my-2 tb-table" />
-    <RaidsTable class="my-2 raids-table" />
-    <SpecialEventsTable class="my-2 proving-grounds-nodes" />
-    <CantinaStoreTable class="my-2 cantina-store" />
-    <GuildStoreTable class="my-2 guild-store" />
-    <GuildEventsTable class="my-2 guild-events" />
-    <SquadArenaTable class="my-2 squad-arena" />
-    <GalacticWarTable class="my-2 galactic-war" />
-    <FleetArenaTable class="my-2 fleet-arena" />
-    <ShardStoreTable class="my-2 shard-store" />
-    <LegendaryTable class="my-2 legendary-table" />
-    <GLTable class="my-2 gl-table" />
+    <NodesTable
+      class="my-2 tb-nodes"
+      :nodeTableNames="['Territory Battles']"
+      label="Territory Battle Units"
+      idRef="territoryBattles"
+      type="TB"
+    />
+    <NodesTable
+      class="my-2 raids-table"
+      :nodeTableNames="['Raids']"
+      label="Raid Units"
+      idRef="raidUnits"
+      type="raid"
+    />
+    <NodesTable
+      class="my-2 proving-grounds-nodes"
+      :nodeTableNames="[
+        'Proving Grounds',
+        'Galactic Bounties I',
+        'Galactic Bounties II',
+        'Assault Battles',
+      ]"
+      label="Special Events"
+      idRef="specialEvents"
+      type="special"
+    />
+    <NodesTable
+      class="my-2 guild-events"
+      :nodeTableNames="[
+        'Guild Events Store (Mk 1)',
+        'Guild Events Store (Mk 2)',
+        'Guild Events Store (Mk 3)',
+      ]"
+      label="Guild Events Store"
+      idRef="guildEventsStore"
+      type="store"
+      :currencyTypes="['get1', 'get2', 'get3']"
+    />
+    <NodesTable
+      class="my-2 cantina-store"
+      :nodeTableNames="['Cantina Battles Store']"
+      label="Cantina Store"
+      idRef="cantinaStore"
+      type="store"
+      :currencyTypes="['cantinaBattleCurrency']"
+    />
+    <NodesTable
+      class="my-2 guild-store"
+      :nodeTableNames="['Guild Store']"
+      label="Guild Store"
+      idRef="guildStore"
+      type="store"
+      :currencyTypes="['guildStoreCurrency']"
+    />
+    <NodesTable
+      class="my-2 squad-arena"
+      :nodeTableNames="['Squad Arena Store']"
+      label="Squad Arena Store"
+      idRef="squadArena"
+      type="store"
+      :currencyTypes="['squadArenaCurrency']"
+    />
+    <NodesTable
+      class="my-2 galactic-war"
+      :nodeTableNames="['Galactic War Store']"
+      label="Galactic War Store"
+      idRef="galacticWar"
+      type="store"
+      :currencyTypes="['galacticWarCurrency']"
+    />
+    <NodesTable
+      class="my-2 fleet-arena"
+      :nodeTableNames="['Fleet Arena Store']"
+      label="Fleet Arena Store"
+      idRef="fleetArena"
+      type="store"
+      :currencyTypes="['fleetArenaCurrency']"
+    />
+    <NodesTable
+      class="my-2 shard-store"
+      :nodeTableNames="['Shard Store']"
+      label="Shard Shop Currency Store"
+      idRef="shardStore"
+      type="store"
+      :currencyTypes="['shardCurrency']"
+    />
+    <NodesTable
+      class="my-2 conquest-units"
+      :nodeTableNames="['Conquest']"
+      label="Conquest Units"
+      idRef="conquestUnits"
+      type="standard"
+    />
+    <NodesTable
+      class="my-2 legendary-table"
+      :nodeTableNames="['Legendary Events']"
+      label="Legendary Units"
+      idRef="legendaryUnits"
+      type="legendary"
+    />
+    <NodesTable
+      class="my-2 gl-table"
+      :nodeTableNames="['Galactic Legends']"
+      label="Galactic Legends"
+      idRef="glUnits"
+      type="gl"
+    />
   </div>
 </template>
 
@@ -37,37 +135,11 @@
 import { defineComponent } from "vue";
 
 import NodesTable from "./tables/nodesTable.vue";
-import TbTableContainer from "./tables/tbTableContainer.vue";
-import RaidsTable from "./tables/raidsTable.vue";
-import SpecialEventsTable from "./tables/specialEvents.vue";
-import ConquestTable from "./tables/conquestTable.vue";
-import CantinaStoreTable from "./tables/cantinaStoreTable.vue";
-import GuildStoreTable from "./tables/guildStoreTable.vue";
-import SquadArenaTable from "./tables/squadArenaTable.vue";
-import GalacticWarTable from "./tables/galacticWarTable.vue";
-import FleetArenaTable from "./tables/fleetArenaTable.vue";
-import GuildEventsTable from "./tables/guildEventsTable.vue";
-import ShardStoreTable from "./tables/shardStoreTable.vue";
-import LegendaryTable from "./tables/legendary/legendaryTable.vue";
-import GLTable from "./tables/legendary/glTable.vue";
 
 export default defineComponent({
   name: "ShardTableContainer",
   components: {
     NodesTable,
-    TbTableContainer,
-    SpecialEventsTable,
-    RaidsTable,
-    ConquestTable,
-    CantinaStoreTable,
-    GuildStoreTable,
-    SquadArenaTable,
-    GalacticWarTable,
-    FleetArenaTable,
-    GuildEventsTable,
-    ShardStoreTable,
-    LegendaryTable,
-    GLTable,
   },
 });
 </script>

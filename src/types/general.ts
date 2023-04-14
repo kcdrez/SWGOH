@@ -149,7 +149,7 @@ interface iExpandOptions {
     change: Function;
   };
   multiSelect?: {
-    options: { label: string; value: string }[];
+    options: { label: string; value: string; showOption?: boolean }[];
     change: Function;
     value?: string[];
   };

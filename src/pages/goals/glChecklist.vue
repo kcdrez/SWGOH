@@ -1,10 +1,11 @@
 <template>
   <div class="container swgoh-page">
-    <LegendarySummaryTable
-      :unitList="glUnitList"
-      :storageKey="storageKey + 'Summary'"
-      class="mb-2"
-    />
+    <ExpandableSection class="mb-2" title="Summary" idRef="glChecklistSummary">
+      <LegendarySummaryTable
+        :unitList="glUnitList"
+        :storageKey="storageKey + 'Summary'"
+      />
+    </ExpandableSection>
     <ExpandableSection
       v-for="unit in glUnitList"
       :key="unit.id"

@@ -42,15 +42,17 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
+interface iOption {
+  label: string;
+  value: any;
+  showOption?: boolean;
+}
+
 export default defineComponent({
   name: "MultiSelect",
   props: {
     options: {
-      type: Array as () => {
-        label: string;
-        value: any;
-        showOption?: boolean;
-      }[],
+      type: Array as () => iOption[],
       required: true,
     },
     label: {
@@ -71,8 +73,14 @@ export default defineComponent({
   },
   computed: {
     showWarning(): boolean {
-      return !this.options.every((option: { label: string; value: any }) => {
-        return this.selected.some((select: string) => option.value === select);
+      return !this.options.every((option: iOption) => {
+        if (option.showOption || option.showOption === undefined) {
+          return this.selected.some(
+            (select: string) => option.value === select
+          );
+        } else {
+          return true;
+        }
       });
     },
   },
@@ -90,10 +98,7 @@ export default defineComponent({
       this.show = !this.show;
     },
     handleFocusOut(e: FocusEvent) {
-      if (
-        !e.relatedTarget ||
-        (e?.relatedTarget as any)?.classList.contains("select-columns")
-      ) {
+      if (!e.relatedTarget) {
         this.show = false;
       }
     },
