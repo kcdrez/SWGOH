@@ -22,9 +22,10 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents, setupSimpleView } from "utils";
+import { setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import ShardTable from "./shardTable.vue";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "specialEvents";
 interface dataModel {
@@ -92,7 +93,7 @@ export default defineComponent({
         });
       });
     },
-    expandOptions(): any {
+    expandOptions(): iExpandOptions {
       return {
         toggle: {
           change: (val: boolean) => {

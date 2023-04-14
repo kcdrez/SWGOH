@@ -1,66 +1,15 @@
 <template>
-  <div
-    class="section-header collapse-header extended-1 align-items-center d-flex justify-content-center"
+  <ExpandableSection
+    :title="goal.name ?? goal.id"
+    :idRef="storageKey"
+    :options="expandOptions"
+    class="mb-2"
   >
-    <h3
-      data-bs-toggle="collapse"
-      :href="`#${storageKey}`"
-      v-if="!goal.isEditing"
-    >
-      {{ goal.name ?? goal.id }}
-    </h3>
-    <div class="align-items-center d-flex justify-content-center">
-      <template v-if="goal.isEditing">
-        <input
-          type="text"
-          v-model="goal.tempName"
-          @keypress.enter="goal.saveName()"
-          class="form-control form-control-sm"
-        />
-        <i
-          class="fas fa-ban text-small mx-1"
-          title="Cancel Changes"
-          @click="goal.isEditing = false"
-        ></i>
-        <i
-          class="fas fa-save text-small mx-1"
-          title="Save Changes"
-          @click="goal.saveName()"
-        ></i>
-      </template>
-      <template v-else>
-        <i
-          class="fas fa-edit text-small mx-1"
-          title="Edit Name"
-          @click="goal.isEditing = true"
-        ></i>
-      </template>
-      <i
-        class="fas fa-plus text-small mx-1"
-        title="Add Unit"
-        @click="showAddUnitModal = true"
-      ></i>
-      <i
-        class="fas fa-trash text-small mx-1"
-        title="Delete Goal"
-        @click="deleteGoalModal = true"
-      ></i>
-    </div>
-    <div class="toggles-container">
-      <MultiSelect
-        class="select-columns"
-        :options="cols"
-        :storageKey="storageKey + 'Columns'"
-        @checked="selectedColumns = $event"
-      />
-    </div>
-  </div>
-  <div :id="`${storageKey}`" :ref="`${storageKey}`" class="collapse">
     <div class="total-progress-bar">
       <ProgressBar :percent="totalProgress(goal.list, 'requirement')" />
     </div>
     <SwgohTable :table="{ header, body }" />
-  </div>
+  </ExpandableSection>
   <Modal :isOpen="showAddUnitModal">
     <template v-slot:header>Add New Unit</template>
     <template v-slot:body>
@@ -130,9 +79,10 @@ import UnitSearch from "components/units/unitSearch.vue";
 import Modal from "components/general/modal.vue";
 import { getPercent, getUnit, totalProgress } from "types/unit";
 import { Goal } from "types/goals";
-import { setupEvents, setupSorting } from "utils";
+import { setupSorting } from "utils";
 import { iHeaderCell, iHeaderRow, iTableBody, iTableHead } from "types/general";
 import { IPrerequisite } from "types/shards";
+import { iExpandOptions } from "types/general";
 
 export default defineComponent({
   name: "GoalsTable",
@@ -312,6 +262,79 @@ export default defineComponent({
         []
       );
     },
+    expandOptions(): iExpandOptions {
+      const options = {
+        buttons: [],
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+        onShow: () => {
+          const tableComponent = this.$refs[this.refName] as any;
+          tableComponent?.refresh();
+        },
+      } as any;
+
+      if (this.goal.isEditing) {
+        options.buttons.push(
+          ...[
+            {
+              icon: "fas fa-ban text-small mx-1",
+              title: "Cancel Changes",
+              click: () => {
+                this.goal.isEditing = false;
+              },
+            },
+            {
+              icon: "fas fa-save text-small mx-1",
+              title: "Save Changes",
+              click: () => {
+                this.goal.saveName();
+              },
+            },
+          ]
+        );
+        options.input = {
+          value: this.goal.tempName,
+          change: (newVal: string) => {
+            this.goal.tempName = newVal;
+          },
+          onEnter: () => {
+            this.goal.saveName();
+          },
+        };
+      } else {
+        options.buttons.push({
+          icon: "fas fa-edit text-small mx-1",
+          title: "Edit Name",
+          click: () => {
+            this.goal.isEditing = true;
+          },
+        });
+      }
+      options.buttons.push(
+        ...[
+          {
+            icon: "fas fa-plus text-small mx-1",
+            title: "Add Unit",
+            click: () => {
+              this.showAddUnitModal = true;
+            },
+          },
+          {
+            icon: "fas fa-trash text-small mx-1",
+            title: "Delete Goal",
+            click: () => {
+              this.deleteGoalModal = true;
+            },
+          },
+        ]
+      );
+
+      return options;
+    },
   },
   methods: {
     ...mapActions("player", ["removeGoal"]),
@@ -321,12 +344,6 @@ export default defineComponent({
     showCol(key: string): boolean {
       return this.selectedColumns.some((x: string) => x === key);
     },
-  },
-  mounted() {
-    setupEvents(
-      this.$refs[`${this.storageKey}`] as HTMLElement,
-      `${this.storageKey}`
-    );
   },
 });
 </script>
@@ -342,26 +359,25 @@ export default defineComponent({
   input {
     max-width: 200px;
   }
+}
+::v-deep(i) {
+  cursor: pointer;
 
-  i {
-    cursor: pointer;
+  &:hover {
+    transform: scale(1.5);
 
-    &:hover {
-      transform: scale(1.5);
-
-      &.fa-edit,
-      &.fa-plus {
-        color: $primary;
-      }
-      &.fa-ban {
-        color: $warning;
-      }
-      &.fa-save {
-        color: $success;
-      }
-      &.fa-trash {
-        color: $danger;
-      }
+    &.fa-edit,
+    &.fa-plus {
+      color: $primary;
+    }
+    &.fa-ban {
+      color: $warning;
+    }
+    &.fa-save {
+      color: $success;
+    }
+    &.fa-trash {
+      color: $danger;
     }
   }
 }

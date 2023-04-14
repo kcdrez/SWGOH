@@ -33,6 +33,7 @@ import { Unit } from "types/unit";
 import { NodeCharacter, FarmingNode } from "types/shards";
 import LegendaryRequirementsTable from "components/shards/tables/legendary/legendaryRequirementsTable.vue";
 import LegendarySummaryTable from "components/shards/tables/legendary/legendarySummaryTable.vue";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "glChecklist";
 
@@ -102,7 +103,7 @@ export default defineComponent({
         },
       ];
     },
-    expandOptions(): any {
+    expandOptions(): iExpandOptions {
       return this.glUnitList.reduce((acc: any, unit: Unit) => {
         acc[unit.id] = {
           toggle: {

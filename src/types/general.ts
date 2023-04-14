@@ -131,6 +131,32 @@ interface iTable {
   classes?: string;
 }
 
+interface iExpandOptions {
+  input?: {
+    onEnter?: Function;
+    change: Function;
+    value: string;
+  };
+  buttons?: {
+    classes: string;
+    click: Function;
+    title?: string;
+  }[];
+  toggle?: {
+    onLabel: string;
+    offLabel: string;
+    value: boolean;
+    change: Function;
+  };
+  multiSelect?: {
+    options: { label: string; value: string }[];
+    change: Function;
+    value?: string[];
+  };
+  onShow?: Function;
+  onHide?: Function;
+}
+
 export {
   iHeaderCell,
   iHeaderRow,
@@ -139,4 +165,5 @@ export {
   iTableRow,
   iTableCell,
   iTable,
+  iExpandOptions,
 };

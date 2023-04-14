@@ -22,9 +22,10 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents, setupSimpleView } from "utils";
+import { setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import ShardTable from "./shardTable.vue";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "fleetNodes";
 
@@ -90,7 +91,7 @@ export default defineComponent({
         return unit.whereToFarm.some((node) => node.table === "Fleet");
       });
     },
-    expandOptions(): any {
+    expandOptions(): iExpandOptions {
       return {
         toggle: {
           change: (val: boolean) => {

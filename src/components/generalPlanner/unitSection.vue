@@ -17,6 +17,7 @@ import { Unit } from "types/unit";
 import { maxGearLevel } from "types/gear";
 import { setupColumnEvents, setupSimpleView, setupSorting } from "utils";
 import { iHeaderCell, iTableBody, iTableHead } from "types/general";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "unitSection";
 
@@ -319,7 +320,7 @@ export default defineComponent({
         this.showCol("targetLevel"),
       ].filter((x) => !!x).length;
     },
-    expandOptions(): any {
+    expandOptions(): iExpandOptions {
       return {
         toggle: {
           change: (val: boolean) => {
@@ -330,7 +331,9 @@ export default defineComponent({
           offLabel: "Advanced",
         },
         multiSelect: {
-          options: this.cols,
+          options: this.cols.map((x) => {
+            return { label: x.label, value: x.value };
+          }),
           change: (newVal: string[]) => {
             this.selectedColumns = newVal;
           },

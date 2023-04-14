@@ -1,20 +1,13 @@
 <template>
   <div class="container swgoh-page">
-    <div class="mb-2">
-      <div
-        class="collapse-header section-header align-items-center d-flex justify-content-center"
-      >
-        <h3 data-bs-toggle="collapse" :href="`#${storageKey}`">Goal List</h3>
-        <i
-          class="fas fa-plus text-small mx-1"
-          title="Add Goal"
-          @click="showAddGoalModal = true"
-        ></i>
-      </div>
-      <div :id="`${storageKey}`" class="collapse" :ref="`${storageKey}`">
-        <SwgohTable :table="{ header, body }" />
-      </div>
-    </div>
+    <ExpandableSection
+      class="mb-2"
+      title="Goal List"
+      :idRef="storageKey"
+      :options="expandOptions"
+    >
+      <SwgohTable :table="{ header, body }" />
+    </ExpandableSection>
     <div class="mb-2">
       <template v-for="item in player.goalList" :key="item.id">
         <GoalsTable
@@ -65,12 +58,13 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 
-import { setupEvents, setupSorting } from "utils";
+import { setupSorting } from "utils";
 import { totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import GoalsTable from "components/shards/progress/goalsTable.vue";
 import Modal from "components/general/modal.vue";
 import { iTableBody, iTableHead } from "types/general";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "goalListPage";
 
@@ -203,32 +197,25 @@ export default defineComponent({
           return 0;
         });
     },
+    expandOptions(): iExpandOptions {
+      return {
+        buttons: [
+          {
+            classes: "fas fa-plus text-small mx-1 c-pointer",
+            title: "Add Goal",
+            click: () => {
+              this.showAddGoalModal = true;
+            },
+          },
+        ],
+      };
+    },
   },
   methods: {
     ...mapActions("player", ["addGoal"]),
     totalProgress,
   },
-  mounted() {
-    setupEvents(this.$refs[`${storageKey}`] as HTMLElement, `${storageKey}`);
-  },
 });
 </script>
 
-<style lang="scss" scoped>
-@import "styles/variables.scss";
-.section-header {
-  z-index: 1;
-
-  i {
-    cursor: pointer;
-
-    &:hover {
-      transform: scale(1.5);
-
-      &.fa-plus {
-        color: $primary;
-      }
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

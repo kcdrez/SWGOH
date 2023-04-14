@@ -19,6 +19,7 @@ import { defineComponent } from "vue";
 import { Unit } from "types/unit";
 import { Gear } from "types/gear";
 import GearTable from "components/gear/gearTable.vue";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "gearSection";
 interface dataModel {
@@ -109,7 +110,7 @@ export default defineComponent({
       ];
       return list;
     },
-    expandOptions(): any {
+    expandOptions(): iExpandOptions {
       return {
         multiSelect: {
           options: this.cols,

@@ -26,9 +26,10 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { setupEvents, setupSimpleView } from "utils";
+import { setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import StoreTable from "./storeTable.vue";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "cantinaStore";
 interface dataModel {
@@ -106,7 +107,7 @@ export default defineComponent({
         );
       });
     },
-    expandOptions(): any {
+    expandOptions(): iExpandOptions {
       return {
         toggle: {
           change: (val: boolean) => {

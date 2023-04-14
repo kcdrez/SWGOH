@@ -21,8 +21,9 @@
 import { defineComponent } from "vue";
 import { mapGetters, mapState } from "vuex";
 
-import { setupEvents, setupSimpleView } from "utils";
+import { setupSimpleView } from "utils";
 import ShardTable from "components/shards/tables/shardTable.vue";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "shardSection";
 interface dataModel {
@@ -84,7 +85,7 @@ export default defineComponent({
       ];
       return list;
     },
-    expandOptions(): any {
+    expandOptions(): iExpandOptions {
       return {
         toggle: {
           change: (val: boolean) => {

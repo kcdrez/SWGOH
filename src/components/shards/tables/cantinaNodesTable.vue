@@ -25,6 +25,7 @@ import { mapGetters } from "vuex";
 import { setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import ShardTable from "./shardTable.vue";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "cantinaNodes";
 
@@ -90,7 +91,7 @@ export default defineComponent({
         return unit.whereToFarm.some((node) => node.table === "Cantina");
       });
     },
-    expandOptions(): any {
+    expandOptions(): iExpandOptions {
       return {
         toggle: {
           change: (val: boolean) => {

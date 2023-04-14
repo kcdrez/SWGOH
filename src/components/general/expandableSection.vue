@@ -1,11 +1,20 @@
 <template>
   <div>
     <div class="collapse-header section-header" :class="containerClass">
+      <div class="align-items-center d-flex justify-content-center">
+        <input
+          v-if="options?.input"
+          type="text"
+          v-model="_inputValue"
+          @keypress.enter="onEnter($event)"
+          class="form-control form-control-sm"
+        />
+      </div>
       <h3
-        class="w-100"
         data-bs-toggle="collapse"
         :href="`#${idRef}`"
         :ref="idRef"
+        v-if="!options?.input"
       >
         <i
           class="fa fa-chevron-up me-3"
@@ -14,6 +23,14 @@
         ></i>
         <div class="d-inline">{{ title }}</div>
       </h3>
+      <template v-if="options?.buttons">
+        <i
+          v-for="button in options.buttons"
+          :class="button.classes"
+          :title="button.title"
+          @click="button.click()"
+        ></i>
+      </template>
       <div class="toggles-container" v-if="showOptionsContainer">
         <div class="simple-view-container" v-if="options?.toggle">
           <Toggle
@@ -41,6 +58,7 @@
 import { defineComponent } from "vue";
 
 import { setupEvents } from "utils";
+import { iExpandOptions } from "types/general";
 
 export default defineComponent({
   name: "ExpandableSection",
@@ -58,23 +76,8 @@ export default defineComponent({
       default: false,
     },
     options: {
-      type: Object,
+      type: Object as () => iExpandOptions,
       default: () => {
-        // const options = {
-        //   toggle: {
-        //     change: () => {},
-        //     value: null,
-        //     onLabel: "",
-        //     offLabel: "",
-        //   },
-        //   multiSelect: {
-        //     options: [],
-        //     change: () => {},
-        //     value: null,
-        //   },
-        //   onShow: () => {},
-        //   onHide: () => {},
-        // };
         return null;
       },
     },
@@ -84,17 +87,20 @@ export default defineComponent({
       showing: false,
       _toggleValue: this.options?.toggle?.value ?? false,
       _selected: this.options?.multiSelect?.value ?? [],
+      _inputValue: this.options?.input?.value ?? "",
     };
   },
   computed: {
     showOptionsContainer(): boolean {
-      return this.options?.toggle || this.options?.multiSelect;
+      return !!this.options?.toggle || !!this.options?.multiSelect;
     },
     containerClass(): string {
       if (this.options?.toggle && this.options?.multiSelect) {
         return "extended-2";
       } else if (this.options?.multiSelect) {
         return "extended-1";
+      } else if (this.options?.buttons) {
+        return "align-items-center d-flex justify-content-center";
       } else {
         return "";
       }
@@ -102,10 +108,25 @@ export default defineComponent({
   },
   watch: {
     _toggleValue(newVal) {
-      this.options?.toggle?.change(newVal, this.idRef);
+      this.options?.toggle?.change(newVal);
     },
     _selected(newVal) {
-      this.options?.multiSelect?.change(newVal, this.idRef);
+      this.options?.multiSelect?.change(newVal);
+    },
+    _inputValue(newVal) {
+      this.options?.input?.change(newVal);
+    },
+    options(newVal) {
+      if (newVal?.input) {
+        this._inputValue = newVal?.input.value;
+      }
+    },
+  },
+  methods: {
+    onEnter(val: any) {
+      if (this.options?.input?.onEnter) {
+        this.options?.input?.onEnter(val);
+      }
     },
   },
   mounted() {
@@ -142,6 +163,7 @@ export default defineComponent({
 
 .section-header {
   display: flex;
+  justify-content: center;
   align-items: center;
   background-color: black;
   text-align: center;

@@ -21,8 +21,8 @@ import { mapState } from "vuex";
 
 import { Unit } from "types/unit";
 import { Relic } from "types/relic";
-import { setupEvents } from "utils";
 import RelicTable from "components/relic/relicTable.vue";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "relicSection";
 interface dataModel {
@@ -119,7 +119,7 @@ export default defineComponent({
       });
       return list;
     },
-    expandOptions(): any {
+    expandOptions(): iExpandOptions {
       return {
         multiSelect: {
           options: this.cols,

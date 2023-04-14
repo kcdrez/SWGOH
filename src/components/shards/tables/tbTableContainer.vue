@@ -23,6 +23,7 @@ import { mapGetters } from "vuex";
 import { setupSimpleView } from "utils";
 import { Unit } from "types/unit";
 import TerritoryBattleShardTable from "./territoryBattleShardTable.vue";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "territoryBattles";
 
@@ -82,7 +83,7 @@ export default defineComponent({
         );
       });
     },
-    expandOptions(): any {
+    expandOptions(): iExpandOptions {
       return {
         toggle: {
           change: (val: boolean) => {
