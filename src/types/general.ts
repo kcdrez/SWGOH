@@ -155,6 +155,7 @@ interface iExpandOptions {
   };
   onShow?: Function;
   onHide?: Function;
+  zIndex?: number;
 }
 
 export {

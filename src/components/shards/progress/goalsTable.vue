@@ -71,7 +71,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { Ref, defineComponent, ref } from "vue";
 import { mapActions } from "vuex";
 import _ from "lodash";
 
@@ -79,7 +79,7 @@ import UnitSearch from "components/units/unitSearch.vue";
 import Modal from "components/general/modal.vue";
 import { getPercent, getUnit, totalProgress } from "types/unit";
 import { Goal } from "types/goals";
-import { setupSorting } from "utils";
+import { setupColumnEvents, setupSorting } from "utils";
 import { iHeaderCell, iHeaderRow, iTableBody, iTableHead } from "types/general";
 import { IPrerequisite } from "types/shards";
 import { iExpandOptions } from "types/general";
@@ -91,12 +91,17 @@ export default defineComponent({
       props.storageKey
     );
 
+    const selectedColumns: Ref<string[]> = ref([]);
+    const { showCol } = setupColumnEvents(selectedColumns);
+
     return {
       sortDir,
       sortMethod,
       searchText,
       sortBy,
       sortIcon,
+      selectedColumns,
+      showCol,
     };
   },
   components: {
@@ -122,7 +127,6 @@ export default defineComponent({
       searchUnit: null,
       targetType: "Relic",
       targetValue: 1,
-      selectedColumns: [],
       showAddUnitModal: false,
       deleteGoalModal: false,
     } as any;
@@ -341,9 +345,6 @@ export default defineComponent({
     totalProgress,
     getUnit,
     getPercent,
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x: string) => x === key);
-    },
   },
 });
 </script>

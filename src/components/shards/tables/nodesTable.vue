@@ -1,14 +1,14 @@
 <template>
   <ExpandableSection
     v-if="unitList.length > 0"
-    title="Fleet Battles"
+    :title="label"
     :idRef="refName"
     :options="expandOptions"
   >
     <ShardTable
       :ref="refName"
       :units="unitList"
-      :nodeTableNames="['Fleet']"
+      :nodeTableNames="nodeTableNames"
       :selectedColumns="selectedColumns"
       showUnitName
       showPriority
@@ -27,68 +27,43 @@ import { Unit } from "types/unit";
 import ShardTable from "./shardTable.vue";
 import { iExpandOptions } from "types/general";
 
-const storageKey = "fleetNodes";
-
 interface dataModel {
   selectedColumns: string[];
-  refName: string;
 }
 
 export default defineComponent({
-  name: "FleetNodesTable",
-  setup() {
-    const { simpleView } = setupSimpleView(storageKey);
-    return { simpleView };
-  },
+  name: "NodesTable",
   components: { ShardTable },
+  setup(props) {
+    const { simpleView } = setupSimpleView(props.idRef);
+    return { simpleView, refName: props.idRef + "Table" };
+  },
+  props: {
+    label: {
+      type: String,
+      required: true,
+    },
+    nodeTableNames: {
+      type: Array as () => string[],
+      required: true,
+    },
+    idRef: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
       selectedColumns: [],
-      refName: storageKey + "Table",
     } as dataModel;
   },
   computed: {
     ...mapGetters("shards", ["unitFarmingList"]),
-    cols(): { label: string; value: any }[] {
-      const list = [
-        {
-          label: "Name",
-          value: "name",
-        },
-        {
-          label: "Locations",
-          value: "locations",
-        },
-        {
-          label: "Owned Shards",
-          value: "owned",
-        },
-        {
-          label: "Shards Remaining",
-          value: "remaining",
-        },
-        {
-          label: "Progress",
-          value: "progress",
-        },
-        {
-          label: "Attempts",
-          value: "attempts",
-        },
-        {
-          label: "Estimated Time",
-          value: "time",
-        },
-        {
-          label: "Priority",
-          value: "priority",
-        },
-      ];
-      return list;
-    },
     unitList(): Unit[] {
       return this.unitFarmingList.filter((unit: Unit) => {
-        return unit.whereToFarm.some((node) => node.table === "Fleet");
+        return unit.whereToFarm.some((node) =>
+          this.nodeTableNames.includes(node.table)
+        );
       });
     },
     expandOptions(): iExpandOptions {
@@ -102,7 +77,40 @@ export default defineComponent({
           offLabel: "Advanced",
         },
         multiSelect: {
-          options: this.cols,
+          options: [
+            {
+              label: "Name",
+              value: "name",
+            },
+            {
+              label: "Locations",
+              value: "locations",
+            },
+            {
+              label: "Owned Shards",
+              value: "owned",
+            },
+            {
+              label: "Shards Remaining",
+              value: "remaining",
+            },
+            {
+              label: "Progress",
+              value: "progress",
+            },
+            {
+              label: "Attempts",
+              value: "attempts",
+            },
+            {
+              label: "Estimated Time",
+              value: "time",
+            },
+            {
+              label: "Priority",
+              value: "priority",
+            },
+          ],
           change: (newVal: string[]) => {
             this.selectedColumns = newVal;
           },

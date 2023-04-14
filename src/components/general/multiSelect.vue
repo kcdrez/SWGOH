@@ -90,7 +90,10 @@ export default defineComponent({
       this.show = !this.show;
     },
     handleFocusOut(e: FocusEvent) {
-      if (!e.relatedTarget) {
+      if (
+        !e.relatedTarget ||
+        (e?.relatedTarget as any)?.classList.contains("select-columns")
+      ) {
         this.show = false;
       }
     },

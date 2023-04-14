@@ -150,9 +150,10 @@
     <div class="row">
       <div class="col">
         <RelicCalculatorTable
-          v-for="table in calculator.tableData"
+          v-for="(table, index) in calculator.tableData"
           :key="table.id"
           :plannerData="table"
+          :zIndex="calculator.tableData.length - index"
           class="mb-2"
         />
       </div>

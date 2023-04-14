@@ -1,8 +1,23 @@
 <template>
   <div class="mb-3 shard-table-container">
-    <StandardNodesTable class="my-2 standard-nodes" />
-    <FleetNodesTable class="my-2 fleet-nodes" />
-    <CantinaNodesTable class="my-2 cantina-nodes" />
+    <NodesTable
+      class="my-2 standard-nodes"
+      :nodeTableNames="['Light Side', 'Dark Side']"
+      label="Light & Dark Side Battles"
+      idRef="standardNodes"
+    />
+    <NodesTable
+      class="my-2 fleet-nodes"
+      :nodeTableNames="['Fleet']"
+      label="Fleet Battles"
+      idRef="fleetNodes"
+    />
+    <NodesTable
+      class="my-2 cantina-nodes"
+      :nodeTableNames="['Cantina']"
+      label="Cantina Battles"
+      idRef="cantinaNodes"
+    />
     <TbTableContainer class="my-2 tb-table" />
     <RaidsTable class="my-2 raids-table" />
     <SpecialEventsTable class="my-2 proving-grounds-nodes" />
@@ -21,9 +36,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import StandardNodesTable from "./tables/standardNodesTable.vue";
-import FleetNodesTable from "./tables/fleetNodesTable.vue";
-import CantinaNodesTable from "./tables/cantinaNodesTable.vue";
+import NodesTable from "./tables/nodesTable.vue";
 import TbTableContainer from "./tables/tbTableContainer.vue";
 import RaidsTable from "./tables/raidsTable.vue";
 import SpecialEventsTable from "./tables/specialEvents.vue";
@@ -41,9 +54,7 @@ import GLTable from "./tables/legendary/glTable.vue";
 export default defineComponent({
   name: "ShardTableContainer",
   components: {
-    StandardNodesTable,
-    FleetNodesTable,
-    CantinaNodesTable,
+    NodesTable,
     TbTableContainer,
     SpecialEventsTable,
     RaidsTable,
@@ -83,7 +94,7 @@ export default defineComponent({
   ::v-deep(.assault-battles-nodes .section-header) {
     z-index: 15;
   }
-    ::v-deep(.proving-grounds-nodes .section-header) {
+  ::v-deep(.proving-grounds-nodes .section-header) {
     z-index: 14;
   }
   ::v-deep(.cantina-store .section-header) {

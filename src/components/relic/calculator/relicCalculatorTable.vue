@@ -6,33 +6,15 @@
   >
     <SwgohTable :table="{ header, body }" />
   </ExpandableSection>
-  <!-- <div>
-    <div class="collapse-header section-header extended-1">
-      <h3>
-        <div data-bs-toggle="collapse" :href="`#${plannerData.id}`">
-          {{ plannerData.label }}
-        </div>
-      </h3>
-      <MultiSelect
-        class="select-columns"
-        :options="cols"
-        :storageKey="storageKey + 'Columns'"
-        @checked="selectedColumns = $event"
-      />
-    </div>
-    <div :ref="storageKey" class="collapse">
-      <SwgohTable :table="{ header, body }" :id="plannerData.id" />
-    </div>
-  </div> -->
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { Ref, defineComponent, ref } from "vue";
 import { mapState, mapGetters } from "vuex";
 
 import { FarmingNode } from "types/shards";
 import { RelicPlanner } from "types/relicPlanner";
-import { setupSorting } from "utils";
+import { setupColumnEvents, setupSorting } from "utils";
 import {
   iExpandOptions,
   iHeaderCell,
@@ -51,11 +33,16 @@ export default defineComponent({
       `${storageKey}-${props.plannerData.id}`
     );
 
+    const selectedColumns: Ref<string[]> = ref([]);
+    const { showCol } = setupColumnEvents(selectedColumns);
+
     return {
       sortDir,
       sortMethod,
       sortBy,
       sortIcon,
+      selectedColumns,
+      showCol,
     };
   },
   props: {
@@ -63,11 +50,13 @@ export default defineComponent({
       type: Object as () => RelicPlanner,
       required: true,
     },
+    zIndex: {
+      type: Number,
+      default: null,
+    },
   },
   data() {
-    return {
-      selectedColumns: [],
-    } as any;
+    return {} as any;
   },
   computed: {
     ...mapState("gear", ["gearList"]),
@@ -172,7 +161,7 @@ export default defineComponent({
     },
     body(): iTableBody {
       const challengeGearRows: iTableRow[] = this.plannerData.challengeGear.map(
-        (gear) => {
+        (gear: any) => {
           return {
             cells: [
               {
@@ -224,7 +213,7 @@ export default defineComponent({
         }
       );
       const storeGearRows: iTableRow[] = this.plannerData.storeGear.map(
-        (gear) => {
+        (gear: any) => {
           return {
             cells: [
               {
@@ -350,6 +339,7 @@ export default defineComponent({
             this.selectedColumns = newVal;
           },
         },
+        zIndex: this.zIndex,
       };
     },
   },
@@ -359,9 +349,6 @@ export default defineComponent({
         (x: FarmingNode) => x.id === locationId
       );
       return match ? match.label : locationId;
-    },
-    showCol(key: string): boolean {
-      return this.selectedColumns.some((x) => x === key);
     },
   },
 });

@@ -1,6 +1,10 @@
 <template>
   <div>
-    <div class="collapse-header section-header" :class="containerClass">
+    <div
+      class="collapse-header section-header"
+      :class="containerClass"
+      :style="{ zIndex: options?.zIndex ?? 10 }"
+    >
       <div class="align-items-center d-flex justify-content-center">
         <input
           v-if="options?.input"
@@ -172,7 +176,7 @@ export default defineComponent({
   position: sticky;
   top: 56px;
   height: 50px;
-  z-index: 10;
+  // z-index: 10;
 
   h1,
   h2,
