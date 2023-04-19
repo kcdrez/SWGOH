@@ -455,7 +455,7 @@ export default defineComponent({
       const match = unit.stats.find((x: any) => x.key === stat);
       if (match) {
         const { min, max } = match;
-        const arr = [];
+        const arr: string[] = [];
         if (min) {
           arr.push("Minimum: " + min);
         }

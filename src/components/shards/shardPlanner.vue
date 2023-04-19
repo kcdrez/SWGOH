@@ -474,7 +474,7 @@ export default defineComponent({
         return this.tables.some((tableName) => elTables.includes(tableName));
       });
 
-      let days = [];
+      let days: number[] = [];
       if (this.showNodeTable) {
         days.push(nodeEstimatedTime(unitList, this.tables));
       }

@@ -34,7 +34,7 @@ export default defineComponent({
     },
     searchBy: {
       type: Array as PropType<string[]>,
-      default: () => {
+      default: (n: any) => {
         return ["name"];
       },
     },

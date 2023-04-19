@@ -1,18 +1,20 @@
 <template>
   <ModalComponent :isOpen="isOpen" ref="modal">
-    <template v-slot:header v-if="title">
-      <h5 class="modal-title">{{ title }}</h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="modal"
-        aria-label="Close"
-      ></button>
+    <template #header>
+      <template v-if="title">
+        <h5 class="modal-title">{{ title }}</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </template>
     </template>
-    <template v-slot:body>
+    <template #body>
       <p>{{ text }}</p>
     </template>
-    <template v-slot:footer>
+    <template #footer>
       <button
         type="button"
         class="btn btn-secondary"

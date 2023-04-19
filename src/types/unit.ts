@@ -755,7 +755,7 @@ export class Unit {
   }
 
   public get gearOptions() {
-    const list = [];
+    const list: number[] = [];
     for (let i = (this.gearLevel || 0) + 1; i <= maxGearLevel; i++) {
       list.push(i);
     }
@@ -763,7 +763,7 @@ export class Unit {
   }
 
   public get relicOptions() {
-    const list = [];
+    const list: number[] = [];
     for (let i = this.relicLevel; i <= maxRelicLevel; i++) {
       list.push(i);
     }

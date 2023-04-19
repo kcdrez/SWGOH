@@ -765,7 +765,7 @@ export default defineComponent({
               100)
       );
 
-      const setsStrings = [];
+      const setsStrings: string[] = [];
       if (sets.health) {
         setsStrings.push(`${sets.health} Health`);
       }
@@ -773,7 +773,7 @@ export default defineComponent({
         setsStrings.push(`${sets.defense} Defense`);
       }
 
-      const primaryStrings = [];
+      const primaryStrings: string[] = [];
       if (primaries.health) {
         primaryStrings.push(`${primaries.health} Health`);
       }
