@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import _ from "lodash";
 
 import { Unit } from "types/unit";
@@ -21,10 +21,10 @@ export default defineComponent({
   props: {
     unit: {
       required: true,
-      type: Object as PropType<Unit>,
+      type: Object as () => Unit,
     },
     nodeTableNames: {
-      type: Array as PropType<string[]>,
+      type: Array as () => string[],
       required: true,
     },
   },

@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
 import { loadingState } from "types/loading";
@@ -15,7 +15,7 @@ export default defineComponent({
   name: "LoadingBasicPage",
   props: {
     dependencyModules: {
-      type: Array as PropType<string[]>,
+      type: Array as () => string[],
       required: true,
     },
     loadAsync: {

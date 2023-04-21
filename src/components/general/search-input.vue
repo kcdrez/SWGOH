@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "SearchInput",
@@ -33,7 +33,7 @@ export default defineComponent({
       required: true,
     },
     searchBy: {
-      type: Array as PropType<string[]>,
+      type: Array as () => string[],
       default: (n: any) => {
         return ["name"];
       },

@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 
 import { loadingState } from "types/loading";
 
@@ -18,7 +18,7 @@ export default defineComponent({
   name: "Error",
   props: {
     state: {
-      type: String as PropType<loadingState>,
+      type: String as () => loadingState,
       required: true,
     },
     message: {

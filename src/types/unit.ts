@@ -355,6 +355,7 @@ export class Unit {
         };
       };
     };
+
     const glShardsTiers: tGLUnlockMap = {
       JABBATHEHUTT: {
         tier1: {
@@ -405,20 +406,18 @@ export class Unit {
           shards: 25,
         },
         tier3: {
-          tickets: 50, //unknown
+          tickets: 60,
           count: 3,
           shards: 50,
         },
         tier4: {
           tickets: 100, //unknown
           count: 2,
-          shards: 55,
           ultMats: 4,
         },
         tier5: {
           tickets: 100, //unknown
           count: 4,
-          shards: 0,
           ultMats: 4,
         },
         tier6: {

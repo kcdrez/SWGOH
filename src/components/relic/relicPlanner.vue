@@ -1,64 +1,53 @@
 <template>
-  <div v-if="!unit.isShip && unit.relicLevel < maxRelicLevel">
-    <div class="collapse-header section-header">
-      <h3>
-        <div data-bs-toggle="collapse" href="#relicSection">Relic Planner</div>
-      </h3>
-    </div>
-    <div id="relicSection" class="collapse" ref="relicSection">
-      <div class="relic-header">
-        <div class="current-level">
-          <div>Current Relic Level:</div>
-          <RelicLevelIcon
-            :relicLevel="unit.relicLevel"
-            :alignment="unit.alignment"
-          />
-        </div>
-        <div class="target-level">
-          Target Level:
-          <select v-model.number="unit.relicTarget" class="mx-2">
-            <option v-for="num in unit.relicOptions" :value="num" :key="num">
-              Relic {{ num }}
-            </option>
-          </select>
-        </div>
+  <ExpandableSection
+    title="Relic Planner"
+    :idRef="storageKey"
+    :options="expandOptions"
+    v-if="!unit.isShip && unit.relicLevel < maxRelicLevel"
+  >
+    <div class="relic-header">
+      <div class="current-level">
+        <div>Current Relic Level:</div>
+        <RelicLevelIcon
+          :relicLevel="unit.relicLevel"
+          :alignment="unit.alignment"
+        />
       </div>
-      <Timestamp
-        class="time-estimate"
-        label="Estimated completion:"
-        :title="$filters.daysFromNow(unit.relicTotalDays)"
-        :displayText="$filters.pluralText(unit.relicTotalDays, 'day')"
-        displayClasses="d-inline"
-      />
-      <EnergySpent showCantina />
-      <MultiSelect
-        class="select-columns"
-        :options="cols"
-        :storageKey="storageKey + 'Columns'"
-        @checked="selectedColumns = $event"
-      />
-      <RelicTable
-        :relicList="relicList"
-        :targetLevels="[{ level: unit.relicLevel, target: unit.relicTarget }]"
-        :selectedColumns="selectedColumns"
-        :storageKey="storageKey + 'Table'"
-      />
+      <div class="target-level">
+        Target Level:
+        <select v-model.number="unit.relicTarget" class="mx-2">
+          <option v-for="num in unit.relicOptions" :value="num" :key="num">
+            Relic {{ num }}
+          </option>
+        </select>
+      </div>
     </div>
-  </div>
+    <Timestamp
+      class="time-estimate"
+      label="Estimated completion:"
+      :title="$filters.daysFromNow(unit.relicTotalDays)"
+      :displayText="$filters.pluralText(unit.relicTotalDays, 'day')"
+      displayClasses="d-inline" />
+    <EnergySpent showCantina />
+    <RelicTable
+      :relicList="relicList"
+      :targetLevels="[{ level: unit.relicLevel, target: unit.relicTarget }]"
+      :selectedColumns="selectedColumns"
+      :storageKey="storageKey + 'Table'"
+  /></ExpandableSection>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { mapGetters, mapState } from "vuex";
+import { defineComponent } from "vue";
+import { mapState } from "vuex";
 
 import RelicTable from "components/relic/relicTable.vue";
 import Timestamp from "components/general/timestamp.vue";
 import EnergySpent from "components/energySpent.vue";
 import RelicLevelIcon from "components/units/relicLevelIcon.vue";
-import { loadingState } from "types/loading";
 import { Relic, maxRelicLevel } from "types/relic";
 import { Unit } from "types/unit";
-import { setupEvents } from "utils";
+import { iExpandOptions } from "types/general";
 
 const storageKey = "relicPlanner";
 
@@ -67,7 +56,7 @@ export default defineComponent({
   components: { RelicTable, Timestamp, EnergySpent, RelicLevelIcon },
   props: {
     unit: {
-      type: Object as PropType<Unit>,
+      type: Object as () => Unit,
       required: true,
     },
   },
@@ -76,19 +65,15 @@ export default defineComponent({
       maxRelicLevel,
       selectedColumns: [],
       storageKey,
-    };
+    } as any;
   },
   computed: {
     ...mapState("relic", ["relicConfig"]),
-    ...mapGetters(["someLoading"]),
-    requestState(): loadingState {
-      return this.someLoading(["relic", "unit"]);
-    },
     relicList(): Relic[] {
       return Object.values(this.relicConfig);
     },
     cols(): { label: string; value: any }[] {
-      const list = [
+      return [
         {
           label: "Icon",
           value: "icon",
@@ -122,13 +107,17 @@ export default defineComponent({
           value: "time",
         },
       ];
-      return list;
     },
-  },
-  mounted() {
-    if (!this.unit.isShip && this.unit.relicLevel < maxRelicLevel) {
-      setupEvents(this.$refs.relicSection as HTMLElement, storageKey);
-    }
+    expandOptions(): iExpandOptions {
+      return {
+        multiSelect: {
+          options: this.cols,
+          change: (newVal: string[]) => {
+            this.selectedColumns = newVal;
+          },
+        },
+      };
+    },
   },
 });
 </script>

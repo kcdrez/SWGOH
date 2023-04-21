@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
 import GearPlanner from "components/gear/gearPlanner.vue";
@@ -34,7 +34,7 @@ export default defineComponent({
   components: { GearPlanner, RelicPlanner, ShardPlanner, UnitIcon },
   props: {
     unit: {
-      type: Object as PropType<Unit>,
+      type: Object as () => Unit,
       required: true,
     },
   },

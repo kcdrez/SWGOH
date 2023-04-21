@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, Ref } from "vue";
+import { defineComponent, ref, Ref } from "vue";
 
 import { Match, TeamMember } from "types/teams";
 import MultiSelect from "components/general/multiSelect.vue";
@@ -83,7 +83,7 @@ export default defineComponent({
   props: {
     match: {
       required: true,
-      type: Object as PropType<Match>,
+      type: Object as () => Match,
     },
   },
   computed: {

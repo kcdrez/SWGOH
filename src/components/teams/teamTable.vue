@@ -107,7 +107,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, Ref, toRefs } from "vue";
+import { defineComponent, ref, Ref, toRefs } from "vue";
 
 import { SortType, Team, TeamMember } from "types/teams";
 import { Unit } from "types/unit";
@@ -140,11 +140,11 @@ export default defineComponent({
   props: {
     team: {
       required: true,
-      type: Object as PropType<Team>,
+      type: Object as () => Team,
     },
     unitList: {
       required: false,
-      type: Object as PropType<Unit[]>,
+      type: Array as () => Unit[],
     },
     size: {
       type: String,

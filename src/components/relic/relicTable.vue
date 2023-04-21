@@ -1,9 +1,16 @@
 <template>
-  <SwgohTable :table="{ header, body }" />
+  <div>
+    <SwgohTable :table="{ header, body }" v-if="relicList.length > 0" />
+    <div v-else class="text-center">
+      There are no relic requirements for these units. This is either because
+      you already own all the relic materials and can immediately upgrade to the
+      target level or all the units are already at the target relic level.
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, toRefs } from "vue";
+import { defineComponent, toRefs } from "vue";
 import { mapState } from "vuex";
 
 import { Relic } from "types/relic";
@@ -36,11 +43,11 @@ export default defineComponent({
   props: {
     relicList: {
       required: true,
-      type: Object as PropType<Relic[]>,
+      type: Array as () => Relic[],
     },
     targetLevels: {
       required: true,
-      type: Array as PropType<{ level: number; target: number }[]>,
+      type: Array as () => { level: number; target: number }[],
       validator: (arr: any[]) => {
         return arr.every((x) => {
           return "level" in x && "target" in x;

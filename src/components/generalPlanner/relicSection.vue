@@ -4,6 +4,7 @@
     :idRef="refName"
     :options="expandOptions"
     class="mt-3"
+    v-if="!(hideOnEmpty && fullRelicList.length === 0)"
   >
     <RelicTable
       :relicList="fullRelicList"
@@ -44,6 +45,10 @@ export default defineComponent({
         return {};
       },
     },
+    hideOnEmpty: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -54,7 +59,7 @@ export default defineComponent({
   computed: {
     ...mapState("relic", ["relicConfig"]),
     cols(): { label: string; value: any }[] {
-      const list = [
+      return [
         {
           label: "Icon",
           value: "icon",
@@ -92,24 +97,31 @@ export default defineComponent({
           value: "time",
         },
       ];
-      return list;
     },
     fullRelicList(): Relic[] {
-      const list: Relic[] = Object.values(this.relicConfig);
-      list.forEach((relic) => relic.resetNeeded());
+      const relicList: Relic[] = Object.values(this.relicConfig);
+      const neededList: Relic[] = [];
+      relicList.forEach((relic) => relic.resetNeeded());
       this.units.forEach((unit: Unit) => {
         if (unit.relicLevel < unit.relicTarget) {
-          list.forEach((relic: Relic) => {
+          relicList.forEach((relic: Relic) => {
             const target = this.relicTargets[unit.id] ?? unit.relicTarget;
-            relic.addNeededBy({
-              name: unit.name,
-              id: unit.id,
-              amount: relic.amountNeeded([{ target, level: unit.relicLevel }]),
-            });
+            const amount = relic.amountNeeded([
+              { target, level: unit.relicLevel },
+            ]);
+            console.log(amount);
+            if (amount > 0) {
+              relic.addNeededBy({
+                name: unit.name,
+                id: unit.id,
+                amount,
+              });
+              neededList.push(relic);
+            }
           });
         }
       });
-      return list;
+      return neededList;
     },
     relicTargetLevels(): any[] {
       const list: any[] = [];

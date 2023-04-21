@@ -1,187 +1,137 @@
 <template>
-  <div>
-    <div class="collapse-header section-header">
-      <h3>
-        <div data-bs-toggle="collapse" href="#shardSection">
-          7 Star Unlock Planner
+  <ExpandableSection
+    title="7 Star Unlock Planner"
+    :idRef="storageKey"
+    v-if="unit.stars < 7"
+  >
+    <h5 v-if="unit.whereToFarm.length === 0" class="my-1 text-center">
+      This unit is not currently farmable.
+    </h5>
+    <template v-else>
+      <div class="shard-header">
+        <div class="current-level">
+          Current Star Level:
+          <span v-if="unit.stars <= 0" class="ms-1">0</span>
+          <img
+            v-for="index in unit.stars || 0"
+            :key="index"
+            src="images/star.png"
+          />
         </div>
-      </h3>
-    </div>
-    <div id="shardSection" class="collapse mx-3" ref="shardSection">
-      <h5 v-if="unit.whereToFarm.length === 0" class="my-1 text-center">
-        This unit is not currently farmable.
-      </h5>
-      <template v-else>
-        <div class="shard-header">
-          <div class="current-level">
-            Current Star Level:
-            <span v-if="unit.stars <= 0" class="ms-1">0</span>
-            <img
-              v-for="index in unit.stars || 0"
-              :key="index"
-              src="images/star.png"
-            />
-          </div>
-        </div>
-        <Timestamp
-          class="time-estimate"
-          label="Estimated completion:"
-          :timeLength="shardTimeUnlock"
-          displayClasses="d-inline"
-          v-if="unit.stars < 7"
+      </div>
+      <Timestamp
+        class="time-estimate"
+        label="Estimated completion:"
+        :timeLength="shardTimeUnlock"
+        displayClasses="d-inline"
+        v-if="unit.stars < 7"
+      />
+      <template v-if="showNodeTable">
+        <MultiSelect
+          class="select-columns"
+          :options="cols.shards"
+          :storageKey="storageKey + 'ShardColumns'"
+          @checked="selectedColumns.shards = $event"
         />
-        <template v-if="showNodeTable">
-          <MultiSelect
-            class="select-columns"
-            :options="cols.shards"
-            :storageKey="storageKey + 'ShardColumns'"
-            @checked="selectedColumns.shards = $event"
-          />
-          <ShardTable
-            :units="[unit]"
-            :selectedColumns="selectedColumns.shards"
-            showActions
-            loadOnCreation
-            :storageKey="storageKey + 'ShardTable'"
-          />
-        </template>
-        <template v-if="showShopTable">
-          <MultiSelect
-            class="select-columns"
-            :options="cols.store"
-            :storageKey="storageKey + 'StoreColumns'"
-            @checked="selectedColumns.store = $event"
-          />
-          <StoreTable
-            :units="[unit]"
-            :selectedColumns="selectedColumns.store"
-            :currencyTypes="unit.currencyTypes"
-            :storageKey="storageKey + 'StoreTable'"
-            loadOnCreation
-          />
-        </template>
-        <template v-if="showTBTable">
-          <MultiSelect
-            class="select-columns"
-            :options="cols.tb"
-            :storageKey="storageKey + 'TBColumns'"
-            @checked="selectedColumns.tb = $event"
-          />
-          <TerritoryBattleShardTable
-            :units="[unit]"
-            :selectedColumns="selectedColumns.tb"
-            :storageKey="storageKey + 'TBTable'"
-            loadOnCreation
-          />
-        </template>
-        <div class="legendary-container" v-if="showLegendaryTable">
-          <div class="collapse-header section-header">
-            <h5 class="w-100">
-              <div
-                data-bs-toggle="collapse"
-                href="#prerequisite-legendary-table"
-              >
-                Unlock Status
-              </div>
-            </h5>
-            <div class="simple-view-container">
-              <Toggle
-                v-model="simpleViewLegendary"
-                onLabel="Simple"
-                offLabel="Advanced"
-              />
-            </div>
-            <MultiSelect
-              class="select-columns"
-              :options="cols.legendary"
-              :storageKey="storageKey + 'LegendaryColumns'"
-              @checked="selectedColumns.legendary = $event"
-            />
-          </div>
-          <div
-            id="prerequisite-legendary-table"
-            class="collapse"
-            ref="prerequisiteLegendaryTable"
-          >
-            <LegendaryRequirementsTable
-              class="mt-2"
-              :unit="unit"
-              :selectedColumns="selectedColumns.legendary"
-              :storageKey="storageKey + 'Legendary'"
-              :simpleView="simpleViewLegendary"
-              nodeKey="legendary"
-            />
-          </div>
-          <GearSection
-            class="gear-section"
-            :units="prerequisites.list"
-            :gearTargets="prerequisites.gearTargets"
-          />
-          <RelicSection
-            class="relic-section"
-            :units="prerequisites.list"
-            :relicTargets="prerequisites.relicTargets"
-          />
-        </div>
-        <div class="gl-container" v-if="showGLTable">
-          <div class="collapse-header section-header">
-            <h5 class="w-100">
-              <div data-bs-toggle="collapse" href="#prerequisite-gl-table">
-                Unlock Status
-              </div>
-            </h5>
-            <div class="simple-view-container">
-              <Toggle
-                v-model="simpleViewGl"
-                onLabel="Simple"
-                offLabel="Advanced"
-              />
-            </div>
-            <MultiSelect
-              class="select-columns"
-              :options="cols.gl"
-              :storageKey="storageKey + 'GLColumns'"
-              @checked="selectedColumns.gl = $event"
-            />
-          </div>
-          <div
-            id="prerequisite-gl-table"
-            class="collapse"
-            ref="prerequisiteGLTable"
-          >
-            <LegendaryRequirementsTable
-              class="mt-2"
-              :unit="unit"
-              :selectedColumns="selectedColumns.gl"
-              :storageKey="storageKey + 'GL'"
-              :simpleView="simpleViewGl"
-              nodeKey="galactic_legends"
-            />
-          </div>
-          <GearSection
-            class="gear-section"
-            :units="prerequisites.list"
-            :gearTargets="prerequisites.gearTargets"
-          />
-          <RelicSection
-            class="relic-section"
-            :units="prerequisites.list"
-            :relicTargets="prerequisites.relicTargets"
-          />
-        </div>
-        <div v-if="unitUsages.length > 0">
-          <h5 class="text-center">
-            This unit is required for the following Legendary/GL events:
-          </h5>
-          <SwgohTable :table="{ header, body }" />
-        </div>
+        <ShardTable
+          :units="[unit]"
+          :selectedColumns="selectedColumns.shards"
+          showActions
+          loadOnCreation
+          :storageKey="storageKey + 'ShardTable'"
+        />
       </template>
-    </div>
-  </div>
+      <template v-if="showShopTable">
+        <MultiSelect
+          class="select-columns"
+          :options="cols.store"
+          :storageKey="storageKey + 'StoreColumns'"
+          @checked="selectedColumns.store = $event"
+        />
+        <StoreTable
+          :units="[unit]"
+          :selectedColumns="selectedColumns.store"
+          :currencyTypes="unit.currencyTypes"
+          :storageKey="storageKey + 'StoreTable'"
+          loadOnCreation
+        />
+      </template>
+      <template v-if="showTBTable">
+        <MultiSelect
+          class="select-columns"
+          :options="cols.tb"
+          :storageKey="storageKey + 'TBColumns'"
+          @checked="selectedColumns.tb = $event"
+        />
+        <TerritoryBattleShardTable
+          :units="[unit]"
+          :selectedColumns="selectedColumns.tb"
+          :storageKey="storageKey + 'TBTable'"
+          loadOnCreation
+        />
+      </template>
+      <ExpandableSection
+        class="legendary-container"
+        title="Unlock Status"
+        idRef="prerequisite-legendary-table"
+        :options="legendaryExpandOptions"
+        v-if="showLegendaryTable"
+      >
+        <LegendaryRequirementsTable
+          class="mt-2"
+          :unit="unit"
+          :selectedColumns="selectedColumns.legendary"
+          :storageKey="storageKey + 'Legendary'"
+          :simpleView="simpleViewLegendary"
+          nodeKey="legendary" />
+        <GearSection
+          class="gear-section"
+          :units="prerequisites.list"
+          :gearTargets="prerequisites.gearTargets"
+          :hideOnEmpty="true" />
+        <RelicSection
+          class="relic-section"
+          :units="prerequisites.list"
+          :relicTargets="prerequisites.relicTargets"
+          :hideOnEmpty="true"
+      /></ExpandableSection>
+      <ExpandableSection
+        class="gl-container"
+        title="Unlock Status"
+        idRef="prerequisite-gl-table"
+        :options="glExpandOptions"
+        v-if="showGLTable"
+      >
+        <LegendaryRequirementsTable
+          class="mt-2"
+          :unit="unit"
+          :selectedColumns="selectedColumns.gl"
+          :storageKey="storageKey + 'GL'"
+          :simpleView="simpleViewGl"
+          nodeKey="galactic_legends" />
+        <GearSection
+          class="gear-section"
+          :units="prerequisites.list"
+          :gearTargets="prerequisites.gearTargets"
+          :hideOnEmpty="true" />
+        <RelicSection
+          class="relic-section"
+          :units="prerequisites.list"
+          :relicTargets="prerequisites.relicTargets"
+          :hideOnEmpty="true"
+      /></ExpandableSection>
+      <div v-if="unitUsages.length > 0">
+        <h5 class="text-center">
+          This unit is required for the following Legendary/GL events:
+        </h5>
+        <SwgohTable :table="{ header, body }" />
+      </div>
+    </template>
+  </ExpandableSection>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import { mapState, mapGetters } from "vuex";
 
 import ShardTable from "./tables/shardTable.vue";
@@ -202,7 +152,7 @@ import {
 import { estimatedTime as shopEstimatedTime } from "types/currency";
 import { Unit, getUnit, getPercent, getPrerequisites } from "types/unit";
 import { estimatedTime as tbEstimatedTime } from "types/guild";
-import { iTableBody, iTableHead } from "types/general";
+import { iExpandOptions, iTableBody, iTableHead } from "types/general";
 import { maxGearLevel } from "types/gear";
 
 const storageKey = "shardPlanner";
@@ -227,7 +177,7 @@ export default defineComponent({
   },
   props: {
     unit: {
-      type: Object as PropType<Unit>,
+      type: Object as () => Unit,
       required: true,
     },
   },
@@ -241,7 +191,7 @@ export default defineComponent({
         gl: [],
       },
       storageKey,
-    };
+    } as any;
   },
   computed: {
     ...mapGetters("player", ["unitData"]),
@@ -524,6 +474,42 @@ export default defineComponent({
         },
         { list: [], relicTargets: {}, gearTargets: {} }
       );
+    },
+    legendaryExpandOptions(): iExpandOptions {
+      return {
+        multiSelect: {
+          options: this.cols.legendary,
+          change: (newVal: string[]) => {
+            this.selectedColumns.legendary = newVal;
+          },
+        },
+        toggle: {
+          onLabel: "Simple",
+          offLabel: "Advanced",
+          change: (val: boolean) => {
+            this.simpleViewLegendary = val;
+          },
+          value: this.simpleViewLegendary,
+        },
+      };
+    },
+    glExpandOptions(): iExpandOptions {
+      return {
+        multiSelect: {
+          options: this.cols.gl,
+          change: (newVal: string[]) => {
+            this.selectedColumns.gl = newVal;
+          },
+        },
+        toggle: {
+          onLabel: "Simple",
+          offLabel: "Advanced",
+          change: (val: boolean) => {
+            this.simpleViewGl = val;
+          },
+          value: this.simpleViewGl,
+        },
+      };
     },
   },
   methods: {

@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, toRefs } from "vue";
+import { defineComponent, toRefs } from "vue";
 
 import { Unit, unitsByPriority } from "types/unit";
 import { mapState } from "vuex";
@@ -54,7 +54,7 @@ export default defineComponent({
       default: false,
     },
     currencyTypes: {
-      type: Array as PropType<CurrencyTypeConfig[]>,
+      type: Array as () => CurrencyTypeConfig[],
       required: true,
       validator: (arr: any[]) => {
         return arr.every((x) => {
@@ -63,7 +63,7 @@ export default defineComponent({
       },
     },
     nodeTableNames: {
-      type: Array as PropType<string[]>,
+      type: Array as () => string[],
       default: () => {
         return [];
       },

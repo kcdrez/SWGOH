@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
 import { setupSorting } from "utils";
@@ -28,7 +28,7 @@ export default defineComponent({
   },
   props: {
     unitList: {
-      type: Array as PropType<(Unit | NodeCharacter)[]>,
+      type: Array as () => (Unit | NodeCharacter)[],
       required: true,
     },
     storageKey: {

@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 
 import { loadingState, loadingSize } from "types/loading";
 
@@ -18,7 +18,7 @@ export default defineComponent({
   name: "LoadingComponent",
   props: {
     state: {
-      type: String as PropType<loadingState>,
+      type: String as () => loadingState,
       required: true,
     },
     message: {
@@ -26,7 +26,7 @@ export default defineComponent({
       default: "Loading Data...",
     },
     size: {
-      type: String as PropType<loadingSize>,
+      type: String as () => loadingSize,
       default: "",
     },
     displayText: {

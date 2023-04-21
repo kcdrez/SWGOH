@@ -2,8 +2,8 @@
   <div>
     <SwgohTable
       :table="{ header, body }"
-      v-if="gearList.length > 0"
       class="mb-0"
+      v-if="gearList.length > 0"
     />
     <div v-else class="text-center">
       There are no gear requirements for these units. This is either because you
@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, toRefs } from "vue";
+import { defineComponent, toRefs } from "vue";
 import { mapActions, mapState } from "vuex";
 
 import { Gear } from "types/gear";
@@ -52,7 +52,7 @@ export default defineComponent({
   props: {
     gearList: {
       required: true,
-      type: Object as PropType<Gear[]>,
+      type: Array as () => Gear[],
     },
     showRequiredByUnit: {
       type: Boolean,

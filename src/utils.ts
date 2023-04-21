@@ -28,6 +28,7 @@ export function setupEvents(
         callbackOnShow();
       }
     }
+    //known bug: nested collapse functions are triggering all parents too
     el.addEventListener("hidden.bs.collapse", () => {
       store.dispatch("toggleCollapse", { name, hidden: true });
       if (callbackOnHide) {
@@ -42,7 +43,7 @@ export function setupEvents(
     });
   } else {
     console.warn(
-      "cannot set up collapse events; HTML element doesn't exists",
+      "cannot set up collapse events; HTML element doesn't exist",
       name
     );
   }

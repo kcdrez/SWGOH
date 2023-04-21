@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, toRefs } from "vue";
+import { defineComponent, toRefs } from "vue";
 import { mapActions } from "vuex";
 
 import { Unit, unitsByPriority } from "types/unit";
@@ -34,7 +34,7 @@ export default defineComponent({
   props: {
     units: {
       required: true,
-      type: Object as PropType<Unit[]>,
+      type: Array as () => Unit[],
     },
     showUnitName: {
       type: Boolean,

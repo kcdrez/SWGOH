@@ -3,6 +3,7 @@
     title="Gear Summary"
     :idRef="refName"
     :options="expandOptions"
+    v-if="!(hideOnEmpty && fullGearList.length === 0)"
   >
     <GearTable
       :gearList="fullGearList"
@@ -40,6 +41,10 @@ export default defineComponent({
       default: () => {
         return {};
       },
+    },
+    hideOnEmpty: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

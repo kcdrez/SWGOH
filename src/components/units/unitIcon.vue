@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 
 import { Unit } from "types/unit";
 import { NodeCharacter } from "types/shards";
@@ -48,7 +48,7 @@ export default defineComponent({
   props: {
     unit: {
       required: true,
-      type: Object as PropType<Unit | NodeCharacter | undefined>,
+      type: Object as () => Unit | NodeCharacter | undefined,
     },
     isLink: {
       type: Boolean,

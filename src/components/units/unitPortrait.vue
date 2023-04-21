@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 
 import { Unit } from "types/unit";
 import RelicLevelIcon from "./relicLevelIcon.vue";
@@ -50,7 +50,7 @@ export default defineComponent({
   props: {
     unit: {
       required: true,
-      type: Object as PropType<Unit>,
+      type: Object as () => Unit,
     },
     size: {
       type: String,
