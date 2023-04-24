@@ -73,6 +73,10 @@ import Player from "components/player.vue";
 export default defineComponent({
   name: "HomePage",
   components: { Player },
+  data() {
+    //needed to include for $filters to work with linting
+    return {} as any;
+  },
   computed: {
     ...mapState("player", ["player", "requestState"]),
     allyCode: {

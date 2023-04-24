@@ -242,19 +242,9 @@ import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 import { v4 as uuid } from "uuid";
 
-import { Match, MatchPayload, Team } from "types/teams";
+import { Team } from "types/teams";
 import TeamTable from "components/teams/teamTable.vue";
 import MatchTable from "components/teams/matchTable.vue";
-
-type dataModel = {
-  allyCode: string;
-  deleteTarget: { team: null | Team; type: "player" | "opponent" | "" };
-  newPlayerTeamName: string;
-  newOpponentTeamName: string;
-  newMatchup: MatchPayload;
-  showDeleteOpponentConfirm: boolean;
-  deleteMatchTarget: null | Match;
-};
 
 export default defineComponent({
   name: "MatchUpPage",
@@ -271,7 +261,7 @@ export default defineComponent({
       },
       showDeleteOpponentConfirm: false,
       deleteMatchTarget: null,
-    } as dataModel;
+    } as any;
   },
   computed: {
     ...mapState("player", ["player"]),
