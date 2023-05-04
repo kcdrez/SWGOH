@@ -267,7 +267,7 @@ export default defineComponent({
       );
     },
     expandOptions(): iExpandOptions {
-      const options = {
+      const options: iExpandOptions = {
         buttons: [],
         multiSelect: {
           options: this.cols,
@@ -279,20 +279,20 @@ export default defineComponent({
           const tableComponent = this.$refs[this.refName] as any;
           tableComponent?.refresh();
         },
-      } as any;
+      };
 
       if (this.goal.isEditing) {
-        options.buttons.push(
+        options.buttons?.push(
           ...[
             {
-              icon: "fas fa-ban text-small mx-1",
+              classes: "fas fa-ban text-small mx-1",
               title: "Cancel Changes",
               click: () => {
                 this.goal.isEditing = false;
               },
             },
             {
-              icon: "fas fa-save text-small mx-1",
+              classes: "fas fa-save text-small mx-1",
               title: "Save Changes",
               click: () => {
                 this.goal.saveName();
@@ -310,25 +310,26 @@ export default defineComponent({
           },
         };
       } else {
-        options.buttons.push({
-          icon: "fas fa-edit text-small mx-1",
+        options.buttons?.push({
+          classes: "fas fa-edit text-small mx-1",
           title: "Edit Name",
           click: () => {
             this.goal.isEditing = true;
           },
         });
       }
-      options.buttons.push(
+
+      options.buttons?.push(
         ...[
           {
-            icon: "fas fa-plus text-small mx-1",
+            classes: "fas fa-plus text-small mx-1",
             title: "Add Unit",
             click: () => {
               this.showAddUnitModal = true;
             },
           },
           {
-            icon: "fas fa-trash text-small mx-1",
+            classes: "fas fa-trash text-small mx-1",
             title: "Delete Goal",
             click: () => {
               this.deleteGoalModal = true;
@@ -336,6 +337,8 @@ export default defineComponent({
           },
         ]
       );
+
+      console.log(options.buttons);
 
       return options;
     },
