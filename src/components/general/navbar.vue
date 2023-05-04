@@ -107,13 +107,13 @@ export default defineComponent({
     navItems(): any[] {
       const characterMenu = [
         {
-          label: "Character Farming",
-          to: { name: "CharacterFarmingPage" },
+          label: "General Planner",
+          to: { name: "GeneralPlannerPage" },
           show: this.isLoggedIn,
         },
         {
-          label: "General Planner",
-          to: { name: "GeneralPlannerPage" },
+          label: "Character Farming",
+          to: { name: "CharacterFarmingPage" },
           show: this.isLoggedIn,
         },
         {
