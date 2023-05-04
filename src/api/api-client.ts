@@ -280,7 +280,12 @@ class ApiClient {
       }
     });
 
-    const speedArr = unitMapping.owned.map((u) => u.speed);
+    const speedArr = unitMapping.owned.reduce((acc: number[], u) => {
+      if (u.speed) {
+        acc.push(u.speed);
+      }
+      return acc;
+    }, []);
 
     unitMapping.speed = {
       min: Math.min(...speedArr),

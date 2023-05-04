@@ -58,28 +58,28 @@ type unitMappingData = {
   [key: number]: number;
 };
 
-interface IUnitOwned {
+export interface IUnitOwned {
   allyCode: number;
   name: string;
-  stars: number;
-  gearLevel: number;
-  relicLevel: number;
-  zetas: number;
-  omicrons: number;
-  speed: number;
-  speedMod: number;
-  physicalOffense: number;
-  specialOffense: number;
-  protection: number;
-  health: number;
-  tenacity: number;
-  potency: number;
-  physicalCrit: number;
-  specialCrit: number;
-  critDamage: number;
-  armor: number;
-  resistance: number;
-  ultimate: boolean;
+  stars?: number;
+  gearLevel?: number;
+  relicLevel?: number;
+  zetas?: number;
+  omicrons?: number;
+  speed?: number;
+  speedMod?: number;
+  physicalOffense?: number;
+  specialOffense?: number;
+  protection?: number;
+  health?: number;
+  tenacity?: number;
+  potency?: number;
+  physicalCrit?: number;
+  specialCrit?: number;
+  critDamage?: number;
+  armor?: number;
+  resistance?: number;
+  ultimate?: boolean;
 }
 
 export type tUnitOwnedKeys =

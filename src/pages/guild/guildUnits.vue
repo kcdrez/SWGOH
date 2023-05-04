@@ -12,13 +12,11 @@
         displayText="Please wait...This may take a few minutes."
       >
         <template v-if="data">
-          <button class="btn btn-sm btn-primary my-3" @click="downloadXlsx()">
-            Download as XLSX
-          </button>
           <ExpandableSection
             title="Player Data"
             idRef="guildPlayerData"
             :options="expandOptions"
+            class="mt-2"
           >
             <SwgohTable :table="{ header, body }" />
           </ExpandableSection>
@@ -58,7 +56,7 @@ import _ from "lodash";
 import { loadingState } from "types/loading";
 import { setupColumnEvents, setupSorting, unvue } from "utils";
 import { Unit } from "types/unit";
-import { IGuildUnitMap } from "types/guild";
+import { IGuildUnitMap, IUnitOwned } from "types/guild";
 import UnitSearch from "components/units/unitSearch.vue";
 import { iHeaderCell, iHeaderRow, iTableBody, iTableHead } from "types/general";
 import { iExpandOptions } from "types/general";
@@ -325,7 +323,7 @@ export default defineComponent({
     body(): iTableBody {
       return {
         classes: "align-middle text-center",
-        rows: this.players.map((player: any) => {
+        rows: this.players.map((player: IUnitOwned) => {
           return {
             cells: [
               {
@@ -340,100 +338,100 @@ export default defineComponent({
               },
               {
                 show: this.showCol("stars"),
-                data: player.stars,
+                data: player?.stars ?? "-",
                 label: "Stars:",
               },
               {
                 show: this.showCol("gearLevel") && (!this.unit?.isShip ?? true),
-                data: player.gearLevel,
+                data: player?.gearLevel ?? "-",
                 label: "Gear Level:",
               },
               {
                 show:
                   this.showCol("relicLevel") && (!this.unit?.isShip ?? true),
-                data: player.relicLevel,
+                data: player?.relicLevel ?? "-",
                 label: "Relic Level:",
               },
               {
                 show: this.showCol("zetas") && (!this.unit?.isShip ?? true),
-                data: player.zetas,
+                data: player?.zetas ?? "-",
                 label: "Zetas:",
               },
               {
                 show:
                   this.showCol("omicrons") &&
                   (this.unit?.hasOmicronAbilities("Territory Wars") ?? false),
-                data: player.omicrons,
+                data: player?.omicrons ?? "-",
                 label: "Omicrons:",
               },
               {
                 show: this.showCol("speed"),
-                data: player.speed,
+                data: player?.speed ?? "-",
                 label: "Speed:",
               },
               {
                 show: this.showCol("speedMods") && (!this.unit?.isShip ?? true),
-                data: player.speedMod,
+                data: player?.speedMod ?? "-",
                 label: "Speed (Mods):",
               },
               {
                 show: this.showCol("physicalOffense"),
-                data: player.physicalOffense,
+                data: player.physicalOffense ?? "-",
                 label: "Physical Offense:",
               },
               {
                 show: this.showCol("specialOffense"),
-                data: player.specialOffense,
+                data: player?.specialOffense ?? "-",
                 label: "Special Offense:",
               },
               {
                 show: this.showCol("protection"),
-                data: player.protection,
+                data: player?.protection ?? "-",
                 label: "Protection:",
               },
               {
                 show: this.showCol("health"),
-                data: player.health,
+                data: player?.health ?? "-",
                 label: "Health:",
               },
               {
                 show: this.showCol("tenacity"),
-                data: player.tenacity,
+                data: player?.tenacity ?? "-",
                 label: "Tenacity:",
               },
               {
                 show: this.showCol("potency"),
-                data: player.potency,
+                data: player?.potency ?? "-",
                 label: "Potency:",
               },
               {
                 show: this.showCol("physicalCrit"),
-                data: player.physicalCrit,
+                data: player?.physicalCrit ?? "-",
                 label: "Physical Crit Chance:",
               },
               {
                 show: this.showCol("specialCrit"),
-                data: player.specialCrit,
+                data: player?.specialCrit ?? "-",
                 label: "Special Crit Chance:",
               },
               {
                 show: this.showCol("critDamage"),
-                data: player.critDamage,
+                data: player?.critDamage ?? "-",
                 label: "Crit Damage:",
               },
               {
                 show: this.showCol("armor"),
-                data: player.armor,
+                data: player?.armor ?? "-",
                 label: "Armor:",
               },
               {
                 show: this.showCol("resistance"),
-                data: player.resistance,
+                data: player?.resistance ?? "-",
                 label: "Resistance:",
               },
               {
                 show: this.showCol("ultimate") && (this.unit?.isGL ?? false),
-                data: player.ultimate ? "Yes" : "No",
+                data: player?.ultimate ? "Yes" : "No",
                 label: "Has Ult:",
               },
             ],
@@ -452,8 +450,13 @@ export default defineComponent({
         []
       );
     },
-    players(): any[] {
-      return (this.data?.owned ?? []).sort((a, b) => {
+    players(): IUnitOwned[] {
+      const list: IUnitOwned[] = [
+        ...(this.data?.owned ?? []),
+        ...(this.data?.unowned ?? []),
+      ];
+
+      return list.sort((a, b) => {
         if (this.sortMethod === "name") {
           const compareA = a.name.toLowerCase();
           const compareB = b.name.toLowerCase();
@@ -463,8 +466,8 @@ export default defineComponent({
             return compareA > compareB ? -1 : 1;
           }
         } else {
-          const compareA = (a as any)[this.sortMethod];
-          const compareB = (b as any)[this.sortMethod];
+          const compareA = (a as IUnitOwned)[this.sortMethod];
+          const compareB = (b as IUnitOwned)[this.sortMethod];
           if (this.sortDir === "asc") {
             return compareA > compareB ? 1 : -1;
           } else {
@@ -484,6 +487,16 @@ export default defineComponent({
             this.selectedColumns = newVal;
           },
         },
+        buttons: [
+          {
+            classes:
+              "fas fa-download mx-2 c-pointer p-1 border rounded bg-primary",
+            title: "Download data as an xlsx file",
+            click: () => {
+              this.downloadXlsx();
+            },
+          },
+        ],
       };
     },
   },
@@ -501,7 +514,7 @@ export default defineComponent({
       }
     }, 500),
     downloadXlsx(): void {
-      const rows = unvue(this.data?.owned ?? []);
+      const rows: IUnitOwned[] = unvue(this.players);
       const wb = utils.book_new();
       const ws = utils.json_to_sheet(
         rows.map((row: any) => {
@@ -516,7 +529,7 @@ export default defineComponent({
 
       utils.book_append_sheet(wb, ws, "Players");
 
-      const fileName = this.selected?.id;
+      const fileName = this.unit?.id;
       writeFile(wb, fileName + ".xlsx");
     },
   },

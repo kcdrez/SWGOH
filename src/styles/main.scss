@@ -249,6 +249,52 @@ button:disabled {
   font-size: 3rem;
 }
 
+.text-primary {
+  color: $primary;
+}
+
+.text-warning {
+  color: $warning;
+}
+
+.text-danger {
+  color: $danger;
+}
+
+.text-success {
+  color: $success;
+}
+
+.text-hover-primary {
+  &:hover {
+    color: $primary;
+  }
+}
+
+.text-hover-warning {
+  &:hover {
+    color: $warning;
+  }
+}
+
+.text-hover-danger {
+  &:hover {
+    color: $danger;
+  }
+}
+
+.text-hover-success {
+  &:hover {
+    color: $success;
+  }
+}
+
+.hover-grow {
+  &:hover {
+    transform: scale(1.5);
+  }
+}
+
 .input-group {
   .search-input:not(:first-child) {
     input {
