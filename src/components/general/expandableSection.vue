@@ -21,20 +21,20 @@
         v-if="!options?.input"
       >
         <i
-          class="fa fa-chevron-up me-3"
+          class="fa fa-chevron-up mx-2"
           :class="showing ? 'up' : 'down'"
           aria-hidden="true"
         ></i>
-        <div class="d-inline">{{ title }}</div>
+        <div class="d-inline me-2">{{ title }}</div>
       </h3>
-      <template v-if="options?.buttons">
+      <div v-if="options?.buttons">
         <i
           v-for="button in options.buttons"
           :class="button.classes"
           :title="button.title"
           @click="button.click()"
         ></i>
-      </template>
+      </div>
       <div class="toggles-container" v-if="showOptionsContainer">
         <div class="simple-view-container" v-if="options?.toggle">
           <Toggle
@@ -165,6 +165,74 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "styles/variables.scss";
 
+.section-header,
+.col-header {
+  position: relative;
+  .select-columns {
+    position: absolute;
+    top: 0;
+    right: 1rem;
+    width: 250px;
+    margin-top: 0.5rem;
+    text-align: left;
+  }
+  h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: break-word;
+  }
+  @media only screen and (max-width: 1100px) {
+    & {
+      padding-bottom: 0;
+
+      .select-columns {
+        position: unset;
+        width: 100%;
+        padding: 0 0.25rem;
+        margin: 0.5rem 0 0;
+      }
+      &.extended-1,
+      &.extended-2 {
+        flex-direction: column;
+
+        .toggles-container {
+          display: flex;
+          align-items: center;
+          padding: 0.25rem 0.5rem 0 0.5rem;
+          width: 100%;
+        }
+        .simple-view-container {
+          position: unset;
+        }
+        .select-columns {
+          padding: 0;
+          margin: 0 0 0 0.5rem;
+        }
+      }
+    }
+  }
+  @media only screen and (max-width: 600px) {
+    &.extended-1 {
+      // height: 83px;
+    }
+    &.extended-2 {
+      // height: 112px;
+
+      .toggles-container {
+        display: block;
+      }
+      .simple-view-container {
+        position: unset;
+      }
+      .select-columns {
+        padding: 0;
+        margin: 0.25rem 0 0 0;
+      }
+    }
+  }
+}
+
 .section-header {
   display: flex;
   justify-content: center;
@@ -174,9 +242,6 @@ export default defineComponent({
   padding: 0.5rem 0;
   border-bottom: 1px solid $light;
   position: sticky;
-  top: 56px;
-  height: 50px;
-  // z-index: 10;
 
   h1,
   h2,

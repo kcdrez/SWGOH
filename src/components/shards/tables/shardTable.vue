@@ -9,7 +9,7 @@ import { defineComponent, toRefs } from "vue";
 
 import { Unit } from "types/unit";
 import { estimatedTime } from "types/shards";
-import { setupColumnEvents, setupSorting } from "utils";
+import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
@@ -123,22 +123,22 @@ export default defineComponent({
               },
               {
                 label: "Shards Owned",
-                show: this.showCol("owned"),
+                show: this.showCol("ownedShards"),
                 sortMethodShow: true,
-                icon: this.sortIcon("owned"),
-                value: "owned",
+                icon: this.sortIcon("ownedShards"),
+                value: "ownedShards",
                 click: () => {
-                  this.sortBy("owned");
+                  this.sortBy("ownedShards");
                 },
               },
               {
                 label: "Shards Remaining",
-                show: this.showCol("remaining"),
+                show: this.showCol("remainingShards"),
                 sortMethodShow: true,
-                icon: this.sortIcon("remaining"),
-                value: "remaining",
+                icon: this.sortIcon("remainingShards"),
+                value: "remainingShards",
                 click: () => {
-                  this.sortBy("remaining");
+                  this.sortBy("remainingShards");
                 },
               },
               {
@@ -157,12 +157,12 @@ export default defineComponent({
               },
               {
                 label: "Est. Time",
-                show: this.showUnitName && this.showCol("time"),
+                show: this.showUnitName && this.showCol("estimatedTime"),
                 sortMethodShow: true,
-                icon: this.sortIcon("time"),
-                value: "time",
+                icon: this.sortIcon("estimatedTime"),
+                value: "estimatedTime",
                 click: () => {
-                  this.sortBy("time");
+                  this.sortBy("estimatedTime");
                 },
               },
               {
@@ -220,12 +220,12 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showCol("owned"),
+                show: this.showCol("ownedShards"),
                 type: "shardsOwned",
                 data: { unit },
               },
               {
-                show: this.showCol("remaining"),
+                show: this.showCol("remainingShards"),
                 label: "Shards Remaining:",
                 data: unit.remainingShards,
               },
@@ -243,7 +243,7 @@ export default defineComponent({
                 data: { unit },
               },
               {
-                show: this.showUnitName && this.showCol("time"),
+                show: this.showUnitName && this.showCol("estimatedTime"),
                 label: "Completion Date:",
                 type: "time",
                 data: {
@@ -299,53 +299,22 @@ export default defineComponent({
           return name.includes(compare);
         })
         .sort((a: Unit, b: Unit) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "progress") {
-            if (this.sortDir === "asc") {
-              return a.shardPercent > b.shardPercent ? 1 : -1;
-            } else {
-              return a.shardPercent > b.shardPercent ? -1 : 1;
-            }
-          } else if (this.sortMethod === "owned") {
-            if (this.sortDir === "asc") {
-              return a.ownedShards > b.ownedShards ? 1 : -1;
-            } else {
-              return a.ownedShards > b.ownedShards ? -1 : 1;
-            }
-          } else if (this.sortMethod === "remaining") {
-            if (this.sortDir === "asc") {
-              return a.remainingShards > b.remainingShards ? 1 : -1;
-            } else {
-              return a.remainingShards > b.remainingShards ? -1 : 1;
-            }
-          } else if (this.sortMethod === "time") {
-            if (this.sortDir === "asc") {
-              return a.estimatedTime > b.estimatedTime ? 1 : -1;
-            } else {
-              return a.estimatedTime > b.estimatedTime ? -1 : 1;
-            }
+          if (this.sortMethod === "progress") {
+            return sortValues(
+              a.shardPercent,
+              b.shardPercent,
+              this.sortDir,
+              this.sortMethod
+            );
           } else if (this.sortMethod === "priority") {
-            const priorityA = a.tablePriority(this.nodeTableNames);
-            const priorityB = b.tablePriority(this.nodeTableNames);
-
-            if (priorityA <= 0) {
-              return this.sortDir === "asc" ? 1 : -1;
-            } else if (priorityB <= 0) {
-              return this.sortDir === "asc" ? -1 : 1;
-            } else if (this.sortDir === "asc") {
-              return priorityA > priorityB ? 1 : -1;
-            } else {
-              return priorityA > priorityB ? -1 : 1;
-            }
+            return sortValues(
+              a.tablePriority(this.nodeTableNames),
+              b.tablePriority(this.nodeTableNames),
+              this.sortDir,
+              this.sortMethod
+            );
           }
-          return 0;
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         });
     },
   },

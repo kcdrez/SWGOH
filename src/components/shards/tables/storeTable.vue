@@ -10,7 +10,7 @@ import { defineComponent, toRefs } from "vue";
 import { Unit, unitsByPriority } from "types/unit";
 import { mapState } from "vuex";
 import { CurrencyTypeConfig, estimatedTime } from "types/currency";
-import { setupColumnEvents, setupSorting } from "utils";
+import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
@@ -119,32 +119,32 @@ export default defineComponent({
               },
               {
                 label: "Shards Owned",
-                show: this.showCol("owned"),
+                show: this.showCol("ownedShards"),
                 sortMethodShow: true,
-                icon: this.sortIcon("owned"),
-                value: "owned",
+                icon: this.sortIcon("ownedShards"),
+                value: "ownedShards",
                 click: () => {
-                  this.sortBy("owned");
+                  this.sortBy("ownedShards");
                 },
               },
               {
                 label: "Shards Remaining",
-                show: this.showCol("remaining"),
+                show: this.showCol("remainingShards"),
                 sortMethodShow: true,
-                icon: this.sortIcon("remaining"),
-                value: "remaining",
+                icon: this.sortIcon("remainingShards"),
+                value: "remainingShards",
                 click: () => {
-                  this.sortBy("remaining");
+                  this.sortBy("remainingShards");
                 },
               },
               {
                 label: "Progress",
-                show: this.showCol("progress"),
+                show: this.showCol("shardPercent"),
                 sortMethodShow: true,
-                icon: this.sortIcon("progress"),
-                value: "progress",
+                icon: this.sortIcon("shardPercent"),
+                value: "shardPercent",
                 click: () => {
-                  this.sortBy("progress");
+                  this.sortBy("shardPercent");
                 },
               },
               {
@@ -179,12 +179,12 @@ export default defineComponent({
               },
               {
                 label: "Est. Time",
-                show: this.showCol("time"),
+                show: this.showCol("estimatedTime"),
                 sortMethodShow: true,
-                icon: this.sortIcon("time"),
-                value: "time",
+                icon: this.sortIcon("estimatedTime"),
+                value: "estimatedTime",
                 click: () => {
-                  this.sortBy("time");
+                  this.sortBy("estimatedTime");
                 },
               },
               {
@@ -219,17 +219,17 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showCol("owned"),
+                show: this.showCol("ownedShards"),
                 type: "shardsOwned",
                 data: { unit },
               },
               {
-                show: this.showCol("remaining"),
+                show: this.showCol("remainingShards"),
                 label: "Shards Remaining",
                 data: unit.remainingShards,
               },
               {
-                show: this.showCol("progress"),
+                show: this.showCol("shardPercent"),
                 type: "progress",
                 data: unit.shardPercent,
               },
@@ -258,7 +258,7 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showUnitName && this.showCol("time"),
+                show: this.showUnitName && this.showCol("estimatedTime"),
                 type: "time",
                 label: "Completion Date:",
                 data: {
@@ -289,50 +289,19 @@ export default defineComponent({
           return name.includes(compare);
         })
         .sort((a: Unit, b: Unit) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "progress") {
-            if (this.sortDir === "asc") {
-              return a.shardPercent > b.shardPercent ? 1 : -1;
-            } else {
-              return a.shardPercent > b.shardPercent ? -1 : 1;
-            }
-          } else if (this.sortMethod === "time") {
-            if (this.sortDir === "asc") {
-              return a.estimatedTime > b.estimatedTime ? 1 : -1;
-            } else {
-              return a.estimatedTime > b.estimatedTime ? -1 : 1;
-            }
-          } else if (this.sortMethod === "owned") {
-            if (this.sortDir === "asc") {
-              return a.ownedShards > b.ownedShards ? 1 : -1;
-            } else {
-              return a.ownedShards > b.ownedShards ? -1 : 1;
-            }
-          } else if (this.sortMethod === "remaining") {
-            if (this.sortDir === "asc") {
-              return a.remainingShards > b.remainingShards ? 1 : -1;
-            } else {
-              return a.remainingShards > b.remainingShards ? -1 : 1;
-            }
-          } else if (this.sortMethod === "wallet") {
+          if (this.sortMethod === "wallet") {
             for (let i = 0; i <= this.currencyTypes.length; i++) {
-              const currency = (this.currencyTypes as CurrencyTypeConfig[])[i];
+              const currency = this.currencyTypes[i];
               const includesA = a.currencyTypes.includes(currency);
               const includesB = a.currencyTypes.includes(currency);
 
-              if (includesA && includesB) {
-                return 0;
-              } else if (includesA) {
-                return this.sortDir === "asc" ? 1 : -1;
-              } else if (includesB) {
-                return this.sortDir === "asc" ? -1 : 1;
+              if (includesA || includesB) {
+                return sortValues(
+                  includesA,
+                  includesB,
+                  this.sortDir,
+                  this.sortMethod
+                );
               }
             }
           } else if (this.sortMethod === "dailyCurrency") {
@@ -342,7 +311,6 @@ export default defineComponent({
               const currency = (this.currencyTypes as CurrencyTypeConfig[])[i];
               const includesA = a.currencyTypes.includes(currency);
               const includesB = b.currencyTypes.includes(currency);
-              // const amount = this.dailyCurrency[currency];
 
               if (includesA && includesB) {
                 amountA = this.dailyCurrency[currency];
@@ -354,38 +322,33 @@ export default defineComponent({
               }
             }
 
-            if (amountA > amountB) {
-              return this.sortDir === "asc" ? 1 : -1;
-            } else if (amountB > amountA) {
-              return this.sortDir === "asc" ? -1 : 1;
-            }
+            return sortValues(amountA, amountB, this.sortDir, this.sortMethod);
           } else if (this.sortMethod === "remainingCurrency") {
             for (let i = 0; i <= this.currencyTypes.length; i++) {
               const currency = (this.currencyTypes as CurrencyTypeConfig[])[i];
               const remainingA = this.remainingCurrency(a, currency);
               const remainingB = this.remainingCurrency(b, currency);
 
-              if (remainingA > remainingB) {
-                return this.sortDir === "asc" ? 1 : -1;
-              } else if (remainingB > remainingA) {
-                return this.sortDir === "asc" ? -1 : 1;
+              if (remainingA !== remainingB) {
+                return sortValues(
+                  remainingA,
+                  remainingB,
+                  this.sortDir,
+                  this.sortMethod
+                );
               }
             }
           } else if (this.sortMethod === "priority") {
             const priorityA = a.tablePriority(this.nodeTableNames);
             const priorityB = b.tablePriority(this.nodeTableNames);
-
-            if (priorityA <= 0) {
-              return this.sortDir === "asc" ? 1 : -1;
-            } else if (priorityB <= 0) {
-              return this.sortDir === "asc" ? -1 : 1;
-            } else if (this.sortDir === "asc") {
-              return priorityA > priorityB ? 1 : -1;
-            } else {
-              return priorityA > priorityB ? -1 : 1;
-            }
+            return sortValues(
+              priorityA,
+              priorityB,
+              this.sortDir,
+              this.sortMethod
+            );
           }
-          return 0;
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         });
     },
     orderedPriorityList(): Unit[] {

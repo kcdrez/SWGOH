@@ -128,10 +128,6 @@ export default defineComponent({
   }
 }
 
-::v-deep(thead.sticky-header) {
-  top: 106px !important;
-}
-
 ::v-deep(.search-units-input-group) {
   @media only screen and (max-width: 775px) {
     button,

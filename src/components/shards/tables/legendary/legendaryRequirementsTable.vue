@@ -199,7 +199,7 @@ import {
 } from "types/unit";
 import { displayValue, IPrerequisite } from "types/shards";
 import { isGearRequirement, isRelicRequirement } from "types/shards";
-import { setupSorting, setupColumnEvents } from "utils";
+import { setupSorting, setupColumnEvents, sortValues } from "utils";
 import { iTableHead } from "types/general";
 import TableHeader from "components/general/table/tableHeader.vue";
 
@@ -356,15 +356,7 @@ export default defineComponent({
           const unitA: Unit | undefined = getUnit(a?.id ?? "");
           const unitB: Unit | undefined = getUnit(b?.id ?? "");
           if (unitA && unitB) {
-            if (this.sortMethod === "name") {
-              const compareA = unitA.name.toLowerCase();
-              const compareB = unitB.name.toLowerCase();
-              if (this.sortDir === "asc") {
-                return compareA > compareB ? 1 : -1;
-              } else {
-                return compareA > compareB ? -1 : 1;
-              }
-            } else if (this.sortMethod === "current") {
+            if (this.sortMethod === "current") {
               const isRelicA = isRelicRequirement(
                 a.requirement?.type || "",
                 null,
@@ -406,61 +398,72 @@ export default defineComponent({
 
               if (isStarsA || isStarsB) {
                 if (isStarsA && isStarsB) {
-                  if (this.sortDir === "asc") {
-                    return valueA > valueB ? 1 : -1;
-                  } else {
-                    return valueA > valueB ? -1 : 1;
-                  }
-                } else if (this.sortDir === "asc") {
-                  return isStarsA ? 1 : -1;
-                } else {
-                  return isStarsA ? -1 : 1;
+                  return sortValues(
+                    valueA,
+                    valueB,
+                    this.sortDir,
+                    this.sortMethod
+                  );
                 }
+                return sortValues(
+                  isStarsA,
+                  isStarsB,
+                  this.sortDir,
+                  this.sortMethod
+                );
               } else if (isPowerA || isPowerB) {
                 if (isPowerA && isPowerB) {
-                  if (this.sortDir === "asc") {
-                    return valueA > valueB ? 1 : -1;
-                  } else {
-                    return valueA > valueB ? -1 : 1;
-                  }
-                } else if (this.sortDir === "asc") {
-                  return isPowerA ? 1 : -1;
-                } else {
-                  return isPowerB ? -1 : 1;
+                  return sortValues(
+                    valueA,
+                    valueB,
+                    this.sortDir,
+                    this.sortMethod
+                  );
                 }
+                return sortValues(
+                  isPowerA,
+                  isPowerB,
+                  this.sortDir,
+                  this.sortMethod
+                );
               } else if (isRelicA === isRelicB || isGearA === isGearB) {
-                if (this.sortDir === "asc") {
-                  return valueA > valueB ? 1 : -1;
-                } else {
-                  return valueA > valueB ? -1 : 1;
-                }
+                return sortValues(
+                  valueA,
+                  valueB,
+                  this.sortDir,
+                  this.sortMethod
+                );
               } else if (isRelicA || isRelicB) {
-                if (this.sortDir === "asc") {
-                  return isRelicA ? 1 : -1;
-                } else {
-                  return isRelicA ? -1 : 1;
-                }
+                return sortValues(
+                  isRelicA,
+                  false,
+                  this.sortDir,
+                  this.sortMethod
+                );
               } else if (isGearA || isGearB) {
-                if (this.sortDir === "asc") {
-                  return isGearA ? 1 : -1;
-                } else {
-                  return isGearA ? -1 : 1;
-                }
+                return sortValues(
+                  isGearA,
+                  false,
+                  this.sortDir,
+                  this.sortMethod
+                );
               } else if (!isGearA && !isGearB) {
-                if (this.sortDir === "asc") {
-                  return a.requirement?.type === "Stars" ? 1 : -1;
-                } else {
-                  return a.requirement?.type === "Stars" ? -1 : 1;
-                }
+                return sortValues(
+                  a.requirement?.type === "Stars",
+                  false,
+                  this.sortDir,
+                  this.sortMethod
+                );
               } else if (
                 a.requirement?.type === "Power" ||
                 b.requirement?.type === "Power"
               ) {
-                if (this.sortDir === "asc") {
-                  return a.requirement?.type === "Power" ? 1 : -1;
-                } else {
-                  return a.requirement?.type === "Power" ? -1 : 1;
-                }
+                return sortValues(
+                  a.requirement?.type === "Power",
+                  false,
+                  this.sortDir,
+                  this.sortMethod
+                );
               }
             } else if (this.sortMethod === "requirements") {
               const typeA = a.requirement?.type ?? "";
@@ -468,45 +471,37 @@ export default defineComponent({
               if (typeA === typeB) {
                 const valueA = a.requirement?.value ?? 0;
                 const valueB = b.requirement?.value ?? 0;
-                if (this.sortDir === "asc") {
-                  return valueA > valueB ? 1 : -1;
-                } else {
-                  return valueA > valueB ? -1 : 1;
-                }
+                return sortValues(
+                  valueA,
+                  valueB,
+                  this.sortDir,
+                  this.sortMethod
+                );
               } else {
-                if (this.sortDir === "asc") {
-                  return typeA > typeB ? 1 : -1;
-                } else {
-                  return typeA > typeB ? -1 : 1;
-                }
+                return sortValues(typeA, typeB, this.sortDir, this.sortMethod);
               }
             } else if (this.sortMethod === "recommended") {
               const typeA = a.recommended?.type ?? "";
               const typeB = b.recommended?.type ?? "";
               if (typeA === typeB) {
-                const valueA = a.recommended?.value ?? 0;
-                const valueB = b.recommended?.value ?? 0;
-                if (this.sortDir === "asc") {
-                  return valueA > valueB ? 1 : -1;
-                } else {
-                  return valueA > valueB ? -1 : 1;
-                }
+                return sortValues(
+                  a.recommended?.value ?? 0,
+                  b.recommended?.value ?? 0,
+                  this.sortDir,
+                  this.sortMethod
+                );
               } else {
-                if (this.sortDir === "asc") {
-                  return typeA > typeB ? 1 : -1;
-                } else {
-                  return typeA > typeB ? -1 : 1;
-                }
+                return sortValues(typeA, typeB, this.sortDir, this.sortMethod);
               }
             } else if (this.sortMethod === "progress") {
-              const percentA = getPercent(a, "requirement");
-              const percentB = getPercent(b, "requirement");
-              if (this.sortDir === "asc") {
-                return percentA > percentB ? 1 : -1;
-              } else {
-                return percentA > percentB ? -1 : 1;
-              }
+              return sortValues(
+                getPercent(a, "requirement"),
+                getPercent(b, "requirement"),
+                this.sortDir,
+                this.sortMethod
+              );
             }
+            return sortValues(unitA, unitB, this.sortDir, this.sortMethod);
           }
           return 0;
         });
@@ -586,9 +581,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "styles/variables.scss";
 
-.sticky-header {
-  top: 105px;
-}
 .unit-list-tags {
   display: flex;
   justify-content: center;

@@ -79,15 +79,15 @@ import UnitSearch from "components/units/unitSearch.vue";
 import Modal from "components/general/modal.vue";
 import { getPercent, getUnit, totalProgress } from "types/unit";
 import { Goal } from "types/goals";
-import { setupColumnEvents, setupSorting } from "utils";
+import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { iHeaderCell, iHeaderRow, iTableBody, iTableHead } from "types/general";
-import { IPrerequisite } from "types/shards";
+import { IPrerequisite, displayValue } from "types/shards";
 import { iExpandOptions } from "types/general";
 
 export default defineComponent({
   name: "GoalsTable",
   setup(props) {
-    const { sortDir, sortMethod, searchText, sortBy, sortIcon } = setupSorting(
+    const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(
       props.storageKey
     );
 
@@ -97,7 +97,6 @@ export default defineComponent({
     return {
       sortDir,
       sortMethod,
-      searchText,
       sortBy,
       sortIcon,
       selectedColumns,
@@ -132,6 +131,24 @@ export default defineComponent({
     } as any;
   },
   computed: {
+    sortedGoalList(): Goal[] {
+      return this.goal.list.sort((a: IPrerequisite, b: IPrerequisite) => {
+        if (this.sortMethod === "target") {
+          const compareA = a.requirement?.value ?? 0;
+          const compareB = b.requirement?.value ?? 0;
+
+          return sortValues(compareA, compareB, this.sortDir, this.sortMethod);
+        } else if (this.sortMethod === "percent") {
+          return sortValues(
+            getPercent(a, "recommended"),
+            getPercent(b, "recommended"),
+            this.sortDir,
+            this.sortMethod
+          );
+        }
+        return sortValues(a, b, this.sortDir, this.sortMethod);
+      });
+    },
     header(): iTableHead {
       return {
         classes: "sticky-header show-on-mobile",
@@ -148,12 +165,12 @@ export default defineComponent({
             cells: [
               {
                 label: "Unit Name",
-                show: this.showCol("name"),
+                show: this.showCol("id"),
                 sortMethodShow: true,
-                icon: this.sortIcon("name"),
-                value: "name",
+                icon: this.sortIcon("id"),
+                value: "id",
                 click: () => {
-                  this.sortBy("name");
+                  this.sortBy("id");
                 },
               },
               {
@@ -178,12 +195,12 @@ export default defineComponent({
               },
               {
                 label: "Progress",
-                show: this.showCol("progress"),
+                show: this.showCol("percent"),
                 sortMethodShow: true,
-                icon: this.sortIcon("progress"),
+                icon: this.sortIcon("percent"),
                 value: "progress",
                 click: () => {
-                  this.sortBy("progress");
+                  this.sortBy("percent");
                 },
               },
               {
@@ -199,7 +216,7 @@ export default defineComponent({
     body(): iTableBody {
       return {
         classes: "align-middle text-center",
-        rows: this.goal.list.map((unit: IPrerequisite) => {
+        rows: this.sortedGoalList.map((unit: IPrerequisite) => {
           return {
             cells: [
               {
@@ -209,7 +226,7 @@ export default defineComponent({
                   isLink: true,
                   hideImage: this.simpleView,
                 },
-                show: this.showCol("name"),
+                show: this.showCol("id"),
               },
               {
                 show: this.showCol("current"),
@@ -233,9 +250,9 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showCol("progress"),
+                show: this.showCol("percent"),
                 type: "progress",
-                data: this.getPercent(unit, "recommended"),
+                data: getPercent(unit, "recommended"),
               },
               {
                 show: this.showCol("actions"),
@@ -338,8 +355,6 @@ export default defineComponent({
         ]
       );
 
-      console.log(options.buttons);
-
       return options;
     },
   },
@@ -347,17 +362,12 @@ export default defineComponent({
     ...mapActions("player", ["removeGoal"]),
     totalProgress,
     getUnit,
-    getPercent,
   },
 });
 </script>
 
 <style lang="scss" scoped>
 @import "styles/variables.scss";
-
-.sticky-header {
-  top: 105px;
-}
 
 ::v-deep(i.text-small) {
   cursor: pointer;

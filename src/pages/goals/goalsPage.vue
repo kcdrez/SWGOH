@@ -58,7 +58,7 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 
-import { setupSorting } from "utils";
+import { setupSorting, sortValues } from "utils";
 import { totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import GoalsTable from "components/shards/progress/goalsTable.vue";
@@ -132,9 +132,9 @@ export default defineComponent({
                 label: "Progress",
                 show: true,
                 sortMethodShow: true,
-                icon: this.sortIcon("progress"),
+                icon: this.sortIcon("totalProgress"),
                 click: () => {
-                  this.sortBy("progress");
+                  this.sortBy("totalProgress");
                 },
               },
             ],
@@ -162,7 +162,7 @@ export default defineComponent({
               {
                 show: true,
                 type: "progress",
-                data: this.totalProgress(goal.list, "requirement"),
+                data: totalProgress(goal.list, "requirement"),
               },
             ],
           };
@@ -177,24 +177,15 @@ export default defineComponent({
           return name.includes(compare);
         })
         .sort((a: Goal, b: Goal) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase().replace(/\s/g, "");
-            const compareB = b.name.toLowerCase().replace(/\s/g, "");
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "progress") {
-            const progressA = this.totalProgress(a.list);
-            const progressB = this.totalProgress(b.list);
-            if (this.sortDir === "asc") {
-              return progressA - progressB;
-            } else {
-              return progressB - progressA;
-            }
+          if (this.sortMethod === "totalProgress") {
+            return sortValues(
+              totalProgress(a.list, "recommended"),
+              totalProgress(b.list, "recommended"),
+              this.sortDir,
+              this.sortMethod
+            );
           }
-          return 0;
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         });
     },
     expandOptions(): iExpandOptions {
@@ -213,7 +204,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("player", ["addGoal"]),
-    totalProgress,
   },
 });
 </script>

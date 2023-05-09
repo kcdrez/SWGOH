@@ -190,10 +190,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "styles/variables.scss";
 
-.sticky-header {
-  top: 106px;
-}
-
 .gear-container {
   .row {
     &:nth-of-type(2n + 1) {

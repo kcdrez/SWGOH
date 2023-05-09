@@ -19,7 +19,7 @@ import { mapState, mapGetters } from "vuex";
 
 import { Gear, IScavenger } from "types/gear";
 import { FarmingNode } from "types/shards";
-import { setupColumnEvents, setupSorting } from "utils";
+import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import {
   iExpandOptions,
   iHeaderCell,
@@ -225,31 +225,22 @@ export default defineComponent({
           return acc;
         }, [])
         .sort((a: tScavenger, b: tScavenger) => {
-          // return (a.scavenger?.priority ?? 0) > (b.scavenger?.priority ?? 0);
           if (this.sortMethod === "name") {
-            const compareA = a.data.name.toLowerCase();
-            const compareB = b.data.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
+            return sortValues(a.data, b.data, this.sortDir, this.sortMethod);
           } else if (this.sortMethod === "amount") {
-            if (this.sortDir === "asc") {
-              return a.scavenger.count > b.scavenger.count ? 1 : -1;
-            } else {
-              return a.scavenger.count > b.scavenger.count ? -1 : 1;
-            }
+            return sortValues(
+              a.scavenger.count,
+              b.scavenger.count,
+              this.sortDir,
+              this.sortMethod
+            );
           } else if (this.sortMethod === "priority") {
-            if (this.sortDir === "asc") {
-              return (a.scavenger.priority ?? 0) > (b.scavenger.priority ?? 0)
-                ? 1
-                : -1;
-            } else {
-              return (a.scavenger.priority ?? 0) > (b.scavenger.priority ?? 0)
-                ? -1
-                : 1;
-            }
+            return sortValues(
+              a.scavenger.priority ?? 0,
+              b.scavenger.priority ?? 0,
+              this.sortDir,
+              this.sortMethod
+            );
           } else if (this.sortMethod === "locations") {
             const stores = [
               "guild_store",
@@ -265,26 +256,22 @@ export default defineComponent({
               const storeStatus = checkStore(stores[i], a, b);
 
               if (storeStatus === 1 || storeStatus === 2) {
-                if (this.sortDir === "asc") {
-                  return storeStatus === 1 ? -1 : 1;
-                } else {
-                  return storeStatus === 1 ? 1 : -1;
-                }
+                return sortValues(
+                  storeStatus === 1,
+                  false,
+                  this.sortDir,
+                  this.sortMethod
+                );
               } else if (storeStatus === 0) {
                 return 1;
               }
             }
-            if (this.sortDir === "asc") {
-              return (a.scavenger.nodes ?? []).length >
-                (b.scavenger.nodes ?? []).length
-                ? 1
-                : -1;
-            } else {
-              return (a.scavenger.nodes ?? []).length >
-                (b.scavenger.nodes ?? []).length
-                ? -1
-                : 1;
-            }
+            return sortValues(
+              a.scavenger.nodes ?? [],
+              b.scavenger.nodes ?? [],
+              this.sortDir,
+              this.sortMethod
+            );
           }
           return 0;
         });
@@ -346,8 +333,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.sticky-header {
-  top: 106px;
-}
-</style>
+<style lang="scss" scoped></style>

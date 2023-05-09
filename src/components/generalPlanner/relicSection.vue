@@ -109,14 +109,22 @@ export default defineComponent({
             const amount = relic.amountNeeded([
               { target, level: unit.relicLevel },
             ]);
-            console.log(amount);
+            const exists = neededList.find((x) => x.id == relic.id);
             if (amount > 0) {
-              relic.addNeededBy({
-                name: unit.name,
-                id: unit.id,
-                amount,
-              });
-              neededList.push(relic);
+              if (exists) {
+                exists.addNeededBy({
+                  name: unit.name,
+                  id: unit.id,
+                  amount,
+                });
+              } else {
+                relic.addNeededBy({
+                  name: unit.name,
+                  id: unit.id,
+                  amount,
+                });
+                neededList.push(relic);
+              }
             }
           });
         }

@@ -2,6 +2,7 @@ import _ from "lodash";
 
 import store from "vuex-store/store";
 import { Mod, Unit } from "./unit";
+import { sortValues } from "utils";
 
 export class Team {
   private _id: string;
@@ -79,102 +80,71 @@ export class Team {
   }
   public get fullUnitList() {
     return this.units.sort((a, b) => {
-      if (this.sortMethod === "name") {
-        if (this.sortDir === "asc") {
-          return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
-        } else {
-          return a.name.toLowerCase() > b.name.toLowerCase() ? -1 : 1;
-        }
-      } else if (this.sortMethod === "isLeader") {
-        if (a.isLeader) {
-          return this.sortDir === "asc" ? -1 : 1;
-        } else if (b.isLeader) {
-          return this.sortDir === "asc" ? 1 : -1;
-        }
-        return 0;
-      } else if (this.sortMethod === "subTotal") {
-        if (this.sortDir === "asc") {
-          return a.speed - b.speed;
-        } else {
-          return b.speed - a.speed;
-        }
+      if (this.sortMethod === "subTotal") {
+        return sortValues(
+          a.speed,
+          b.speed,
+          this.sortDir ?? "asc",
+          this.sortMethod
+        );
       } else if (this.sortMethod === "total" || this.sortMethod === undefined) {
-        const compareA: number = this.grandTotal(a, true);
-        const compareB: number = this.grandTotal(b, true);
-        if (this.sortDir === "asc") {
-          return compareA - compareB;
-        } else {
-          return compareB - compareA;
-        }
+        return sortValues(
+          this.grandTotal(a, true),
+          this.grandTotal(b, true),
+          this.sortDir ?? "asc",
+          this.sortMethod
+        );
       } else if (this.sortMethod === "square") {
-        const modA = a.mods[0];
-        const modB = b.mods[0];
-        const speedA = speedValueFromMod(modA);
-        const speedB = speedValueFromMod(modB);
-        if (this.sortDir === "asc") {
-          return speedA - speedB;
-        } else {
-          return speedB - speedA;
-        }
+        return sortValues(
+          speedValueFromMod(a.mods[0]),
+          speedValueFromMod(b.mods[0]),
+          this.sortDir ?? "asc",
+          this.sortMethod
+        );
       } else if (this.sortMethod === "diamond") {
-        const modA = a.mods[2];
-        const modB = b.mods[2];
-        const speedA = speedValueFromMod(modA);
-        const speedB = speedValueFromMod(modB);
-        if (this.sortDir === "asc") {
-          return speedA - speedB;
-        } else {
-          return speedB - speedA;
-        }
+        return sortValues(
+          speedValueFromMod(a.mods[2]),
+          speedValueFromMod(b.mods[2]),
+          this.sortDir ?? "asc",
+          this.sortMethod
+        );
       } else if (this.sortMethod === "circle") {
-        const modA = a.mods[4];
-        const modB = b.mods[4];
-        const speedA = speedValueFromMod(modA);
-        const speedB = speedValueFromMod(modB);
-        if (this.sortDir === "asc") {
-          return speedA - speedB;
-        } else {
-          return speedB - speedA;
-        }
+        return sortValues(
+          speedValueFromMod(a.mods[4]),
+          speedValueFromMod(b.mods[4]),
+          this.sortDir ?? "asc",
+          this.sortMethod
+        );
       } else if (this.sortMethod === "arrow") {
-        const modA = a.mods[1];
-        const modB = b.mods[1];
-        const speedA = speedValueFromMod(modA);
-        const speedB = speedValueFromMod(modB);
-        if (this.sortDir === "asc") {
-          return speedA - speedB;
-        } else {
-          return speedB - speedA;
-        }
+        return sortValues(
+          speedValueFromMod(a.mods[1]),
+          speedValueFromMod(b.mods[1]),
+          this.sortDir ?? "asc",
+          this.sortMethod
+        );
       } else if (this.sortMethod === "triangle") {
-        const modA = a.mods[3];
-        const modB = b.mods[3];
-        const speedA = speedValueFromMod(modA);
-        const speedB = speedValueFromMod(modB);
-        if (this.sortDir === "asc") {
-          return speedA - speedB;
-        } else {
-          return speedB - speedA;
-        }
+        return sortValues(
+          speedValueFromMod(a.mods[3]),
+          speedValueFromMod(b.mods[3]),
+          this.sortDir ?? "asc",
+          this.sortMethod
+        );
       } else if (this.sortMethod === "cross") {
-        const modA = a.mods[5];
-        const modB = b.mods[5];
-        const speedA = speedValueFromMod(modA);
-        const speedB = speedValueFromMod(modB);
-        if (this.sortDir === "asc") {
-          return speedA - speedB;
-        } else {
-          return speedB - speedA;
-        }
+        return sortValues(
+          speedValueFromMod(a.mods[5]),
+          speedValueFromMod(b.mods[5]),
+          this.sortDir ?? "asc",
+          this.sortMethod
+        );
       } else if (this.sortMethod === "speedSet") {
-        if (a.hasSpeedSet) {
-          return this.sortDir === "asc" ? -1 : 1;
-        } else if (b.hasSpeedSet) {
-          return this.sortDir === "asc" ? 1 : -1;
-        }
-        return 0;
+        return sortValues(
+          a.hasSpeedSet,
+          b.hasSpeedSet,
+          this.sortDir ?? "asc",
+          this.sortMethod
+        );
       }
-      return 0;
+      return sortValues(a, b, this.sortDir ?? "asc", this.sortMethod);
     });
   }
   private get isPlayer() {

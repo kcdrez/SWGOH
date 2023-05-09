@@ -10,7 +10,7 @@ import { mapActions } from "vuex";
 
 import { Unit, unitsByPriority } from "types/unit";
 import { estimatedTime } from "types/guild";
-import { setupColumnEvents, setupSorting } from "utils";
+import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
@@ -108,32 +108,32 @@ export default defineComponent({
               },
               {
                 label: "Shards Owned",
-                show: this.showCol("owned"),
+                show: this.showCol("ownedShards"),
                 sortMethodShow: true,
-                icon: this.sortIcon("owned"),
-                value: "owned",
+                icon: this.sortIcon("ownedShards"),
+                value: "ownedShards",
                 click: () => {
-                  this.sortBy("owned");
+                  this.sortBy("ownedShards");
                 },
               },
               {
                 label: "Shards Remaining",
-                show: this.showCol("remaining"),
+                show: this.showCol("remainingShards"),
                 sortMethodShow: true,
-                icon: this.sortIcon("remaining"),
-                value: "remaining",
+                icon: this.sortIcon("remainingShards"),
+                value: "remainingShards",
                 click: () => {
-                  this.sortBy("remaining");
+                  this.sortBy("remainingShards");
                 },
               },
               {
                 label: "Progress",
-                show: this.showCol("progress"),
+                show: this.showCol("shardPercent"),
                 sortMethodShow: true,
-                icon: this.sortIcon("progress"),
-                value: "progress",
+                icon: this.sortIcon("shardPercent"),
+                value: "shardPercent",
                 click: () => {
-                  this.sortBy("progress");
+                  this.sortBy("shardPercent");
                 },
               },
               {
@@ -183,17 +183,17 @@ export default defineComponent({
                 label: "Farming Locations:",
               },
               {
-                show: this.showCol("owned"),
+                show: this.showCol("ownedShards"),
                 type: "shardsOwned",
                 data: { unit },
               },
               {
-                show: this.showCol("remaining"),
+                show: this.showCol("remainingShards"),
                 label: "Remaining Shards:",
                 data: unit.remainingShards,
               },
               {
-                show: this.showCol("progress"),
+                show: this.showCol("shardPercent"),
                 type: "progress",
                 data: unit.shardPercent,
               },
@@ -218,40 +218,15 @@ export default defineComponent({
           return name.includes(compare);
         })
         .sort((a: Unit, b: Unit) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "progress") {
-            if (this.sortDir === "asc") {
-              return a.shardPercent > b.shardPercent ? 1 : -1;
-            } else {
-              return a.shardPercent > b.shardPercent ? -1 : 1;
-            }
-          } else if (this.sortMethod === "owned") {
-            if (this.sortDir === "asc") {
-              return a.ownedShards > b.ownedShards ? 1 : -1;
-            } else {
-              return a.ownedShards > b.ownedShards ? -1 : 1;
-            }
-          } else if (this.sortMethod === "remaining") {
-            if (this.sortDir === "asc") {
-              return a.remainingShards > b.remainingShards ? 1 : -1;
-            } else {
-              return a.remainingShards > b.remainingShards ? -1 : 1;
-            }
-          } else if (this.sortMethod === "time") {
-            if (this.sortDir === "asc") {
-              return this.estimatedTime(a) > this.estimatedTime(b) ? 1 : -1;
-            } else {
-              return this.estimatedTime(a) > this.estimatedTime(b) ? -1 : 1;
-            }
+          if (this.sortMethod === "time") {
+            return sortValues(
+              this.estimatedTime(a),
+              this.estimatedTime(b),
+              this.sortDir,
+              this.sortMethod
+            );
           }
-          return 0;
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         });
     },
     orderedPriorityList(): Unit[] {

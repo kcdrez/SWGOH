@@ -27,7 +27,7 @@ import { mapActions, mapState } from "vuex";
 
 import { Gear } from "types/gear";
 import GearIcon from "components/gear/gearIcon.vue";
-import { setupColumnEvents, setupSorting } from "utils";
+import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { iTable, iTableBody, iTableHead } from "types/general";
 
 export default defineComponent({
@@ -90,63 +90,19 @@ export default defineComponent({
           return name.includes(compare);
         })
         .sort((a: Gear, b: Gear) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "mark") {
-            if (this.sortDir === "asc") {
-              return a.markLevel - b.markLevel;
-            } else {
-              return b.markLevel - a.markLevel;
-            }
-          } else if (this.sortMethod === "locations") {
-            if (this.sortDir === "asc") {
-              return a.locations[0] > b.locations[0] ? 1 : -1;
-            } else {
-              return a.locations[0] < b.locations[0] ? -1 : 1;
-            }
-          } else if (this.sortMethod === "progress") {
-            if (this.sortDir === "asc") {
-              return a.progress - b.progress;
-            } else {
-              return b.progress - a.progress;
-            }
-          } else if (this.sortMethod === "time") {
+          if (this.sortMethod === "timeEstimate") {
             const compareA =
               a.timeEstimation === 0 ? Infinity : a.timeEstimation;
             const compareB =
               b.timeEstimation === 0 ? Infinity : b.timeEstimation;
-
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "owned") {
-            if (this.sortDir === "asc") {
-              return a.owned - b.owned;
-            } else {
-              return b.owned - a.owned;
-            }
-          } else if (this.sortMethod === "needed") {
-            if (this.sortDir === "asc") {
-              return a.totalAmount - b.totalAmount;
-            } else {
-              return b.totalAmount - a.totalAmount;
-            }
-          } else if (this.sortMethod === "required") {
-            if (this.sortDir === "asc") {
-              return a.neededBy[0] > b.neededBy[0] ? 1 : -1;
-            } else {
-              return a.neededBy[0] < b.neededBy[0] ? -1 : 1;
-            }
+            return sortValues(
+              compareA,
+              compareB,
+              this.sortDir,
+              this.sortMethod
+            );
           }
-          return 0;
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         });
     },
     irrelevantGear(): Gear[] {
@@ -195,12 +151,12 @@ export default defineComponent({
               },
               {
                 label: "Mark",
-                show: this.showCol("mark"),
+                show: this.showCol("markLevel"),
                 sortMethodShow: true,
-                icon: this.sortIcon("mark"),
-                value: "mark",
+                icon: this.sortIcon("markLevel"),
+                value: "markLevel",
                 click: () => {
-                  this.sortBy("mark");
+                  this.sortBy("markLevel");
                 },
               },
               {
@@ -208,11 +164,6 @@ export default defineComponent({
                 maxWidth: "150px",
                 show: this.showCol("locations"),
                 sortMethodShow: true,
-                icon: this.sortIcon("locations"),
-                value: "locations",
-                click: () => {
-                  this.sortBy("locations");
-                },
               },
               {
                 label: "Owned",
@@ -237,13 +188,13 @@ export default defineComponent({
               {
                 label: "Needed",
                 maxWidth: "125px",
-                show: this.showCol("needed"),
+                show: this.showCol("totalAmount"),
                 sortMethodShow: true,
-                icon: this.sortIcon("needed"),
-                value: "needed",
+                icon: this.sortIcon("totalAmount"),
+                value: "totalAmount",
                 title: "Amount of gear needed for all characters being tracked",
                 click: () => {
-                  this.sortBy("needed");
+                  this.sortBy("totalAmount");
                 },
               },
               {
@@ -260,17 +211,17 @@ export default defineComponent({
               {
                 label: "Required By",
                 maxWidth: "125px",
-                show: this.showRequiredByUnit && this.showCol("required"),
+                show: this.showRequiredByUnit && this.showCol("neededBy"),
               },
               {
                 label: "Est. Time",
                 maxWidth: "125px",
-                show: this.showCol("time"),
+                show: this.showCol("timeEstimate"),
                 sortMethodShow: true,
-                icon: this.sortIcon("time"),
-                value: "time",
+                icon: this.sortIcon("timeEstimate"),
+                value: "timeEstimate",
                 click: () => {
-                  this.sortBy("time");
+                  this.sortBy("timeEstimate");
                 },
               },
               {
@@ -304,7 +255,7 @@ export default defineComponent({
                 show: this.showCol("name"),
               },
               {
-                show: this.showCol("mark"),
+                show: this.showCol("markLevel"),
                 data: gear.mark,
                 classes: !!gear.mark ? "hidden-sm" : "",
               },
@@ -332,7 +283,7 @@ export default defineComponent({
                 data: gear,
               },
               {
-                show: this.showCol("needed"),
+                show: this.showCol("totalAmount"),
                 label: "Amount Needed:",
                 data: gear.totalAmount,
               },
@@ -342,7 +293,7 @@ export default defineComponent({
                 data: gear.percent,
               },
               {
-                show: this.showRequiredByUnit && this.showCol("required"),
+                show: this.showRequiredByUnit && this.showCol("neededBy"),
                 classes: "text-left text-center-sm",
                 label: "Needed By:",
                 type: "list",
@@ -386,7 +337,7 @@ export default defineComponent({
                 data: {
                   timestamp: gear.timeEstimation,
                 },
-                show: this.showCol("time"),
+                show: this.showCol("timeEstimate"),
               },
               {
                 show: this.showCol("actions"),

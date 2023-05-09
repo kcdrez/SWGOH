@@ -17,7 +17,13 @@ import { defineComponent, toRefs } from "vue";
 import { mapActions, mapState } from "vuex";
 
 import { ITerritoryWarEvent } from "types/guild";
-import { round2Decimals, setupColumnEvents, setupSorting, unvue } from "utils";
+import {
+  round2Decimals,
+  setupColumnEvents,
+  setupSorting,
+  sortValues,
+  unvue,
+} from "utils";
 import { iTableBody, iTableHead } from "types/general";
 
 const storageKey = "territoryWarTable";
@@ -382,54 +388,28 @@ export default defineComponent({
           return moment(e.date).isAfter(moment().subtract(6, "months"));
         })
         .sort((a: ITerritoryWarEvent, b: ITerritoryWarEvent) => {
-          if (this.sortMethod === "date") {
-            if (this.sortDir === "asc") {
-              return moment(a.date).isBefore(b.date) ? 1 : -1;
-            } else {
-              return moment(b.date).isBefore(a.date) ? 1 : -1;
-            }
-          } else if (this.sortMethod === "win_loss") {
-            if (a.win && b.win) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return a.win ? 1 : -1;
-            } else {
-              return b.win ? 1 : -1;
-            }
-          } else if (this.sortMethod === "get1") {
-            if (a.currencies.get1 === b.currencies.get1) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return a.currencies.get1 > b.currencies.get1 ? 1 : -1;
-            } else {
-              return a.currencies.get1 > b.currencies.get1 ? -1 : 1;
-            }
-          } else if (this.sortMethod === "get2") {
-            if (a.currencies.get2 === b.currencies.get2) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return a.currencies.get2 > b.currencies.get2 ? 1 : -1;
-            } else {
-              return a.currencies.get2 > b.currencies.get2 ? -1 : 1;
-            }
-          } else if (this.sortMethod === "get3") {
-            if (a.currencies.get3 === b.currencies.get3) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return a.currencies.get3 > b.currencies.get3 ? 1 : -1;
-            } else {
-              return a.currencies.get3 > b.currencies.get3 ? -1 : 1;
-            }
+          if (
+            this.sortMethod === "get1" ||
+            this.sortMethod === "get2" ||
+            this.sortMethod === "get3"
+          ) {
+            return sortValues(
+              a.currencies[this.sortMethod],
+              b.currencies[this.sortMethod],
+              this.sortDir,
+              this.sortMethod
+            );
           } else if (this.sortMethod === "zetas") {
-            if (a.abilityMats.zetas === b.abilityMats.zetas) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return a.abilityMats.zetas > b.abilityMats.zetas ? 1 : -1;
-            } else {
-              return a.abilityMats.zetas > b.abilityMats.zetas ? -1 : 1;
-            }
+            return sortValues(
+              a.abilityMats.zetas,
+              b.abilityMats.zetas,
+              this.sortDir,
+              this.sortMethod
+            );
+          } else if (this.sortMethod === "win_loss") {
+            return sortValues(a.win, b.win, this.sortDir, this.sortMethod);
           }
-          return 0;
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         });
     },
     averageWinRate(): number {
@@ -597,8 +577,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.sticky-header {
-  top: 105px;
-}
-</style>
+<style lang="scss" scoped></style>

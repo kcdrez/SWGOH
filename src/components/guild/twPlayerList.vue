@@ -6,7 +6,7 @@
 import { defineComponent, toRefs } from "vue";
 import { mapState } from "vuex";
 
-import { setupColumnEvents, setupSorting } from "utils";
+import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { Unit } from "types/unit";
 import { iHeaderCell, iTableBody, iTableCell, iTableHead } from "types/general";
 
@@ -231,40 +231,23 @@ export default defineComponent({
           }
         })
         .sort((a: any, b: any) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "joined") {
-            const aJoined = this._playersJoined.includes(a.allyCode);
-            if (this.sortDir === "asc") {
-              return aJoined ? -1 : 1;
-            } else {
-              return aJoined ? 1 : -1;
-            }
+          if (this.sortMethod === "joined") {
+            const hasJoined = this._playersJoined.includes(a.allyCode);
+            return sortValues(hasJoined, false, this.sortDir, this.sortMethod);
           } else if (this.sortMethod === "omicrons") {
-            const aOmis = this.getOmicrons(a);
-            const bOmis = this.getOmicrons(b);
-            if (this.sortDir === "asc") {
-              return aOmis.length > bOmis.length ? 1 : -1;
-            } else {
-              return aOmis.length > bOmis.length ? -1 : 1;
-            }
+            return sortValues(
+              this.getOmicrons(a).length,
+              this.getOmicrons(b).length,
+              this.sortDir,
+              this.sortMethod
+            );
           } else if (this.units.some((x) => x.id === this.sortMethod)) {
-            const aUnit = a.units.some(
+            const aUnit: boolean = a.units.some(
               (x: any) => x.base_id === this.sortMethod
             );
-            if (this.sortDir === "asc") {
-              return aUnit ? -1 : 1;
-            } else {
-              return aUnit ? 1 : -1;
-            }
+            return sortValues(aUnit, false, this.sortDir, this.sortMethod);
           }
-          return 0;
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         });
     },
   },

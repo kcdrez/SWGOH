@@ -155,6 +155,7 @@ import { mapGetters, mapState } from "vuex";
 
 import { Unit } from "types/unit";
 import { iTableBody, iTableHead } from "types/general";
+import { sortValues } from "utils";
 
 interface dataModel {
   selected: null | Unit;
@@ -634,37 +635,23 @@ export default defineComponent({
         this.primaryCount === 3 ? primaries3 : primaries4
       ).sort((a, b) => {
         if (this.sortMethod === "total") {
-          if (this.sortDir === "asc") {
-            return a.value - b.value;
-          } else {
-            return b.value - a.value;
-          }
+          return sortValues(a.value, b.value, this.sortDir, this.sortMethod);
         } else if (this.sortMethod === "sets") {
-          if (this.sortDir === "asc") {
-            return (a.sets.health ?? 0) - (b.sets.health ?? 0);
-          } else {
-            return (b.sets.health ?? 0) - (a.sets.health ?? 0);
-          }
+          return sortValues(
+            a.sets.health ?? 0,
+            b.sets.health ?? 0,
+            this.sortDir,
+            this.sortMethod
+          );
         } else if (this.sortMethod === "primaries") {
-          const healthA = a.primaries.health ?? 0;
-          const healthB = b.primaries.health ?? 0;
-
-          if (this.sortDir === "asc") {
-            if (healthA === healthB) {
-              return (a.primaries.defense ?? 0) - (b.primaries.defense ?? 0);
-            } else {
-              return (a.primaries.health ?? 0) - (b.primaries.health ?? 0);
-            }
-          } else {
-            if (healthA === healthB) {
-              return (b.primaries.defense ?? 0) - (a.primaries.defense ?? 0);
-            } else {
-              return (b.primaries.health ?? 0) - (a.primaries.health ?? 0);
-            }
-          }
-        } else {
-          return 0;
+          return sortValues(
+            a.primaries.health ?? 0,
+            b.primaries.health ?? 0,
+            this.sortDir,
+            this.sortMethod
+          );
         }
+        return sortValues(a, b, this.sortDir, this.sortMethod);
       });
 
       const maxValue = Math.max(...primariesList.map((x) => x.value));

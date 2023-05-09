@@ -354,8 +354,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-.sticky-header {
-  top: 106px;
-}
-</style>
+<style lang="scss" scoped></style>

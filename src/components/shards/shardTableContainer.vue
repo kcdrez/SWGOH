@@ -197,8 +197,4 @@ export default defineComponent({
     z-index: 5;
   }
 }
-
-::v-deep(thead.sticky-header) {
-  top: 106px !important;
-}
 </style>

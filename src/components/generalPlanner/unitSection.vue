@@ -15,7 +15,12 @@ import { mapActions } from "vuex";
 import { UnitPlannerItem } from "types/planner";
 import { Unit } from "types/unit";
 import { maxGearLevel } from "types/gear";
-import { setupColumnEvents, setupSimpleView, setupSorting } from "utils";
+import {
+  setupColumnEvents,
+  setupSimpleView,
+  setupSorting,
+  sortValues,
+} from "utils";
 import { iHeaderCell, iTableBody, iTableHead } from "types/general";
 import { iExpandOptions } from "types/general";
 
@@ -54,28 +59,16 @@ export default defineComponent({
   computed: {
     unitList(): Unit[] {
       return this.units.sort((a: Unit, b: Unit) => {
-        if (this.sortMethod === "name") {
-          const compareA = a.name.toLowerCase();
-          const compareB = b.name.toLowerCase();
-          if (this.sortDir === "asc") {
-            return compareA > compareB ? 1 : -1;
-          } else {
-            return compareA > compareB ? -1 : 1;
-          }
-        } else if (this.sortMethod === "curLevel") {
-          const compareA =
+        if (this.sortMethod === "curLevel") {
+          const compareA: number =
             a.gearLevel === maxGearLevel
               ? a.relicLevel + maxGearLevel
               : a.gearLevel;
-          const compareB =
+          const compareB: number =
             b.gearLevel === maxGearLevel
               ? b.relicLevel + maxGearLevel
               : b.gearLevel;
-          if (this.sortDir === "asc") {
-            return compareA > compareB ? 1 : -1;
-          } else {
-            return compareA > compareB ? -1 : 1;
-          }
+          return sortValues(compareA, compareB, this.sortDir, this.sortMethod);
         } else if (this.sortMethod === "targetLevel") {
           const compareA =
             a.gearTarget === maxGearLevel
@@ -85,27 +78,7 @@ export default defineComponent({
             b.gearTarget === maxGearLevel
               ? b.relicTarget + maxGearLevel
               : b.gearTarget;
-          if (this.sortDir === "asc") {
-            return compareA > compareB ? 1 : -1;
-          } else {
-            return compareA > compareB ? -1 : 1;
-          }
-        } else if (this.sortMethod === "gearDate") {
-          const compareA = a.gearTotalDays === 0 ? Infinity : a.gearTotalDays;
-          const compareB = b.gearTotalDays === 0 ? Infinity : b.gearTotalDays;
-          if (this.sortDir === "asc") {
-            return compareA > compareB ? 1 : -1;
-          } else {
-            return compareA > compareB ? -1 : 1;
-          }
-        } else if (this.sortMethod === "estRelic") {
-          const compareA = a.relicTotalDays === 0 ? Infinity : a.relicTotalDays;
-          const compareB = b.relicTotalDays === 0 ? Infinity : b.relicTotalDays;
-          if (this.sortDir === "asc") {
-            return compareA > compareB ? 1 : -1;
-          } else {
-            return compareA > compareB ? -1 : 1;
-          }
+          return sortValues(compareA, compareB, this.sortDir, this.sortMethod);
         } else if (this.sortMethod === "completed") {
           let compareA = a.gearTotalDays + a.relicTotalDays;
           compareA = compareA === 0 ? Infinity : compareA;
@@ -113,13 +86,10 @@ export default defineComponent({
           let compareB = b.gearTotalDays + b.relicTotalDays;
           compareB = compareB === 0 ? Infinity : compareB;
 
-          if (this.sortDir === "asc") {
-            return compareA > compareB ? 1 : -1;
-          } else {
-            return compareA > compareB ? -1 : 1;
-          }
+          return sortValues(compareA, compareB, this.sortDir, this.sortMethod);
+        } else {
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         }
-        return 0;
       });
     },
     header(): iTableHead {
@@ -168,22 +138,22 @@ export default defineComponent({
               },
               {
                 label: "Est. Gear Date",
-                show: this.showCol("gearDate"),
+                show: this.showCol("gearTotalDays"),
                 sortMethodShow: true,
-                icon: this.sortIcon("gearDate"),
-                value: "gearDate",
+                icon: this.sortIcon("gearTotalDays"),
+                value: "gearTotalDays",
                 click: () => {
-                  this.sortBy("gearDate");
+                  this.sortBy("gearTotalDays");
                 },
               },
               {
                 label: "Est. Relic Date",
-                show: this.showCol("estRelic"),
+                show: this.showCol("relicTotalDays"),
                 sortMethodShow: true,
-                icon: this.sortIcon("estRelic"),
-                value: "estRelic",
+                icon: this.sortIcon("relicTotalDays"),
+                value: "relicTotalDays",
                 click: () => {
-                  this.sortBy("estRelic");
+                  this.sortBy("relicTotalDays");
                 },
               },
               {
@@ -241,7 +211,7 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showCol("gearDate"),
+                show: this.showCol("gearTotalDays"),
                 type: "time",
                 label: "Est. Gear Date:",
                 classes:
@@ -252,7 +222,7 @@ export default defineComponent({
                 },
               },
               {
-                show: this.showCol("estRelic"),
+                show: this.showCol("relicTotalDays"),
                 type: "time",
                 label: "Est. Gear Date:",
                 classes:

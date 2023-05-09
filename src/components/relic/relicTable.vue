@@ -19,6 +19,7 @@ import {
   pluralText,
   setupColumnEvents,
   setupSorting,
+  sortValues,
 } from "utils";
 import { iTableBody, iTableHead } from "types/general";
 
@@ -277,47 +278,27 @@ export default defineComponent({
     },
     filteredRelics(): Relic[] {
       return (this.relicList as Relic[])
+        .filter((relic: Relic) => {
+          const name = relic.name.toLowerCase().replace(/\s/g, "");
+          const id = relic.id.toLowerCase().replace(/\s/g, "");
+          const compare = this.searchText.toLowerCase().replace(/\s/g, "");
+          return name.includes(compare) || id.includes(compare);
+        })
         .sort((a: Relic, b: Relic) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "locations") {
-            const compareA = a.location.node.toLowerCase();
-            const compareB = b.location.node.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "rarity") {
-            if (this.sortDir === "asc") {
-              return a.rarity - b.rarity;
-            } else {
-              return b.rarity - a.rarity;
-            }
-          } else if (this.sortMethod === "owned") {
-            if (this.sortDir === "asc") {
-              return a.owned - b.owned;
-            } else {
-              return b.owned - a.owned;
-            }
+          if (this.sortMethod === "locations") {
+            return sortValues(
+              a.location.node,
+              b.location.node,
+              this.sortDir,
+              this.sortMethod
+            );
           } else if (this.sortMethod === "needed") {
-            if (this.sortDir === "asc") {
-              return (
-                a.amountNeeded(this.targetLevels) -
-                b.amountNeeded(this.targetLevels)
-              );
-            } else {
-              return (
-                b.amountNeeded(this.targetLevels) -
-                a.amountNeeded(this.targetLevels)
-              );
-            }
+            return sortValues(
+              a.amountNeeded(this.targetLevels),
+              b.amountNeeded(this.targetLevels),
+              this.sortDir,
+              this.sortMethod
+            );
           } else if (this.sortMethod === "progress") {
             const amountNeededA = a.amountNeeded(this.targetLevels);
             const amountNeededB = b.amountNeeded(this.targetLevels);
@@ -330,35 +311,21 @@ export default defineComponent({
               return this.sortDir === "asc" ? -1 : 1;
             }
 
-            if (this.sortDir === "asc") {
-              return (
-                a.progress(this.targetLevels) - b.progress(this.targetLevels)
-              );
-            } else {
-              return (
-                b.progress(this.targetLevels) - a.progress(this.targetLevels)
-              );
-            }
+            return sortValues(
+              a.progress(this.targetLevels),
+              b.progress(this.targetLevels),
+              this.sortDir,
+              this.sortMethod
+            );
           } else if (this.sortMethod === "time") {
-            if (this.sortDir === "asc") {
-              return (
-                a.timeEstimation(this.targetLevels) -
-                b.timeEstimation(this.targetLevels)
-              );
-            } else {
-              return (
-                b.timeEstimation(this.targetLevels) -
-                a.timeEstimation(this.targetLevels)
-              );
-            }
+            return sortValues(
+              a.timeEstimation(this.targetLevels),
+              b.timeEstimation(this.targetLevels),
+              this.sortDir,
+              this.sortMethod
+            );
           }
-          return 0;
-        })
-        .filter((relic: Relic) => {
-          const name = relic.name.toLowerCase().replace(/\s/g, "");
-          const id = relic.id.toLowerCase().replace(/\s/g, "");
-          const compare = this.searchText.toLowerCase().replace(/\s/g, "");
-          return name.includes(compare) || id.includes(compare);
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         });
     },
   },

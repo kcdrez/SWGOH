@@ -54,7 +54,7 @@ import { writeFile, utils } from "xlsx";
 import _ from "lodash";
 
 import { loadingState } from "types/loading";
-import { setupColumnEvents, setupSorting, unvue } from "utils";
+import { setupColumnEvents, setupSorting, sortValues, unvue } from "utils";
 import { Unit } from "types/unit";
 import { IGuildUnitMap, IUnitOwned } from "types/guild";
 import UnitSearch from "components/units/unitSearch.vue";
@@ -457,23 +457,7 @@ export default defineComponent({
       ];
 
       return list.sort((a, b) => {
-        if (this.sortMethod === "name") {
-          const compareA = a.name.toLowerCase();
-          const compareB = b.name.toLowerCase();
-          if (this.sortDir === "asc") {
-            return compareA > compareB ? 1 : -1;
-          } else {
-            return compareA > compareB ? -1 : 1;
-          }
-        } else {
-          const compareA = (a as IUnitOwned)[this.sortMethod];
-          const compareB = (b as IUnitOwned)[this.sortMethod];
-          if (this.sortDir === "asc") {
-            return compareA > compareB ? 1 : -1;
-          } else {
-            return compareA > compareB ? -1 : 1;
-          }
-        }
+        return sortValues(a, b, this.sortDir, this.sortMethod);
       });
     },
     loadingUnitState(): loadingState {

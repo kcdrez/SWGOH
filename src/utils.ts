@@ -4,6 +4,8 @@ import { ref, computed, watch, Ref } from "vue";
 import _ from "lodash";
 
 import store from "./vuex-store/store";
+import { getPercent, getUnit, totalProgress } from "types/unit";
+import { displayValue } from "types/shards";
 
 export function unvue(data: any) {
   return JSON.parse(JSON.stringify(data));
@@ -99,7 +101,6 @@ export function daysFromNow(
 }
 
 export async function importFile(files: any[]) {
-  // const {files, filters} = data;
   if (!files) return;
   return await processXlsxFiles(files);
 }
@@ -213,4 +214,68 @@ export function setupSimpleView(storageKey: string) {
   });
 
   return { simpleView };
+}
+
+export function sortValues(
+  valueA: any,
+  valueB: any,
+  sortDir: "asc" | "desc",
+  sortMethod?: string
+) {
+  if (sortMethod === "date") {
+    if (sortDir === "asc") {
+      return moment(valueA.date).isBefore(valueB.date) ? 1 : -1;
+    } else {
+      return moment(valueB.date).isBefore(valueB.date) ? 1 : -1;
+    }
+  } else if (
+    typeof valueA === "object" &&
+    typeof valueB === "object" &&
+    !!sortMethod &&
+    sortMethod in valueA &&
+    sortMethod in valueB
+  ) {
+    return getSortOrder(valueA[sortMethod], valueB[sortMethod], sortDir);
+  } else {
+    return getSortOrder(valueA, valueB, sortDir);
+  }
+}
+
+export function getSortOrder(
+  valueA: any,
+  valueB: any,
+  sortDir: "asc" | "desc"
+) {
+  if (valueA instanceof Array && valueB instanceof Array) {
+    return getSortOrder(valueA.length, valueB.length, sortDir);
+  } else if (typeof valueA === "string" && typeof valueB === "string") {
+    const compareA = valueA.toLowerCase().replace(/\s/g, "");
+    const compareB = valueB.toLowerCase().replace(/\s/g, "");
+    if (compareA === compareB) {
+      return 0;
+    } else if (sortDir === "asc") {
+      return compareA > compareB ? 1 : -1;
+    } else {
+      return compareA > compareB ? -1 : 1;
+    }
+  } else if (typeof valueA === "number" && typeof valueB === "number") {
+    if (valueA === valueB) {
+      return 0;
+    } else if (sortDir === "asc") {
+      return valueA - valueB;
+    } else {
+      return valueB - valueA;
+    }
+  } else if (typeof valueA === "boolean" && typeof valueB === "boolean") {
+    if (valueA === valueB) {
+      return 0;
+    } else if (sortDir === "asc") {
+      return valueA ? 1 : -1;
+    } else {
+      return valueB ? 1 : -1;
+    }
+  } else {
+    console.warn("Sorting type mismatch", valueA, valueB, sortDir);
+    return 0;
+  }
 }

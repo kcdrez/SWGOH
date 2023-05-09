@@ -16,7 +16,7 @@ import moment from "moment";
 import { defineComponent, toRefs } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
-import { setupColumnEvents, setupSorting, unvue } from "utils";
+import { setupColumnEvents, setupSorting, sortValues, unvue } from "utils";
 import { TerritoryBattleEvent } from "types/guild";
 import { iTableBody, iTableHead } from "types/general";
 
@@ -564,65 +564,15 @@ export default defineComponent({
     filteredEvents(): TerritoryBattleEvent[] {
       return this.tbEvents().sort(
         (a: TerritoryBattleEvent, b: TerritoryBattleEvent) => {
-          if (this.sortMethod === "date") {
-            if (this.sortDir === "asc") {
-              return moment(a.date).isBefore(b.date) ? 1 : -1;
-            } else {
-              return moment(b.date).isBefore(a.date) ? 1 : -1;
-            }
-          } else if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (compareA === compareB) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod === "get1") {
-            if (a.get1 === b.get1) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return a.get1 > b.get1 ? 1 : -1;
-            } else {
-              return a.get1 > b.get1 ? -1 : 1;
-            }
-          } else if (this.sortMethod === "get2") {
-            if (a.get2 === b.get2) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return a.get2 > b.get2 ? 1 : -1;
-            } else {
-              return a.get2 > b.get2 ? -1 : 1;
-            }
-          } else if (this.sortMethod === "get3") {
-            if (a.get3 === b.get3) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return a.get3 > b.get3 ? 1 : -1;
-            } else {
-              return a.get3 > b.get3 ? -1 : 1;
-            }
-          } else if (this.sortMethod === "stars") {
-            if (a.stars === b.stars) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return a.stars > b.stars ? 1 : -1;
-            } else {
-              return a.stars > b.stars ? -1 : 1;
-            }
-          } else if (this.sortMethod === "character") {
-            if (a.characterShards.count === b.characterShards.count) {
-              return 0;
-            } else if (this.sortDir === "asc") {
-              return a.characterShards.count > b.characterShards.count ? 1 : -1;
-            } else {
-              return a.characterShards.count > b.characterShards.count ? -1 : 1;
-            }
+          if (this.sortMethod === "character") {
+            return sortValues(
+              a.characterShards.count,
+              b.characterShards.count,
+              this.sortDir,
+              this.sortMethod
+            );
           }
-
-          return 0;
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         }
       );
     },
@@ -687,8 +637,5 @@ export default defineComponent({
   @media only screen and (max-width: 768px) {
     display: block;
   }
-}
-.sticky-header {
-  top: 105px;
 }
 </style>

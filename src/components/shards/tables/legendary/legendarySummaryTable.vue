@@ -6,7 +6,7 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import { setupSorting } from "utils";
+import { setupSorting, sortValues } from "utils";
 import { totalProgress, getPrerequisites, Unit } from "types/unit";
 import { NodeCharacter } from "types/shards";
 import { iTable } from "types/general";
@@ -126,23 +126,18 @@ export default defineComponent({
           if (this.sortMethod === "name") {
             const valA = "name" in a ? a.name : a.id;
             const valB = "name" in b ? b.name : b.id;
-            const compareA = valA.toLowerCase();
-            const compareB = valB.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
+            return sortValues(valA, valB, this.sortDir, this.sortMethod);
           } else if (this.sortMethod === "progress") {
             const progressA = this.totalProgress(a.id ?? "", "requirement");
             const progressB = this.totalProgress(b.id ?? "", "requirement");
-            if (this.sortDir === "asc") {
-              return progressA - progressB;
-            } else {
-              return progressB - progressA;
-            }
+            return sortValues(
+              progressA,
+              progressB,
+              this.sortDir,
+              this.sortMethod
+            );
           }
-          return 0;
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         });
     },
   },

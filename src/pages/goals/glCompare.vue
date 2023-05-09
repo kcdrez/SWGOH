@@ -8,7 +8,7 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import { setupSorting } from "utils";
+import { setupSorting, sortValues } from "utils";
 import { Unit, getUnit } from "types/unit";
 import { FarmingNode } from "types/shards";
 import relicMapping from "types/relicMapping";
@@ -159,33 +159,22 @@ export default defineComponent({
           return characterList;
         }, [])
         .sort((a: Unit, b: Unit) => {
-          if (this.sortMethod === "name") {
-            const compareA = a.name.toLowerCase();
-            const compareB = b.name.toLowerCase();
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else if (this.sortMethod in relicMapping) {
-            const compareA = a.getRelicsRequiredToUnlock(this.sortMethod);
-            const compareB = b.getRelicsRequiredToUnlock(this.sortMethod);
-
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
-          } else {
-            const compareA = a.getGearRequiredToUnlock(this.sortMethod);
-            const compareB = b.getGearRequiredToUnlock(this.sortMethod);
-
-            if (this.sortDir === "asc") {
-              return compareA > compareB ? 1 : -1;
-            } else {
-              return compareA > compareB ? -1 : 1;
-            }
+          if (this.sortMethod in relicMapping) {
+            return sortValues(
+              a.getRelicsRequiredToUnlock(this.sortMethod),
+              b.getRelicsRequiredToUnlock(this.sortMethod),
+              this.sortDir,
+              this.sortMethod
+            );
+          } else if (this.sortMethod !== "name") {
+            return sortValues(
+              a.getGearRequiredToUnlock(this.sortMethod),
+              b.getGearRequiredToUnlock(this.sortMethod),
+              this.sortDir,
+              this.sortMethod
+            );
           }
+          return sortValues(a, b, this.sortDir, this.sortMethod);
         });
     },
     gearList(): Gear[] {

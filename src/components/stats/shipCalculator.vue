@@ -659,7 +659,6 @@ export default defineComponent({
 
 .output-table {
   position: sticky;
-  top: 105px;
   z-index: 9;
 }
 
