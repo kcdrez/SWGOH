@@ -305,6 +305,8 @@
           class="form-control form-control-sm"
           type="date"
           v-model="_value"
+          :min="cell.data.min"
+          :max="cell.data.max"
           @keypress.enter="handleEnter(_value)"
           @change="handleChange($event)"
         />

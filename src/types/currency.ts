@@ -14,6 +14,9 @@ export const currencyTypeList: CurrencyTypeConfig[] = [
   "squadArenaCurrency",
   "galacticWarCurrency",
   "fleetArenaCurrency",
+  "raid1",
+  "raid2",
+  "raid3",
 ];
 
 export type CurrencyTypeConfig =
@@ -25,7 +28,10 @@ export type CurrencyTypeConfig =
   | "guildStoreCurrency"
   | "squadArenaCurrency"
   | "galacticWarCurrency"
-  | "fleetArenaCurrency";
+  | "fleetArenaCurrency"
+  | "raid1"
+  | "raid2"
+  | "raid3";
 export interface IWallet {
   get1?: number;
   get2?: number;
@@ -36,6 +42,9 @@ export interface IWallet {
   squadArenaCurrency?: number;
   galacticWarCurrency?: number;
   fleetArenaCurrency?: number;
+  raid1?: number;
+  raid2?: number;
+  raid3?: number;
 }
 
 export class Wallet {
@@ -48,6 +57,9 @@ export class Wallet {
   private _squadArenaCurrency?: number;
   private _galacticWarCurrency?: number;
   private _fleetArenaCurrency?: number;
+  private _raid1?: number;
+  private _raid2?: number;
+  private _raid3?: number;
 
   constructor(data: IWallet) {
     this._get1 = data?.get1;
@@ -59,6 +71,9 @@ export class Wallet {
     this._squadArenaCurrency = data?.squadArenaCurrency;
     this._galacticWarCurrency = data?.galacticWarCurrency;
     this._fleetArenaCurrency = data?.fleetArenaCurrency;
+    this._raid1 = data?.raid1;
+    this._raid2 = data?.raid2;
+    this._raid3 = data?.raid3;
   }
 
   public get get1() {
@@ -124,6 +139,27 @@ export class Wallet {
     this._fleetArenaCurrency = val;
     this.save();
   }
+  public get raid1() {
+    return this._raid1;
+  }
+  public set raid1(val) {
+    this._raid1 = val;
+    this.save();
+  }
+  public get raid2() {
+    return this._raid2;
+  }
+  public set raid2(val) {
+    this._raid2 = val;
+    this.save();
+  }
+  public get raid3() {
+    return this._raid3;
+  }
+  public set raid3(val) {
+    this._raid3 = val;
+    this.save();
+  }
 
   private save = _.debounce(() => {
     apiClient.saveWallet(store.state.player.player?.id, this.sanitize());
@@ -140,6 +176,9 @@ export class Wallet {
       squadArenaCurrency: this.squadArenaCurrency,
       galacticWarCurrency: this.galacticWarCurrency,
       fleetArenaCurrency: this.fleetArenaCurrency,
+      raid1: this.raid1,
+      raid2: this.raid2,
+      raid3: this.raid3,
     };
   }
 }

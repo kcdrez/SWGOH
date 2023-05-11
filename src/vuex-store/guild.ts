@@ -9,6 +9,7 @@ import {
   GuildPayload,
   TerritoryBattleEvent,
   ITerritoryWarEvent,
+  iRaidEvent,
 } from "types/guild";
 import { round2Decimals } from "utils";
 
@@ -17,6 +18,7 @@ interface State {
   guildId: string;
   territoryWarEvents: ITerritoryWarEvent[];
   territoryBattleEvents: TerritoryBattleEvent[];
+  raidEvents: iRaidEvent[];
   accessLevel: number;
 }
 
@@ -29,6 +31,7 @@ const store = {
     guildId: "",
     territoryWarEvents: [],
     territoryBattleEvents: [],
+    raidEvents: [],
     accessLevel: 0,
     tbRecommended: {
       DSGeos: {
@@ -163,6 +166,7 @@ const store = {
     SET_EVENTS(state: State, payload: GuildPayload) {
       state.territoryWarEvents = payload?.territoryWar || [];
       state.territoryBattleEvents = payload?.territoryBattle || [];
+      state.raidEvents = payload.raidEvents ?? [];
     },
     UPSERT_TERRITORY_WAR_EVENT(state: State, payload: ITerritoryWarEvent) {
       const index = state.territoryWarEvents.findIndex(
@@ -196,6 +200,12 @@ const store = {
       );
       if (index >= 0) {
         state.territoryBattleEvents.splice(index, 1);
+      }
+    },
+    REMOVE_RAID_EVENT(state: State, eventId: string) {
+      const index = state.raidEvents.findIndex((x) => x.id === eventId);
+      if (index >= 0) {
+        state.raidEvents.splice(index, 1);
       }
     },
   },
@@ -311,6 +321,17 @@ const store = {
       } else {
         return await apiClient.fetchGuildUnitData(guildId, data.unitId);
       }
+    },
+    addRaidEvent({ dispatch, state }: ActionCtx, event: iRaidEvent) {
+      dispatch("saveRaidEvents", [...state.raidEvents, event]);
+    },
+    removeRaidEvent({ commit, dispatch, state }: ActionCtx, eventId: string) {
+      commit("REMOVE_RAID_EVENT", eventId);
+      dispatch("saveRaidEvents", state.raidEvents);
+    },
+    async saveRaidEvents({ state, commit }: ActionCtx, events: iRaidEvent[]) {
+      const response = await apiClient.updateRaidEvents(state.guildId, events);
+      commit("SET_EVENTS", response);
     },
   },
 };

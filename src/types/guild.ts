@@ -5,6 +5,7 @@ import { unvue } from "utils";
 export interface GuildPayload {
   territoryWar?: ITerritoryWarEvent[];
   territoryBattle?: TerritoryBattleEvent[];
+  raidEvents?: iRaidEvent[];
 }
 
 export interface ITerritoryWarEvent {
@@ -52,6 +53,18 @@ export interface TerritoryBattleEvent {
   gear: any[];
   crystals: number;
   characterShards: { id: string; count: number };
+}
+
+export interface iRaidEvent {
+  id: string;
+  date: string;
+  type: "Krayt";
+  score: number;
+  currencies: {
+    raid1: number;
+    raid2: number;
+    raid3: number;
+  };
 }
 
 type unitMappingData = {

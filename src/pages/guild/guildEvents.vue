@@ -12,9 +12,17 @@
       <ExpandableSection
         title="Territory Battles History"
         idRef="guildTerritoryBattleSection"
+        class="mb-3"
         :options="expandOptionsTB"
       >
         <TerritoryBattleTable :selectedColumns="tbSelectedColumns" />
+      </ExpandableSection>
+      <ExpandableSection
+        title="Raids History"
+        idRef="raidsSection"
+        :options="expandOptionsRaids"
+      >
+        <RaidEventsTable :selectedColumns="raidSelectedColumns" />
       </ExpandableSection>
     </template>
     <div class="row" v-else>
@@ -47,17 +55,19 @@ import { mapState } from "vuex";
 
 import TerritoryWarTable from "components/guild/territoryWarTable.vue";
 import TerritoryBattleTable from "components/guild/territoryBattleTable.vue";
+import RaidEventsTable from "components/guild/raidEventsTable.vue";
 import { iExpandOptions } from "types/general";
 
 export default defineComponent({
   name: "GuildEventsPage",
-  components: { TerritoryWarTable, TerritoryBattleTable },
+  components: { TerritoryWarTable, TerritoryBattleTable, RaidEventsTable },
   data() {
     return {
       sortDir: "asc",
       sortMethod: "date",
       tbSelectedColumns: [],
       twSelectedColumns: [],
+      raidSelectedColumns: [],
       guildIdInput: "",
     } as any;
   },
@@ -137,6 +147,45 @@ export default defineComponent({
           ],
           change: (newVal: string[]) => {
             this.tbSelectedColumns = newVal;
+          },
+        },
+      };
+    },
+    expandOptionsRaids(): iExpandOptions {
+      return {
+        multiSelect: {
+          options: [
+            {
+              label: "Date",
+              value: "date",
+            },
+            {
+              label: "Name",
+              value: "name",
+            },
+            {
+              label: "Score",
+              value: "score",
+            },
+            {
+              label: "Raid1 Currency",
+              value: "raid1",
+            },
+            {
+              label: "Raid2 Currency",
+              value: "raid2",
+            },
+            {
+              label: "Raid 3 Currency",
+              value: "raid3",
+            },
+            {
+              label: "Actions",
+              value: "actions",
+            },
+          ],
+          change: (newVal: string[]) => {
+            this.raidSelectedColumns = newVal;
           },
         },
       };

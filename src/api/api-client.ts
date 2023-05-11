@@ -12,12 +12,13 @@ import {
   IGuildUnitMap,
   TerritoryBattleEvent,
   ITerritoryWarEvent,
+  iRaidEvent,
 } from "types/guild";
 import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
-  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  baseUrl = "http://localhost:3001/dev";
+  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  // baseUrl = "http://localhost:3001/dev";
 
   constructor() {}
 
@@ -195,6 +196,18 @@ class ApiClient {
         `${this.baseUrl}/guild/${guildId}/territoryBattle`,
         {
           territoryBattleEvents,
+        }
+      );
+      return response.data;
+    }
+  }
+
+  async updateRaidEvents(guildId: string, raidEvents: iRaidEvent[]) {
+    if (guildId) {
+      const response = await axios.patch(
+        `${this.baseUrl}/guild/${guildId}/raidEvents`,
+        {
+          raidEvents,
         }
       );
       return response.data;
