@@ -68,6 +68,19 @@ export class Goal {
     await this.save();
   }
 
+  public saveRequirement(
+    unitId: string,
+    type: IPrerequisiteItem["type"],
+    value: number
+  ) {
+    const match = this._list.find((x) => x.id === unitId);
+    if (match) {
+      match.type = type;
+      match.value = value;
+      this.save();
+    }
+  }
+
   public addUnit(id: string, type: IPrerequisiteItem["type"], value: number) {
     const exists = this._list.some((x) => x.id === id);
 

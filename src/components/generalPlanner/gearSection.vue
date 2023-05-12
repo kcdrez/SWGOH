@@ -82,7 +82,7 @@ export default defineComponent({
         },
         {
           label: "Mark",
-          value: "mark",
+          value: "markLevel",
         },
         {
           label: "Locations",
@@ -90,11 +90,11 @@ export default defineComponent({
         },
         {
           label: "Amount Owned",
-          value: "owned",
+          value: "gearOwned",
         },
         {
           label: "Amount Needed",
-          value: "needed",
+          value: "totalAmount",
         },
         {
           label: "Progress",
@@ -106,7 +106,7 @@ export default defineComponent({
         },
         {
           label: "Required By",
-          value: "required",
+          value: "neededBy",
         },
         {
           label: "Actions",

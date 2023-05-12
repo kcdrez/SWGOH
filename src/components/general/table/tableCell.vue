@@ -38,6 +38,13 @@
           :edit="cell.edit"
         />
       </template>
+      <template v-else-if="cell.type === 'targetLevel'">
+        <TargetLevel
+          :value="cell.data.value"
+          :type="cell.data.type"
+          @dataChange="handleChange($event)"
+        />
+      </template>
       <template v-else-if="cell.type === 'buttons'">
         <div
           class="btn-group btn-group-sm text-center"
@@ -171,7 +178,7 @@
           type="checkbox"
           :checked="cell.data.checked"
           :value="cell.data.value"
-          @change="handleChange()"
+          @change="handleChange($event)"
           :class="cell.data.classes"
           :disabled="cell.data.disabled"
         />
@@ -403,6 +410,7 @@ import DailyCurrency from "components/shards/dailyCurrency.vue";
 import Wallet from "components/shards/wallet.vue";
 import ModIcon from "components/units/modIcon.vue";
 import UnitSearch from "components/units/unitSearch.vue";
+import TargetLevel from "components/units/targetLevel.vue";
 import { Gear } from "types/gear";
 
 export default defineComponent({
@@ -423,6 +431,7 @@ export default defineComponent({
     Wallet,
     ModIcon,
     UnitSearch,
+    TargetLevel,
   },
   props: {
     cell: {
@@ -447,19 +456,21 @@ export default defineComponent({
   },
   methods: {
     getUnit,
-    handleChange: _.debounce(function (this: any, event?: Event) {
-      if (this.cell.change) {
-        let value = event
-          ? (event.target as HTMLInputElement)?.value
-          : this.cell.data.value;
+    handleChange(newVal: any) {
+      const { change } = this.cell;
+      if (change) {
+        let value = newVal;
         if (this.cell.type === "number") {
-          value = Number(value);
-        } else if (value === "true" || value === "false") {
-          value = value === "true";
+          value = Number(newVal);
+        } else if (newVal === "true" || newVal === "false") {
+          value = newVal === "true";
         }
-        this.cell.change(value);
+
+        _.debounce(function () {
+          change(value);
+        }, 500)();
       }
-    }, 500),
+    },
     handleClick: _.debounce(function (this: any, data: any) {
       if (this.cell.click) {
         this.cell.click(data);

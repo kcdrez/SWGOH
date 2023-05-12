@@ -81,7 +81,7 @@ import { getPercent, getUnit, totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { iHeaderCell, iHeaderRow, iTableBody, iTableHead } from "types/general";
-import { IPrerequisite, displayValue } from "types/shards";
+import { IPrerequisite, IPrerequisiteItem } from "types/shards";
 import { iExpandOptions } from "types/general";
 
 export default defineComponent({
@@ -241,12 +241,20 @@ export default defineComponent({
               {
                 show: this.showCol("target"),
                 label: "Target Level:",
-                type: "unitLevel",
+                type: "targetLevel",
+                edit: true,
                 data: {
                   classes: "d-flex justify-content-center",
                   type: unit.requirement?.type,
-                  unitId: unit.id,
                   value: unit.requirement?.value,
+                },
+                change: (val: {
+                  type: IPrerequisiteItem["type"];
+                  value: number;
+                }) => {
+                  if (unit.requirement) {
+                    this.goal.saveRequirement(unit.id, val.type, val.value);
+                  }
                 },
               },
               {

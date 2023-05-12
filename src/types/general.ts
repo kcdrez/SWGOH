@@ -97,6 +97,7 @@ interface iTableCell {
     | "dailyCurrency"
     | "remainingCurrency"
     | "unitRequirement"
+    | "targetLevel"
     | "html"
     | "mod"
     | "unitSearch"
