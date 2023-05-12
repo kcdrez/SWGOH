@@ -60,11 +60,11 @@ export default defineComponent({
         },
         {
           label: "Owned Shards",
-          value: "owned",
+          value: "ownedShards",
         },
         {
           label: "Shards Remaining",
-          value: "remaining",
+          value: "remainingShards",
         },
         {
           label: "Progress",
@@ -76,7 +76,7 @@ export default defineComponent({
         },
         {
           label: "Estimated Time",
-          value: "time",
+          value: "estimatedTime",
         },
         {
           label: "Actions",
