@@ -138,12 +138,12 @@ export default defineComponent({
               },
               {
                 label: "Est. Time",
-                show: this.showUnitName && this.showCol("time"),
+                show: this.showUnitName && this.showCol("estimatedTime"),
                 sortMethodShow: this.showUnitName,
-                icon: this.sortIcon("time"),
-                value: "time",
+                icon: this.sortIcon("estimatedTime"),
+                value: "estimatedTime",
                 click: () => {
-                  this.sortBy("time");
+                  this.sortBy("estimatedTime");
                 },
               },
             ],
@@ -198,7 +198,7 @@ export default defineComponent({
                 data: unit.shardPercent,
               },
               {
-                show: this.showUnitName && this.showCol("time"),
+                show: this.showUnitName && this.showCol("estimatedTime"),
                 type: "time",
                 data: {
                   timestamp: estimatedTime(unit),
@@ -218,7 +218,7 @@ export default defineComponent({
           return name.includes(compare);
         })
         .sort((a: Unit, b: Unit) => {
-          if (this.sortMethod === "time") {
+          if (this.sortMethod === "estimatedTime") {
             return sortValues(
               this.estimatedTime(a),
               this.estimatedTime(b),
