@@ -38,12 +38,6 @@ export default defineComponent({
       required: true,
     },
   },
-  data() {
-    return {
-      // _target: this.value,
-      // _type: this.type,
-    };
-  },
   computed: {
     options(): { value: number; label: string }[] {
       const list: { value: number; label: string }[] = [];
@@ -82,8 +76,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-img {
-  max-width: 40px;
-}
-</style>
+<style lang="scss" scoped></style>

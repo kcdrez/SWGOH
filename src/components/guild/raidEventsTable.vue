@@ -14,10 +14,10 @@
 <script lang="ts">
 import moment from "moment";
 import { defineComponent, toRefs } from "vue";
-import { mapState, mapActions, mapGetters } from "vuex";
+import { mapState, mapActions } from "vuex";
 
 import { setupColumnEvents, setupSorting, sortValues, unvue } from "utils";
-import { TerritoryBattleEvent, iRaidEvent } from "types/guild";
+import { iRaidEvent } from "types/guild";
 import { iTableBody, iTableHead } from "types/general";
 
 const storageKey = "raidEventsTable";
@@ -202,145 +202,6 @@ export default defineComponent({
         }),
       };
     },
-    // footer(): iTableBody {
-    //   return {
-    //     classes: "align-middle text-center",
-    //     zeroState: {
-    //       show: this.raidEvents.length === 0,
-    //       message: "There are no events recorded for this guild.",
-    //     },
-    //     rows: [
-    //       {
-    //         cells: [
-    //           {
-    //             data: "Average",
-    //             show: this.raidEvents.length > 0,
-    //             classes: `category-header ${
-    //               this.avgColSpan <= -1 ? "d-none" : ""
-    //             }`,
-    //             rowspan: "3",
-    //           },
-    //           {
-    //             data: 'Light Side<span class="hide-lg"> Averages</span>',
-    //             type: "html",
-    //             show: true,
-    //           },
-    //           {
-    //             label: "Stars:",
-    //             data: this.tbAvgStars("Light"),
-    //             show: this.showCol("stars"),
-    //           },
-    //           {
-    //             show: this.showCol("get1"),
-    //             data: this.tbAvgCurrency("Light", "get1"),
-    //             label: "GET1:",
-    //           },
-    //           {
-    //             show: this.showCol("get2"),
-    //             data: this.tbAvgCurrency("Light", "get2"),
-    //             label: "GET2:",
-    //           },
-    //           {
-    //             show: this.showCol("get3"),
-    //             data: this.tbAvgCurrency("Light", "get3"),
-    //             label: "GET3:",
-    //           },
-    //           {
-    //             show: this.showCol("character"),
-    //             data: this.tbAvgShards("Light"),
-    //             label: "Character Shards:",
-    //             labelClasses: "character-shards-label",
-    //             colspan: this.showCol("actions") ? "2" : "1",
-    //           },
-    //           {
-    //             show: !this.showCol("character"),
-    //             data: "",
-    //           },
-    //         ],
-    //       },
-    //       {
-    //         cells: [
-    //           {
-    //             data: 'Dark Side<span class="hide-lg"> Averages</span>',
-    //             type: "html",
-    //             show: true,
-    //           },
-    //           {
-    //             label: "Stars:",
-    //             data: this.tbAvgStars("Dark"),
-    //             show: this.showCol("stars"),
-    //           },
-    //           {
-    //             show: this.showCol("get1"),
-    //             data: this.tbAvgCurrency("Dark", "get1"),
-    //             label: "GET1:",
-    //           },
-    //           {
-    //             show: this.showCol("get2"),
-    //             data: this.tbAvgCurrency("Dark", "get2"),
-    //             label: "GET2:",
-    //           },
-    //           {
-    //             show: this.showCol("get3"),
-    //             data: this.tbAvgCurrency("Dark", "get3"),
-    //             label: "GET3:",
-    //           },
-    //           {
-    //             show: this.showCol("character"),
-    //             data: this.tbAvgShards("Dark"),
-    //             label: "Character Shards:",
-    //             labelClasses: "character-shards-label",
-    //             colspan: this.showCol("actions") ? "2" : "1",
-    //           },
-    //           {
-    //             show: !this.showCol("character"),
-    //             data: "",
-    //           },
-    //         ],
-    //       },
-    //       {
-    //         cells: [
-    //           {
-    //             data: 'Rise of the Empire<span class="hide-lg"> Averages</span>',
-    //             type: "html",
-    //             show: true,
-    //           },
-    //           {
-    //             label: "Stars:",
-    //             data: this.tbAvgStars("ROTE"),
-    //             show: this.showCol("stars"),
-    //           },
-    //           {
-    //             show: this.showCol("get1"),
-    //             data: this.tbAvgCurrency("ROTE", "get1"),
-    //             label: "GET1:",
-    //           },
-    //           {
-    //             show: this.showCol("get2"),
-    //             data: this.tbAvgCurrency("ROTE", "get2"),
-    //             label: "GET2:",
-    //           },
-    //           {
-    //             show: this.showCol("get3"),
-    //             data: this.tbAvgCurrency("ROTE", "get3"),
-    //             label: "GET3:",
-    //           },
-    //           {
-    //             show: this.showCol("character"),
-    //             data: this.tbAvgShards("ROTE"),
-    //             label: "Character Shards:",
-    //             labelClasses: "character-shards-label",
-    //             colspan: this.showCol("actions") ? "2" : "1",
-    //           },
-    //           {
-    //             show: !this.showCol("character"),
-    //             data: "",
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   };
-    // },
     addNewHeader(): iTableHead {
       return {
         headers: [
@@ -508,6 +369,7 @@ export default defineComponent({
       });
     },
     addNewDisabled(): boolean {
+      console.log(this.newEvent);
       return !this.newEvent.date || !this.newEvent.score || !this.newEvent.type;
     },
   },

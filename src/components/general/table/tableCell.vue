@@ -459,6 +459,10 @@ export default defineComponent({
     handleChange(newVal: any) {
       const { change } = this.cell;
       if (change) {
+        if (newVal instanceof Event) {
+          newVal = (newVal.target as any).value;
+        }
+
         let value = newVal;
         if (this.cell.type === "number") {
           value = Number(newVal);
