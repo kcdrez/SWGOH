@@ -161,7 +161,7 @@ export default defineComponent({
             },
             {
               label: "Name",
-              value: "name",
+              value: "type",
             },
             {
               label: "Score",

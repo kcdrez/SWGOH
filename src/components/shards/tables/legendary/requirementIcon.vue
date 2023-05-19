@@ -64,7 +64,6 @@ export default defineComponent({
     },
     unitId: {
       type: String,
-      // required: true,
     },
     edit: {
       type: Boolean,

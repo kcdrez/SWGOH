@@ -16,6 +16,13 @@
         :units="prerequisites.list"
         :relicTargets="prerequisites.relicTargets"
       />
+      <TimelineTable
+        :goal="goalData"
+        :units="prerequisites.list"
+        :storageKey="storageKey + goalData.id + 'TimelineTable'"
+        :gearTargets="prerequisites.gearTargets"
+        :progress="totalProgress(goalData.list, 'requirement')"
+      />
     </template>
     <div v-else>Could not find a matching Goal</div>
   </div>
@@ -28,7 +35,8 @@ import { mapState } from "vuex";
 import GearSection from "components/generalPlanner/gearSection.vue";
 import RelicSection from "components/generalPlanner/relicSection.vue";
 import GoalsTable from "components/shards/progress/goalsTable.vue";
-import { Unit, getUnit } from "types/unit";
+import TimelineTable from "components/shards/progress/timelineTable.vue";
+import { Unit, getUnit, totalProgress } from "types/unit";
 import { Goal } from "types/goals";
 import { maxGearLevel } from "types/gear";
 import { IPrerequisite } from "types/shards";
@@ -41,6 +49,7 @@ export default defineComponent({
     GoalsTable,
     GearSection,
     RelicSection,
+    TimelineTable,
   },
   data() {
     return {
@@ -85,7 +94,9 @@ export default defineComponent({
       );
     },
   },
-  methods: {},
+  methods: {
+    totalProgress,
+  },
 });
 </script>
 

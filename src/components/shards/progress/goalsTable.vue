@@ -145,6 +145,50 @@ export default defineComponent({
             this.sortDir,
             this.sortMethod
           );
+        } else if (this.sortMethod === "current") {
+          const unitA = getUnit(a.id ?? "");
+          const unitB = getUnit(b.id ?? "");
+          if (
+            a.requirement?.type === "Relic" &&
+            b.requirement?.type === "Relic"
+          ) {
+            return sortValues(
+              unitA?.relicLevel,
+              unitB?.relicLevel,
+              this.sortDir,
+              this.sortMethod
+            );
+          } else if (a.requirement?.type === "Relic") {
+            return sortValues(
+              unitA?.relicLevel,
+              0,
+              this.sortDir,
+              this.sortMethod
+            );
+          } else if (b.requirement?.type === "Relic") {
+            return sortValues(
+              0,
+              unitB?.relicLevel,
+              this.sortDir,
+              this.sortMethod
+            );
+          } else if (
+            a.requirement?.type === "Gear" &&
+            b.requirement?.type === "Gear"
+          ) {
+            return sortValues(
+              unitA?.gearLevel,
+              unitB?.gearLevel,
+              this.sortDir,
+              this.sortMethod
+            );
+          } else {
+            console.warn(
+              "Unknown requirement type sorting",
+              a.requirement?.type,
+              b.requirement?.type
+            );
+          }
         }
         return sortValues(a, b, this.sortDir, this.sortMethod);
       });
