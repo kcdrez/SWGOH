@@ -1,7 +1,9 @@
 import { v4 as uuid } from "uuid";
+import moment from "moment";
 
 import store from "vuex-store/store";
 import { IPrerequisite, IPrerequisiteItem } from "types/shards";
+import { unvue } from "utils";
 
 type tGoalUnit = {
   id: string;
@@ -12,12 +14,20 @@ export interface IGoal {
   id?: string;
   name: string;
   list?: tGoalUnit[];
+  settings?: ISettings;
+}
+
+interface ISettings {
+  startPercent: number;
+  startDate: string;
+  assaultBattles: number;
 }
 
 export class Goal {
   private _id;
   private _name: string;
   private _list: tGoalUnit[];
+  private _settings?: ISettings;
   public tempName: string = "";
   public isEditing: boolean = false;
 
@@ -26,6 +36,11 @@ export class Goal {
     this._name = data.name;
     this.tempName = data.name;
     this._list = data.list ?? [];
+    this._settings = data.settings ?? {
+      startPercent: 0,
+      startDate: moment().format("YYYY-MM-DD"),
+      assaultBattles: 0,
+    };
   }
 
   public get id() {
@@ -50,11 +65,16 @@ export class Goal {
     });
   }
 
+  public get settings(): ISettings {
+    return unvue(this._settings);
+  }
+
   public sanitize(): IGoal {
     return {
       id: this._id,
       name: this._name,
       list: this._list,
+      settings: this._settings,
     };
   }
 
@@ -79,6 +99,13 @@ export class Goal {
       match.value = value;
       this.save();
     }
+  }
+
+  public async saveSettings(data: any): Promise<void> {
+    this._settings = data;
+    this.isEditing = false;
+    console.log(this.sanitize());
+    await this.save();
   }
 
   public addUnit(id: string, type: IPrerequisiteItem["type"], value: number) {

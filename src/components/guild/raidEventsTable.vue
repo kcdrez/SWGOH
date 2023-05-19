@@ -85,12 +85,12 @@ export default defineComponent({
               },
               {
                 label: "Name",
-                show: this.showCol("name"),
+                show: this.showCol("type"),
                 sortMethodShow: true,
-                icon: this.sortIcon("name"),
-                value: "name",
+                icon: this.sortIcon("type"),
+                value: "type",
                 click: () => {
-                  this.sortBy("name");
+                  this.sortBy("type");
                 },
               },
               {
@@ -152,10 +152,9 @@ export default defineComponent({
                 show: this.showCol("date"),
                 label: "Date:",
                 data: this.$filters.formatDate(event.date),
-                colspan: this.showCol("name") ? "1" : "2",
               },
               {
-                show: this.showCol("name"),
+                show: this.showCol("type"),
                 label: "Raid Type:",
                 data: event.type,
               },
@@ -163,8 +162,6 @@ export default defineComponent({
                 show: this.showCol("score"),
                 label: "Score:",
                 data: event.score,
-                colspan:
-                  this.showCol("date") || this.showCol("name") ? "1" : "2",
               },
               {
                 show: this.showCol("raid1"),
@@ -369,7 +366,6 @@ export default defineComponent({
       });
     },
     addNewDisabled(): boolean {
-      console.log(this.newEvent);
       return !this.newEvent.date || !this.newEvent.score || !this.newEvent.type;
     },
   },
