@@ -1,9 +1,10 @@
 import { Relic, RelicConfigType } from "./relic";
 
-// export default {}
+const AB_FREQUENCY_IN_DAYS = 28;
+const CONQUEST_FREQUENCY_INDAYS = 28;
 
 //https://docs.google.com/spreadsheets/d/10ReT0Q_4yYGd_fU45Clv7XYs23a96xpWgIxLVrg9Eqg/edit#gid=769217271
-export default {
+const relicConfig = {
   fragmented_white: new Relic({
     id: "fragmented_white",
     location: {
@@ -274,3 +275,186 @@ export default {
     rarity: 10,
   }),
 } as RelicConfigType;
+
+const acquisition = {
+  fragmented_white: {
+    conquest: {
+      hard: {
+        box7: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box6: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box5: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box4: 15 / CONQUEST_FREQUENCY_INDAYS,
+        box3: 15 / CONQUEST_FREQUENCY_INDAYS,
+        box2: 20 / CONQUEST_FREQUENCY_INDAYS,
+        box1: 20 / CONQUEST_FREQUENCY_INDAYS,
+      },
+    },
+    assaultBattles: {
+      ct2: 5 / AB_FREQUENCY_IN_DAYS,
+      ct3: 5 / AB_FREQUENCY_IN_DAYS,
+    },
+  },
+  incomplete_green: {
+    conquest: {
+      hard: {
+        box7: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box6: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box5: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box4: 15 / CONQUEST_FREQUENCY_INDAYS,
+        box3: 15 / CONQUEST_FREQUENCY_INDAYS,
+        box2: 20 / CONQUEST_FREQUENCY_INDAYS,
+        box1: 20 / CONQUEST_FREQUENCY_INDAYS,
+      },
+    },
+    assaultBattles: {
+      ct2: 5 / AB_FREQUENCY_IN_DAYS,
+      ct3: 5 / AB_FREQUENCY_IN_DAYS,
+    },
+  },
+  flawed_blue: {
+    conquest: {
+      hard: {
+        box7: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box6: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box5: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box4: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box3: 10 / CONQUEST_FREQUENCY_INDAYS,
+      },
+    },
+    assaultBattles: {
+      ct2: 5 / AB_FREQUENCY_IN_DAYS,
+      ct3: 5 / AB_FREQUENCY_IN_DAYS,
+    },
+  },
+  carbonite_circuit_board: {
+    tw: ((2 / 6) * 10 * 4) / 30.5,
+    conquest: {
+      hard: {
+        box7: 5 / CONQUEST_FREQUENCY_INDAYS,
+        box6: 5 / CONQUEST_FREQUENCY_INDAYS,
+        box5: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box4: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box3: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box2: 15 / CONQUEST_FREQUENCY_INDAYS,
+        box1: 15 / CONQUEST_FREQUENCY_INDAYS,
+      },
+    },
+    assaultBattles: {
+      ct2: 10 / AB_FREQUENCY_IN_DAYS,
+      ct3: 10 / AB_FREQUENCY_IN_DAYS,
+    },
+  },
+  bronzium_wiring: {
+    tw: ((2 / 6) * 10 * 4) / 30.5,
+    conquest: {
+      hard: {
+        box7: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box6: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box5: 20 / CONQUEST_FREQUENCY_INDAYS,
+        box4: 25 / CONQUEST_FREQUENCY_INDAYS,
+        box3: 25 / CONQUEST_FREQUENCY_INDAYS,
+        box2: 40 / CONQUEST_FREQUENCY_INDAYS,
+        box1: 40 / CONQUEST_FREQUENCY_INDAYS,
+      },
+    },
+    assaultBattles: {
+      ct2: 10 / AB_FREQUENCY_IN_DAYS,
+      ct3: 10 / AB_FREQUENCY_IN_DAYS,
+    },
+  },
+  chromium_transistor: {
+    tw: ((2 / 6) * 10 * 4) / 30.5,
+    conquest: {
+      hard: {
+        box7: 5 / CONQUEST_FREQUENCY_INDAYS,
+        box6: 5 / CONQUEST_FREQUENCY_INDAYS,
+        box5: 15 / CONQUEST_FREQUENCY_INDAYS,
+        box4: 15 / CONQUEST_FREQUENCY_INDAYS,
+        box3: 15 / CONQUEST_FREQUENCY_INDAYS,
+        box2: 20 / CONQUEST_FREQUENCY_INDAYS,
+        box1: 20 / CONQUEST_FREQUENCY_INDAYS,
+      },
+    },
+    assaultBattles: {
+      ct2: 10,
+      ct3: 10,
+    },
+  },
+  aurodium_heatsink: {
+    tw: ((2 / 6) * 10 * 4) / 30.5,
+    conquest: {
+      hard: {
+        box7: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box6: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box5: 15 / CONQUEST_FREQUENCY_INDAYS,
+        box4: 20 / CONQUEST_FREQUENCY_INDAYS,
+        box3: 20 / CONQUEST_FREQUENCY_INDAYS,
+      },
+    },
+    assaultBattles: {
+      ct2: 5 / AB_FREQUENCY_IN_DAYS,
+      ct3: 5 / AB_FREQUENCY_IN_DAYS,
+    },
+  },
+  electrium_conductor: {
+    tw: ((2 / 6) * 8 * 4) / 30.5,
+    conquest: {
+      hard: {
+        box7: 5 / CONQUEST_FREQUENCY_INDAYS,
+        box6: 5 / CONQUEST_FREQUENCY_INDAYS,
+        box5: 10 / CONQUEST_FREQUENCY_INDAYS,
+      },
+    },
+    assaultBattles: {
+      ct2: 3 / AB_FREQUENCY_IN_DAYS,
+      ct3: 3 / AB_FREQUENCY_IN_DAYS,
+    },
+  },
+  zinbiddle_card: {
+    tw: ((2 / 6) * 7.5 * 4) / 30.5,
+    conquest: {
+      hard: {
+        box7: 5 / CONQUEST_FREQUENCY_INDAYS,
+        box6: 5 / CONQUEST_FREQUENCY_INDAYS,
+      },
+    },
+  },
+  aeromagnifier: {
+    tw: (3 * 4) / 30.5,
+    conquest: {
+      box7: 10 / CONQUEST_FREQUENCY_INDAYS,
+      box6: 5 / CONQUEST_FREQUENCY_INDAYS,
+      box5: 2 / CONQUEST_FREQUENCY_INDAYS,
+    },
+  },
+  droid_brains: {
+    tw: (2 * 4) / 30.5,
+  },
+};
+
+export default relicConfig;
+export { relicConfig, acquisition };
+
+const conquest = {
+  box7: {
+    label: "Red Crate",
+  },
+  box6: {
+    label: "Gold Crate",
+  },
+  box5: {
+    label: "White Crate",
+  },
+  box4: {
+    label: "Gray Crate",
+  },
+  box3: {
+    label: "Dark Blue Crate",
+  },
+  box2: {
+    label: "Bronze Crate",
+  },
+  box1: {
+    label: "Light Blue Crate",
+  },
+};

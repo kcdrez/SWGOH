@@ -6,22 +6,20 @@
         :storageKey="storageKey + goalData.id + 'Table'"
         :simpleView="true"
       />
+      <TimelineTable
+        :goal="goalData"
+        :storageKey="'TimelineTable' + goalData.id"
+        :prerequisites="prerequisites"
+      />
       <GearSection
         class="gear-section"
         :units="prerequisites.list"
         :gearTargets="prerequisites.gearTargets"
       />
       <RelicSection
-        class="relic-section"
+        class="relic-section mb-2"
         :units="prerequisites.list"
         :relicTargets="prerequisites.relicTargets"
-      />
-      <TimelineTable
-        :goal="goalData"
-        :units="prerequisites.list"
-        :storageKey="storageKey + goalData.id + 'TimelineTable'"
-        :gearTargets="prerequisites.gearTargets"
-        :progress="totalProgress(goalData.list, 'requirement')"
       />
     </template>
     <div v-else>Could not find a matching Goal</div>

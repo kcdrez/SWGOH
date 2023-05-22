@@ -4,6 +4,7 @@ import moment from "moment";
 import store from "vuex-store/store";
 import { IPrerequisite, IPrerequisiteItem } from "types/shards";
 import { unvue } from "utils";
+import { totalProgress } from "types/unit";
 
 type tGoalUnit = {
   id: string;
@@ -17,10 +18,20 @@ export interface IGoal {
   settings?: ISettings;
 }
 
-interface ISettings {
-  startPercent: number;
-  startDate: string;
-  assaultBattles: number;
+export interface ISettings {
+  startPercent?: number;
+  startDate?: string;
+  assaultBattles: {
+    ct1: number;
+    ct2: number;
+    ct3: number;
+  };
+  conquest: {
+    difficulty: "easy" | "normal" | "hard";
+    box: "box1" | "box2" | "box3" | "box4" | "box5" | "box6" | "box7";
+  };
+  calculateCompletion?: boolean;
+  completionDate?: string;
 }
 
 export class Goal {
@@ -39,7 +50,11 @@ export class Goal {
     this._settings = data.settings ?? {
       startPercent: 0,
       startDate: moment().format("YYYY-MM-DD"),
-      assaultBattles: 0,
+      assaultBattles: { ct1: 0, ct2: 0, ct3: 0 },
+      conquest: {
+        difficulty: "easy",
+        box: "box1",
+      },
     };
   }
 
@@ -63,6 +78,27 @@ export class Goal {
         // prerequisites: [] //todo for nested requirements
       };
     });
+  }
+
+  public get daysRemaining(): number {
+    console.log(this.settings.calculateCompletion);
+    if (this.settings.calculateCompletion) {
+      const today = moment();
+      const start = moment(this.settings.startDate);
+      const percentPerDay =
+        (this.progress - (this.settings?.startPercent ?? 0)) /
+        today.diff(start, "days");
+      const percentRemaining = 100 - this.progress;
+      return Math.round(percentRemaining / percentPerDay);
+    } else {
+      const x = moment().diff(moment(this.settings.completionDate), "days");
+      console.log(x);
+      return x;
+    }
+  }
+
+  public get progress() {
+    return totalProgress(this.list, "requirement");
   }
 
   public get settings(): ISettings {
@@ -104,7 +140,6 @@ export class Goal {
   public async saveSettings(data: any): Promise<void> {
     this._settings = data;
     this.isEditing = false;
-    console.log(this.sanitize());
     await this.save();
   }
 

@@ -134,6 +134,10 @@ export class Relic {
     });
     return amount;
   }
+  public remaining(arr: ITargetRange[]) {
+    const total = this.amountNeeded(arr);
+    return total - this.owned;
+  }
 
   public totalAmountNeeded(target: number) {
     let amount = 0;

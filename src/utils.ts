@@ -30,17 +30,23 @@ export function setupEvents(
         callbackOnShow();
       }
     }
-    //known bug: nested collapse functions are triggering all parents too
-    el.addEventListener("hidden.bs.collapse", () => {
-      store.dispatch("toggleCollapse", { name, hidden: true });
-      if (callbackOnHide) {
-        callbackOnHide();
+
+    el.addEventListener("hidden.bs.collapse", (event) => {
+      const targetId = (event.target as any).getAttribute("id");
+      if (targetId === el.id) {
+        store.dispatch("toggleCollapse", { name, hidden: true });
+        if (callbackOnHide) {
+          callbackOnHide();
+        }
       }
     });
-    el.addEventListener("shown.bs.collapse", () => {
-      store.dispatch("toggleCollapse", { name, hidden: false });
-      if (callbackOnShow) {
-        callbackOnShow();
+    el.addEventListener("shown.bs.collapse", (event) => {
+      const targetId = (event.target as any).getAttribute("id");
+      if (targetId === el.id) {
+        store.dispatch("toggleCollapse", { name, hidden: false });
+        if (callbackOnShow) {
+          callbackOnShow();
+        }
       }
     });
   } else {
@@ -222,22 +228,27 @@ export function sortValues(
   sortDir: "asc" | "desc",
   sortMethod?: string
 ) {
-  if (sortMethod === "date") {
-    if (sortDir === "asc") {
-      return moment(valueA.date).isBefore(valueB.date) ? 1 : -1;
+  try {
+    if (sortMethod === "date") {
+      if (sortDir === "asc") {
+        return moment(valueA.date).isBefore(valueB.date) ? 1 : -1;
+      } else {
+        return moment(valueB.date).isBefore(valueB.date) ? 1 : -1;
+      }
+    } else if (
+      typeof valueA === "object" &&
+      typeof valueB === "object" &&
+      !!sortMethod &&
+      sortMethod in valueA &&
+      sortMethod in valueB
+    ) {
+      return getSortOrder(valueA[sortMethod], valueB[sortMethod], sortDir);
     } else {
-      return moment(valueB.date).isBefore(valueB.date) ? 1 : -1;
+      return getSortOrder(valueA, valueB, sortDir);
     }
-  } else if (
-    typeof valueA === "object" &&
-    typeof valueB === "object" &&
-    !!sortMethod &&
-    sortMethod in valueA &&
-    sortMethod in valueB
-  ) {
-    return getSortOrder(valueA[sortMethod], valueB[sortMethod], sortDir);
-  } else {
-    return getSortOrder(valueA, valueB, sortDir);
+  } catch (err) {
+    console.warn(err, valueA, valueB, sortMethod, sortDir);
+    return 0;
   }
 }
 
@@ -275,7 +286,6 @@ export function getSortOrder(
       return valueB ? 1 : -1;
     }
   } else {
-    console.warn("Sorting type mismatch", valueA, valueB, sortDir);
-    return 0;
+    throw new Error("Sorting type mismatch");
   }
 }

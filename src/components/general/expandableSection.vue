@@ -18,6 +18,7 @@
         data-bs-toggle="collapse"
         :href="`#${idRef}`"
         :ref="idRef"
+        :class="options.header?.classes"
         v-if="!options?.input"
       >
         <i
@@ -242,6 +243,7 @@ export default defineComponent({
   padding: 0.5rem 0;
   border-bottom: 1px solid $light;
   position: sticky;
+  min-height: 50px;
 
   h1,
   h2,

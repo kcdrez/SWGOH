@@ -5,49 +5,138 @@
     :options="expandOptions"
     class="my-2"
   >
-    <SwgohTable :table="{ header, body }" />
+    <div class="mx-3">
+      <TimelineGearTable :goal="goal" :prerequisites="prerequisites" />
+      <TimelineRelicTable :goal="goal" :prerequisites="prerequisites" />
+    </div>
   </ExpandableSection>
   <Modal :isOpen="showEditModal">
     <template v-slot:header>Edit Goal Settings</template>
     <template v-slot:body>
       <div class="input-group input-group-sm mb-2">
+        <span
+          class="input-group-text c-help"
+          title="If enabled, the completion date will be automatically calculated for you based on your current progression. If disabled, you can enter the end date manually"
+        >
+          Calculate Completion Date Automatically:
+        </span>
+        <span class="input-group-text fill">
+          <Toggle
+            v-model="editSettings.calculateCompletion"
+            onLabel="Yes"
+            offLabel="No"
+            class="border"
+          />
+        </span>
+      </div>
+      <div
+        class="input-group input-group-sm mb-2"
+        v-if="editSettings.calculateCompletion"
+      >
         <span class="input-group-text">Estimated Completion Date:</span>
-        <span class="input-group-text form-control"
-          >{{ daysFromNow(daysRemaining) }} ({{ daysRemaining }} days)</span
+        <span class="input-group-text fill"
+          >{{ daysFromNow(goal.daysRemaining) }} ({{
+            goal.daysRemaining
+          }}
+          days)</span
         >
       </div>
-      <hr />
       <div class="input-group input-group-sm mb-2">
-        <span class="input-group-text">Start Date:</span>
+        <span class="input-group-text">Current Progress:</span>
+        <span class="input-group-text fill">
+          <ProgressBar :percent="goal.progress" class="w-100" />
+        </span>
+      </div>
+      <hr />
+      <template v-if="editSettings.calculateCompletion">
+        <div class="input-group input-group-sm mb-2">
+          <span class="input-group-text">Start Date:</span>
+          <input
+            class="form-control"
+            type="date"
+            v-model="editSettings.startDate"
+          />
+        </div>
+        <div class="input-group input-group-sm mb-2">
+          <span class="input-group-text">Start Percent:</span>
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="editSettings.startPercent"
+            min="0"
+            :max="goal.progress - 0.01"
+          />
+        </div>
+      </template>
+      <div class="input-group input-group-sm mb-2" v-else>
+        <span class="input-group-text">Target Completion Date:</span>
         <input
           class="form-control"
           type="date"
-          v-model="editSettings.startDate"
+          v-model="editSettings.completionDate"
         />
       </div>
-      <div class="input-group input-group-sm mb-2">
-        <span class="input-group-text">Start Percent:</span>
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="editSettings.startPercent"
-          min="0"
-          max="100"
-        />
+      <hr class="w-50 mx-auto" />
+      <div>
+        <div
+          title="Enter the number of assault battle modes you are able to complete the given level"
+        >
+          Assault Battles
+        </div>
+        <div class="input-group input-group-sm mb-2">
+          <span class="input-group-text">Challenge Tier 1:</span>
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="editSettings.assaultBattles.ct1"
+            min="0"
+            max="6"
+          />
+        </div>
+        <div class="input-group input-group-sm mb-2">
+          <span class="input-group-text">Challenge Tier 2:</span>
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="editSettings.assaultBattles.ct2"
+            min="0"
+            max="6"
+          />
+        </div>
+        <div class="input-group input-group-sm mb-2">
+          <span class="input-group-text">Challenge Tier 3:</span>
+          <input
+            class="form-control"
+            type="number"
+            v-model.number="editSettings.assaultBattles.ct3"
+            min="0"
+            max="6"
+          />
+        </div>
+      </div>
+      <hr class="w-50 mx-auto" />
+      <div>
+        <div
+          title="Enter the difficulty and average reward box you usually recieve"
+        >
+          Conquest
+        </div>
       </div>
       <div class="input-group input-group-sm">
-        <span
-          class="input-group-text c-help"
-          title="The number of Assault Battles you can complete challenge level 3 on consistently"
-          >Assault Battles (CT3):</span
-        >
-        <input
-          class="form-control"
-          type="number"
-          v-model.number="editSettings.assaultBattles"
-          min="0"
-          max="6"
-        />
+        <select class="form-control" v-model="editSettings.conquest.difficulty">
+          <option value="easy">Easy</option>
+          <option value="normal">Normal</option>
+          <option value="hard">Hard</option>
+        </select>
+        <select class="form-control" v-model="editSettings.conquest.box">
+          <option value="box1">Light Blue Crate (Box 1)</option>
+          <option value="box2">Bronze Crate (Box 2)</option>
+          <option value="box3">Dark Blue Crate (Box 3)</option>
+          <option value="box4">Gray Crate (Box 4)</option>
+          <option value="box5">White Crate (Box 5)</option>
+          <option value="box6">Gold Crate (Box 6)</option>
+          <option value="box7">Red Crate (Box 7)</option>
+        </select>
       </div>
     </template>
     <template v-slot:footer>
@@ -59,44 +148,22 @@
       >
         Close
       </button>
-      <button
-        type="button"
-        class="btn btn-primary"
-        @click="save()"
-        :disabled="!editSettings.startDate || editSettings.startPercent < 0"
-      >
-        Save
-      </button>
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
 import { Ref, defineComponent, ref } from "vue";
-import { mapActions } from "vuex";
 import _ from "lodash";
 import moment from "moment";
 
-import UnitSearch from "components/units/unitSearch.vue";
 import Modal from "components/general/modal.vue";
-import { Unit, getPercent, getUnit, totalProgress } from "types/unit";
-import { Goal } from "types/goals";
-import {
-  daysFromNow,
-  setupColumnEvents,
-  setupSorting,
-  sortValues,
-} from "utils";
-import { iHeaderCell, iHeaderRow, iTableBody, iTableHead } from "types/general";
-import {
-  IPrerequisite,
-  IPrerequisiteItem,
-  isRelicRequirement,
-} from "types/shards";
+import TimelineGearTable from "./timelineGearTable.vue";
+import TimelineRelicTable from "./timelineRelicTable.vue";
+import { Unit } from "types/unit";
+import { Goal, ISettings } from "types/goals";
+import { daysFromNow, setupColumnEvents, setupSorting } from "utils";
 import { iExpandOptions } from "types/general";
-import { Gear } from "types/gear";
-import gearMapping from "types/gearMapping";
-import { Relic } from "types/relic";
 
 export default defineComponent({
   name: "TimelineTable",
@@ -117,16 +184,8 @@ export default defineComponent({
       showCol,
     };
   },
-  components: { Modal },
+  components: { Modal, TimelineGearTable, TimelineRelicTable },
   props: {
-    // relicList: {
-    //   type: Object as () => Relic,
-    //   required: true,
-    // },
-    // simpleView: {
-    //   type: Boolean,
-    //   default: false,
-    // },
     goal: {
       type: Object as () => Goal,
       required: true,
@@ -135,196 +194,35 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    units: {
-      type: Array as () => Unit[],
+    prerequisites: {
       required: true,
-    },
-    gearTargets: {
-      type: Object,
-      default: () => {
-        return {};
+      type: Object as () => {
+        list: Unit[];
+        relicTargets: Object;
+        gearTargets: Object;
       },
-    },
-    progress: {
-      type: Number,
-      default: 0,
     },
   },
   data() {
     return {
-      startDate: this.goal.settings?.startDate ?? moment().format("YYYY-MM-DD"),
-      startPercent: this.goal.settings?.startPercent ?? 0,
-      assaultBattles: this.goal.settings?.assaultBattles ?? 0,
       showEditModal: false,
       editSettings: {
+        calculateCompletion: this.goal.settings?.calculateCompletion ?? false,
+        completionDate:
+          this.goal.settings?.completionDate ??
+          moment().add(1, "days").format("YYYY-MM-DD"),
         startDate:
           this.goal.settings?.startDate ?? moment().format("YYYY-MM-DD"),
         startPercent: this.goal.settings?.startPercent ?? 0,
         assaultBattles: this.goal.settings?.assaultBattles ?? 0,
+        conquest: this.goal.settings?.conquest ?? {
+          difficulty: "easy",
+          box: "box1",
+        },
       },
     } as any;
   },
   computed: {
-    header(): iTableHead {
-      return {
-        classes: "sticky-header show-on-mobile",
-        sortMethod: this.sortMethod,
-        sortDir: this.sortDir,
-        methodChange: (val: string) => {
-          this.sortMethod = val;
-        },
-        directionChange: (val: "asc" | "desc") => {
-          this.sortDir = val;
-        },
-        headers: [
-          {
-            cells: [
-              {
-                label: "Gear Name",
-                show: this.showCol("id"),
-                sortMethodShow: true,
-                icon: this.sortIcon("id"),
-                value: "id",
-                click: () => {
-                  this.sortBy("id");
-                },
-              },
-              // {
-              //   label: "id",
-              //   show: this.showCol("id"),
-              //   value: "id",
-              // },
-              {
-                label: "Amount Needed",
-                show: this.showCol("subTotal"),
-                sortMethodShow: true,
-                icon: this.sortIcon("subTotal"),
-                value: "subTotal",
-                click: () => {
-                  this.sortBy("subTotal");
-                },
-              },
-              {
-                label: "Owned",
-                show: this.showCol("owned"),
-                sortMethodShow: true,
-                icon: this.sortIcon("owned"),
-                value: "owned",
-                click: () => {
-                  this.sortBy("owned");
-                },
-              },
-              {
-                label: "Remaining",
-                show: this.showCol("remaining"),
-                sortMethodShow: true,
-                icon: this.sortIcon("remaining"),
-                value: "remaining",
-                click: () => {
-                  this.sortBy("remaining");
-                },
-              },
-              {
-                label: "Total Purchase",
-                title:
-                  "The total amount of gear needed to purchase or farm from any available locations to hit the target date",
-                show: this.showCol("total"),
-                sortMethodShow: true,
-                icon: this.sortIcon("total"),
-                value: "total",
-                click: () => {
-                  this.sortBy("total");
-                },
-              },
-              // {
-              //   label: "Actions",
-              //   value: "actions",
-              //   show: this.showCol("actions"),
-              // },
-            ],
-          },
-        ],
-      };
-    },
-    body(): iTableBody {
-      return {
-        classes: "align-middle text-center",
-        rows: this.fullGearList.map((gear: Gear) => {
-          return {
-            cells: [
-              {
-                type: "gear",
-                data: {
-                  gear,
-                  showName: true,
-                },
-                show: this.showCol("id"),
-              },
-              // {
-              //   data: gear.id,
-              //   show: this.showCol("id"),
-              // },
-              {
-                show: this.showCol("subTotal"),
-                label: "Sub Total Needed:",
-                data: gear.totalAmount,
-              },
-              {
-                show: this.showCol("owned"),
-                label: "Owned:",
-                type: "number",
-                data: {
-                  value: gear.owned,
-                },
-                change: (val: number) => {
-                  gear.owned = val;
-                },
-              },
-              {
-                show: this.showCol("remaining"),
-                label: "Remaining:",
-                data: gear.remaining,
-              },
-              {
-                show: this.showCol("total"),
-                label: "Total Purchase:",
-                data: Math.max(
-                  gear.remaining -
-                    Math.round(
-                      this.gearAmountPerDay(gear.id) * this.daysRemaining
-                    ),
-                  0
-                ),
-              },
-              // {
-              //   show: this.showCol("actions"),
-              //   type: "buttons",
-              //   data: {
-              //     buttons: [
-              //       {
-              //         click: () => {
-              //           this.goal.remove(unit.id);
-              //         },
-              //         icon: "fas fa-trash",
-              //         classes: "btn btn-danger",
-              //       },
-              //     ],
-              //   },
-              // },
-            ],
-          };
-        }),
-      };
-    },
-    cols(): iHeaderCell[] {
-      return this.header.headers.reduce(
-        (acc: iHeaderCell[], row: iHeaderRow) => {
-          row.cells.forEach((cell) => acc.push(cell));
-          return acc;
-        },
-        []
-      );
-    },
     expandOptions(): iExpandOptions {
       const options: iExpandOptions = {
         buttons: [
@@ -336,87 +234,39 @@ export default defineComponent({
             },
           },
         ],
-        multiSelect: {
-          options: this.cols,
-          change: (newVal: string[]) => {
-            this.selectedColumns = newVal;
-          },
-        },
-        onShow: () => {
-          const tableComponent = this.$refs[this.refName] as any;
-          tableComponent?.refresh();
-        },
       };
 
       return options;
     },
-    fullGearList(): Gear[] {
-      const list: Gear[] = [];
-      this.units.forEach((unit: Unit) => {
-        const gearTarget: number = this.gearTargets[unit.id] ?? unit.gearTarget;
-        unit.fullSalvageList(gearTarget).forEach((gear: Gear) => {
-          const match = list.find((x) => x.id === gear.id);
-          if (match) {
-            match.neededBy.push(...gear.neededBy);
-            match.totalAmount += gear.totalAmount;
-          } else {
-            list.push(gear);
-          }
-        });
-      });
-
-      return list
-        .filter((gear: Gear) => !gear.irrelevant)
-        .sort((a: Gear, b: Gear) => {
-          const sortMethod =
-            this.sortMethod === "subTotal" ? "totalAmount" : this.sortMethod;
-          if (this.sortMethod === "subTotal") {
-            return sortValues(a, b, this.sortDir, "totalAmount");
-          } else if (this.sortMethod === "total") {
-          }
-          return sortValues(a, b, this.sortDir, this.sortMethod);
-        });
-    },
-    daysRemaining(): number {
-      const today = moment();
-      const start = moment(this.startDate);
-      const percentPerDay =
-        (this.progress - this.startPercent) / today.diff(start, "days");
-      const percentRemaining = 100 - this.progress;
-      return Math.round(percentRemaining / percentPerDay);
-    },
   },
   methods: {
-    totalProgress,
-    getUnit,
     daysFromNow,
-    gearAmountPerDay(gearId: string): number {
-      const gearData: object = gearMapping.aquisition[gearId];
-      if (gearData) {
-        return Object.entries(gearData).reduce((total: number, x: any[]) => {
-          const [key, value] = x;
-          if (key === "assaultBattles") {
-            return total + value * this.assaultBattles;
-          } else {
-            return total + value;
-          }
-        }, 0);
-      } else {
-        return 0;
-      }
-    },
-    save() {
-      this.goal.saveSettings(this.editSettings);
-    },
   },
   watch: {
     goal: {
       handler(newGoal: Goal) {
-        this.startDate = newGoal.settings.startDate;
-        this.startPercent = newGoal.settings.startPercent;
-        this.assaultBattles = newGoal.settings.assaultBattles;
+        if (!_.isEqual(this.editSettings, newGoal.settings)) {
+          this.editSettings = newGoal.settings;
+        }
       },
       deep: true,
+    },
+    editSettings: {
+      deep: true,
+      handler(newVal: ISettings) {
+        const { ct1, ct2, ct3 } = newVal.assaultBattles;
+        if (ct3 > ct2) {
+          this.editSettings.assaultBattles.ct2 = ct3;
+        }
+        if (ct3 > ct1) {
+          this.editSettings.assaultBattles.ct1 = ct3;
+        }
+        if (ct2 > ct1) {
+          this.editSettings.assaultBattles.ct1 = ct2;
+        }
+
+        this.goal.saveSettings(newVal);
+      },
     },
   },
 });
@@ -462,5 +312,9 @@ export default defineComponent({
 
 hr {
   opacity: 1;
+}
+
+.input-group-text.fill {
+  flex: 1 1 auto;
 }
 </style>
