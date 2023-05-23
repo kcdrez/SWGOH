@@ -30,6 +30,32 @@ export interface ISettings {
     difficulty: "easy" | "normal" | "hard";
     box: "box1" | "box2" | "box3" | "box4" | "box5" | "box6" | "box7";
   };
+  gc: {
+    box:
+      | "box1"
+      | "box2"
+      | "box3"
+      | "box4"
+      | "box5"
+      | "box6"
+      | "box7"
+      | "box8"
+      | "box9"
+      | "box10";
+  };
+  gac: {
+    league: "kyber" | "aurodium" | "chromium" | "bronzium" | "carbonite";
+    division: number;
+    rank:
+      | "rank1"
+      | "rank2"
+      | "rank3"
+      | "rank4"
+      | "rank5"
+      | "rank6"
+      | "rank7"
+      | "rank8";
+  };
   calculateCompletion?: boolean;
   completionDate?: string;
 }
@@ -54,6 +80,14 @@ export class Goal {
       conquest: {
         difficulty: "easy",
         box: "box1",
+      },
+      gc: {
+        box: "box1",
+      },
+      gac: {
+        league: "carbonite",
+        division: 1,
+        rank: "rank8",
       },
     };
   }
@@ -81,7 +115,6 @@ export class Goal {
   }
 
   public get daysRemaining(): number {
-    console.log(this.settings.calculateCompletion);
     if (this.settings.calculateCompletion) {
       const today = moment();
       const start = moment(this.settings.startDate);
@@ -91,8 +124,7 @@ export class Goal {
       const percentRemaining = 100 - this.progress;
       return Math.round(percentRemaining / percentPerDay);
     } else {
-      const x = moment().diff(moment(this.settings.completionDate), "days");
-      console.log(x);
+      const x = moment(this.settings.completionDate).diff(moment(), "days");
       return x;
     }
   }

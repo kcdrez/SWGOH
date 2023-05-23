@@ -1,7 +1,7 @@
 import { Relic, RelicConfigType } from "./relic";
 
 const AB_FREQUENCY_IN_DAYS = 28;
-const CONQUEST_FREQUENCY_INDAYS = 28;
+const CONQUEST_FREQUENCY_IN_DAYS = 28;
 
 //https://docs.google.com/spreadsheets/d/10ReT0Q_4yYGd_fU45Clv7XYs23a96xpWgIxLVrg9Eqg/edit#gid=769217271
 const relicConfig = {
@@ -280,13 +280,18 @@ const acquisition = {
   fragmented_white: {
     conquest: {
       hard: {
-        box7: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box6: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box5: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box4: 15 / CONQUEST_FREQUENCY_INDAYS,
-        box3: 15 / CONQUEST_FREQUENCY_INDAYS,
-        box2: 20 / CONQUEST_FREQUENCY_INDAYS,
-        box1: 20 / CONQUEST_FREQUENCY_INDAYS,
+        box7: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box4: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box3: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box2: 20 / CONQUEST_FREQUENCY_IN_DAYS,
+        box1: 20 / CONQUEST_FREQUENCY_IN_DAYS,
+      },
+      normal: {
+        box7: 20 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 15 / CONQUEST_FREQUENCY_IN_DAYS,
       },
     },
     assaultBattles: {
@@ -297,13 +302,16 @@ const acquisition = {
   incomplete_green: {
     conquest: {
       hard: {
-        box7: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box6: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box5: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box4: 15 / CONQUEST_FREQUENCY_INDAYS,
-        box3: 15 / CONQUEST_FREQUENCY_INDAYS,
-        box2: 20 / CONQUEST_FREQUENCY_INDAYS,
-        box1: 20 / CONQUEST_FREQUENCY_INDAYS,
+        box7: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box4: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box3: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box2: 20 / CONQUEST_FREQUENCY_IN_DAYS,
+        box1: 20 / CONQUEST_FREQUENCY_IN_DAYS,
+      },
+      normal: {
+        box7: 10 / CONQUEST_FREQUENCY_IN_DAYS,
       },
     },
     assaultBattles: {
@@ -314,11 +322,11 @@ const acquisition = {
   flawed_blue: {
     conquest: {
       hard: {
-        box7: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box6: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box5: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box4: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box3: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box7: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box4: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box3: 10 / CONQUEST_FREQUENCY_IN_DAYS,
       },
     },
     assaultBattles: {
@@ -330,13 +338,20 @@ const acquisition = {
     tw: ((2 / 6) * 10 * 4) / 30.5,
     conquest: {
       hard: {
-        box7: 5 / CONQUEST_FREQUENCY_INDAYS,
-        box6: 5 / CONQUEST_FREQUENCY_INDAYS,
-        box5: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box4: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box3: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box2: 15 / CONQUEST_FREQUENCY_INDAYS,
-        box1: 15 / CONQUEST_FREQUENCY_INDAYS,
+        box7: 5 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 5 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box4: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box3: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box2: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box1: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+      },
+      normal: {
+        box7: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 30 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 30 / CONQUEST_FREQUENCY_IN_DAYS,
+        box4: 40 / CONQUEST_FREQUENCY_IN_DAYS,
+        box3: 40 / CONQUEST_FREQUENCY_IN_DAYS,
       },
     },
     assaultBattles: {
@@ -348,13 +363,18 @@ const acquisition = {
     tw: ((2 / 6) * 10 * 4) / 30.5,
     conquest: {
       hard: {
-        box7: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box6: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box5: 20 / CONQUEST_FREQUENCY_INDAYS,
-        box4: 25 / CONQUEST_FREQUENCY_INDAYS,
-        box3: 25 / CONQUEST_FREQUENCY_INDAYS,
-        box2: 40 / CONQUEST_FREQUENCY_INDAYS,
-        box1: 40 / CONQUEST_FREQUENCY_INDAYS,
+        box7: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 20 / CONQUEST_FREQUENCY_IN_DAYS,
+        box4: 25 / CONQUEST_FREQUENCY_IN_DAYS,
+        box3: 25 / CONQUEST_FREQUENCY_IN_DAYS,
+        box2: 40 / CONQUEST_FREQUENCY_IN_DAYS,
+        box1: 40 / CONQUEST_FREQUENCY_IN_DAYS,
+      },
+      normal: {
+        box7: 40 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 40 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 40 / CONQUEST_FREQUENCY_IN_DAYS,
       },
     },
     assaultBattles: {
@@ -366,13 +386,13 @@ const acquisition = {
     tw: ((2 / 6) * 10 * 4) / 30.5,
     conquest: {
       hard: {
-        box7: 5 / CONQUEST_FREQUENCY_INDAYS,
-        box6: 5 / CONQUEST_FREQUENCY_INDAYS,
-        box5: 15 / CONQUEST_FREQUENCY_INDAYS,
-        box4: 15 / CONQUEST_FREQUENCY_INDAYS,
-        box3: 15 / CONQUEST_FREQUENCY_INDAYS,
-        box2: 20 / CONQUEST_FREQUENCY_INDAYS,
-        box1: 20 / CONQUEST_FREQUENCY_INDAYS,
+        box7: 5 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 5 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box4: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box3: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box2: 20 / CONQUEST_FREQUENCY_IN_DAYS,
+        box1: 20 / CONQUEST_FREQUENCY_IN_DAYS,
       },
     },
     assaultBattles: {
@@ -384,11 +404,14 @@ const acquisition = {
     tw: ((2 / 6) * 10 * 4) / 30.5,
     conquest: {
       hard: {
-        box7: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box6: 10 / CONQUEST_FREQUENCY_INDAYS,
-        box5: 15 / CONQUEST_FREQUENCY_INDAYS,
-        box4: 20 / CONQUEST_FREQUENCY_INDAYS,
-        box3: 20 / CONQUEST_FREQUENCY_INDAYS,
+        box7: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 15 / CONQUEST_FREQUENCY_IN_DAYS,
+        box4: 20 / CONQUEST_FREQUENCY_IN_DAYS,
+        box3: 20 / CONQUEST_FREQUENCY_IN_DAYS,
+      },
+      normal: {
+        box7: 20 / CONQUEST_FREQUENCY_IN_DAYS,
       },
     },
     assaultBattles: {
@@ -400,9 +423,9 @@ const acquisition = {
     tw: ((2 / 6) * 8 * 4) / 30.5,
     conquest: {
       hard: {
-        box7: 5 / CONQUEST_FREQUENCY_INDAYS,
-        box6: 5 / CONQUEST_FREQUENCY_INDAYS,
-        box5: 10 / CONQUEST_FREQUENCY_INDAYS,
+        box7: 5 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 5 / CONQUEST_FREQUENCY_IN_DAYS,
+        box5: 10 / CONQUEST_FREQUENCY_IN_DAYS,
       },
     },
     assaultBattles: {
@@ -414,17 +437,17 @@ const acquisition = {
     tw: ((2 / 6) * 7.5 * 4) / 30.5,
     conquest: {
       hard: {
-        box7: 5 / CONQUEST_FREQUENCY_INDAYS,
-        box6: 5 / CONQUEST_FREQUENCY_INDAYS,
+        box7: 5 / CONQUEST_FREQUENCY_IN_DAYS,
+        box6: 5 / CONQUEST_FREQUENCY_IN_DAYS,
       },
     },
   },
   aeromagnifier: {
     tw: (3 * 4) / 30.5,
     conquest: {
-      box7: 10 / CONQUEST_FREQUENCY_INDAYS,
-      box6: 5 / CONQUEST_FREQUENCY_INDAYS,
-      box5: 2 / CONQUEST_FREQUENCY_INDAYS,
+      box7: 10 / CONQUEST_FREQUENCY_IN_DAYS,
+      box6: 5 / CONQUEST_FREQUENCY_IN_DAYS,
+      box5: 2 / CONQUEST_FREQUENCY_IN_DAYS,
     },
   },
   droid_brains: {

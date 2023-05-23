@@ -287,7 +287,9 @@ export default defineComponent({
               const { ct2: ct2Completed, ct3: ct3Completed } =
                 this.goal.settings.assaultBattles;
               return (
-                total + ct2Amount * ct2Completed + ct3Amount * ct3Completed
+                total +
+                (ct2Amount ?? 0) * ct2Completed +
+                (ct3Amount ?? 0) * ct3Completed
               );
             } else if (key === "conquest") {
               const { difficulty, box } = this.goal.settings?.conquest;

@@ -182,13 +182,7 @@ export default defineComponent({
               {
                 show: this.showCol("total"),
                 label: "Total Purchase:",
-                data: Math.max(
-                  gear.remaining -
-                    Math.round(
-                      this.gearAmountPerDay(gear.id) * this.goal.daysRemaining
-                    ),
-                  0
-                ),
+                data: this.amountToPurchase(gear),
               },
               // {
               //   show: this.showCol("actions"),
@@ -258,20 +252,9 @@ export default defineComponent({
           const sortMethod =
             this.sortMethod === "subTotal" ? "totalAmount" : this.sortMethod;
           if (sortMethod === "total") {
-            const valueA = Math.max(
-              a.remaining -
-                Math.round(
-                  this.gearAmountPerDay(a.id) * this.goal.daysRemaining
-                ),
-              0
-            );
-            const valueB = Math.max(
-              b.remaining -
-                Math.round(
-                  this.gearAmountPerDay(b.id) * this.goal.daysRemaining
-                ),
-              0
-            );
+            const valueA = this.amountToPurchase(a);
+            const valueB = this.amountToPurchase(b);
+
             return sortValues(valueA, valueB, this.sortDir, sortMethod);
           }
           return sortValues(a, b, this.sortDir, sortMethod);
@@ -279,23 +262,45 @@ export default defineComponent({
     },
   },
   methods: {
-    gearAmountPerDay(gearId: string): number {
-      const gearData: object = gearMapping.aquisition[gearId];
+    amountToPurchase(gear: Gear): number {
+      let amountPerDay = 0;
+      const gearData: object = gearMapping.aquisition[gear.id];
       if (gearData) {
-        // console.log(gearId, gearData);
-        return Object.entries(gearData).reduce((total: number, x: any[]) => {
-          const [key, value] = x;
-          if (key === "assaultBattles") {
-            const { ct1: ct1Amount, ct0: ct0Amount } = value;
-            const { ct1: ct1Completed } = this.goal.settings.assaultBattles;
-            return total + (ct1Amount ?? 0) * ct1Completed + (ct0Amount ?? 0);
-          } else {
-            return total + value;
-          }
-        }, 0);
-      } else {
-        return 0;
+        amountPerDay = Object.entries(gearData).reduce(
+          (total: number, x: any[]) => {
+            const [key, value] = x;
+            if (key === "assaultBattles") {
+              const { ct1: ct1Amount, ct0: ct0Amount } = value;
+              const { ct1: ct1Completed } = this.goal.settings.assaultBattles;
+              return total + (ct1Amount ?? 0) * ct1Completed + (ct0Amount ?? 0);
+            } else if (key === "conquest") {
+              const { difficulty, box } = this.goal.settings?.conquest;
+              if (difficulty in value && box in value[difficulty]) {
+                return total + (value[difficulty][box] ?? 0);
+              }
+            } else if (key === "gc") {
+              const { box } = this.goal.settings?.gc ?? {};
+              if (box && value.box && box in value.box) {
+                return total + (value.box[box] ?? 0);
+              }
+            } else if (key === "gac") {
+              const { rank } = this.goal.settings?.gac ?? {};
+              if (rank && value.rank && rank in value.rank) {
+                return total + (value.rank[rank] ?? 0);
+              }
+            } else {
+              return total + value;
+            }
+            return total;
+          },
+          0
+        );
       }
+
+      return Math.max(
+        gear.remaining - Math.round(amountPerDay * this.goal.daysRemaining),
+        0
+      );
     },
   },
 });
