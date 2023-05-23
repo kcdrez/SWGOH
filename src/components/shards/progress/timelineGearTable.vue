@@ -280,8 +280,8 @@ export default defineComponent({
               }
             } else if (key === "gc") {
               const { box } = this.goal.settings?.gc ?? {};
-              if (box && value.box && box in value.box) {
-                return total + (value.box[box] ?? 0);
+              if (box && value && box in value) {
+                return total + (value[box] ?? 0);
               }
             } else if (key === "gac") {
               const { rank } = this.goal.settings?.gac ?? {};
