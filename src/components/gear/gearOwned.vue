@@ -32,10 +32,13 @@ export default defineComponent({
     };
   },
   watch: {
-    salvage(newVal: Gear) {
-      if (newVal.owned !== this.owned) {
-        this.owned = unvue(newVal.owned);
-      }
+    salvage: {
+      deep: true,
+      handler(newVal: Gear) {
+        if (newVal.owned !== this.owned) {
+          this.owned = unvue(newVal.owned);
+        }
+      },
     },
   },
   methods: {
