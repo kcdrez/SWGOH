@@ -385,10 +385,6 @@
           :arrow="cell.data.popover.arrow"
           :placement="cell.data.popover.placement"
         >
-          <!-- <router-link v-if="cell.type === 'link'" :to="cell.data.data">{{
-            el.message
-          }}</router-link>
-          <template v-else>Unknown sub type</template> -->
           {{ cell.data.label }}
           <template #content>
             <div
