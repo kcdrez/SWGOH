@@ -379,6 +379,53 @@
         <span v-if="cell.data.message" :class="cell.data.classes">{{
           cell.data.message
         }}</span>
+        <Popper
+          v-else-if="cell.data.popover"
+          :hover="cell.data.popover.hover"
+          :arrow="cell.data.popover.arrow"
+          :placement="cell.data.popover.placement"
+        >
+          <!-- <router-link v-if="cell.type === 'link'" :to="cell.data.data">{{
+            el.message
+          }}</router-link>
+          <template v-else>Unknown sub type</template> -->
+          {{ cell.data.label }}
+          <template #content>
+            <div
+              :class="cell.data.popover.header.classes"
+              v-if="cell.data.popover.header"
+            >
+              {{ cell.data.popover.header.message }}
+            </div>
+            <template v-if="cell.data.popover.list">
+              <div
+                v-for="popoverEl in cell.data.popover.list"
+                :key="popoverEl.id"
+              >
+                <template v-if="popoverEl.type === 'gearText'">
+                  <GearText :level="popoverEl.level" />:
+                  <span class="ml-1">{{ popoverEl.amount }}</span>
+                </template>
+                <template v-else-if="popoverEl.type === 'text'">
+                  {{ popoverEl.label }}</template
+                >
+                <template v-else>Unknown popoverEl type</template>
+              </div>
+            </template>
+            <template v-else-if="cell.data.popover.body">
+              <div :class="cell.data.popover.body.classes">
+                {{ cell.data.popover.body.message }}
+              </div>
+            </template>
+            <template v-else>Unknown popover type</template>
+            <div
+              v-if="cell.data.popover.footer?.show"
+              :class="cell.data.popover.footer.classes"
+            >
+              {{ cell.data.popover.footer.message }}
+            </div>
+          </template>
+        </Popper>
         <template v-else>
           {{ cell.data }}
         </template>

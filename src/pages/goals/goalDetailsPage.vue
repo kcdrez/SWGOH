@@ -11,7 +11,7 @@
         :storageKey="'TimelineTable' + goalData.id"
         :prerequisites="prerequisites"
       />
-      <GearSection
+      <!-- <GearSection
         class="gear-section"
         :units="prerequisites.list"
         :gearTargets="prerequisites.gearTargets"
@@ -20,7 +20,7 @@
         class="relic-section mb-2"
         :units="prerequisites.list"
         :relicTargets="prerequisites.relicTargets"
-      />
+      /> -->
     </template>
     <div v-else>Could not find a matching Goal</div>
   </div>

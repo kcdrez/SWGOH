@@ -90,7 +90,7 @@ export default defineComponent({
         },
         {
           label: "Amount Owned",
-          value: "gearOwned",
+          value: "owned",
         },
         {
           label: "Amount Needed",
