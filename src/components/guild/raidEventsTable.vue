@@ -52,7 +52,7 @@ export default defineComponent({
     return {
       newEvent: {
         date: moment().format("YYYY-MM-DD"),
-        score: 10,
+        score: 0,
         type: "Krayt",
       },
     } as any;
@@ -156,27 +156,27 @@ export default defineComponent({
               {
                 show: this.showCol("type"),
                 label: "Raid Type:",
-                data: event.type,
+                data: event?.type ?? "Unknown",
               },
               {
                 show: this.showCol("score"),
                 label: "Score:",
-                data: event.score,
+                data: new Intl.NumberFormat().format(event?.score ?? 0),
               },
               {
                 show: this.showCol("raid1"),
                 label: "Raid1:",
-                data: event.currencies.raid1,
+                data: event.currencies?.raid1 ?? 0,
               },
               {
                 show: this.showCol("raid2"),
                 label: "Raid2:",
-                data: event.currencies.raid2,
+                data: event.currencies?.raid2 ?? 0,
               },
               {
                 show: this.showCol("raid3"),
                 label: "Raid3:",
-                data: event.currencies.raid3,
+                data: event.currencies?.raid3 ?? 0,
               },
               {
                 show: this.showCol("actions"),
@@ -292,43 +292,11 @@ export default defineComponent({
                 show: true,
                 classes: "flex-sm",
                 label: "Score:",
-                type: "select",
+                type: "number",
                 data: {
                   value: this.newEvent.score,
-                  options: [
-                    {
-                      label: "10mil",
-                      value: 10,
-                    },
-                    {
-                      label: "17mil",
-                      value: 17,
-                    },
-                    {
-                      label: "25mil",
-                      value: 25,
-                    },
-                    {
-                      label: "90mil",
-                      value: 90,
-                    },
-                    {
-                      label: "130mil",
-                      value: 130,
-                    },
-                    {
-                      label: "265mil",
-                      value: 265,
-                    },
-                    {
-                      label: "416mil",
-                      value: 416,
-                    },
-                    {
-                      label: "520mil",
-                      value: 520,
-                    },
-                  ],
+                  min: 0,
+                  max: 520000000,
                 },
                 enter: (val: number) => {
                   this.newEvent.score = Number(val);
@@ -361,9 +329,13 @@ export default defineComponent({
       };
     },
     filteredEvents(): iRaidEvent[] {
-      return this.raidEvents.sort((a: iRaidEvent, b: iRaidEvent) => {
-        return sortValues(a, b, this.sortDir, this.sortMethod);
-      });
+      return this.raidEvents
+        .filter((raidEvent: iRaidEvent) => {
+          return moment(raidEvent.date).isAfter(moment().subtract(6, "months"));
+        })
+        .sort((a: iRaidEvent, b: iRaidEvent) => {
+          return sortValues(a, b, this.sortDir, this.sortMethod);
+        });
     },
     addNewDisabled(): boolean {
       return !this.newEvent.date || !this.newEvent.score || !this.newEvent.type;

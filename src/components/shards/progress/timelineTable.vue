@@ -250,7 +250,8 @@ import Modal from "components/general/modal.vue";
 import TimelineGearTable from "./timelineGearTable.vue";
 import TimelineRelicTable from "./timelineRelicTable.vue";
 import { Unit } from "types/unit";
-import { Goal, ISettings } from "types/goals";
+import { Goal } from "types/goals";
+import { ISettings } from "types/player";
 import { daysFromNow, setupColumnEvents, setupSorting } from "utils";
 import { iExpandOptions } from "types/general";
 
