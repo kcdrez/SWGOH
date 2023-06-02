@@ -25,6 +25,7 @@ import GearListPage from "pages/gear/gearList.vue";
 import ScavengerPage from "pages/relic/scavenger.vue";
 import UnitSearchPage from "pages/units/unitSearch.vue";
 import RelicCalculatorPage from "pages/relic/relicCalculator.vue";
+import SettingsPage from "pages/general/settings.vue";
 
 const routes = [
   {
@@ -50,6 +51,24 @@ const routes = [
         path: "",
         name: "GeneralPlannerPage",
         component: GeneralPlannerPage,
+      },
+    ],
+  },
+  {
+    path: "/settings",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: [],
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "SettingsPage",
+        component: SettingsPage,
       },
     ],
   },

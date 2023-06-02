@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { Player } from "types/player";
+import { ISettings, Player } from "types/player";
 import { ConfigType, Gear, IGear } from "types/gear";
 import { IUnit, Unit } from "types/unit";
 import { Goal, IGoal } from "types/goals";
@@ -17,8 +17,8 @@ import {
 import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3001/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3001/dev";
 
   constructor() {}
 
@@ -328,6 +328,13 @@ class ApiClient {
     if (playerId) {
       await axios.patch(`${this.baseUrl}/player/goalList/${playerId}`, {
         goalList: goals.map((x) => x.sanitize()),
+      });
+    }
+  }
+  async saveSettings(playerId: string | undefined, settings: ISettings | null) {
+    if (playerId && settings) {
+      await axios.patch(`${this.baseUrl}/player/settings/${playerId}`, {
+        settings,
       });
     }
   }

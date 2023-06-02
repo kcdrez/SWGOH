@@ -377,7 +377,6 @@ export default defineComponent({
   },
   methods: {
     amountToPurchase(gear: Gear): any {
-      // let amountPerDay = 0;
       const list: any[] = [
         {
           key: "assaultBattles",

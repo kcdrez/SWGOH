@@ -2,7 +2,7 @@ import { ActionContext } from "vuex";
 import moment from "moment";
 import momentTz from "moment-timezone";
 
-import { Player } from "types/player";
+import { ISettings, Player } from "types/player";
 import { loadingState } from "types/loading";
 import { State as RootState } from "./store";
 import { apiClient } from "../api/api-client";
@@ -136,6 +136,9 @@ const store = {
         state.player?.id ?? "",
         state.player?.goalList ?? []
       );
+    },
+    async saveSettings({ state }: ActionCtx, settings: ISettings) {
+      await apiClient.saveSettings(state.player?.id ?? "", settings ?? null);
     },
   },
 };

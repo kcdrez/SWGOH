@@ -53,6 +53,13 @@
               {{ player?.name || "Profile" }}
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
+              <li v-if="isLoggedIn" class="c-pointer">
+                <router-link
+                  class="dropdown-item"
+                  :to="{ name: 'SettingsPage' }"
+                  >Settings</router-link
+                >
+              </li>
               <li @click="resetPlayer" v-if="isLoggedIn" class="c-pointer">
                 <div class="dropdown-item">Logout</div>
               </li>
