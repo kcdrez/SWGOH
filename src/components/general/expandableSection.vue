@@ -83,7 +83,7 @@ export default defineComponent({
     options: {
       type: Object as () => iExpandOptions,
       default: () => {
-        return null;
+        return {};
       },
     },
   },

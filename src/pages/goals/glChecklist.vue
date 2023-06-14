@@ -143,10 +143,13 @@ export default defineComponent({
     this.glUnitList.forEach((unit: Unit) => {
       this.simpleView[unit.id] = this.simpleView[unit.id] ?? true;
 
-      (this.selectedColumns as any)[unit.id] =
+      if (unit.id in this.selectedColumns) {
         (this.selectedColumns as any)[unit.id].filter(
           (x: string) => x !== "recommended"
-        ) ?? [];
+        );
+      } else {
+        this.selectedColumns[unit.id] = [];
+      }
     });
   },
 });
