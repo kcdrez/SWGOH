@@ -1,11 +1,13 @@
 import store from "vuex-store/store";
 import { Unit } from "./unit";
 import { unvue } from "utils";
+import { IGoal } from "types/goals";
 
 export interface GuildPayload {
   territoryWar?: ITerritoryWarEvent[];
   territoryBattle?: TerritoryBattleEvent[];
   raidEvents?: iRaidEvent[];
+  goalList?: IGoal[];
 }
 
 export interface ITerritoryWarEvent {

@@ -24,10 +24,11 @@ export class Goal {
   private _name: string;
   private _list: tGoalUnit[];
   private _settings?: ISettings;
+  private _type: "player" | "guild";
   public tempName: string = "";
   public isEditing: boolean = false;
 
-  constructor(data: IGoal) {
+  constructor(data: IGoal, type: "player" | "guild" = "player") {
     this._id = data.id ?? uuid();
     this._name = data.name;
     this.tempName = data.name;
@@ -49,6 +50,7 @@ export class Goal {
         rank: "rank8",
       },
     };
+    this._type = type;
   }
 
   public get id() {
@@ -106,7 +108,7 @@ export class Goal {
   }
 
   public async save(): Promise<void> {
-    await store.dispatch("player/saveGoals");
+    await store.dispatch(`${this._type}/saveGoals`);
   }
 
   public async saveName(): Promise<void> {

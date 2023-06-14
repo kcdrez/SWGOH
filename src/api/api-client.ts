@@ -17,8 +17,8 @@ import {
 import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3001/dev";
+  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3001/dev";
 
   constructor() {}
 
@@ -208,6 +208,18 @@ class ApiClient {
         `${this.baseUrl}/guild/${guildId}/raidEvents`,
         {
           raidEvents,
+        }
+      );
+      return response.data;
+    }
+  }
+
+  async updateGuildGoals(guildId: string, goalList: Goal[]) {
+    if (guildId) {
+      const response = await axios.patch(
+        `${this.baseUrl}/guild/${guildId}/goals`,
+        {
+          goalList: goalList.map((x) => x.sanitize()),
         }
       );
       return response.data;

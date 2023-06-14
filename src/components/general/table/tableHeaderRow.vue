@@ -8,6 +8,7 @@
         :title="cell.title"
         @click="handleClick(cell, !cell.input)"
         :colspan="cell.colspan"
+        :rowspan="cell.rowspan"
       >
         <div
           :class="[

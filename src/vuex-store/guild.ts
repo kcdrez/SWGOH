@@ -12,6 +12,7 @@ import {
   iRaidEvent,
 } from "types/guild";
 import { round2Decimals } from "utils";
+import { Goal } from "types/goals";
 
 interface State {
   requestState: loadingState;
@@ -20,6 +21,7 @@ interface State {
   territoryBattleEvents: TerritoryBattleEvent[];
   raidEvents: iRaidEvent[];
   accessLevel: number;
+  goals: Goal[];
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -73,6 +75,7 @@ const store = {
         },
       },
     },
+    goals: [],
   },
   getters: {
     tbEvents(state: State) {
@@ -167,6 +170,7 @@ const store = {
       state.territoryWarEvents = payload?.territoryWar || [];
       state.territoryBattleEvents = payload?.territoryBattle || [];
       state.raidEvents = payload.raidEvents ?? [];
+      state.goals = payload?.goalList?.map((x) => new Goal(x, "guild")) ?? [];
     },
     UPSERT_TERRITORY_WAR_EVENT(state: State, payload: ITerritoryWarEvent) {
       const index = state.territoryWarEvents.findIndex(
@@ -206,6 +210,12 @@ const store = {
       const index = state.raidEvents.findIndex((x) => x.id === eventId);
       if (index >= 0) {
         state.raidEvents.splice(index, 1);
+      }
+    },
+    REMOVE_GOAL(state: State, goalId: string) {
+      const index = state.goals.findIndex((x) => x.id === goalId);
+      if (index >= 0) {
+        state.goals.splice(index, 1);
       }
     },
   },
@@ -331,6 +341,17 @@ const store = {
     },
     async saveRaidEvents({ state, commit }: ActionCtx, events: iRaidEvent[]) {
       const response = await apiClient.updateRaidEvents(state.guildId, events);
+      commit("SET_EVENTS", response);
+    },
+    addGoal({ state, dispatch }: ActionCtx, goal: Goal) {
+      dispatch("saveGoals", [...state.goals, goal]);
+    },
+    removeGoal({ commit, dispatch, state }: ActionCtx, goalId: string) {
+      commit("REMOVE_GOAL", goalId);
+      dispatch("saveGoals", state.raidEvents);
+    },
+    async saveGoals({ state, commit }: ActionCtx, goals: Goal[]) {
+      const response = await apiClient.updateGuildGoals(state.guildId, goals);
       commit("SET_EVENTS", response);
     },
   },
