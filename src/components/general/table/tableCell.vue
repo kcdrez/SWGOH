@@ -375,6 +375,14 @@
           </div>
         </div>
       </template>
+      <template v-else-if="cell.type === 'loading'">
+        <Loading
+          state="LOADING"
+          :message="cell.data?.message"
+          :size="cell.data?.size ?? 'sm'"
+          :displayText="cell.data?.label"
+        />
+      </template>
       <template v-else>
         <span v-if="cell.data.message" :class="cell.data.classes">{{
           cell.data.message

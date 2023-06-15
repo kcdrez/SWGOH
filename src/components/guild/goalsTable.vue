@@ -86,13 +86,12 @@ import { Goal, iGoalPlayer } from "types/goals";
 import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import {
   iHeaderCell,
-  iHeaderRow,
   iTableBody,
   iTableCell,
   iTableHead,
   iTableRow,
 } from "types/general";
-import { IPrerequisite, IPrerequisiteItem } from "types/shards";
+import { IPrerequisite } from "types/shards";
 import { iExpandOptions } from "types/general";
 import { loadingState } from "types/loading";
 
@@ -347,7 +346,7 @@ export default defineComponent({
                 },
               });
               acc.push({
-                show: this.showCol("gear"),
+                show: this.showCol("gear_level"),
                 type: "unitLevel",
                 data: {
                   classes: "justify-content-center",
@@ -356,14 +355,13 @@ export default defineComponent({
                 },
               });
               acc.push({
-                show: this.showCol("relic"),
+                show: this.showCol("relic_tier"),
                 type: "unitLevel",
                 data: {
                   classes: "justify-content-center",
                   type: "Relic",
                   value: match?.relic_tier ?? -1,
                   unitId: unit.id,
-                  // unitData: match,
                 },
               });
               return acc;
@@ -383,7 +381,7 @@ export default defineComponent({
                 type: "progress",
                 data: totalProgress(
                   this.goal.list,
-                  "recommended",
+                  "requirement",
                   player.units
                 ),
               },
@@ -573,19 +571,6 @@ export default defineComponent({
     }
     &.fa-trash {
       color: $danger;
-    }
-  }
-}
-.total-progress-bar {
-  display: flex;
-  margin: 0.5rem;
-  justify-content: center;
-
-  .progress {
-    flex-basis: 33.33%;
-
-    @media only screen and (max-width: 768px) {
-      flex-basis: 100%;
     }
   }
 }
