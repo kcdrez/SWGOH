@@ -11,6 +11,8 @@ import MatchUpPage from "pages/units/matchUpPage.vue";
 import CharacterFarmingPage from "pages/units/characterFarming.vue";
 import GuildEventsPage from "pages/guild/guildEvents.vue";
 import GuildUnitsPage from "pages/guild/guildUnits.vue";
+import GuildGoalsPage from "pages/guild/guildGoals.vue";
+import GuildGoalDetails from "pages/guild/goalDetailsPage.vue";
 import StatCalculatorPage from "pages/units/statCalculator.vue";
 import GLChecklist from "pages/goals/glChecklist.vue";
 import GLCompare from "pages/goals/glCompare.vue";
@@ -173,6 +175,16 @@ const routes = [
         path: "units",
         name: "GuildUnitsPage",
         component: GuildUnitsPage,
+      },
+      {
+        path: "goals",
+        name: "GuildGoalsPage",
+        component: GuildGoalsPage,
+      },
+      {
+        path: "goal/:goalName",
+        name: "GuildGoalDetails",
+        component: GuildGoalDetails,
       },
     ],
   },

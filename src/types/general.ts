@@ -30,8 +30,14 @@ interface iHeaderCell {
   title?: string;
   value?: any;
   colspan?: string;
+  rowspan?: string;
   data?: any;
   showOption?: boolean;
+  buttons?: {
+    classes: string;
+    click: Function;
+    title?: string;
+  }[];
 }
 
 interface iHeaderRow {

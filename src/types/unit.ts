@@ -14,6 +14,7 @@ import { round2Decimals } from "utils";
 import { CurrencyTypeConfig } from "./currency";
 import { anyTagsMatch, tOmicronMode } from "./teams";
 import relicMapping from "./relicMapping";
+import { iGoalPlayer, iGoalUnit } from "types/goals";
 
 interface IStatMultiplier {
   speed: number;
@@ -1480,7 +1481,8 @@ export function unitsByPriority(
 
 export function getPercent(
   item: IPrerequisite,
-  prerequisiteType: "requirement" | "recommended"
+  prerequisiteType: "requirement" | "recommended",
+  playerUnit?: iGoalUnit
 ): number {
   let percentage = 0;
   const type = item[prerequisiteType]?.type ?? item?.requirement?.type;
@@ -1488,7 +1490,7 @@ export function getPercent(
   if (item.id) {
     const unit = getUnit(item.id);
     if (unit) {
-      percentage = getUnitPercent(unit, type, value);
+      percentage = getUnitPercent(unit, type, value, playerUnit);
     }
   } else if (item.tags) {
     const list = getUnitsByTag(item.tags).map((u) => {
@@ -1519,32 +1521,58 @@ export function getPercent(
 export function getUnitPercent(
   unit: Unit,
   type: string | undefined,
-  target: number = 0
+  target: number = 0,
+  playerUnit?: iGoalUnit
 ) {
+  let shardsAmount = 0;
+  if (playerUnit?.stars) {
+    for (let i = 1; i <= playerUnit.stars; i++) {
+      shardsAmount += shardMapping[i];
+    }
+    shardsAmount = Math.min(shardsAmount, 330);
+  } else {
+    shardsAmount = unit.totalOwnedShards;
+  }
+
   if (type === "Power") {
-    return (unit.power / target) * 100;
+    const value = playerUnit?.power ?? unit.power;
+    return (value / target) * 100;
   } else if (type === "Relic") {
     const { gearScale, relicScale, shardsScale } = getScale(
-      unit.gearLevel,
+      playerUnit?.gear_level ?? unit.gearLevel,
       target
     );
-    const gearPercent = getGearPercent(unit) * gearScale;
-    const relicPercent = getRelicPercent(unit, target) * relicScale;
-    const shardsPercent = ((unit.totalOwnedShards + 0.01) / 330) * shardsScale;
+    const gearPercent =
+      getGearPercent(
+        unit,
+        maxGearLevel,
+        playerUnit?.gear_level ?? unit.gearLevel
+      ) * gearScale;
+    const relicPercent =
+      getRelicPercent(unit, target, playerUnit?.relic_tier ?? unit.relicLevel) *
+      relicScale;
+
+    const shardsPercent = ((shardsAmount + 0.01) / 330) * shardsScale;
 
     return (gearPercent + relicPercent + shardsPercent) * 100;
   } else if (type === "Gear") {
-    const { gearScale, shardsScale } = getScale(unit.gearLevel);
-    const gearPercent = getGearPercent(unit, target);
-    const shardsPercent = (unit.totalOwnedShards + 0.01) / 330;
+    const { gearScale, shardsScale } = getScale(
+      playerUnit?.gear_level ?? unit.gearLevel
+    );
+    const gearPercent = getGearPercent(
+      unit,
+      target,
+      playerUnit?.gear_level ?? unit.gearLevel
+    );
+    const shardsPercent = (shardsAmount + 0.01) / 330;
 
     return (gearPercent * gearScale + shardsPercent * shardsScale) * 100;
   } else if (type === "Stars") {
-    let shardsAmount = 0;
+    let totalShardsNeeded = 0;
     for (let i = 1; i <= target; i++) {
-      shardsAmount += shardMapping[i];
+      totalShardsNeeded += shardMapping[i];
     }
-    return Math.min(unit.totalOwnedShards / shardsAmount, 1) * 100;
+    return Math.min(shardsAmount / totalShardsNeeded, 1) * 100;
   }
   return 0;
 }
@@ -1597,7 +1625,23 @@ export function getUnit(unitId: string) {
 
 export function totalProgress(
   prerequisites: IPrerequisite[],
-  prerequisiteType: "requirement" | "recommended"
+  prerequisiteType: "requirement" | "recommended",
+  playerUnits?: iGoalPlayer["units"]
+) {
+  let progress = 0;
+  const typeList = prerequisites.map((x) => x.requirement?.type);
+  (prerequisites ?? []).forEach((item) => {
+    const scale = getTypeScale(item.requirement?.type, typeList);
+    const match = playerUnits?.find((x) => x.base_id === item.id);
+    progress += getPercent(item, prerequisiteType, match) * scale;
+  });
+  return round2Decimals(progress);
+}
+
+export function guildGoalProgress(
+  prerequisites: IPrerequisite[],
+  prerequisiteType: "requirement" | "recommended",
+  units: any[]
 ) {
   let progress = 0;
   const typeList = prerequisites.map((x) => x.requirement?.type);
@@ -1622,9 +1666,14 @@ export function getPrerequisites(unitId: string) {
   return legendaryUnits?.find((x) => x.id === unitId)?.prerequisites ?? [];
 }
 
-function getGearPercent(unit: Unit, target: number = maxGearLevel) {
+function getGearPercent(
+  unit: Unit,
+  target: number = maxGearLevel,
+  value: number = 0
+) {
   let progress = 0;
   const { gearLevel, gearPiecesCount } = unit;
+  value = value || gearLevel;
   const scales = {
     g5: 0.1,
     g8: 0.15,
@@ -1645,9 +1694,9 @@ function getGearPercent(unit: Unit, target: number = maxGearLevel) {
     totalScale = scales.g5;
   }
 
-  if (gearLevel >= maxGearLevel) {
+  if (value >= maxGearLevel) {
     progress += totalScale;
-  } else if (gearLevel === 12) {
+  } else if (value === 12) {
     if (target <= 12) {
       progress += totalScale;
     } else {
@@ -1658,45 +1707,45 @@ function getGearPercent(unit: Unit, target: number = maxGearLevel) {
         scales.g12 +
         scales.g13 * (gearPiecesCount / 6);
     }
-  } else if (gearLevel === 11) {
+  } else if (value === 11) {
     if (target <= 11) {
       progress += totalScale;
     } else {
       progress +=
         scales.g5 + scales.g8 + scales.g11 + scales.g12 * (gearPiecesCount / 6);
     }
-  } else if (gearLevel >= 8 && gearLevel < 11) {
-    if (target <= gearLevel) {
+  } else if (value >= 8 && value < 11) {
+    if (target <= value) {
       progress += totalScale;
     } else {
-      //target is 9+, gearLevel 8-10, target is greater than gearLevel
-      const diff = Math.min(target - gearLevel, 11 - 8); //1-3
+      //target is 9+, value 8-10, target is greater than value
+      const diff = Math.min(target - value, 11 - 8); //1-3
       const totalPiecesNeeded = diff * 6;
-      const totalPiecesEquipped = (gearLevel - 8) * 6 + gearPiecesCount;
+      const totalPiecesEquipped = (value - 8) * 6 + gearPiecesCount;
       progress +=
         scales.g5 +
         scales.g8 +
         scales.g11 * (totalPiecesEquipped / totalPiecesNeeded);
     }
-  } else if (gearLevel >= 5 && gearLevel < 8) {
-    if (target <= gearLevel) {
+  } else if (value >= 5 && value < 8) {
+    if (target <= value) {
       progress += totalScale;
     } else {
-      //target is 6+, gearLevel 5-7, target is greater than gearLevel
-      const diff = Math.min(target - gearLevel, 8 - 5); //1-3
+      //target is 6+, value 5-7, target is greater than value
+      const diff = Math.min(target - value, 8 - 5); //1-3
       const totalPiecesNeeded = diff * 6;
-      const totalPiecesEquipped = (gearLevel - 5) * 6 + gearPiecesCount;
+      const totalPiecesEquipped = (value - 5) * 6 + gearPiecesCount;
       progress +=
         scales.g5 + scales.g8 * (totalPiecesEquipped / totalPiecesNeeded);
     }
   } else {
-    if (target <= gearLevel) {
+    if (target <= value) {
       progress += totalScale;
     } else {
-      //target is 4+, gearLevel 0-4, target is greater than gearLevel
-      const diff = Math.min(target - gearLevel, 5); //1-5
+      //target is 4+, value 0-4, target is greater than value
+      const diff = Math.min(target - value, 5); //1-5
       const totalPiecesNeeded = diff * 6;
-      const totalPiecesEquipped = gearLevel * 6 + gearPiecesCount;
+      const totalPiecesEquipped = value * 6 + gearPiecesCount;
       progress += scales.g5 * (totalPiecesEquipped / totalPiecesNeeded);
     }
   }
@@ -1704,18 +1753,17 @@ function getGearPercent(unit: Unit, target: number = maxGearLevel) {
   return Math.min(progress / totalScale, 1);
 }
 
-function getRelicPercent(unit: Unit, target: number = maxRelicLevel): number {
+function getRelicPercent(
+  unit: Unit,
+  target: number = maxRelicLevel,
+  value: number = 0
+): number {
+  value = value || unit.relicLevel;
   const { fragmented_white, incomplete_green, flawed_blue } =
     store.state.relic.relicConfig;
-  const whiteProgress = fragmented_white.percentApplied(
-    unit.relicLevel,
-    target
-  );
-  const greenProgress = incomplete_green.percentApplied(
-    unit.relicLevel,
-    target
-  );
-  const blueProgress = flawed_blue.percentApplied(unit.relicLevel, target);
+  const whiteProgress = fragmented_white.percentApplied(value, target);
+  const greenProgress = incomplete_green.percentApplied(value, target);
+  const blueProgress = flawed_blue.percentApplied(value, target);
 
   return (whiteProgress + greenProgress + blueProgress + 0.01) / 100 / 3;
 }

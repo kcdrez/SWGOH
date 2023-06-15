@@ -3,7 +3,7 @@ import axios from "axios";
 import { ISettings, Player } from "types/player";
 import { ConfigType, Gear, IGear } from "types/gear";
 import { IUnit, Unit } from "types/unit";
-import { Goal, IGoal } from "types/goals";
+import { Goal, IGoal, iGoalPlayer } from "types/goals";
 import { FarmingNode, IFarmingNode, OwnedShardsMap } from "types/shards";
 import { OwnedRelicConfig } from "types/relic";
 import { ITeam, Match, Team } from "types/teams";
@@ -214,6 +214,18 @@ class ApiClient {
     }
   }
 
+  async updateGuildGoals(guildId: string, goalList: Goal[]) {
+    if (guildId) {
+      const response = await axios.patch(
+        `${this.baseUrl}/guild/${guildId}/goals`,
+        {
+          goalList: goalList.map((x) => x.sanitize()),
+        }
+      );
+      return response.data;
+    }
+  }
+
   async saveWallet(playerId: string | undefined, wallet: IWallet) {
     if (playerId) {
       await axios.patch(`${this.baseUrl}/player/wallet/${playerId}`, {
@@ -311,7 +323,10 @@ class ApiClient {
 
     return unitMapping;
   }
-  async fetchGuildUnits(guildId: string, unitIds: string[] | undefined) {
+  async fetchGuildUnits(
+    guildId: string,
+    unitIds: string[] | undefined
+  ): Promise<iGoalPlayer[]> {
     const response = await axios.post(
       `${this.baseUrl}/guild/${guildId}/units`,
       {

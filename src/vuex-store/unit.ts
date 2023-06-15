@@ -24,11 +24,7 @@ const store = {
     unitName(state: State) {
       return (unitId: string): string => {
         const match = state.unitList.find((x) => x.id === unitId);
-        if (match) {
-          return match.name;
-        } else {
-          return unitId;
-        }
+        return match?.name ?? unitId;
       };
     },
   },

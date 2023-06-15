@@ -176,6 +176,14 @@ export default defineComponent({
           },
           show: true,
         },
+        {
+          label: "Guild Goals",
+          to: {
+            name: "GuildGoalsPage",
+            params: this.isLoggedIn ? { guildId: this.player.guild_id } : {},
+          },
+          show: true,
+        },
       ];
       const miscMenu = [
         {
