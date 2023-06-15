@@ -1,6 +1,6 @@
 <template>
   <tr v-if="header.show ?? true" :class="header.classes">
-    <template v-for="cell in header.cells">
+    <template v-for="(cell, index) in header.cells">
       <th
         v-if="cell.show"
         :max-width="cell?.maxWidth ?? 'auto'"
@@ -9,6 +9,7 @@
         @click="handleClick(cell, !cell.input)"
         :colspan="cell.colspan"
         :rowspan="cell.rowspan"
+        :key="index"
       >
         <div
           :class="[
@@ -100,6 +101,15 @@
             {{ cell.label }}
             <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
           </template>
+          <div v-if="cell?.buttons" class="d-flex align-items-center">
+            <i
+              v-for="(button, index) in cell.buttons"
+              :class="button.classes"
+              :title="button.title"
+              @click="button.click()"
+              :key="index"
+            ></i>
+          </div>
         </div>
       </th>
     </template>

@@ -229,6 +229,16 @@ export default defineComponent({
               this.showCol("relic") ||
               this.showCol("gear"),
             colspan: getColSpan(),
+            containerClass: "d-flex justify-content-center border-bottom",
+            buttons: [
+              {
+                title: "Remove Unit",
+                classes: "fas fa-trash text-small mx-1",
+                click: () => {
+                  this.goal.remove(unit.id);
+                },
+              },
+            ],
           };
         },
         []
