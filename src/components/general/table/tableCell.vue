@@ -17,11 +17,11 @@
     </div>
     <template v-else>
       <template v-if="cell.type === 'link'">
-        <router-link :to="cell.data">{{ cell.value }}</router-link></template
-      >
+        <router-link :to="cell.data">{{ cell.value }}</router-link>
+      </template>
       <template v-else-if="cell.type === 'progress'">
-        <ProgressBar :percent="cell.data"
-      /></template>
+        <ProgressBar :percent="cell.data" />
+      </template>
       <template v-else-if="cell.type === 'unit'">
         <UnitIcon
           :unit="cell.data.unit ?? getUnit(cell.data.id)"

@@ -14,7 +14,8 @@ interface iHeaderCell {
       | "list"
       | "image"
       | "gear"
-      | "relic";
+      | "relic"
+      | "link";
     classes?: string;
     placeholder?: string;
     click?: Function;

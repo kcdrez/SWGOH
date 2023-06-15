@@ -62,6 +62,55 @@
       </button>
     </template>
   </Modal>
+  <Modal :isOpen="editUnitModal.show">
+    <template v-slot:header
+      >Edit Unit ({{ unitName(editUnitModal.target.id) }})</template
+    >
+    <template v-slot:body>
+      <div class="input-group input-group-sm mb-1">
+        <span class="input-group-text">Target Type:</span>
+        <select class="form-control" v-model="editUnitModal.target.type">
+          <option value="Relic">Relic</option>
+          <option value="Gear">Gear</option>
+          <option value="Stars">Stars</option>
+          <option value="Power">Power</option>
+        </select>
+      </div>
+      <div class="input-group input-group-sm">
+        <span class="input-group-text">Target Value:</span>
+        <input
+          class="form-control"
+          type="number"
+          v-model.number="editUnitModal.target.value"
+          min="1"
+        />
+      </div>
+    </template>
+    <template v-slot:footer>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        data-bs-dismiss="modal"
+        @click="editUnitModal.show = false"
+      >
+        Close
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        @click="
+          goal.editUnit(
+            editUnitModal.target.id,
+            editUnitModal.target.type,
+            editUnitModal.target.value
+          );
+          editUnitModal.show = false;
+        "
+      >
+        Save
+      </button>
+    </template>
+  </Modal>
   <Confirm
     :isOpen="deleteGoalModal"
     title="Are you sure?"
@@ -76,7 +125,7 @@
 
 <script lang="ts">
 import { Ref, defineComponent, ref } from "vue";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 import _ from "lodash";
 
 import UnitSearch from "components/units/unitSearch.vue";
@@ -140,13 +189,21 @@ export default defineComponent({
       targetValue: 1,
       showAddUnitModal: false,
       deleteGoalModal: false,
+      editUnitModal: {
+        show: false,
+        target: {
+          type: "Relic",
+          value: 1,
+          id: null,
+        },
+      },
       loading: loadingState.initial,
       players: [],
     } as any;
   },
   computed: {
     ...mapGetters("unit", ["unitName"]),
-    ...mapGetters("guild", ["guildId"]),
+    ...mapState("guild", ["guildId"]),
     sortedGoalList(): Goal[] {
       return this.goal.list.sort((a: IPrerequisite, b: IPrerequisite) => {
         if (this.sortMethod === "target") {
@@ -224,6 +281,14 @@ export default defineComponent({
         (unit: IPrerequisite) => {
           return {
             label: this.unitName(unit.id),
+            input: {
+              type: "link",
+            },
+            data: {
+              name: "GuildUnitsPage",
+              params: { guildId: this.guildId },
+              query: { unitId: unit.id },
+            },
             show:
               this.showCol("stars") ||
               this.showCol("relic") ||
@@ -236,6 +301,16 @@ export default defineComponent({
                 title: "Remove Unit",
                 click: () => {
                   this.goal.remove(unit.id);
+                },
+              },
+              {
+                classes: "fas fa-edit text-small mx-1",
+                title: "Edit Unit",
+                click: () => {
+                  this.editUnitModal.target.id = unit.id;
+                  this.editUnitModal.target.value = unit.requirement?.value;
+                  this.editUnitModal.target.type = unit.requirement?.type;
+                  this.editUnitModal.show = true;
                 },
               },
             ],

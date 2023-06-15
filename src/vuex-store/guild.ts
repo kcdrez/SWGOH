@@ -345,18 +345,23 @@ const store = {
     },
     addGoal({ state, dispatch }: ActionCtx, goal: Goal) {
       state?.goals.push(goal);
-      dispatch("saveGoals");
+      dispatch("saveGoals", true);
     },
     removeGoal({ commit, dispatch, state }: ActionCtx, goalId: string) {
       commit("REMOVE_GOAL", goalId);
-      dispatch("saveGoals");
+      dispatch("saveGoals", false);
     },
-    async saveGoals({ state, commit }: ActionCtx) {
+    async saveGoals({ state, commit }: ActionCtx, shouldRefresh: boolean) {
+      // const shouldRefresh = false; //goal.length is different, goal.unit.length is different
+      // const goalDiff =
       const response = await apiClient.updateGuildGoals(
         state.guildId,
-        state?.goals ?? []
+        state?.goals ?? [],
+        shouldRefresh
       );
-      commit("SET_EVENTS", response);
+      if (shouldRefresh) {
+        commit("SET_EVENTS", response);
+      }
     },
   },
 };

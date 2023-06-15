@@ -96,6 +96,9 @@
           <template v-else-if="cell.input?.type === 'relic'">
             <RelicIcon :item="cell.data.relic" />
           </template>
+          <template v-else-if="cell.input?.type === 'link'">
+            <router-link :to="cell.data">{{ cell.label }}</router-link>
+          </template>
           <template v-else>
             {{ cell.label }}
             <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>

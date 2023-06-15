@@ -214,12 +214,13 @@ class ApiClient {
     }
   }
 
-  async updateGuildGoals(guildId: string, goalList: Goal[]) {
+  async updateGuildGoals(guildId: string, goalList: Goal[], refresh: boolean) {
     if (guildId) {
       const response = await axios.patch(
         `${this.baseUrl}/guild/${guildId}/goals`,
         {
           goalList: goalList.map((x) => x.sanitize()),
+          refresh,
         }
       );
       return response.data;

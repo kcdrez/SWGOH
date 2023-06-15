@@ -107,14 +107,14 @@ export class Goal {
     };
   }
 
-  public async save(): Promise<void> {
-    await store.dispatch(`${this._type}/saveGoals`);
+  public async save(shouldRefresh: boolean = false): Promise<void> {
+    await store.dispatch(`${this._type}/saveGoals`, shouldRefresh);
   }
 
   public async saveName(): Promise<void> {
     this._name = this.tempName;
     this.isEditing = false;
-    await this.save();
+    await this.save(false);
   }
 
   public saveRequirement(
@@ -126,7 +126,7 @@ export class Goal {
     if (match) {
       match.type = type;
       match.value = value;
-      this.save();
+      this.save(false);
     }
   }
 
@@ -145,7 +145,17 @@ export class Goal {
         type,
         value,
       });
-      this.save();
+      this.save(true);
+    }
+  }
+
+  public editUnit(id, type: IPrerequisiteItem["type"], value: number) {
+    const exists = this._list.find((x) => x.id === id);
+
+    if (exists) {
+      exists.type = type;
+      exists.value = value;
+      this.save(false);
     }
   }
 
@@ -153,7 +163,7 @@ export class Goal {
     const index = this._list.findIndex((x) => x.id === id);
     if (index > -1) {
       this._list.splice(index, 1);
-      this.save();
+      this.save(false);
     }
   }
 }

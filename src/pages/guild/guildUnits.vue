@@ -55,7 +55,7 @@ import _ from "lodash";
 
 import { loadingState } from "types/loading";
 import { setupColumnEvents, setupSorting, sortValues, unvue } from "utils";
-import { Unit } from "types/unit";
+import { Unit, getUnit } from "types/unit";
 import { IGuildUnitMap, IUnitOwned } from "types/guild";
 import UnitSearch from "components/units/unitSearch.vue";
 import { iHeaderCell, iHeaderRow, iTableBody, iTableHead } from "types/general";
@@ -516,6 +516,14 @@ export default defineComponent({
       const fileName = this.unit?.id;
       writeFile(wb, fileName + ".xlsx");
     },
+  },
+  created() {
+    if (this.$route.query.unitId) {
+      const unit = getUnit(this.$route.query.unitId.toString());
+      if (unit) {
+        this.selectUnit(unit);
+      }
+    }
   },
 });
 </script>
