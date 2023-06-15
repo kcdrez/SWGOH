@@ -109,7 +109,8 @@ interface iTableCell {
     | "unitSearch"
     | "date"
     | "select"
-    | "relicFarm";
+    | "relicFarm"
+    | "loading";
   edit?: boolean;
   data: any;
   labelClasses?: string;

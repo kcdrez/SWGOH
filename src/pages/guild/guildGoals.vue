@@ -8,15 +8,6 @@
     >
       <SwgohTable :table="{ header, body }" />
     </ExpandableSection>
-    <!-- <div class="mb-2">
-      <template v-for="item in player.goalList" :key="item.id">
-        <GoalsTable
-          :goal="item"
-          :storageKey="storageKey + item.id + 'Table'"
-          :simpleView="true"
-        />
-      </template>
-    </div> -->
   </div>
   <Modal :isOpen="showAddGoalModal">
     <template v-slot:header>Add New Goal</template>
@@ -94,28 +85,17 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
-import { setupSorting, sortValues } from "utils";
+import { round2Decimals, setupSorting, sortValues } from "utils";
 import { totalProgress } from "types/unit";
-import { Goal } from "types/goals";
+import { Goal, iGoalPlayer } from "types/goals";
 import GoalsTable from "components/shards/progress/goalsTable.vue";
 import Modal from "components/general/modal.vue";
 import { iTableBody, iTableHead } from "types/general";
 import { iExpandOptions } from "types/general";
 import UnitSearch from "components/units/unitSearch.vue";
-import { IPrerequisiteItem } from "types/shards";
+import { loadingState } from "types/loading";
 
 const storageKey = "guildGoalListPage";
-
-interface dataModel {
-  storageKey: string;
-  showAddGoalModal: boolean;
-  newGoal: Goal;
-  unitDetails: {
-    unit: any;
-    type: IPrerequisiteItem["type"];
-    value: number;
-  };
-}
 
 export default defineComponent({
   name: "GuildGoalsPage",
@@ -146,6 +126,8 @@ export default defineComponent({
         type: "Relic",
         value: 1,
       },
+      loading: loadingState.initial,
+      players: [],
     } as any;
   },
   computed: {
@@ -216,9 +198,13 @@ export default defineComponent({
                 show: true,
               },
               {
-                show: true,
+                show: this.loading !== loadingState.ready,
+                type: "loading",
+              },
+              {
+                show: this.loading === loadingState.ready,
                 type: "progress",
-                data: totalProgress(goal.list, "requirement"),
+                data: this.getTotalProgressForGoal(goal),
               },
             ],
           };
@@ -260,12 +246,41 @@ export default defineComponent({
   },
   methods: {
     ...mapActions("guild", ["addGoal"]),
+    ...mapActions("guild", ["fetchGuildUnitData"]),
     addUnitToGoal() {
       const { unit, type, value } = this.unitDetails;
       if (unit) {
         this.newGoal.addUnit(unit.id, type, value);
       }
     },
+    getTotalProgressForGoal(goal: Goal): number {
+      return round2Decimals(
+        this.players.reduce((total: number, player: iGoalPlayer) => {
+          const progress = totalProgress(
+            goal.list,
+            "requirement",
+            player.units
+          );
+          total += progress;
+          return total;
+        }, 0) / this.players.length
+      );
+    },
+  },
+  async created() {
+    this.loading = loadingState.loading;
+    const unitIds = this.goals.reduce((acc: string[], goal: Goal) => {
+      goal.list.forEach((unit) => {
+        if (unit.id) {
+          acc.push(unit.id);
+        }
+      });
+      return acc;
+    }, []);
+    this.players = await this.fetchGuildUnitData({
+      unitId: unitIds,
+    });
+    this.loading = loadingState.ready;
   },
 });
 </script>
