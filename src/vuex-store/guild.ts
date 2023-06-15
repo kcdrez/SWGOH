@@ -344,14 +344,18 @@ const store = {
       commit("SET_EVENTS", response);
     },
     addGoal({ state, dispatch }: ActionCtx, goal: Goal) {
-      dispatch("saveGoals", [...state.goals, goal]);
+      state?.goals.push(goal);
+      dispatch("saveGoals");
     },
     removeGoal({ commit, dispatch, state }: ActionCtx, goalId: string) {
       commit("REMOVE_GOAL", goalId);
-      dispatch("saveGoals", state.raidEvents);
+      dispatch("saveGoals");
     },
-    async saveGoals({ state, commit }: ActionCtx, goals: Goal[]) {
-      const response = await apiClient.updateGuildGoals(state.guildId, goals);
+    async saveGoals({ state, commit }: ActionCtx) {
+      const response = await apiClient.updateGuildGoals(
+        state.guildId,
+        state?.goals ?? []
+      );
       commit("SET_EVENTS", response);
     },
   },

@@ -82,7 +82,7 @@ import _ from "lodash";
 import UnitSearch from "components/units/unitSearch.vue";
 import Modal from "components/general/modal.vue";
 import { getPercent, getUnit, totalProgress } from "types/unit";
-import { Goal } from "types/goals";
+import { Goal, iGoalPlayer } from "types/goals";
 import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import {
   iHeaderCell,
@@ -99,7 +99,7 @@ import { loadingState } from "types/loading";
 export default defineComponent({
   name: "GuildGoalsTable",
   setup(props) {
-    const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(
+    const { sortDir, sortMethod, sortBy, sortIcon, searchText } = setupSorting(
       props.storageKey
     );
 
@@ -113,6 +113,7 @@ export default defineComponent({
       sortIcon,
       selectedColumns,
       showCol,
+      searchText,
     };
   },
   components: {
@@ -213,8 +214,8 @@ export default defineComponent({
       const getColSpan = () => {
         return [
           this.showCol("stars"),
-          this.showCol("relic"),
-          this.showCol("gear"),
+          this.showCol("relic_tier"),
+          this.showCol("gear_level"),
         ]
           .filter((x) => !!x)
           .length.toString();
@@ -223,43 +224,51 @@ export default defineComponent({
       const unitHeaders: iHeaderCell[] = this.goal.list.map(
         (unit: IPrerequisite) => {
           return {
-            label: this.unitName(unit.id)?.name ?? unit.id,
+            label: this.unitName(unit.id),
             show:
               this.showCol("stars") ||
               this.showCol("relic") ||
               this.showCol("gear"),
             colspan: getColSpan(),
+            containerClass: "d-flex justify-content-center",
+            buttons: [
+              {
+                classes: "fas fa-trash text-small mx-1",
+                title: "Remove Unit",
+                click: () => {
+                  this.goal.remove(unit.id);
+                },
+              },
+            ],
           };
         },
         []
       );
+
       const headerCells: iHeaderCell[] = this.goal.list.reduce(
         (acc: iHeaderCell[], unit: IPrerequisite) => {
           acc.push({
             label: "Stars",
             show: this.showCol("stars"),
             icon: this.sortIcon("stars-" + unit.id),
-            value: "stars",
             click: () => {
               this.sortBy("stars-" + unit.id);
             },
           });
           acc.push({
             label: "Gear Level",
-            show: this.showCol("gear"),
-            icon: this.sortIcon("gear-" + unit.id),
-            value: "gear",
+            show: this.showCol("gear_level"),
+            icon: this.sortIcon("gear_level" + unit.id),
             click: () => {
-              this.sortBy("gear-" + unit.id);
+              this.sortBy("gear_level-" + unit.id);
             },
           });
           acc.push({
             label: "Relic Level",
-            show: this.showCol("relic"),
-            icon: this.sortIcon("relic-" + unit.id),
-            value: "relic",
+            show: this.showCol("relic_tier"),
+            icon: this.sortIcon("relic_tier-" + unit.id),
             click: () => {
-              this.sortBy("relic-" + unit.id);
+              this.sortBy("relic_tier-" + unit.id);
             },
           });
           return acc;
@@ -284,13 +293,35 @@ export default defineComponent({
                 label: "Player Name",
                 show: this.showCol("player"),
                 icon: this.sortIcon("player"),
-                value: "player",
                 click: () => {
                   this.sortBy("player");
                 },
                 rowspan: "2",
+                input: {
+                  type: "input",
+                  classes: "mx-auto my-1 w-75",
+                  placeholder: "Search by Player",
+                  label: "Search",
+                  value: this.searchText,
+                  change: (val: string) => {
+                    this.searchText = val;
+                  },
+                  click: () => {
+                    this.sortBy("name");
+                  },
+                },
               },
               ...unitHeaders,
+              {
+                label: "Progress",
+                show: this.showCol("progress"),
+                sortMethodShow: true,
+                icon: this.sortIcon("progress"),
+                click: () => {
+                  this.sortBy("progress");
+                },
+                rowspan: "2",
+              },
             ],
           },
           {
@@ -300,55 +331,66 @@ export default defineComponent({
       };
     },
     body(): iTableBody {
-      const rows: iTableRow[] = this.players.map((player) => {
-        const unitCells: iTableCell[] = this.goal.list.reduce(
-          (acc: iTableCell[], unit: any) => {
-            const match = player.units.find((u) => u.base_id === unit.id);
-            const relicLevel = match?.relic_tier > 0 ? match?.relic_tier : 0;
+      const rows: iTableRow[] = this.filteredPlayers.map(
+        (player: iGoalPlayer) => {
+          const unitCells: iTableCell[] = this.goal.list.reduce(
+            (acc: iTableCell[], unit: IPrerequisite) => {
+              const match = player.units.find((u) => u.base_id === unit.id);
 
-            acc.push({
-              show: this.showCol("stars"),
-              type: "unitLevel",
-              data: {
-                classes: "justify-content-center",
-                type: "Stars",
-                value: match?.stars ?? 0,
-              },
-            });
-            acc.push({
-              show: this.showCol("gear"),
-              type: "unitLevel",
-              data: {
-                classes: "justify-content-center",
-                type: "Gear",
-                value: match?.gear_level ?? 0,
-              },
-            });
-            acc.push({
-              show: this.showCol("relic"),
-              type: "unitLevel",
-              data: {
-                classes: "justify-content-center",
-                type: "Relic",
-                value: relicLevel,
-                unitId: unit.id,
-              },
-            });
-            return acc;
-          },
-          []
-        );
-        return {
-          cells: [
-            {
-              label: "Player",
-              show: this.showCol("player"),
-              data: player.name,
+              acc.push({
+                show: this.showCol("stars"),
+                type: "unitLevel",
+                data: {
+                  classes: "justify-content-center",
+                  type: "Stars",
+                  value: match?.stars ?? 0,
+                },
+              });
+              acc.push({
+                show: this.showCol("gear"),
+                type: "unitLevel",
+                data: {
+                  classes: "justify-content-center",
+                  type: "Gear",
+                  value: match?.gear_level ?? 0,
+                },
+              });
+              acc.push({
+                show: this.showCol("relic"),
+                type: "unitLevel",
+                data: {
+                  classes: "justify-content-center",
+                  type: "Relic",
+                  value: match?.relic_tier ?? -1,
+                  unitId: unit.id,
+                  // unitData: match,
+                },
+              });
+              return acc;
             },
-            ...unitCells,
-          ],
-        };
-      });
+            []
+          );
+          return {
+            cells: [
+              {
+                label: "Player",
+                show: this.showCol("player"),
+                data: player.name,
+              },
+              ...unitCells,
+              {
+                show: this.showCol("progress"),
+                type: "progress",
+                data: totalProgress(
+                  this.goal.list,
+                  "recommended",
+                  player.units
+                ),
+              },
+            ],
+          };
+        }
+      );
 
       return {
         classes: "align-middle text-center",
@@ -356,17 +398,28 @@ export default defineComponent({
       };
     },
     cols(): iHeaderCell[] {
-      return this.header.headers.reduce(
-        (acc: iHeaderCell[], row: iHeaderRow) => {
-          row.cells.forEach((cell) => {
-            if (acc.every((x) => x.value !== cell.value)) {
-              acc.push(cell);
-            }
-          });
-          return acc;
+      return [
+        {
+          label: "Player",
+          value: "player",
         },
-        []
-      );
+        {
+          label: "Stars",
+          value: "stars",
+        },
+        {
+          label: "Gear Level",
+          value: "gear_level",
+        },
+        {
+          label: "Relic Level",
+          value: "relic_tier",
+        },
+        {
+          label: "Progress",
+          value: "progress",
+        },
+      ];
     },
     expandOptions(): iExpandOptions {
       const options: iExpandOptions = {
@@ -441,6 +494,46 @@ export default defineComponent({
       );
 
       return options;
+    },
+    filteredPlayers(): iGoalPlayer[] {
+      return this.players
+        .filter((player: iGoalPlayer) => {
+          const name = player.name.toLowerCase().replace(/\s/g, "");
+          const compare = this.searchText.toLowerCase().replace(/\s/g, "");
+          return name.includes(compare);
+        })
+        .sort((a: iGoalPlayer, b: iGoalPlayer) => {
+          if (this.sortMethod === "player") {
+            return sortValues(a.name, b.name, this.sortDir, this.sortMethod);
+          } else if (this.sortMethod === "progress") {
+            const progressA = totalProgress(
+              this.goal.list,
+              "recommended",
+              a.units
+            );
+            const progressB = totalProgress(
+              this.goal.list,
+              "recommended",
+              b.units
+            );
+            return sortValues(
+              progressA,
+              progressB,
+              this.sortDir,
+              this.sortMethod
+            );
+          } else {
+            const [method, unitId] = this.sortMethod.split("-");
+
+            const matchA = a.units.find((x) => x.base_id === unitId);
+            const matchB = b.units.find((x) => x.base_id === unitId);
+
+            const valueA = matchA ? matchA[method] : 0;
+            const valueB = matchB ? matchB[method] : 0;
+
+            return sortValues(valueA, valueB, this.sortDir, this.sortMethod);
+          }
+        });
     },
   },
   methods: {

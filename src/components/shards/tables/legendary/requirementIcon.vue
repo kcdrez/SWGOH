@@ -46,6 +46,7 @@ import {
   isRelicRequirement,
 } from "types/shards";
 import { maxGearLevel } from "types/gear";
+import { iGoalUnit } from "types/goals";
 
 export default defineComponent({
   name: "RequirementIcon",

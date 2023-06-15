@@ -3,7 +3,7 @@ import axios from "axios";
 import { ISettings, Player } from "types/player";
 import { ConfigType, Gear, IGear } from "types/gear";
 import { IUnit, Unit } from "types/unit";
-import { Goal, IGoal } from "types/goals";
+import { Goal, IGoal, iGoalPlayer } from "types/goals";
 import { FarmingNode, IFarmingNode, OwnedShardsMap } from "types/shards";
 import { OwnedRelicConfig } from "types/relic";
 import { ITeam, Match, Team } from "types/teams";
@@ -17,8 +17,8 @@ import {
 import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
-  // baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
-  baseUrl = "http://localhost:3001/dev";
+  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  // baseUrl = "http://localhost:3001/dev";
 
   constructor() {}
 
@@ -323,7 +323,10 @@ class ApiClient {
 
     return unitMapping;
   }
-  async fetchGuildUnits(guildId: string, unitIds: string[] | undefined) {
+  async fetchGuildUnits(
+    guildId: string,
+    unitIds: string[] | undefined
+  ): Promise<iGoalPlayer[]> {
     const response = await axios.post(
       `${this.baseUrl}/guild/${guildId}/units`,
       {

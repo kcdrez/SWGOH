@@ -157,3 +157,17 @@ export class Goal {
     }
   }
 }
+
+export interface iGoalPlayer {
+  units: iGoalUnit[];
+  name: string;
+}
+
+export interface iGoalUnit {
+  relic_tier: number;
+  stars: number;
+  base_id: string;
+  name: string;
+  gear_level: number;
+  power: number;
+}

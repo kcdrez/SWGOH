@@ -23,7 +23,7 @@ export default defineComponent({
       type: Number,
       required: true,
       validator: (val: number) => {
-        return val >= 0 && val <= maxRelicLevel;
+        return val <= maxRelicLevel;
       },
     },
     alignment: {

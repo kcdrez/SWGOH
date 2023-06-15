@@ -100,6 +100,14 @@
             {{ cell.label }}
             <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
           </template>
+          <div v-if="cell?.buttons" class="d-flex align-items-center">
+            <i
+              v-for="button in cell.buttons"
+              :class="button.classes"
+              :title="button.title"
+              @click="button.click()"
+            ></i>
+          </div>
         </div>
       </th>
     </template>
