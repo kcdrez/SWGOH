@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center my-2" v-if="state === 'LOADING'">
+    <div class="text-center" v-if="state === 'LOADING'">
       <i class="fas fa-spinner fa-spin" :class="sizeClass" :title="message" />
       <div v-if="displayText">{{ displayText }}</div>
     </div>

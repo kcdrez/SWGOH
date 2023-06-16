@@ -12,7 +12,8 @@ import {
   iRaidEvent,
 } from "types/guild";
 import { round2Decimals } from "utils";
-import { Goal } from "types/goals";
+import { Goal, IGoal, iGoalPlayer } from "types/goals";
+import { rest } from "lodash";
 
 interface State {
   requestState: loadingState;
@@ -22,6 +23,7 @@ interface State {
   raidEvents: iRaidEvent[];
   accessLevel: number;
   goals: Goal[];
+  players: iGoalPlayer[];
 }
 
 type ActionCtx = ActionContext<State, RootState>;
@@ -76,6 +78,7 @@ const store = {
       },
     },
     goals: [],
+    players: [],
   },
   getters: {
     tbEvents(state: State) {
@@ -167,10 +170,18 @@ const store = {
       state.accessLevel = level;
     },
     SET_EVENTS(state: State, payload: GuildPayload) {
-      state.territoryWarEvents = payload?.territoryWar || [];
-      state.territoryBattleEvents = payload?.territoryBattle || [];
-      state.raidEvents = payload.raidEvents ?? [];
-      state.goals = payload?.goalList?.map((x) => new Goal(x, "guild")) ?? [];
+      if (payload.territoryWar) {
+        state.territoryWarEvents = payload?.territoryWar || [];
+      }
+      if (payload.territoryBattle) {
+        state.territoryBattleEvents = payload?.territoryBattle || [];
+      }
+      if (payload.raidEvents) {
+        state.raidEvents = payload.raidEvents ?? [];
+      }
+      if (payload.goalList) {
+        state.goals = payload?.goalList?.map((x) => new Goal(x, "guild")) ?? [];
+      }
     },
     UPSERT_TERRITORY_WAR_EVENT(state: State, payload: ITerritoryWarEvent) {
       const index = state.territoryWarEvents.findIndex(
@@ -217,6 +228,23 @@ const store = {
       if (index >= 0) {
         state.goals.splice(index, 1);
       }
+    },
+    SET_PLAYER_DATA(state: State, playerData: iGoalPlayer[]) {
+      playerData.forEach((player) => {
+        const match = state.players.find((p) => player.allyCode === p.allyCode);
+        if (match) {
+          player.units.forEach((unit) => {
+            const unitMatch = match.units.find(
+              (u) => u.base_id === unit.base_id
+            );
+            if (!unitMatch) {
+              match.units.push(unit);
+            }
+          });
+        } else {
+          state.players.push(player);
+        }
+      });
     },
   },
   actions: {
@@ -319,7 +347,7 @@ const store = {
       commit("SET_EVENTS", response);
     },
     async fetchGuildUnitData(
-      { state }: ActionCtx,
+      { state, commit }: ActionCtx,
       data: {
         unitId: string | string[] | undefined;
         guildId: string | undefined;
@@ -327,9 +355,69 @@ const store = {
     ) {
       const guildId = data.guildId ?? state.guildId;
       if (Array.isArray(data.unitId) || data.unitId === undefined) {
-        return await apiClient.fetchGuildUnits(guildId, data.unitId);
+        const filteredIds =
+          data.unitId?.filter((unitId) => {
+            if (state.players.length === 0) {
+              return true;
+            }
+            const anyPlayerHasIt = state.players.some((player) => {
+              if (player.units.length === 0) {
+                return true;
+              }
+              const exists = player.units.some(
+                (unit) => unit.base_id === unitId
+              );
+              return exists;
+            });
+            return !anyPlayerHasIt;
+          }) ?? undefined;
+        if (filteredIds?.length ?? 0 > 0) {
+          const response = await apiClient.fetchGuildUnits(
+            guildId,
+            filteredIds
+          );
+          commit("SET_PLAYER_DATA", response);
+        }
       } else {
-        return await apiClient.fetchGuildUnitData(guildId, data.unitId);
+        const playerData = state.players.reduce(
+          (acc: any, player: any) => {
+            const { units, ...restPlayer } = player;
+            if (units.length === 0) {
+              acc.exists = true;
+            }
+            const unitMatch = units.find(
+              (unit) => unit.base_id === data.unitId
+            );
+            acc.exists = !!unitMatch || acc.exists;
+            acc.list.push({
+              unit: unitMatch,
+              ...restPlayer,
+            });
+            return acc;
+          },
+          { exists: false, list: [] }
+        );
+
+        if (playerData.exists) {
+          return apiClient.mapGuildUnit(playerData.list);
+        } else {
+          const players = await apiClient.fetchGuildUnitData(
+            guildId,
+            data.unitId
+          );
+          commit(
+            "SET_PLAYER_DATA",
+            players.map((player) => {
+              const { unit, ...restPlayer } = player;
+              return {
+                units: [unit],
+                ...restPlayer,
+              };
+            })
+          );
+
+          return apiClient.mapGuildUnit(players);
+        }
       }
     },
     addRaidEvent({ dispatch, state }: ActionCtx, event: iRaidEvent) {
@@ -343,24 +431,30 @@ const store = {
       const response = await apiClient.updateRaidEvents(state.guildId, events);
       commit("SET_EVENTS", response);
     },
-    addGoal({ state, dispatch }: ActionCtx, goal: Goal) {
-      state?.goals.push(goal);
+    addGoal({ state, dispatch }: ActionCtx, goalData: IGoal) {
+      const newGoal = new Goal(goalData);
+      state?.goals.push(newGoal);
       dispatch("saveGoals", true);
     },
     removeGoal({ commit, dispatch, state }: ActionCtx, goalId: string) {
       commit("REMOVE_GOAL", goalId);
       dispatch("saveGoals", false);
     },
+    saveGoal({ dispatch, state }: ActionCtx, goalData: IGoal) {
+      const index = state.goals.findIndex((x) => x.id === goalData.id);
+      if (index > -1) {
+        state.goals.splice(index, 1, new Goal(goalData));
+      }
+      dispatch("saveGoals", true);
+    },
     async saveGoals({ state, commit }: ActionCtx, shouldRefresh: boolean) {
-      // const shouldRefresh = false; //goal.length is different, goal.unit.length is different
-      // const goalDiff =
       const response = await apiClient.updateGuildGoals(
         state.guildId,
         state?.goals ?? [],
         shouldRefresh
       );
       if (shouldRefresh) {
-        commit("SET_EVENTS", response);
+        commit("SET_PLAYER_DATA", response);
       }
     },
   },

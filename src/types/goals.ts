@@ -99,12 +99,12 @@ export class Goal {
   }
 
   public sanitize(): IGoal {
-    return {
+    return unvue({
       id: this._id,
       name: this._name,
       list: this._list,
       settings: this._settings,
-    };
+    });
   }
 
   public async save(shouldRefresh: boolean = false): Promise<void> {
@@ -171,6 +171,8 @@ export class Goal {
 export interface iGoalPlayer {
   units: iGoalUnit[];
   name: string;
+  allyCode: number;
+  totalGP: number;
 }
 
 export interface iGoalUnit {

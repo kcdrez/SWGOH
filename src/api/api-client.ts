@@ -248,6 +248,10 @@ class ApiClient {
     const response = await axios.get(
       `${this.baseUrl}/guild/${guildId}/${unitId}`
     );
+    return response?.data ?? [];
+  }
+
+  mapGuildUnit(data: any[]) {
     const unitMapping: IGuildUnitMap = {
       zetas: {},
       gearLevels: {},
@@ -256,7 +260,7 @@ class ApiClient {
       unowned: [],
     };
 
-    (response?.data ?? []).forEach((player: any) => {
+    data.forEach((player: any) => {
       if (player.unit) {
         const unit = new Unit(player.unit);
         if (unit.gearLevel >= 12) {
@@ -324,6 +328,7 @@ class ApiClient {
 
     return unitMapping;
   }
+
   async fetchGuildUnits(
     guildId: string,
     unitIds: string[] | undefined

@@ -198,12 +198,11 @@ export default defineComponent({
         },
       },
       loading: loadingState.initial,
-      players: [],
     } as any;
   },
   computed: {
     ...mapGetters("unit", ["unitName"]),
-    ...mapState("guild", ["guildId"]),
+    ...mapState("guild", ["guildId", "players"]),
     sortedGoalList(): Goal[] {
       return this.goal.list.sort((a: IPrerequisite, b: IPrerequisite) => {
         if (this.sortMethod === "target") {
@@ -617,7 +616,7 @@ export default defineComponent({
   },
   async created() {
     this.loading = loadingState.loading;
-    this.players = await this.fetchGuildUnitData({
+    await this.fetchGuildUnitData({
       unitId: this.goal.list.map((x) => x.id),
     });
     this.loading = loadingState.ready;
