@@ -8,6 +8,7 @@ import UnitPage from "pages/units/unitPage.vue";
 import GeneralPlannerPage from "pages/general/generalPlanner.vue";
 import TeamPage from "pages/units/team.vue";
 import MatchUpPage from "pages/units/matchUpPage.vue";
+import GameSimulationPage from "pages/units/gameSimulation.vue";
 import CharacterFarmingPage from "pages/units/characterFarming.vue";
 import GuildEventsPage from "pages/guild/guildEvents.vue";
 import GuildUnitsPage from "pages/guild/guildUnits.vue";
@@ -134,6 +135,25 @@ const routes = [
         path: "",
         name: "MatchUpPage",
         component: MatchUpPage,
+      },
+    ],
+  },
+  {
+    path: "/game_simulation",
+    components: {
+      default: PlayerLoadingPage,
+    },
+    props: {
+      default: {
+        dependencyModules: ["teams", "opponents"],
+        errorLoading: "no loading",
+      },
+    },
+    children: [
+      {
+        path: "",
+        name: "GameSimulationPage",
+        component: GameSimulationPage,
       },
     ],
   },
