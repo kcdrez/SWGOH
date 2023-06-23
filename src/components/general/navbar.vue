@@ -145,6 +145,11 @@ export default defineComponent({
           to: { name: "MatchUpPage" },
           show: this.isLoggedIn,
         },
+        {
+          label: "Simulation",
+          to: { name: "GameSimulationPage" },
+          show: this.isLoggedIn,
+        },
       ];
       const guildMenu = [
         {

@@ -14,6 +14,7 @@ $secondary-text-dark: darken($secondary, 10%);
 
 $success: #009975;
 $success-dark-1: darken($success, 10%);
+$success-dark-2: darken($success, 20%);
 $success-light-1: lighten($success, 10%);
 $success-light-2: lighten($success, 20%);
 $success-text-light: lighten($success, 50%);
@@ -21,6 +22,8 @@ $success-text-dark: darken($success, 15%);
 
 $danger: #c66c7e;
 $danger-dark-1: darken($danger, 10%);
+$danger-dark-2: darken($danger, 20%);
+$danger-dark-3: darken($danger, 30%);
 $danger-light-1: lighten($danger, 10%);
 $danger-light-2: lighten($danger, 20%);
 $danger-text-light: lighten($danger, 50%);
