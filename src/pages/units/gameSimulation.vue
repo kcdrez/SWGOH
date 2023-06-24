@@ -149,6 +149,26 @@
                 min="1"
               />
             </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text row-label">Tenacity:</span>
+              <input
+                class="form-control form-control-sm"
+                type="number"
+                v-model.number="character.tenacity"
+                min="1"
+                max="100"
+              />
+            </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text row-label">Potency:</span>
+              <input
+                class="form-control form-control-sm"
+                type="number"
+                v-model.number="character.potency"
+                min="1"
+                max="100"
+              />
+            </div>
           </div>
         </div>
         <div class="col">
@@ -282,6 +302,26 @@
                 min="1"
               />
             </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text row-label">Tenacity:</span>
+              <input
+                class="form-control form-control-sm"
+                type="number"
+                v-model.number="character.tenacity"
+                min="1"
+                max="100"
+              />
+            </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text row-label">Potency:</span>
+              <input
+                class="form-control form-control-sm"
+                type="number"
+                v-model.number="character.potency"
+                min="1"
+                max="100"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -356,6 +396,7 @@ export default defineComponent({
         let j = 0;
         do {
           j++;
+          this.logs.push(`Turn ${j}`);
           this.nextAction();
           const team1Lost = this.team1.every((x) => x.health <= 0);
           const team2Lost = this.team2.every((x) => x.health <= 0);
@@ -371,6 +412,7 @@ export default defineComponent({
           }
         } while (true);
       }
+      [...this.team1, ...this.team2].forEach((x) => x.reset());
     },
     nextAction() {
       const allChars: Character[] = [
@@ -395,7 +437,7 @@ export default defineComponent({
 
       if (character !== null) {
         allChars.forEach((char) => {
-          char.turnMeter += (tmAmount / character.speed) * char.speed;
+          char.changeTurnMeter((tmAmount / character.speed) * char.speed);
         });
 
         const opponents: Character[] =
@@ -403,23 +445,13 @@ export default defineComponent({
             ? (this.team2 as Character[])
             : (this.team1 as Character[]);
 
-        this.logs.push(...character.takeAction(opponents));
+        const teammates: Character[] =
+          character.owner === "team2"
+            ? (this.team2 as Character[])
+            : (this.team1 as Character[]);
+
+        this.logs.push(...character.takeAction(opponents, teammates));
       }
-    },
-    inflictEffects(character, ability, opponent) {
-      ability.effects.forEach((effect) => {
-        if (effect.condition) {
-          if (effect.condition.debuffs) {
-            const hasDebuff = opponent.debuffs.some((d) =>
-              effect.condition.debuffs.includes(d.name)
-            );
-            if (!hasDebuff) {
-              return;
-            }
-          }
-        }
-        character.inflictDebuffs(effect.actions, opponent);
-      });
     },
   },
 });

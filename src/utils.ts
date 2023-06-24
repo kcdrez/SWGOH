@@ -4,8 +4,6 @@ import { ref, computed, watch, Ref } from "vue";
 import _ from "lodash";
 
 import store from "./vuex-store/store";
-import { getPercent, getUnit, totalProgress } from "types/unit";
-import { displayValue } from "types/shards";
 
 export function unvue(data: any) {
   return JSON.parse(JSON.stringify(data));
@@ -62,7 +60,8 @@ export function formatDate(date: any, format: string = "MMM DD, YYYY") {
 }
 
 export function round2Decimals(num: number) {
-  return Math.round((num + Number.EPSILON) * 100) / 100;
+  return _.round(num, 2);
+  // return Math.round((num + Number.EPSILON) * 100) / 100;
 }
 
 export async function initializeModules(
