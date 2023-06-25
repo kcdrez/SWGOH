@@ -384,7 +384,12 @@ export default defineComponent({
   },
   methods: {
     reset() {
-      [...this.team1, ...this.team2].forEach((x) => x.reset());
+      this.team1.forEach((x) =>
+        x.reset(this.team1 as Character[], this.team2 as Character[])
+      );
+      this.team2.forEach((x) =>
+        x.reset(this.team2 as Character[], this.team1 as Character[])
+      );
       this.logs = [];
     },
     start() {
@@ -412,7 +417,6 @@ export default defineComponent({
           }
         } while (true);
       }
-      [...this.team1, ...this.team2].forEach((x) => x.reset());
     },
     nextAction() {
       const allChars: Character[] = [

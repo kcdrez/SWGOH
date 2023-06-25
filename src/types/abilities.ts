@@ -1,15 +1,10 @@
-import { iAbility } from "types/characters";
+import { iAbility, iUniqueAbility } from "types/characters";
 import { v4 as uuid } from "uuid";
 
-type tCharacter = {
-  [key: string]: tAbility;
-};
-
-type tAbility = {
-  [key: string]: iAbility;
-};
-
-const characterMapping: tCharacter = {
+const characterMapping: Record<
+  string,
+  Record<string, iAbility | iUniqueAbility>
+> = {
   COMMANDERLUKESKYWALKER: {
     specialskill_COMMANDERLUKESKYWALKER02: {
       id: "specialskill_COMMANDERLUKESKYWALKER02",
@@ -83,7 +78,7 @@ const characterMapping: tCharacter = {
       turnsRemaining: 0,
       targets: [
         {
-          target: { count: 1 },
+          target: { targetCount: 1 },
           effects: [
             {
               cooldown: {
@@ -103,7 +98,7 @@ const characterMapping: tCharacter = {
           ],
         },
         {
-          target: { count: 1 },
+          target: { targetCount: 1 },
           effects: [
             {
               dispel: {
@@ -128,7 +123,7 @@ const characterMapping: tCharacter = {
       turnsRemaining: 0,
       targets: [
         {
-          target: { count: 1 },
+          target: { targetCount: 1 },
           debuffs: [
             {
               name: "Speed Down",
@@ -172,6 +167,75 @@ const characterMapping: tCharacter = {
         },
       ],
     },
+    uniqueskill_COMMANDERLUKESKYWALKER01: {
+      name: "Learn Control",
+      id: "uniqueskill_COMMANDERLUKESKYWALKER01",
+      triggers: [
+        {
+          triggerType: "always",
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          events: [],
+          effects: [
+            {
+              condition: {
+                buffs: ["Call to Action"],
+                inverted: true,
+              },
+              stats: {
+                amount: 0.5,
+                value: "critAvoid",
+                type: "flat",
+              },
+            },
+            {
+              condition: {
+                buffs: ["Call to Action"],
+                inverted: true,
+              },
+              stats: {
+                amount: 100,
+                value: "tenacity",
+                type: "flat",
+              },
+            },
+            {
+              condition: {
+                buffs: ["Call to Action"],
+                inverted: true,
+              },
+              stats: {
+                amount: 0.5,
+                value: "counter",
+                type: "flat",
+              },
+            },
+            {
+              condition: {
+                buffs: ["Call to Action"],
+                inverted: true,
+              },
+              stats: {
+                amount: 0.5,
+                value: "defense",
+                type: "percent",
+              },
+            },
+          ],
+        },
+        {
+          triggerType: "damage",
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          events: [],
+          //gain tm when rebels take damage
+        },
+      ],
+    },
   },
   OLDBENKENOBI: {
     basicskill_OLDBENKENOBI: {
@@ -181,7 +245,7 @@ const characterMapping: tCharacter = {
       turnsRemaining: 0,
       targets: [
         {
-          target: { count: 1 },
+          target: { targetCount: 1 },
           debuffs: [
             {
               name: "Evasion Down",
@@ -296,6 +360,83 @@ const characterMapping: tCharacter = {
               name: "Defense Up",
               id: uuid(),
               duration: 2,
+            },
+          ],
+        },
+      ],
+    },
+    uniqueskill_OLDBENKENOBI01: {
+      id: "uniqueskill_OLDBENKENOBI01",
+      name: "If You Strike Me Down",
+      triggers: [
+        {
+          triggerType: "damage",
+          target: {
+            tags: ["Jedi & !Self", "Rebel & !Self"],
+            allies: true,
+          },
+          events: [
+            {
+              target: {
+                tags: ["Self"],
+                allies: true,
+              },
+              buffs: [
+                {
+                  duration: 5,
+                  name: "TM",
+                  id: uuid(),
+                },
+              ],
+            },
+          ],
+        },
+        {
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          triggerType: "death",
+          events: [
+            {
+              triggerCount: 1,
+              target: {
+                allies: true,
+                all: true,
+              },
+              buffs: [
+                {
+                  duration: 2,
+                  name: "Offense Up",
+                  id: uuid(),
+                },
+                {
+                  duration: 2,
+                  name: "Speed Up",
+                  id: uuid(),
+                },
+                {
+                  duration: 25,
+                  name: "TM",
+                  id: uuid(),
+                },
+              ],
+              effects: [
+                {
+                  recover: {
+                    healthType: "protection",
+                    amount: 0.5,
+                    type: "percent",
+                  },
+                },
+                {
+                  recover: {
+                    healthType: "health",
+                    amount: 0.5,
+                    type: "percent",
+                  },
+                },
+              ],
             },
           ],
         },

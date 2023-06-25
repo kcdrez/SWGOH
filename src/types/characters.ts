@@ -7,7 +7,9 @@ interface iCharacter {
   id: string;
   name: string;
   stats: iStats;
-  abilities: string[];
+  activeAbilities: string[];
+  uniqueAbilities?: string[];
+  leaderAbilities?: string[];
   owner: string;
   alignment: "Light Side" | "Dark Side" | "Neutral";
   categories: string[];
@@ -105,6 +107,8 @@ type tBuff =
   | "Call to Action"
   | "Defense Up"
   | "Potency Up"
+  | "Offense Up"
+  | "Speed Up"
   | "Taunt"
   | "TM"
   | "all";
@@ -121,6 +125,7 @@ export interface iStatusEffect {
   unique?: boolean;
   expires?: iTarget;
   id: string;
+  sourceAbility?: iAbility | iUniqueAbility | null;
 }
 
 export interface iEffects {
@@ -135,14 +140,19 @@ export interface iAbility {
   targets?: iTarget[];
 }
 
+export interface iUniqueAbility {
+  id: string;
+  name: string;
+  triggers?: iTrigger[];
+}
+
+interface iTrigger extends iTarget {
+  triggerType: "damage" | "death" | "always";
+  events: iTarget[];
+}
+
 interface iTarget {
-  target: {
-    tags?: string[];
-    allies?: boolean;
-    all?: boolean;
-    count?: number;
-    scale?: "Resisted";
-  };
+  target: iTargetData;
   debuffs?: iStatusEffect[];
   buffs?: iStatusEffect[];
   effects?: iEffect[];
@@ -150,18 +160,23 @@ interface iTarget {
   damage?: number;
   damageVariance?: number;
   damageType?: "physical" | "special";
+  triggerCount?: number;
+  ability?: iAbility | iUniqueAbility | null;
+}
+
+interface iTargetData {
+  tags?: string[];
+  allies?: boolean;
+  all?: boolean;
+  targetCount?: number;
+  scale?: "Resisted";
 }
 
 interface iEffect {
   condition?: {
     debuffs?: tDebuff[];
     buffs?: tBuff[];
-    stats?: {
-      value: string;
-      amount: number;
-      type: "flat" | "percent";
-      amountType?: "greater" | "less";
-    };
+    stats?: iStatsCheck;
     inverted?: boolean;
     isNew?: boolean;
   };
@@ -182,6 +197,14 @@ interface iEffect {
     amount: number;
   };
   scale?: string;
+  stats?: iStatsCheck;
+}
+
+interface iStatsCheck {
+  value: string;
+  amount: number;
+  type: "flat" | "percent";
+  amountType?: "greater" | "less";
 }
 
 interface iHistory {
@@ -195,13 +218,17 @@ export class Character {
   private _tm: number = 0;
   private _buffs: iStatusEffect[];
   private _debuffs: iStatusEffect[];
-  private _abilities: iAbility[];
+  private _activeAbilities: iAbility[];
+  private _uniqueAbilities: iUniqueAbility[];
   private _owner: string;
   private _history: iHistory = {
     resisted: 0,
   };
   private _alignment: iCharacter["alignment"];
   private _categories: string[];
+  private _triggers: iTrigger[] = [];
+  private _teammates: Character[] = [];
+  private _opponents: Character[] = [];
 
   constructor(data: iCharacter) {
     this._baseStats = data.stats;
@@ -209,8 +236,11 @@ export class Character {
     this._id = data.id;
     this._buffs = [];
     this._debuffs = [];
-    this._abilities = data.abilities.map((x: string) => {
-      return abilities[this._id][x];
+    this._activeAbilities = data.activeAbilities.map((x: string) => {
+      return abilities[this._id][x] as iAbility;
+    });
+    this._uniqueAbilities = (data.uniqueAbilities ?? []).map((x: string) => {
+      return abilities[this._id][x] as iUniqueAbility;
     });
     this._owner = data.owner;
     this._alignment = data.alignment;
@@ -290,8 +320,12 @@ export class Character {
   }
   public get speed() {
     const { speed } = this._baseStats;
-    if (this.hasDebuff("Speed Down")) {
+    if (this.hasBuff("Speed Up") && this.hasDebuff("Speed Down")) {
+      return speed;
+    } else if (this.hasDebuff("Speed Down")) {
       return speed * 0.75;
+    } else if (this.hasBuff("Speed Up")) {
+      return speed * 1.25;
     }
     return speed;
   }
@@ -312,10 +346,14 @@ export class Character {
   }
   public get tenacity() {
     const { tenacity } = this._baseStats;
+    const { tenacity: tempTenacity } = this.tempStats as Record<
+      string,
+      iStatsCheck
+    >;
     if (this.hasDebuff("Tenacity Down")) {
       return 0;
     }
-    return tenacity;
+    return tenacity + (tempTenacity?.amount ?? 0);
   }
   public set tenacity(val) {
     this._baseStats.tenacity = val;
@@ -334,14 +372,25 @@ export class Character {
   public set potency(val) {
     this._baseStats.potency = val;
   }
+  public get counterChance() {
+    const { counter: tempCounter } = this.tempStats as Record<
+      string,
+      iStatsCheck
+    >;
+    return tempCounter?.amount ?? 0;
+  }
 
   public get physical() {
     const self = this;
     return {
       get offense() {
         const { offense } = self._baseStats.physical;
-        if (self.hasDebuff("Offense Down")) {
+        if (self.hasBuff("Offense Up") && self.hasDebuff("Offense Down")) {
+          return offense;
+        } else if (self.hasDebuff("Offense Down")) {
           return offense * 0.5;
+        } else if (self.hasDebuff("Offense Up")) {
+          return offense * 1.5;
         }
         return offense;
       },
@@ -365,14 +414,28 @@ export class Character {
       },
       get armor() {
         const { armor } = self._baseStats.physical;
-        if (self.hasBuff("Defense Up") && self.hasDebuff("Defense Down")) {
-          return armor;
-        } else if (self.hasDebuff("Defense Down")) {
-          return armor * 0.5;
-        } else if (self.hasBuff("Defense Up")) {
-          return armor * 1.5;
+
+        const { defense: tempDefense } = self.tempStats as Record<
+          string,
+          iStatsCheck
+        >;
+        let newArmor = armor;
+
+        if (tempDefense.type === "percent") {
+          newArmor *= 1 + tempDefense?.amount ?? 0;
+        } else {
+          newArmor += tempDefense?.amount ?? 0;
         }
-        return armor;
+
+        if (self.hasBuff("Defense Up") && self.hasDebuff("Defense Down")) {
+          return newArmor;
+        } else if (self.hasDebuff("Defense Down")) {
+          return newArmor * 0.5;
+        } else if (self.hasBuff("Defense Up")) {
+          return newArmor * 1.5;
+        }
+
+        return newArmor;
       },
       set armor(val) {
         self._baseStats.physical.armor = val;
@@ -413,7 +476,12 @@ export class Character {
       },
       get critAvoid() {
         const { critAvoid } = self._baseStats.physical;
-        return critAvoid;
+        const { critAvoid: tempCritAvoid } = self.tempStats as Record<
+          string,
+          iStatsCheck
+        >;
+
+        return critAvoid + (tempCritAvoid?.amount ?? 0);
       },
       set critAvoid(val) {
         self._baseStats.physical.critAvoid = val;
@@ -425,8 +493,12 @@ export class Character {
     return {
       get offense() {
         const { offense } = self._baseStats.special;
-        if (self.hasDebuff("Offense Down")) {
+        if (self.hasBuff("Offense Up") && self.hasDebuff("Offense Down")) {
+          return offense;
+        } else if (self.hasDebuff("Offense Down")) {
           return offense * 0.5;
+        } else if (self.hasDebuff("Offense Up")) {
+          return offense * 1.5;
         }
         return offense;
       },
@@ -450,14 +522,28 @@ export class Character {
       },
       get armor() {
         const { armor } = self._baseStats.special;
-        if (self.hasBuff("Defense Up") && self.hasDebuff("Defense Down")) {
-          return armor;
-        } else if (self.hasDebuff("Defense Down")) {
-          return armor * 0.5;
-        } else if (self.hasBuff("Defense Up")) {
-          return armor * 1.5;
+
+        const { defense: tempDefense } = self.tempStats as Record<
+          string,
+          iStatsCheck
+        >;
+        let newArmor = armor;
+
+        if (tempDefense.type === "percent") {
+          newArmor *= 1 + tempDefense?.amount ?? 0;
+        } else {
+          newArmor += tempDefense?.amount ?? 0;
         }
-        return armor;
+
+        if (self.hasBuff("Defense Up") && self.hasDebuff("Defense Down")) {
+          return newArmor;
+        } else if (self.hasDebuff("Defense Down")) {
+          return newArmor * 0.5;
+        } else if (self.hasBuff("Defense Up")) {
+          return newArmor * 1.5;
+        }
+
+        return newArmor;
       },
       set armor(val) {
         self._baseStats.special.armor = val;
@@ -504,6 +590,20 @@ export class Character {
         self._baseStats.special.critAvoid = val;
       },
     };
+  }
+  private get tempStats(): Record<string, iStatsCheck> {
+    return this._triggers.reduce((statsMapping, trigger) => {
+      if (trigger.triggerType === "always") {
+        trigger.effects?.forEach((effect) => {
+          if (effect.stats) {
+            if (this.checkCondition(effect.condition, this)) {
+              statsMapping[effect.stats.value] = effect.stats;
+            }
+          }
+        });
+      }
+      return statsMapping;
+    }, {});
   }
 
   //Turn Meter and turn order logic
@@ -599,30 +699,45 @@ export class Character {
   public addBuff(
     buff: iStatusEffect | iStatusEffect[],
     isNew: boolean,
-    scalar: number
+    scalar: number,
+    ability: iAbility | iUniqueAbility | null
   ): string[] {
     if (Array.isArray(buff)) {
       return buff.reduce((arr: string[], b) => {
-        arr.push(...this.addBuff(b, isNew, scalar));
+        arr.push(...this.addBuff(b, isNew, scalar, ability));
         return arr;
       }, []);
     } else if (buff.name === "TM") {
-      return [this.changeTurnMeter(buff.duration * scalar)];
+      if (scalar > 0) {
+        return [
+          this.changeTurnMeter(buff.duration * scalar) +
+            `${
+              ability
+                ? ` (src: <span class="ability">${ability.name}</span>)`
+                : ""
+            }`,
+        ];
+      }
     } else if (this.hasDebuff("Buff Immunity") && !buff.cantPrevent) {
       return [
         `<em>${this.name}</em> could not gain <span class="buff">${buff.name}</span> due to <span class="debuff">Buff Immunity</span>`,
       ];
     } else if (!this.hasDebuff("Buff Immunity")) {
-      this._buffs.push({
-        ...buff,
-        duration: buff.duration * scalar,
-        isNew,
-      });
-      return [
-        `<em>${this.name}</em> gained <span class="buff">${
-          buff.name
-        }</span> for <b>${buff.duration * scalar}</b> turns`,
-      ];
+      if (scalar > 0) {
+        this._buffs.push({
+          ...buff,
+          duration: buff.duration * scalar,
+          isNew,
+          sourceAbility: ability,
+        });
+        return [
+          `<em>${this.name}</em> gained <span class="buff">${
+            buff.name
+          }</span> for <b>${buff.duration * scalar}</b> turns ${
+            ability ? `(src: <span class="ability">${ability.name}</span>)` : ""
+          }`,
+        ];
+      }
     }
     return [];
   }
@@ -674,15 +789,19 @@ export class Character {
     }
     return logs;
   }
-  public addDebuff(
+  private inflictDebuff(
     debuffs: iStatusEffect[],
-    opponent: Character,
+    targetCharacter: Character,
     scalar: number = 1
-  ): { logs: string[]; resisted: number } {
+  ): string[] {
     const logs: string[] = [];
-    let resisted = 0;
+    this._history.resisted = 0;
+
     debuffs.forEach((debuff) => {
-      const resistedChance = Math.max(this.tenacity - opponent.potency, 15);
+      const resistedChance = Math.max(
+        targetCharacter.tenacity - this.potency,
+        15
+      );
       if (
         resistedChance < randomNumber(0, 100) ||
         debuff.cantResist ||
@@ -693,25 +812,27 @@ export class Character {
         }
 
         if (debuff.name === "TM") {
-          logs.push(this.changeTurnMeter(debuff.duration * scalar));
+          logs.push(targetCharacter.changeTurnMeter(debuff.duration * scalar));
         } else {
           const amount = debuff.duration * scalar;
 
-          this.debuffs.push(unvue(debuff));
+          targetCharacter.debuffs.push(unvue(debuff));
           logs.push(
-            `<em>${this.name}</em> was inflicted with <span class="debuff">${
+            `<em>${
+              targetCharacter.name
+            }</em> was inflicted with <span class="debuff">${
               debuff.name
             }</span> for ${amount} turn${amount > 1 ? "s" : ""}`
           );
         }
       } else {
-        resisted++;
+        this._history.resisted++;
         logs.push(
-          `<em>${this.name}</em> resisted <span class="debuff">${debuff.name}</span>`
+          `<em>${targetCharacter.name}</em> resisted <span class="debuff">${debuff.name}</span>`
         );
       }
     });
-    return { logs, resisted };
+    return logs;
   }
   private removeDebuff(
     debuff: tDebuff | tDebuff[] | null,
@@ -758,14 +879,20 @@ export class Character {
   }
 
   //Abilities
-  public get abilities() {
-    return this._abilities;
+  public get activeAbilities() {
+    return this._activeAbilities;
+  }
+  public get basicAbility() {
+    return this.activeAbilities.find((a) => {
+      return a.id.startsWith("basic");
+    });
   }
   public chooseAbility(): iAbility | undefined {
-    const ability = this._abilities.find((a) => {
-      if (this.hasDebuff("Ability Block")) {
-        return a.id.startsWith("basic");
-      }
+    if (this.hasDebuff("Ability Block")) {
+      return this.basicAbility;
+    }
+
+    const ability = this._activeAbilities.find((a) => {
       return a.turnsRemaining <= 0;
     });
 
@@ -779,10 +906,10 @@ export class Character {
     opponents: Character[],
     targetSelection: iTarget
   ): Character[] {
-    const { allies, count, tags, all } = targetSelection.target;
+    const { allies, targetCount, tags, all } = targetSelection.target;
     if (all) {
       return allies ? teammates : opponents;
-    } else if (count) {
+    } else if (targetCount) {
       let validTargets: Character[] = [];
       if (allies) {
         validTargets = teammates;
@@ -806,7 +933,7 @@ export class Character {
         if (!exists) {
           arr.push(validTargets[rand]);
         }
-      } while (arr.length < count);
+      } while (arr.length < targetCount);
       return arr;
     } else if (tags) {
       return (allies ? teammates : opponents).filter((char) =>
@@ -857,13 +984,21 @@ export class Character {
       };
     }
   }
-  public takeDamage(character: Character, target: iTarget, ability: iAbility) {
+  public dealDamage(
+    targetCharacter: Character,
+    target: iTarget,
+    abilitySource: iAbility | iUniqueAbility | null,
+    canCounter: boolean = true
+  ) {
+    const logs: string[] = [];
     const abilityModifier = target?.damage ?? 0;
     const variance = target?.damageVariance ?? 5;
-    const { offense, critChance, armorPen } = character.getCombatStats(
+    const { offense, critChance, armorPen } = this.getCombatStats(
       target.damageType
     );
-    const { armor, critAvoid } = this.getCombatStats(target.damageType);
+    const { armor, critAvoid } = targetCharacter.getCombatStats(
+      target.damageType
+    );
     const varianceRand = randomNumber(0 - variance, variance) / 100;
     const varianceOffense = offense * (1 - varianceRand);
     const damageTaken =
@@ -872,137 +1007,169 @@ export class Character {
     const isCrit = randomNumber(0, 100) <= (critChance - critAvoid) * 100;
 
     const damageTotal = Math.max(
-      Math.round(damageTaken * (isCrit ? character.critDamage : 1)),
+      Math.round(damageTaken * (isCrit ? targetCharacter.critDamage : 1)),
       1
     );
-    this.protection -= damageTotal;
+    targetCharacter.protection -= damageTotal;
 
-    const logs = [
+    logs.push(
       `<span class="damage">${damageTotal}</span> damage was dealt to <em>${
-        this.name
+        targetCharacter.name
       }</em>${
         isCrit ? " <span class='crit'>(Crit)</span>" : ""
       } (Protection: <b class="protection">${
-        this.protection
-      }</b> , Health: <b class="health">${this.health}</b>)`,
-    ];
+        targetCharacter.protection
+      }</b> , Health: <b class="health">${targetCharacter.health}</b>)`
+    );
 
     logs.push(
-      ...character.heal({
+      ...this.heal({
         type: "flat",
         amount: damageTotal * this.healthSteal,
         healthType: "health",
       })
     );
 
-    if (this.health <= 0) {
-      logs.push(`<em>${character.name}</em> defeated <em>${this.name}</em>`);
+    if (targetCharacter.health <= 0) {
+      logs.push(
+        `<em>${targetCharacter.name}</em> defeated <em>${this.name}</em>`
+      );
+    } else if (canCounter) {
+      logs.push(...targetCharacter.counterAttack(this));
     }
 
     return logs;
   }
-  public checkEffects(
+  public counterAttack(targetCharacter: Character): string[] {
+    const logs: string[] = [];
+    const rand = randomNumber(1, 100);
+    console.log(this.id, this.counterChance, rand);
+    if (rand <= this.counterChance * 100) {
+      console.log("countering");
+      logs.push(`<em>${this.name}</em> countered`);
+      this.basicAbility?.targets?.forEach((t) => {
+        logs.push(
+          ...this.dealDamage(
+            targetCharacter,
+            t,
+            this.basicAbility ?? null,
+            false
+          )
+        );
+      });
+    }
+    return logs;
+  }
+  public inflictEffects(
     { effects, target }: iTarget,
-    opponent: Character
+    targetCharacter: Character,
+    ability: iAbility | iUniqueAbility | null
   ): string[] {
     const logs: string[] = [];
     effects?.forEach((effect) => {
-      if (effect?.condition) {
-        const { buffs, debuffs, stats, inverted, isNew } = effect.condition;
-        if (buffs) {
-          const hasBuffs = buffs.every((status) => {
-            const match = this._buffs.find((x) => x.name === status);
-            if (match) {
-              return isNew === false ? !match.isNew : true;
-            }
-            return false;
-          });
-
-          if ((hasBuffs && !inverted) || (!hasBuffs && inverted)) {
-            logs.push(
-              ...this.addEffects(opponent, effect, this.targetSelf(target))
-            );
-          }
-        }
-        if (debuffs) {
-          const hasDebuffs = debuffs.every((status) => {
-            const match = this.buffs.find((x) => x.name === status);
-            if (match) {
-              return isNew ? match.isNew : true;
-            }
-            return false;
-          });
-
-          if ((hasDebuffs && !inverted) || (!hasDebuffs && inverted)) {
-            logs.push(
-              ...this.addEffects(opponent, effect, this.targetSelf(target))
-            );
-          }
-        }
-        if (stats) {
-          let meetsStatRequirement = false;
-          const stat = this[stats.value];
-          if (!isNaN(stat)) {
-            //if it is a number
-            const num = Number(stat);
-            if (stats.value === "health" && stats.type === "percent") {
-              const percent = num / this.maxHealth;
-              meetsStatRequirement =
-                stats.amountType === "greater"
-                  ? stats.amount > percent
-                  : stats.amount < percent;
-            } else if (
-              stats.value === "protection" &&
-              stats.type === "percent"
-            ) {
-              const percent = num / this.maxProtection;
-              meetsStatRequirement =
-                stats.amountType === "greater"
-                  ? stats.amount > percent
-                  : stats.amount < percent;
-            } else {
-              meetsStatRequirement =
-                stats.amountType === "greater"
-                  ? stats.amount > num
-                  : stats.amount < num;
-            }
-          } else {
-            console.warn(`Could not find stat ${stat.type} on ${this.name}`);
-          }
-
-          if (
-            (meetsStatRequirement && !inverted) ||
-            (!meetsStatRequirement && inverted)
-          ) {
-            logs.push(
-              ...this.addEffects(opponent, effect, this.targetSelf(target))
-            );
-          }
-        }
-      } else {
+      if (this.checkCondition(effect.condition, targetCharacter)) {
         logs.push(
-          ...this.addEffects(opponent, effect, this.targetSelf(target))
+          ...this.addEffects(
+            targetCharacter,
+            effect,
+            this.targetSelf(target),
+            ability
+          )
         );
       }
     });
     return logs;
   }
+  private checkCondition(
+    condition: iEffect["condition"],
+    targetCharacter: Character
+  ): boolean {
+    if (!condition) {
+      return true;
+    }
+
+    const { buffs, debuffs, stats, inverted, isNew } = condition;
+    let results = false;
+    if (buffs) {
+      const hasBuffs = buffs.every((status) => {
+        const match = this._buffs.find((x) => x.name === status);
+        if (match) {
+          return isNew === false ? !match.isNew : true;
+        }
+        return false;
+      });
+      results = (hasBuffs && !inverted) || (!hasBuffs && inverted) || results;
+    }
+    if (debuffs) {
+      const hasDebuffs = debuffs.every((status) => {
+        const match = this.buffs.find((x) => x.name === status);
+        if (match) {
+          return isNew ? match.isNew : true;
+        }
+        return false;
+      });
+
+      results =
+        (hasDebuffs && !inverted) || (!hasDebuffs && inverted) || results;
+    }
+    if (stats) {
+      let meetsStatRequirement = false;
+      const stat = targetCharacter[stats.value];
+      if (!isNaN(stat)) {
+        //if it is a number
+        const num = Number(stat);
+        if (stats.value === "health" && stats.type === "percent") {
+          const percent = num / targetCharacter.maxHealth;
+          meetsStatRequirement =
+            stats.amountType === "greater"
+              ? stats.amount > percent
+              : stats.amount < percent;
+        } else if (stats.value === "protection" && stats.type === "percent") {
+          const percent = num / targetCharacter.maxProtection;
+          meetsStatRequirement =
+            stats.amountType === "greater"
+              ? stats.amount > percent
+              : stats.amount < percent;
+        } else {
+          meetsStatRequirement =
+            stats.amountType === "greater"
+              ? stats.amount > num
+              : stats.amount < num;
+        }
+      } else {
+        console.warn(
+          `Could not find stat ${stat.type} on ${targetCharacter.name}`
+        );
+      }
+
+      results =
+        (meetsStatRequirement && !inverted) ||
+        (!meetsStatRequirement && inverted) ||
+        results;
+    }
+    return results;
+  }
   private addEffects(
-    opponent: Character,
+    targetCharacter: Character,
     effect: iEffect,
-    isNew: boolean
+    isNew: boolean,
+    ability: iAbility | iUniqueAbility | null
   ): string[] {
     const logs: string[] = [];
     if (effect.dispel) {
-      logs.push(...this.removeBuff(effect.dispel?.buffs ?? null, opponent));
-      logs.push(...this.removeDebuff(effect.dispel?.debuffs ?? null, opponent));
+      logs.push(
+        ...targetCharacter.removeBuff(effect.dispel?.buffs ?? null, this)
+      );
+      logs.push(
+        ...targetCharacter.removeDebuff(effect.dispel?.debuffs ?? null, this)
+      );
     }
 
     if (effect.cooldown) {
       if (effect.cooldown.target === "Self") {
-        logs.push(opponent.changeCooldown(effect));
-      } else {
         logs.push(this.changeCooldown(effect));
+      } else {
+        logs.push(targetCharacter.changeCooldown(effect));
       }
     }
 
@@ -1010,27 +1177,35 @@ export class Character {
       logs.push(...this.heal(effect.recover));
     }
 
+    if (effect.stats) {
+      console.info("todo: change stats");
+    }
+
     logs.push(
-      ...this.addBuff(effect.buffs ?? [], isNew, this.getScalar(effect.scale))
+      ...this.addBuff(
+        effect.buffs ?? [],
+        isNew,
+        this.getScalar(effect.scale),
+        ability
+      )
     );
-    const { logs: logsList, resisted } = this.addDebuff(
-      effect.debuffs ?? [],
-      opponent
-    );
-    logs.push(...logsList);
+    logs.push(...this.inflictDebuff(effect.debuffs ?? [], targetCharacter));
     return logs;
   }
   public changeCooldown(effect: iEffect): string {
     if (effect.cooldown) {
       const { amount, id } = effect.cooldown;
-      const ability = this.abilities.find((a) => a.id === id);
+      const ability = this._activeAbilities.find((a) => a.id === id);
       if (ability) {
         ability.turnsRemaining += amount;
         return `${this.name}'s ${ability.name}'s cooldown was ${
           amount > 0 ? "increased" : "decreased"
         } by ${amount}`;
       } else {
-        console.warn(`Could not change the cooldown of ${id}`, this.abilities);
+        console.warn(
+          `Could not change the cooldown of ${id}`,
+          this._activeAbilities
+        );
       }
     }
     return "";
@@ -1083,32 +1258,48 @@ export class Character {
   private processTargets(
     targetData: iTarget,
     char: Character,
-    ability: iAbility | null,
+    ability: iAbility | iUniqueAbility | null,
     isNew?: boolean
   ): string[] {
     const logs: string[] = [];
+    const triggers: iTrigger["triggerType"][] = [];
     const { damage, effects, debuffs, buffs, target } = targetData;
+
+    if (targetData?.triggerCount) {
+      if (targetData.triggerCount > 0) {
+        targetData.triggerCount--;
+      } else {
+        return logs;
+      }
+    }
+
     if (damage && ability) {
-      logs.push(...char.takeDamage(this, targetData, ability));
+      logs.push(...this.dealDamage(char, targetData, ability));
+      triggers.push("damage");
+      if (char.health <= 0) {
+        triggers.push("death");
+      }
     }
 
     if (effects && char.health > 0) {
-      logs.push(...char.checkEffects(targetData, this));
+      logs.push(...this.inflictEffects(targetData, char, ability));
     }
     if (debuffs && char.health > 0) {
-      const { logs: logsList, resisted } = char.addDebuff(debuffs, this);
-      this._history.resisted = resisted;
-      logs.push(...logsList);
+      logs.push(...this.inflictDebuff(debuffs, char));
     }
     if (buffs) {
       logs.push(
         ...char.addBuff(
           buffs,
           isNew === false ? false : this.targetSelf(target),
-          this.getScalar(target.scale)
+          char.getScalar(target.scale),
+          ability
         )
       );
     }
+
+    logs.push(...char.executeTriggers(triggers));
+
     return logs;
   }
   public hasTags(tag: string, id: string): boolean {
@@ -1127,12 +1318,42 @@ export class Character {
       return 1;
     }
   }
-  private targetSelf(target: iTarget["target"]): boolean {
+  private targetSelf(target: iTrigger["target"]): boolean {
     const all = target.all ?? false;
     const allies = target.allies ?? false;
     const tagsMatch = anyTagsMatch(this, target.tags ?? [], this.id);
 
     return (all && allies) || tagsMatch;
+  }
+  public addTrigger(trigger: iTrigger, ability: iAbility | iUniqueAbility) {
+    this._triggers.push({ ...trigger, ability });
+  }
+  private executeTriggers(types: iTrigger["triggerType"][]): string[] {
+    const logs: string[] = [];
+    this._triggers.forEach((t) => {
+      if (types.includes(t.triggerType)) {
+        t.events.forEach((targetData) => {
+          const targets = this.findTargets(
+            this._teammates,
+            this._opponents,
+            targetData
+          );
+
+          targets.forEach((char) => {
+            const attackMissed = char.checkEvade(targetData, this);
+            if (attackMissed) {
+              logs.push(`<em>${char.name}</em> evaded`);
+              return;
+            }
+
+            logs.push(
+              ...this.processTargets(targetData, char, t.ability ?? null)
+            );
+          });
+        });
+      }
+    });
+    return logs;
   }
   public endOfTurn(): string[] {
     const logs: string[] = [];
@@ -1141,7 +1362,7 @@ export class Character {
         (
           acc: {
             newDebuffList: iStatusEffect[];
-            expireDebuffs: iTarget[];
+            expireDebuffs: iStatusEffect[];
             debuffsRemoved: string[];
           },
           debuff: iStatusEffect
@@ -1156,7 +1377,7 @@ export class Character {
             acc.newDebuffList.push(debuff);
           } else {
             if (debuff.expires) {
-              acc.expireDebuffs.push(debuff.expires);
+              acc.expireDebuffs.push(debuff);
             }
 
             acc.debuffsRemoved.push(debuff.name);
@@ -1170,7 +1391,7 @@ export class Character {
       (
         acc: {
           newBuffList: iStatusEffect[];
-          expiredBuffs: iTarget[];
+          expiredBuffs: iStatusEffect[];
           buffsRemoved: string[];
         },
         buff: iStatusEffect
@@ -1185,7 +1406,7 @@ export class Character {
           acc.newBuffList.push(buff);
         } else {
           if (buff.expires) {
-            acc.expiredBuffs.push(buff.expires);
+            acc.expiredBuffs.push(buff);
           }
 
           acc.buffsRemoved.push(buff.name);
@@ -1215,9 +1436,18 @@ export class Character {
 
     const expiredList = [...expireDebuffs, ...expiredBuffs];
     expiredList.forEach((x) => {
-      logs.push(...this.processTargets(x, this, null, false));
+      if (x.expires) {
+        logs.push(
+          ...this.processTargets(
+            x.expires,
+            this,
+            x.sourceAbility ?? null,
+            false
+          )
+        );
+      }
     });
-    this.abilities.forEach((a) => {
+    this._activeAbilities.forEach((a) => {
       a.turnsRemaining--;
     });
     this._history = {
@@ -1226,15 +1456,26 @@ export class Character {
 
     return logs;
   }
-  public reset() {
+  public reset(teammates: Character[], opponents: Character[]) {
     this._baseStats.health = this._baseStats.maxHealth;
     this._baseStats.protection = this._baseStats.maxProtection;
-    this._abilities.forEach((a) => {
+    this._activeAbilities.forEach((a) => {
       a.turnsRemaining = 0;
     });
     this._debuffs = [];
     this._buffs = [];
     this._tm = 0;
+    this._triggers = [];
+    this._teammates = teammates;
+    this._opponents = opponents;
+
+    this._uniqueAbilities.forEach((ability) => {
+      ability.triggers?.forEach((trigger) => {
+        this.findTargets(teammates, opponents, trigger).forEach((target) => {
+          target.addTrigger(trigger, ability);
+        });
+      });
+    });
   }
 }
 
@@ -1243,11 +1484,12 @@ export const team1: Character[] = [
     name: "Commander Luke Skywalker",
     id: "COMMANDERLUKESKYWALKER",
     owner: "team1",
-    abilities: [
+    activeAbilities: [
       "specialskill_COMMANDERLUKESKYWALKER02",
       "specialskill_COMMANDERLUKESKYWALKER01",
       "basicskill_COMMANDERLUKESKYWALKER",
     ],
+    uniqueAbilities: ["uniqueskill_COMMANDERLUKESKYWALKER01"],
     stats: {
       maxHealth: 30802,
       health: 30802,
@@ -1289,11 +1531,12 @@ export const team2: Character[] = [
     name: "Obi-Wan Kenobi (Old Ben)",
     id: "OLDBENKENOBI",
     owner: "team2",
-    abilities: [
+    activeAbilities: [
       "specialskill_OLDBENKENOBI02",
       "specialskill_OLDBENKENOBI01",
       "basicskill_OLDBENKENOBI",
     ],
+    uniqueAbilities: ["uniqueskill_OLDBENKENOBI01"],
     stats: {
       maxHealth: 34584,
       health: 34584,
