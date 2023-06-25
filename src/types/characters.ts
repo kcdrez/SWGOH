@@ -147,8 +147,13 @@ export interface iUniqueAbility {
 }
 
 interface iTrigger extends iTarget {
-  triggerType: "damage" | "death" | "always";
-  events: iTarget[];
+  triggerType:
+    | "damage"
+    | "death"
+    | "resistDetrimentalEffect"
+    | "inflictDebuff"
+    | "always";
+  events?: iTarget[];
 }
 
 interface iTarget {
@@ -165,6 +170,7 @@ interface iTarget {
 }
 
 interface iTargetData {
+  targetIds?: string[];
   tags?: string[];
   allies?: boolean;
   all?: boolean;
@@ -360,14 +366,27 @@ export class Character {
   }
   public get potency() {
     const { potency } = this._baseStats;
-    if (this.hasDebuff("Potency Down") && this.hasDebuff("Potency Down")) {
-      return potency;
-    } else if (this.hasDebuff("Potency Down")) {
-      return Math.max(potency - 50, 0);
-    } else if (this.hasBuff("Potency Up")) {
-      return Math.max(potency + 50, 0);
+
+    const { potency: tempPotency } = this.tempStats as Record<
+      string,
+      iStatsCheck
+    >;
+    let newPotency = potency;
+
+    if (tempPotency?.type === "percent") {
+      newPotency *= 1 + tempPotency?.amount ?? 0;
+    } else {
+      newPotency += tempPotency?.amount ?? 0;
     }
-    return potency;
+
+    if (this.hasDebuff("Potency Down") && this.hasDebuff("Potency Down")) {
+      return newPotency;
+    } else if (this.hasDebuff("Potency Down")) {
+      return Math.max(newPotency - 50, 0);
+    } else if (this.hasBuff("Potency Up")) {
+      return Math.max(newPotency + 50, 0);
+    }
+    return newPotency;
   }
   public set potency(val) {
     this._baseStats.potency = val;
@@ -421,7 +440,7 @@ export class Character {
         >;
         let newArmor = armor;
 
-        if (tempDefense.type === "percent") {
+        if (tempDefense?.type === "percent") {
           newArmor *= 1 + tempDefense?.amount ?? 0;
         } else {
           newArmor += tempDefense?.amount ?? 0;
@@ -529,7 +548,7 @@ export class Character {
         >;
         let newArmor = armor;
 
-        if (tempDefense.type === "percent") {
+        if (tempDefense?.type === "percent") {
           newArmor *= 1 + tempDefense?.amount ?? 0;
         } else {
           newArmor += tempDefense?.amount ?? 0;
@@ -802,8 +821,10 @@ export class Character {
         targetCharacter.tenacity - this.potency,
         15
       );
+      const resistedEffect = resistedChance < randomNumber(1, 100);
+
       if (
-        resistedChance < randomNumber(0, 100) ||
+        resistedEffect ||
         debuff.cantResist ||
         debuff.name === "Tenacity Down"
       ) {
@@ -824,11 +845,15 @@ export class Character {
               debuff.name
             }</span> for ${amount} turn${amount > 1 ? "s" : ""}`
           );
+          this.executeTriggers(["inflictDebuff"]);
         }
       } else {
         this._history.resisted++;
         logs.push(
           `<em>${targetCharacter.name}</em> resisted <span class="debuff">${debuff.name}</span>`
+        );
+        logs.push(
+          ...targetCharacter.executeTriggers(["resistDetrimentalEffect"])
         );
       }
     });
@@ -906,7 +931,8 @@ export class Character {
     opponents: Character[],
     targetSelection: iTarget
   ): Character[] {
-    const { allies, targetCount, tags, all } = targetSelection.target;
+    const { allies, targetCount, tags, all, targetIds } =
+      targetSelection.target;
     if (all) {
       return allies ? teammates : opponents;
     } else if (targetCount) {
@@ -938,6 +964,10 @@ export class Character {
     } else if (tags) {
       return (allies ? teammates : opponents).filter((char) =>
         anyTagsMatch(char, tags, this.id)
+      );
+    } else if (targetIds) {
+      return (allies ? teammates : opponents).filter((char) =>
+        targetIds.includes(char.id)
       );
     } else {
       return [];
@@ -1043,9 +1073,7 @@ export class Character {
   public counterAttack(targetCharacter: Character): string[] {
     const logs: string[] = [];
     const rand = randomNumber(1, 100);
-    console.log(this.id, this.counterChance, rand);
     if (rand <= this.counterChance * 100) {
-      console.log("countering");
       logs.push(`<em>${this.name}</em> countered`);
       this.basicAbility?.targets?.forEach((t) => {
         logs.push(
@@ -1189,7 +1217,7 @@ export class Character {
         ability
       )
     );
-    logs.push(...this.inflictDebuff(effect.debuffs ?? [], targetCharacter));
+    logs.push(...targetCharacter.inflictDebuff(effect.debuffs ?? [], this));
     return logs;
   }
   public changeCooldown(effect: iEffect): string {
@@ -1328,11 +1356,12 @@ export class Character {
   public addTrigger(trigger: iTrigger, ability: iAbility | iUniqueAbility) {
     this._triggers.push({ ...trigger, ability });
   }
-  private executeTriggers(types: iTrigger["triggerType"][]): string[] {
+  public executeTriggers(types: iTrigger["triggerType"][]): string[] {
+    console.log(this.name, types);
     const logs: string[] = [];
     this._triggers.forEach((t) => {
       if (types.includes(t.triggerType)) {
-        t.events.forEach((targetData) => {
+        t.events?.forEach((targetData) => {
           const targets = this.findTargets(
             this._teammates,
             this._opponents,
@@ -1350,6 +1379,11 @@ export class Character {
               ...this.processTargets(targetData, char, t.ability ?? null)
             );
           });
+        });
+
+        //BROKEN
+        t.effects?.forEach((effect) => {
+          logs.push(...this.addEffects(this, effect, true, null));
         });
       }
     });
@@ -1515,7 +1549,7 @@ export const team1: Character[] = [
         critAvoid: 0,
       },
       critDamage: 1.5,
-      tenacity: 45,
+      tenacity: 100,
       potency: 41,
       healthSteal: 10,
     },

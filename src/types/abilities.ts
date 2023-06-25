@@ -177,7 +177,6 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          events: [],
           effects: [
             {
               condition: {
@@ -228,11 +227,117 @@ const characterMapping: Record<
         {
           triggerType: "damage",
           target: {
+            tags: ["Rebel & !Self"],
+            allies: true,
+          },
+          events: [
+            {
+              target: {
+                targetIds: ["COMMANDERLUKESKYWALKER"],
+                allies: true,
+              },
+              effects: [
+                {
+                  buffs: [
+                    {
+                      id: uuid(),
+                      name: "TM",
+                      duration: 50,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    uniqueskill_COMMANDERLUKESKYWALKER02: {
+      name: "It Binds All Things",
+      id: "uniqueskill_COMMANDERLUKESKYWALKER02",
+      triggers: [
+        {
+          triggerType: "always",
+          target: {
             tags: ["Self"],
             allies: true,
           },
-          events: [],
-          //gain tm when rebels take damage
+          effects: [
+            {
+              stats: {
+                amount: 40,
+                value: "potency",
+                type: "flat",
+              },
+            },
+          ],
+        },
+        {
+          triggerType: "resistDetrimentalEffect",
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          effects: [
+            {
+              recover: {
+                healthType: "health",
+                amount: 5,
+                type: "percent",
+              },
+            },
+            {
+              recover: {
+                healthType: "protection",
+                amount: 5,
+                type: "percent",
+              },
+            },
+          ],
+        },
+        {
+          triggerType: "inflictDebuff",
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          effects: [
+            {
+              buffs: [
+                {
+                  name: "TM",
+                  duration: 10,
+                  id: uuid(),
+                },
+              ],
+            },
+          ],
+        },
+        {
+          triggerType: "inflictDebuff",
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          events: [
+            {
+              target: {
+                all: true,
+                allies: true,
+              },
+              effects: [
+                {
+                  buffs: [
+                    {
+                      name: "TM",
+                      duration: 5,
+                      id: uuid(),
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     },

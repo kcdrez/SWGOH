@@ -19,7 +19,7 @@
       </div>
       <div class="row">
         <div class="col">
-          <div v-for="character in team1">
+          <div v-for="character in team1" :key="character.id">
             <h3>{{ character.name }}</h3>
             <div class="input-group input-group-sm">
               <span class="input-group-text row-label">Max Protection:</span>
@@ -172,7 +172,7 @@
           </div>
         </div>
         <div class="col">
-          <div v-for="character in team2">
+          <div v-for="character in team2" :key="character.id">
             <h3>{{ character.name }}</h3>
             <div class="input-group input-group-sm">
               <span class="input-group-text row-label">Max Protection:</span>
@@ -330,7 +330,9 @@
           <div>Team 1 Wins: {{ simulation.team1Wins }}</div>
           <div>Team 2 Wins: {{ simulation.team2Wins }}</div>
           <ol>
-            <li v-for="log in logs"><span v-html="log"></span></li>
+            <li v-for="(log, index) in logs" :key="index">
+              <span v-html="log"></span>
+            </li>
           </ol>
         </div>
       </div>
