@@ -29,14 +29,14 @@ const characterMapping: Record<
                   id: uuid(),
                 },
               ],
-              recover: {
+              heal: {
                 healthType: "health",
                 amount: 0.4,
                 type: "percent",
               },
             },
             {
-              recover: {
+              heal: {
                 healthType: "protection",
                 amount: 0.4,
                 type: "percent",
@@ -88,7 +88,7 @@ const characterMapping: Record<
               },
               condition: {
                 stats: {
-                  value: "health",
+                  statToModify: "health",
                   amount: 1,
                   type: "percent",
                   amountType: "less",
@@ -108,7 +108,7 @@ const characterMapping: Record<
           ],
           debuffs: [
             { name: "TM", duration: -100, id: uuid() },
-            // { name: "Buff Immunity", duration: 2, id: uuid() },
+            { name: "Buff Immunity", duration: 2, id: uuid() },
             { name: "Tenacity Down", duration: 2, id: uuid() },
           ],
           damage: 2.978,
@@ -185,7 +185,7 @@ const characterMapping: Record<
               },
               stats: {
                 amount: 0.5,
-                value: "critAvoid",
+                statToModify: "critAvoid",
                 type: "flat",
               },
             },
@@ -196,7 +196,7 @@ const characterMapping: Record<
               },
               stats: {
                 amount: 100,
-                value: "tenacity",
+                statToModify: "tenacity",
                 type: "flat",
               },
             },
@@ -207,7 +207,7 @@ const characterMapping: Record<
               },
               stats: {
                 amount: 0.5,
-                value: "counter",
+                statToModify: "counter",
                 type: "flat",
               },
             },
@@ -218,14 +218,14 @@ const characterMapping: Record<
               },
               stats: {
                 amount: 0.5,
-                value: "defense",
+                statToModify: "defense",
                 type: "percent",
               },
             },
           ],
         },
         {
-          triggerType: "damage",
+          triggerType: "receiveDamage",
           target: {
             tags: ["Rebel & !Self"],
             allies: true,
@@ -266,7 +266,7 @@ const characterMapping: Record<
             {
               stats: {
                 amount: 40,
-                value: "potency",
+                statToModify: "potency",
                 type: "flat",
               },
             },
@@ -280,16 +280,16 @@ const characterMapping: Record<
           },
           effects: [
             {
-              recover: {
+              heal: {
                 healthType: "health",
-                amount: 5,
+                amount: 0.05,
                 type: "percent",
               },
             },
             {
-              recover: {
+              heal: {
                 healthType: "protection",
-                amount: 5,
+                amount: 0.05,
                 type: "percent",
               },
             },
@@ -322,7 +322,7 @@ const characterMapping: Record<
           events: [
             {
               target: {
-                all: true,
+                tags: ["!Self"],
                 allies: true,
               },
               effects: [
@@ -407,6 +407,7 @@ const characterMapping: Record<
             },
           ],
         },
+        //todo: add the following to an event
         {
           target: {
             tags: ["Jedi", "Rebel"],
@@ -475,7 +476,7 @@ const characterMapping: Record<
       name: "If You Strike Me Down",
       triggers: [
         {
-          triggerType: "damage",
+          triggerType: "receiveDamage",
           target: {
             tags: ["Jedi & !Self", "Rebel & !Self"],
             allies: true,
@@ -483,7 +484,7 @@ const characterMapping: Record<
           events: [
             {
               target: {
-                tags: ["Self"],
+                targetIds: ["OLDBENKENOBI"],
                 allies: true,
               },
               buffs: [
@@ -528,14 +529,14 @@ const characterMapping: Record<
               ],
               effects: [
                 {
-                  recover: {
+                  heal: {
                     healthType: "protection",
                     amount: 0.5,
                     type: "percent",
                   },
                 },
                 {
-                  recover: {
+                  heal: {
                     healthType: "health",
                     amount: 0.5,
                     type: "percent",
@@ -544,6 +545,73 @@ const characterMapping: Record<
               ],
             },
           ],
+        },
+      ],
+    },
+  },
+  AAYLASECURA: {
+    basicskill_AAYLASECURA: {
+      name: "Inspiring Strike",
+      id: "basicskill_AAYLASECURA",
+      cooldown: 0,
+      turnsRemaining: 0,
+      targets: [
+        {
+          target: { targetCount: 1 },
+          damage: 1.645,
+          damageType: "physical",
+
+          effects: [
+            {
+              assist: {
+                chance: 0.35,
+                modifier: {
+                  stats: {
+                    amount: 0.5,
+                    type: "percent",
+                    statToModify: "offense",
+                  },
+                  condition: {
+                    tags: ["Jedi"],
+                  },
+                },
+                target: {
+                  target: { allies: true, targetCount: 1, tags: ["!Self"] },
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    specialskill_AAYLASECURA01: {
+      id: "specialskill_AAYLASECURA01",
+      name: "Survivor",
+      cooldown: 3,
+      turnsRemaining: 0,
+      triggers: [
+        {
+          triggerType: "dealDamage",
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          effects: [
+            {
+              heal: {
+                type: "percent",
+                healthType: "health",
+              },
+              scale: 0.65,
+            },
+          ],
+        },
+      ],
+      targets: [
+        {
+          target: { targetCount: 1 },
+          damage: 3.008,
+          damageType: "physical",
         },
       ],
     },

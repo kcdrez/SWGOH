@@ -392,19 +392,19 @@ export default defineComponent({
       this.team2.forEach((x) =>
         x.reset(this.team2 as Character[], this.team1 as Character[])
       );
-      this.logs = [];
     },
     start() {
+      this.logs = [];
       this.simulation.team1Wins = 0;
       this.simulation.team2Wins = 0;
-      this.simulation.count = Math.min(this.simulation.count, 1000);
+      this.simulation.count = Math.min(this.simulation.count, 100);
       for (let i = 0; i < this.simulation.count; i++) {
         this.reset();
         let j = 0;
         do {
           j++;
-          this.logs.push(`Turn ${j}`);
-          this.nextAction();
+
+          this.nextAction(j);
           const team1Lost = this.team1.every((x) => x.health <= 0);
           const team2Lost = this.team2.every((x) => x.health <= 0);
           if (team1Lost || team2Lost || j > 100) {
@@ -419,8 +419,9 @@ export default defineComponent({
           }
         } while (true);
       }
+      this.reset();
     },
-    nextAction() {
+    nextAction(turnNumber: number) {
       const allChars: Character[] = [
         ...this.team1,
         ...this.team2,
@@ -456,7 +457,9 @@ export default defineComponent({
             ? (this.team2 as Character[])
             : (this.team1 as Character[]);
 
-        this.logs.push(...character.takeAction(opponents, teammates));
+        this.logs.push(`Turn ${turnNumber}`);
+
+        this.logs.push(...character.takeAction());
       }
     },
   },
