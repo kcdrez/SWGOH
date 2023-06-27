@@ -19,7 +19,7 @@
       </div>
       <div class="row">
         <div class="col">
-          <div v-for="character in team1">
+          <div v-for="character in team1" :key="character.id">
             <h3>{{ character.name }}</h3>
             <div class="input-group input-group-sm">
               <span class="input-group-text row-label">Max Protection:</span>
@@ -172,7 +172,7 @@
           </div>
         </div>
         <div class="col">
-          <div v-for="character in team2">
+          <div v-for="character in team2" :key="character.id">
             <h3>{{ character.name }}</h3>
             <div class="input-group input-group-sm">
               <span class="input-group-text row-label">Max Protection:</span>
@@ -330,7 +330,9 @@
           <div>Team 1 Wins: {{ simulation.team1Wins }}</div>
           <div>Team 2 Wins: {{ simulation.team2Wins }}</div>
           <ol>
-            <li v-for="log in logs"><span v-html="log"></span></li>
+            <li v-for="(log, index) in logs" :key="index">
+              <span v-html="log"></span>
+            </li>
           </ol>
         </div>
       </div>
@@ -384,20 +386,25 @@ export default defineComponent({
   },
   methods: {
     reset() {
-      [...this.team1, ...this.team2].forEach((x) => x.reset());
-      this.logs = [];
+      this.team1.forEach((x) =>
+        x.reset(this.team1 as Character[], this.team2 as Character[])
+      );
+      this.team2.forEach((x) =>
+        x.reset(this.team2 as Character[], this.team1 as Character[])
+      );
     },
     start() {
+      this.logs = [];
       this.simulation.team1Wins = 0;
       this.simulation.team2Wins = 0;
-      this.simulation.count = Math.min(this.simulation.count, 1000);
+      this.simulation.count = Math.min(this.simulation.count, 100);
       for (let i = 0; i < this.simulation.count; i++) {
         this.reset();
         let j = 0;
         do {
           j++;
-          this.logs.push(`Turn ${j}`);
-          this.nextAction();
+
+          this.nextAction(j);
           const team1Lost = this.team1.every((x) => x.health <= 0);
           const team2Lost = this.team2.every((x) => x.health <= 0);
           if (team1Lost || team2Lost || j > 100) {
@@ -412,9 +419,9 @@ export default defineComponent({
           }
         } while (true);
       }
-      [...this.team1, ...this.team2].forEach((x) => x.reset());
+      this.reset();
     },
-    nextAction() {
+    nextAction(turnNumber: number) {
       const allChars: Character[] = [
         ...this.team1,
         ...this.team2,
@@ -422,12 +429,14 @@ export default defineComponent({
 
       const { character, tmAmount } = allChars.reduce(
         (acc: { tmAmount: number; character: null | Character }, char) => {
-          if (!acc.character) {
-            acc.character = char;
-          } else {
-            const results = acc.character.compareTm(char);
-            acc.character = results.character;
-            acc.tmAmount = results.amount;
+          if (!char?.isDead) {
+            if (!acc.character) {
+              acc.character = char;
+            } else {
+              const results = acc.character.compareTm(char);
+              acc.character = results.character;
+              acc.tmAmount = results.amount;
+            }
           }
 
           return acc;
@@ -437,7 +446,9 @@ export default defineComponent({
 
       if (character !== null) {
         allChars.forEach((char) => {
-          char.changeTurnMeter((tmAmount / character.speed) * char.speed);
+          if (!char.isDead) {
+            char.changeTurnMeter((tmAmount / character.speed) * char.speed);
+          }
         });
 
         const opponents: Character[] =
@@ -450,7 +461,9 @@ export default defineComponent({
             ? (this.team2 as Character[])
             : (this.team1 as Character[]);
 
-        this.logs.push(...character.takeAction(opponents, teammates));
+        this.logs.push(`Turn ${turnNumber}`);
+
+        this.logs.push(...character.takeAction());
       }
     },
   },

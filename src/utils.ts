@@ -6,7 +6,7 @@ import _ from "lodash";
 import store from "./vuex-store/store";
 
 export function unvue(data: any) {
-  return JSON.parse(JSON.stringify(data));
+  return _.cloneDeep(data);
 }
 
 export function setupEvents(
