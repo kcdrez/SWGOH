@@ -1,7 +1,9 @@
-import { randomNumber, unvue } from "utils";
-import abilities from "types/abilities";
+import { v4 as uuid } from "uuid";
 import { round } from "lodash";
 import _ from "lodash";
+
+import { randomNumber, unvue } from "utils";
+import abilities from "types/abilities";
 import { aayla, cls, oldBen } from "types/_tempCharacterData";
 
 export interface iCharacter {
@@ -104,12 +106,21 @@ type tDebuff =
   | "Vulnerable"
   | "all"; //
 type tBuff =
+  | "Accuracy Up"
   | "Call to Action"
+  | "Critical Chance Up"
+  | "Critical Damage Up"
+  | "Critical Hit Immunity"
+  | "Defense Penetration Up"
   | "Defense Up"
+  | "Evasion Up"
+  | "Health Up"
+  | "Health Steal Up"
   | "Potency Up"
   | "Offense Up"
   | "Speed Up"
   | "Taunt"
+  | "Tenacity Up"
   | "TM"
   | "all";
 type tStatusEffect = tDebuff | tBuff;
@@ -166,8 +177,11 @@ interface iTrigger extends iTarget {
     | "death"
     | "resistDetrimentalEffect"
     | "inflictDebuff"
+    | "criticalHit"
     | "always";
   events?: iTarget[];
+  data?: any;
+  id: string;
 }
 
 interface iTarget {
@@ -284,17 +298,30 @@ export class Character {
 
   //Stats
   public get maxProtection() {
-    return this._baseStats.maxProtection;
+    return this.getModifiedStats(
+      [],
+      this._baseStats.maxProtection,
+      this.tempStats.maxProtection
+    );
   }
   public set maxProtection(val) {
     this._baseStats.maxProtection = val;
   }
   public get maxHealth() {
-    const { maxHealth } = this._baseStats;
-    if (this.hasDebuff("Health Down")) {
-      return maxHealth * 0.8;
-    }
-    return maxHealth;
+    return this.getModifiedStats(
+      [
+        {
+          hasEffect: this.hasDebuff("Health Down"),
+          value: -0.2,
+        },
+        {
+          hasEffect: this.hasBuff("Health Up"),
+          value: 0.15,
+        },
+      ],
+      this._baseStats.maxHealth,
+      this.tempStats.maxHealth
+    );
   }
   public set maxHealth(val) {
     this._baseStats.maxHealth = val;
@@ -322,6 +349,13 @@ export class Character {
     if (this._baseStats.protection > this._baseStats.maxProtection) {
       this._baseStats.protection = this._baseStats.maxProtection;
     }
+
+    if (this.health <= 0) {
+      this.removePassiveTriggers();
+    }
+  }
+  public get isDead() {
+    return this.health <= 0;
   }
   public heal(
     healData: iEffect["heal"],
@@ -330,7 +364,7 @@ export class Character {
   ): string[] {
     const logs: string[] = [];
 
-    if (healData) {
+    if (healData && !this.isDead) {
       const { healthType, type, amount: healAmount } = healData;
       const maxAmount =
         healthType === "health" ? this.maxHealth : this.maxProtection;
@@ -362,71 +396,95 @@ export class Character {
     return logs;
   }
   public get healthSteal() {
-    return this._baseStats.healthSteal;
+    return this.getModifiedStats(
+      [
+        {
+          hasEffect: this.hasDebuff("Health Steal Down"),
+          value: -0.5,
+        },
+        {
+          hasEffect: this.hasBuff("Health Steal Up"),
+          value: 0.5,
+        },
+      ],
+      this._baseStats.healthSteal,
+      this.tempStats.healthSteal
+    );
   }
   public get speed() {
-    const { speed } = this._baseStats;
-    if (this.hasBuff("Speed Up") && this.hasDebuff("Speed Down")) {
-      return speed;
-    } else if (this.hasDebuff("Speed Down")) {
-      return speed * 0.75;
-    } else if (this.hasBuff("Speed Up")) {
-      return speed * 1.25;
-    }
-    return speed;
+    return this.getModifiedStats(
+      [
+        {
+          hasEffect: this.hasDebuff("Speed Down"),
+          value: -0.25,
+        },
+        {
+          hasEffect: this.hasBuff("Speed Up"),
+          value: 0.25,
+        },
+      ],
+      this._baseStats.speed,
+      this.tempStats.speed,
+      true
+    );
   }
   public set speed(val) {
     this._baseStats.speed = val;
   }
   public get critDamage() {
-    const { critDamage } = this._baseStats;
-    let amount = critDamage;
-    if (this.hasBuff("Call to Action")) {
-      amount += 0.5;
-    }
-    if (this.hasDebuff("Critical Damage Down")) {
-      amount = Math.min(amount - 0.5, 0);
-    }
-
-    return amount;
+    return this.getModifiedStats(
+      [
+        {
+          hasEffect: this.hasDebuff("Call to Action"),
+          value: 0.5,
+        },
+        {
+          hasEffect: this.hasDebuff("Critical Damage Down"),
+          value: -0.5,
+        },
+        {
+          hasEffect: this.hasBuff("Critical Damage Up"),
+          value: 0.5,
+        },
+      ],
+      this._baseStats.critDamage,
+      this.tempStats.critDamage
+    );
   }
   public get tenacity() {
-    const { tenacity } = this._baseStats;
-    const { tenacity: tempTenacity } = this.tempStats as Record<
-      string,
-      iStatsCheck
-    >;
-    if (this.hasDebuff("Tenacity Down")) {
-      return 0;
-    }
-    return tenacity + (tempTenacity?.amount ?? 0);
+    return this.getModifiedStats(
+      [
+        {
+          hasEffect: this.hasDebuff("Tenacity Down"),
+          value: -1000,
+        },
+        {
+          hasEffect: this.hasBuff("Tenacity Up"),
+          value: 99999,
+        },
+      ],
+      this._baseStats.tenacity,
+      this.tempStats.tenacity
+    );
   }
   public set tenacity(val) {
     this._baseStats.tenacity = val;
   }
   public get potency() {
-    const { potency } = this._baseStats;
-
-    const { potency: tempPotency } = this.tempStats as Record<
-      string,
-      iStatsCheck
-    >;
-    let newPotency = potency;
-
-    if (tempPotency?.type === "percent") {
-      newPotency *= 1 + tempPotency?.amount ?? 0;
-    } else {
-      newPotency += tempPotency?.amount ?? 0;
-    }
-
-    if (this.hasDebuff("Potency Down") && this.hasDebuff("Potency Down")) {
-      return newPotency;
-    } else if (this.hasDebuff("Potency Down")) {
-      return Math.max(newPotency - 50, 0);
-    } else if (this.hasBuff("Potency Up")) {
-      return Math.max(newPotency + 50, 0);
-    }
-    return newPotency;
+    return this.getModifiedStats(
+      [
+        {
+          hasEffect: this.hasDebuff("Potency Down"),
+          value: -50,
+        },
+        {
+          hasEffect: this.hasBuff("Potency Up"),
+          value: 50,
+        },
+      ],
+      this._baseStats.potency,
+      this.tempStats.potency
+    );
   }
   public set potency(val) {
     this._baseStats.potency = val;
@@ -438,11 +496,17 @@ export class Character {
     >;
     return tempCounter?.amount ?? 0;
   }
+  public get counterDamage() {
+    const { counterDamage: tempCounterDamage } = this.tempStats as Record<
+      string,
+      iStatsCheck
+    >;
+    return tempCounterDamage?.amount ?? 1;
+  }
   private callAllyToAssist(assistData: iEffect["assist"]): string[] {
     const logs: string[] = [];
     if (assistData) {
-      const rand = randomNumber(1, 100);
-      if (rand <= assistData.chance * 100) {
+      if (chanceOfEvent(assistData.chance)) {
         this.findTargets(assistData.target).forEach((target) => {
           logs.push(
             `${format.characterName(
@@ -475,104 +539,110 @@ export class Character {
     const self = this;
     return {
       get offense() {
-        const { offense } = self._baseStats.physical;
-        if (self.hasBuff("Offense Up") && self.hasDebuff("Offense Down")) {
-          return offense;
-        } else if (self.hasDebuff("Offense Down")) {
-          return offense * 0.5;
-        } else if (self.hasDebuff("Offense Up")) {
-          return offense * 1.5;
-        }
-        return offense;
+        return self.getModifiedStats(
+          [
+            { hasEffect: self.hasDebuff("Offense Down"), value: -0.5 },
+            { hasEffect: self.hasBuff("Offense Up"), value: 0.5 },
+          ],
+          self._baseStats.physical.offense,
+          self.tempStats.tempOffense,
+          true
+        );
       },
       set offense(val) {
         self._baseStats.physical.offense = val;
       },
       get critChance() {
-        const { critChance } = self._baseStats.physical;
-        let amount = critChance;
-        if (self.hasBuff("Call to Action")) {
-          amount += 0.5;
-        }
-        if (self.hasDebuff("Critical Chance Down")) {
-          amount = Math.min(amount - 0.25, 0);
-        }
-
-        return amount;
+        return self.getModifiedStats(
+          [
+            { hasEffect: self.hasDebuff("Critical Chance Down"), value: -0.25 },
+            { hasEffect: self.hasBuff("Critical Chance Up"), value: 0.25 },
+            { hasEffect: self.hasBuff("Call to Action"), value: 0.5 },
+          ],
+          self._baseStats.physical.critChance,
+          self.tempStats.tempCritChance
+        );
       },
       set critChance(val) {
         self._baseStats.physical.critChance = val;
       },
       get armor() {
-        const { armor } = self._baseStats.physical;
-
-        const { defense: tempDefense } = self.tempStats as Record<
-          string,
-          iStatsCheck
-        >;
-        let newArmor = armor;
-
-        if (tempDefense?.type === "percent") {
-          newArmor *= 1 + tempDefense?.amount ?? 0;
-        } else {
-          newArmor += tempDefense?.amount ?? 0;
-        }
-
-        if (self.hasBuff("Defense Up") && self.hasDebuff("Defense Down")) {
-          return newArmor;
-        } else if (self.hasDebuff("Defense Down")) {
-          return newArmor * 0.5;
-        } else if (self.hasBuff("Defense Up")) {
-          return newArmor * 1.5;
-        }
-
-        return newArmor;
+        return self.getModifiedStats(
+          [
+            { hasEffect: self.hasDebuff("Defense Down"), value: -0.5 },
+            { hasEffect: self.hasBuff("Defense Up"), value: 0.5 },
+          ],
+          self._baseStats.physical.armor,
+          self.tempStats.armor,
+          true
+        );
       },
       set armor(val) {
         self._baseStats.physical.armor = val;
       },
       get armorPen() {
-        const { armorPen } = self._baseStats.physical;
-        if (self.hasDebuff("Defense Penetration Down")) {
-          return Math.max(armorPen - 150, 0);
-        }
-        return armorPen;
+        return self.getModifiedStats(
+          [
+            {
+              hasEffect: self.hasDebuff("Defense Penetration Down"),
+              value: -150,
+            },
+            { hasEffect: self.hasBuff("Defense Penetration Up"), value: 150 },
+          ],
+          self._baseStats.physical.armorPen,
+          self.tempStats.armorPen
+        );
       },
       set armorPen(val) {
         self._baseStats.physical.armorPen = val;
       },
       get accuracy() {
-        const { accuracy } = self._baseStats.physical;
-        let amount = accuracy;
-        if (self.hasBuff("Call to Action")) {
-          amount += 50;
-        }
-        if (self.hasDebuff("Accuracy Down")) {
-          amount = Math.max(amount - 15, 0);
-        }
-        return amount;
+        return self.getModifiedStats(
+          [
+            {
+              hasEffect: self.hasDebuff("Accuracy Down"),
+              value: -0.15,
+            },
+            { hasEffect: self.hasBuff("Accuracy Up"), value: 0.15 },
+          ],
+          self._baseStats.physical.accuracy,
+          self.tempStats.accuracy
+        );
       },
       set accuracy(val) {
         self._baseStats.physical.accuracy = val;
       },
       get dodge() {
-        const { dodge } = self._baseStats.physical;
-        if (self.hasDebuff("Evasion Down")) {
-          return Math.max(dodge - 25, 0);
-        }
-        return dodge;
+        return self.getModifiedStats(
+          [
+            {
+              hasEffect: self.hasDebuff("Evasion Down"),
+              value: -0.15,
+            },
+            { hasEffect: self.hasBuff("Evasion Up"), value: 0.15 },
+          ],
+          self._baseStats.physical.dodge,
+          self.tempStats.dodge
+        );
       },
       set dodge(val) {
         self._baseStats.physical.dodge = val;
       },
       get critAvoid() {
-        const { critAvoid } = self._baseStats.physical;
-        const { critAvoid: tempCritAvoid } = self.tempStats as Record<
-          string,
-          iStatsCheck
-        >;
-
-        return critAvoid + (tempCritAvoid?.amount ?? 0);
+        return self.getModifiedStats(
+          [
+            {
+              hasEffect: self.hasDebuff("Vulnerable"),
+              value: -999,
+            },
+            {
+              hasEffect: self.hasBuff("Critical Hit Immunity"),
+              value: 1000000,
+            },
+          ],
+          self._baseStats.physical.critAvoid,
+          self.tempStats.critAvoid
+        );
       },
       set critAvoid(val) {
         self._baseStats.physical.critAvoid = val;
@@ -583,99 +653,110 @@ export class Character {
     const self = this;
     return {
       get offense() {
-        const { offense } = self._baseStats.special;
-        if (self.hasBuff("Offense Up") && self.hasDebuff("Offense Down")) {
-          return offense;
-        } else if (self.hasDebuff("Offense Down")) {
-          return offense * 0.5;
-        } else if (self.hasDebuff("Offense Up")) {
-          return offense * 1.5;
-        }
-        return offense;
+        return self.getModifiedStats(
+          [
+            { hasEffect: self.hasDebuff("Offense Down"), value: -0.5 },
+            { hasEffect: self.hasBuff("Offense Up"), value: 0.5 },
+          ],
+          self._baseStats.special.offense,
+          self.tempStats.tempOffense,
+          true
+        );
       },
       set offense(val) {
         self._baseStats.special.offense = val;
       },
       get critChance() {
-        const { critChance } = self._baseStats.special;
-        let amount = critChance;
-        if (self.hasBuff("Call to Action")) {
-          amount += 0.5;
-        }
-        if (self.hasDebuff("Critical Chance Down")) {
-          amount = Math.min(amount - 0.25, 0);
-        }
-
-        return amount;
+        return self.getModifiedStats(
+          [
+            { hasEffect: self.hasDebuff("Critical Chance Down"), value: -0.25 },
+            { hasEffect: self.hasBuff("Critical Chance Up"), value: 0.25 },
+            { hasEffect: self.hasBuff("Call to Action"), value: 0.5 },
+          ],
+          self._baseStats.special.critChance,
+          self.tempStats.tempCritChance
+        );
       },
       set critChance(val) {
-        self._baseStats.special.critChance = val;
+        self._baseStats.physical.critChance = val;
       },
       get armor() {
-        const { armor } = self._baseStats.special;
-
-        const { defense: tempDefense } = self.tempStats as Record<
-          string,
-          iStatsCheck
-        >;
-        let newArmor = armor;
-
-        if (tempDefense?.type === "percent") {
-          newArmor *= 1 + tempDefense?.amount ?? 0;
-        } else {
-          newArmor += tempDefense?.amount ?? 0;
-        }
-
-        if (self.hasBuff("Defense Up") && self.hasDebuff("Defense Down")) {
-          return newArmor;
-        } else if (self.hasDebuff("Defense Down")) {
-          return newArmor * 0.5;
-        } else if (self.hasBuff("Defense Up")) {
-          return newArmor * 1.5;
-        }
-
-        return newArmor;
+        return self.getModifiedStats(
+          [
+            { hasEffect: self.hasDebuff("Defense Down"), value: -0.5 },
+            { hasEffect: self.hasBuff("Defense Up"), value: 0.5 },
+          ],
+          self._baseStats.special.armor,
+          self.tempStats.armor,
+          true
+        );
       },
       set armor(val) {
         self._baseStats.special.armor = val;
       },
       get armorPen() {
-        const { armorPen } = self._baseStats.special;
-        if (self.hasDebuff("Defense Penetration Down")) {
-          return Math.max(armorPen - 150, 0);
-        }
-        return armorPen;
+        return self.getModifiedStats(
+          [
+            {
+              hasEffect: self.hasDebuff("Defense Penetration Down"),
+              value: -150,
+            },
+            { hasEffect: self.hasBuff("Defense Penetration Up"), value: 150 },
+          ],
+          self._baseStats.special.armorPen,
+          self.tempStats.armorPen
+        );
       },
       set armorPen(val) {
         self._baseStats.special.armorPen = val;
       },
       get accuracy() {
-        const { accuracy } = self._baseStats.special;
-        let amount = accuracy;
-        if (self.hasBuff("Call to Action")) {
-          amount += 50;
-        }
-        if (self.hasDebuff("Accuracy Down")) {
-          amount = Math.max(amount - 15, 0);
-        }
-        return amount;
+        return self.getModifiedStats(
+          [
+            {
+              hasEffect: self.hasDebuff("Accuracy Down"),
+              value: -0.15,
+            },
+            { hasEffect: self.hasBuff("Accuracy Up"), value: 0.15 },
+          ],
+          self._baseStats.special.accuracy,
+          self.tempStats.accuracy
+        );
       },
       set accuracy(val) {
         self._baseStats.special.accuracy = val;
       },
       get dodge() {
-        const { dodge } = self._baseStats.special;
-        if (self.hasDebuff("Accuracy Down")) {
-          return Math.max(dodge - 25, 0);
-        }
-        return dodge;
+        return self.getModifiedStats(
+          [
+            {
+              hasEffect: self.hasDebuff("Evasion Down"),
+              value: -0.15,
+            },
+            { hasEffect: self.hasBuff("Evasion Up"), value: 0.15 },
+          ],
+          self._baseStats.special.dodge,
+          self.tempStats.dodge
+        );
       },
       set dodge(val) {
         self._baseStats.special.dodge = val;
       },
       get critAvoid() {
-        const { critAvoid } = self._baseStats.special;
-        return critAvoid;
+        return self.getModifiedStats(
+          [
+            {
+              hasEffect: self.hasDebuff("Vulnerable"),
+              value: -999,
+            },
+            {
+              hasEffect: self.hasBuff("Critical Hit Immunity"),
+              value: 1000000,
+            },
+          ],
+          self._baseStats.special.critAvoid,
+          self.tempStats.critAvoid
+        );
       },
       set critAvoid(val) {
         self._baseStats.special.critAvoid = val;
@@ -695,6 +776,34 @@ export class Character {
       }
       return statsMapping;
     }, {});
+  }
+  private getModifiedStats(
+    statusEffectConfig: { hasEffect: boolean; value: number }[],
+    baseStat: number,
+    tempStat: iStatsCheck,
+    isMultiplicative: boolean = false
+  ) {
+    let newStat = baseStat;
+
+    if (tempStat?.type === "percent") {
+      newStat *= 1 + tempStat?.amount ?? 0;
+    } else {
+      newStat += tempStat?.amount ?? 0;
+    }
+
+    let amountIncrease = 0;
+
+    statusEffectConfig.forEach((effect) => {
+      if (effect.hasEffect) {
+        amountIncrease += effect.value;
+      }
+    });
+
+    if (isMultiplicative) {
+      return newStat * (1 + amountIncrease);
+    } else {
+      return newStat + amountIncrease;
+    }
   }
 
   //Turn Meter and turn order logic
@@ -899,17 +1008,15 @@ export class Character {
     debuffs.forEach((debuff) => {
       const resistedChance = Math.max(
         targetCharacter.tenacity - this.potency,
-        15
+        0.15
       );
-      const resistedEffect = resistedChance > randomNumber(1, 100);
-
       if (
-        !resistedEffect ||
+        !chanceOfEvent(resistedChance) ||
         debuff.cantResist ||
         debuff.name === "Tenacity Down" ||
         this.isSelf(targetCharacter)
       ) {
-        if (randomNumber(0, 100) > (debuff.chance ?? 1) * 100) {
+        if (!chanceOfEvent(debuff.chance ?? 0)) {
           return;
         }
 
@@ -918,7 +1025,10 @@ export class Character {
         } else {
           const amount = debuff.duration * scalar;
 
-          targetCharacter.debuffs.push(unvue(debuff));
+          targetCharacter.debuffs.push({
+            ...unvue(debuff),
+            isNew: true,
+          });
           logs.push(
             `${format.characterName(
               targetCharacter.name,
@@ -927,7 +1037,16 @@ export class Character {
               debuff.name,
             ])} for ${amount} turn${amount > 1 ? "s" : ""}`
           );
-          logs.push(...this.executePassiveTriggers(["inflictDebuff"]));
+          logs.push(
+            ...this.executePassiveTriggers([
+              {
+                triggerType: "inflictDebuff",
+                target: {},
+                data: { debuff: debuff.name },
+                id: uuid(),
+              },
+            ])
+          );
         }
       } else {
         this._history.resisted++;
@@ -940,7 +1059,14 @@ export class Character {
           ])}`
         );
         logs.push(
-          ...targetCharacter.executePassiveTriggers(["resistDetrimentalEffect"])
+          ...targetCharacter.executePassiveTriggers([
+            {
+              triggerType: "resistDetrimentalEffect",
+              target: {},
+              data: { debuff: debuff.name },
+              id: uuid(),
+            },
+          ])
         );
       }
     });
@@ -1017,11 +1143,21 @@ export class Character {
     }
     return ability ?? null;
   }
-  public findTargets(targetSelection: iTarget): Character[] {
+  public findTargets(
+    targetSelection: iTarget,
+    target?: Character,
+    ignore?: {
+      paralysisDebuff?: boolean;
+      daze?: boolean;
+      noAssist?: boolean;
+      dead?: boolean;
+    }
+  ): Character[] {
     const { allies, targetCount, tags, all, targetIds } =
       targetSelection.target;
+    let list: Character[] = [];
     if (all) {
-      return allies ? this._teammates : this._opponents;
+      list = allies ? this._teammates : this._opponents;
     } else if (targetCount) {
       let validTargets: Character[] = [];
       if (allies) {
@@ -1043,28 +1179,41 @@ export class Character {
           return tags ? anyTagsMatch(char, tags, this.id) : true;
         });
       }
-      const arr: Character[] = [];
 
       do {
         const rand: number = randomNumber(0, validTargets.length - 1);
         const el = validTargets[rand];
-        const exists = arr.some((x) => x.id === el.id);
+        const exists = list.some((x) => x.id === el.id);
         if (!exists) {
-          arr.push(validTargets[rand]);
+          list.push(validTargets[rand]);
         }
-      } while (arr.length < targetCount && validTargets.length >= targetCount);
-      return arr;
+      } while (list.length < targetCount && validTargets.length >= targetCount);
     } else if (tags) {
-      return (allies ? this._teammates : this._opponents).filter((char) =>
+      list = (allies ? this._teammates : this._opponents).filter((char) =>
         anyTagsMatch(char, tags, this.id)
       );
     } else if (targetIds) {
-      return (allies ? this._teammates : this._opponents).filter((char) =>
-        targetIds.includes(char.id)
-      );
-    } else {
-      return [];
+      list = (allies ? this._teammates : this._opponents).filter((char) => {
+        let shouldInclude = false;
+        if (target instanceof Character) {
+          shouldInclude = targetIds.includes("target") && char.id === target.id;
+        }
+        return targetIds.includes(char.id) || shouldInclude;
+      });
     }
+    return list.filter((char: Character) => {
+      let shouldExclude = false;
+      if (char.isDead && !ignore?.dead) {
+        shouldExclude = true;
+      }
+      if (ignore?.paralysisDebuff) {
+        shouldExclude = char.hasDebuff("Stun") || shouldExclude;
+      }
+      if (ignore?.daze) {
+        shouldExclude = char.hasDebuff("Daze") || shouldExclude;
+      }
+      return !shouldExclude;
+    });
   }
 
   //other properties
@@ -1151,15 +1300,13 @@ export class Character {
     const damageTaken =
       (varianceOffense - (armor - armorPen)) * abilityModifier;
 
-    const isCrit = randomNumber(0, 100) <= (critChance - critAvoid) * 100;
+    const isCrit = chanceOfEvent(critChance - critAvoid);
 
     const damageTotal = Math.max(
       Math.round(damageTaken * (isCrit ? targetCharacter.critDamage : 1)),
       1
     );
     targetCharacter.protection -= damageTotal;
-
-    this.executePassiveTriggers(["dealDamage"], damageTotal);
 
     logs.push(
       format.damage(
@@ -1179,39 +1326,74 @@ export class Character {
           amount: damageTotal * this.healthSteal,
           healthType: "health",
         },
-        abilitySource
+        {
+          name: "Health Steal",
+          id: "whatever",
+          turnsRemaining: 0,
+          cooldown: 0,
+        }
       )
     );
 
     if (targetCharacter.health <= 0) {
       logs.push(
         `${format.characterName(
-          targetCharacter.name,
-          targetCharacter.owner
-        )} defeated ${format.characterName(this.name, this.owner)}`
+          this.name,
+          this.owner
+        )} defeated ${format.characterName(targetCharacter.name, this.owner)}`
       );
     } else if (canCounter) {
       logs.push(...targetCharacter.counterAttack(this));
     }
 
-    return logs;
+    return { logs, damageDealt: damageTotal, isCrit };
   }
   public counterAttack(targetCharacter: Character): string[] {
     const logs: string[] = [];
-    const rand = randomNumber(1, 100);
-    if (rand <= this.counterChance * 100) {
+    if (chanceOfEvent(this.counterChance)) {
       logs.push(
         `${format.characterName(this.name, this.owner)} counter attacked`
       );
-      this.basicAbility?.targets?.forEach((t) => {
-        logs.push(
-          ...this.dealDamage(
-            targetCharacter,
-            t,
-            this.basicAbility ?? null,
-            false
-          )
+      this.basicAbility?.targets?.forEach((target) => {
+        const {
+          logs: damageLogs,
+          damageDealt,
+          isCrit,
+        } = this.dealDamage(
+          targetCharacter,
+          target,
+          this.basicAbility ?? null,
+          false,
+          {
+            statToModify: "offense",
+            amount: this.counterDamage,
+            type: "percent",
+          }
         );
+        logs.push(...damageLogs);
+
+        logs.push(
+          ...this.executePassiveTriggers([
+            {
+              triggerType: "dealDamage",
+              target: {},
+              data: { damageDealt, isCrit },
+              id: uuid(),
+            },
+          ])
+        );
+        if (isCrit) {
+          logs.push(
+            ...this.executePassiveTriggers([
+              {
+                triggerType: "criticalHit",
+                target: {},
+                data: { damageDealt, isCrit, target: targetCharacter },
+                id: uuid(),
+              },
+            ])
+          );
+        }
       });
     }
     return logs;
@@ -1336,9 +1518,8 @@ export class Character {
       }
     }
 
-    // console.log(this.id, effect.heal, data);
     if (effect.heal) {
-      logs.push(...this.heal(effect.heal, ability, data));
+      logs.push(...this.heal(effect.heal, ability, data?.healAmount));
     }
 
     if (effect.stats) {
@@ -1349,15 +1530,21 @@ export class Character {
       logs.push(...this.callAllyToAssist(effect.assist));
     }
 
-    logs.push(
-      ...this.addBuff(
-        effect.buffs ?? [],
-        isNew,
-        this.getScalar(effect.scale),
-        ability
-      )
-    );
-    logs.push(...targetCharacter.inflictDebuff(effect.debuffs ?? [], this));
+    if (effect.buffs) {
+      logs.push(
+        ...this.addBuff(
+          effect.buffs ?? [],
+          isNew,
+          this.getScalar(effect.scale),
+          ability
+        )
+      );
+    }
+
+    if (effect.debuffs) {
+      logs.push(...targetCharacter.inflictDebuff(effect.debuffs ?? [], this));
+    }
+
     return logs;
   }
   public changeCooldown(effect: iEffect): string {
@@ -1386,17 +1573,25 @@ export class Character {
     if (cantMiss || this.isSelf(opponent)) {
       return false;
     } else {
-      const rand = randomNumber(0, 100);
       const { dodge } = this.getCombatStats(damageType);
       const { accuracy } = opponent.getCombatStats(damageType);
 
-      const changeToDodge =
+      const chanceToDodge =
         modifyStat(dodge, "dodge", stats) -
         modifyStat(accuracy, "accuracy", stats);
-      return rand <= changeToDodge;
+      return chanceOfEvent(chanceToDodge);
     }
   }
+  public startOfTurn() {
+    this._debuffs.forEach((debuff) => {
+      debuff.isNew = false;
+    });
+    this._buffs.forEach((debuff) => {
+      debuff.isNew = false;
+    });
+  }
   public takeAction() {
+    this.startOfTurn();
     this._tm = 0;
     const logs: string[] = [];
     let ability: iAbility | null = null;
@@ -1453,15 +1648,15 @@ export class Character {
   }
   private processTargets(
     targetData: iTarget,
-    char: Character,
+    targetCharacter: Character,
     ability: iAbility | null,
     isNew?: boolean,
     stats?: iStatsCheck,
     canCounter?: boolean
   ): string[] {
     const logs: string[] = [];
-    const myTriggers: iTrigger["triggerType"][] = [];
-    const opponentTriggers: iTrigger["triggerType"][] = [];
+    const myTriggers: iTrigger[] = [];
+    const opponentTriggers: iTrigger[] = [];
     const { damage, effects, debuffs, buffs, target } = targetData;
 
     if (targetData?.triggerCount) {
@@ -1473,34 +1668,66 @@ export class Character {
     }
 
     if (damage && ability) {
-      logs.push(
-        ...this.dealDamage(char, targetData, ability, canCounter, stats)
+      const {
+        logs: damageLogs,
+        damageDealt,
+        isCrit,
+      } = this.dealDamage(
+        targetCharacter,
+        targetData,
+        ability,
+        canCounter,
+        stats
       );
-      opponentTriggers.push("receiveDamage");
-      myTriggers.push("dealDamage");
-      if (char.health <= 0) {
-        opponentTriggers.push("death");
+      logs.push(...damageLogs);
+      opponentTriggers.push({
+        triggerType: "receiveDamage",
+        target: {},
+        data: { damageDealt, isCrit },
+        id: uuid(),
+      });
+      myTriggers.push({
+        triggerType: "dealDamage",
+        target: {},
+        data: { damageDealt, isCrit },
+        id: uuid(),
+      });
+
+      if (isCrit) {
+        myTriggers.push({
+          triggerType: "criticalHit",
+          target: {},
+          data: { damageDealt, isCrit },
+          id: uuid(),
+        });
+      }
+      if (targetCharacter.health <= 0) {
+        opponentTriggers.push({
+          triggerType: "death",
+          target: {},
+          id: uuid(),
+        });
       }
     }
 
-    if (effects && char.health > 0) {
-      logs.push(...this.inflictEffects(targetData, char, ability));
+    if (effects && !targetCharacter.isDead) {
+      logs.push(...this.inflictEffects(targetData, targetCharacter, ability));
     }
-    if (debuffs && char.health > 0) {
-      logs.push(...this.inflictDebuff(debuffs, char));
+    if (debuffs && !targetCharacter.isDead) {
+      logs.push(...this.inflictDebuff(debuffs, targetCharacter));
     }
-    if (buffs) {
+    if (buffs && !targetCharacter.isDead) {
       logs.push(
-        ...char.addBuff(
+        ...targetCharacter.addBuff(
           buffs,
           isNew === false ? false : this.targetSelf(target),
-          char.getScalar(target.scale),
+          targetCharacter.getScalar(target.scale),
           ability
         )
       );
     }
 
-    logs.push(...char.executePassiveTriggers(opponentTriggers));
+    logs.push(...targetCharacter.executePassiveTriggers(opponentTriggers));
     logs.push(...this.executeAbilityTriggers(ability, myTriggers));
 
     return logs;
@@ -1536,48 +1763,73 @@ export class Character {
   public addTrigger(trigger: iTrigger, ability: iAbility) {
     this._triggers.push({ ...trigger, ability });
   }
-  public executePassiveTriggers(
-    types: iTrigger["triggerType"][],
-    data?: any
-  ): string[] {
+  public removeTrigger(id: string) {
+    const index = this._triggers.findIndex((t) => t.id === id);
+    if (index > -1) {
+      this._triggers.splice(index, 1);
+    }
+  }
+  public executePassiveTriggers(types: iTrigger[]): string[] {
     const logs: string[] = [];
     this._triggers.forEach((trigger) => {
-      if (types.includes(trigger.triggerType)) {
-        logs.push(...this.executeTrigger(trigger, data));
-      }
+      types.forEach((type) => {
+        if (trigger.triggerType === type.triggerType) {
+          logs.push(...this.executeTrigger({ ...type, ...trigger }));
+        }
+      });
     });
     return logs;
   }
-  public executeAbilityTriggers(
-    ability: iAbility | null,
-    types: iTrigger["triggerType"][],
-    data?: any
-  ) {
+  public executeAbilityTriggers(ability: iAbility | null, types: iTrigger[]) {
     const logs: string[] = [];
     ability?.triggers?.forEach((trigger) => {
-      if (types.includes(trigger.triggerType)) {
-        logs.push(...this.executeTrigger(trigger, data));
-      }
+      types.forEach((type) => {
+        if (trigger.triggerType === type.triggerType) {
+          logs.push(
+            ...this.executeTrigger({ ...trigger, ability, data: type.data })
+          );
+        }
+      });
     });
     return logs;
   }
-  public executeTrigger(
-    { events, effects, ability }: iTrigger,
-    data?: any
-  ): string[] {
+  public executeTrigger({
+    triggerType,
+    events,
+    effects,
+    ability,
+    data,
+  }: iTrigger): string[] {
     const logs: string[] = [];
     events?.forEach((targetData) => {
-      const targets = this.findTargets(targetData);
+      const targets = this.findTargets(targetData, data?.target);
 
       targets.forEach((char) => {
-        logs.push(...char.processTargets(targetData, this, ability ?? null));
+        //if this needs to be switched, then the logic is broken
+        logs.push(...this.processTargets(targetData, char, ability ?? null));
       });
     });
 
     effects?.forEach((effect) => {
+      if (triggerType === "dealDamage" && effect.heal) {
+        data.healAmount = data?.damageDealt * (effect?.scale ?? 1);
+      }
       logs.push(...this.addEffects(this, effect, true, ability ?? null, data));
     });
     return logs;
+  }
+  private removePassiveTriggers() {
+    this._uniqueAbilities.forEach((ability) => {
+      ability.triggers?.forEach((trigger) => {
+        this.findTargets(trigger, undefined, { dead: true }).forEach(
+          (target) => {
+            if (target.id !== this.id) {
+              target.removeTrigger(trigger.id);
+            }
+          }
+        );
+      });
+    });
   }
   public endOfTurn(ability: iAbility | null): string[] {
     const logs: string[] = [];
@@ -1694,7 +1946,7 @@ export class Character {
     this._teammates = teammates;
     this._opponents = opponents;
 
-    [...this._uniqueAbilities, ...this._activeAbilities].forEach((ability) => {
+    this._uniqueAbilities.forEach((ability) => {
       ability.triggers?.forEach((trigger) => {
         this.findTargets(trigger).forEach((target) => {
           target.addTrigger(trigger, ability as iAbility);
@@ -1805,3 +2057,10 @@ const format = {
     return ability ? ` (src: ${format.ability(ability.name)})` : "";
   },
 };
+
+function chanceOfEvent(percentChance: number): boolean {
+  if (percentChance < 1) {
+    percentChance *= 100;
+  }
+  return percentChance >= randomNumber(1, 100);
+}

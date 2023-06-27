@@ -429,12 +429,14 @@ export default defineComponent({
 
       const { character, tmAmount } = allChars.reduce(
         (acc: { tmAmount: number; character: null | Character }, char) => {
-          if (!acc.character) {
-            acc.character = char;
-          } else {
-            const results = acc.character.compareTm(char);
-            acc.character = results.character;
-            acc.tmAmount = results.amount;
+          if (!char?.isDead) {
+            if (!acc.character) {
+              acc.character = char;
+            } else {
+              const results = acc.character.compareTm(char);
+              acc.character = results.character;
+              acc.tmAmount = results.amount;
+            }
           }
 
           return acc;
@@ -444,7 +446,9 @@ export default defineComponent({
 
       if (character !== null) {
         allChars.forEach((char) => {
-          char.changeTurnMeter((tmAmount / character.speed) * char.speed);
+          if (!char.isDead) {
+            char.changeTurnMeter((tmAmount / character.speed) * char.speed);
+          }
         });
 
         const opponents: Character[] =

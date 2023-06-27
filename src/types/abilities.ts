@@ -173,6 +173,7 @@ const characterMapping: Record<
       triggers: [
         {
           triggerType: "always",
+          id: uuid(),
           target: {
             tags: ["Self"],
             allies: true,
@@ -195,7 +196,7 @@ const characterMapping: Record<
                 inverted: true,
               },
               stats: {
-                amount: 100,
+                amount: 1,
                 statToModify: "tenacity",
                 type: "flat",
               },
@@ -226,6 +227,7 @@ const characterMapping: Record<
         },
         {
           triggerType: "receiveDamage",
+          id: uuid(),
           target: {
             tags: ["Rebel & !Self"],
             allies: true,
@@ -258,6 +260,7 @@ const characterMapping: Record<
       triggers: [
         {
           triggerType: "always",
+          id: uuid(),
           target: {
             tags: ["Self"],
             allies: true,
@@ -265,7 +268,7 @@ const characterMapping: Record<
           effects: [
             {
               stats: {
-                amount: 40,
+                amount: 0.4,
                 statToModify: "potency",
                 type: "flat",
               },
@@ -274,6 +277,7 @@ const characterMapping: Record<
         },
         {
           triggerType: "resistDetrimentalEffect",
+          id: uuid(),
           target: {
             tags: ["Self"],
             allies: true,
@@ -297,6 +301,7 @@ const characterMapping: Record<
         },
         {
           triggerType: "inflictDebuff",
+          id: uuid(),
           target: {
             tags: ["Self"],
             allies: true,
@@ -315,6 +320,7 @@ const characterMapping: Record<
         },
         {
           triggerType: "inflictDebuff",
+          id: uuid(),
           target: {
             tags: ["Self"],
             allies: true,
@@ -477,6 +483,7 @@ const characterMapping: Record<
       triggers: [
         {
           triggerType: "receiveDamage",
+          id: uuid(),
           target: {
             tags: ["Jedi & !Self", "Rebel & !Self"],
             allies: true,
@@ -498,6 +505,7 @@ const characterMapping: Record<
           ],
         },
         {
+          id: uuid(),
           target: {
             tags: ["Self"],
             allies: true,
@@ -591,6 +599,7 @@ const characterMapping: Record<
       turnsRemaining: 0,
       triggers: [
         {
+          id: uuid(),
           triggerType: "dealDamage",
           target: {
             tags: ["Self"],
@@ -599,7 +608,7 @@ const characterMapping: Record<
           effects: [
             {
               heal: {
-                type: "percent",
+                type: "flat",
                 healthType: "health",
               },
               scale: 0.65,
@@ -612,6 +621,65 @@ const characterMapping: Record<
           target: { targetCount: 1 },
           damage: 3.008,
           damageType: "physical",
+        },
+      ],
+    },
+    uniqueskill_AAYLASECURA01: {
+      id: "uniqueskill_AAYLASECURA01",
+      name: "Superior Riposte",
+      triggers: [
+        {
+          triggerType: "criticalHit",
+          id: uuid(),
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          events: [
+            {
+              target: {
+                targetIds: ["target"],
+              },
+              debuffs: [
+                {
+                  duration: 1,
+                  name: "Stun",
+                  id: uuid(),
+                },
+              ],
+            },
+          ],
+        },
+        {
+          triggerType: "always",
+          id: uuid(),
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          effects: [
+            {
+              stats: {
+                amount: 0.1,
+                statToModify: "critChance",
+                type: "flat",
+              },
+            },
+            {
+              stats: {
+                amount: 0.65,
+                statToModify: "counter",
+                type: "flat",
+              },
+            },
+            {
+              stats: {
+                amount: 0.5,
+                statToModify: "counterDamage",
+                type: "percent",
+              },
+            },
+          ],
         },
       ],
     },
