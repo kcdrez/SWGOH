@@ -684,6 +684,65 @@ const characterMapping: Record<
       ],
     },
   },
+  HANSOLO: {
+    basicskill_HANSOLO: {
+      id: "basicskill_HANSOLO",
+      name: "Quick Draw",
+      cooldown: 0,
+      turnsRemaining: 0,
+      targets: [
+        {
+          damageType: "physical",
+          cantMiss: true,
+          target: { targetCount: 1 },
+          damage: 1.85,
+          modifyDamage: {
+            condition: {
+              tm: {
+                amount: 50,
+                greaterThan: false,
+              },
+            },
+            stats: {
+              type: "percent",
+              statToModify: "offense",
+              amount: 1.75,
+            },
+          },
+          effects: [
+            {
+              condition: {
+                tm: {
+                  amount: 49.999999,
+                  greaterThan: true,
+                },
+              },
+              debuffs: [
+                {
+                  name: "TM",
+                  duration: -35,
+                  id: uuid(),
+                },
+              ],
+            },
+            {
+              condition: {
+                tm: {
+                  amount: 50,
+                  greaterThan: false,
+                },
+              },
+              stats: {
+                type: "percent",
+                statToModify: "offense",
+                amount: 0.75,
+              },
+            },
+          ],
+        },
+      ],
+    },
+  },
 };
 
 export default characterMapping;

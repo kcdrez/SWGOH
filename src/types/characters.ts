@@ -4,7 +4,7 @@ import _ from "lodash";
 
 import { randomNumber, unvue } from "utils";
 import abilities from "types/abilities";
-import { aayla, cls, oldBen } from "types/_tempCharacterData";
+import { aayla, cls, hanSolo, oldBen } from "types/_tempCharacterData";
 
 export interface iCharacter {
   id: string;
@@ -191,6 +191,7 @@ interface iTarget {
   effects?: iEffect[];
   cantMiss?: boolean;
   damage?: number;
+  modifyDamage?: iEffect;
   damageVariance?: number;
   damageType?: "physical" | "special";
   triggerCount?: number;
@@ -213,6 +214,10 @@ interface iCondition {
   inverted?: boolean;
   isNew?: boolean;
   tags?: string[];
+  tm?: {
+    amount: number;
+    greaterThan: boolean;
+  };
 }
 interface iEffect {
   condition?: iCondition;
@@ -1241,7 +1246,7 @@ export class Character {
   //Methods
   public getCombatStats(
     damageType: iTarget["damageType"],
-    stats?: iStatsCheck
+    stats?: iStatsCheck | null
   ) {
     if (damageType === "physical") {
       const baseStat = this.physical;
@@ -1282,7 +1287,7 @@ export class Character {
     target: iTarget,
     abilitySource: iAbility | null,
     canCounter: boolean = true,
-    stats?: iStatsCheck
+    stats?: iStatsCheck | null
   ) {
     const logs: string[] = [];
     const abilityModifier = target?.damage ?? 0;
@@ -1301,6 +1306,8 @@ export class Character {
       (varianceOffense - (armor - armorPen)) * abilityModifier;
 
     const isCrit = chanceOfEvent(critChance - critAvoid);
+
+    console.log(offense, this.physical.offense, varianceOffense, stats);
 
     const damageTotal = Math.max(
       Math.round(damageTaken * (isCrit ? targetCharacter.critDamage : 1)),
@@ -1426,7 +1433,7 @@ export class Character {
       return true;
     }
 
-    const { buffs, debuffs, stats, inverted, isNew, tags } = condition;
+    const { buffs, debuffs, stats, inverted, isNew, tags, tm } = condition;
     let results = false;
     if (buffs) {
       const hasBuffs = buffs.every((status) => {
@@ -1489,7 +1496,14 @@ export class Character {
         results;
     }
     if (tags) {
-      results = anyTagsMatch(targetCharacter, tags, this.id);
+      results = anyTagsMatch(targetCharacter, tags, this.id) || results;
+    }
+    if (tm) {
+      if (tm.greaterThan) {
+        results = targetCharacter.turnMeter > tm.amount || results;
+      } else {
+        results = targetCharacter.turnMeter < tm.amount || results;
+      }
     }
     return results;
   }
@@ -1667,7 +1681,22 @@ export class Character {
       }
     }
 
+    console.log(this.id, "process targets", targetData);
+
     if (damage && ability) {
+      //check conditions
+      const _stats = this.checkCondition(
+        targetData.modifyDamage?.condition,
+        targetCharacter
+      )
+        ? targetData.modifyDamage?.stats
+        : null;
+      console.log(
+        this.id,
+        _stats,
+        targetCharacter.id,
+        targetCharacter.turnMeter
+      );
       const {
         logs: damageLogs,
         damageDealt,
@@ -1677,7 +1706,7 @@ export class Character {
         targetData,
         ability,
         canCounter,
-        stats
+        stats ?? _stats
       );
       logs.push(...damageLogs);
       opponentTriggers.push({
@@ -1960,7 +1989,11 @@ export const team1: Character[] = [unvue(cls)].map((c) => {
   return new Character(c, "team1");
 });
 
-export const team2: Character[] = [unvue(aayla), unvue(oldBen)].map((c) => {
+export const team2: Character[] = [
+  unvue(aayla),
+  unvue(oldBen),
+  unvue(hanSolo),
+].map((c) => {
   return new Character(unvue(c), "team2");
 });
 
@@ -1983,7 +2016,11 @@ export function anyTagsMatch(
   });
 }
 
-function modifyStat(baseStat: number, statType: string, stats?: iStatsCheck) {
+function modifyStat(
+  baseStat: number,
+  statType: string,
+  stats?: iStatsCheck | null
+) {
   if (statType === stats?.statToModify) {
     if (stats.type === "percent") {
       return baseStat * stats.amount;
