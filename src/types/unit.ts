@@ -45,7 +45,7 @@ export interface IUnit {
   categories: string[];
   ability_classes: string[];
   role: string;
-  alignment: string;
+  alignment: "Light Side" | "Dark Side" | "Neutral";
   statMultipliers?: IStatMultiplier;
 
   //attributes that only exist when the character is unlocked
@@ -84,7 +84,7 @@ export class Unit {
   private _categories: string[];
   private _ability_classes: string[];
   private _role: string;
-  private _alignment: string;
+  private _alignment: IUnit["alignment"];
   private _is_ship: boolean;
   private _id: string;
   private _image: string;
@@ -157,6 +157,18 @@ export class Unit {
   }
   public get abilities() {
     return this._ability_data;
+  }
+  public get basicAbility() {
+    return this._ability_data.find((x) => x.id.startsWith("basicskill"));
+  }
+  public get specialAbilities() {
+    return this._ability_data.filter((x) => x.id.startsWith("specialskill"));
+  }
+  public get uniqueAbilities() {
+    return this._ability_data.filter((x) => x.id.startsWith("uniqueskill"));
+  }
+  public get leaderAbility() {
+    return this._ability_data.find((x) => x.id.startsWith("leaderskill"));
   }
   public get hasUlt() {
     return this._has_ultimate ?? false;
@@ -871,6 +883,9 @@ export class Unit {
     });
     return data;
   }
+  public get healthSteal() {
+    return this._stats["27"];
+  }
   public get tenacity() {
     return round2Decimals(this._stats["18"] * 100);
   }
@@ -885,6 +900,12 @@ export class Unit {
   }
   public get physicalArmor() {
     return this.armor.physical;
+  }
+  public get armorPen() {
+    return this._stats["10"];
+  }
+  public get resistancePen() {
+    return this._stats["11"];
   }
   private getBaseDefense(armor: number): number {
     const defenseFinal = (armor * 637.5) / (100 - armor);
@@ -1085,6 +1106,27 @@ export class Unit {
   }
   public get baseCritDamage() {
     return this.critDamage - this.modCritDamage;
+  }
+
+  public get physicalCritAvoid() {
+    return this._stats["39"];
+  }
+  public get specialCritAvoid() {
+    return this._stats["40"];
+  }
+
+  public get physicalDodge() {
+    return this._stats["12"];
+  }
+  public get specialDodge() {
+    return this._stats["13"];
+  }
+
+  public get physicalAccuracy() {
+    return this._stats["37"];
+  }
+  public get specialAccuracy() {
+    return this._stats["38"];
   }
 
   public get gearTarget() {

@@ -17,7 +17,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               dispel: {
                 debuffs: "all",
@@ -78,8 +78,8 @@ const characterMapping: Record<
       turnsRemaining: 0,
       targets: [
         {
-          target: { targetCount: 1 },
-          effects: [
+          target: { targetCount: 1, allies: false },
+          actions: [
             {
               cooldown: {
                 id: "specialskill_COMMANDERLUKESKYWALKER01",
@@ -91,15 +91,14 @@ const characterMapping: Record<
                   statToModify: "health",
                   amount: 1,
                   type: "percent",
-                  amountType: "less",
                 },
               },
             },
           ],
         },
         {
-          target: { targetCount: 1 },
-          effects: [
+          target: { targetCount: 1, allies: false },
+          actions: [
             {
               dispel: {
                 buffs: "all",
@@ -119,11 +118,9 @@ const characterMapping: Record<
     basicskill_COMMANDERLUKESKYWALKER: {
       id: "basicskill_COMMANDERLUKESKYWALKER",
       name: "Destined Strike",
-      cooldown: 0,
-      turnsRemaining: 0,
       targets: [
         {
-          target: { targetCount: 1 },
+          target: { targetCount: 1, allies: false },
           debuffs: [
             {
               name: "Speed Down",
@@ -136,7 +133,7 @@ const characterMapping: Record<
               id: uuid(),
             },
           ],
-          effects: [
+          actions: [
             {
               condition: {
                 debuffs: ["Speed Down"],
@@ -178,7 +175,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               condition: {
                 buffs: ["Call to Action"],
@@ -238,7 +235,7 @@ const characterMapping: Record<
                 targetIds: ["COMMANDERLUKESKYWALKER"],
                 allies: true,
               },
-              effects: [
+              actions: [
                 {
                   buffs: [
                     {
@@ -265,7 +262,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               stats: {
                 amount: 0.4,
@@ -282,7 +279,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               heal: {
                 healthType: "health",
@@ -306,7 +303,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               buffs: [
                 {
@@ -331,7 +328,70 @@ const characterMapping: Record<
                 tags: ["!Self"],
                 allies: true,
               },
-              effects: [
+              actions: [
+                {
+                  buffs: [
+                    {
+                      name: "TM",
+                      duration: 5,
+                      id: uuid(),
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    leaderskill_COMMANDERLUKESKYWALKER: {
+      name: "Rebel Maneuvers",
+      id: "leaderskill_COMMANDERLUKESKYWALKER",
+      triggers: [
+        {
+          triggerType: "always",
+          id: uuid(),
+          target: {
+            allies: true,
+            tags: ["Rebel"],
+          },
+          actions: [
+            {
+              stats: {
+                amount: 0.5,
+                statToModify: "counter",
+                type: "flat",
+              },
+            },
+            {
+              stats: {
+                amount: 0.5,
+                statToModify: "defense",
+                type: "percent",
+              },
+            },
+            {
+              stats: {
+                amount: 0.15,
+                statToModify: "offense",
+                type: "percent",
+              },
+            },
+          ],
+        },
+        {
+          target: {
+            allies: false,
+          },
+          triggerType: "resistDetrimentalEffect",
+          id: uuid(),
+          events: [
+            {
+              target: {
+                allies: false,
+                tags: ["Rebel"],
+              },
+              actions: [
                 {
                   buffs: [
                     {
@@ -352,11 +412,9 @@ const characterMapping: Record<
     basicskill_OLDBENKENOBI: {
       id: "basicskill_OLDBENKENOBI",
       name: "Elegant Form",
-      cooldown: 0,
-      turnsRemaining: 0,
       targets: [
         {
-          target: { targetCount: 1 },
+          target: { targetCount: 1, allies: false },
           debuffs: [
             {
               name: "Evasion Down",
@@ -371,6 +429,7 @@ const characterMapping: Record<
         {
           target: {
             tags: ["Self"],
+            allies: true,
           },
           buffs: [
             {
@@ -390,7 +449,6 @@ const characterMapping: Record<
       targets: [
         {
           target: {
-            all: true,
             allies: false,
           },
           cantMiss: true,
@@ -463,10 +521,7 @@ const characterMapping: Record<
           ],
         },
         {
-          target: {
-            all: true,
-            allies: true,
-          },
+          target: { allies: true },
           buffs: [
             {
               name: "Defense Up",
@@ -516,7 +571,6 @@ const characterMapping: Record<
               triggerCount: 1,
               target: {
                 allies: true,
-                all: true,
               },
               buffs: [
                 {
@@ -535,7 +589,7 @@ const characterMapping: Record<
                   id: uuid(),
                 },
               ],
-              effects: [
+              actions: [
                 {
                   heal: {
                     healthType: "protection",
@@ -556,20 +610,65 @@ const characterMapping: Record<
         },
       ],
     },
+    leaderskill_OLDBENKENOBI: {
+      id: "leaderskill_OLDBENKENOBI",
+      name: "Old Jedi Knight",
+      triggers: [
+        {
+          triggerType: "always",
+          id: uuid(),
+          target: {
+            allies: true,
+          },
+          actions: [
+            {
+              stats: {
+                type: "flat",
+                statToModify: "dodge",
+                amount: 0.15,
+              },
+            },
+          ],
+        },
+        {
+          triggerType: "dodge",
+          id: uuid(),
+          target: {
+            allies: true,
+          },
+          events: [
+            {
+              target: {
+                tags: ["Self"],
+                allies: true,
+              },
+              actions: [
+                {
+                  buffs: [
+                    {
+                      name: "TM",
+                      duration: 30,
+                      id: uuid(),
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   },
   AAYLASECURA: {
     basicskill_AAYLASECURA: {
       name: "Inspiring Strike",
       id: "basicskill_AAYLASECURA",
-      cooldown: 0,
-      turnsRemaining: 0,
       targets: [
         {
-          target: { targetCount: 1 },
+          target: { targetCount: 1, allies: false },
           damage: 1.645,
           damageType: "physical",
-
-          effects: [
+          actions: [
             {
               assist: {
                 chance: 0.35,
@@ -605,7 +704,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               heal: {
                 type: "flat",
@@ -618,7 +717,7 @@ const characterMapping: Record<
       ],
       targets: [
         {
-          target: { targetCount: 1 },
+          target: { targetCount: 1, allies: false },
           damage: 3.008,
           damageType: "physical",
         },
@@ -657,7 +756,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               stats: {
                 amount: 0.1,
@@ -678,6 +777,140 @@ const characterMapping: Record<
                 statToModify: "counterDamage",
                 type: "percent",
               },
+            },
+          ],
+        },
+      ],
+    },
+  },
+  HANSOLO: {
+    basicskill_HANSOLO: {
+      id: "basicskill_HANSOLO",
+      name: "Quick Draw",
+      targets: [
+        {
+          damageType: "physical",
+          cantMiss: true,
+          target: { targetCount: 1, allies: false },
+          damage: 1.85,
+          modifyDamage: {
+            condition: {
+              tm: {
+                amount: 50,
+                greaterThan: false,
+              },
+            },
+            stats: {
+              type: "percent",
+              statToModify: "offense",
+              amount: 1.75,
+            },
+          },
+          actions: [
+            {
+              condition: {
+                tm: {
+                  amount: 49.999999,
+                  greaterThan: true,
+                },
+              },
+              debuffs: [
+                {
+                  name: "TM",
+                  duration: -35,
+                  id: uuid(),
+                },
+              ],
+            },
+            {
+              condition: {
+                tm: {
+                  amount: 50,
+                  greaterThan: false,
+                },
+              },
+              stats: {
+                type: "percent",
+                statToModify: "offense",
+                amount: 0.75,
+              },
+            },
+          ],
+        },
+      ],
+    },
+    specialskill_HANSOLO01: {
+      name: "Deadeye",
+      id: "specialskill_HANSOLO011",
+      cooldown: 3,
+      turnsRemaining: 0,
+      targets: [
+        {
+          damageType: "physical",
+          target: { targetCount: 1, allies: false },
+          damage: 3.699,
+          debuffs: [
+            {
+              name: "Stun",
+              duration: 1,
+              id: uuid(),
+            },
+          ],
+        },
+        {
+          target: {
+            tags: ["Self"],
+            allies: true,
+            scale: "physical critChance",
+          },
+          buffs: [
+            {
+              name: "TM",
+              duration: 100,
+              id: uuid(),
+            },
+          ],
+        },
+      ],
+    },
+    specialskill_HANSOLO02: {
+      id: "specialskill_HANSOLO01",
+      name: "Never Tell Me The Odds",
+      turnsRemaining: 0,
+      cooldown: 4,
+      targets: [
+        {
+          target: {
+            allies: true,
+          },
+          buffs: [
+            {
+              name: "Critical Chance Up",
+              duration: 2,
+              id: uuid(),
+            },
+            {
+              name: "Evasion Up",
+              duration: 2,
+              id: uuid(),
+            },
+          ],
+        },
+        {
+          target: {
+            allies: true,
+            tags: ["Self"],
+          },
+          buffs: [
+            {
+              name: "Critical Damage Up",
+              duration: 2,
+              id: uuid(),
+            },
+            {
+              name: "TM",
+              duration: 50,
+              id: uuid(),
             },
           ],
         },

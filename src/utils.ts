@@ -288,3 +288,10 @@ export function getSortOrder(
     throw new Error("Sorting type mismatch");
   }
 }
+
+export function numbersOnly(e: any) {
+  const keyCode = e.keyCode ? e.keyCode : e.which;
+  if (keyCode < 48 || keyCode > 57) {
+    e.preventDefault();
+  }
+}

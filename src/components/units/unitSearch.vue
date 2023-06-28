@@ -11,11 +11,13 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
+import { Unit } from "types/unit";
+
 export default defineComponent({
   name: "UnitSearch",
   props: {
     list: {
-      type: Array,
+      type: Array as () => Unit[],
       default: () => {
         return null;
       },

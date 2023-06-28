@@ -1,4 +1,4 @@
-import { iCharacter } from "./characters";
+import { IUnit } from "types/unit";
 
 export const oldBen = {
   name: "Obi-Wan Kenobi (Old Ben)",
@@ -38,7 +38,7 @@ export const oldBen = {
     potency: 0.45,
     healthSteal: 0.2,
   },
-  alignment: "Light Side" as iCharacter["alignment"],
+  alignment: "Light Side" as IUnit["alignment"],
   categories: ["Rebel", "Jedi", "Tank", "Leader"],
 };
 
@@ -83,7 +83,7 @@ export const cls = {
     potency: 0.41,
     healthSteal: 10,
   },
-  alignment: "Light Side" as iCharacter["alignment"],
+  alignment: "Light Side" as IUnit["alignment"],
   categories: ["Rebel", "Unaligned Force User", "Attacker", "Leader"],
 };
 
@@ -121,6 +121,50 @@ export const aayla = {
     potency: 0.41,
     healthSteal: 0.15,
   },
-  alignment: "Light Side" as iCharacter["alignment"],
+  alignment: "Light Side" as IUnit["alignment"],
   categories: ["Rebel", "Unaligned Force User", "Attacker", "Leader"],
 };
+
+export const hanSolo = {
+  name: "Han Solo",
+  id: "HANSOLO",
+  activeAbilities: [
+    "specialskill_HANSOLO02",
+    "specialskill_HANSOLO01",
+    "basicskill_HANSOLO",
+  ],
+  uniqueAbilities: [],
+  stats: {
+    maxHealth: 34539,
+    health: 34539,
+    protection: 38628,
+    maxProtection: 38628,
+    speed: 156,
+    physical: {
+      offense: 3562,
+      critChance: 0.5775,
+      armorPen: 204,
+      accuracy: 0,
+      armor: 288,
+      dodge: 2,
+      critAvoid: 0,
+    },
+    special: {
+      offense: 1500,
+      critChance: 0.1,
+      armorPen: 0,
+      accuracy: 0,
+      armor: 162,
+      dodge: 2,
+      critAvoid: 0,
+    },
+    critDamage: 1.5,
+    tenacity: 0.35,
+    potency: 0.35,
+    healthSteal: 0.1,
+  },
+  alignment: "Light Side" as IUnit["alignment"],
+  categories: ["Rebel", "Unaligned Force User", "Attacker", "Leader"],
+};
+
+export default [oldBen, cls, aayla, hanSolo];

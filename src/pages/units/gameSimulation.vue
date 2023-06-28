@@ -1,342 +1,155 @@
 <template>
-  <div class="container swgoh-page">
+  <div class="swgoh-page">
     <div class="container">
       <div class="row">
         <div class="col">
-          <div class="input-group input-group-sm">
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              v-model.number="simulation.count"
-              min="1"
-              max="1000"
-            />
-            <button class="btn btn-sm btn-primary" @click="start()">
-              Run the Simulations
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <div v-for="character in team1" :key="character.id">
-            <h3>{{ character.name }}</h3>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Max Protection:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.maxProtection"
-                min="1"
-              />
+          <div class="opponent-container">
+            <div v-if="requestState === 'ERROR'" class="text-warning mt-2">
+              An error occurred retrieving the opponent. Please check the ally
+              code and try again. If the issue persists, it may be because your
+              opponent does not have a swgoh.gg account and thus this tool
+              cannot be used.
             </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Max Health:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.maxHealth"
-                min="1"
-              />
+            <div v-if="opponent" class="mt-3">
+              Your opponent is:
+              <a
+                class="me-2 link-shadow"
+                :href="`https://swgoh.gg/p/${opponent.allyCode}`"
+                target="_blank"
+                >{{ opponent.name }}</a
+              >
+              <button
+                class="btn btn-sm btn-danger"
+                title="Remove this opponent to add another one"
+                @click="showDeleteOpponentConfirm = true"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
             </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Speed:</span>
+            <div v-else class="input-group input-group-sm new-opponent">
               <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.speed"
-                min="1"
+                class="form-control"
+                type="text"
+                placeholder="Opponent Ally Code"
+                v-model="allyCode"
+                @keypress.enter="fetchOpponent(allyCode)"
+                @keypress="numbersOnly($event)"
               />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Crit Damage:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.critDamage"
-                min="1.5"
-                step=".01"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Crit Avoidance:</span>
-              <span class="input-group-text row-label">Physical:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.physical.critAvoid"
-                min="0"
-                step=".01"
-              />
-              <span class="input-group-text row-label">Special:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.special.critAvoid"
-                min="0"
-                step=".01"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Offense:</span>
-              <span class="input-group-text row-label">Physical:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.physical.offense"
-                min="1"
-              />
-              <span class="input-group-text row-label">Special:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.special.offense"
-                min="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Crit Chance:</span>
-              <span class="input-group-text row-label">Physical:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.physical.critChance"
-                min="0"
-                step=".01"
-                max="1"
-              />
-              <span class="input-group-text row-label">Special:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.special.critChance"
-                min="0"
-                step=".01"
-                max="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Defense:</span>
-              <span class="input-group-text row-label">Armor:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.physical.armor"
-                min="1"
-              />
-              <span class="input-group-text row-label">Resistance:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.special.armor"
-                min="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Armor Penetration:</span>
-              <span class="input-group-text row-label">Physical:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.physical.armorPen"
-                min="1"
-              />
-              <span class="input-group-text row-label">Special:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.special.armorPen"
-                min="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Tenacity:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.tenacity"
-                min="1"
-                max="100"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Potency:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.potency"
-                min="1"
-                max="100"
-              />
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div v-for="character in team2" :key="character.id">
-            <h3>{{ character.name }}</h3>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Max Protection:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.maxProtection"
-                min="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Max Health:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.maxHealth"
-                min="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Speed:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.speed"
-                min="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Crit Damage:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.critDamage"
-                min="1.5"
-                step=".01"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Crit Avoidance:</span>
-              <span class="input-group-text row-label">Physical:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.physical.critAvoid"
-                min="0"
-                step=".01"
-              />
-              <span class="input-group-text row-label">Special:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.special.critAvoid"
-                min="0"
-                step=".01"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Offense:</span>
-              <span class="input-group-text row-label">Physical:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.physical.offense"
-                min="1"
-              />
-              <span class="input-group-text row-label">Special:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.special.offense"
-                min="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Crit Chance:</span>
-              <span class="input-group-text row-label">Physical:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.physical.critChance"
-                min="0"
-                step=".01"
-                max="1"
-              />
-              <span class="input-group-text row-label">Special:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.special.critChance"
-                min="0"
-                step=".01"
-                max="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Defense:</span>
-              <span class="input-group-text row-label">Armor:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.physical.armor"
-                min="1"
-              />
-              <span class="input-group-text row-label">Resistance:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.special.armor"
-                min="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Armor Penetration:</span>
-              <span class="input-group-text row-label">Physical:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.physical.armorPen"
-                min="1"
-              />
-              <span class="input-group-text row-label">Special:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.special.armorPen"
-                min="1"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Tenacity:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.tenacity"
-                min="1"
-                max="100"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text row-label">Potency:</span>
-              <input
-                class="form-control form-control-sm"
-                type="number"
-                v-model.number="character.potency"
-                min="1"
-                max="100"
-              />
+              <button
+                class="btn btn-primary"
+                type="button"
+                @click="fetchOpponent(allyCode)"
+                :disabled="allyCode.trim() === ''"
+              >
+                Find Opponent
+              </button>
             </div>
           </div>
         </div>
       </div>
-      <div class="row">
+      <div class="row" v-if="opponent">
         <div class="col">
-          <div>Team 1 Wins: {{ simulation.team1Wins }}</div>
-          <div>Team 2 Wins: {{ simulation.team2Wins }}</div>
-          <ol>
-            <li v-for="(log, index) in logs" :key="index">
-              <span v-html="log"></span>
+          <div>Your Team:</div>
+          <UnitSearch
+            :list="playerUnitList"
+            @select="addToTeam('player', $event)"
+          />
+          <ul class="character-list">
+            <li
+              v-for="(character, index) in playerTeam"
+              :key="'player_' + character.id"
+              title="Remove this Character"
+            >
+              <span
+                @click="removeCharacter('player', index)"
+                class="character-element"
+              >
+                <i class="fa fa-times-circle me-2"></i>
+                <span>{{ character.name }}</span>
+              </span>
+              <span class="float-end d-flex align-items-center">
+                <input
+                  type="checkbox"
+                  v-model="character.isLeader"
+                  :id="'player_' + character.id"
+                  class="me-2"
+                  :disabled="disableLeader('player', character.id)"
+                />
+                <label :for="'player_' + character.id">Is Leader?</label>
+              </span>
             </li>
-          </ol>
+          </ul>
+        </div>
+        <div class="col">
+          <div>Opponent's Team:</div>
+          <UnitSearch
+            :list="opponentUnitList"
+            @select="addToTeam('opponent', $event)"
+          />
+          <ul class="character-list">
+            <li
+              v-for="(character, index) in opponentTeam"
+              :key="'opponent_' + character.id"
+              title="Remove this Character"
+            >
+              <span
+                @click="removeCharacter('opponent', index)"
+                class="character-element"
+              >
+                <i class="fa fa-times-circle me-2"></i>
+                <span>{{ character.name }}</span>
+              </span>
+              <span class="float-end d-flex align-items-center">
+                <input
+                  type="checkbox"
+                  v-model="character.isLeader"
+                  :id="'opponent_' + character.id"
+                  class="me-2"
+                  :disabled="disableLeader('opponent', character.id)"
+                />
+                <label :for="'opponent_' + character.id">Is Leader?</label>
+              </span>
+            </li>
+          </ul>
         </div>
       </div>
+      <template v-if="playerTeam.length > 0 && opponentTeam.length > 0">
+        <div class="row">
+          <div class="col">
+            <div class="input-group input-group-sm">
+              <input
+                class="form-control form-control-sm"
+                type="number"
+                v-model.number="simulation.count"
+                min="1"
+                max="1000"
+              />
+              <button class="btn btn-sm btn-primary" @click="start()">
+                Run the Simulations
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div>Team 1 Wins: {{ simulation.playerWins }}</div>
+            <div>Team 2 Wins: {{ simulation.opponentWins }}</div>
+            <ol>
+              <li v-for="(log, index) in logs" :key="index">
+                <span v-html="log"></span>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </template>
     </div>
+    <Confirm
+      :isOpen="showDeleteOpponentConfirm"
+      title="Are you sure?"
+      :text="`Are you sure you want to remove this opponent? You will lose all of their teams and match ups. This cannot be undone.`"
+      @confirm="removeOpponent()"
+      @cancel="showDeleteOpponentConfirm = false"
+    />
   </div>
 </template>
 
@@ -348,72 +161,139 @@ import { v4 as uuid } from "uuid";
 import { Team } from "types/teams";
 import TeamTable from "components/teams/teamTable.vue";
 import MatchTable from "components/teams/matchTable.vue";
-import { randomNumber, unvue } from "utils";
+import { randomNumber, unvue, numbersOnly } from "utils";
 import { random } from "lodash";
 import abilities from "types/abilities";
-import {
-  team1,
-  team2,
-  Character,
-  iStatusEffect,
-  iAbility,
-} from "types/characters";
+import { Character, iStatusEffect, iAbility } from "types/characters";
+import { Unit } from "types/unit";
+import UnitSearch from "components/units/unitSearch.vue";
+import characterList from "types/_tempCharacterData";
 
 interface dataModel {
   simulation: {
     count: number;
-    team1Wins: number;
-    team2Wins: number;
+    playerWins: number;
+    opponentWins: number;
   };
-  team1: Character[];
-  team2: Character[];
+  playerTeam: Character[];
+  opponentTeam: Character[];
   logs: string[];
+  showDeleteOpponentConfirm: boolean;
+  allyCode: string;
 }
 
 export default defineComponent({
   name: "GameSimulationPage",
-  data() {
+  components: { UnitSearch },
+  data(): dataModel {
     return {
       simulation: {
         count: 1,
-        team1Wins: 0,
-        team2Wins: 0,
+        playerWins: 0,
+        opponentWins: 0,
       },
-      team1,
-      team2,
+      playerTeam: [],
+      opponentTeam: [],
       logs: [],
-    } as dataModel;
+      showDeleteOpponentConfirm: false,
+      allyCode: "",
+    };
+  },
+  computed: {
+    ...mapState("opponents", {
+      opponent: "player",
+      opponentTeams: "teams",
+      matches: "matches",
+      requestState: "requestState",
+    }),
+    ...mapState("player", ["player"]),
+    playerUnitList(): Unit[] {
+      return this.player?.units.filter((unit: Unit) => {
+        return (
+          characterList.some((c) => c.id === unit.id) &&
+          !this.playerTeam.some((x) => x.id === unit.id)
+        );
+      });
+    },
+    opponentUnitList(): Unit[] {
+      return this.opponent?.units.filter((unit: Unit) => {
+        return (
+          characterList.some((c) => c.id === unit.id) &&
+          !this.opponentTeam.some((x) => x.id === unit.id)
+        );
+      });
+    },
   },
   methods: {
+    ...mapActions("opponents", {
+      fetchOpponent: "fetchPlayer",
+      deleteOpponentTeam: "deleteTeam",
+      addOpponentTeam: "upsertTeam",
+      saveOpponentTeams: "saveTeams",
+      addMatch: "addMatch",
+      deleteOpponent: "deleteOpponent",
+      refreshMatches: "refreshMatches",
+      removeMatch: "removeMatch",
+    }),
+    addToTeam(teamName: "player" | "opponent", unit: Unit) {
+      if (unit instanceof Unit) {
+        if (teamName === "player") {
+          if (!this.playerTeam.some((x) => x.id === unit.id)) {
+            this.playerTeam.push(new Character(unit, this.player.name));
+          }
+        } else {
+          if (!this.opponentTeam.some((x) => x.id === unit.id)) {
+            this.opponentTeam.push(new Character(unit, this.opponent.name));
+          }
+        }
+      }
+    },
+    removeCharacter(teamName: "player" | "opponent", index: number) {
+      if (teamName === "player") {
+        this.playerTeam.splice(index, 1);
+      } else {
+        this.opponentTeam.splice(index, 1);
+      }
+    },
+    initializeMatch() {
+      [...this.playerTeam, ...this.opponentTeam].forEach((x) => x.initialize());
+    },
     reset() {
-      this.team1.forEach((x) =>
-        x.reset(this.team1 as Character[], this.team2 as Character[])
+      this.playerTeam.forEach((x) =>
+        x.reset(
+          this.playerTeam as Character[],
+          this.opponentTeam as Character[]
+        )
       );
-      this.team2.forEach((x) =>
-        x.reset(this.team2 as Character[], this.team1 as Character[])
+      this.opponentTeam.forEach((x) =>
+        x.reset(
+          this.opponentTeam as Character[],
+          this.playerTeam as Character[]
+        )
       );
     },
     start() {
       this.logs = [];
-      this.simulation.team1Wins = 0;
-      this.simulation.team2Wins = 0;
+      this.simulation.playerWins = 0;
+      this.simulation.opponentWins = 0;
       this.simulation.count = Math.min(this.simulation.count, 100);
       for (let i = 0; i < this.simulation.count; i++) {
         this.reset();
+        this.initializeMatch();
         let j = 0;
         do {
           j++;
 
-          this.nextAction(j);
-          const team1Lost = this.team1.every((x) => x.health <= 0);
-          const team2Lost = this.team2.every((x) => x.health <= 0);
-          if (team1Lost || team2Lost || j > 100) {
-            const winner = team1Lost ? "Team 2" : "Team 1";
-            this.logs.push(`Match ends: ${winner} is the winner!`);
-            if (team1Lost) {
-              this.simulation.team2Wins++;
+          this.nextTurn(j);
+          const playerLost = this.playerTeam.every((x) => x.health <= 0);
+          const opponentList = this.opponentTeam.every((x) => x.health <= 0);
+          if (playerLost || opponentList || j > 100) {
+            const winner = playerLost ? this.opponent : this.player;
+            this.logs.push(`Match ends: ${winner.name} is the winner!`);
+            if (playerLost) {
+              this.simulation.opponentWins++;
             } else {
-              this.simulation.team1Wins++;
+              this.simulation.playerWins++;
             }
             break;
           }
@@ -421,10 +301,10 @@ export default defineComponent({
       }
       this.reset();
     },
-    nextAction(turnNumber: number) {
+    nextTurn(turnNumber: number) {
       const allChars: Character[] = [
-        ...this.team1,
-        ...this.team2,
+        ...this.playerTeam,
+        ...this.opponentTeam,
       ] as Character[];
 
       const { character, tmAmount } = allChars.reduce(
@@ -451,19 +331,24 @@ export default defineComponent({
           }
         });
 
-        const opponents: Character[] =
-          character.owner === "team1"
-            ? (this.team2 as Character[])
-            : (this.team1 as Character[]);
-
-        const teammates: Character[] =
-          character.owner === "team2"
-            ? (this.team2 as Character[])
-            : (this.team1 as Character[]);
-
         this.logs.push(`Turn ${turnNumber}`);
-
         this.logs.push(...character.takeAction());
+      }
+    },
+    removeOpponent() {
+      this.deleteOpponent();
+      this.showDeleteOpponentConfirm = false;
+    },
+    numbersOnly,
+    disableLeader(teamName: "player" | "opponent", characterId): boolean {
+      if (teamName === "player") {
+        return this.playerTeam.some((character) => {
+          return character.isLeader && character.id !== characterId;
+        });
+      } else {
+        return this.opponentTeam.some((character) => {
+          return character.isLeader && character.id !== characterId;
+        });
       }
     },
   },
@@ -494,5 +379,16 @@ export default defineComponent({
 }
 ::v-deep(.health) {
   color: $success-text-light;
+}
+
+.character-list {
+  list-style-type: none;
+  .character-element {
+    cursor: pointer;
+
+    &:hover {
+      color: $danger-text-dark;
+    }
+  }
 }
 </style>
