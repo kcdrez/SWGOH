@@ -166,7 +166,7 @@ export interface iAbility
   name: string;
   cooldown: number;
   targets?: iTarget[];
-  actions?: any[];
+  actions?: iEffect[];
 }
 
 export interface iUniqueAbility extends iGeneralAbility {}
@@ -205,7 +205,7 @@ interface iTargetData {
   allies?: boolean;
   all?: boolean;
   targetCount?: number;
-  scale?: "Resisted";
+  scale?: "Resisted" | "physical critChance";
 }
 
 interface iCondition {
@@ -1017,12 +1017,12 @@ export class Character {
         0.15
       );
       if (
-        !chanceOfEvent(resistedChance) ||
+        !chanceOfEvent(resistedChance * 100) ||
         debuff.cantResist ||
         debuff.name === "Tenacity Down" ||
         this.isSelf(targetCharacter)
       ) {
-        if (!chanceOfEvent(debuff.chance ?? 0)) {
+        if (chanceOfEvent(debuff.chance ?? 0)) {
           return;
         }
 
@@ -1411,7 +1411,6 @@ export class Character {
   ): string[] {
     const logs: string[] = [];
     actions?.forEach((action) => {
-      console.log(this.id, ability?.name, action);
       if (this.checkCondition(action.condition, targetCharacter)) {
         logs.push(
           ...this.addEffects(
@@ -1464,12 +1463,11 @@ export class Character {
         //if it is a number
         const num = Number(stat);
         if (stats.statToModify === "health" && stats.type === "percent") {
-          console.log("checking health percent");
           const percent = num / targetCharacter.maxHealth;
           meetsStatRequirement =
             stats.amountType === "greater"
-              ? stats.amount > percent
-              : stats.amount < percent;
+              ? stats.amount < percent
+              : stats.amount > percent;
         } else if (
           stats.statToModify === "protection" &&
           stats.type === "percent"
@@ -1516,7 +1514,6 @@ export class Character {
     data?: any
   ): string[] {
     const logs: string[] = [];
-    // console.log(this.id, effect, ability?.name);
     if (effect.dispel) {
       logs.push(
         ...targetCharacter.removeBuff(effect.dispel?.buffs ?? null, this)
@@ -1527,7 +1524,6 @@ export class Character {
     }
 
     if (effect.cooldown) {
-      console.log(this.id, effect.cooldown);
       if (effect.cooldown.target === "Self") {
         logs.push(this.changeCooldown(effect));
       } else {
@@ -1572,7 +1568,7 @@ export class Character {
         ability.turnsRemaining += amount;
         return `${this.name}'s ${ability.name}'s cooldown was ${
           amount > 0 ? "increased" : "decreased"
-        } by ${amount}`;
+        } by ${Math.abs(amount)}`;
       } else {
         console.warn(
           `Could not change the cooldown of ${id}`,
@@ -1737,6 +1733,7 @@ export class Character {
       logs.push(...this.inflictEffects(targetData, targetCharacter, ability));
     }
     if (debuffs && !targetCharacter.isDead) {
+      console.log(this.id, targetCharacter.id, debuffs);
       logs.push(...this.inflictDebuff(debuffs, targetCharacter));
     }
     if (buffs && !targetCharacter.isDead) {
@@ -1767,11 +1764,15 @@ export class Character {
   private getScalar(type: string | number = ""): number {
     if (type === "Resisted") {
       return this._history.resisted;
+    } else if (type.toString().includes(" critChance")) {
+      const split = type.toString().split(" ");
+      if (split[0] === "physical" || split[0] === "special") {
+        return this.getCombatStats(split[0])[split[1]];
+      }
     } else if (typeof type === "string") {
       return 1;
-    } else {
-      return type;
     }
+    return Number(type);
   }
   private targetSelf(target: iTrigger["target"]): boolean {
     const all = target.all ?? false;

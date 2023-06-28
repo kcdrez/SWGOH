@@ -128,7 +128,7 @@ export const aayla = {
 export const hanSolo = {
   name: "Han Solo",
   id: "HANSOLO",
-  activeAbilities: ["basicskill_HANSOLO"],
+  activeAbilities: ["specialskill_HANSOLO01", "basicskill_HANSOLO"],
   uniqueAbilities: [],
   stats: {
     maxHealth: 34539,

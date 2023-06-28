@@ -91,7 +91,6 @@ const characterMapping: Record<
                   statToModify: "health",
                   amount: 1,
                   type: "percent",
-                  amountType: "less",
                 },
               },
             },
@@ -737,6 +736,40 @@ const characterMapping: Record<
                 statToModify: "offense",
                 amount: 0.75,
               },
+            },
+          ],
+        },
+      ],
+    },
+    specialskill_HANSOLO01: {
+      name: "Deadeye",
+      id: "specialskill_HANSOLO011",
+      cooldown: 3,
+      turnsRemaining: 0,
+      targets: [
+        {
+          damageType: "physical",
+          target: { targetCount: 1 },
+          damage: 3.699,
+          debuffs: [
+            {
+              name: "Stun",
+              duration: 1,
+              id: uuid(),
+            },
+          ],
+        },
+        {
+          target: {
+            tags: ["Self"],
+            allies: true,
+            scale: "physical critChance",
+          },
+          buffs: [
+            {
+              name: "TM",
+              duration: 100,
+              id: uuid(),
             },
           ],
         },
