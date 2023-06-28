@@ -169,7 +169,7 @@ const store = {
         commit("SET_REQUEST_STATE", loadingState.ready);
       }
     },
-    async fetchPlayer({ commit }: ActionCtx, allyCode: string) {
+    async fetchPlayer({ commit, dispatch }: ActionCtx, allyCode: string) {
       if (allyCode) {
         commit("SET_REQUEST_STATE", loadingState.loading);
         try {
@@ -177,6 +177,7 @@ const store = {
           commit("SET_OPPONENT", player);
           commit("SET_ALLY_CODE", allyCode);
           commit("SET_REQUEST_STATE", loadingState.ready);
+          dispatch("saveTeams");
         } catch (err) {
           console.error(err);
           commit("SET_REQUEST_STATE", loadingState.error);
@@ -266,7 +267,6 @@ const store = {
         dispatch("saveMatches");
       }
     },
-    // removeMatch({ commit }: ActionCtx, matchId: string) {},
     async deleteOpponent({ rootState, commit }: ActionCtx) {
       await apiClient.deleteOpponent(rootState.player.player?.id);
       commit("RESET");

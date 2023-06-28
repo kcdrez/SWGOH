@@ -21,7 +21,7 @@ import Error from "components/general/error.vue";
 import MultiSelect from "components/general/multiSelect.vue";
 import ExpandableSection from "components/general/expandableSection.vue";
 import SwgohTable from "components/general/table/swgohTable.vue";
-import { formatDate, pluralText, daysFromNow } from "utils";
+import { formatDate, pluralText, daysFromNow, numbersOnly } from "utils";
 
 const app = createApp(App);
 
@@ -36,12 +36,7 @@ app.config.globalProperties.$filters = {
   },
   daysFromNow,
   pluralText,
-  numbersOnly(e: KeyboardEvent) {
-    const keyCode = e.keyCode ? e.keyCode : e.which;
-    if (keyCode < 48 || keyCode > 57) {
-      e.preventDefault();
-    }
-  },
+  numbersOnly,
   formatDate,
 };
 

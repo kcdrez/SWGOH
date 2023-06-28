@@ -4,18 +4,7 @@ import _ from "lodash";
 
 import { randomNumber, unvue } from "utils";
 import abilities from "types/abilities";
-import { aayla, cls, hanSolo, oldBen } from "types/_tempCharacterData";
-
-export interface iCharacter {
-  id: string;
-  name: string;
-  stats: iStats;
-  activeAbilities: string[];
-  uniqueAbilities?: string[];
-  leaderAbilities?: string[];
-  alignment: "Light Side" | "Dark Side" | "Neutral";
-  categories: string[];
-}
+import { Ability, IUnit, Unit } from "types/unit";
 
 export interface iStats {
   maxHealth: number;
@@ -79,7 +68,7 @@ type tDebuff =
   | "Fracture" //
   | "Healing Immunity" //
   | "Health Down" //add check when its applied so current health doesnt exceed it
-  | "Health Steal Down" //
+  | "Health Steal Down"
   | "Hunted" //
   | "Inevitable Failure" //
   | "Marked"
@@ -137,6 +126,7 @@ export interface iStatusEffect {
   expires?: iTarget;
   id: string;
   sourceAbility?: iAbility | null;
+  isStackable?: boolean;
 }
 
 export interface iEffects {
@@ -179,6 +169,7 @@ interface iTrigger extends iTarget {
     | "resistDetrimentalEffect"
     | "inflictDebuff"
     | "criticalHit"
+    | "dodge"
     | "always";
   events?: iTarget[];
   data?: any;
@@ -203,7 +194,6 @@ interface iTargetData {
   targetIds?: string[];
   tags?: string[];
   allies?: boolean;
-  all?: boolean;
   targetCount?: number;
   scale?: "Resisted" | "physical critChance";
 }
@@ -273,30 +263,91 @@ export class Character {
   private _tm: number = 0;
   private _buffs: iStatusEffect[];
   private _debuffs: iStatusEffect[];
-  private _activeAbilities: iAbility[];
+  private _activeAbilities: (iBasicAbility | iSpecialAbility)[];
   private _uniqueAbilities: iUniqueAbility[];
+  private _leaderAbility: iUniqueAbility | null;
   private _owner: string;
   private _history: iHistory = {
     resisted: 0,
   };
-  private _alignment: iCharacter["alignment"];
+  private _alignment: IUnit["alignment"];
   private _categories: string[];
   private _triggers: iTrigger[] = [];
   private _teammates: Character[] = [];
   private _opponents: Character[] = [];
+  public isLeader: boolean = false;
 
-  constructor(data: iCharacter, owner: string) {
-    this._baseStats = data.stats;
+  constructor(data: Unit, owner: string) {
+    this._baseStats = {
+      maxHealth: data.health,
+      health: data.health,
+      maxProtection: data.protection,
+      protection: data.protection,
+      speed: data.speed,
+      physical: {
+        offense: data.offense.physical,
+        armor: (data.armor.physical * 637.5) / (100 - data.armor.physical),
+        armorPen: data.armorPen,
+        critChance: data.critChance.physical,
+        accuracy: data.physicalAccuracy / 100,
+        dodge: data.physicalDodge / 100,
+        critAvoid: data.specialCritAvoid / 100,
+      },
+      special: {
+        offense: data.offense.special,
+        armor: (data.armor.special * 637.5) / (100 - data.armor.special),
+        armorPen: data.resistancePen,
+        critChance: data.critChance.special / 100,
+        accuracy: data.specialAccuracy / 100,
+        dodge: data.specialDodge / 100,
+        critAvoid: data.specialCritAvoid / 100,
+      },
+      critDamage: data.critDamage / 100,
+      tenacity: data.tenacity / 100,
+      potency: data.potency / 100,
+      healthSteal: data.healthSteal,
+    };
     this._name = data.name;
     this._id = data.id;
     this._buffs = [];
     this._debuffs = [];
-    this._activeAbilities = data.activeAbilities.map((x: string) => {
-      return _.cloneDeep(abilities[this._id][x]) as iAbility;
-    });
-    this._uniqueAbilities = (data.uniqueAbilities ?? []).map((x: string) => {
-      return _.cloneDeep(abilities[this._id][x]) as iUniqueAbility;
-    });
+    this._activeAbilities = [
+      ...data.specialAbilities,
+      data.basicAbility,
+    ].reduce(
+      (
+        acc: (iBasicAbility | iSpecialAbility)[],
+        ability: Ability | undefined
+      ) => {
+        const abilitiesMap = abilities[data.id];
+        const abilityId = ability?.id ?? "";
+        if (abilityId && abilityId in abilitiesMap) {
+          acc.push(_.cloneDeep(abilitiesMap[abilityId]));
+        }
+        return acc;
+      },
+      []
+    );
+
+    this._uniqueAbilities = data.uniqueAbilities.reduce(
+      (acc: iUniqueAbility[], ability: Ability | undefined) => {
+        const abilitiesMap = abilities[data.id];
+        const abilityId = ability?.id ?? "";
+        if (abilityId && abilityId in abilitiesMap) {
+          acc.push(_.cloneDeep(abilitiesMap[abilityId]));
+        }
+        return acc;
+      },
+      []
+    );
+    this._leaderAbility = (() => {
+      const abilitiesMap = abilities[data.id];
+      const abilityId = data.leaderAbility?.id ?? "";
+      if (abilityId && abilityId in abilitiesMap) {
+        return _.cloneDeep(abilitiesMap[abilityId]);
+      }
+      return null;
+    })();
     this._owner = owner;
     this._alignment = data.alignment;
     this._categories = data.categories;
@@ -496,6 +547,10 @@ export class Character {
     this._baseStats.potency = val;
   }
   public get counterChance() {
+    if (this.hasDebuff("Stun")) {
+      return 0;
+    }
+
     const { counter: tempCounter } = this.tempStats as Record<
       string,
       iStatsCheck
@@ -535,7 +590,13 @@ export class Character {
         !modifier ||
         (modifier.condition && this.checkCondition(modifier.condition, this))
       ) {
-        logs.push(...this.useAbility(this.basicAbility, modifier.stats, false));
+        logs.push(
+          ...this.useAbility(
+            this.basicAbility as iAbility,
+            modifier.stats,
+            false
+          )
+        );
       }
     }
     return logs;
@@ -934,20 +995,23 @@ export class Character {
         ])}`,
       ];
     } else if (!this.hasDebuff("Buff Immunity")) {
-      if (scalar > 0) {
-        this._buffs.push({
-          ...buff,
-          duration: buff.duration * scalar,
-          isNew,
-          sourceAbility: ability,
-        });
-        return [
-          `${format.characterName(this.name, this.owner)} gained ${format.buff([
-            buff.name,
-          ])} for <b>${buff.duration * scalar}</b> turns${format.abilitySource(
-            ability
-          )}`,
-        ];
+      if (!this.hasBuff(buff.name) || buff.isStackable) {
+        if (scalar > 0) {
+          this._buffs.push({
+            ...buff,
+            duration: buff.duration * scalar,
+            isNew,
+            sourceAbility: ability,
+          });
+          return [
+            `${format.characterName(
+              this.name,
+              this.owner
+            )} gained ${format.buff([buff.name])} for <b>${
+              buff.duration * scalar
+            }</b> turns${format.abilitySource(ability)}`,
+          ];
+        }
       }
     }
     return [];
@@ -1012,41 +1076,65 @@ export class Character {
     this._history.resisted = 0;
 
     debuffs.forEach((debuff) => {
-      const resistedChance = Math.max(
-        targetCharacter.tenacity - this.potency,
-        0.15
-      );
-      if (
-        !chanceOfEvent(resistedChance * 100) ||
-        debuff.cantResist ||
-        debuff.name === "Tenacity Down" ||
-        this.isSelf(targetCharacter)
-      ) {
-        if (chanceOfEvent(debuff.chance ?? 0)) {
-          return;
-        }
+      if (!targetCharacter.hasDebuff(debuff.name) || debuff.isStackable) {
+        const resistedChance = Math.max(
+          targetCharacter.tenacity - this.potency,
+          0.15
+        );
+        if (
+          !chanceOfEvent(resistedChance * 100) ||
+          debuff.cantResist ||
+          debuff.name === "Tenacity Down" ||
+          this.isSelf(targetCharacter)
+        ) {
+          if (chanceOfEvent(debuff.chance ?? 0)) {
+            return;
+          }
 
-        if (debuff.name === "TM") {
-          logs.push(targetCharacter.changeTurnMeter(debuff.duration * scalar));
+          if (debuff.name === "TM") {
+            logs.push(
+              targetCharacter.changeTurnMeter(debuff.duration * scalar)
+            );
+          } else {
+            const amount = debuff.duration * scalar;
+
+            targetCharacter.debuffs.push({
+              ...unvue(debuff),
+              isNew: true,
+            });
+            logs.push(
+              `${format.characterName(
+                targetCharacter.name,
+                targetCharacter.owner
+              )} was inflicted with ${format.debuff([
+                debuff.name,
+              ])} for ${amount} turn${amount > 1 ? "s" : ""}`
+            );
+            logs.push(
+              ...this.executePassiveTriggers([
+                {
+                  triggerType: "inflictDebuff",
+                  target: {},
+                  data: { debuff: debuff.name },
+                  id: uuid(),
+                },
+              ])
+            );
+          }
         } else {
-          const amount = debuff.duration * scalar;
-
-          targetCharacter.debuffs.push({
-            ...unvue(debuff),
-            isNew: true,
-          });
+          this._history.resisted++;
           logs.push(
             `${format.characterName(
               targetCharacter.name,
               targetCharacter.owner
-            )} was inflicted with ${format.debuff([
-              debuff.name,
-            ])} for ${amount} turn${amount > 1 ? "s" : ""}`
+            )} resisted ${format.debuff([
+              debuff.name === "TM" ? "TM decrease" : debuff.name,
+            ])}`
           );
           logs.push(
-            ...this.executePassiveTriggers([
+            ...targetCharacter.executePassiveTriggers([
               {
-                triggerType: "inflictDebuff",
+                triggerType: "resistDetrimentalEffect",
                 target: {},
                 data: { debuff: debuff.name },
                 id: uuid(),
@@ -1054,26 +1142,6 @@ export class Character {
             ])
           );
         }
-      } else {
-        this._history.resisted++;
-        logs.push(
-          `${format.characterName(
-            targetCharacter.name,
-            targetCharacter.owner
-          )} resisted ${format.debuff([
-            debuff.name === "TM" ? "TM decrease" : debuff.name,
-          ])}`
-        );
-        logs.push(
-          ...targetCharacter.executePassiveTriggers([
-            {
-              triggerType: "resistDetrimentalEffect",
-              target: {},
-              data: { debuff: debuff.name },
-              id: uuid(),
-            },
-          ])
-        );
       }
     });
     return logs;
@@ -1137,17 +1205,21 @@ export class Character {
   }
   public chooseAbility(): iAbility | null {
     if (this.hasDebuff("Ability Block")) {
-      return this.basicAbility ?? null;
+      return (this.basicAbility as iAbility) ?? null;
     }
 
     const ability = this._activeAbilities.find((a) => {
-      return a.turnsRemaining <= 0;
+      if ("turnsRemaining" in a) {
+        return a.turnsRemaining <= 0;
+      } else {
+        return a;
+      }
     });
 
-    if (ability) {
+    if (ability && "turnsRemaining" in ability) {
       ability.turnsRemaining = ability.cooldown;
     }
-    return ability ?? null;
+    return (ability as iAbility) ?? null;
   }
   public findTargets(
     targetSelection: iTarget,
@@ -1159,32 +1231,46 @@ export class Character {
       dead?: boolean;
     }
   ): Character[] {
-    const { allies, targetCount, tags, all, targetIds } =
-      targetSelection.target;
-    let list: Character[] = [];
-    if (all) {
-      list = allies ? this._teammates : this._opponents;
-    } else if (targetCount) {
-      let validTargets: Character[] = [];
-      if (allies) {
-        validTargets = this._teammates.filter((char) => {
-          return tags ? anyTagsMatch(char, tags, this.id) : true;
-        });
-      } else {
-        const taunting = this._opponents.filter((c) => {
+    const { allies, targetCount, tags, targetIds } = targetSelection.target;
+    let list: Character[] = [...this._teammates, ...this._opponents];
+
+    if (allies) {
+      list = list.filter((x) => x.owner === this.owner);
+    } else if (allies === false) {
+      list = list.filter((x) => x.owner !== this.owner);
+    }
+
+    if (targetIds) {
+      list = list.filter((char) => {
+        let shouldInclude = false;
+        if (target instanceof Character) {
+          shouldInclude = targetIds.includes("target") && char.id === target.id;
+        }
+        return targetIds.includes(char.id) || shouldInclude;
+      });
+    }
+
+    if (tags) {
+      list = list.filter((char) => anyTagsMatch(char, tags, this.id));
+    }
+
+    if (targetCount) {
+      let validTargets: Character[] = list;
+      if (allies === false) {
+        const forcedTargets = list.filter((c) => {
           if (this.effects.ignoreTaunt) {
-            return false;
+            return true;
           }
           return [...c.buffs, ...c.debuffs].some((b) =>
             ["Taunt", "Marked", "Deathmarked"].includes(b.name)
           );
         });
-        validTargets = (
-          taunting.length > 0 ? taunting : this._opponents
-        ).filter((char) => {
-          return tags ? anyTagsMatch(char, tags, this.id) : true;
-        });
+        validTargets = forcedTargets.length > 0 ? forcedTargets : list;
+      } else {
+        validTargets = list;
       }
+
+      list = [];
 
       do {
         const rand: number = randomNumber(0, validTargets.length - 1);
@@ -1194,20 +1280,13 @@ export class Character {
           list.push(validTargets[rand]);
         }
       } while (list.length < targetCount && validTargets.length >= targetCount);
-    } else if (tags) {
-      list = (allies ? this._teammates : this._opponents).filter((char) =>
-        anyTagsMatch(char, tags, this.id)
-      );
-    } else if (targetIds) {
-      list = (allies ? this._teammates : this._opponents).filter((char) => {
-        let shouldInclude = false;
-        if (target instanceof Character) {
-          shouldInclude = targetIds.includes("target") && char.id === target.id;
-        }
-        return targetIds.includes(char.id) || shouldInclude;
-      });
     }
+
     return list.filter((char: Character) => {
+      if (!char) {
+        return false;
+      }
+
       let shouldExclude = false;
       if (char.isDead && !ignore?.dead) {
         shouldExclude = true;
@@ -1341,6 +1420,19 @@ export class Character {
       )
     );
 
+    if (isCrit) {
+      logs.push(
+        ...this.executePassiveTriggers([
+          {
+            triggerType: "criticalHit",
+            target: {},
+            data: { damageDealt: damageTotal, isCrit, target: targetCharacter },
+            id: uuid(),
+          },
+        ])
+      );
+    }
+
     if (targetCharacter.health <= 0) {
       logs.push(
         `${format.characterName(
@@ -1368,7 +1460,7 @@ export class Character {
         } = this.dealDamage(
           targetCharacter,
           target,
-          this.basicAbility ?? null,
+          (this.basicAbility as iAbility) ?? null,
           false,
           {
             statToModify: "offense",
@@ -1388,18 +1480,6 @@ export class Character {
             },
           ])
         );
-        if (isCrit) {
-          logs.push(
-            ...this.executePassiveTriggers([
-              {
-                triggerType: "criticalHit",
-                target: {},
-                data: { damageDealt, isCrit, target: targetCharacter },
-                id: uuid(),
-              },
-            ])
-          );
-        }
       });
     }
     return logs;
@@ -1532,7 +1612,9 @@ export class Character {
     }
 
     if (effect.heal) {
-      logs.push(...this.heal(effect.heal, ability, data?.healAmount));
+      logs.push(
+        ...targetCharacter.heal(effect.heal, ability, data?.healAmount)
+      );
     }
 
     if (effect.stats) {
@@ -1540,12 +1622,12 @@ export class Character {
     }
 
     if (effect.assist) {
-      logs.push(...this.callAllyToAssist(effect.assist));
+      logs.push(...targetCharacter.callAllyToAssist(effect.assist));
     }
 
     if (effect.buffs) {
       logs.push(
-        ...this.addBuff(
+        ...targetCharacter.addBuff(
           effect.buffs ?? [],
           isNew,
           this.getScalar(effect.scale),
@@ -1564,7 +1646,7 @@ export class Character {
     if (effect.cooldown) {
       const { amount, id } = effect.cooldown;
       const ability = this._activeAbilities.find((a) => a.id === id);
-      if (ability) {
+      if (ability && "turnsRemaining" in ability) {
         ability.turnsRemaining += amount;
         return `${this.name}'s ${ability.name}'s cooldown was ${
           amount > 0 ? "increased" : "decreased"
@@ -1592,7 +1674,7 @@ export class Character {
       const chanceToDodge =
         modifyStat(dodge, "dodge", stats) -
         modifyStat(accuracy, "accuracy", stats);
-      return chanceOfEvent(chanceToDodge);
+      return chanceOfEvent(chanceToDodge * 100);
     }
   }
   public startOfTurn() {
@@ -1643,6 +1725,15 @@ export class Character {
         const attackMissed = char.checkEvade(targetData, this, stats);
         if (attackMissed) {
           logs.push(`${format.characterName(char.name, char.owner)} evaded`);
+          logs.push(
+            ...char.executePassiveTriggers([
+              {
+                triggerType: "dodge",
+                target: {},
+                id: uuid(),
+              },
+            ])
+          );
           return;
         }
         logs.push(
@@ -1712,14 +1803,6 @@ export class Character {
         id: uuid(),
       });
 
-      if (isCrit) {
-        myTriggers.push({
-          triggerType: "criticalHit",
-          target: {},
-          data: { damageDealt, isCrit },
-          id: uuid(),
-        });
-      }
       if (targetCharacter.health <= 0) {
         opponentTriggers.push({
           triggerType: "death",
@@ -1733,7 +1816,6 @@ export class Character {
       logs.push(...this.inflictEffects(targetData, targetCharacter, ability));
     }
     if (debuffs && !targetCharacter.isDead) {
-      console.log(this.id, targetCharacter.id, debuffs);
       logs.push(...this.inflictDebuff(debuffs, targetCharacter));
     }
     if (buffs && !targetCharacter.isDead) {
@@ -1775,11 +1857,10 @@ export class Character {
     return Number(type);
   }
   private targetSelf(target: iTrigger["target"]): boolean {
-    const all = target.all ?? false;
     const allies = target.allies ?? false;
     const tagsMatch = anyTagsMatch(this, target.tags ?? [], this.id);
 
-    return (all && allies) || tagsMatch;
+    return allies || tagsMatch;
   }
   private isSelf(char?: Character) {
     return this.id === char?.id && this.owner === char?.owner;
@@ -1947,7 +2028,7 @@ export class Character {
       }
     });
     this._activeAbilities.forEach((a) => {
-      if (ability?.id !== a.id) {
+      if (ability?.id !== a.id && "turnsRemaining" in a) {
         a.turnsRemaining--;
       }
     });
@@ -1958,17 +2039,22 @@ export class Character {
     return logs;
   }
   public reset(teammates: Character[], opponents: Character[]) {
+    this._triggers = [];
+    this._teammates = teammates;
+    this._opponents = opponents;
+  }
+
+  public initialize() {
     this._baseStats.health = this._baseStats.maxHealth;
     this._baseStats.protection = this._baseStats.maxProtection;
     this._activeAbilities.forEach((a) => {
-      a.turnsRemaining = 0;
+      if ("turnsRemaining" in a) {
+        a.turnsRemaining = 0;
+      }
     });
     this._debuffs = [];
     this._buffs = [];
     this._tm = 0;
-    this._triggers = [];
-    this._teammates = teammates;
-    this._opponents = opponents;
 
     this._uniqueAbilities.forEach((ability) => {
       ability.triggers?.forEach((trigger) => {
@@ -1977,20 +2063,16 @@ export class Character {
         });
       });
     });
+
+    if (this.isLeader && this._leaderAbility) {
+      this._leaderAbility.triggers?.forEach((trigger) => {
+        this.findTargets(trigger).forEach((target) => {
+          target.addTrigger(trigger, this._leaderAbility as iAbility);
+        });
+      });
+    }
   }
 }
-
-export const team1: Character[] = [unvue(cls)].map((c) => {
-  return new Character(c, "team1");
-});
-
-export const team2: Character[] = [
-  unvue(aayla),
-  unvue(oldBen),
-  unvue(hanSolo),
-].map((c) => {
-  return new Character(unvue(c), "team2");
-});
 
 //todo: combine these functions with /teams.js
 export function anyTagsMatch(
