@@ -166,6 +166,7 @@ export interface iAbility
   name: string;
   cooldown: number;
   targets?: iTarget[];
+  actions?: any[];
 }
 
 export interface iUniqueAbility extends iGeneralAbility {}
@@ -188,7 +189,7 @@ interface iTarget {
   target: iTargetData;
   debuffs?: iStatusEffect[];
   buffs?: iStatusEffect[];
-  effects?: iEffect[];
+  actions?: iEffect[];
   cantMiss?: boolean;
   damage?: number;
   modifyDamage?: iEffect;
@@ -771,7 +772,7 @@ export class Character {
   private get tempStats(): Record<string, iStatsCheck> {
     return this._triggers.reduce((statsMapping, trigger) => {
       if (trigger.triggerType === "always") {
-        trigger.effects?.forEach((effect) => {
+        trigger.actions?.forEach((effect) => {
           if (effect.stats) {
             if (this.checkCondition(effect.condition, this)) {
               statsMapping[effect.stats.statToModify] = effect.stats;
@@ -1307,8 +1308,6 @@ export class Character {
 
     const isCrit = chanceOfEvent(critChance - critAvoid);
 
-    console.log(offense, this.physical.offense, varianceOffense, stats);
-
     const damageTotal = Math.max(
       Math.round(damageTaken * (isCrit ? targetCharacter.critDamage : 1)),
       1
@@ -1406,17 +1405,18 @@ export class Character {
     return logs;
   }
   public inflictEffects(
-    { effects, target }: iTarget,
+    { actions, target }: iTarget,
     targetCharacter: Character,
     ability: iAbility | null
   ): string[] {
     const logs: string[] = [];
-    effects?.forEach((effect) => {
-      if (this.checkCondition(effect.condition, targetCharacter)) {
+    actions?.forEach((action) => {
+      console.log(this.id, ability?.name, action);
+      if (this.checkCondition(action.condition, targetCharacter)) {
         logs.push(
           ...this.addEffects(
             targetCharacter,
-            effect,
+            action,
             this.targetSelf(target),
             ability
           )
@@ -1464,6 +1464,7 @@ export class Character {
         //if it is a number
         const num = Number(stat);
         if (stats.statToModify === "health" && stats.type === "percent") {
+          console.log("checking health percent");
           const percent = num / targetCharacter.maxHealth;
           meetsStatRequirement =
             stats.amountType === "greater"
@@ -1515,6 +1516,7 @@ export class Character {
     data?: any
   ): string[] {
     const logs: string[] = [];
+    // console.log(this.id, effect, ability?.name);
     if (effect.dispel) {
       logs.push(
         ...targetCharacter.removeBuff(effect.dispel?.buffs ?? null, this)
@@ -1525,6 +1527,7 @@ export class Character {
     }
 
     if (effect.cooldown) {
+      console.log(this.id, effect.cooldown);
       if (effect.cooldown.target === "Self") {
         logs.push(this.changeCooldown(effect));
       } else {
@@ -1671,7 +1674,7 @@ export class Character {
     const logs: string[] = [];
     const myTriggers: iTrigger[] = [];
     const opponentTriggers: iTrigger[] = [];
-    const { damage, effects, debuffs, buffs, target } = targetData;
+    const { damage, actions, debuffs, buffs, target } = targetData;
 
     if (targetData?.triggerCount) {
       if (targetData.triggerCount > 0) {
@@ -1681,22 +1684,13 @@ export class Character {
       }
     }
 
-    console.log(this.id, "process targets", targetData);
-
     if (damage && ability) {
-      //check conditions
       const _stats = this.checkCondition(
         targetData.modifyDamage?.condition,
         targetCharacter
       )
         ? targetData.modifyDamage?.stats
         : null;
-      console.log(
-        this.id,
-        _stats,
-        targetCharacter.id,
-        targetCharacter.turnMeter
-      );
       const {
         logs: damageLogs,
         damageDealt,
@@ -1739,7 +1733,7 @@ export class Character {
       }
     }
 
-    if (effects && !targetCharacter.isDead) {
+    if (actions && !targetCharacter.isDead) {
       logs.push(...this.inflictEffects(targetData, targetCharacter, ability));
     }
     if (debuffs && !targetCharacter.isDead) {
@@ -1825,7 +1819,7 @@ export class Character {
   public executeTrigger({
     triggerType,
     events,
-    effects,
+    actions,
     ability,
     data,
   }: iTrigger): string[] {
@@ -1839,11 +1833,11 @@ export class Character {
       });
     });
 
-    effects?.forEach((effect) => {
-      if (triggerType === "dealDamage" && effect.heal) {
-        data.healAmount = data?.damageDealt * (effect?.scale ?? 1);
+    actions?.forEach((action) => {
+      if (triggerType === "dealDamage" && action.heal) {
+        data.healAmount = data?.damageDealt * (action?.scale ?? 1);
       }
-      logs.push(...this.addEffects(this, effect, true, ability ?? null, data));
+      logs.push(...this.addEffects(this, action, true, ability ?? null, data));
     });
     return logs;
   }

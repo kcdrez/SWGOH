@@ -17,7 +17,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               dispel: {
                 debuffs: "all",
@@ -79,7 +79,7 @@ const characterMapping: Record<
       targets: [
         {
           target: { targetCount: 1 },
-          effects: [
+          actions: [
             {
               cooldown: {
                 id: "specialskill_COMMANDERLUKESKYWALKER01",
@@ -99,7 +99,7 @@ const characterMapping: Record<
         },
         {
           target: { targetCount: 1 },
-          effects: [
+          actions: [
             {
               dispel: {
                 buffs: "all",
@@ -136,7 +136,7 @@ const characterMapping: Record<
               id: uuid(),
             },
           ],
-          effects: [
+          actions: [
             {
               condition: {
                 debuffs: ["Speed Down"],
@@ -178,7 +178,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               condition: {
                 buffs: ["Call to Action"],
@@ -238,7 +238,7 @@ const characterMapping: Record<
                 targetIds: ["COMMANDERLUKESKYWALKER"],
                 allies: true,
               },
-              effects: [
+              actions: [
                 {
                   buffs: [
                     {
@@ -265,7 +265,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               stats: {
                 amount: 0.4,
@@ -282,7 +282,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               heal: {
                 healthType: "health",
@@ -306,7 +306,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               buffs: [
                 {
@@ -331,7 +331,7 @@ const characterMapping: Record<
                 tags: ["!Self"],
                 allies: true,
               },
-              effects: [
+              actions: [
                 {
                   buffs: [
                     {
@@ -535,7 +535,7 @@ const characterMapping: Record<
                   id: uuid(),
                 },
               ],
-              effects: [
+              actions: [
                 {
                   heal: {
                     healthType: "protection",
@@ -569,7 +569,7 @@ const characterMapping: Record<
           damage: 1.645,
           damageType: "physical",
 
-          effects: [
+          actions: [
             {
               assist: {
                 chance: 0.35,
@@ -605,7 +605,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               heal: {
                 type: "flat",
@@ -657,7 +657,7 @@ const characterMapping: Record<
             tags: ["Self"],
             allies: true,
           },
-          effects: [
+          actions: [
             {
               stats: {
                 amount: 0.1,
@@ -709,7 +709,7 @@ const characterMapping: Record<
               amount: 1.75,
             },
           },
-          effects: [
+          actions: [
             {
               condition: {
                 tm: {
