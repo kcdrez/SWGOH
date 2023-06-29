@@ -69,7 +69,7 @@
               </span>
               <span
                 class="float-end d-flex align-items-center"
-                v-if="character._leaderAbility"
+                v-if="character.hasLeaderAbility"
               >
                 <input
                   type="checkbox"
@@ -104,7 +104,7 @@
               </span>
               <span
                 class="float-end d-flex align-items-center"
-                v-if="character._leaderAbility"
+                v-if="character.hasLeaderAbility"
               >
                 <input
                   type="checkbox"
@@ -136,10 +136,23 @@
             </div>
           </div>
         </div>
-        <div class="row">
+        <div
+          class="row"
+          v-if="simulation.playerWins + simulation.opponentWins > 0"
+        >
           <div class="col">
-            <div>Team 1 Wins: {{ simulation.playerWins }}</div>
-            <div>Team 2 Wins: {{ simulation.opponentWins }}</div>
+            <div>{{ player.name }} Wins: {{ simulation.playerWins }}</div>
+            <div>{{ opponent.name }} Wins: {{ simulation.opponentWins }}</div>
+            <div>
+              Winrate:
+              {{
+                round(
+                  simulation.playerWins /
+                    (simulation.playerWins + simulation.opponentWins),
+                  2
+                ) * 100
+              }}%
+            </div>
             <ol>
               <li v-for="(log, index) in logs" :key="index">
                 <span v-html="log"></span>
@@ -161,16 +174,16 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions, mapGetters } from "vuex";
 import { v4 as uuid } from "uuid";
 
 import { Team } from "types/teams";
 import TeamTable from "components/teams/teamTable.vue";
 import MatchTable from "components/teams/matchTable.vue";
-import { randomNumber, unvue, numbersOnly } from "utils";
+import { randomNumber, unvue, numbersOnly, round } from "utils";
 import { random } from "lodash";
 import abilities from "types/abilities";
-import { Character, iStatusEffect, iAbility } from "types/characters";
+import { Character, iStatusEffect, iAbility, format } from "types/characters";
 import characterMapping from "types/abilities";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
@@ -213,6 +226,8 @@ export default defineComponent({
       requestState: "requestState",
     }),
     ...mapState("player", ["player"]),
+    ...mapGetters("player", { getPlayerUnitData: "unitData" }),
+    ...mapGetters("opponents", { getOpponentUnitData: "unitData" }),
     playerUnitList(): Unit[] {
       return this.player?.units.filter((unit: Unit) => {
         return (
@@ -252,6 +267,7 @@ export default defineComponent({
             this.opponentTeam.push(new Character(unit, this.opponent.name));
           }
         }
+        this.saveData();
       }
     },
     removeCharacter(teamName: "player" | "opponent", index: number) {
@@ -260,9 +276,62 @@ export default defineComponent({
       } else {
         this.opponentTeam.splice(index, 1);
       }
+      this.saveData();
+    },
+    saveData() {
+      window.localStorage.setItem(
+        "simulation",
+        JSON.stringify({
+          playerUnits: this.playerTeam.map((x) => x.id),
+          opponentUnits: this.opponentTeam.map((x) => x.id),
+        })
+      );
     },
     initializeMatch() {
       [...this.playerTeam, ...this.opponentTeam].forEach((x) => x.initialize());
+
+      const startTriggers = [...this.playerTeam, ...this.opponentTeam]
+        .filter((char) => {
+          return char.triggers.some((trigger) => {
+            return trigger.triggerType === "start";
+          });
+        })
+        .sort((a, b) => {
+          if (
+            (a.id === "HANSOLO" && b.id === "HANSOLO") ||
+            (a.id !== "HANSOLO" && b.id !== "HANSOLO")
+          ) {
+            if (a.speed > b.speed) {
+              return 1;
+            } else if (b.speed > a.speed) {
+              return -1;
+            } else {
+              return randomNumber(0, 1) === 0 ? 1 : -1;
+            }
+          } else if (a.id === "HANSOLO") {
+            return 1;
+          } else if (b.id === "HANSOLO") {
+            return -1;
+          }
+          return 0;
+        });
+
+      startTriggers.forEach((char, index) => {
+        this.logs.push(
+          `Turn 0.${index + 1}`,
+          `${format.characterName(char.name, char.owner)} - Start of Match`
+        );
+        this.logs.push(
+          ...char.executePassiveTriggers([
+            {
+              triggerType: "start",
+              target: {},
+              data: {},
+              id: uuid(),
+            },
+          ])
+        );
+      });
     },
     reset() {
       this.playerTeam.forEach((x) =>
@@ -289,7 +358,6 @@ export default defineComponent({
         let j = 0;
         do {
           j++;
-          console.log("TURN", j);
           this.nextTurn(j);
           const playerLost = this.playerTeam.every((x) => x.health <= 0);
           const opponentList = this.opponentTeam.every((x) => x.health <= 0);
@@ -344,8 +412,11 @@ export default defineComponent({
     removeOpponent() {
       this.deleteOpponent();
       this.showDeleteOpponentConfirm = false;
+      this.opponentTeam = [];
+      this.saveData();
     },
     numbersOnly,
+    round,
     disableLeader(teamName: "player" | "opponent", characterId): boolean {
       if (teamName === "player") {
         return this.playerTeam.some((character) => {
@@ -357,6 +428,25 @@ export default defineComponent({
         });
       }
     },
+  },
+  created() {
+    const teamData = JSON.parse(
+      window.localStorage.getItem("simulation") ?? "{}"
+    );
+    if (teamData?.playerUnits) {
+      teamData.playerUnits.forEach((id) => {
+        const unit: Unit = this.getPlayerUnitData(id);
+        if (unit) {
+          this.addToTeam("player", unit);
+        }
+      });
+      teamData.opponentUnits.forEach((id) => {
+        const unit: Unit = this.getOpponentUnitData(id);
+        if (unit) {
+          this.addToTeam("opponent", unit);
+        }
+      });
+    }
   },
 });
 </script>

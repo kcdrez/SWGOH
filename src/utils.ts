@@ -61,7 +61,10 @@ export function formatDate(date: any, format: string = "MMM DD, YYYY") {
 
 export function round2Decimals(num: number) {
   return _.round(num, 2);
-  // return Math.round((num + Number.EPSILON) * 100) / 100;
+}
+
+export function round(num, decimals) {
+  return _.round(num, decimals);
 }
 
 export async function initializeModules(

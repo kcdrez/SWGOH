@@ -967,7 +967,6 @@ const characterMapping: Record<
           events: [
             {
               target: {
-                //this isnt targetting the same character
                 targetIds: ["target"],
               },
               actions: [
@@ -983,6 +982,214 @@ const characterMapping: Record<
                   },
                 },
               ],
+            },
+          ],
+        },
+        {
+          id: uuid(),
+          triggerType: "start",
+          triggerData: {
+            limit: 1,
+            count: 1,
+            frequency: "match",
+          },
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          events: [
+            {
+              target: {
+                targetCount: 1,
+                allies: false,
+                ignoreTaunt: true,
+              },
+              actions: [
+                {
+                  ability: {
+                    abilityToUse: "basicskill_HANSOLO",
+                    modifiers: [
+                      {
+                        target: {
+                          targetCount: 1,
+                          allies: false,
+                          ignoreTaunt: true,
+                        },
+                        debuffs: [
+                          {
+                            name: "Stun",
+                            duration: 1,
+                            cantResist: true,
+                            id: uuid(),
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+  CHEWBACCALEGENDARY: {
+    basicskill_CHEWBACCALEGENDARY: {
+      id: "basicskill_CHEWBACCALEGENDARY",
+      name: "Overcharged Shot",
+      targets: [
+        {
+          target: { targetCount: 1, allies: false },
+          debuffs: [
+            {
+              name: "Tenacity Down",
+              duration: 2,
+              id: uuid(),
+            },
+          ],
+          damage: 1.4,
+          damageType: "physical",
+        },
+      ],
+    },
+    specialskill_CHEWBACCALEGENDARY01: {
+      id: "specialskill_CHEWBACCALEGENDARY01",
+      name: "Pulverize",
+      cooldown: 4,
+      turnsRemaining: 0,
+      targets: [
+        {
+          target: { allies: false },
+          actions: [
+            {
+              dispel: {
+                buffs: "all",
+              },
+            },
+          ],
+        },
+        {
+          target: { allies: false },
+          damage: 0.9,
+          damageType: "physical",
+          stats: {
+            statToModify: "armor",
+            amount: 0,
+            type: "percent",
+          },
+        },
+        {
+          target: { tags: ["Self"], allies: true },
+          buffs: [
+            {
+              name: "Offense Up",
+              duration: 2,
+              id: uuid(),
+            },
+            {
+              name: "Critical Chance Up",
+              duration: 2,
+              id: uuid(),
+            },
+          ],
+        },
+      ],
+    },
+    specialskill_CHEWBACCALEGENDARY02: {
+      id: "specialskill_CHEWBACCALEGENDARY01",
+      name: "Furious Bowcaster",
+      cooldown: 3,
+      turnsRemaining: 0,
+      targets: [
+        {
+          target: {
+            targetCount: 1,
+            allies: false,
+          },
+          cantMiss: true,
+          debuffs: [
+            {
+              name: "Stun",
+              duration: 1,
+              id: uuid(),
+            },
+          ],
+          damage: 2.4,
+          damageType: "physical",
+          actions: [
+            {
+              condition: {
+                stats: {
+                  statToModify: "protection",
+                  type: "flat",
+                  amount: 1,
+                  amountType: "less",
+                },
+              },
+              cooldown: {
+                amount: -100,
+                target: "Self",
+                id: "specialskill_CHEWBACCALEGENDARY01",
+              },
+            },
+          ],
+        },
+      ],
+    },
+    uniqueskill_CHEWBACCALEGENDARY01: {
+      id: "uniqueskill_CHEWBACCALEGENDARY01",
+      name: "Loyal Friend",
+      triggers: [
+        {
+          id: uuid(),
+          triggerType: "start",
+          triggerData: {
+            limit: 1,
+            count: 1,
+            frequency: "match",
+          },
+          target: {
+            tags: ["Self"],
+          },
+          events: [
+            {
+              target: {
+                weakest: true,
+                allies: true,
+                tags: ["!Self"],
+              },
+              blueEffects: [
+                {
+                  name: "Guard",
+                  duration: Infinity,
+                  id: uuid(),
+                },
+              ],
+              // actions: [
+              //   {
+              //     ability: {
+              //       abilityToUse: "basicskill_HANSOLO",
+              //       modifiers: [
+              //         {
+              //           target: {
+              //             targetCount: 1,
+              //             allies: false,
+              //             ignoreTaunt: true,
+              //           },
+              //           debuffs: [
+              //             {
+              //               name: "Stun",
+              //               duration: 1,
+              //               cantResist: true,
+              //               id: uuid(),
+              //             },
+              //           ],
+              //         },
+              //       ],
+              //     },
+              //   },
+              // ],
             },
           ],
         },
