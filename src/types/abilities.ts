@@ -821,13 +821,11 @@ const characterMapping: Record<
             allies: true,
           },
           events: [
-            //todo this isnt triggering properly
             {
               target: {
                 targetIds: ["target"],
               },
               actions: [
-                //todo: this isnt targetting correctly
                 {
                   condition: {
                     tm: {
@@ -969,6 +967,7 @@ const characterMapping: Record<
           events: [
             {
               target: {
+                //this isnt targetting the same character
                 targetIds: ["target"],
               },
               actions: [

@@ -102,7 +102,10 @@
                 <i class="fa fa-times-circle me-2"></i>
                 <span>{{ character.name }}</span>
               </span>
-              <span class="float-end d-flex align-items-center">
+              <span
+                class="float-end d-flex align-items-center"
+                v-if="character._leaderAbility"
+              >
                 <input
                   type="checkbox"
                   v-model="character.isLeader"
@@ -286,7 +289,7 @@ export default defineComponent({
         let j = 0;
         do {
           j++;
-
+          console.log("TURN", j);
           this.nextTurn(j);
           const playerLost = this.playerTeam.every((x) => x.health <= 0);
           const opponentList = this.opponentTeam.every((x) => x.health <= 0);

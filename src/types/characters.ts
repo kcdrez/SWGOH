@@ -175,6 +175,7 @@ interface iTrigger extends iTarget {
   events?: iTarget[];
   data?: any;
   id: string;
+  srcAbility?: iAbility | null;
 }
 
 interface iTarget {
@@ -297,7 +298,7 @@ export class Character {
       speed: data.speed,
       physical: {
         offense: data.offense.physical,
-        armor: (data.armor.physical * 637.5) / (100 - data.armor.physical),
+        armor: (data.physicalArmor * 637.5) / (100 - data.physicalArmor),
         armorPen: data.armorPen,
         critChance: data.critChance.physical,
         accuracy: data.physicalAccuracy / 100,
@@ -323,7 +324,7 @@ export class Character {
     this._buffs = [];
     this._debuffs = [];
     this._activeAbilities = [
-      ...data.specialAbilities,
+      // ...data.specialAbilities,
       data.basicAbility,
     ].reduce(
       (
@@ -558,6 +559,7 @@ export class Character {
     this._baseStats.potency = val;
   }
   public get counterChance() {
+    return 100;
     if (this.hasDebuff("Stun")) {
       return 0;
     }
@@ -1259,6 +1261,7 @@ export class Character {
         }
         return targetIds.includes(char.id) || shouldInclude;
       });
+      console.log("list targets", list);
     }
 
     if (tags) {
@@ -1376,10 +1379,11 @@ export class Character {
   public dealDamage(
     targetCharacter: Character,
     target: iTarget,
-    abilitySource: iAbility | null,
-    canCounter: boolean = true,
+    srcAbility: iAbility | null,
     stats?: iStatsCheck | null
   ) {
+    console.log("damage to", targetCharacter.id, this.id);
+
     const logs: string[] = [];
     const abilityModifier = target?.damage ?? 0;
     const variance = target?.damageVariance ?? 5;
@@ -1393,8 +1397,11 @@ export class Character {
     );
     const varianceRand = randomNumber(0 - variance, variance) / 100;
     const varianceOffense = offense * (1 - varianceRand);
+    const modifiedArmor = armor - armorPen;
+    const damageReduction =
+      (modifiedArmor * 100) / (modifiedArmor + 637.5) / 100;
     const damageTaken =
-      (varianceOffense - (armor - armorPen)) * abilityModifier;
+      varianceOffense * abilityModifier * (1 - damageReduction);
 
     const isCrit = chanceOfEvent(critChance - critAvoid);
 
@@ -1439,6 +1446,7 @@ export class Character {
             target: {},
             data: { damageDealt: damageTotal, isCrit, target: targetCharacter },
             id: uuid(),
+            srcAbility,
           },
         ])
       );
@@ -1451,17 +1459,22 @@ export class Character {
           this.owner
         )} defeated ${format.characterName(targetCharacter.name, this.owner)}`
       );
-    } else if (canCounter) {
-      logs.push(...targetCharacter.counterAttack(this));
     }
 
     return { logs, damageDealt: damageTotal, isCrit };
   }
   public counterAttack(targetCharacter: Character): string[] {
     const logs: string[] = [];
-    if (chanceOfEvent(this.counterChance)) {
+    if (
+      chanceOfEvent(this.counterChance) &&
+      !this.isDead &&
+      this.owner !== targetCharacter.owner
+    ) {
       logs.push(
-        `${format.characterName(this.name, this.owner)} counter attacked`
+        `${format.characterName(
+          this.name,
+          this.owner
+        )} counter attacked with ${format.ability(this.basicAbility?.name)}`
       );
       this.basicAbility?.targets?.forEach((target) => {
         const {
@@ -1472,7 +1485,6 @@ export class Character {
           targetCharacter,
           target,
           (this.basicAbility as iAbility) ?? null,
-          false,
           {
             statToModify: "offense",
             amount: this.counterDamage,
@@ -1481,16 +1493,17 @@ export class Character {
         );
         logs.push(...damageLogs);
 
-        logs.push(
-          ...this.executePassiveTriggers([
-            {
-              triggerType: "dealDamage",
-              target: {},
-              data: { damageDealt, isCrit },
-              id: uuid(),
-            },
-          ])
-        );
+        // logs.push(
+        //   ...this.executePassiveTriggers([
+        //     {
+        //       triggerType: "dealDamage",
+        //       target: {},
+        //       data: { damageDealt, isCrit },
+        //       id: uuid(),
+        //       srcAbility: this.basicAbility as iAbility,
+        //     },
+        //   ])
+        // );
       });
     }
     return logs;
@@ -1604,7 +1617,6 @@ export class Character {
     ability: iAbility | null,
     data?: any
   ): string[] {
-    console.log(targetCharacter.id);
     const logs: string[] = [];
     if (effect.dispel) {
       logs.push(
@@ -1649,7 +1661,8 @@ export class Character {
     }
 
     if (effect.debuffs) {
-      logs.push(...targetCharacter.inflictDebuff(effect.debuffs ?? [], this));
+      //it looks backwards from the other logic but its not
+      logs.push(...this.inflictDebuff(effect.debuffs ?? [], targetCharacter));
     }
 
     if (effect.ability) {
@@ -1777,10 +1790,14 @@ export class Character {
               triggerType: "ability",
               target: {},
               id: uuid(),
-              data: { ability, target: char },
+              data: { target: char },
+              srcAbility: ability,
             },
           ])
         );
+        if (targetData.damage) {
+          logs.push(...char.counterAttack(this));
+        }
       });
     });
 
@@ -1794,6 +1811,7 @@ export class Character {
     stats?: iStatsCheck,
     canCounter?: boolean
   ): string[] {
+    console.log(targetCharacter.name, targetCharacter.owner);
     const logs: string[] = [];
     const myTriggers: iTrigger[] = [];
     const opponentTriggers: iTrigger[] = [];
@@ -1822,22 +1840,21 @@ export class Character {
         targetCharacter,
         targetData,
         ability,
-        canCounter,
         stats ?? _stats
       );
       logs.push(...damageLogs);
       opponentTriggers.push({
         triggerType: "receiveDamage",
         target: {},
-        data: { damageDealt, isCrit },
+        data: { damageDealt, isCrit, ability },
         id: uuid(),
-        ability,
       });
       myTriggers.push({
         triggerType: "dealDamage",
         target: {},
         data: { damageDealt, isCrit, target: targetCharacter },
         id: uuid(),
+        srcAbility: ability,
       });
 
       if (targetCharacter.health <= 0) {
@@ -1845,11 +1862,13 @@ export class Character {
           triggerType: "death",
           target: {},
           id: uuid(),
+          srcAbility: ability,
         });
       }
     }
 
     if (actions && !targetCharacter.isDead) {
+      console.log("doing actions", targetCharacter.name, targetCharacter.owner);
       logs.push(...this.inflictEffects(targetData, targetCharacter, ability));
     }
     if (debuffs && !targetCharacter.isDead) {
@@ -1916,8 +1935,6 @@ export class Character {
     this._triggers.forEach((trigger) => {
       types.forEach((type) => {
         if (trigger.triggerType === type.triggerType) {
-          if (type.triggerType === "ability") {
-          }
           if (trigger?.triggerData?.count !== undefined) {
             if (trigger.triggerData.count >= 1) {
               trigger.triggerData.count--;
@@ -1937,18 +1954,22 @@ export class Character {
     ability?.triggers?.forEach((trigger) => {
       types.forEach((type) => {
         if (trigger.triggerType === type.triggerType) {
-          console.log(ability.id);
-          logs.push(
-            ...this.executeTrigger({ ...trigger, ability, data: type.data })
-          );
-
           if (trigger?.triggerData?.count) {
-            if (trigger.triggerData.count > 1) {
+            if (trigger.triggerData.count >= 1) {
               trigger.triggerData.count--;
             } else {
               return;
             }
           }
+
+          console.log("ability trigger", type);
+          logs.push(
+            ...this.executeTrigger({
+              ...trigger,
+              ...type,
+              srcAbility: ability,
+            })
+          );
         }
       });
     });
@@ -1960,18 +1981,20 @@ export class Character {
     actions,
     ability,
     data,
+    srcAbility,
   }: iTrigger): string[] {
     const logs: string[] = [];
     events?.forEach((targetData) => {
+      console.log(targetData, data?.target);
       const targets = this.findTargets(targetData, data?.target);
-      console.log(targets);
       targets.forEach((char) => {
         //if this needs to be switched, then the logic is broken
+        console.log(char.name, char.owner);
         logs.push(
           ...this.processTargets(
             targetData,
             char,
-            data?.ability ?? ability ?? null
+            srcAbility ?? ability ?? null
           )
         );
       });
