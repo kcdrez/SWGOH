@@ -241,7 +241,7 @@ const characterMapping: Record<
                     {
                       id: uuid(),
                       name: "TM",
-                      duration: 50,
+                      duration: 10,
                     },
                   ],
                 },
@@ -568,7 +568,11 @@ const characterMapping: Record<
           triggerType: "death",
           events: [
             {
-              triggerCount: 1,
+              triggerData: {
+                limit: 1,
+                frequency: "match",
+                count: 1,
+              },
               target: {
                 allies: true,
               },
@@ -806,34 +810,40 @@ const characterMapping: Record<
               amount: 1.75,
             },
           },
-          actions: [
+        },
+      ],
+      triggers: [
+        {
+          triggerType: "dealDamage",
+          id: uuid(),
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          events: [
+            //todo this isnt triggering properly
             {
-              condition: {
-                tm: {
-                  amount: 49.999999,
-                  greaterThan: true,
-                },
+              target: {
+                targetIds: ["target"],
               },
-              debuffs: [
+              actions: [
+                //todo: this isnt targetting correctly
                 {
-                  name: "TM",
-                  duration: -35,
-                  id: uuid(),
+                  condition: {
+                    tm: {
+                      amount: 49.999999,
+                      greaterThan: true,
+                    },
+                  },
+                  debuffs: [
+                    {
+                      name: "TM",
+                      duration: -35,
+                      id: uuid(),
+                    },
+                  ],
                 },
               ],
-            },
-            {
-              condition: {
-                tm: {
-                  amount: 50,
-                  greaterThan: false,
-                },
-              },
-              stats: {
-                type: "percent",
-                statToModify: "offense",
-                amount: 0.75,
-              },
             },
           ],
         },
@@ -866,7 +876,7 @@ const characterMapping: Record<
           buffs: [
             {
               name: "TM",
-              duration: 100,
+              duration: 1,
               id: uuid(),
             },
           ],
@@ -911,6 +921,69 @@ const characterMapping: Record<
               name: "TM",
               duration: 50,
               id: uuid(),
+            },
+          ],
+        },
+      ],
+    },
+    uniqueskill_HANSOLO01: {
+      id: "uniqueskill_HANSOLO01",
+      name: "Shoots First",
+      triggers: [
+        {
+          triggerType: "always",
+          id: uuid(),
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          actions: [
+            {
+              stats: {
+                amount: 0.2,
+                statToModify: "critChance",
+                type: "flat",
+              },
+            },
+            {
+              stats: {
+                amount: 0.35,
+                statToModify: "counter",
+                type: "flat",
+              },
+            },
+          ],
+        },
+        {
+          triggerType: "ability",
+          id: uuid(),
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          triggerData: {
+            limit: 1,
+            count: 1,
+            frequency: "turn",
+          },
+          events: [
+            {
+              target: {
+                targetIds: ["target"],
+              },
+              actions: [
+                {
+                  ability: {
+                    abilityTrigger: "basicskill_HANSOLO",
+                    abilityToUse: "basicskill_HANSOLO",
+                  },
+                  stats: {
+                    type: "percent",
+                    amount: 0.5,
+                    statToModify: "offense",
+                  },
+                },
+              ],
             },
           ],
         },

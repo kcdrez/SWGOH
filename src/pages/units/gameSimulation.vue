@@ -67,7 +67,10 @@
                 <i class="fa fa-times-circle me-2"></i>
                 <span>{{ character.name }}</span>
               </span>
-              <span class="float-end d-flex align-items-center">
+              <span
+                class="float-end d-flex align-items-center"
+                v-if="character._leaderAbility"
+              >
                 <input
                   type="checkbox"
                   v-model="character.isLeader"
@@ -165,9 +168,9 @@ import { randomNumber, unvue, numbersOnly } from "utils";
 import { random } from "lodash";
 import abilities from "types/abilities";
 import { Character, iStatusEffect, iAbility } from "types/characters";
+import characterMapping from "types/abilities";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
-import characterList from "types/_tempCharacterData";
 
 interface dataModel {
   simulation: {
@@ -210,7 +213,7 @@ export default defineComponent({
     playerUnitList(): Unit[] {
       return this.player?.units.filter((unit: Unit) => {
         return (
-          characterList.some((c) => c.id === unit.id) &&
+          unit.id in characterMapping &&
           !this.playerTeam.some((x) => x.id === unit.id)
         );
       });
@@ -218,7 +221,7 @@ export default defineComponent({
     opponentUnitList(): Unit[] {
       return this.opponent?.units.filter((unit: Unit) => {
         return (
-          characterList.some((c) => c.id === unit.id) &&
+          unit.id in characterMapping &&
           !this.opponentTeam.some((x) => x.id === unit.id)
         );
       });

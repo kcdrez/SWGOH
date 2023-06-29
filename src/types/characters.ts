@@ -170,7 +170,8 @@ interface iTrigger extends iTarget {
     | "inflictDebuff"
     | "criticalHit"
     | "dodge"
-    | "always";
+    | "always"
+    | "ability";
   events?: iTarget[];
   data?: any;
   id: string;
@@ -186,7 +187,12 @@ interface iTarget {
   modifyDamage?: iEffect;
   damageVariance?: number;
   damageType?: "physical" | "special";
-  triggerCount?: number;
+  // triggerCount?: number;
+  triggerData?: {
+    limit: number;
+    count: number;
+    frequency: "match" | "turn";
+  };
   ability?: iAbility | null;
 }
 
@@ -232,6 +238,11 @@ interface iEffect {
   assist?: iAssist;
   scale?: number;
   stats?: iStatsCheck;
+  ability?: {
+    abilityTrigger: string;
+    abilityToUse: string;
+  };
+  data?: any;
 }
 
 interface iStatsCheck {
@@ -1244,7 +1255,7 @@ export class Character {
       list = list.filter((char) => {
         let shouldInclude = false;
         if (target instanceof Character) {
-          shouldInclude = targetIds.includes("target") && char.id === target.id;
+          shouldInclude = targetIds.includes("target") && char.isSelf(target);
         }
         return targetIds.includes(char.id) || shouldInclude;
       });
@@ -1593,6 +1604,7 @@ export class Character {
     ability: iAbility | null,
     data?: any
   ): string[] {
+    console.log(targetCharacter.id);
     const logs: string[] = [];
     if (effect.dispel) {
       logs.push(
@@ -1638,6 +1650,20 @@ export class Character {
 
     if (effect.debuffs) {
       logs.push(...targetCharacter.inflictDebuff(effect.debuffs ?? [], this));
+    }
+
+    if (effect.ability) {
+      const { abilityTrigger, abilityToUse } = effect.ability;
+      if (abilityTrigger === ability?.id) {
+        if (abilityToUse) {
+          const ability = this.activeAbilities.find(
+            (a) => a.id === abilityToUse
+          );
+          if (ability) {
+            logs.push(...this.useAbility(ability as iAbility, effect.stats));
+          }
+        }
+      }
     }
 
     return logs;
@@ -1745,6 +1771,16 @@ export class Character {
             stats
           )
         );
+        logs.push(
+          ...this.executePassiveTriggers([
+            {
+              triggerType: "ability",
+              target: {},
+              id: uuid(),
+              data: { ability, target: char },
+            },
+          ])
+        );
       });
     });
 
@@ -1763,9 +1799,9 @@ export class Character {
     const opponentTriggers: iTrigger[] = [];
     const { damage, actions, debuffs, buffs, target } = targetData;
 
-    if (targetData?.triggerCount) {
-      if (targetData.triggerCount > 0) {
-        targetData.triggerCount--;
+    if (targetData?.triggerData?.count) {
+      if (targetData.triggerData.count > 0) {
+        targetData.triggerData.count--;
       } else {
         return logs;
       }
@@ -1795,11 +1831,12 @@ export class Character {
         target: {},
         data: { damageDealt, isCrit },
         id: uuid(),
+        ability,
       });
       myTriggers.push({
         triggerType: "dealDamage",
         target: {},
-        data: { damageDealt, isCrit },
+        data: { damageDealt, isCrit, target: targetCharacter },
         id: uuid(),
       });
 
@@ -1874,12 +1911,22 @@ export class Character {
       this._triggers.splice(index, 1);
     }
   }
-  public executePassiveTriggers(types: iTrigger[]): string[] {
+  public executePassiveTriggers(types: iTrigger[], data?: any): string[] {
     const logs: string[] = [];
     this._triggers.forEach((trigger) => {
       types.forEach((type) => {
         if (trigger.triggerType === type.triggerType) {
-          logs.push(...this.executeTrigger({ ...type, ...trigger }));
+          if (type.triggerType === "ability") {
+          }
+          if (trigger?.triggerData?.count !== undefined) {
+            if (trigger.triggerData.count >= 1) {
+              trigger.triggerData.count--;
+            } else {
+              return;
+            }
+          }
+          //order matters
+          logs.push(...this.executeTrigger({ data, ...trigger, ...type }));
         }
       });
     });
@@ -1890,9 +1937,18 @@ export class Character {
     ability?.triggers?.forEach((trigger) => {
       types.forEach((type) => {
         if (trigger.triggerType === type.triggerType) {
+          console.log(ability.id);
           logs.push(
             ...this.executeTrigger({ ...trigger, ability, data: type.data })
           );
+
+          if (trigger?.triggerData?.count) {
+            if (trigger.triggerData.count > 1) {
+              trigger.triggerData.count--;
+            } else {
+              return;
+            }
+          }
         }
       });
     });
@@ -1908,10 +1964,16 @@ export class Character {
     const logs: string[] = [];
     events?.forEach((targetData) => {
       const targets = this.findTargets(targetData, data?.target);
-
+      console.log(targets);
       targets.forEach((char) => {
         //if this needs to be switched, then the logic is broken
-        logs.push(...this.processTargets(targetData, char, ability ?? null));
+        logs.push(
+          ...this.processTargets(
+            targetData,
+            char,
+            data?.ability ?? ability ?? null
+          )
+        );
       });
     });
 
@@ -1919,7 +1981,16 @@ export class Character {
       if (triggerType === "dealDamage" && action.heal) {
         data.healAmount = data?.damageDealt * (action?.scale ?? 1);
       }
-      logs.push(...this.addEffects(this, action, true, ability ?? null, data));
+
+      logs.push(
+        ...this.addEffects(
+          data?.target ?? this,
+          action,
+          true,
+          data.ability ?? ability ?? null,
+          data
+        )
+      );
     });
     return logs;
   }
@@ -2032,6 +2103,21 @@ export class Character {
         a.turnsRemaining--;
       }
     });
+    this._triggers.forEach((t) => {
+      if (t.triggerData) {
+        if (t.triggerData.frequency === "turn") {
+          t.triggerData.count = t.triggerData.limit;
+        }
+      }
+
+      t.events?.forEach((e) => {
+        if (e.triggerData) {
+          if (e.triggerData.frequency === "turn") {
+            e.triggerData.count = e.triggerData.limit;
+          }
+        }
+      });
+    });
     this._history = {
       resisted: 0,
     };
@@ -2043,7 +2129,6 @@ export class Character {
     this._teammates = teammates;
     this._opponents = opponents;
   }
-
   public initialize() {
     this._baseStats.health = this._baseStats.maxHealth;
     this._baseStats.protection = this._baseStats.maxProtection;
