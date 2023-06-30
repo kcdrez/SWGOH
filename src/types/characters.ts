@@ -46,6 +46,7 @@ type tDebuff =
   | "Burning" //
   | "Buzz Droids" //
   | "Captive" //
+  | "Cooldown Increase"
   | "Concussion Mine" //
   | "Confuse" //
   | "Corrupted Battle Meditation" //
@@ -89,7 +90,7 @@ type tDebuff =
   | "Stun"
   | "Target Lock" //
   | "Tenacity Down"
-  | "TM"
+  | "TM Decrease"
   | "Torture" //
   | "Useful Pawn" //
   | "Vulnerable"
@@ -100,6 +101,7 @@ type tBuff =
   | "Critical Chance Up"
   | "Critical Damage Up"
   | "Critical Hit Immunity"
+  | "Cooldown Decrease"
   | "Defense Penetration Up"
   | "Defense Up"
   | "Evasion Up"
@@ -110,13 +112,13 @@ type tBuff =
   | "Speed Up"
   | "Taunt"
   | "Tenacity Up"
-  | "TM"
+  | "TM Increase"
   | "all";
-type tBlueEffect = "Guard";
-type tStatusEffect = tDebuff | tBuff | tBlueEffect;
+type tStatusEffect = "Guard";
+// type tStatusEffect = tDebuff | tBuff | tBlueEffect;
 
 export interface iStatusEffect {
-  name: tStatusEffect;
+  name: tBuff | tDebuff | tStatusEffect;
   duration: number;
   isNew?: boolean;
   chance?: number;
@@ -128,6 +130,14 @@ export interface iStatusEffect {
   id: string;
   sourceAbility?: iAbility | null;
   isStackable?: boolean;
+}
+
+interface iBuff extends iStatusEffect {
+  name: tBuff;
+}
+
+interface iDebuff extends iStatusEffect {
+  name: tDebuff;
 }
 
 export interface iEffects {
@@ -164,6 +174,7 @@ export interface iUniqueAbility extends iGeneralAbility {}
 
 interface iTrigger extends iTarget {
   triggerType:
+    | "useAbility"
     | "receiveDamage"
     | "dealDamage"
     | "death"
@@ -173,7 +184,8 @@ interface iTrigger extends iTarget {
     | "dodge"
     | "always"
     | "ability"
-    | "start";
+    | "start"
+    | "pregame";
   events?: iTarget[];
   data?: any;
   id: string;
@@ -182,10 +194,11 @@ interface iTrigger extends iTarget {
 
 interface iTarget {
   target: iTargetData;
-  debuffs?: iStatusEffect[];
-  buffs?: iStatusEffect[];
-  blueEffects?: iStatusEffect[];
+  debuffs?: iDebuff[];
+  buffs?: iBuff[];
+  statusEffects?: iStatusEffect[];
   actions?: iEffect[];
+  triggers?: iTrigger[];
   cantMiss?: boolean;
   damage?: number;
   modifyDamage?: iEffect;
@@ -208,6 +221,7 @@ interface iTargetData {
   targetCount?: number;
   scale?: "Resisted" | "physical critChance";
   ignoreTaunt?: boolean;
+  statusEffects?: tStatusEffect[];
 }
 
 interface iCondition {
@@ -224,8 +238,8 @@ interface iCondition {
 }
 interface iEffect {
   condition?: iCondition;
-  debuffs?: iStatusEffect[];
-  buffs?: iStatusEffect[];
+  debuffs?: iDebuff[];
+  buffs?: iBuff[];
   dispel?: {
     debuffs?: tDebuff[] | tDebuff;
     buffs?: tBuff[] | tBuff;
@@ -244,10 +258,20 @@ interface iEffect {
   assist?: iAssist;
   scale?: number;
   stats?: iStatsCheck;
+  damage?: {
+    scale?: {
+      target: iTarget;
+      stats: Record<string, number>;
+    };
+  };
   ability?: {
     abilityTrigger?: string;
     abilityToUse: string;
     modifiers?: iTarget[];
+  };
+  immune?: {
+    negativeStatusEffects?: (tDebuff | tStatusEffect)[];
+    positiveStatusEffects?: (tBuff | tStatusEffect)[];
   };
   data?: any;
 }
@@ -262,7 +286,6 @@ interface iStatsCheck {
 interface iAssist {
   condition?: iCondition;
   chance: number;
-  stats?: iStatsCheck;
   modifier: {
     stats: iStatsCheck;
     condition?: iCondition;
@@ -279,9 +302,9 @@ export class Character {
   private _name: string;
   private _id: string;
   private _tm: number = 0;
-  private _buffs: iStatusEffect[];
-  private _debuffs: iStatusEffect[];
-  private _blueEffects: iStatusEffect[] = [];
+  private _buffs: iBuff[];
+  private _debuffs: iDebuff[];
+  private _statusEffects: iStatusEffect[] = [];
   private _activeAbilities: (iBasicAbility | iSpecialAbility)[];
   private _uniqueAbilities: iUniqueAbility[];
   private _leaderAbility: iUniqueAbility | null;
@@ -512,7 +535,7 @@ export class Character {
     return this.getModifiedStats(
       [
         {
-          hasEffect: this.hasDebuff("Call to Action"),
+          hasEffect: this.hasBuff("Call to Action"),
           value: 0.5,
         },
         {
@@ -584,18 +607,23 @@ export class Character {
     >;
     return tempCounterDamage?.amount ?? 1;
   }
-  private callAllyToAssist(assistData: iEffect["assist"]): string[] {
+  private callAllyToAssist(
+    assistData: iEffect["assist"],
+    targetCharacter: Character
+  ): string[] {
     const logs: string[] = [];
-    if (assistData) {
-      if (chanceOfEvent(assistData.chance)) {
-        this.findTargets(assistData.target).forEach((target) => {
+    if (assistData && !targetCharacter.isDead) {
+      if (chanceOfEvent(assistData.chance * 100)) {
+        this.findTargets(assistData.target).forEach((ally) => {
           logs.push(
-            `${format.characterName(
-              target.name,
-              target.owner
-            )} is called to assist`
+            `${format.characterName(ally.name, ally.owner)} is called to assist`
           );
-          logs.push(...target.assist(assistData.modifier, target));
+          logs.push(
+            ...ally.assist(
+              assistData.modifier,
+              targetCharacter.owner === this.owner ? null : targetCharacter
+            )
+          );
         });
       }
     }
@@ -604,15 +632,12 @@ export class Character {
 
   public assist(
     modifier: iAssist["modifier"],
-    targetCharacter: Character
+    targetCharacter: Character | null
   ): string[] {
     const logs: string[] = [];
 
     if (this.basicAbility) {
-      if (
-        !modifier ||
-        (modifier.condition && this.checkCondition(modifier.condition, this))
-      ) {
+      if (!modifier || this.checkCondition(modifier.condition, this)) {
         logs.push(
           ...this.useAbility(
             this.basicAbility as iAbility,
@@ -649,6 +674,7 @@ export class Character {
             { hasEffect: self.hasDebuff("Critical Chance Down"), value: -0.25 },
             { hasEffect: self.hasBuff("Critical Chance Up"), value: 0.25 },
             { hasEffect: self.hasBuff("Call to Action"), value: 0.5 },
+            { hasEffect: self.hasStatusEffect("Guard"), value: 0.25 },
           ],
           self._baseStats.physical.critChance,
           self.tempStats.tempCritChance
@@ -727,7 +753,9 @@ export class Character {
               value: -999,
             },
             {
-              hasEffect: self.hasBuff("Critical Hit Immunity"),
+              hasEffect:
+                self.hasBuff("Critical Hit Immunity") ||
+                self.hasStatusEffect("Guard"),
               value: 1000000,
             },
           ],
@@ -763,6 +791,7 @@ export class Character {
             { hasEffect: self.hasDebuff("Critical Chance Down"), value: -0.25 },
             { hasEffect: self.hasBuff("Critical Chance Up"), value: 0.25 },
             { hasEffect: self.hasBuff("Call to Action"), value: 0.5 },
+            { hasEffect: self.hasStatusEffect("Guard"), value: 0.25 },
           ],
           self._baseStats.special.critChance,
           self.tempStats.tempCritChance
@@ -841,7 +870,9 @@ export class Character {
               value: -999,
             },
             {
-              hasEffect: self.hasBuff("Critical Hit Immunity"),
+              hasEffect:
+                self.hasBuff("Critical Hit Immunity") ||
+                self.hasStatusEffect("Guard"),
               value: 1000000,
             },
           ],
@@ -869,6 +900,31 @@ export class Character {
       }
       return statsMapping;
     }, {});
+  }
+  private get immunity(): Record<string, boolean> {
+    return this._triggers.reduce(
+      (immuneMapping, trigger) => {
+        trigger.actions?.forEach((effect) => {
+          if (effect.immune) {
+            if (this.checkCondition(effect.condition, this)) {
+              effect.immune.negativeStatusEffects?.forEach((x) => {
+                immuneMapping[x] = true;
+              });
+              effect.immune.positiveStatusEffects?.forEach((x) => {
+                immuneMapping[x] = true;
+              });
+            }
+          }
+        });
+        if (trigger.triggerType === "always") {
+        }
+        return immuneMapping;
+      },
+      {
+        Daze: this.hasStatusEffect("Guard"),
+        Stun: this.hasStatusEffect("Guard"),
+      }
+    );
   }
   private getModifiedStats(
     statusEffectConfig: { hasEffect: boolean; value: number }[],
@@ -984,28 +1040,61 @@ export class Character {
   public get buffs() {
     return this._buffs;
   }
-  public get blueEffects() {
-    return this._blueEffects;
+  public get statusEfects() {
+    return this._statusEffects;
   }
-  public hasDebuff(name: tStatusEffect | tStatusEffect[]) {
+  public hasDebuff(name: tDebuff | tDebuff[] | iDebuff | iDebuff[]) {
     if (Array.isArray(name)) {
-      return name.every((x) => this.hasDebuff(x));
+      return (name as (tDebuff | iDebuff)[]).every((x) => this.hasDebuff(x));
     } else {
-      return this.debuffs.some((d) => d.name === name);
+      return this.debuffs.some((d) => {
+        if (typeof name === "string") {
+          return d.name === name;
+        } else {
+          return d.id === name.id;
+        }
+      });
     }
   }
-  public hasBuff(name: tStatusEffect | tStatusEffect[]) {
+  public hasBuff(name: tBuff | tBuff[] | iBuff | iBuff[]) {
     if (Array.isArray(name)) {
-      return name.every((x) => this.hasBuff(x));
+      return (name as (tBuff | iBuff)[]).every((x) => this.hasBuff(x));
     } else {
-      return this.buffs.some((d) => d.name === name);
+      return this.buffs.some((d) => {
+        if (typeof name === "string") {
+          return d.name === name;
+        } else {
+          return d.id === name.id;
+        }
+      });
     }
   }
-  public hasStatusEffect(name: tStatusEffect) {
-    return [...this.debuffs, ...this.buffs].some((d) => d.name === name);
+  public hasStatusEffect(
+    name: tStatusEffect | tStatusEffect[] | iStatusEffect | iStatusEffect[]
+  ): boolean {
+    if (Array.isArray(name)) {
+      return (name as (tStatusEffect | iStatusEffect)[]).every((x) =>
+        this.hasStatusEffect(x)
+      );
+    } else {
+      return this._statusEffects.some((d) => {
+        if (typeof name === "string") {
+          return d.name === name;
+        } else {
+          return d.id === name.id;
+        }
+      });
+    }
+  }
+  public isImmune(statusEffect: iStatusEffect | tStatusEffect): boolean {
+    if (typeof statusEffect === "string") {
+      return this.immunity[statusEffect];
+    } else {
+      return this.immunity[statusEffect.name];
+    }
   }
   public addBuff(
-    buff: iStatusEffect | iStatusEffect[],
+    buff: iBuff | iBuff[],
     isNew: boolean,
     scalar: number,
     ability: iAbility | null
@@ -1015,7 +1104,7 @@ export class Character {
         arr.push(...this.addBuff(b, isNew, scalar, ability));
         return arr;
       }, []);
-    } else if (buff.name === "TM") {
+    } else if (buff.name === "TM Increase") {
       if (scalar > 0) {
         return [
           this.changeTurnMeter(buff.duration * scalar) +
@@ -1032,7 +1121,7 @@ export class Character {
         ])}`,
       ];
     } else if (!this.hasDebuff("Buff Immunity")) {
-      if (!this.hasBuff(buff.name) || buff.isStackable) {
+      if ((!this.hasBuff(buff) || buff.isStackable) && !this.isImmune(buff)) {
         if (scalar > 0) {
           this._buffs.push({
             ...buff,
@@ -1054,22 +1143,35 @@ export class Character {
     return [];
   }
   private removeBuff(
-    buff: tBuff | tBuff[] | null,
+    buff: iBuff | iBuff[] | tBuff | tBuff[] | null,
     opponent?: Character
   ): string[] {
     const list: string[] = [];
     const logs: string[] = [];
     if (Array.isArray(buff)) {
       logs.push(
-        ...buff.reduce((arr: string[], b) => {
+        ...(buff as (iBuff | tBuff)[]).reduce((arr: string[], b) => {
           arr.push(...this.removeBuff(b, opponent));
           return arr;
         }, [])
       );
     } else {
+      let buffData: iBuff | null = null;
+      if (typeof buff === "string") {
+        buffData = {
+          name: buff,
+          id: uuid(),
+          duration: 1,
+        };
+      } else {
+        buffData = buff;
+      }
+
       this._buffs = this._buffs.filter((b) => {
         if (
-          (b.name === buff || buff === "all") &&
+          (b.name === buffData?.name ||
+            buffData?.name === "all" ||
+            b.id === buffData?.id) &&
           !this.isSelf(opponent) &&
           !b.cantDispel
         ) {
@@ -1083,9 +1185,7 @@ export class Character {
       });
 
       if (list.length > 0) {
-        if (opponent?.id === this.id) {
-          logs.push(`${format.buff(list)} was removed`);
-        } else if (opponent) {
+        if (opponent && !this.isSelf(opponent)) {
           logs.push(
             `${format.characterName(
               opponent.name,
@@ -1105,7 +1205,7 @@ export class Character {
     return logs;
   }
   private inflictDebuff(
-    debuffs: iStatusEffect[],
+    debuffs: iDebuff[],
     targetCharacter: Character,
     scalar: number = 1
   ): string[] {
@@ -1124,39 +1224,53 @@ export class Character {
           debuff.name === "Tenacity Down" ||
           this.isSelf(targetCharacter)
         ) {
-          if (chanceOfEvent(debuff.chance ?? 0)) {
-            return;
-          }
-
-          if (debuff.name === "TM") {
-            logs.push(
-              targetCharacter.changeTurnMeter(debuff.duration * scalar)
-            );
-          } else {
-            const amount = debuff.duration * scalar;
-
-            targetCharacter.debuffs.push({
-              ...unvue(debuff),
-              isNew: true,
-            });
+          if (targetCharacter.isImmune(debuff)) {
             logs.push(
               `${format.characterName(
                 targetCharacter.name,
                 targetCharacter.owner
-              )} was inflicted with ${format.debuff([
-                debuff.name,
-              ])} for ${amount} turn${amount > 1 ? "s" : ""}`
+              )} is immune to ${debuff.name}`
             );
-            logs.push(
-              ...this.executePassiveTriggers([
-                {
-                  triggerType: "inflictDebuff",
-                  target: {},
-                  data: { debuff: debuff.name },
-                  id: uuid(),
-                },
-              ])
-            );
+          } else {
+            if (chanceOfEvent(debuff.chance ?? 0)) {
+              return;
+            }
+
+            if (debuff.name === "TM Decrease") {
+              logs.push(
+                targetCharacter.changeTurnMeter(debuff.duration * scalar)
+              );
+            } else {
+              if (
+                (!targetCharacter.hasDebuff(debuff) || debuff.isStackable) &&
+                !targetCharacter.isImmune(debuff)
+              ) {
+                const amount = debuff.duration * scalar;
+
+                targetCharacter.debuffs.push({
+                  ...unvue(debuff),
+                  isNew: true,
+                });
+                logs.push(
+                  `${format.characterName(
+                    targetCharacter.name,
+                    targetCharacter.owner
+                  )} was inflicted with ${format.debuff([
+                    debuff.name,
+                  ])} for ${amount} turn${amount > 1 ? "s" : ""}`
+                );
+                logs.push(
+                  ...this.executePassiveTriggers([
+                    {
+                      triggerType: "inflictDebuff",
+                      target: {},
+                      data: { debuff: debuff.name },
+                      id: uuid(),
+                    },
+                  ])
+                );
+              }
+            }
           }
         } else {
           this._history.resisted++;
@@ -1164,9 +1278,7 @@ export class Character {
             `${format.characterName(
               targetCharacter.name,
               targetCharacter.owner
-            )} resisted ${format.debuff([
-              debuff.name === "TM" ? "TM decrease" : debuff.name,
-            ])}`
+            )} resisted ${format.debuff([debuff.name])}`
           );
           logs.push(
             ...targetCharacter.executePassiveTriggers([
@@ -1184,21 +1296,40 @@ export class Character {
     return logs;
   }
   private removeDebuff(
-    debuff: tDebuff | tDebuff[] | null,
+    debuff: iDebuff | iDebuff[] | tDebuff | tDebuff[] | null,
     opponent?: Character
   ): string[] {
     const list: string[] = [];
     const logs: string[] = [];
+
     if (Array.isArray(debuff)) {
       logs.push(
-        ...debuff.reduce((arr: string[], d) => {
-          arr.push(...this.removeDebuff(d, opponent));
-          return arr;
-        }, [])
+        ...(debuff as (iDebuff | tDebuff)[]).reduce(
+          (arr: string[], d: iDebuff | tDebuff) => {
+            arr.push(...this.removeDebuff(d, opponent));
+            return arr;
+          },
+          []
+        )
       );
     } else {
+      let debuffData: iDebuff | null = null;
+      if (typeof debuff === "string") {
+        debuffData = {
+          name: debuff,
+          id: uuid(),
+          duration: 1,
+        };
+      } else {
+        debuffData = debuff;
+      }
+
       this._debuffs = unvue(this._debuffs).filter((x) => {
-        if (x.name === debuff || debuff === "all") {
+        if (
+          x.name === debuffData?.name ||
+          debuffData?.name === "all" ||
+          x.id === debuffData?.id
+        ) {
           if (x.expires) {
             logs.push(...this.processTargets(x.expires, this, null));
           }
@@ -1209,7 +1340,7 @@ export class Character {
       });
 
       if (list.length > 0) {
-        if (opponent) {
+        if (opponent && !this.isSelf(opponent)) {
           logs.push(
             `${format.characterName(
               opponent.name,
@@ -1230,23 +1361,84 @@ export class Character {
     }
     return logs;
   }
-  private addBlueEffect(
+  private addStatusEffect(
     effect: iStatusEffect | iStatusEffect[],
     ability: iAbility | null
   ): string[] {
     if (Array.isArray(effect)) {
       return effect.reduce((arr: string[], e) => {
-        arr.push(...this.addBlueEffect(e, ability));
+        arr.push(...this.addStatusEffect(e, ability));
         return arr;
       }, []);
     } else {
-      this._blueEffects.push(effect);
-      return [
-        `${format.characterName(this.name, this.owner)} gained ${format.buff([
-          effect.name,
-        ])} ${format.abilitySource(ability)}`,
-      ];
+      if (
+        (!this.hasStatusEffect(effect) || effect.isStackable) &&
+        !this.isImmune(effect)
+      ) {
+        this._statusEffects.push(effect);
+        return [
+          `${format.characterName(this.name, this.owner)} gained ${format.buff([
+            effect.name,
+          ])} ${format.abilitySource(ability)}`,
+        ];
+      }
     }
+    return [];
+  }
+  private removeStatusEffect(
+    statusEffect:
+      | iStatusEffect
+      | iStatusEffect[]
+      | tStatusEffect
+      | tStatusEffect[]
+      | null
+  ): string[] {
+    const logs: string[] = [];
+    if (Array.isArray(statusEffect)) {
+      logs.push(
+        ...(statusEffect as (iStatusEffect | tStatusEffect)[]).reduce(
+          (arr: string[], d) => {
+            arr.push(...this.removeStatusEffect(d));
+            return arr;
+          },
+          []
+        )
+      );
+    } else {
+      const list: string[] = [];
+      let statusEffectData: iStatusEffect | null = null;
+      if (typeof statusEffect === "string") {
+        statusEffectData = {
+          name: statusEffect,
+          id: uuid(),
+          duration: 1,
+        };
+      } else {
+        statusEffectData = statusEffect;
+      }
+
+      this._statusEffects = unvue(this._statusEffects).filter((x) => {
+        if (
+          x.name === statusEffectData?.name ||
+          statusEffectData?.name === "all" ||
+          x.id === statusEffectData?.id
+        ) {
+          if (x.expires) {
+            logs.push(...this.processTargets(x.expires, this, null));
+          }
+          list.push(x.name);
+          return false;
+        }
+        return true;
+      });
+
+      if (list.length > 0) {
+        logs.push(
+          `${format.debuff(list)} ${list.length <= 1 ? "was" : "were"} removed`
+        );
+      }
+    }
+    return logs;
   }
 
   //Abilities
@@ -1293,14 +1485,33 @@ export class Character {
       dead?: boolean;
     }
   ): Character[] {
-    const { allies, targetCount, tags, targetIds, weakest } =
+    const { allies, targetCount, tags, targetIds, weakest, statusEffects } =
       targetSelection.target;
-    let list: Character[] = [...this._teammates, ...this._opponents];
+    let list: Character[] = [...this._teammates, ...this._opponents].filter(
+      (char: Character) => {
+        let shouldExclude = false;
+
+        if (char.isDead && !ignore?.dead) {
+          shouldExclude = true;
+        }
+        if (ignore?.paralysisDebuff) {
+          shouldExclude = char.hasDebuff("Stun") || shouldExclude;
+        }
+        if (ignore?.daze) {
+          shouldExclude = char.hasDebuff("Daze") || shouldExclude;
+        }
+        return !shouldExclude;
+      }
+    );
 
     if (allies) {
       list = list.filter((x) => x.owner === this.owner);
     } else if (allies === false) {
       list = list.filter((x) => x.owner !== this.owner);
+    }
+
+    if (tags) {
+      list = list.filter((char) => anyTagsMatch(char, tags, this.id));
     }
 
     if (targetIds) {
@@ -1309,12 +1520,31 @@ export class Character {
         if (target instanceof Character) {
           shouldInclude = targetIds.includes("target") && char.isSelf(target);
         }
-        return targetIds.includes(char.id) || shouldInclude;
+        return anyTagsMatch(char, targetIds, this.id) || shouldInclude;
       });
     }
 
-    if (tags) {
-      list = list.filter((char) => anyTagsMatch(char, tags, this.id));
+    if (weakest) {
+      const weakestChar = list.reduce(
+        (acc: null | Character, el: Character) => {
+          if (!acc) {
+            return el;
+          } else {
+            const totalEl = el.protection + el.health;
+            const totalAcc = acc.protection + acc.health;
+            if (totalEl < totalAcc) {
+              return el;
+            } else if (totalEl === totalAcc) {
+              return randomNumber(0, 1) === 0 ? el : acc;
+            }
+          }
+          return acc;
+        },
+        null
+      );
+      if (!!weakestChar) {
+        list = [weakestChar];
+      }
     }
 
     if (targetCount) {
@@ -1345,46 +1575,11 @@ export class Character {
       } while (list.length < targetCount && validTargets.length >= targetCount);
     }
 
-    if (weakest) {
-      const weakestChar = list.reduce(
-        (acc: null | Character, el: Character) => {
-          if (!acc) {
-            return el;
-          } else {
-            const totalEl = el.protection + el.health;
-            const totalAcc = acc.protection + acc.health;
-            if (totalEl < totalAcc) {
-              return el;
-            } else if (totalEl === totalAcc) {
-              return randomNumber(0, 1) === 0 ? el : acc;
-            }
-          }
-          return acc;
-        },
-        null
-      );
-      if (!!weakestChar) {
-        list = [weakestChar];
-      }
+    if (statusEffects) {
+      list = list.filter((x) => x.hasStatusEffect(statusEffects));
     }
 
-    return list.filter((char: Character) => {
-      if (!char) {
-        return false;
-      }
-
-      let shouldExclude = false;
-      if (char.isDead && !ignore?.dead) {
-        shouldExclude = true;
-      }
-      if (ignore?.paralysisDebuff) {
-        shouldExclude = char.hasDebuff("Stun") || shouldExclude;
-      }
-      if (ignore?.daze) {
-        shouldExclude = char.hasDebuff("Daze") || shouldExclude;
-      }
-      return !shouldExclude;
-    });
+    return list.filter((char: Character) => !!char);
   }
 
   //other properties
@@ -1516,6 +1711,42 @@ export class Character {
 
     return { logs, damageDealt: damageTotal, isCrit };
   }
+  public dealTrueDamage(
+    targetCharacter: Character,
+    damageTotal: number,
+    isCrit: boolean = false
+  ): string[] {
+    const logs: string[] = [];
+    targetCharacter.protection -= damageTotal;
+
+    logs.push(
+      format.damage(
+        damageTotal,
+        targetCharacter.name,
+        targetCharacter.owner,
+        isCrit,
+        targetCharacter.protection,
+        targetCharacter.health
+      )
+    );
+
+    logs.push(
+      ...this.heal(
+        {
+          type: "flat",
+          amount: damageTotal * this.healthSteal,
+          healthType: "health",
+        },
+        {
+          name: "Health Steal",
+          id: "whatever",
+          turnsRemaining: 0,
+          cooldown: 0,
+        }
+      )
+    );
+    return logs;
+  }
   private calculateDamage(
     targetCharacter: Character,
     target: iTarget,
@@ -1548,48 +1779,33 @@ export class Character {
     );
     return { isCrit, damageTotal };
   }
-  public counterAttack(targetCharacter: Character): string[] {
+  public counterAttack(
+    targetCharacter: Character,
+    canBeCountered: boolean = true
+  ): string[] {
     const logs: string[] = [];
-    if (
-      chanceOfEvent(this.counterChance) &&
-      !this.isDead &&
-      this.owner !== targetCharacter.owner
-    ) {
-      logs.push(
-        `${format.characterName(
-          this.name,
-          this.owner
-        )} counter attacked with ${format.ability(this.basicAbility?.name)}`
-      );
-      this.basicAbility?.targets?.forEach((target) => {
-        const {
-          logs: damageLogs,
-          damageDealt,
-          isCrit,
-        } = this.dealDamage(
-          targetCharacter,
-          target,
-          (this.basicAbility as iAbility) ?? null,
-          {
-            statToModify: "offense",
-            amount: this.counterDamage,
-            type: "percent",
-          }
-        );
-        logs.push(...damageLogs);
-
+    if (canBeCountered && !targetCharacter.isDead) {
+      if (
+        chanceOfEvent(this.counterChance) &&
+        !this.isDead &&
+        this.owner !== targetCharacter.owner
+      ) {
         logs.push(
-          ...this.executePassiveTriggers([
-            {
-              triggerType: "dealDamage",
-              target: {},
-              data: { damageDealt, isCrit },
-              id: uuid(),
-              srcAbility: this.basicAbility as iAbility,
-            },
-          ])
+          `${format.characterName(this.name, this.owner)} counter attacked`
         );
-      });
+        logs.push(
+          ...this.useAbility(
+            this.basicAbility as iAbility,
+            {
+              statToModify: "offense",
+              amount: this.counterDamage,
+              type: "percent",
+            },
+            targetCharacter,
+            false
+          )
+        );
+      }
     }
     return logs;
   }
@@ -1707,6 +1923,13 @@ export class Character {
       logs.push(
         ...targetCharacter.removeBuff(effect.dispel?.buffs ?? null, this)
       );
+
+      console.log(
+        this.id,
+        this.owner,
+        targetCharacter.id,
+        targetCharacter.owner
+      );
       logs.push(
         ...targetCharacter.removeDebuff(effect.dispel?.debuffs ?? null, this)
       );
@@ -1731,7 +1954,7 @@ export class Character {
     }
 
     if (effect.assist) {
-      logs.push(...targetCharacter.callAllyToAssist(effect.assist));
+      logs.push(...this.callAllyToAssist(effect.assist, targetCharacter));
     }
 
     if (effect.buffs) {
@@ -1784,23 +2007,47 @@ export class Character {
       }
     }
 
+    if (effect.damage) {
+      if (effect.damage.scale) {
+        // this.findTargets(effect.damage.scale.target).forEach
+        this.dealTrueDamage(targetCharacter, 0);
+      }
+    }
+
     return logs;
   }
   public changeCooldown(effect: iEffect): string {
     if (effect.cooldown) {
       const { amount, id } = effect.cooldown;
-      const ability = this._activeAbilities.find((a) => a.id === id);
-      if (ability && "turnsRemaining" in ability) {
-        const finalAmount = amount >= 0 ? amount : 0 - ability.turnsRemaining;
-        ability.turnsRemaining += finalAmount;
-        return `${this.name}'s ${ability.name}'s cooldown was ${
-          finalAmount > 0 ? "increased" : "decreased"
-        } by ${Math.abs(finalAmount)}`;
+      const name = amount > 0 ? "Cooldown Increase" : "Cooldown Decrease";
+      if (
+        this.isImmune({
+          name,
+          id: uuid(),
+          duration: amount,
+        })
+      ) {
+        return `${format.characterName(
+          this.name,
+          this.owner
+        )} is immune to ${format.buff([name])}`;
       } else {
-        console.warn(
-          `Could not change the cooldown of ${id}`,
-          this._activeAbilities
-        );
+        const ability = this._activeAbilities.find((a) => a.id === id);
+        if (ability && "turnsRemaining" in ability) {
+          const finalAmount = amount === 0 ? ability.turnsRemaining : amount;
+          ability.turnsRemaining += finalAmount;
+          return `${format.characterName(
+            this.name,
+            this.owner
+          )}'s ${format.ability(ability.name)}'s cooldown was ${
+            finalAmount > 0 ? "increased" : "decreased"
+          } by ${Math.abs(finalAmount)}`;
+        } else {
+          console.warn(
+            `Could not change the cooldown of ${id}`,
+            this._activeAbilities
+          );
+        }
       }
     }
     return "";
@@ -1858,7 +2105,7 @@ export class Character {
   public useAbility(
     ability: iAbility,
     stats?: iStatsCheck,
-    targetCharacter?: Character,
+    targetCharacter?: Character | null,
     canBeCountered?: boolean
   ): string[] {
     const logs: string[] = [];
@@ -1904,11 +2151,29 @@ export class Character {
             },
           ])
         );
-        if (targetData.damage) {
-          logs.push(...char.counterAttack(this));
-        }
       });
+
+      const primaryCharIndex = randomNumber(0, targets.length - 1);
+
+      logs.push(
+        ...this.executePassiveTriggers([
+          {
+            triggerType: "useAbility",
+            id: uuid(),
+            target: {},
+            data: { ability, target: targets[primaryCharIndex] },
+          },
+        ])
+      );
+
+      if (targetData.damage) {
+        targets.forEach((char) => {
+          logs.push(...char.counterAttack(this, canBeCountered));
+        });
+      }
     });
+
+    this.resetTriggers();
 
     return logs;
   }
@@ -1918,12 +2183,13 @@ export class Character {
     ability: iAbility | null,
     isNew?: boolean,
     stats?: iStatsCheck,
-    canCounter?: boolean
+    canBeCountered?: boolean
   ): string[] {
     const logs: string[] = [];
     const myTriggers: iTrigger[] = [];
     const opponentTriggers: iTrigger[] = [];
-    const { damage, actions, debuffs, buffs, target, blueEffects } = targetData;
+    const { damage, actions, debuffs, buffs, target, statusEffects, triggers } =
+      targetData;
 
     if (targetData?.triggerData?.count) {
       if (targetData.triggerData.count > 0) {
@@ -1962,7 +2228,7 @@ export class Character {
         target: {},
         data: { damageDealt, isCrit, target: targetCharacter },
         id: uuid(),
-        srcAbility: ability,
+        // srcAbility: ability,
       });
 
       if (targetCharacter.health <= 0) {
@@ -1991,13 +2257,16 @@ export class Character {
         )
       );
     }
-    if (blueEffects) {
-      console.log("adding blue effect to", targetCharacter.name);
-      logs.push(...targetCharacter.addBlueEffect(blueEffects, ability));
+    if (statusEffects) {
+      logs.push(...targetCharacter.addStatusEffect(statusEffects, ability));
+    }
+    if (triggers && ability) {
+      triggers.forEach((t) => targetCharacter.addTrigger(t, ability));
     }
 
     logs.push(...targetCharacter.executePassiveTriggers(opponentTriggers));
     logs.push(...this.executeAbilityTriggers(ability, myTriggers));
+    logs.push(...this.executePassiveTriggers(myTriggers));
 
     return logs;
   }
@@ -2006,9 +2275,15 @@ export class Character {
       return true;
     } else if (tag === "Self") {
       return this.id === id;
-    } else if (tag === "Light Side" || tag === "Dark Side" || "Neutral") {
+    } else if (
+      tag === "Light Side" ||
+      tag === "Dark Side" ||
+      tag === "Neutral"
+    ) {
       return this.alignment === tag;
-    } else return false;
+    } else {
+      return tag === this.id;
+    }
   }
   private getScalar(type: string | number = ""): number {
     if (type === "Resisted") {
@@ -2036,13 +2311,41 @@ export class Character {
     return this._triggers;
   }
   public addTrigger(trigger: iTrigger, ability: iAbility) {
-    this._triggers.push({ ...trigger, ability });
+    const match = this._triggers.find((t) => t.id === trigger.id);
+    if (!match) {
+      this._triggers.push({ ...unvue(trigger), ability: unvue(ability) });
+    }
   }
-  public removeTrigger(id: string) {
-    const index = this._triggers.findIndex((t) => t.id === id);
+  public removeTrigger(trigger: iTrigger): string[] {
+    const logs: string[] = [];
+    logs.push(...this.removeEvents([trigger]));
+    logs.push(...this.removeEvents(trigger?.events));
+
+    const index = this._triggers.findIndex((t) => t.id === trigger.id);
     if (index > -1) {
       this._triggers.splice(index, 1);
     }
+    return logs;
+  }
+  public removeEvents(events?: iTarget[]): string[] {
+    const logs: string[] = [];
+    events?.forEach((event) => {
+      [...this._teammates, ...this._opponents].forEach((target) => {
+        event.buffs?.forEach((buff) => {
+          logs.push(...target.removeBuff(buff));
+        });
+        event.debuffs?.forEach((debuff) => {
+          logs.push(...target.removeDebuff(debuff));
+        });
+        event.statusEffects?.forEach((s) => {
+          logs.push(...target.removeStatusEffect(s));
+        });
+        event.triggers?.forEach((trigger) => {
+          logs.push(...target.removeTrigger(trigger));
+        });
+      });
+    });
+    return logs;
   }
   public executePassiveTriggers(types: iTrigger[], data?: any): string[] {
     const logs: string[] = [];
@@ -2130,16 +2433,36 @@ export class Character {
   }
   private removePassiveTriggers() {
     this._uniqueAbilities.forEach((ability) => {
-      ability.triggers?.forEach((trigger) => {
-        this.findTargets(trigger, undefined, { dead: true }).forEach(
-          (target) => {
-            if (target.id !== this.id) {
-              target.removeTrigger(trigger.id);
-            }
-          }
-        );
+      this.removeAllTriggers(ability.triggers);
+    });
+  }
+  private removeAllTriggers(triggers?: iTrigger[]) {
+    const logs: string[] = [];
+    triggers?.forEach((trigger) => {
+      [...this._teammates, ...this._opponents].forEach((target) => {
+        logs.push(...target.removeTrigger(trigger));
       });
     });
+  }
+  private resetTriggers() {
+    this._triggers.forEach((t) => {
+      if (t.triggerData) {
+        if (t.triggerData.frequency === "turn") {
+          t.triggerData.count = t.triggerData.limit;
+        }
+      }
+
+      t.events?.forEach((e) => {
+        if (e.triggerData) {
+          if (e.triggerData.frequency === "turn") {
+            e.triggerData.count = e.triggerData.limit;
+          }
+        }
+      });
+    });
+    this._history = {
+      resisted: 0,
+    };
   }
   public endOfTurn(ability: iAbility | null): string[] {
     const logs: string[] = [];
@@ -2147,11 +2470,11 @@ export class Character {
       this._debuffs.reduce(
         (
           acc: {
-            newDebuffList: iStatusEffect[];
-            expireDebuffs: iStatusEffect[];
+            newDebuffList: iDebuff[];
+            expireDebuffs: iDebuff[];
             debuffsRemoved: string[];
           },
-          debuff: iStatusEffect
+          debuff: iDebuff
         ) => {
           if (debuff.isNew) {
             debuff.isNew = false;
@@ -2176,11 +2499,11 @@ export class Character {
     const { newBuffList, expiredBuffs, buffsRemoved } = this._buffs.reduce(
       (
         acc: {
-          newBuffList: iStatusEffect[];
-          expiredBuffs: iStatusEffect[];
+          newBuffList: iBuff[];
+          expiredBuffs: iBuff[];
           buffsRemoved: string[];
         },
-        buff: iStatusEffect
+        buff: iBuff
       ) => {
         if (buff.isNew) {
           buff.isNew = false;
@@ -2232,29 +2555,12 @@ export class Character {
         );
       }
     });
+
     this._activeAbilities.forEach((a) => {
       if (ability?.id !== a.id && "turnsRemaining" in a) {
         a.turnsRemaining--;
       }
     });
-    this._triggers.forEach((t) => {
-      if (t.triggerData) {
-        if (t.triggerData.frequency === "turn") {
-          t.triggerData.count = t.triggerData.limit;
-        }
-      }
-
-      t.events?.forEach((e) => {
-        if (e.triggerData) {
-          if (e.triggerData.frequency === "turn") {
-            e.triggerData.count = e.triggerData.limit;
-          }
-        }
-      });
-    });
-    this._history = {
-      resisted: 0,
-    };
 
     return logs;
   }

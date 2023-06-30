@@ -136,10 +136,7 @@
             </div>
           </div>
         </div>
-        <div
-          class="row"
-          v-if="simulation.playerWins + simulation.opponentWins > 0"
-        >
+        <div class="row" v-if="logs.length > 0">
           <div class="col">
             <div>{{ player.name }} Wins: {{ simulation.playerWins }}</div>
             <div>{{ opponent.name }} Wins: {{ simulation.opponentWins }}</div>
@@ -288,9 +285,10 @@ export default defineComponent({
       );
     },
     initializeMatch() {
-      [...this.playerTeam, ...this.opponentTeam].forEach((x) => x.initialize());
+      const allCharacters = [...this.playerTeam, ...this.opponentTeam];
+      allCharacters.forEach((x) => x.initialize());
 
-      const startTriggers = [...this.playerTeam, ...this.opponentTeam]
+      const startTriggers = allCharacters
         .filter((char) => {
           return char.triggers.some((trigger) => {
             return trigger.triggerType === "start";
@@ -316,21 +314,50 @@ export default defineComponent({
           return 0;
         });
 
-      startTriggers.forEach((char, index) => {
-        this.logs.push(
-          `Turn 0.${index + 1}`,
-          `${format.characterName(char.name, char.owner)} - Start of Match`
-        );
-        this.logs.push(
-          ...char.executePassiveTriggers([
-            {
-              triggerType: "start",
-              target: {},
-              data: {},
-              id: uuid(),
-            },
-          ])
-        );
+      const pregameTriggers = allCharacters.filter((char) => {
+        return char.triggers.some((trigger) => {
+          return trigger.triggerType === "pregame";
+        });
+      });
+
+      let i = 0;
+
+      pregameTriggers.forEach((char) => {
+        const pregameLogs = char.executePassiveTriggers([
+          {
+            triggerType: "pregame",
+            target: {},
+            data: {},
+            id: uuid(),
+          },
+        ]);
+
+        if (pregameLogs.length > 0) {
+          this.logs.push(
+            `${format.characterName(char.name, char.owner)} - Match Set Up`
+          );
+          this.logs.push(...pregameLogs);
+        }
+      });
+
+      startTriggers.forEach((char) => {
+        const startLogs = char.executePassiveTriggers([
+          {
+            triggerType: "start",
+            target: {},
+            data: {},
+            id: uuid(),
+          },
+        ]);
+
+        if (startLogs.length > 0) {
+          i++;
+          this.logs.push(
+            `Turn 0.${i}`,
+            `${format.characterName(char.name, char.owner)} - Start of Match`
+          );
+          this.logs.push(...startLogs);
+        }
       });
     },
     reset() {

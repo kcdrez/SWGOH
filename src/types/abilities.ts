@@ -25,7 +25,7 @@ const characterMapping: Record<
               buffs: [
                 {
                   duration: 100,
-                  name: "TM",
+                  name: "TM Increase",
                   id: uuid(),
                 },
               ],
@@ -81,6 +81,23 @@ const characterMapping: Record<
           target: { targetCount: 1, allies: false },
           actions: [
             {
+              dispel: {
+                buffs: "all",
+              },
+            },
+          ],
+          debuffs: [
+            { name: "TM Decrease", duration: -100, id: uuid() },
+            { name: "Buff Immunity", duration: 2, id: uuid() },
+            { name: "Tenacity Down", duration: 2, id: uuid() },
+          ],
+          damage: 2.978,
+          damageType: "physical",
+        },
+        {
+          target: { targetCount: 1, allies: false },
+          actions: [
+            {
               cooldown: {
                 id: "specialskill_COMMANDERLUKESKYWALKER01",
                 amount: -1,
@@ -95,23 +112,6 @@ const characterMapping: Record<
               },
             },
           ],
-        },
-        {
-          target: { targetCount: 1, allies: false },
-          actions: [
-            {
-              dispel: {
-                buffs: "all",
-              },
-            },
-          ],
-          debuffs: [
-            { name: "TM", duration: -100, id: uuid() },
-            { name: "Buff Immunity", duration: 2, id: uuid() },
-            { name: "Tenacity Down", duration: 2, id: uuid() },
-          ],
-          damage: 2.978,
-          damageType: "physical",
         },
       ],
     },
@@ -140,7 +140,7 @@ const characterMapping: Record<
               },
               debuffs: [
                 {
-                  name: "TM",
+                  name: "TM Decrease",
                   duration: -30,
                   id: uuid(),
                 },
@@ -240,7 +240,7 @@ const characterMapping: Record<
                   buffs: [
                     {
                       id: uuid(),
-                      name: "TM",
+                      name: "TM Increase",
                       duration: 10,
                     },
                   ],
@@ -307,7 +307,7 @@ const characterMapping: Record<
             {
               buffs: [
                 {
-                  name: "TM",
+                  name: "TM Increase",
                   duration: 10,
                   id: uuid(),
                 },
@@ -332,7 +332,7 @@ const characterMapping: Record<
                 {
                   buffs: [
                     {
-                      name: "TM",
+                      name: "TM Increase",
                       duration: 5,
                       id: uuid(),
                     },
@@ -395,7 +395,7 @@ const characterMapping: Record<
                 {
                   buffs: [
                     {
-                      name: "TM",
+                      name: "TM Increase",
                       duration: 5,
                       id: uuid(),
                     },
@@ -464,7 +464,7 @@ const characterMapping: Record<
               id: uuid(),
             },
             {
-              name: "TM",
+              name: "TM Decrease",
               duration: -60,
               chance: 0.8,
               id: uuid(),
@@ -481,7 +481,7 @@ const characterMapping: Record<
           buffs: [
             {
               duration: 3,
-              name: "TM",
+              name: "TM Increase",
               id: uuid(),
             },
           ],
@@ -552,7 +552,7 @@ const characterMapping: Record<
               buffs: [
                 {
                   duration: 5,
-                  name: "TM",
+                  name: "TM Increase",
                   id: uuid(),
                 },
               ],
@@ -589,7 +589,7 @@ const characterMapping: Record<
                 },
                 {
                   duration: 25,
-                  name: "TM",
+                  name: "TM Increase",
                   id: uuid(),
                 },
               ],
@@ -650,7 +650,7 @@ const characterMapping: Record<
                 {
                   buffs: [
                     {
-                      name: "TM",
+                      name: "TM Increase",
                       duration: 30,
                       id: uuid(),
                     },
@@ -682,12 +682,13 @@ const characterMapping: Record<
                     type: "percent",
                     statToModify: "offense",
                   },
-                  condition: {
-                    tags: ["Jedi"],
-                  },
                 },
                 target: {
-                  target: { allies: true, targetCount: 1, tags: ["!Self"] },
+                  target: {
+                    allies: true,
+                    targetCount: 1,
+                    tags: ["Jedi & !Self"],
+                  },
                 },
               },
             },
@@ -835,7 +836,7 @@ const characterMapping: Record<
                   },
                   debuffs: [
                     {
-                      name: "TM",
+                      name: "TM Decrease",
                       duration: -35,
                       id: uuid(),
                     },
@@ -873,8 +874,8 @@ const characterMapping: Record<
           },
           buffs: [
             {
-              name: "TM",
-              duration: 1,
+              name: "TM Increase",
+              duration: 100,
               id: uuid(),
             },
           ],
@@ -916,7 +917,7 @@ const characterMapping: Record<
               id: uuid(),
             },
             {
-              name: "TM",
+              name: "TM Increase",
               duration: 50,
               id: uuid(),
             },
@@ -1128,7 +1129,7 @@ const characterMapping: Record<
                 },
               },
               cooldown: {
-                amount: -100,
+                amount: 0,
                 target: "Self",
                 id: "specialskill_CHEWBACCALEGENDARY01",
               },
@@ -1143,7 +1144,7 @@ const characterMapping: Record<
       triggers: [
         {
           id: uuid(),
-          triggerType: "start",
+          triggerType: "pregame",
           triggerData: {
             limit: 1,
             count: 1,
@@ -1158,38 +1159,193 @@ const characterMapping: Record<
                 weakest: true,
                 allies: true,
                 tags: ["!Self"],
+                targetIds: ["!HANSOLO"],
+                targetCount: 1,
               },
-              blueEffects: [
+              statusEffects: [
                 {
                   name: "Guard",
                   duration: Infinity,
                   id: uuid(),
                 },
               ],
-              // actions: [
-              //   {
-              //     ability: {
-              //       abilityToUse: "basicskill_HANSOLO",
-              //       modifiers: [
-              //         {
-              //           target: {
-              //             targetCount: 1,
-              //             allies: false,
-              //             ignoreTaunt: true,
-              //           },
-              //           debuffs: [
-              //             {
-              //               name: "Stun",
-              //               duration: 1,
-              //               cantResist: true,
-              //               id: uuid(),
-              //             },
-              //           ],
-              //         },
-              //       ],
-              //     },
-              //   },
-              // ],
+              triggers: [
+                {
+                  triggerType: "useAbility",
+                  id: uuid(),
+                  target: { targetIds: ["target"] },
+                  triggerData: {
+                    frequency: "turn",
+                    count: 1,
+                    limit: 1,
+                  },
+                  actions: [
+                    {
+                      assist: {
+                        chance: 1,
+                        target: {
+                          target: {
+                            allies: true,
+                            targetIds: ["CHEWBACCALEGENDARY"],
+                          },
+                        },
+                        modifier: {
+                          stats: {
+                            type: "percent",
+                            statToModify: "offense",
+                            amount: 0.8,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              target: {
+                targetIds: ["HANSOLO"],
+                allies: true,
+              },
+              statusEffects: [
+                {
+                  name: "Guard",
+                  duration: Infinity,
+                  id: uuid(),
+                },
+              ],
+              triggers: [
+                {
+                  triggerType: "useAbility",
+                  id: uuid(),
+                  target: { targetIds: ["target"] },
+                  triggerData: {
+                    frequency: "turn",
+                    count: 1,
+                    limit: 1,
+                  },
+                  actions: [
+                    {
+                      assist: {
+                        chance: 1,
+                        target: {
+                          target: {
+                            allies: true,
+                            targetIds: ["CHEWBACCALEGENDARY"],
+                          },
+                        },
+                        modifier: {
+                          stats: {
+                            type: "percent",
+                            statToModify: "offense",
+                            amount: 0.8,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          triggerType: "dealDamage",
+          id: uuid(),
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          events: [
+            {
+              target: {
+                statusEffects: ["Guard"],
+                allies: true,
+              },
+              actions: [
+                {
+                  heal: {
+                    healthType: "health",
+                    amount: 0.03,
+                    type: "percent",
+                  },
+                },
+                {
+                  heal: {
+                    healthType: "protection",
+                    amount: 0.03,
+                    type: "percent",
+                  },
+                },
+              ],
+            },
+            {
+              target: {
+                allies: true,
+                tags: ["Self"],
+              },
+              actions: [
+                {
+                  heal: {
+                    healthType: "health",
+                    amount: 0.03,
+                    type: "percent",
+                  },
+                },
+                {
+                  heal: {
+                    healthType: "protection",
+                    amount: 0.03,
+                    type: "percent",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    uniqueskill_CHEWBACCALEGENDARY02: {
+      id: "uniqueskill_CHEWBACCALEGENDARY01",
+      name: "Raging Wookie",
+      triggers: [
+        {
+          triggerType: "always",
+          id: uuid(),
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          actions: [
+            {
+              immune: {
+                negativeStatusEffects: ["Ability Block", "Cooldown Increase"],
+              },
+            },
+          ],
+        },
+        {
+          id: uuid(),
+          triggerType: "dealDamage",
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          events: [
+            {
+              target: { targetIds: ["target"] },
+              actions: [
+                {
+                  damage: {
+                    scale: {
+                      target: { targetIds: ["target"] },
+                      stats: {
+                        health: 1,
+                      },
+                    },
+                  },
+                },
+              ],
             },
           ],
         },
