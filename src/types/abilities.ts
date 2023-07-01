@@ -1039,6 +1039,7 @@ const characterMapping: Record<
     basicskill_CHEWBACCALEGENDARY: {
       id: "basicskill_CHEWBACCALEGENDARY",
       name: "Overcharged Shot",
+      sort: 0,
       targets: [
         {
           target: { targetCount: 1, allies: false },
@@ -1306,8 +1307,9 @@ const characterMapping: Record<
       ],
     },
     uniqueskill_CHEWBACCALEGENDARY02: {
-      id: "uniqueskill_CHEWBACCALEGENDARY01",
+      id: "uniqueskill_CHEWBACCALEGENDARY02",
       name: "Raging Wookie",
+      sort: 1,
       triggers: [
         {
           triggerType: "always",
@@ -1338,12 +1340,96 @@ const characterMapping: Record<
                 {
                   damage: {
                     scale: {
-                      target: { targetIds: ["target"] },
+                      target: { target: { targetIds: ["target"] } },
                       stats: {
-                        health: 1,
+                        statToModify: "maxHealth",
+                        type: "percent",
+                        amount: 0.2,
                       },
                     },
                   },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          triggerType: "receiveDamage",
+          id: uuid(),
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          actions: [
+            {
+              stats: {
+                statToModify: "offense",
+                type: "percent",
+                amount: 0.25,
+                expires: {
+                  frequency: "turn",
+                  count: 1,
+                },
+              },
+            },
+            {
+              stats: {
+                statToModify: "critChance",
+                type: "flat",
+                amount: 0.25,
+                expires: {
+                  frequency: "turn",
+                  count: 1,
+                },
+              },
+            },
+            {
+              cooldown: {
+                id: "specialskill_CHEWBACCALEGENDARY01",
+                amount: -1,
+                target: "Self",
+              },
+            },
+          ],
+        },
+        {
+          triggerType: "pregame",
+          id: uuid(),
+          target: {
+            tags: ["Self"],
+            allies: true,
+          },
+          events: [
+            {
+              target: {
+                statusEffects: ["Guard"],
+                allies: true,
+              },
+              triggers: [
+                {
+                  triggerType: "receiveDamage",
+                  id: uuid(),
+                  target: {
+                    tags: ["Self"],
+                    allies: true,
+                  },
+                  events: [
+                    {
+                      target: {
+                        targetIds: ["CHEWBACCALEGENDARY"],
+                        allies: true,
+                      },
+                      actions: [
+                        {
+                          cooldown: {
+                            id: "specialskill_CHEWBACCALEGENDARY01",
+                            amount: -1,
+                            target: 1,
+                          },
+                        },
+                      ],
+                    },
+                  ],
                 },
               ],
             },
