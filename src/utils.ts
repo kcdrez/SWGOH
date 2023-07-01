@@ -288,7 +288,7 @@ export function getSortOrder(
       return valueB ? 1 : -1;
     }
   } else {
-    throw new Error("Sorting type mismatch");
+    // throw new Error("Sorting type mismatch");
   }
 }
 

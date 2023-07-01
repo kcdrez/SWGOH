@@ -8,6 +8,7 @@
       :table="{ header: addNewHeader, body: addNewBody }"
       v-if="accessLevel >= 3"
     />
+    <div id="my-chart-id"><canvas id="my-canvas"></canvas></div>
   </div>
 </template>
 
@@ -15,6 +16,28 @@
 import moment from "moment";
 import { defineComponent, toRefs } from "vue";
 import { mapState, mapActions } from "vuex";
+// const { Chart } = await import("chart.js");
+import Chart from "chart.js/auto";
+// import { Bar } from "vue-chartjs";
+
+// import {
+//   Chart as ChartJS,
+//   Title,
+//   Tooltip,
+//   Legend,
+//   BarElement,
+//   CategoryScale,
+//   LinearScale,
+// } from "chart.js";
+
+// ChartJS.register(
+//   Title,
+//   Tooltip,
+//   Legend,
+//   BarElement,
+//   CategoryScale,
+//   LinearScale
+// );
 
 import { setupColumnEvents, setupSorting, sortValues, unvue } from "utils";
 import { iRaidEvent } from "types/guild";
@@ -24,6 +47,7 @@ const storageKey = "raidEventsTable";
 
 export default defineComponent({
   name: "RaidEventsTable",
+  // components: { Bar },
   setup(props) {
     const { sortDir, sortMethod, sortBy, sortIcon } = setupSorting(storageKey);
     const list = toRefs(props).selectedColumns;
@@ -340,6 +364,14 @@ export default defineComponent({
     addNewDisabled(): boolean {
       return !this.newEvent.date || !this.newEvent.score || !this.newEvent.type;
     },
+    chartData() {
+      return {
+        labels: this.raidEvents.map((event) =>
+          this.$filters.formatDate(event.date, "DD-MMM 'YY")
+        ),
+        data: this.raidEvents.map((event) => event.score),
+      };
+    },
   },
   methods: {
     ...mapActions("guild", ["addRaidEvent", "removeRaidEvent"]),
@@ -360,10 +392,76 @@ export default defineComponent({
       });
     },
   },
+  mounted() {
+    new Chart(document.getElementById("my-canvas") as any, {
+      type: "line",
+      data: {
+        labels: this.chartData.labels,
+        datasets: [
+          {
+            label: "Krayt Dragon Raid",
+            data: this.chartData.data,
+            // borderColor: "red",
+          },
+        ],
+      },
+      options: {
+        scales: {
+          y: {
+            title: {
+              text: "Raid Score",
+              display: true,
+              color: "black",
+              font: {
+                size: 18,
+              },
+            },
+            ticks: {
+              color: "black",
+              font: {
+                size: 14,
+              },
+            },
+          },
+          x: {
+            title: {
+              text: "Date",
+              display: true,
+              color: "black",
+              font: {
+                size: 18,
+              },
+            },
+            ticks: {
+              color: "black",
+              font: {
+                size: 14,
+              },
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: "black",
+              font: {
+                size: 20,
+              },
+            },
+          },
+        },
+      },
+    });
+  },
 });
 </script>
 
 <style lang="scss" scoped>
+@import "styles/variables.scss";
+
+canvas {
+  background-color: $light;
+}
 ::v-deep(.character-shards-label) {
   @media only screen and (max-width: 768px) {
     display: block;
