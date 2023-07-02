@@ -51,8 +51,9 @@
           role="group"
           :class="cell.data.groupClasses"
         >
-          <template v-for="button in cell.data.buttons">
+          <template v-for="(button, index) in cell.data.buttons">
             <button
+              :key="index"
               v-if="!button.hide"
               @click="button.click"
               :class="button.classes"
@@ -71,6 +72,7 @@
       <template v-else-if="cell.type === 'gearList'">
         <GearIcon
           v-for="id in cell.data.ids"
+          :key="id"
           :gearId="id"
           :showName="cell.data.showName"
         />
@@ -325,7 +327,11 @@
           @keypress.enter="handleEnter(_value)"
           @change="handleChange($event)"
         >
-          <option v-for="option in cell.data.options" :value="option.value">
+          <option
+            v-for="(option, index) in cell.data.options"
+            :value="option.value"
+            :key="index"
+          >
             {{ option.label }}
           </option>
         </select>

@@ -143,6 +143,7 @@ import {
 import { IPrerequisite } from "types/shards";
 import { iExpandOptions } from "types/general";
 import { loadingState } from "types/loading";
+import { maxGearLevel } from "types/gear";
 
 export default defineComponent({
   name: "GuildGoalsTable",
@@ -198,6 +199,7 @@ export default defineComponent({
         },
       },
       loading: loadingState.initial,
+      hideRelicList: [],
     } as any;
   },
   computed: {
@@ -267,11 +269,7 @@ export default defineComponent({
     },
     header(): iTableHead {
       const getColSpan = () => {
-        return [
-          this.showCol("stars"),
-          this.showCol("relic_tier"),
-          this.showCol("gear_level"),
-        ]
+        return [this.showCol("stars"), this.showCol("relic_tier")]
           .filter((x) => !!x)
           .length.toString();
       };
@@ -288,28 +286,35 @@ export default defineComponent({
               params: { guildId: this.guildId },
               query: { unitId: unit.id },
             },
-            show:
-              this.showCol("stars") ||
-              this.showCol("relic") ||
-              this.showCol("gear"),
+            show: this.showCol("stars") || this.showCol("relic"),
             colspan: getColSpan(),
             containerClass: "d-flex justify-content-center",
             buttons: [
               {
-                classes: "fas fa-trash text-small mx-1",
-                title: "Remove Unit",
-                click: () => {
-                  this.goal.remove(unit.id);
-                },
-              },
-              {
-                classes: "fas fa-edit text-small mx-1",
-                title: "Edit Unit",
-                click: () => {
-                  this.editUnitModal.target.id = unit.id;
-                  this.editUnitModal.target.value = unit.requirement?.value;
-                  this.editUnitModal.target.type = unit.requirement?.type;
-                  this.editUnitModal.show = true;
+                classes: "fa fa-bars text-small mx-2",
+                menu: {
+                  menuItems: [
+                    {
+                      label: "Delete",
+                      click: () => {
+                        this.goal.remove(unit.id);
+                      },
+                    },
+                    {
+                      label: "Edit",
+                      click: () => {
+                        this.editUnitModal.target.id = unit.id;
+                        this.editUnitModal.target.value =
+                          unit.requirement?.value;
+                        this.editUnitModal.target.type = unit.requirement?.type;
+                        this.editUnitModal.show = true;
+                      },
+                    },
+                    {
+                      label: "-divider-",
+                    },
+                    ...this.relicLevelCols,
+                  ],
                 },
               },
             ],
@@ -329,15 +334,7 @@ export default defineComponent({
             },
           });
           acc.push({
-            label: "Gear Level",
-            show: this.showCol("gear_level"),
-            icon: this.sortIcon("gear_level" + unit.id),
-            click: () => {
-              this.sortBy("gear_level-" + unit.id);
-            },
-          });
-          acc.push({
-            label: "Relic Level",
+            label: "Gear/Relic Level",
             show: this.showCol("relic_tier"),
             icon: this.sortIcon("relic_tier-" + unit.id),
             click: () => {
@@ -404,8 +401,8 @@ export default defineComponent({
       };
     },
     body(): iTableBody {
-      const rows: iTableRow[] = this.filteredPlayers.map(
-        (player: iGoalPlayer) => {
+      const rows: iTableRow[] = this.filteredPlayers.reduce(
+        (list: iTableRow[], player: iGoalPlayer) => {
           const unitCells: iTableCell[] = this.goal.list.reduce(
             (acc: iTableCell[], unit: IPrerequisite) => {
               const match = player.units.find((u) => u.base_id === unit.id);
@@ -420,29 +417,28 @@ export default defineComponent({
                 },
               });
               acc.push({
-                show: this.showCol("gear_level"),
-                type: "unitLevel",
-                data: {
-                  classes: "justify-content-center",
-                  type: "Gear",
-                  value: match?.gear_level ?? 0,
-                },
-              });
-              acc.push({
                 show: this.showCol("relic_tier"),
                 type: "unitLevel",
                 data: {
                   classes: "justify-content-center",
-                  type: "Relic",
-                  value: match?.relic_tier ?? -1,
+                  type:
+                    (match?.gear_level ?? 0) <= maxGearLevel - 1
+                      ? "Gear"
+                      : "Relic",
+                  value:
+                    (match?.gear_level ?? 0) <= maxGearLevel - 1
+                      ? match?.gear_level ?? 0
+                      : match?.relic_tier ?? -1,
                   unitId: unit.id,
                 },
               });
+
               return acc;
             },
             []
           );
-          return {
+
+          list.push({
             cells: [
               {
                 label: "Player",
@@ -460,8 +456,10 @@ export default defineComponent({
                 ),
               },
             ],
-          };
-        }
+          });
+          return list;
+        },
+        []
       );
 
       return {
@@ -480,10 +478,6 @@ export default defineComponent({
           value: "stars",
         },
         {
-          label: "Gear Level",
-          value: "gear_level",
-        },
-        {
           label: "Relic Level",
           value: "relic_tier",
         },
@@ -492,6 +486,66 @@ export default defineComponent({
           value: "progress",
         },
       ];
+    },
+    relicLevelCols(): any[] {
+      return this.players
+        .reduce((list, player: iGoalPlayer) => {
+          this.goal.list.forEach((unit: IPrerequisite) => {
+            const match = player.units.find((u) => u.base_id === unit.id);
+            if (match) {
+              let label = "";
+              if ((match?.gear_level ?? 0) <= maxGearLevel - 1) {
+                label = "Gear " + (match?.gear_level ?? 0);
+              } else {
+                label = "Relic " + match.relic_tier;
+              }
+
+              const exists = list.some((x) => x.label === label);
+              if (!exists) {
+                const index = this.hideRelicList.findIndex(
+                  (x) => x.label === label && x.unitId === unit.id
+                );
+
+                list.push({
+                  label,
+                  icon: {
+                    classes:
+                      index > -1
+                        ? "me-2 min-12px"
+                        : "fa fa-check text-small me-2 min-12px",
+                  },
+                  containerClass: "d-flex align-items-center",
+                  click: () => {
+                    if (index > -1) {
+                      this.hideRelicList.splice(index, 1);
+                    } else {
+                      this.hideRelicList.push({
+                        label,
+                        unitId: unit.id,
+                      });
+                    }
+                  },
+                });
+              }
+            }
+          });
+          return list;
+        }, [])
+        .sort((a, b) => {
+          const labelA = a.label.split(" ");
+          const labelB = b.label.split(" ");
+
+          if (labelA[0] === labelB[0]) {
+            const numA = Number(labelA[1]);
+            const numB = Number(labelB[1]);
+            return numA > numB ? 1 : -1;
+          } else if (labelA[0] === "Gear") {
+            return -1;
+          } else if (labelB[0] === "Gear") {
+            return 1;
+          }
+          return 0;
+        });
     },
     expandOptions(): iExpandOptions {
       const options: iExpandOptions = {
@@ -572,7 +626,25 @@ export default defineComponent({
         .filter((player: iGoalPlayer) => {
           const name = player.name.toLowerCase().replace(/\s/g, "");
           const compare = this.searchText.toLowerCase().replace(/\s/g, "");
-          return name.includes(compare);
+
+          if (!name.includes(compare)) {
+            return false;
+          }
+
+          return player.units.every((unit) => {
+            if (this.goal.list.some((u) => u.id === unit.base_id)) {
+              let label = "";
+              if ((unit?.gear_level ?? 0) <= maxGearLevel - 1) {
+                label = "Gear " + (unit?.gear_level ?? 0);
+              } else {
+                label = "Relic " + unit?.relic_tier;
+              }
+              return !this.hideRelicList.some(
+                (x) => x.label === label && x.unitId === unit.base_id
+              );
+            }
+            return true;
+          });
         })
         .sort((a: iGoalPlayer, b: iGoalPlayer) => {
           if (this.sortMethod === "player") {
@@ -608,6 +680,17 @@ export default defineComponent({
         });
     },
   },
+  watch: {
+    hideRelicList: {
+      deep: true,
+      handler(val) {
+        window.localStorage.setItem(
+          "hideRelicList" + this.goal.id,
+          JSON.stringify(val)
+        );
+      },
+    },
+  },
   methods: {
     ...mapActions("player", ["removeGoal"]),
     ...mapActions("guild", ["fetchGuildUnitData"]),
@@ -619,6 +702,9 @@ export default defineComponent({
     await this.fetchGuildUnitData({
       unitId: this.goal.list.map((x) => x.id),
     });
+    this.hideRelicList = JSON.parse(
+      window.localStorage.getItem("hideRelicList" + this.goal.id) || "[]"
+    );
     this.loading = loadingState.ready;
   },
 });
@@ -647,5 +733,9 @@ export default defineComponent({
       color: $danger;
     }
   }
+}
+
+::v-deep(.min-12px) {
+  min-width: 12px;
 }
 </style>

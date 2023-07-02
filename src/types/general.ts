@@ -36,8 +36,19 @@ interface iHeaderCell {
   showOption?: boolean;
   buttons?: {
     classes: string;
-    click: Function;
+    click?: Function;
     title?: string;
+    menu?: {
+      menuItems: {
+        label: string;
+        title?: string;
+        containerClass?: string;
+        icon?: {
+          classes: string;
+        };
+        click: Function;
+      }[];
+    };
   }[];
 }
 

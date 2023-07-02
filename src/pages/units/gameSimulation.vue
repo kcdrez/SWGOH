@@ -181,7 +181,7 @@ import { randomNumber, unvue, numbersOnly, round } from "utils";
 import { random } from "lodash";
 import abilities from "types/abilities";
 import { Character, iStatusEffect, iAbility, format } from "types/characters";
-import characterMapping from "types/abilities";
+// import characterMapping from "types/characters"
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
 
@@ -228,15 +228,14 @@ export default defineComponent({
     playerUnitList(): Unit[] {
       return this.player?.units.filter((unit: Unit) => {
         return (
-          unit.id in characterMapping &&
-          !this.playerTeam.some((x) => x.id === unit.id)
+          unit.id in abilities && !this.playerTeam.some((x) => x.id === unit.id)
         );
       });
     },
     opponentUnitList(): Unit[] {
       return this.opponent?.units.filter((unit: Unit) => {
         return (
-          unit.id in characterMapping &&
+          unit.id in abilities &&
           !this.opponentTeam.some((x) => x.id === unit.id)
         );
       });

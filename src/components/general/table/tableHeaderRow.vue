@@ -1,7 +1,8 @@
 <template>
   <tr v-if="header.show ?? true" :class="header.classes">
-    <template v-for="cell in header.cells">
+    <template v-for="(cell, index) in header.cells">
       <th
+        :key="index"
         v-if="cell.show"
         :max-width="cell?.maxWidth ?? 'auto'"
         :class="[cell.click && !cell.input ? 'c-pointer' : '', cell.classes]"
@@ -104,12 +105,42 @@
             <i class="fas mx-1" :class="cell.icon" v-if="cell.icon"></i>
           </template>
           <div v-if="cell?.buttons" class="d-flex align-items-center">
-            <i
-              v-for="button in cell.buttons"
-              :class="button.classes"
-              :title="button.title"
-              @click="button.click()"
-            ></i>
+            <template v-for="(button, index) in cell.buttons">
+              <template v-if="button.menu">
+                <div :key="index" class="dropdown">
+                  <div data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                    <i :class="button.classes" :title="button.title"></i>
+                  </div>
+                  <ul class="dropdown-menu">
+                    <li
+                      v-for="(item, index) in button.menu.menuItems"
+                      :key="index"
+                    >
+                      <hr
+                        class="dropdown-divider"
+                        v-if="item.label === '-divider-'"
+                      />
+                      <a
+                        class="dropdown-item c-pointer"
+                        :class="item.containerClass"
+                        @click="item.click()"
+                        v-else
+                      >
+                        <i :class="item.icon.classes" v-if="item.icon"></i>
+                        <div>{{ item.label }}</div>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </template>
+              <i
+                v-else
+                :key="index"
+                :class="button.classes"
+                :title="button.title"
+                @click="button.click()"
+              ></i>
+            </template>
           </div>
         </div>
       </th>
@@ -179,5 +210,11 @@ export default defineComponent({
   width: 305px;
   margin-left: auto;
   margin-right: 12px;
+}
+
+.dropdown-menu {
+  padding: 0;
+  height: 300px;
+  overflow: auto;
 }
 </style>
