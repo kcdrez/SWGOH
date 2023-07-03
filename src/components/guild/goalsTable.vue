@@ -493,40 +493,42 @@ export default defineComponent({
           this.goal.list.forEach((unit: IPrerequisite) => {
             const match = player.units.find((u) => u.base_id === unit.id);
             if (match) {
-              let label = "";
+              let labels: string[] = ["Stars " + match.stars];
               if ((match?.gear_level ?? 0) <= maxGearLevel - 1) {
-                label = "Gear " + (match?.gear_level ?? 0);
+                labels.push("Gear " + (match?.gear_level ?? 0));
               } else {
-                label = "Relic " + match.relic_tier;
+                labels.push("Relic " + match.relic_tier);
               }
 
-              const exists = list.some((x) => x.label === label);
-              if (!exists) {
-                const index = this.hideRelicList.findIndex(
-                  (x) => x.label === label && x.unitId === unit.id
-                );
+              labels.forEach((label) => {
+                const exists = list.some((x) => x.label === label);
+                if (!exists) {
+                  const index = this.hideRelicList.findIndex(
+                    (x) => x.label === label && x.unitId === unit.id
+                  );
 
-                list.push({
-                  label,
-                  icon: {
-                    classes:
-                      index > -1
-                        ? "me-2 min-12px"
-                        : "fa fa-check text-small me-2 min-12px",
-                  },
-                  containerClass: "d-flex align-items-center",
-                  click: () => {
-                    if (index > -1) {
-                      this.hideRelicList.splice(index, 1);
-                    } else {
-                      this.hideRelicList.push({
-                        label,
-                        unitId: unit.id,
-                      });
-                    }
-                  },
-                });
-              }
+                  list.push({
+                    label,
+                    icon: {
+                      classes:
+                        index > -1
+                          ? "me-2 min-12px"
+                          : "fa fa-check text-small me-2 min-12px",
+                    },
+                    containerClass: "d-flex align-items-center",
+                    click: () => {
+                      if (index > -1) {
+                        this.hideRelicList.splice(index, 1);
+                      } else {
+                        this.hideRelicList.push({
+                          label,
+                          unitId: unit.id,
+                        });
+                      }
+                    },
+                  });
+                }
+              });
             }
           });
           return list;
@@ -539,10 +541,10 @@ export default defineComponent({
             const numA = Number(labelA[1]);
             const numB = Number(labelB[1]);
             return numA > numB ? 1 : -1;
-          } else if (labelA[0] === "Gear") {
-            return -1;
-          } else if (labelB[0] === "Gear") {
+          } else if (labelA < labelB) {
             return 1;
+          } else if (labelA > labelB) {
+            return -1;
           }
           return 0;
         });
@@ -633,15 +635,17 @@ export default defineComponent({
 
           return player.units.every((unit) => {
             if (this.goal.list.some((u) => u.id === unit.base_id)) {
-              let label = "";
+              let labels: string[] = ["Stars " + unit.stars];
               if ((unit?.gear_level ?? 0) <= maxGearLevel - 1) {
-                label = "Gear " + (unit?.gear_level ?? 0);
+                labels.push("Gear " + (unit?.gear_level ?? 0));
               } else {
-                label = "Relic " + unit?.relic_tier;
+                labels.push("Relic " + unit?.relic_tier);
               }
-              return !this.hideRelicList.some(
-                (x) => x.label === label && x.unitId === unit.base_id
-              );
+              return !this.hideRelicList.some((x) => {
+                return labels.some(
+                  (l) => x.label === l && x.unitId === unit.base_id
+                );
+              });
             }
             return true;
           });

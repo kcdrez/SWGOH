@@ -40,7 +40,7 @@ type tDebuff =
   | "Ability Block"
   | "Accuracy Down"
   | "Anguish" //todo
-  | "Blind" //todo
+  | "Blind"
   | "Breach" //
   | "Buff Immunity"
   | "Burning" //
@@ -97,6 +97,7 @@ type tDebuff =
   | "all"; //
 type tBuff =
   | "Accuracy Up"
+  | "Advantage"
   | "Call to Action"
   | "Critical Chance Up"
   | "Critical Damage Up"
@@ -688,6 +689,7 @@ export class Character {
             { hasEffect: self.hasBuff("Critical Chance Up"), value: 0.25 },
             { hasEffect: self.hasBuff("Call to Action"), value: 0.5 },
             { hasEffect: self.hasStatusEffect("Guard"), value: 0.25 },
+            { hasEffect: self.hasBuff("Advantage"), value: 100 },
           ],
           self._baseStats.physical.critChance,
           self.getTempStat("critChance")
@@ -734,6 +736,7 @@ export class Character {
               value: -0.15,
             },
             { hasEffect: self.hasBuff("Accuracy Up"), value: 0.15 },
+            { hasEffect: self.hasDebuff("Blind"), value: -999 },
           ],
           self._baseStats.physical.accuracy,
           self.getTempStat("accuracy")
