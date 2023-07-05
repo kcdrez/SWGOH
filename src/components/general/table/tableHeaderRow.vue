@@ -214,7 +214,7 @@ export default defineComponent({
 
 .dropdown-menu {
   padding: 0;
-  height: 300px;
+  max-height: 300px;
   overflow: auto;
 }
 </style>

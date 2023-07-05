@@ -313,7 +313,7 @@ export default defineComponent({
                     {
                       label: "-divider-",
                     },
-                    ...this.relicLevelCols,
+                    ...this.relicLevelCols[unit?.id ?? ""],
                   ],
                 },
               },
@@ -488,66 +488,78 @@ export default defineComponent({
       ];
     },
     relicLevelCols(): any[] {
-      return this.players
-        .reduce((list, player: iGoalPlayer) => {
-          this.goal.list.forEach((unit: IPrerequisite) => {
-            const match = player.units.find((u) => u.base_id === unit.id);
-            if (match) {
-              let labels: string[] = ["Stars " + match.stars];
-              if ((match?.gear_level ?? 0) <= maxGearLevel - 1) {
-                labels.push("Gear " + (match?.gear_level ?? 0));
-              } else {
-                labels.push("Relic " + match.relic_tier);
+      return this.players.reduce((map, player: iGoalPlayer) => {
+        this.goal.list.forEach((unit: IPrerequisite) => {
+          const match = player.units.find((u) => u.base_id === unit.id);
+          if (match) {
+            const list: any[] = [];
+            let labels: string[] = ["Stars 0", "Stars " + match.stars];
+            if ((match?.gear_level ?? 0) <= maxGearLevel - 1) {
+              labels.push("Gear " + (match?.gear_level ?? 0));
+            } else {
+              labels.push("Relic " + match.relic_tier);
+            }
+
+            labels.forEach((label) => {
+              const exists = list.some((x) => x.label === label);
+              if (!exists) {
+                const index = this.hideRelicList.findIndex(
+                  (x) => x.label === label && x.unitId === unit.id
+                );
+
+                list.push({
+                  label,
+                  icon: {
+                    classes:
+                      index > -1
+                        ? "me-2 min-12px"
+                        : "fa fa-check text-small me-2 min-12px",
+                  },
+                  containerClass: "d-flex align-items-center",
+                  click: () => {
+                    if (index > -1) {
+                      this.hideRelicList.splice(index, 1);
+                    } else {
+                      this.hideRelicList.push({
+                        label,
+                        unitId: unit.id,
+                      });
+                    }
+                  },
+                });
               }
+            });
 
-              labels.forEach((label) => {
-                const exists = list.some((x) => x.label === label);
-                if (!exists) {
-                  const index = this.hideRelicList.findIndex(
-                    (x) => x.label === label && x.unitId === unit.id
-                  );
+            if (list.length > 0) {
+              if (match.base_id in map) {
+                map[match.base_id].push(...list);
+              } else {
+                map[match.base_id] = list;
+              }
+              map[match.base_id] = [
+                ...new Map(
+                  map[match.base_id].map((m) => [m.label, m])
+                ).values(),
+              ].sort((a: any, b: any) => {
+                const labelA = a.label.split(" ");
+                const labelB = b.label.split(" ");
 
-                  list.push({
-                    label,
-                    icon: {
-                      classes:
-                        index > -1
-                          ? "me-2 min-12px"
-                          : "fa fa-check text-small me-2 min-12px",
-                    },
-                    containerClass: "d-flex align-items-center",
-                    click: () => {
-                      if (index > -1) {
-                        this.hideRelicList.splice(index, 1);
-                      } else {
-                        this.hideRelicList.push({
-                          label,
-                          unitId: unit.id,
-                        });
-                      }
-                    },
-                  });
+                if (labelA[0] === labelB[0]) {
+                  const numA = Number(labelA[1]);
+                  const numB = Number(labelB[1]);
+                  return numA > numB ? 1 : -1;
+                } else if (labelA < labelB) {
+                  return 1;
+                } else if (labelA > labelB) {
+                  return -1;
                 }
+                return 0;
               });
             }
-          });
-          return list;
-        }, [])
-        .sort((a, b) => {
-          const labelA = a.label.split(" ");
-          const labelB = b.label.split(" ");
-
-          if (labelA[0] === labelB[0]) {
-            const numA = Number(labelA[1]);
-            const numB = Number(labelB[1]);
-            return numA > numB ? 1 : -1;
-          } else if (labelA < labelB) {
-            return 1;
-          } else if (labelA > labelB) {
-            return -1;
           }
-          return 0;
         });
+        return map;
+      }, {});
     },
     expandOptions(): iExpandOptions {
       const options: iExpandOptions = {
@@ -633,21 +645,27 @@ export default defineComponent({
             return false;
           }
 
-          return player.units.every((unit) => {
-            if (this.goal.list.some((u) => u.id === unit.base_id)) {
-              let labels: string[] = ["Stars " + unit.stars];
-              if ((unit?.gear_level ?? 0) <= maxGearLevel - 1) {
-                labels.push("Gear " + (unit?.gear_level ?? 0));
-              } else {
-                labels.push("Relic " + unit?.relic_tier);
-              }
-              return !this.hideRelicList.some((x) => {
-                return labels.some(
-                  (l) => x.label === l && x.unitId === unit.base_id
-                );
-              });
+          return this.goal.list.every((unit) => {
+            let labels: string[] = [];
+            const match = player.units.find((u) => u.base_id === unit.id);
+            if (match) {
+              labels.push(
+                `Gear ${match.gear_level}`,
+                `Relic ${match.relic_tier}`,
+                `Stars ${match.stars}`
+              );
+            } else {
+              labels.push("Stars 0");
             }
-            return true;
+            console.log(unit.id, labels);
+            return !labels.some((label) => {
+              const labelMatch = this.hideRelicList.some(
+                (hidden) =>
+                  hidden.label === label && hidden.unitId === unit.base_id
+              );
+              console.log(labelMatch, this.hideRelicList);
+              return labelMatch;
+            });
           });
         })
         .sort((a: iGoalPlayer, b: iGoalPlayer) => {
@@ -700,6 +718,7 @@ export default defineComponent({
     ...mapActions("guild", ["fetchGuildUnitData"]),
     totalProgress,
     getUnit,
+    // getFilterCols(unitId: string) {},
   },
   async created() {
     this.loading = loadingState.loading;
