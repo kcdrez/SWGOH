@@ -645,7 +645,7 @@ export default defineComponent({
             return false;
           }
 
-          return this.goal.list.every((unit) => {
+          return this.goal.list.every((unit: IPrerequisite) => {
             let labels: string[] = [];
             const match = player.units.find((u) => u.base_id === unit.id);
             if (match) {
@@ -657,13 +657,10 @@ export default defineComponent({
             } else {
               labels.push("Stars 0");
             }
-            console.log(unit.id, labels);
             return !labels.some((label) => {
               const labelMatch = this.hideRelicList.some(
-                (hidden) =>
-                  hidden.label === label && hidden.unitId === unit.base_id
+                (hidden) => hidden.label === label && hidden.unitId === unit.id
               );
-              console.log(labelMatch, this.hideRelicList);
               return labelMatch;
             });
           });
