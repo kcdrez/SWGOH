@@ -6,12 +6,26 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
   basicskill_AAYLASECURA: {
     name: "Inspiring Strike",
     id: "basicskill_AAYLASECURA",
-    targets: [
+    actions: [
       {
-        target: { targetCount: 1, allies: false },
-        damage: 1.645,
-        damageType: "physical",
-        actions: [
+        targets: [{ allies: false }, { targetCount: 1 }],
+        effects: [
+          {
+            damage: {
+              modifier: 1.645,
+              damageType: "physical",
+              variance: 5,
+            },
+          },
+        ],
+      },
+      {
+        targets: [
+          { allies: true },
+          { tags: ["Jedi & !Self"] },
+          { targetCount: 1 },
+        ],
+        effects: [
           {
             assist: {
               chance: 0.35,
@@ -20,13 +34,6 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
                   amount: 0.5,
                   type: "percent",
                   statToModify: "offense",
-                },
-              },
-              target: {
-                target: {
-                  allies: true,
-                  targetCount: 1,
-                  tags: ["Jedi & !Self"],
                 },
               },
             },
@@ -40,30 +47,33 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
     name: "Survivor",
     cooldown: 3,
     turnsRemaining: 0,
-    triggers: [
+    actions: [
       {
-        id: uuid(),
-        triggerType: "dealDamage",
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        actions: [
+        targets: [{ allies: false }, { targetCount: 1 }],
+        effects: [
           {
-            heal: {
-              type: "flat",
-              healthType: "health",
+            damage: {
+              modifier: 3.008,
+              damageType: "physical",
+              variance: 5,
             },
-            scale: 0.65,
           },
         ],
       },
-    ],
-    targets: [
       {
-        target: { targetCount: 1, allies: false },
-        damage: 3.008,
-        damageType: "physical",
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
+          {
+            heal: {
+              healthType: "health",
+              amount: 0.65,
+              percent: true,
+            },
+            scalesBy: {
+              damage: true,
+            },
+          },
+        ],
       },
     ],
   },
@@ -74,15 +84,10 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "criticalHit",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        events: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
-            target: {
-              targetIds: ["target"],
-            },
+            targets: [{ targetIds: ["target"] }],
             debuffs: [
               {
                 duration: 1,
@@ -96,11 +101,8 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        actions: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
             stats: {
               amount: 0.1,
@@ -111,7 +113,7 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
           {
             stats: {
               amount: 0.65,
-              statToModify: "counter",
+              statToModify: "counterChance",
               type: "flat",
             },
           },

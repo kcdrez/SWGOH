@@ -68,7 +68,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
         actions: [
           {
             dispel: {
-              debuffs: "all",
+              buffs: "all",
             },
             debuffs: [
               {
@@ -79,6 +79,17 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
             ],
           },
         ],
+      },
+    ],
+  },
+  specialskill_C3POCHEWBACCA02: {
+    id: "specialskill_C3POCHEWBACCA01",
+    name: "Chewie's Rage",
+    targets: [
+      {
+        damageType: "physical",
+        target: { allies: false },
+        damage: 2,
       },
     ],
   },
