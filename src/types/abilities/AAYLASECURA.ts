@@ -12,7 +12,9 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
         effects: [
           {
             damage: {
-              modifier: 1.645,
+              modifier: {
+                value: 1.645,
+              },
               damageType: "physical",
               variance: 5,
             },
@@ -53,7 +55,9 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
         effects: [
           {
             damage: {
-              modifier: 3.008,
+              modifier: {
+                value: 3.008,
+              },
               damageType: "physical",
               variance: 5,
             },

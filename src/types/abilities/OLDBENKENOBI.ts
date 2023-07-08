@@ -6,30 +6,42 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
   basicskill_OLDBENKENOBI: {
     id: "basicskill_OLDBENKENOBI",
     name: "Elegant Form",
-    targets: [
+    actions: [
       {
-        target: { targetCount: 1, allies: false },
-        debuffs: [
+        targets: [{ allies: false }, { targetCount: 1 }],
+        effects: [
           {
-            name: "Evasion Down",
-            duration: 2,
-            id: uuid(),
+            damage: {
+              modifier: {
+                value: 1.758,
+              },
+              damageType: "physical",
+            },
+            cantMiss: true,
+          },
+          {
+            debuffs: [
+              {
+                name: "Evasion Down",
+                duration: 2,
+                id: uuid(),
+              },
+            ],
+            cantMiss: true,
           },
         ],
-        damage: 1.758,
-        damageType: "physical",
-        cantMiss: true,
       },
       {
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        buffs: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
-            name: "Potency Up",
-            duration: 2,
-            id: uuid(),
+            buffs: [
+              {
+                name: "Potency Up",
+                duration: 2,
+                id: uuid(),
+              },
+            ],
           },
         ],
       },
@@ -40,43 +52,87 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
     name: "Mind Tricks",
     cooldown: 5,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        target: {
-          allies: false,
-        },
-        cantMiss: true,
-        debuffs: [
+        targets: [{ allies: false }],
+        effects: [
           {
-            name: "Ability Block",
-            duration: 1,
-            id: uuid(),
+            cantMiss: true,
+            debuffs: [
+              {
+                name: "Ability Block",
+                duration: 1,
+                id: uuid(),
+                triggers: [
+                  {
+                    id: uuid(),
+                    triggerType: "resistDetrimentalEffect",
+                    targets: [{ allies: true }, { tags: ["Jedi", "Rebel"] }],
+                    effects: [
+                      {
+                        buffs: [
+                          {
+                            name: "TM Increase",
+                            duration: 3,
+                            id: uuid(),
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: "Offense Down",
+                duration: 2,
+                id: uuid(),
+                triggers: [
+                  {
+                    id: uuid(),
+                    triggerType: "resistDetrimentalEffect",
+                    targets: [{ allies: true }, { tags: ["Jedi", "Rebel"] }],
+                    effects: [
+                      {
+                        buffs: [
+                          {
+                            name: "TM Increase",
+                            duration: 3,
+                            id: uuid(),
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: "TM Decrease",
+                duration: -60,
+                chance: 0.8,
+                id: uuid(),
+                triggers: [
+                  {
+                    id: uuid(),
+                    triggerType: "resistDetrimentalEffect",
+                    targets: [{ allies: true }, { tags: ["Jedi", "Rebel"] }],
+                    effects: [
+                      {
+                        buffs: [
+                          {
+                            name: "TM Increase",
+                            duration: 3,
+                            id: uuid(),
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
           {
-            name: "Offense Down",
-            duration: 2,
-            id: uuid(),
-          },
-          {
-            name: "TM Decrease",
-            duration: -60,
-            chance: 0.8,
-            id: uuid(),
-          },
-        ],
-      },
-      //todo: add the following to an event
-      {
-        target: {
-          tags: ["Jedi", "Rebel"],
-          allies: true,
-          scale: "Resisted",
-        },
-        buffs: [
-          {
-            duration: 3,
-            name: "TM Increase",
-            id: uuid(),
+            triggers: [],
           },
         ],
       },
@@ -87,40 +143,42 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
     name: "Devoted Protector",
     cooldown: 4,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        buffs: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
-            name: "Taunt",
-            duration: 2,
-            id: uuid(),
-            expires: {
-              target: {
-                tags: ["Self"],
-                allies: true,
+            buffs: [
+              {
+                name: "Taunt",
+                duration: 2,
+                id: uuid(),
+                triggers: [
+                  {
+                    id: uuid(),
+                    triggerType: "expires",
+                    targets: [{ allies: true }, { tags: ["Self"] }],
+                    effects: [
+                      { buffs: [{ name: "Taunt", duration: 1, id: uuid() }] },
+                    ],
+                  },
+                ],
               },
-              buffs: [
-                {
-                  name: "Taunt",
-                  duration: 1,
-                  id: uuid(),
-                },
-              ],
-            },
+            ],
           },
         ],
       },
       {
-        target: { allies: true },
-        buffs: [
+        targets: [{ allies: true }],
+        effects: [
           {
-            name: "Defense Up",
-            id: uuid(),
-            duration: 2,
+            buffs: [
+              {
+                name: "Defense Up",
+                id: uuid(),
+                duration: 2,
+              },
+            ],
           },
         ],
       },
@@ -133,16 +191,13 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "receiveDamage",
         id: uuid(),
-        target: {
-          tags: ["Jedi & !Self", "Rebel & !Self"],
-          allies: true,
-        },
-        events: [
+        targets: [
+          { allies: true },
+          { tags: ["Jedi & !Self", "Rebel & !Self"] },
+        ],
+        effects: [
           {
-            target: {
-              targetIds: ["OLDBENKENOBI"],
-              allies: true,
-            },
+            targets: [{ allies: true }, { targetIds: ["OLDBENKENOBI"] }],
             buffs: [
               {
                 duration: 5,
@@ -155,21 +210,16 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       },
       {
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
+        targets: [{ allies: true }, { tags: ["Self"] }],
         triggerType: "death",
-        events: [
+        triggerData: {
+          limit: 1,
+          frequency: "match",
+          count: 1,
+        },
+        effects: [
           {
-            triggerData: {
-              limit: 1,
-              frequency: "match",
-              count: 1,
-            },
-            target: {
-              allies: true,
-            },
+            targets: [{ allies: true }],
             buffs: [
               {
                 duration: 2,
@@ -187,22 +237,22 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
                 id: uuid(),
               },
             ],
-            actions: [
-              {
-                heal: {
-                  healthType: "protection",
-                  amount: 0.5,
-                  type: "percent",
-                },
-              },
-              {
-                heal: {
-                  healthType: "health",
-                  amount: 0.5,
-                  type: "percent",
-                },
-              },
-            ],
+          },
+          {
+            targets: [{ allies: true }],
+            heal: {
+              healthType: "protection",
+              amount: 0.5,
+              percent: true,
+            },
+          },
+          {
+            targets: [{ allies: true }],
+            heal: {
+              healthType: "health",
+              amount: 0.5,
+              percent: true,
+            },
           },
         ],
       },
@@ -215,10 +265,8 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          allies: true,
-        },
-        actions: [
+        targets: [{ allies: true }],
+        effects: [
           {
             stats: {
               type: "flat",
@@ -231,24 +279,15 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "dodge",
         id: uuid(),
-        target: {
-          allies: true,
-        },
-        events: [
+        targets: [{ allies: true }],
+        effects: [
           {
-            target: {
-              tags: ["Self"],
-              allies: true,
-            },
-            actions: [
+            targets: [{ allies: true }, { tags: ["Self"] }],
+            buffs: [
               {
-                buffs: [
-                  {
-                    name: "TM Increase",
-                    duration: 30,
-                    id: uuid(),
-                  },
-                ],
+                name: "TM Increase",
+                duration: 30,
+                id: uuid(),
               },
             ],
           },

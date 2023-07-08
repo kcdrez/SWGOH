@@ -1,60 +1,54 @@
 import { v4 as uuid } from "uuid";
 
-import { iAbility, iUniqueAbility } from "types/characters";
+import {
+  iBasicAbility,
+  iUniqueAbility,
+  iSpecialAbility,
+} from "types/characters";
 
-const hansolo: Record<string, iAbility | iUniqueAbility> = {
+const hansolo: Record<
+  string,
+  iBasicAbility | iSpecialAbility | iUniqueAbility
+> = {
   basicskill_HANSOLO: {
     id: "basicskill_HANSOLO",
     name: "Quick Draw",
-    targets: [
+    actions: [
       {
-        damageType: "physical",
-        cantMiss: true,
-        target: { targetCount: 1, allies: false },
-        damage: 1.85,
-        modifyDamage: {
-          condition: {
-            tm: {
-              amount: 50,
-              greaterThan: false,
-            },
-          },
-          stats: {
-            type: "percent",
-            statToModify: "offense",
-            amount: 1.75,
-          },
-        },
-      },
-    ],
-    triggers: [
-      {
-        triggerType: "dealDamage",
-        id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        events: [
+        targets: [{ allies: false }, { targetCount: 1 }],
+        effects: [
           {
-            target: {
-              targetIds: ["target"],
-            },
-            actions: [
-              {
+            damage: {
+              modifier: {
+                value: 1.85,
                 condition: {
                   tm: {
-                    amount: 49.999999,
-                    greaterThan: true,
+                    amount: 50,
+                    greaterThan: false,
                   },
                 },
-                debuffs: [
-                  {
-                    name: "TM Decrease",
-                    duration: -35,
-                    id: uuid(),
-                  },
-                ],
+                stats: {
+                  type: "percent",
+                  statToModify: "offense",
+                  amount: 1.75,
+                },
+              },
+              damageType: "physical",
+            },
+            cantMiss: true,
+          },
+          {
+            condition: {
+              tm: {
+                amount: 49.999999,
+                greaterThan: true,
+              },
+            },
+            debuffs: [
+              {
+                name: "TM Decrease",
+                duration: -35,
+                id: uuid(),
               },
             ],
           },
@@ -67,30 +61,47 @@ const hansolo: Record<string, iAbility | iUniqueAbility> = {
     id: "specialskill_HANSOLO011",
     cooldown: 3,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        damageType: "physical",
-        target: { targetCount: 1, allies: false },
-        damage: 3.699,
-        debuffs: [
+        targets: [{ allies: false }, { targetCount: 1 }],
+        effects: [
           {
-            name: "Stun",
-            duration: 1,
-            id: uuid(),
+            damage: {
+              damageType: "physical",
+              modifier: {
+                value: 3.699,
+              },
+            },
+          },
+          {
+            debuffs: [
+              {
+                name: "Stun",
+                duration: 1,
+                id: uuid(),
+              },
+            ],
           },
         ],
       },
       {
-        target: {
-          tags: ["Self"],
-          allies: true,
-          scale: "physical critChance",
-        },
-        buffs: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
-            name: "TM Increase",
-            duration: 100,
-            id: uuid(),
+            buffs: [
+              {
+                name: "TM Increase",
+                duration: 100,
+                id: uuid(),
+              },
+            ],
+            scalesBy: {
+              stat: {
+                type: "physical",
+                name: "critChance",
+                percent: 1,
+              },
+            },
           },
         ],
       },
@@ -101,39 +112,42 @@ const hansolo: Record<string, iAbility | iUniqueAbility> = {
     name: "Never Tell Me The Odds",
     turnsRemaining: 0,
     cooldown: 4,
-    targets: [
+    actions: [
       {
-        target: {
-          allies: true,
-        },
-        buffs: [
+        targets: [{ allies: true }],
+        effects: [
           {
-            name: "Critical Chance Up",
-            duration: 2,
-            id: uuid(),
-          },
-          {
-            name: "Evasion Up",
-            duration: 2,
-            id: uuid(),
+            buffs: [
+              {
+                name: "Critical Chance Up",
+                duration: 2,
+                id: uuid(),
+              },
+              {
+                name: "Evasion Up",
+                duration: 2,
+                id: uuid(),
+              },
+            ],
           },
         ],
       },
       {
-        target: {
-          allies: true,
-          tags: ["Self"],
-        },
-        buffs: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
-            name: "Critical Damage Up",
-            duration: 2,
-            id: uuid(),
-          },
-          {
-            name: "TM Increase",
-            duration: 50,
-            id: uuid(),
+            buffs: [
+              {
+                name: "Critical Damage Up",
+                duration: 2,
+                id: uuid(),
+              },
+              {
+                name: "TM Increase",
+                duration: 50,
+                id: uuid(),
+              },
+            ],
           },
         ],
       },
@@ -146,11 +160,8 @@ const hansolo: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        actions: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
             stats: {
               amount: 0.2,
@@ -161,7 +172,7 @@ const hansolo: Record<string, iAbility | iUniqueAbility> = {
           {
             stats: {
               amount: 0.35,
-              statToModify: "counter",
+              statToModify: "counterChance",
               type: "flat",
             },
           },
@@ -170,33 +181,28 @@ const hansolo: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "ability",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
+        targets: [
+          {
+            tags: ["Self"],
+            allies: true,
+          },
+        ],
         triggerData: {
           limit: 1,
           count: 1,
           frequency: "turn",
         },
-        events: [
+        effects: [
           {
-            target: {
-              targetIds: ["target"],
-            },
-            actions: [
-              {
-                ability: {
-                  abilityTrigger: "basicskill_HANSOLO",
-                  abilityToUse: "basicskill_HANSOLO",
-                },
-                stats: {
-                  type: "percent",
-                  amount: 0.5,
-                  statToModify: "offense",
-                },
+            targets: [{ targetIds: ["target"] }],
+            ability: {
+              abilityToUse: "basicskill_HANSOLO",
+              stats: {
+                type: "percent",
+                amount: 0.5,
+                statToModify: "offense",
               },
-            ],
+            },
           },
         ],
       },
@@ -208,41 +214,24 @@ const hansolo: Record<string, iAbility | iUniqueAbility> = {
           count: 1,
           frequency: "match",
         },
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        events: [
+        targets: [{ ignoreTaunt: true }, { allies: false }, { targetCount: 1 }],
+        effects: [
           {
-            target: {
-              targetCount: 1,
-              allies: false,
-              ignoreTaunt: true,
-            },
-            actions: [
-              {
-                ability: {
-                  abilityToUse: "basicskill_HANSOLO",
-                  modifiers: [
+            ability: {
+              abilityToUse: "basicskill_HANSOLO",
+              effects: [
+                {
+                  debuffs: [
                     {
-                      target: {
-                        targetCount: 1,
-                        allies: false,
-                        ignoreTaunt: true,
-                      },
-                      debuffs: [
-                        {
-                          name: "Stun",
-                          duration: 1,
-                          cantResist: true,
-                          id: uuid(),
-                        },
-                      ],
+                      name: "Stun",
+                      duration: 1,
+                      cantResist: true,
+                      id: uuid(),
                     },
                   ],
                 },
-              },
-            ],
+              ],
+            },
           },
         ],
       },

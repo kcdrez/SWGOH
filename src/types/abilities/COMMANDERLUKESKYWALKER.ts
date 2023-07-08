@@ -8,17 +8,16 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
     name: "Call to Action",
     cooldown: 4,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        actions: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
             dispel: {
               debuffs: "all",
             },
+          },
+          {
             buffs: [
               {
                 duration: 100,
@@ -26,17 +25,19 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
                 id: uuid(),
               },
             ],
-            heal: {
-              healthType: "health",
-              amount: 0.4,
-              type: "percent",
-            },
           },
           {
             heal: {
               healthType: "protection",
               amount: 0.4,
-              type: "percent",
+              percent: true,
+            },
+          },
+          {
+            heal: {
+              healthType: "health",
+              amount: 0.4,
+              percent: true,
             },
           },
           {
@@ -73,39 +74,42 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
     name: "Use the Force",
     cooldown: 4,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        target: { targetCount: 1, allies: false },
-        actions: [
+        targets: [{ allies: false }, { targetCount: 1 }],
+        effects: [
           {
             dispel: {
               buffs: "all",
             },
           },
-        ],
-        debuffs: [
-          { name: "TM Decrease", duration: -100, id: uuid() },
-          { name: "Buff Immunity", duration: 2, id: uuid() },
-          { name: "Tenacity Down", duration: 2, id: uuid() },
-        ],
-        damage: 2.978,
-        damageType: "physical",
-      },
-      {
-        target: { targetCount: 1, allies: false },
-        actions: [
           {
-            cooldown: {
-              id: "specialskill_COMMANDERLUKESKYWALKER01",
-              amount: -1,
-              target: "Self",
+            debuffs: [
+              { name: "TM Decrease", duration: -100, id: uuid() },
+              { name: "Buff Immunity", duration: 2, id: uuid() },
+              { name: "Tenacity Down", duration: 2, id: uuid() },
+            ],
+          },
+          {
+            damage: {
+              damageType: "physical",
+              modifier: {
+                value: 2.978,
+              },
             },
+          },
+          {
             condition: {
               stats: {
                 statToModify: "health",
                 amount: 1,
                 type: "percent",
               },
+            },
+            cooldown: {
+              id: "specialskill_COMMANDERLUKESKYWALKER01",
+              amount: -1,
+              target: [{ allies: true }, { tags: ["Self"] }],
             },
           },
         ],
@@ -115,22 +119,18 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
   basicskill_COMMANDERLUKESKYWALKER: {
     id: "basicskill_COMMANDERLUKESKYWALKER",
     name: "Destined Strike",
-    targets: [
+    actions: [
       {
-        target: { targetCount: 1, allies: false },
-        debuffs: [
+        targets: [{ allies: false }, { targetCount: 1 }],
+        effects: [
           {
-            name: "Speed Down",
-            duration: 1,
-            id: uuid(),
+            damage: {
+              damageType: "physical",
+              modifier: {
+                value: 1.781,
+              },
+            },
           },
-          {
-            name: "Defense Down",
-            duration: 1,
-            id: uuid(),
-          },
-        ],
-        actions: [
           {
             condition: {
               debuffs: ["Speed Down"],
@@ -155,9 +155,21 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
               },
             ],
           },
+          {
+            debuffs: [
+              {
+                name: "Speed Down",
+                duration: 2,
+                id: uuid(),
+              },
+              {
+                name: "Defense Down",
+                duration: 2,
+                id: uuid(),
+              },
+            ],
+          },
         ],
-        damage: 1.781,
-        damageType: "physical",
       },
     ],
   },

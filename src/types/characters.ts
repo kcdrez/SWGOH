@@ -138,8 +138,8 @@ export interface iStatusEffect {
   // cantMiss?: boolean;
   /** Determines if the effect is unique */
   unique?: boolean;
-  /** Triggers that happen when the effect expires */
-  expires?: iTarget;
+  /** Triggers that will occur at a certain time */
+  triggers?: iTrigger[];
   /** Unique identifier */
   id: string;
   /** The original source of the effect */
@@ -207,7 +207,8 @@ interface iTrigger extends iAction {
     | "always"
     | "ability"
     | "start"
-    | "pregame";
+    | "pregame"
+    | "expires";
   /** Misc data to be used for various effects */
   data?: any;
   /** Unique identifier */
@@ -299,6 +300,8 @@ interface iEffect {
   debuffs?: iDebuff[];
   /** The buffs being granted */
   buffs?: iBuff[];
+  /** The status effects (blue effects) being granted */
+  statusEffects?: iStatusEffect[];
   /** The (de)buffs being removed */
   dispel?: {
     debuffs?: tDebuff[] | tDebuff;
@@ -308,10 +311,10 @@ interface iEffect {
   cooldown?: {
     /** The ID of the ability being manipulated */
     id: string;
-    /** The amount the ability is being manipulated. Possitive number increases the cooldown, negative number increases the cooldown */
+    /** The amount the ability is being manipulated. Positive number increases the cooldown, negative number increases the cooldown */
     amount: number;
-    /** Todo: not sure what this is for */
-    target: "Self" | number;
+    /** The target that the ability belongs to */
+    target: iTargetData[];
   };
   /** Heal the target */
   heal?: {
@@ -330,18 +333,29 @@ interface iEffect {
   stats?: iStatsCheck;
   /** Deal damage to the target */
   damage?: {
-    /** The amount this ability will scale with offense */
-    modifier: number;
+    /** The modifier data used to determine how to calculate damage */
+    modifier: {
+      /** The amount this ability will scale with offense */
+      value: number;
+      /** The condition to check if a modifier to the status should be applied */
+      condition?: iCondition;
+      /** The stats to be applied to modify the damage */
+      stats?: iStatsCheck;
+    };
     /** The variance amount of damage (usually 5 or 10) */
-    variance: number;
+    variance?: number;
     /** The type of damage being dealt */
     damageType: "physical" | "special" | "true";
   };
-  /** Todo: whats this for? */
+  /** Use an ability */
   ability?: {
     abilityTrigger?: string;
+    /** The id of the ability that should be used */
     abilityToUse: string;
-    modifiers?: iTarget[];
+    /** The stats modification */
+    stats?: iStatsCheck;
+    /** Any additional effects to add to the use of the ability */
+    effects?: iEffect[];
   };
   /** Set the target immune to certain effects */
   immune?: {
@@ -363,24 +377,40 @@ interface iEffect {
       /** How much of the user's stat should be used as the scale (i.e. .3 would be 30% of the user's stat) */
       percent?: number;
       /** Who should be the target used by the scaling (i.e. opponent's health, user's health, etc.) */
-      target?: iTargetData;
+      targets?: iTargetData[];
     };
     /** Scales the data based on how much damage was dealt */
     damage?: boolean;
   };
+  /** Triggers to add to the target that will occur at a later time */
+  triggers?: iTrigger[];
   /** Misc. data used for checking various effects */
   data?: any;
 }
 
 interface iStatsCheck {
-  statToModify: "critChance" | "counterChance" | "counterDamage" | "offense";
+  /** The stat that will be modified */
+  statToModify:
+    | "critChance"
+    | "counterChance"
+    | "counterDamage"
+    | "offense"
+    | "defense"
+    | "protection"
+    | "dodge"
+    | "health";
+  /** The amount that the stat will be modified */
   amount: number;
+  /** Determines if the stat will be modified by a percent or a flat amount */
   type: "flat" | "percent";
+  /** Todo: whats this? */
   amountType?: "greater" | "less";
+  /** Determines when the effect will expire and thus be removed */
   expires?: {
     count: number;
     frequency: "turn";
   };
+  stacking?: boolean;
 }
 
 /** Used to determine if another unit should assist */
@@ -397,7 +427,7 @@ interface iAssist {
     condition?: iCondition;
   };
   /** Who are valid targets to call for the assist */
-  // target: iTargetData;
+  targets?: iTargetData[];
 }
 
 interface iHistory {
