@@ -28,7 +28,7 @@ const hansolo: Record<
                   },
                 },
                 stats: {
-                  type: "percent",
+                  modifiedType: "multiplicative",
                   statToModify: "offense",
                   amount: 1.75,
                 },
@@ -166,20 +166,20 @@ const hansolo: Record<
             stats: {
               amount: 0.2,
               statToModify: "critChance",
-              type: "flat",
+              modifiedType: "additive",
             },
           },
           {
             stats: {
               amount: 0.35,
               statToModify: "counterChance",
-              type: "flat",
+              modifiedType: "additive",
             },
           },
         ],
       },
       {
-        triggerType: "ability",
+        triggerType: "useAbility",
         id: uuid(),
         targets: [
           {
@@ -198,7 +198,7 @@ const hansolo: Record<
             ability: {
               abilityToUse: "basicskill_HANSOLO",
               stats: {
-                type: "percent",
+                modifiedType: "multiplicative",
                 amount: 0.5,
                 statToModify: "offense",
               },

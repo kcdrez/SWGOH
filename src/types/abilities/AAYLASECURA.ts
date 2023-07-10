@@ -34,7 +34,7 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
               modifier: {
                 stats: {
                   amount: 0.5,
-                  type: "percent",
+                  modifiedType: "multiplicative",
                   statToModify: "offense",
                 },
               },
@@ -111,21 +111,55 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
             stats: {
               amount: 0.1,
               statToModify: "critChance",
-              type: "flat",
+              modifiedType: "additive",
             },
           },
           {
             stats: {
               amount: 0.65,
               statToModify: "counterChance",
-              type: "flat",
+              modifiedType: "additive",
             },
           },
           {
             stats: {
               amount: 0.5,
               statToModify: "counterDamage",
-              type: "percent",
+              modifiedType: "additive",
+            },
+          },
+        ],
+      },
+    ],
+  },
+  leaderskill_AAYLASECURA: {
+    id: "leaderskill_AAYLASECURA",
+    name: "Jedi Valor",
+    actions: [{}],
+    triggers: [
+      {
+        id: uuid(),
+        triggerType: "always",
+        targets: [{ allies: true }, { tags: ["Jedi"] }],
+        effects: [
+          {
+            stats: {
+              modifiedType: "additive",
+              statToModify: "tenacity",
+              amount: 0.4,
+            },
+          },
+        ],
+      },
+      {
+        id: uuid(),
+        triggerType: "resistDetrimentalEffect",
+        targets: [{ allies: true }, { tags: ["Jedi"] }],
+        effects: [
+          {
+            heal: {
+              healthType: "health",
+              amount: 0.4,
             },
           },
         ],

@@ -269,7 +269,7 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
         effects: [
           {
             stats: {
-              type: "flat",
+              modifiedType: "additive",
               statToModify: "dodge",
               amount: 0.15,
             },

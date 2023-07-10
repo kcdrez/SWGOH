@@ -6,10 +6,10 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
   basicskill_C3PO: {
     id: "basicskill_C3PO",
     name: "Baffling Trick",
-    targets: [
+    actions: [
       {
-        target: { targetCount: 1, allies: false },
-        actions: [
+        targets: [{ allies: false }, { targetCount: 1 }],
+        effects: [
           {
             condition: {
               debuffs: ["Confuse"],
@@ -17,13 +17,13 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
             //all stacks duration set to 3
           },
           {
+            cantMiss: true,
             debuffs: [
               {
                 name: "Confuse",
                 duration: 3,
                 id: uuid(),
                 unique: true,
-                cantMiss: true,
               },
             ],
           },
@@ -39,7 +39,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
           {
             scalesBy: {
               buffs: ["Translation"],
-              target: { tags: ["Self"], allies: true },
+              targets: [{ allies: true }, { tags: ["Self"] }],
             },
             debuffs: [
               {

@@ -55,7 +55,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
                 stats: {
                   statToModify: "defense",
                   amount: 1,
-                  type: "percent",
+                  modifiedType: "multiplicative",
                 },
               },
             },
@@ -112,7 +112,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
             condition: {
               stats: {
                 statToModify: "protection",
-                type: "flat",
+                modifiedType: "additive",
                 amount: 1,
                 amountType: "less",
               },
@@ -175,7 +175,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
                       ],
                       modifier: {
                         stats: {
-                          type: "percent",
+                          modifiedType: "multiplicative",
                           statToModify: "offense",
                           amount: 0.8,
                         },
@@ -226,7 +226,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
                       ],
                       modifier: {
                         stats: {
-                          type: "percent",
+                          modifiedType: "multiplicative",
                           statToModify: "offense",
                           amount: 0.8,
                         },
@@ -312,7 +312,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
           {
             stats: {
               statToModify: "offense",
-              type: "percent",
+              modifiedType: "multiplicative",
               amount: 0.25,
               expires: {
                 frequency: "turn",
@@ -324,7 +324,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
           {
             stats: {
               statToModify: "critChance",
-              type: "percent",
+              modifiedType: "multiplicative",
               amount: 0.25,
               expires: {
                 frequency: "turn",

@@ -103,7 +103,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
               stats: {
                 statToModify: "health",
                 amount: 1,
-                type: "percent",
+                modifiedType: "multiplicative",
               },
             },
             cooldown: {
@@ -180,11 +180,8 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        actions: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
             condition: {
               buffs: ["Call to Action"],
@@ -193,7 +190,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
             stats: {
               amount: 0.5,
               statToModify: "critAvoid",
-              type: "flat",
+              modifiedType: "additive",
             },
           },
           {
@@ -204,7 +201,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
             stats: {
               amount: 1,
               statToModify: "tenacity",
-              type: "flat",
+              modifiedType: "additive",
             },
           },
           {
@@ -214,8 +211,8 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
             },
             stats: {
               amount: 0.5,
-              statToModify: "counter",
-              type: "flat",
+              statToModify: "counterChance",
+              modifiedType: "additive",
             },
           },
           {
@@ -226,7 +223,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
             stats: {
               amount: 0.5,
               statToModify: "defense",
-              type: "percent",
+              modifiedType: "multiplicative",
             },
           },
         ],
@@ -234,25 +231,18 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "receiveDamage",
         id: uuid(),
-        target: {
-          tags: ["Rebel & !Self"],
-          allies: true,
-        },
-        events: [
+        targets: [{ allies: true }, { tags: ["Rebel & !Self"] }],
+        effects: [
           {
-            target: {
-              targetIds: ["COMMANDERLUKESKYWALKER"],
-              allies: true,
-            },
-            actions: [
+            targets: [
+              { allies: true },
+              { targetIds: ["COMMANDERLUKESKYWALKER"] },
+            ],
+            buffs: [
               {
-                buffs: [
-                  {
-                    id: uuid(),
-                    name: "TM Increase",
-                    duration: 10,
-                  },
-                ],
+                id: uuid(),
+                name: "TM Increase",
+                duration: 10,
               },
             ],
           },
@@ -267,16 +257,13 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        actions: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
             stats: {
               amount: 0.4,
               statToModify: "potency",
-              type: "flat",
+              modifiedType: "additive",
             },
           },
         ],
@@ -284,23 +271,20 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "resistDetrimentalEffect",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        actions: [
-          {
-            heal: {
-              healthType: "health",
-              amount: 0.05,
-              type: "percent",
-            },
-          },
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
             heal: {
               healthType: "protection",
               amount: 0.05,
-              type: "percent",
+              percent: true,
+            },
+          },
+          {
+            heal: {
+              healthType: "health",
+              amount: 0.05,
+              percent: true,
             },
           },
         ],
@@ -308,11 +292,13 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "inflictDebuff",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        actions: [
+        targets: [
+          {
+            tags: ["Self"],
+            allies: true,
+          },
+        ],
+        effects: [
           {
             buffs: [
               {
@@ -327,25 +313,15 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "inflictDebuff",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        events: [
+        targets: [{ allies: true }, { tags: ["Self"] }],
+        effects: [
           {
-            target: {
-              tags: ["!Self"],
-              allies: true,
-            },
-            actions: [
+            targets: [{ allies: true }, { tags: ["!Self"] }],
+            buffs: [
               {
-                buffs: [
-                  {
-                    name: "TM Increase",
-                    duration: 5,
-                    id: uuid(),
-                  },
-                ],
+                name: "TM Increase",
+                duration: 5,
+                id: uuid(),
               },
             ],
           },
@@ -360,55 +336,43 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          allies: true,
-          tags: ["Rebel"],
-        },
-        actions: [
+        targets: [{ allies: true }, { tags: ["Rebel"] }],
+        effects: [
           {
             stats: {
               amount: 0.5,
-              statToModify: "counter",
-              type: "flat",
+              statToModify: "counterChance",
+              modifiedType: "additive",
             },
           },
           {
             stats: {
               amount: 0.5,
               statToModify: "defense",
-              type: "percent",
+              modifiedType: "multiplicative",
             },
           },
           {
             stats: {
               amount: 0.15,
               statToModify: "offense",
-              type: "percent",
+              modifiedType: "multiplicative",
             },
           },
         ],
       },
       {
-        target: {
-          allies: false,
-        },
+        targets: [{ allies: false }],
         triggerType: "resistDetrimentalEffect",
         id: uuid(),
-        events: [
+        effects: [
           {
-            target: {
-              allies: false,
-              tags: ["Rebel"],
-            },
-            actions: [
+            targets: [{ allies: false }, { tags: ["Rebel"] }],
+            buffs: [
               {
-                buffs: [
-                  {
-                    name: "TM Increase",
-                    duration: 5,
-                    id: uuid(),
-                  },
-                ],
+                name: "TM Increase",
+                duration: 5,
+                id: uuid(),
               },
             ],
           },

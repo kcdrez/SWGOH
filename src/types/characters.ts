@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { round } from "lodash";
+import { round, template } from "lodash";
 import _ from "lodash";
 
 import { randomNumber, unvue } from "utils";
@@ -7,32 +7,57 @@ import abilities from "types/abilities";
 import { Ability, IUnit, Unit } from "types/unit";
 
 export interface iStats {
+  /** The maximum amount of health */
   maxHealth: number;
+  /** The current health, used to determine if the unit is dead or not */
   health: number;
+  /** The maximum amount of protection */
   maxProtection: number;
+  /** The current protection, which is depleted first before health */
   protection: number;
+  /** How soon a unit takes a turn */
   speed: number;
+  /** The physical attributes */
   physical: {
+    /** Used to determine how much damage will be dealt for physical attacks */
     offense: number;
+    /** Used to determine how much of the opponent's physical offense will be mitigated prior to calculating damage. TODO: check if this is a percent or flat value */
     armor: number;
+    /** The amount of the opponent's armor will be ignored */
     armorPen: number;
+    /** The chances of scoring a critical hit (decimal) */
     critChance: number;
+    /** The amount of the opponent's dodge that is ignored */
     accuracy: number;
+    /** The chances of evading an attack/effect (decimal) */
     dodge: number;
+    /** The amount of the opponent's critChance that will be mitigated (decimal) */
     critAvoid: number;
   };
+  /** The special attributes */
   special: {
+    /** Used to determine how much damage will be dealt for special attacks */
     offense: number;
+    /** Used to determine how much of the opponent's special offense will be mitigated prior to calculating damage. (aka resistance). TODO: check if this is a percent or flat value */
     armor: number;
+    /** The amount of the opponent's armor (resistance) will be ignored */
     armorPen: number;
+    /** The chances of scoring a critical hit (decimal) */
     critChance: number;
+    /** The amount of the opponent's dodge that is ignored */
     accuracy: number;
+    /** The chances of evading an attack/effect (decimal) */
     dodge: number;
+    /** The amount of the opponent's critChance that will be mitigated (decimal) */
     critAvoid: number;
   };
+  /** How much extra damage a critical hit will deal (decimal) */
   critDamage: number;
+  /** The chances of resisting a negative status effect (decimal) */
   tenacity: number;
+  /** The chances of successfulling inflicing a negative status effect (decimal) */
   potency: number;
+  /** The amount of health that will be healed when dealing damage (decimal) */
   healthSteal: number;
 }
 
@@ -117,7 +142,6 @@ type tBuff =
   | "TM Increase"
   | "all";
 type tStatusEffect = "Guard";
-// type tStatusEffect = tDebuff | tBuff | tBlueEffect;
 
 /** A generic status effect, usually a buff or debuff */
 export interface iStatusEffect {
@@ -185,30 +209,60 @@ export interface iSpecialAbility extends iGeneralAbility {
 export interface iAbility
   extends iBasicAbility,
     iSpecialAbility,
-    iUniqueAbility {
-  // id: string;
-  // name: string;
-}
+    iUniqueAbility {}
 
 export interface iUniqueAbility extends iGeneralAbility {}
 
 /** An effect that happens when something else happens */
 interface iTrigger extends iAction {
-  /** Determines when the effect will occur */
+  /**
+   * Determines when the effect will occur
+   *
+   * ability: Unknown
+   *
+   * always: An effect that will always be present
+   *
+   * criticalHit: Triggers whenever a criticalHit is scored
+   *
+   * dealDamage: Triggers whenever damage is dealt
+   *
+   * death: Triggers whenever the target is defeated
+   *
+   * defeat: Triggers whenever the target defeats another target
+   *
+   * dodge: Triggers whenever the target dodges an effect/attack
+   *
+   * expires: Triggers whenever an effect expires
+   *
+   * inflictDebuff: Triggers whenever the target inflicts a debuff
+   *
+   * pregame: Triggers before the game begins
+   *
+   * receiveDamage: Triggers whenever the target receives damage
+   *
+   * resistDetrimentalEffect: Triggers whenever the target resists an effect
+   *
+   * revive: Triggers whenever the target is revived
+   *
+   * start: Triggers at the start of the game (after pregame)
+   *
+   * useAbility: Triggers whenever the target uses an ability
+   */
   triggerType:
-    | "useAbility"
-    | "receiveDamage"
+    | "always"
+    | "criticalHit"
     | "dealDamage"
     | "death"
-    | "resistDetrimentalEffect"
-    | "inflictDebuff"
-    | "criticalHit"
+    | "defeat"
     | "dodge"
-    | "always"
-    | "ability"
-    | "start"
+    | "expires"
+    | "inflictDebuff"
     | "pregame"
-    | "expires";
+    | "receiveDamage"
+    | "resistDetrimentalEffect"
+    | "revive"
+    | "start"
+    | "useAbility";
   /** Misc data to be used for various effects */
   data?: any;
   /** Unique identifier */
@@ -229,25 +283,23 @@ interface iTrigger extends iAction {
 /** Determines who is being targeted and what is happening to them */
 interface iAction {
   /** A list of filters, in order, which will be applied to determine who to target */
-  targets: iTargetData[];
-  // debuffs?: iDebuff[];
-  // buffs?: iBuff[];
-  // statusEffects?: iStatusEffect[];
+  targets?: iTargetData[];
   /** The actions themselves that will be applied to the target(s) in order */
   effects?: iEffect[];
-  // cantMiss?: boolean;
-  // damage?: number;
-  // modifyDamage?: iEffect;
-  // damageVariance?: number;
-  // damageType?: "physical" | "special";
-  // stats?: iStatsCheck;
-  // ability?: iAbility | null;
-
-  /** Any triggers that should occur as a result of this effect */
-  // triggers?: iTrigger[]
+  /** The actions will repeat until the conditions are no longer met */
+  repeats?: {
+    /** How many times the action has been done */
+    count: number;
+    /** The maximum number of times this action can be done */
+    limit: number;
+    /** The method in which to set the limit, if a variable amount */
+    limitCounter?: "deadOpponents";
+    /** When the count should be reset */
+    reset: "turn";
+  };
 }
 
-/** Various filters used to determine who should be targetted */
+/** Various filters used to determine who should be targeted */
 interface iTargetData {
   /** A list of specific characters that should be targeted */
   targetIds?: string[];
@@ -259,11 +311,16 @@ interface iTargetData {
   weakest?: boolean;
   /** Determines how many units of the given filters should be selected */
   targetCount?: number;
-  // scale?: "Resisted" | "physical critChance";
   /** Determines if the filtering should ignore any taunt effects */
   ignoreTaunt?: boolean;
-  /** Determines if any units should be targetted with specific status effects */
+  /** Determines if any units should be targeted with specific status effects */
   statusEffects?: tStatusEffect[];
+  /** Determines if any units should be targeted with specific debuffs */
+  debuffs?: tDebuff[];
+  /** Determines if any units should be targeted with specific buffs */
+  buffs?: tBuff[];
+  /** Determines if the target is the leader or not */
+  isLeader?: boolean;
 }
 
 /** Data used to determine certain things */
@@ -320,15 +377,14 @@ interface iEffect {
   heal?: {
     /** Health or Protection */
     healthType: "health" | "protection";
-    /** Determines if it should be a percent of something, or a flat amount */
-    percent?: boolean;
+    /** Determines if the amound should be added to the current health, or scale from the unit's maxHealth/Protection */
+    amountType?: "additive" | "multiplicative";
     /** The amount to heal. For percentages, keep the amount a decimal (e.g. 0.4 would be a 40% heal) */
     amount?: number;
     // scale?: number;
   };
   /** Call another unit to assist */
   assist?: iAssist;
-  // scale?: number;
   /** Change the target's stats */
   stats?: iStatsCheck;
   /** Deal damage to the target */
@@ -359,8 +415,14 @@ interface iEffect {
   };
   /** Set the target immune to certain effects */
   immune?: {
+    /** The negative status effects or debuffs that cannot be given to the target */
     negativeStatusEffects?: (tDebuff | tStatusEffect)[];
+    /** The positive status effects or buffs that cannot be given to the target */
     positiveStatusEffects?: (tBuff | tStatusEffect)[];
+    /** The target cannot assist */
+    assists?: boolean;
+    /** The target cannot counter attack */
+    counterAttack?: boolean;
   };
   /** Scale the above effects with various data */
   scalesBy?: {
@@ -381,35 +443,80 @@ interface iEffect {
     };
     /** Scales the data based on how much damage was dealt */
     damage?: boolean;
+    /** Who to target to check the scale */
+    targets?: iTargetData[];
   };
   /** Triggers to add to the target that will occur at a later time */
   triggers?: iTrigger[];
   /** Misc. data used for checking various effects */
+  revive?: {
+    health: {
+      amount: number;
+      percent: boolean;
+    };
+    protection?: {
+      amount: number;
+      percent: boolean;
+    };
+  };
   data?: any;
 }
 
 interface iStatsCheck {
-  /** The stat that will be modified */
+  /** The stat that will be modified
+   *
+   * counterChance: The chances of counter attacking (as a decimal)
+   *
+   * counterDamage: The amount of damage used to scale offense (as a decimal; e.g. 1.5 would be 150% damage)
+   *
+   * critAvoid: The chances to mitigate a critical hit (as a decimal)
+   *
+   * critChance: The chances of getting a critical hit (as a decimal)
+   *
+   * defense: Increases the amount of offense to mitigate
+   *
+   * dodge: The chances of missing an attack/effect
+   *
+   * health: The amount of health
+   *
+   * maxHealth/maxProtection: The max health or protection
+   *
+   * offense: The amount of damage an attack deals
+   *
+   * potency: The chances a negative status effect will successful be inflicted
+   *
+   * protection: The amount of protection
+   *
+   * tenacity: The chances to mitigate a negative status effect
+   */
   statToModify:
-    | "critChance"
     | "counterChance"
     | "counterDamage"
-    | "offense"
+    | "critAvoid"
+    | "critChance"
     | "defense"
-    | "protection"
     | "dodge"
-    | "health";
+    | "health"
+    | "maxHealth"
+    | "maxProtection"
+    | "offense"
+    | "potency"
+    | "protection"
+    | "tenacity";
   /** The amount that the stat will be modified */
   amount: number;
-  /** Determines if the stat will be modified by a percent or a flat amount */
-  type: "flat" | "percent";
+  /** Determines if the stat will added to the existing stat (additive) or multiplied together (multiplicative) */
+  modifiedType: "additive" | "multiplicative";
   /** Todo: whats this? */
   amountType?: "greater" | "less";
   /** Determines when the effect will expire and thus be removed */
   expires?: {
+    /** How many cycles before the effect is removed */
     count: number;
+    /** How often the effect is checked to see if it should be removed */
     frequency: "turn";
   };
+  /** Todo: whats this for? */
   stacking?: boolean;
 }
 
@@ -602,17 +709,17 @@ export class Character {
   }
   public heal(
     healData: iEffect["heal"],
-    ability?: iAbility | null,
+    ability?: iGeneralAbility | null,
     amount?: number
   ): string[] {
     const logs: string[] = [];
 
     if (healData && !this.isDead) {
-      const { healthType, type, amount: healAmount } = healData;
+      const { healthType, amountType, amount: healAmount } = healData;
       const maxAmount =
         healthType === "health" ? this.maxHealth : this.maxProtection;
       const finalAmount =
-        type === "percent"
+        amountType === "multiplicative"
           ? (healAmount ?? amount ?? 1) * maxAmount
           : healAmount ?? amount ?? 0;
 
@@ -752,14 +859,19 @@ export class Character {
     );
     return damageAmount;
   }
+  /** Call an ally to assist with their basic attack
+   *
+   * @assistData - The data in which is used to determine how to assist
+   * @targetCharacter - The character in which is being attacked
+   */
   private callAllyToAssist(
-    assistData: iEffect["assist"],
+    assistData: iAssist,
     targetCharacter: Character
   ): string[] {
     const logs: string[] = [];
     if (assistData && !targetCharacter.isDead) {
       if (chanceOfEvent(assistData.chance * 100)) {
-        this.findTargets(assistData.target).forEach((ally) => {
+        this.findTargets(assistData?.targets ?? []).forEach((ally) => {
           logs.push(
             `${format.characterName(ally.name, ally.owner)} is called to assist`
           );
@@ -1046,7 +1158,7 @@ export class Character {
     const finalMapping: Record<string, iStatsCheck[]> = this._triggers.reduce(
       (statsMapping, trigger) => {
         if (trigger.triggerType === "always") {
-          trigger.actions?.forEach(({ stats, condition }) => {
+          trigger.effects?.forEach(({ stats, condition }) => {
             if (
               stats &&
               stats.statToModify &&
@@ -1069,7 +1181,7 @@ export class Character {
   private get immunity(): Record<string, boolean> {
     return this._triggers.reduce(
       (immuneMapping, trigger) => {
-        trigger.actions?.forEach((effect) => {
+        trigger.effects?.forEach((effect) => {
           if (effect.immune) {
             if (this.checkCondition(effect.condition, this)) {
               effect.immune.negativeStatusEffects?.forEach((x) => {
@@ -1101,17 +1213,20 @@ export class Character {
 
     tempStats
       .sort((a: iStatsCheck, b: iStatsCheck) => {
-        if (a.type === "percent" && b.type === "percent") {
+        if (
+          a.modifiedType === "multiplicative" &&
+          b.modifiedType === "multiplicative"
+        ) {
           return 0;
-        } else if (a.type === "percent") {
+        } else if (a.modifiedType === "multiplicative") {
           return 1;
-        } else if (b.type === "percent") {
+        } else if (b.modifiedType === "multiplicative") {
           return -1;
         }
         return 0;
       })
       .forEach((stat) => {
-        if (stat?.type === "percent") {
+        if (stat?.modifiedType === "multiplicative") {
           newStat *= 1 + stat?.amount ?? 0;
         } else {
           newStat += stat?.amount ?? 0;
@@ -1324,7 +1439,7 @@ export class Character {
     buff: iBuff | iBuff[] | tBuff | tBuff[] | null,
     opponent?: Character
   ): string[] {
-    const list: string[] = [];
+    const listOfRemovedBuffs: iBuff[] = [];
     const logs: string[] = [];
     if (Array.isArray(buff)) {
       logs.push(
@@ -1353,31 +1468,36 @@ export class Character {
           !this.isSelf(opponent) &&
           !b.cantDispel
         ) {
-          if (b.expires) {
-            logs.push(...this.processTargets(b.expires, this, null));
-          }
-          list.push(b.name);
+          listOfRemovedBuffs.push(b);
           return false;
         }
         return true;
       });
 
-      if (list.length > 0) {
+      if (listOfRemovedBuffs.length > 0) {
         if (opponent && !this.isSelf(opponent)) {
           logs.push(
             `${format.characterName(
               opponent.name,
               opponent.owner
-            )} removed ${format.buff(list)} from ${format.characterName(
-              this.name,
-              this.owner
-            )}`
+            )} removed ${format.buff(
+              listOfRemovedBuffs.map((x) => x.name)
+            )} from ${format.characterName(this.name, this.owner)}`
           );
         } else {
           logs.push(
-            `${format.buff(list)} ${list.length <= 1 ? "was" : "were"} removed`
+            `${format.buff(listOfRemovedBuffs.map((x) => x.name))} ${
+              listOfRemovedBuffs.length <= 1 ? "was" : "were"
+            } removed`
           );
         }
+        listOfRemovedBuffs.forEach((buff) => {
+          buff.triggers?.forEach((trigger) => {
+            if (trigger.triggerType === "expires") {
+              logs.push(...this.executeTrigger(trigger));
+            }
+          });
+        });
       }
     }
     return logs;
@@ -1388,7 +1508,6 @@ export class Character {
     scalar: number = 1
   ): string[] {
     const logs: string[] = [];
-    this._history.resisted = 0;
 
     debuffs.forEach((debuff) => {
       if (!targetCharacter.hasDebuff(debuff.name) || debuff.isStackable) {
@@ -1441,7 +1560,6 @@ export class Character {
                   ...this.executePassiveTriggers([
                     {
                       triggerType: "inflictDebuff",
-                      target: {},
                       data: { debuff: debuff.name },
                       id: uuid(),
                     },
@@ -1451,7 +1569,6 @@ export class Character {
             }
           }
         } else {
-          this._history.resisted++;
           logs.push(
             `${format.characterName(
               targetCharacter.name,
@@ -1462,7 +1579,6 @@ export class Character {
             ...targetCharacter.executePassiveTriggers([
               {
                 triggerType: "resistDetrimentalEffect",
-                target: {},
                 data: { debuff: debuff.name },
                 id: uuid(),
               },
@@ -1477,7 +1593,7 @@ export class Character {
     debuff: iDebuff | iDebuff[] | tDebuff | tDebuff[] | null,
     opponent?: Character
   ): string[] {
-    const list: string[] = [];
+    const listOfRemovedDebuffs: iDebuff[] = [];
     const logs: string[] = [];
 
     if (Array.isArray(debuff)) {
@@ -1502,39 +1618,42 @@ export class Character {
         debuffData = debuff;
       }
 
-      this._debuffs = unvue(this._debuffs).filter((x) => {
+      this._debuffs = unvue(this._debuffs).filter((debuff: iDebuff) => {
         if (
-          x.name === debuffData?.name ||
+          debuff.name === debuffData?.name ||
           debuffData?.name === "all" ||
-          x.id === debuffData?.id
+          debuff.id === debuffData?.id
         ) {
-          if (x.expires) {
-            logs.push(...this.processTargets(x.expires, this, null));
-          }
-          list.push(x.name);
+          listOfRemovedDebuffs.push(debuff);
           return false;
         }
         return true;
       });
 
-      if (list.length > 0) {
+      if (listOfRemovedDebuffs.length > 0) {
         if (opponent && !this.isSelf(opponent)) {
           logs.push(
             `${format.characterName(
               opponent.name,
               opponent.owner
-            )} removed ${format.debuff(list)} from ${format.characterName(
-              this.name,
-              this.owner
-            )}`
+            )} removed ${format.debuff(
+              listOfRemovedDebuffs.map((x) => x.name)
+            )} from ${format.characterName(this.name, this.owner)}`
           );
         } else {
           logs.push(
-            `${format.debuff(list)} ${
-              list.length <= 1 ? "was" : "were"
+            `${format.debuff(listOfRemovedDebuffs.map((x) => x.name))} ${
+              listOfRemovedDebuffs.length <= 1 ? "was" : "were"
             } removed`
           );
         }
+        listOfRemovedDebuffs.forEach((buff) => {
+          buff.triggers?.forEach((trigger) => {
+            if (trigger.triggerType === "expires") {
+              logs.push(...this.executeTrigger(trigger));
+            }
+          });
+        });
       }
     }
     return logs;
@@ -1583,7 +1702,7 @@ export class Character {
         )
       );
     } else {
-      const list: string[] = [];
+      const listOfRemovedStatusEffects: iStatusEffect[] = [];
       let statusEffectData: iStatusEffect | null = null;
       if (typeof statusEffect === "string") {
         statusEffectData = {
@@ -1595,25 +1714,33 @@ export class Character {
         statusEffectData = statusEffect;
       }
 
-      this._statusEffects = unvue(this._statusEffects).filter((x) => {
-        if (
-          x.name === statusEffectData?.name ||
-          statusEffectData?.name === "all" ||
-          x.id === statusEffectData?.id
-        ) {
-          if (x.expires) {
-            logs.push(...this.processTargets(x.expires, this, null));
+      this._statusEffects = unvue(this._statusEffects).filter(
+        (statusEffect: iStatusEffect) => {
+          if (
+            statusEffect.name === statusEffectData?.name ||
+            statusEffectData?.name === "all" ||
+            statusEffect.id === statusEffectData?.id
+          ) {
+            listOfRemovedStatusEffects.push(statusEffect);
+            return false;
           }
-          list.push(x.name);
-          return false;
+          return true;
         }
-        return true;
-      });
+      );
 
-      if (list.length > 0) {
+      if (listOfRemovedStatusEffects.length > 0) {
         logs.push(
-          `${format.debuff(list)} ${list.length <= 1 ? "was" : "were"} removed`
+          `${format.debuff(listOfRemovedStatusEffects.map((x) => x.name))} ${
+            listOfRemovedStatusEffects.length <= 1 ? "was" : "were"
+          } removed`
         );
+        listOfRemovedStatusEffects.forEach((buff) => {
+          buff.triggers?.forEach((trigger) => {
+            if (trigger.triggerType === "expires") {
+              logs.push(...this.executeTrigger(trigger));
+            }
+          });
+        });
       }
     }
     return logs;
@@ -1654,110 +1781,116 @@ export class Character {
     return (ability as iAbility) ?? null;
   }
   public findTargets(
-    targetSelection: iTarget,
-    target?: Character,
-    ignore?: {
-      paralysisDebuff?: boolean;
-      daze?: boolean;
-      noAssist?: boolean;
-      dead?: boolean;
-    }
+    targetList: iTargetData[],
+    target?: Character
+    // ignore?: {
+    //   paralysisDebuff?: boolean;
+    //   daze?: boolean;
+    //   noAssist?: boolean;
+    //   dead?: boolean;
+    // }
   ): Character[] {
-    const { allies, targetCount, tags, targetIds, weakest, statusEffects } =
-      targetSelection.target;
-    let list: Character[] = [...this._teammates, ...this._opponents].filter(
-      (char: Character) => {
-        let shouldExclude = false;
+    const validTargets: Character[] = [
+      ...this._teammates,
+      ...this._opponents,
+    ].filter((char: Character) => {
+      let shouldExclude = false;
 
-        if (char.isDead && !ignore?.dead) {
-          shouldExclude = true;
-        }
-        if (ignore?.paralysisDebuff) {
-          shouldExclude = char.hasDebuff("Stun") || shouldExclude;
-        }
-        if (ignore?.daze) {
-          shouldExclude = char.hasDebuff("Daze") || shouldExclude;
-        }
-        return !shouldExclude;
-      }
-    );
+      // if (char.isDead && !ignore?.dead) {
+      //   shouldExclude = true;
+      // }
+      // if (ignore?.paralysisDebuff) {
+      //   shouldExclude = char.hasDebuff("Stun") || shouldExclude;
+      // }
+      // if (ignore?.daze) {
+      //   shouldExclude = char.hasDebuff("Daze") || shouldExclude;
+      // }
+      return !shouldExclude;
+    });
 
-    if (allies) {
-      list = list.filter((x) => x.owner === this.owner);
-    } else if (allies === false) {
-      list = list.filter((x) => x.owner !== this.owner);
-    }
-
-    if (tags) {
-      list = list.filter((char) => anyTagsMatch(char, tags, this.id));
-    }
-
-    if (targetIds) {
-      list = list.filter((char) => {
-        let shouldInclude = false;
-        if (target instanceof Character) {
-          shouldInclude = targetIds.includes("target") && char.isSelf(target);
-        }
-        return anyTagsMatch(char, targetIds, this.id) || shouldInclude;
-      });
-    }
-
-    if (weakest) {
-      const weakestChar = list.reduce(
-        (acc: null | Character, el: Character) => {
-          if (!acc) {
-            return el;
-          } else {
-            const totalEl = el.protection + el.health;
-            const totalAcc = acc.protection + acc.health;
-            if (totalEl < totalAcc) {
-              return el;
-            } else if (totalEl === totalAcc) {
-              return randomNumber(0, 1) === 0 ? el : acc;
+    return targetList.reduce((list: Character[], targetFilter: iTargetData) => {
+      validTargets.forEach((char) => {
+        if (targetFilter.allies) {
+          if (char.owner === this.owner) {
+            list.push(char);
+          }
+        } else if (targetFilter.allies === false) {
+          if (char.owner !== this.owner) {
+            const forcedEffects = ["Taunt", "Marked", "Deathmarked"];
+            const anyForced = validTargets.some((c) => {
+              return [...c.buffs, ...c.debuffs].some((b) =>
+                forcedEffects.includes(b.name)
+              );
+            });
+            if (anyForced) {
+              const charIsForced = [...char.buffs, ...char.debuffs].some((b) =>
+                forcedEffects.includes(b.name)
+              );
+              if (charIsForced) {
+                list.push(char);
+              }
+            } else {
+              list.push(char);
             }
           }
-          return acc;
-        },
-        null
-      );
-      if (!!weakestChar) {
-        list = [weakestChar];
-      }
-    }
-
-    if (targetCount) {
-      let validTargets: Character[] = list;
-      if (allies === false) {
-        const forcedTargets = list.filter((c) => {
-          if (this.effects.ignoreTaunt) {
-            return true;
+        } else if (targetFilter.buffs) {
+          if (char.hasBuff(targetFilter.buffs)) {
+            list.push(char);
           }
-          return [...c.buffs, ...c.debuffs].some((b) =>
-            ["Taunt", "Marked", "Deathmarked"].includes(b.name)
+        } else if (targetFilter.debuffs) {
+          if (char.hasDebuff(targetFilter.debuffs)) {
+            list.push(char);
+          }
+        } else if (targetFilter.isLeader) {
+          if (char.isLeader) {
+            list.push(char);
+          }
+        } else if (targetFilter.statusEffects) {
+          if (char.hasStatusEffect(targetFilter.statusEffects)) {
+            list.push(char);
+          }
+        } else if (targetFilter.tags) {
+          if (anyTagsMatch(char, targetFilter.tags, this.id)) {
+            list.push(char);
+          }
+        } else if (targetFilter.targetIds) {
+          let shouldInclude = false;
+          if (target instanceof Character) {
+            shouldInclude =
+              targetFilter.targetIds.includes("target") && char.isSelf(target);
+          }
+          shouldInclude =
+            anyTagsMatch(char, targetFilter.targetIds, this.id) ||
+            shouldInclude;
+          if (shouldInclude) {
+            list.push(char);
+          }
+        } else if (targetFilter.targetCount) {
+          const tempList: Character[] = [];
+          do {
+            const rand: number = randomNumber(0, list.length - 1);
+            const el = list[rand];
+            const exists = tempList.some((x) => x.id === el.id);
+            if (!exists) {
+              tempList.push(list[rand]);
+            }
+          } while (
+            tempList.length < targetFilter.targetCount &&
+            list.length >= targetFilter.targetCount
           );
-        });
-        validTargets = forcedTargets.length > 0 ? forcedTargets : list;
-      } else {
-        validTargets = list;
-      }
-
-      list = [];
-
-      do {
-        const rand: number = randomNumber(0, validTargets.length - 1);
-        const el = validTargets[rand];
-        const exists = list.some((x) => x.id === el.id);
-        if (!exists) {
-          list.push(validTargets[rand]);
+          return tempList;
+        } else if (targetFilter.weakest) {
+          const weakest = list.reduce((prev, cur) => {
+            const totalStatsPrev = prev.health + prev.protection;
+            const totalStatsCur = cur.health + cur.protection;
+            return totalStatsPrev < totalStatsCur ? prev : cur;
+          }, char);
+          return [weakest];
         }
-      } while (list.length < targetCount && validTargets.length >= targetCount);
-    }
-
-    if (statusEffects) {
-      list = list.filter((x) => x.hasStatusEffect(statusEffects));
-    }
-
-    return list.filter((char: Character) => !!char);
+        return targetList;
+      });
+      return list;
+    }, []);
   }
 
   //other properties
@@ -1784,7 +1917,7 @@ export class Character {
 
   //Methods
   public getCombatStats(
-    damageType: iTarget["damageType"],
+    damageType?: "physical" | "special" | "true",
     stats?: iStatsCheck | null
   ) {
     if (damageType === "physical") {
@@ -1810,6 +1943,7 @@ export class Character {
         critAvoid: modifyStat(baseStat.critAvoid, "critAvoid", stats),
       };
     } else {
+      //todo: handle true damage
       return {
         offense: 0,
         critChance: 0,
@@ -1823,7 +1957,7 @@ export class Character {
   }
   public dealDamage(
     targetCharacter: Character,
-    target: iTarget,
+    effect: iEffect,
     srcAbility: iAbility | null,
     stats?: iStatsCheck | null
   ) {
@@ -1831,8 +1965,8 @@ export class Character {
 
     const { isCrit, damageTotal } = this.calculateDamage(
       targetCharacter,
-      target,
-      stats ?? target.stats
+      effect.damage,
+      stats ?? effect.stats
     );
 
     logs.push(...this.dealTrueDamage(targetCharacter, damageTotal, isCrit));
@@ -1862,15 +1996,13 @@ export class Character {
     logs.push(
       ...this.heal(
         {
-          type: "flat",
+          amountType: "additive",
           amount: damageTotal * this.healthSteal,
           healthType: "health",
         },
         {
           name: "Health Steal",
-          id: "whatever",
-          turnsRemaining: 0,
-          cooldown: 0,
+          id: "healthSteal",
         }
       )
     );
@@ -1880,7 +2012,6 @@ export class Character {
         ...this.executePassiveTriggers([
           {
             triggerType: "criticalHit",
-            target: {},
             data: { damageDealt: damageTotal, isCrit, target: targetCharacter },
             id: uuid(),
             srcAbility,
@@ -1901,17 +2032,17 @@ export class Character {
   }
   private calculateDamage(
     targetCharacter: Character,
-    target: iTarget,
+    damageData: iEffect["damage"],
     stats?: iStatsCheck | null
   ): { isCrit: boolean; damageTotal: number } {
-    const abilityModifier = target?.damage ?? 0;
-    const variance = target?.damageVariance ?? 5;
+    const abilityModifier = damageData?.modifier.value ?? 0;
+    const variance = damageData?.variance ?? 5;
     const { offense, critChance, armorPen } = this.getCombatStats(
-      target.damageType,
+      damageData?.damageType,
       stats
     );
     const { armor, critAvoid } = targetCharacter.getCombatStats(
-      target.damageType,
+      damageData?.damageType,
       stats
     );
     const varianceOffense =
@@ -1951,7 +2082,7 @@ export class Character {
             {
               statToModify: "offense",
               amount: this.counterDamage,
-              type: "percent",
+              modifiedType: "multiplicative",
             },
             targetCharacter,
             false
@@ -1962,7 +2093,7 @@ export class Character {
     return logs;
   }
   public inflictEffects(
-    { actions, target }: iTarget,
+    effect: iEffect,
     targetCharacter: Character,
     ability: iAbility | null
   ): string[] {
@@ -2824,7 +2955,7 @@ export const format = {
     amount: number,
     currentProt: number,
     currentHealth: number,
-    ability: iAbility | null = null
+    ability: iGeneralAbility | null = null
   ) {
     return `${this.characterName(
       charName,
@@ -2872,7 +3003,7 @@ export const format = {
   ability(name) {
     return `<span class="ability">${name}</span>`;
   },
-  abilitySource(ability: iAbility | null) {
+  abilitySource(ability: iGeneralAbility | null) {
     return ability ? ` (src: ${format.ability(ability.name)})` : "";
   },
 };
