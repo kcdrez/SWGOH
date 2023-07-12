@@ -284,10 +284,13 @@ export default defineComponent({
       );
     },
     initializeMatch() {
-      const allCharacters = [...this.playerTeam, ...this.opponentTeam];
+      const allCharacters: Character[] = [
+        ...this.playerTeam,
+        ...this.opponentTeam,
+      ] as Character[];
       allCharacters.forEach((x) => x.initialize());
 
-      const startTriggers = allCharacters
+      const startTriggers: Character[] = allCharacters
         .filter((char) => {
           return char.triggers.some((trigger) => {
             return trigger.triggerType === "start";
@@ -323,12 +326,7 @@ export default defineComponent({
 
       pregameTriggers.forEach((char) => {
         const pregameLogs = char.executePassiveTriggers([
-          {
-            triggerType: "pregame",
-            target: {},
-            data: {},
-            id: uuid(),
-          },
+          { triggerType: "pregame" },
         ]);
 
         if (pregameLogs.length > 0) {
@@ -343,9 +341,8 @@ export default defineComponent({
         const startLogs = char.executePassiveTriggers([
           {
             triggerType: "start",
-            target: {},
-            data: {},
-            id: uuid(),
+            ability: null,
+            target: char as Character,
           },
         ]);
 
@@ -374,6 +371,7 @@ export default defineComponent({
       );
     },
     start() {
+      const maxRoundCount = 1000; //to prevent infinite loops
       this.logs = [];
       this.simulation.playerWins = 0;
       this.simulation.opponentWins = 0;
@@ -387,7 +385,7 @@ export default defineComponent({
           this.nextTurn(j);
           const playerLost = this.playerTeam.every((x) => x.health <= 0);
           const opponentList = this.opponentTeam.every((x) => x.health <= 0);
-          if (playerLost || opponentList || j > 100) {
+          if (playerLost || opponentList || j > maxRoundCount) {
             const winner = playerLost ? this.opponent : this.player;
             this.logs.push(`Match ends: ${winner.name} is the winner!`);
             if (playerLost) {

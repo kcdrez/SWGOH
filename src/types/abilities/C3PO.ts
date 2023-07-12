@@ -8,7 +8,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
     name: "Baffling Trick",
     actions: [
       {
-        targets: [{ allies: false }, { targetCount: 1 }],
+        targets: { filters: [{ allies: false }], targetCount: 1 },
         effects: [
           {
             condition: {
@@ -39,7 +39,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
           {
             scalesBy: {
               buffs: ["Translation"],
-              targets: [{ allies: true }, { tags: ["Self"] }],
+              targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
             },
             debuffs: [
               {

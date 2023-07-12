@@ -8,7 +8,10 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
     id: "basicskill_AAYLASECURA",
     actions: [
       {
-        targets: [{ allies: false }, { targetCount: 1 }],
+        targets: {
+          filters: [{ allies: false }],
+          targetCount: 1,
+        },
         effects: [
           {
             damage: {
@@ -16,17 +19,15 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
                 value: 1.645,
               },
               damageType: "physical",
-              variance: 5,
             },
           },
         ],
       },
       {
-        targets: [
-          { allies: true },
-          { tags: ["Jedi & !Self"] },
-          { targetCount: 1 },
-        ],
+        targets: {
+          filters: [{ allies: true }, { tags: ["Jedi & !Self"] }],
+          targetCount: 1,
+        },
         effects: [
           {
             assist: {
@@ -51,7 +52,10 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
     turnsRemaining: 0,
     actions: [
       {
-        targets: [{ allies: false }, { targetCount: 1 }],
+        targets: {
+          filters: [{ allies: false }],
+          targetCount: 1,
+        },
         effects: [
           {
             damage: {
@@ -59,23 +63,30 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
                 value: 3.008,
               },
               damageType: "physical",
-              variance: 5,
             },
           },
         ],
       },
+    ],
+    triggers: [
       {
-        targets: [{ allies: true }, { tags: ["Self"] }],
-        effects: [
+        triggerType: "dealDamage",
+        id: uuid(),
+        actions: [
           {
-            heal: {
-              healthType: "health",
-              amount: 0.65,
-              percent: true,
-            },
-            scalesBy: {
-              damage: true,
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                heal: {
+                  healthType: "health",
+                  amount: 0.65,
+                  amountType: "multiplicative",
+                },
+                scalesBy: {
+                  damage: true,
+                },
+              },
+            ],
           },
         ],
       },
@@ -88,15 +99,19 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "criticalHit",
         id: uuid(),
-        targets: [{ allies: true }, { tags: ["Self"] }],
-        effects: [
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        actions: [
           {
-            targets: [{ targetIds: ["target"] }],
-            debuffs: [
+            targets: { filters: [{ targetIds: ["target"] }] },
+            effects: [
               {
-                duration: 1,
-                name: "Stun",
-                id: uuid(),
+                debuffs: [
+                  {
+                    duration: 1,
+                    name: "Stun",
+                    id: uuid(),
+                  },
+                ],
               },
             ],
           },
@@ -105,28 +120,33 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        targets: [{ allies: true }, { tags: ["Self"] }],
-        effects: [
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        actions: [
           {
-            stats: {
-              amount: 0.1,
-              statToModify: "critChance",
-              modifiedType: "additive",
-            },
-          },
-          {
-            stats: {
-              amount: 0.65,
-              statToModify: "counterChance",
-              modifiedType: "additive",
-            },
-          },
-          {
-            stats: {
-              amount: 0.5,
-              statToModify: "counterDamage",
-              modifiedType: "additive",
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  amount: 0.1,
+                  statToModify: "critChance",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                stats: {
+                  amount: 0.65,
+                  statToModify: "counterChance",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                stats: {
+                  amount: 0.5,
+                  statToModify: "counterDamage",
+                  modifiedType: "additive",
+                },
+              },
+            ],
           },
         ],
       },
@@ -135,32 +155,42 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
   leaderskill_AAYLASECURA: {
     id: "leaderskill_AAYLASECURA",
     name: "Jedi Valor",
-    actions: [{}],
     triggers: [
       {
         id: uuid(),
         triggerType: "always",
-        targets: [{ allies: true }, { tags: ["Jedi"] }],
-        effects: [
+        targets: { filters: [{ allies: true }, { tags: ["Jedi"] }] },
+        actions: [
           {
-            stats: {
-              modifiedType: "additive",
-              statToModify: "tenacity",
-              amount: 0.4,
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  modifiedType: "additive",
+                  statToModify: "tenacity",
+                  amount: 0.4,
+                },
+              },
+            ],
           },
         ],
       },
       {
         id: uuid(),
         triggerType: "resistDetrimentalEffect",
-        targets: [{ allies: true }, { tags: ["Jedi"] }],
-        effects: [
+        targets: { filters: [{ allies: true }, { tags: ["Jedi"] }] },
+        actions: [
           {
-            heal: {
-              healthType: "health",
-              amount: 0.4,
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                heal: {
+                  healthType: "health",
+                  amount: 0.1,
+                  amountType: "multiplicative",
+                },
+              },
+            ],
           },
         ],
       },

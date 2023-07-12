@@ -10,7 +10,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
     turnsRemaining: 0,
     actions: [
       {
-        targets: [{ allies: true }, { tags: ["Self"] }],
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         effects: [
           {
             dispel: {
@@ -30,14 +30,14 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
             heal: {
               healthType: "protection",
               amount: 0.4,
-              percent: true,
+              amountType: "multiplicative",
             },
           },
           {
             heal: {
               healthType: "health",
               amount: 0.4,
-              percent: true,
+              amountType: "multiplicative",
             },
           },
           {
@@ -76,7 +76,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
     turnsRemaining: 0,
     actions: [
       {
-        targets: [{ allies: false }, { targetCount: 1 }],
+        targets: { filters: [{ allies: false }], targetCount: 1 },
         effects: [
           {
             dispel: {
@@ -109,7 +109,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
             cooldown: {
               id: "specialskill_COMMANDERLUKESKYWALKER01",
               amount: -1,
-              target: [{ allies: true }, { tags: ["Self"] }],
+              target: { filters: [{ allies: true }, { tags: ["Self"] }] },
             },
           },
         ],
@@ -121,7 +121,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
     name: "Destined Strike",
     actions: [
       {
-        targets: [{ allies: false }, { targetCount: 1 }],
+        targets: { filters: [{ allies: false }], targetCount: 1 },
         effects: [
           {
             damage: {
@@ -180,69 +180,79 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        targets: [{ allies: true }, { tags: ["Self"] }],
-        effects: [
+        actions: [
           {
-            condition: {
-              buffs: ["Call to Action"],
-              inverted: true,
-            },
-            stats: {
-              amount: 0.5,
-              statToModify: "critAvoid",
-              modifiedType: "additive",
-            },
-          },
-          {
-            condition: {
-              buffs: ["Call to Action"],
-              inverted: true,
-            },
-            stats: {
-              amount: 1,
-              statToModify: "tenacity",
-              modifiedType: "additive",
-            },
-          },
-          {
-            condition: {
-              buffs: ["Call to Action"],
-              inverted: true,
-            },
-            stats: {
-              amount: 0.5,
-              statToModify: "counterChance",
-              modifiedType: "additive",
-            },
-          },
-          {
-            condition: {
-              buffs: ["Call to Action"],
-              inverted: true,
-            },
-            stats: {
-              amount: 0.5,
-              statToModify: "defense",
-              modifiedType: "multiplicative",
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                condition: {
+                  buffs: ["Call to Action"],
+                  inverted: true,
+                },
+                stats: {
+                  amount: 0.5,
+                  statToModify: "critAvoid",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                condition: {
+                  buffs: ["Call to Action"],
+                  inverted: true,
+                },
+                stats: {
+                  amount: 1,
+                  statToModify: "tenacity",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                condition: {
+                  buffs: ["Call to Action"],
+                  inverted: true,
+                },
+                stats: {
+                  amount: 0.5,
+                  statToModify: "counterChance",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                condition: {
+                  buffs: ["Call to Action"],
+                  inverted: true,
+                },
+                stats: {
+                  amount: 0.5,
+                  statToModify: "defense",
+                  modifiedType: "multiplicative",
+                },
+              },
+            ],
           },
         ],
       },
       {
         triggerType: "receiveDamage",
         id: uuid(),
-        targets: [{ allies: true }, { tags: ["Rebel & !Self"] }],
-        effects: [
+        targets: { filters: [{ allies: true }, { tags: ["Rebel & !Self"] }] },
+        actions: [
           {
-            targets: [
-              { allies: true },
-              { targetIds: ["COMMANDERLUKESKYWALKER"] },
-            ],
-            buffs: [
+            targets: {
+              filters: [
+                { allies: true },
+                { targetIds: ["COMMANDERLUKESKYWALKER"] },
+              ],
+            },
+            effects: [
               {
-                id: uuid(),
-                name: "TM Increase",
-                duration: 10,
+                buffs: [
+                  {
+                    id: uuid(),
+                    name: "TM Increase",
+                    duration: 10,
+                  },
+                ],
               },
             ],
           },
@@ -257,54 +267,42 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        targets: [{ allies: true }, { tags: ["Self"] }],
-        effects: [
+        actions: [
           {
-            stats: {
-              amount: 0.4,
-              statToModify: "potency",
-              modifiedType: "additive",
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  amount: 0.4,
+                  statToModify: "potency",
+                  modifiedType: "additive",
+                },
+              },
+            ],
           },
         ],
       },
       {
         triggerType: "resistDetrimentalEffect",
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         id: uuid(),
-        targets: [{ allies: true }, { tags: ["Self"] }],
-        effects: [
+        actions: [
           {
-            heal: {
-              healthType: "protection",
-              amount: 0.05,
-              percent: true,
-            },
-          },
-          {
-            heal: {
-              healthType: "health",
-              amount: 0.05,
-              percent: true,
-            },
-          },
-        ],
-      },
-      {
-        triggerType: "inflictDebuff",
-        id: uuid(),
-        targets: [
-          {
-            tags: ["Self"],
-            allies: true,
-          },
-        ],
-        effects: [
-          {
-            buffs: [
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
               {
-                name: "TM Increase",
-                duration: 10,
-                id: uuid(),
+                heal: {
+                  healthType: "protection",
+                  amount: 0.05,
+                  amountType: "multiplicative",
+                },
+              },
+              {
+                heal: {
+                  healthType: "health",
+                  amount: 0.05,
+                  amountType: "multiplicative",
+                },
               },
             ],
           },
@@ -313,15 +311,40 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "inflictDebuff",
         id: uuid(),
-        targets: [{ allies: true }, { tags: ["Self"] }],
-        effects: [
+        targets: { filters: [{ tags: ["Self"], allies: true }] },
+        actions: [
           {
-            targets: [{ allies: true }, { tags: ["!Self"] }],
-            buffs: [
+            targets: { filters: [{ tags: ["Self"], allies: true }] },
+            effects: [
               {
-                name: "TM Increase",
-                duration: 5,
-                id: uuid(),
+                buffs: [
+                  {
+                    name: "TM Increase",
+                    duration: 10,
+                    id: uuid(),
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        triggerType: "inflictDebuff",
+        id: uuid(),
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        actions: [
+          {
+            targets: { filters: [{ allies: true }, { tags: ["!Self"] }] },
+            effects: [
+              {
+                buffs: [
+                  {
+                    name: "TM Increase",
+                    duration: 5,
+                    id: uuid(),
+                  },
+                ],
               },
             ],
           },
@@ -336,43 +359,51 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        targets: [{ allies: true }, { tags: ["Rebel"] }],
-        effects: [
+        actions: [
           {
-            stats: {
-              amount: 0.5,
-              statToModify: "counterChance",
-              modifiedType: "additive",
-            },
-          },
-          {
-            stats: {
-              amount: 0.5,
-              statToModify: "defense",
-              modifiedType: "multiplicative",
-            },
-          },
-          {
-            stats: {
-              amount: 0.15,
-              statToModify: "offense",
-              modifiedType: "multiplicative",
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Rebel"] }] },
+            effects: [
+              {
+                stats: {
+                  amount: 0.5,
+                  statToModify: "counterChance",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                stats: {
+                  amount: 0.5,
+                  statToModify: "defense",
+                  modifiedType: "multiplicative",
+                },
+              },
+              {
+                stats: {
+                  amount: 0.15,
+                  statToModify: "offense",
+                  modifiedType: "multiplicative",
+                },
+              },
+            ],
           },
         ],
       },
       {
-        targets: [{ allies: false }],
+        targets: { filters: [{ allies: false }] },
         triggerType: "resistDetrimentalEffect",
         id: uuid(),
-        effects: [
+        actions: [
           {
-            targets: [{ allies: false }, { tags: ["Rebel"] }],
-            buffs: [
+            targets: { filters: [{ allies: false }, { tags: ["Rebel"] }] },
+            effects: [
               {
-                name: "TM Increase",
-                duration: 5,
-                id: uuid(),
+                buffs: [
+                  {
+                    name: "TM Increase",
+                    duration: 5,
+                    id: uuid(),
+                  },
+                ],
               },
             ],
           },

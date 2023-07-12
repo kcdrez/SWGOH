@@ -8,7 +8,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
     name: "Frantic Shot",
     actions: [
       {
-        targets: [{ allies: false }, { targetCount: 1 }],
+        targets: { filters: [{ allies: false }], targetCount: 1 },
         effects: [
           {
             damage: {
@@ -36,7 +36,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
     name: "Shining Distraction",
     actions: [
       {
-        targets: [{ allies: true }, { tags: ["Self"] }],
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         effects: [
           {
             dispel: {
@@ -46,12 +46,12 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
       {
-        targets: [{ allies: true }, { tags: ["Rebel"] }],
+        targets: { filters: [{ allies: true }, { tags: ["Rebel"] }] },
         effects: [
           {
             heal: {
               amount: 0.15,
-              percent: true,
+              amountType: "multiplicative",
               healthType: "protection",
             },
           },
@@ -67,11 +67,9 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
       {
-        targets: [
-          {
-            allies: false,
-          },
-        ],
+        targets: {
+          filters: [{ allies: false }],
+        },
         effects: [
           {
             cantMiss: true,
@@ -98,7 +96,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
     name: "Chewie's Rage",
     actions: [
       {
-        targets: [{ allies: false }],
+        targets: { filters: [{ allies: false }] },
         effects: [
           {
             damage: {
@@ -121,15 +119,19 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
       {
         id: uuid(),
         triggerType: "defeat",
-        effects: [
+        actions: [
           {
-            targets: [{ allies: true }, { tags: ["Self"] }],
-            stats: {
-              statToModify: "offense",
-              amount: 0.1,
-              modifiedType: "multiplicative",
-              stacking: true,
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  statToModify: "offense",
+                  amount: 0.1,
+                  modifiedType: "multiplicative",
+                  stacking: true,
+                },
+              },
+            ],
           },
         ],
       },
@@ -138,27 +140,31 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
   uniqueskill_C3POCHEWBACCA01: {
     id: "uniqueskill_C3POCHEWBACCA01",
     name: "I Must Tell The Others",
-    actions: [{}],
     triggers: [
       {
         id: uuid(),
         triggerType: "always",
-        targets: [{ allies: false }],
-        effects: [
+        targets: { filters: [{ allies: false }] },
+        actions: [
           {
-            condition: { debuffs: ["Blind"] },
-            stats: {
-              modifiedType: "additive",
-              amount: -0.4,
-              statToModify: "tenacity",
-            },
-          },
-          {
-            condition: { debuffs: ["Blind"] },
-            immune: {
-              assists: true,
-              counterAttack: true,
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                condition: { debuffs: ["Blind"] },
+                stats: {
+                  modifiedType: "additive",
+                  amount: -0.4,
+                  statToModify: "tenacity",
+                },
+              },
+              {
+                condition: { debuffs: ["Blind"] },
+                immune: {
+                  assists: true,
+                  counterAttack: true,
+                },
+              },
+            ],
           },
         ],
       },
@@ -170,236 +176,287 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
           count: 0,
           frequency: "turn",
         },
-        targets: [{ allies: true }, { tags: ["Rebel & !Self"] }],
-        effects: [
+        targets: { filters: [{ allies: true }, { tags: ["Rebel & !Self"] }] },
+        actions: [
           {
-            targets: [{ allies: true }, { targetIds: ["C3POCHEWBACCA"] }],
-            assist: {
-              chance: 1,
-              modifier: {
-                stats: {
-                  statToModify: "offense",
-                  amount: 0.7,
-                  modifiedType: "multiplicative",
+            targets: {
+              filters: [{ allies: true }, { targetIds: ["C3POCHEWBACCA"] }],
+            },
+            effects: [
+              {
+                assist: {
+                  chance: 1,
+                  modifier: {
+                    stats: {
+                      statToModify: "offense",
+                      amount: 0.7,
+                      modifiedType: "multiplicative",
+                    },
+                  },
                 },
               },
-            },
+            ],
           },
         ],
       },
       {
         id: uuid(),
         triggerType: "revive",
-        targets: [{ allies: true }, { tags: ["Rebel & !Self"] }],
-        effects: [
+        targets: { filters: [{ allies: true }, { tags: ["Rebel & !Self"] }] },
+        actions: [
           {
-            targets: [{ allies: true }, { targetIds: ["C3POCHEWBACCA"] }],
-            revive: {
-              health: {
-                amount: 0.5,
-                percent: true,
+            targets: {
+              filters: [{ allies: true }, { targetIds: ["C3POCHEWBACCA"] }],
+            },
+            effects: [
+              {
+                revive: {
+                  health: {
+                    amount: 0.5,
+                    percent: true,
+                  },
+                  protection: {
+                    amount: 0.5,
+                    percent: true,
+                  },
+                },
               },
-              protection: {
-                amount: 0.5,
-                percent: true,
+            ],
+          },
+        ],
+      },
+      {
+        id: uuid(),
+        triggerType: "always",
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        actions: [
+          {
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  statToModify: "maxHealth",
+                  amount: 0.4,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
               },
-            },
+              {
+                stats: {
+                  statToModify: "maxProtection",
+                  amount: 0.4,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+              {
+                stats: {
+                  statToModify: "offense",
+                  amount: 0.4,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+              {
+                stats: {
+                  statToModify: "defense",
+                  amount: 0.4,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+              {
+                stats: {
+                  statToModify: "potency",
+                  amount: 0.4,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+              {
+                stats: {
+                  statToModify: "tenacity",
+                  amount: 0.4,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+            ],
           },
         ],
       },
       {
         id: uuid(),
         triggerType: "always",
-        targets: [{ allies: true }, { tags: ["Self"] }],
-        effects: [
+        targets: { filters: [{ allies: true }, { tags: ["!Self & Rebel"] }] },
+        actions: [
           {
-            stats: {
-              statToModify: "maxHealth",
-              amount: 0.4,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-          {
-            stats: {
-              statToModify: "maxProtection",
-              amount: 0.4,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-          {
-            stats: {
-              statToModify: "offense",
-              amount: 0.4,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-          {
-            stats: {
-              statToModify: "defense",
-              amount: 0.4,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-          {
-            stats: {
-              statToModify: "potency",
-              amount: 0.4,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-          {
-            stats: {
-              statToModify: "tenacity",
-              amount: 0.4,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-        ],
-      },
-      {
-        id: uuid(),
-        triggerType: "always",
-        targets: [{ allies: true }, { tags: ["!Self & Rebel"] }],
-        effects: [
-          {
-            stats: {
-              statToModify: "maxHealth",
-              amount: 0.2,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-          {
-            stats: {
-              statToModify: "maxProtection",
-              amount: 0.2,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-          {
-            stats: {
-              statToModify: "offense",
-              amount: 0.2,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-          {
-            stats: {
-              statToModify: "defense",
-              amount: 0.2,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-          {
-            stats: {
-              statToModify: "potency",
-              amount: 0.2,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
-          },
-          {
-            stats: {
-              statToModify: "tenacity",
-              amount: 0.2,
-              modifiedType: "multiplicative",
-            },
-            scalesBy: {
-              targets: [
-                { allies: true },
-                { tags: ["Rebel"] },
-                { isLeader: true },
-              ],
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  statToModify: "maxHealth",
+                  amount: 0.2,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+              {
+                stats: {
+                  statToModify: "maxProtection",
+                  amount: 0.2,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+              {
+                stats: {
+                  statToModify: "offense",
+                  amount: 0.2,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+              {
+                stats: {
+                  statToModify: "defense",
+                  amount: 0.2,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+              {
+                stats: {
+                  statToModify: "potency",
+                  amount: 0.2,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+              {
+                stats: {
+                  statToModify: "tenacity",
+                  amount: 0.2,
+                  modifiedType: "multiplicative",
+                },
+                scalesBy: {
+                  targets: {
+                    filters: [
+                      { allies: true },
+                      { tags: ["Rebel"] },
+                      { isLeader: true },
+                    ],
+                  },
+                },
+              },
+            ],
           },
         ],
       },
       {
         id: uuid(),
         triggerType: "always",
-        targets: [{ allies: true }, { tags: ["Rebel"] }],
-        effects: [
+        targets: { filters: [{ allies: true }, { tags: ["Rebel"] }] },
+        actions: [
           {
-            stats: {
-              statToModify: "critAvoid",
-              amount: 0.15,
-              modifiedType: "additive",
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  statToModify: "critAvoid",
+                  amount: 0.15,
+                  modifiedType: "additive",
+                },
+              },
+            ],
           },
         ],
       },

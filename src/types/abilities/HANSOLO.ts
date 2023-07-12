@@ -6,6 +6,8 @@ import {
   iSpecialAbility,
 } from "types/characters";
 
+const quickDrawActionId = uuid();
+
 const hansolo: Record<
   string,
   iBasicAbility | iSpecialAbility | iUniqueAbility
@@ -15,7 +17,8 @@ const hansolo: Record<
     name: "Quick Draw",
     actions: [
       {
-        targets: [{ allies: false }, { targetCount: 1 }],
+        id: quickDrawActionId,
+        targets: { filters: [{ allies: false }], targetCount: 1 },
         effects: [
           {
             damage: {
@@ -63,7 +66,7 @@ const hansolo: Record<
     turnsRemaining: 0,
     actions: [
       {
-        targets: [{ allies: false }, { targetCount: 1 }],
+        targets: { filters: [{ allies: false }], targetCount: 1 },
         effects: [
           {
             damage: {
@@ -85,7 +88,7 @@ const hansolo: Record<
         ],
       },
       {
-        targets: [{ allies: true }, { tags: ["Self"] }],
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         effects: [
           {
             buffs: [
@@ -114,7 +117,7 @@ const hansolo: Record<
     cooldown: 4,
     actions: [
       {
-        targets: [{ allies: true }],
+        targets: { filters: [{ allies: true }] },
         effects: [
           {
             buffs: [
@@ -133,7 +136,7 @@ const hansolo: Record<
         ],
       },
       {
-        targets: [{ allies: true }, { tags: ["Self"] }],
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         effects: [
           {
             buffs: [
@@ -160,49 +163,58 @@ const hansolo: Record<
       {
         triggerType: "always",
         id: uuid(),
-        targets: [{ allies: true }, { tags: ["Self"] }],
-        effects: [
+        actions: [
           {
-            stats: {
-              amount: 0.2,
-              statToModify: "critChance",
-              modifiedType: "additive",
-            },
-          },
-          {
-            stats: {
-              amount: 0.35,
-              statToModify: "counterChance",
-              modifiedType: "additive",
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  amount: 0.2,
+                  statToModify: "critChance",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                stats: {
+                  amount: 0.35,
+                  statToModify: "counterChance",
+                  modifiedType: "additive",
+                },
+              },
+            ],
           },
         ],
       },
       {
         triggerType: "useAbility",
         id: uuid(),
-        targets: [
-          {
-            tags: ["Self"],
-            allies: true,
-          },
-        ],
+        targets: { filters: [{ tags: ["Self"], allies: true }] },
         triggerData: {
           limit: 1,
           count: 1,
           frequency: "turn",
         },
-        effects: [
+        actions: [
           {
-            targets: [{ targetIds: ["target"] }],
-            ability: {
-              abilityToUse: "basicskill_HANSOLO",
-              stats: {
-                modifiedType: "multiplicative",
-                amount: 0.5,
-                statToModify: "offense",
+            targets: { filters: [{ targetIds: ["target"] }] },
+            effects: [
+              {
+                ability: {
+                  abilityToUse: "basicskill_HANSOLO",
+                  abilityTrigger: "basicskill_HANSOLO",
+                  actionId: quickDrawActionId,
+                  effects: [
+                    {
+                      stats: {
+                        modifiedType: "multiplicative",
+                        amount: 0.5,
+                        statToModify: "offense",
+                      },
+                    },
+                  ],
+                },
               },
-            },
+            ],
           },
         ],
       },
@@ -214,24 +226,33 @@ const hansolo: Record<
           count: 1,
           frequency: "match",
         },
-        targets: [{ ignoreTaunt: true }, { allies: false }, { targetCount: 1 }],
-        effects: [
+        actions: [
           {
-            ability: {
-              abilityToUse: "basicskill_HANSOLO",
-              effects: [
-                {
-                  debuffs: [
+            targets: {
+              filters: [{ allies: false }],
+              ignoreTaunt: true,
+              targetCount: 1,
+            },
+            effects: [
+              {
+                ability: {
+                  abilityToUse: "basicskill_HANSOLO",
+                  actionId: quickDrawActionId,
+                  effects: [
                     {
-                      name: "Stun",
-                      duration: 1,
-                      cantResist: true,
-                      id: uuid(),
+                      debuffs: [
+                        {
+                          name: "Stun",
+                          duration: 1,
+                          cantResist: true,
+                          id: uuid(),
+                        },
+                      ],
                     },
                   ],
                 },
-              ],
-            },
+              },
+            ],
           },
         ],
       },
