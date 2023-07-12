@@ -161,6 +161,14 @@ export default defineComponent({
           show: true,
         },
         {
+          label: "TB Platoons",
+          to: {
+            name: "TBPlatoons",
+            params: this.isLoggedIn ? { guildId: this.player.guild_id } : {},
+          },
+          show: true,
+        },
+        {
           label: "TW Planner",
           to: { name: "TWPlannerPage" },
           show: this.isLoggedIn,

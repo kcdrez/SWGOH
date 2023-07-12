@@ -22,6 +22,7 @@ import GoalDetails from "pages/goals/goalDetailsPage.vue";
 import TBStatusPage from "pages/guild/TBStatusPage.vue";
 import TWPlannerPage from "pages/guild/twPlanner.vue";
 import GuildStats from "pages/guild/guildStats.vue";
+import TBPlatoons from "pages/guild/tbPlatoons.vue";
 import WidgetsPage from "pages/general/widgets.vue";
 import GearListPage from "pages/gear/gearList.vue";
 // import GearPage from "pages/gearPage.vue";
@@ -233,6 +234,11 @@ const routes = [
         path: "stats",
         name: "GuildStats",
         component: GuildStats,
+      },
+      {
+        path: "tbPlatoons",
+        name: "TBPlatoons",
+        component: TBPlatoons,
       },
     ],
   },
