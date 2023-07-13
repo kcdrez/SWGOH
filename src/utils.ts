@@ -289,6 +289,7 @@ export function getSortOrder(
     }
   } else {
     // throw new Error("Sorting type mismatch");
+    return 0;
   }
 }
 

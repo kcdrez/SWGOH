@@ -112,7 +112,7 @@ import { apiClient } from "../../api/api-client";
 import { maxRelicLevel } from "types/relic";
 import { iHeaderCell, iTableBody, iTableCell, iTableHead } from "types/general";
 import platoonData from "resources/tbPlatoons";
-import { setupColumnEvents, setupSorting } from "utils";
+import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { iGoalPlayer } from "types/goals";
 
 interface dataModel {
@@ -184,17 +184,37 @@ export default defineComponent({
               {
                 label: "Requirements",
                 show: true, //this.showCol("requirements"),
-                icon: this.sortIcon("requirements"),
+                icon: this.sortIcon("total"),
                 click: () => {
-                  this.sortBy("requirements");
+                  this.sortBy("total");
                 },
               },
               {
-                label: "Completed",
+                label: "Players",
                 show: true, //this.showCol("requirements"),
-                icon: this.sortIcon("requirements"),
+              },
+              {
+                label: "Coverage",
+                show: true, //this.showCol("requirements"),
+                icon: this.sortIcon("coverage"),
                 click: () => {
-                  this.sortBy("requirements");
+                  this.sortBy("coverage");
+                },
+              },
+              {
+                label: "Redundancy",
+                show: true, //this.showCol("requirements"),
+                icon: this.sortIcon("redundancy"),
+                click: () => {
+                  this.sortBy("redundancy");
+                },
+              },
+              {
+                label: "Difficulty",
+                show: true, //this.showCol("requirements"),
+                icon: this.sortIcon("difficulty"),
+                click: () => {
+                  this.sortBy("difficulty");
                 },
               },
             ],
@@ -230,32 +250,50 @@ export default defineComponent({
             return { ...x, alignment: "Light Side", isShip: true };
           }),
         ];
-        const fullList = [...characterList, ...shipsList].reduce(
-          (acc: any[], char) => {
-            console.log(char.id);
+        const fullList = [...characterList, ...shipsList]
+          .reduce((acc: any[], char: any) => {
             const exists: any = acc.find((x: any) => x.id === char.id);
             if (exists) {
               exists[char.alignment] = exists[char.alignment] ?? 0;
               exists[char.alignment] += char.amount;
               exists.total += char.amount;
             } else {
+              const requirement = char.isShip
+                ? phaseData.ships.requirement
+                : phaseData.characters.requirement;
+              const playerList = this.getPlayerList(char.id, requirement);
+
               acc.push({
                 ...char,
                 [char.alignment]: char.amount,
                 total: char.amount,
+                players: playerList.map((x) => x.name),
+                requirement,
               });
             }
             return acc;
-          },
-          []
-        );
+          }, [])
+          .sort((a, b) => {
+            if (this.sortMethod === "coverage") {
+              return sortValues(
+                a.players.length,
+                b.players.length,
+                this.sortDir,
+                this.sortMethod
+              );
+            } else if (this.sortMethod === "redundancy") {
+              return sortValues(
+                Math.max(a.players.length - a.total, 0),
+                Math.max(b.players.length - b.total, 0),
+                this.sortDir,
+                this.sortMethod
+              );
+            }
+            return sortValues(a, b, this.sortDir, this.sortMethod);
+          });
         return {
           classes: "align-middle text-center",
           rows: fullList.map((char) => {
-            const requirement = char.isShip
-              ? phaseData.ships.requirement
-              : phaseData.characters.requirement;
-
             return {
               cells: [
                 {
@@ -265,8 +303,8 @@ export default defineComponent({
                   data: {
                     id: char.id,
                     isLink: false,
-                    type: requirement.type,
-                    level: requirement.amount,
+                    type: char.requirement.type,
+                    level: char.requirement.amount,
                   },
                 },
                 {
@@ -291,7 +329,46 @@ export default defineComponent({
                     ],
                   },
                 },
-                this.getPlayersCompletedCell(char, requirement),
+                {
+                  show: true,
+                  type: "list",
+                  data: {
+                    classes: "mb-0 text-left player-list",
+                    list: char.players.map((x) => {
+                      return { message: x, id: x };
+                    }),
+                  },
+                },
+                {
+                  show: true,
+                  data: {
+                    message: `Completed: ${char.players.length}`,
+                    classes:
+                      char.players.length < char.total
+                        ? "text-danger"
+                        : "text-success",
+                  },
+                },
+                {
+                  show: true,
+                  data: {
+                    classes:
+                      char.players.length < char.total + 3
+                        ? "text-warning"
+                        : "text-success",
+
+                    message: `Redundant Coverage: ${Math.max(
+                      char.players.length - char.total,
+                      0
+                    )}`,
+                  },
+                },
+                {
+                  show: true,
+                  data: {
+                    message: char.difficulty,
+                  },
+                },
               ],
             };
           }),
@@ -300,13 +377,13 @@ export default defineComponent({
         return { rows: [] };
       }
     },
-    getPlayersCompletedCell(
-      unit: { id: string; total: number },
+    getPlayerList(
+      unitId: string,
       requirement: { amount: number; type: string }
-    ): iTableCell {
-      const playerList = this.players.reduce(
-        (list: iGoalPlayer[], player: iGoalPlayer) => {
-          const match = player.units.find((x) => x.base_id === unit.id);
+    ) {
+      return this.players
+        .reduce((list: iGoalPlayer[], player: iGoalPlayer) => {
+          const match = player.units.find((x) => x.base_id === unitId);
           if (match) {
             if (requirement.type === "Stars") {
               if (match.stars >= requirement.amount) {
@@ -319,45 +396,8 @@ export default defineComponent({
             }
           }
           return list;
-        },
-        []
-      );
-      return {
-        show: true,
-        type: "list",
-        data: {
-          classes: "mb-0 no-bullets",
-          list: [
-            {
-              popover: {
-                hover: true,
-                arrow: true,
-                placement: "right",
-                list: playerList.map((x) => {
-                  return { message: x.name, id: x.name };
-                }),
-              },
-              classes: "c-pointer",
-              message: "View Players",
-            },
-            {
-              message: `Completed: ${playerList.length}`,
-              classes:
-                playerList.length < unit.total ? "text-danger" : "text-success",
-            },
-            {
-              message: `Redundant Coverage: ${Math.max(
-                playerList.length - unit.total,
-                0
-              )}`,
-              classes:
-                playerList.length < unit.total + 3
-                  ? "text-warning"
-                  : "text-success",
-            },
-          ],
-        },
-      };
+        }, [])
+        .sort((a, b) => a.name.localeCompare(b.name));
     },
   },
   async created() {
@@ -410,9 +450,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-:deep(.popper) {
+:deep(.player-list) {
   overflow: scroll;
   max-height: 300px;
-  cursor: default;
 }
 </style>
