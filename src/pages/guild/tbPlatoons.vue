@@ -75,6 +75,17 @@
                 Phase 6
               </button>
             </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#playerPlatoons"
+                type="button"
+                role="tab"
+              >
+                Players Overview
+              </button>
+            </li>
           </ul>
           <div class="tab-content">
             <div class="tab-pane fade show active" id="phase1" role="tabpanel">
@@ -90,11 +101,16 @@
               <SwgohTable :table="{ header, body: getTableBody(4) }" />
             </div>
             <div class="tab-pane fade" id="phase5" role="tabpanel">
-              Phase 5 Platoons Under construction
+              <SwgohTable :table="{ header, body: getTableBody(5) }" />
             </div>
             <div class="tab-pane fade" id="phase6" role="tabpanel">
-              Phase 6 Platoons Under construction
+              <SwgohTable :table="{ header, body: getTableBody(6) }" />
             </div>
+            <div
+              class="tab-pane fade"
+              id="playerPlatoons"
+              role="tabpanel"
+            ></div>
           </div>
         </Loading>
       </div>
