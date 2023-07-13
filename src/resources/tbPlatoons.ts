@@ -1431,7 +1431,7 @@ export default [
           difficulty: 4,
         },
         {
-          id: "CAPITALENDURANCE",
+          id: "CAPITALJEDICRUISER",
           amount: 1,
           difficulty: 5,
         },
@@ -2966,7 +2966,7 @@ export default [
           difficulty: 1,
         },
         {
-          id: "IDENVERSIO",
+          id: "IDENVERSIOEMPIRE",
           amount: 1,
           difficulty: 1,
         },
@@ -2991,7 +2991,7 @@ export default [
           difficulty: 1,
         },
         {
-          id: "MOFFGIDEON",
+          id: "MOFFGIDEONS1",
           amount: 1,
           difficulty: 1,
         },
@@ -3075,7 +3075,7 @@ export default [
           difficulty: 3,
         },
         {
-          id: "GRANDMASSTERLUKE",
+          id: "GRANDMASTERLUKE",
           amount: 2,
           difficulty: 2,
         },
@@ -3090,7 +3090,7 @@ export default [
           difficulty: 2,
         },
         {
-          id: "SUPREMELEADERKYLO",
+          id: "SUPREMELEADERKYLOREN",
           amount: 2,
           difficulty: 2,
         },
@@ -3120,7 +3120,7 @@ export default [
           difficulty: 1,
         },
         {
-          id: "BOHDIROOK",
+          id: "BODHIROOK",
           amount: 1,
           difficulty: 1,
         },
@@ -3292,7 +3292,7 @@ export default [
           difficulty: 1,
         },
         {
-          id: "R2D2LEGENDARY",
+          id: "R2D2_LEGENDARY",
           amount: 2,
           difficulty: 2,
         },
@@ -3317,7 +3317,7 @@ export default [
           difficulty: 2,
         },
         {
-          id: "BOHDIROOK",
+          id: "BODHIROOK",
           amount: 1,
           difficulty: 1,
         },
@@ -3554,7 +3554,7 @@ export default [
           difficulty: 4,
         },
         {
-          id: "GHARC170CLONESERGEANTOST",
+          id: "ARC170CLONESERGEANT",
           amount: 1,
           difficulty: 4,
         },
@@ -3864,7 +3864,7 @@ export default [
           difficulty: 1,
         },
         {
-          id: "JEDIMASTERKENOBIA",
+          id: "JEDIMASTERKENOBI",
           amount: 2,
           difficulty: 2,
         },
@@ -4097,7 +4097,7 @@ export default [
           difficulty: 2,
         },
         {
-          id: "BOHDIROOK",
+          id: "BODHIROOK",
           amount: 1,
           difficulty: 1,
         },
@@ -4242,7 +4242,7 @@ export default [
           difficulty: 3,
         },
         {
-          id: "EMPERORSSHITTLE",
+          id: "EMPERORSSHUTTLE",
           amount: 1,
           difficulty: 3,
         },

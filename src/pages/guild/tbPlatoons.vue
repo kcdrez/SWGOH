@@ -89,28 +89,26 @@
           </ul>
           <div class="tab-content">
             <div class="tab-pane fade show active" id="phase1" role="tabpanel">
-              <SwgohTable :table="{ header, body: getTableBody(1) }" />
+              <PlatoonsTable :phase="1" />
             </div>
             <div class="tab-pane fade" id="phase2" role="tabpanel">
-              <SwgohTable :table="{ header, body: getTableBody(2) }" />
+              <PlatoonsTable :phase="2" />
             </div>
             <div class="tab-pane fade" id="phase3" role="tabpanel">
-              <SwgohTable :table="{ header, body: getTableBody(3) }" />
+              <PlatoonsTable :phase="3" />
             </div>
             <div class="tab-pane fade" id="phase4" role="tabpanel">
-              <SwgohTable :table="{ header, body: getTableBody(4) }" />
+              <PlatoonsTable :phase="4" />
             </div>
             <div class="tab-pane fade" id="phase5" role="tabpanel">
-              <SwgohTable :table="{ header, body: getTableBody(5) }" />
+              <PlatoonsTable :phase="5" />
             </div>
             <div class="tab-pane fade" id="phase6" role="tabpanel">
-              <SwgohTable :table="{ header, body: getTableBody(6) }" />
+              <PlatoonsTable :phase="6" />
             </div>
-            <div
-              class="tab-pane fade"
-              id="playerPlatoons"
-              role="tabpanel"
-            ></div>
+            <div class="tab-pane fade" id="playerPlatoons" role="tabpanel">
+              <SwgohTable :table="{ header, body }" />
+            </div>
           </div>
         </Loading>
       </div>
@@ -124,12 +122,11 @@ import { defineComponent, Ref, ref } from "vue";
 import { mapActions, mapState } from "vuex";
 
 import { loadingState } from "types/loading";
-import { apiClient } from "../../api/api-client";
-import { maxRelicLevel } from "types/relic";
-import { iHeaderCell, iTableBody, iTableCell, iTableHead } from "types/general";
+import { iTableBody, iTableHead } from "types/general";
 import platoonData from "resources/tbPlatoons";
 import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { iGoalPlayer } from "types/goals";
+import PlatoonsTable from "components/guild/platoonsTable.vue";
 
 interface dataModel {
   loading: loadingState;
@@ -139,20 +136,18 @@ const storageKey = "TBPlatoons";
 
 export default defineComponent({
   name: "TBPlatoons",
+  components: {
+    PlatoonsTable,
+  },
   setup(_props) {
     const { sortDir, sortMethod, sortBy, sortIcon, searchText } =
       setupSorting(storageKey);
-
-    const selectedColumns: Ref<string[]> = ref([]);
-    const { showCol } = setupColumnEvents(selectedColumns);
 
     return {
       sortDir,
       sortMethod,
       sortBy,
       sortIcon,
-      selectedColumns,
-      showCol,
       searchText,
     };
   },
@@ -168,22 +163,13 @@ export default defineComponent({
     },
     header(): iTableHead {
       return {
-        classes: "sticky-header show-on-mobile",
-        sortMethod: this.sortMethod,
-        sortDir: this.sortDir,
-        methodChange: (val: string) => {
-          this.sortMethod = val;
-        },
-        directionChange: (val: "asc" | "desc") => {
-          this.sortDir = val;
-        },
         headers: [
           {
             cells: [
               {
-                label: "Unit",
+                label: "Player",
                 show: true, //this.showCol("unit"),
-                icon: this.sortIcon("unit"),
+                icon: this.sortIcon("player"),
                 input: {
                   type: "input",
                   classes: "mx-auto my-1 w-75",
@@ -198,39 +184,59 @@ export default defineComponent({
                 },
               },
               {
-                label: "Requirements",
-                show: true, //this.showCol("requirements"),
+                label: "Phase 1",
+                show: true,
+                icon: this.sortIcon("phase1"),
+                click: () => {
+                  this.sortBy("phase1");
+                },
+              },
+              {
+                label: "Phase 2",
+                show: true,
+                icon: this.sortIcon("phase2"),
+                click: () => {
+                  this.sortBy("phase2");
+                },
+              },
+              {
+                label: "Phase 3",
+                show: true,
+                icon: this.sortIcon("phase3"),
+                click: () => {
+                  this.sortBy("phase3");
+                },
+              },
+              {
+                label: "Phase 4",
+                show: true,
+                icon: this.sortIcon("phase4"),
+                click: () => {
+                  this.sortBy("phase4");
+                },
+              },
+              {
+                label: "Phase 5",
+                show: true,
+                icon: this.sortIcon("phase5"),
+                click: () => {
+                  this.sortBy("phase5");
+                },
+              },
+              {
+                label: "Phase 6",
+                show: true,
+                icon: this.sortIcon("phase6"),
+                click: () => {
+                  this.sortBy("phase6");
+                },
+              },
+              {
+                label: "Total",
+                show: true,
                 icon: this.sortIcon("total"),
                 click: () => {
                   this.sortBy("total");
-                },
-              },
-              {
-                label: "Players",
-                show: true, //this.showCol("requirements"),
-              },
-              {
-                label: "Coverage",
-                show: true, //this.showCol("requirements"),
-                icon: this.sortIcon("coverage"),
-                click: () => {
-                  this.sortBy("coverage");
-                },
-              },
-              {
-                label: "Redundancy",
-                show: true, //this.showCol("requirements"),
-                icon: this.sortIcon("redundancy"),
-                click: () => {
-                  this.sortBy("redundancy");
-                },
-              },
-              {
-                label: "Difficulty",
-                show: true, //this.showCol("requirements"),
-                icon: this.sortIcon("difficulty"),
-                click: () => {
-                  this.sortBy("difficulty");
                 },
               },
             ],
@@ -238,182 +244,203 @@ export default defineComponent({
         ],
       };
     },
-  },
-  methods: {
-    ...mapActions("guild", ["fetchGuildUnitData"]),
-    getTableBody(phase: number): iTableBody {
-      const phaseData = platoonData.find((x) => x.phase === phase);
-      if (phaseData) {
-        const characterList = [
-          ...phaseData.characters.darkside.map((x) => {
-            return { ...x, alignment: "Dark Side" };
-          }),
-          ...phaseData.characters.mixed.map((x) => {
-            return { ...x, alignment: "Mixed" };
-          }),
-          ...phaseData.characters.lightside.map((x) => {
-            return { ...x, alignment: "Light Side" };
-          }),
-        ];
-        const shipsList = [
-          ...phaseData.ships.darkside.map((x) => {
-            return { ...x, alignment: "Dark Side", isShip: true };
-          }),
-          ...phaseData.ships.mixed.map((x) => {
-            return { ...x, alignment: "Mixed", isShip: true };
-          }),
-          ...phaseData.ships.lightside.map((x) => {
-            return { ...x, alignment: "Light Side", isShip: true };
-          }),
-        ];
-        const fullList = [...characterList, ...shipsList]
-          .reduce((acc: any[], char: any) => {
-            const exists: any = acc.find((x: any) => x.id === char.id);
-            if (exists) {
-              exists[char.alignment] = exists[char.alignment] ?? 0;
-              exists[char.alignment] += char.amount;
-              exists.total += char.amount;
-            } else {
-              const requirement = char.isShip
-                ? phaseData.ships.requirement
-                : phaseData.characters.requirement;
-              const playerList = this.getPlayerList(char.id, requirement);
-
-              acc.push({
-                ...char,
-                [char.alignment]: char.amount,
-                total: char.amount,
-                players: playerList.map((x) => x.name),
-                requirement,
-              });
-            }
-            return acc;
-          }, [])
-          .sort((a, b) => {
-            if (this.sortMethod === "coverage") {
-              return sortValues(
-                a.players.length,
-                b.players.length,
-                this.sortDir,
-                this.sortMethod
-              );
-            } else if (this.sortMethod === "redundancy") {
-              return sortValues(
-                Math.max(a.players.length - a.total, 0),
-                Math.max(b.players.length - b.total, 0),
-                this.sortDir,
-                this.sortMethod
-              );
-            }
-            return sortValues(a, b, this.sortDir, this.sortMethod);
-          });
-        return {
-          classes: "align-middle text-center",
-          rows: fullList.map((char) => {
-            return {
-              cells: [
-                {
-                  show: true,
-                  type: "unit",
-                  classes: "align-middle",
-                  data: {
-                    id: char.id,
-                    isLink: false,
-                    type: char.requirement.type,
-                    level: char.requirement.amount,
-                  },
-                },
-                {
-                  show: true,
-                  type: "list",
-                  data: {
-                    classes: "text-left",
-                    list: [
-                      {
-                        message: `Dark Side: ${char["Dark Side"]}`,
-                        hidden: !char["Dark Side"],
-                      },
-                      {
-                        message: `Mixed: ${char["Mixed"]}`,
-                        hidden: !char["Mixed"],
-                      },
-                      {
-                        message: `Light Side: ${char["Light Side"]}`,
-                        hidden: !char["Light Side"],
-                      },
-                      { message: `Total: ${char.total}` },
-                    ],
-                  },
-                },
-                {
-                  show: true,
-                  type: "list",
-                  data: {
-                    classes: "mb-0 text-left player-list",
-                    list: char.players.map((x) => {
-                      return { message: x, id: x };
+    body(): iTableBody {
+      return {
+        classes: "align-middle text-center",
+        rows: this.playerData.map((player: any) => {
+          return {
+            cells: [
+              {
+                show: true,
+                data: player.name,
+              },
+              {
+                show: true,
+                data: {
+                  classes: "c-pointer",
+                  label: player.phaseMapping.phase1.length,
+                  popover: {
+                    hover: true,
+                    arrow: true,
+                    placement: "right",
+                    list: player.phaseMapping.phase1.map((x: any) => {
+                      return { type: "text", label: x.name, id: x.id };
                     }),
                   },
                 },
-                {
-                  show: true,
-                  data: {
-                    message: `Completed: ${char.players.length}`,
-                    classes:
-                      char.players.length < char.total
-                        ? "text-danger"
-                        : "text-success",
+              },
+              {
+                show: true,
+                data: {
+                  classes: "c-pointer",
+                  label: player.phaseMapping.phase2.length,
+                  popover: {
+                    hover: true,
+                    arrow: true,
+                    placement: "right",
+                    list: player.phaseMapping.phase2.map((x: any) => {
+                      return { type: "text", label: x.name, id: x.id };
+                    }),
                   },
                 },
-                {
-                  show: true,
-                  data: {
-                    classes:
-                      char.players.length < char.total + 3
-                        ? "text-warning"
-                        : "text-success",
-
-                    message: `Redundant Coverage: ${Math.max(
-                      char.players.length - char.total,
-                      0
-                    )}`,
+              },
+              {
+                show: true,
+                data: {
+                  classes: "c-pointer",
+                  label: player.phaseMapping.phase3.length,
+                  popover: {
+                    hover: true,
+                    arrow: true,
+                    placement: "right",
+                    list: player.phaseMapping.phase3.map((x: any) => {
+                      return { type: "text", label: x.name, id: x.id };
+                    }),
                   },
                 },
-                {
-                  show: true,
-                  data: {
-                    message: char.difficulty,
+              },
+              {
+                show: true,
+                data: {
+                  classes: "c-pointer",
+                  label: player.phaseMapping.phase4.length,
+                  popover: {
+                    hover: true,
+                    arrow: true,
+                    placement: "right",
+                    list: player.phaseMapping.phase4.map((x: any) => {
+                      return { type: "text", label: x.name, id: x.id };
+                    }),
                   },
                 },
-              ],
-            };
-          }),
-        };
-      } else {
-        return { rows: [] };
-      }
+              },
+              {
+                show: true,
+                data: {
+                  classes: "c-pointer",
+                  label: player.phaseMapping.phase5.length,
+                  popover: {
+                    hover: true,
+                    arrow: true,
+                    placement: "right",
+                    list: player.phaseMapping.phase5.map((x: any) => {
+                      return { type: "text", label: x.name, id: x.id };
+                    }),
+                  },
+                },
+              },
+              {
+                show: true,
+                data: {
+                  classes: "c-pointer",
+                  label: player.phaseMapping.phase6.length,
+                  popover: {
+                    hover: true,
+                    arrow: true,
+                    placement: "right",
+                    list: player.phaseMapping.phase6.map((x: any) => {
+                      return { type: "text", label: x.name, id: x.id };
+                    }),
+                  },
+                },
+              },
+              {
+                show: true,
+                data: {
+                  classes: "",
+                  message: player.phaseMapping.total,
+                },
+              },
+            ],
+          };
+        }),
+      };
     },
-    getPlayerList(
-      unitId: string,
-      requirement: { amount: number; type: string }
-    ) {
+    playerData(): any {
       return this.players
-        .reduce((list: iGoalPlayer[], player: iGoalPlayer) => {
-          const match = player.units.find((x) => x.base_id === unitId);
+        .map((player: iGoalPlayer) => {
+          return {
+            name: player.name,
+            units: player.units,
+            phaseMapping: this.phaseAvailablePlatoons(player),
+          };
+        })
+        .sort((a: any, b: any) => {
+          if (this.sortMethod === "player") {
+            return sortValues(a.name, b.name, this.sortDir, this.sortMethod);
+          } else {
+            if (this.sortMethod === "total") {
+              return sortValues(
+                a.phaseMapping.total,
+                b.phaseMapping.total,
+                this.sortDir,
+                this.sortMethod
+              );
+            } else if (this.sortMethod in a.phaseMapping) {
+              return sortValues(
+                a.phaseMapping[this.sortMethod].length,
+                b.phaseMapping[this.sortMethod].length,
+                this.sortDir,
+                this.sortMethod
+              );
+            }
+          }
+          return 0;
+        });
+    },
+  },
+  methods: {
+    ...mapActions("guild", ["fetchGuildUnitData"]),
+    phaseAvailablePlatoons(player: iGoalPlayer) {
+      const phaseData = {
+        phase1: [],
+        phase2: [],
+        phase3: [],
+        phase4: [],
+        phase5: [],
+        phase6: [],
+        total: 0,
+      };
+
+      platoonData.forEach((phase) => {
+        processData(phase.characters.darkside, phase);
+        processData(phase.characters.mixed, phase);
+        processData(phase.characters.lightside, phase);
+        processData(phase.ships.darkside, phase);
+        processData(phase.ships.mixed, phase);
+        processData(phase.ships.lightside, phase);
+
+        phaseData[`phase${phase.phase}`].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+      });
+
+      function processData(characterList: any[], phase: any) {
+        characterList.forEach((character) => {
+          const match = player.units.find((x) => x.base_id === character.id);
           if (match) {
-            if (requirement.type === "Stars") {
-              if (match.stars >= requirement.amount) {
-                list.push(player);
-              }
-            } else if (requirement.type === "Relic") {
-              if (match.relic_tier >= requirement.amount) {
-                list.push(player);
+            const exists = phaseData[`phase${phase.phase}`].some(
+              (x) => x.base_id === match.base_id
+            );
+            if (!exists) {
+              const { requirement } = phase.characters;
+              if (requirement.type === "Relic") {
+                if (match.relic_tier >= requirement.amount) {
+                  phaseData[`phase${phase.phase}`].push(match);
+                  phaseData.total++;
+                }
+              } else if (requirement.type === "Stars") {
+                if (match.stars >= requirement.amount) {
+                  phaseData[`phase${phase.phase}`].push(match);
+                  phaseData.total++;
+                }
               }
             }
           }
-          return list;
-        }, [])
-        .sort((a, b) => a.name.localeCompare(b.name));
+        });
+      }
+
+      return phaseData;
     },
   },
   async created() {
@@ -466,7 +493,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-:deep(.player-list) {
+:deep(.popper) {
   overflow: scroll;
   max-height: 300px;
 }

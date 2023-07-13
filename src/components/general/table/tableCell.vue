@@ -407,7 +407,7 @@
           :arrow="cell.data.popover.arrow"
           :placement="cell.data.popover.placement"
         >
-          {{ cell.data.label }}
+          <span :class="cell.data.classes">{{ cell.data.label }}</span>
           <template #content>
             <div
               :class="cell.data.popover.header.classes"
