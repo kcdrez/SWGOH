@@ -48,7 +48,7 @@ export default [
           amount: 2,
         },
         {
-          id: "DARTHMAUL",
+          id: "MAUL",
           amount: 2,
         },
         {
@@ -152,7 +152,7 @@ export default [
           amount: 1,
         },
         {
-          id: "SITHTROOPER",
+          id: "FOSITHTROOPER",
           amount: 1,
         },
         {
@@ -258,7 +258,7 @@ export default [
           amount: 1,
         },
         {
-          id: "DARTHMAUL",
+          id: "MAUL",
           amount: 1,
         },
         {
@@ -338,7 +338,7 @@ export default [
           amount: 1,
         },
         {
-          id: "SITHTROOPER",
+          id: "FOSITHTROOPER",
           amount: 1,
         },
         {
@@ -873,7 +873,7 @@ export default [
           amount: 1,
         },
         {
-          id: "SITHTROOPER",
+          id: "FOSITHTROOPER",
           amount: 1,
         },
         {
@@ -1314,7 +1314,7 @@ export default [
           amount: 1,
         },
         {
-          id: "SITHTROOPER",
+          id: "FOSITHTROOPER",
           amount: 1,
         },
         {
@@ -1324,213 +1324,47 @@ export default [
       ],
       mixed: [
         {
-          id: "COMMANDERAHSOKA",
-          amount: 6,
-        },
-        {
           id: "BOBAFETTSCION",
-          amount: 5,
+          amount: 6,
         },
         {
           id: "DARTHMALGUS",
           amount: 5,
         },
         {
-          id: "GENERALSKYWALKER",
-          amount: 4,
-        },
-        {
           id: "MAULS7",
-          amount: 4,
-        },
-        {
-          id: "HOTHLEIA",
-          amount: 4,
-        },
-        {
-          id: "BENSOLO",
-          amount: 3,
-        },
-        {
-          id: "GRANDINQUISITOR",
-          amount: 3,
-        },
-        {
-          id: "JEDIKNIGHTLUKE",
-          amount: 3,
-        },
-        {
-          id: "EMBO",
-          amount: 2,
-        },
-        {
-          id: "SITHPALPATINE",
-          amount: 2,
-        },
-        {
-          id: "WATTAMBOR",
-          amount: 2,
-        },
-        {
-          id: "AAYLASECURA",
-          amount: 1,
-        },
-        {
-          id: "ADMIRALACKBAR",
-          amount: 1,
-        },
-        {
-          id: "BASTILASHAN",
-          amount: 1,
-        },
-        {
-          id: "BT1",
-          amount: 1,
-        },
-        {
-          id: "COUNTDOOKU",
-          amount: 1,
-        },
-        {
-          id: "DARTHMALAK",
-          amount: 1,
-        },
-        {
-          id: "DEATHTROOPER",
-          amount: 1,
-        },
-        {
-          id: "GENERALHUX",
-          amount: 1,
-        },
-        {
-          id: "GENERALKENOBI",
-          amount: 1,
-        },
-        {
-          id: "VEERS",
-          amount: 1,
-        },
-        {
-          id: "HANSOLO",
-          amount: 1,
-        },
-        {
-          id: "HERMITYODA",
-          amount: 1,
-        },
-        {
-          id: "IMPERIALPROBEDROID",
-          amount: 1,
-        },
-        {
-          id: "JAWA",
-          amount: 1,
-        },
-        {
-          id: "GRANDMASTERLUKE",
-          amount: 1,
-        },
-        {
-          id: "KIADIMUNDI",
-          amount: 1,
-        },
-        {
-          id: "KUIIL",
-          amount: 1,
-        },
-        {
-          id: "L3_37",
-          amount: 1,
-        },
-        {
-          id: "ADMINISTRATORLANDO",
-          amount: 1,
-        },
-        {
-          id: "LOGRAY",
-          amount: 1,
-        },
-        {
-          id: "LORDVADER",
-          amount: 1,
-        },
-        {
-          id: "GLREY",
-          amount: 1,
-        },
-        {
-          id: "SANASTARROS",
-          amount: 1,
-        },
-        {
-          id: "SITHTROOPER",
-          amount: 1,
-        },
-        {
-          id: "SNOWTROOPER",
-          amount: 1,
-        },
-        {
-          id: "STARKILLER",
-          amount: 1,
-        },
-        {
-          id: "SUPREMELEADERKYLOREN",
-          amount: 1,
-        },
-        {
-          id: "THEMANDALORIAN",
-          amount: 1,
-        },
-        {
-          id: "C3POCHEWBACCA",
-          amount: 1,
-        },
-        {
-          id: "ZAALBAR",
-          amount: 1,
-        },
-      ],
-      lightside: [
-        {
-          id: "BENSOLO",
-          amount: 10,
-        },
-        {
-          id: "COMMANDERAHSOKA",
           amount: 5,
         },
         {
-          id: "GRANDMASTERYODA",
+          id: "JEDIKNIGHTLUKE",
           amount: 4,
         },
         {
-          id: "BB8",
-          amount: 2,
-        },
-        {
-          id: "C3POLEGENDARY",
-          amount: 2,
-        },
-        {
-          id: "CHEWBACCALEGENDARY",
-          amount: 2,
-        },
-        {
-          id: "GREEFKARGA",
-          amount: 2,
+          id: "COMMANDERAHSOKA",
+          amount: 4,
         },
         {
           id: "JEDIMASTERKENOBI",
+          amount: 3,
+        },
+        {
+          id: "SITHPALPATINE",
+          amount: 3,
+        },
+        {
+          id: "BASTILASHANDARK",
           amount: 2,
         },
         {
-          id: "KANANJARRUSS3",
+          id: "DARTHMALAK",
           amount: 2,
         },
         {
-          id: "R2D2_LEGENDARY",
+          id: "GRANDMASTERLUKE",
+          amount: 2,
+        },
+        {
+          id: "OLDBENKENOBI",
           amount: 2,
         },
         {
@@ -1538,19 +1372,27 @@ export default [
           amount: 2,
         },
         {
-          id: "REYJEDITRAINING",
+          id: "STARKILLER",
           amount: 2,
         },
         {
-          id: "AAYLASECURA",
+          id: "SUPREMELEADERKYLOREN",
+          amount: 2,
+        },
+        {
+          id: "50RT",
           amount: 1,
         },
         {
-          id: "ADMIRALRADDUS",
+          id: "B1BATTLEDROIDV2",
           amount: 1,
         },
         {
-          id: "ARCTROOPER501ST",
+          id: "BARRISSOFFEE",
+          amount: 1,
+        },
+        {
+          id: "BENSOLO",
           amount: 1,
         },
         {
@@ -1558,59 +1400,79 @@ export default [
           amount: 1,
         },
         {
-          id: "CLONESERGEANTPHASEI",
+          id: "CARADUNE",
           amount: 1,
         },
         {
-          id: "COMMANDERLUKESKYWALKER",
+          id: "CHIRRUTIMWE",
           amount: 1,
         },
         {
-          id: "CT210408",
+          id: "CORUSCANTUNDERWORLDPOLICE",
           amount: 1,
         },
         {
-          id: "CT5555",
+          id: "EWOKELDER",
           amount: 1,
         },
         {
-          id: "CT7567",
+          id: "EWOKSCOUT",
           amount: 1,
         },
         {
-          id: "ENFYSNEST",
+          id: "FIFTHBROTHER",
           amount: 1,
         },
         {
-          id: "EZRABRIDGERS3",
+          id: "GENERALSKYWALKER",
           amount: 1,
         },
         {
-          id: "JEDIKNIGHTREVAN",
+          id: "GEONOSIANSPY",
           amount: 1,
         },
         {
-          id: "JUHANI",
+          id: "HK47",
           amount: 1,
         },
         {
-          id: "L3_37",
+          id: "HONDO",
           amount: 1,
         },
         {
-          id: "MONMOTHMA",
+          id: "HOTHREBELSCOUT",
           amount: 1,
         },
         {
-          id: "BADBATCHOMEGA",
+          id: "BADBATCHHUNTER",
           amount: 1,
         },
         {
-          id: "PADMEAMIDALA",
+          id: "KYLORENUNMASKED",
           amount: 1,
         },
         {
-          id: "PAO",
+          id: "LUMINARAUNDULI",
+          amount: 1,
+        },
+        {
+          id: "MARAJADE",
+          amount: 1,
+        },
+        {
+          id: "NIGHTSISTERACOLYTE",
+          amount: 1,
+        },
+        {
+          id: "QUIGONJINN",
+          amount: 1,
+        },
+        {
+          id: "EPIXFINN",
+          amount: 1,
+        },
+        {
+          id: "EPIXPOE",
           amount: 1,
         },
         {
@@ -1618,19 +1480,133 @@ export default [
           amount: 1,
         },
         {
-          id: "YOUNGCHEWBACCA",
+          id: "UNDERCOVERLANDO",
           amount: 1,
         },
         {
-          id: "SMUGGLERCHEWBACCA",
-          amount: 1,
-        },
-        {
-          id: "WEDGEANTILLES",
+          id: "TEEBO",
           amount: 1,
         },
         {
           id: "YOUNGHAN",
+          amount: 1,
+        },
+      ],
+      lightside: [
+        {
+          id: "BENSOLO",
+          amount: 6,
+        },
+        {
+          id: "COMMANDERAHSOKA",
+          amount: 6,
+        },
+        {
+          id: "GRANDMASTERLUKE",
+          amount: 5,
+        },
+        {
+          id: "LOGRAY",
+          amount: 5,
+        },
+        {
+          id: "GLREY",
+          amount: 5,
+        },
+        {
+          id: "THEMANDALORIANBESKARARMOR",
+          amount: 5,
+        },
+        {
+          id: "R2D2_LEGENDARY",
+          amount: 4,
+        },
+        {
+          id: "BB8",
+          amount: 3,
+        },
+        {
+          id: "C3POLEGENDARY",
+          amount: 3,
+        },
+        {
+          id: "COMMANDERLUKESKYWALKER",
+          amount: 3,
+        },
+        {
+          id: "KIADIMUNDI",
+          amount: 3,
+        },
+        {
+          id: "PADMEAMIDALA",
+          amount: 3,
+        },
+        {
+          id: "GRANDMASTERYODA",
+          amount: 2,
+        },
+        {
+          id: "HANSOLO",
+          amount: 2,
+        },
+        {
+          id: "HERMITYODA",
+          amount: 2,
+        },
+        {
+          id: "JEDIKNIGHTREVAN",
+          amount: 2,
+        },
+        {
+          id: "HOTHLEIA",
+          amount: 2,
+        },
+        {
+          id: "RESISTANCETROOPER",
+          amount: 2,
+        },
+        {
+          id: "CLONESERGEANTPHASEI",
+          amount: 1,
+        },
+        {
+          id: "CT5555",
+          amount: 1,
+        },
+        {
+          id: "EWOKSCOUT",
+          amount: 1,
+        },
+        {
+          id: "GENERALKENOBI",
+          amount: 1,
+        },
+        {
+          id: "HOTHREBELSCOUT",
+          amount: 1,
+        },
+        {
+          id: "HOTHREBELSOLDIER",
+          amount: 1,
+        },
+        {
+          id: "ANAKINKNIGHT",
+          amount: 1,
+        },
+        {
+          id: "K2SO",
+          amount: 1,
+        },
+        {
+          id: "MACEWINDU",
+          amount: 1,
+        },
+        {
+          id: "REYJEDITRAINING",
+          amount: 1,
+        },
+        {
+          id: "UNDERCOVERLANDO",
           amount: 1,
         },
       ],
@@ -1684,65 +1660,586 @@ export default [
       ],
       mixed: [
         {
+          id: "TIEINTERCEPTOR",
+          amount: 5,
+        },
+        {
           id: "SCYTHE",
-          amount: 7,
+          amount: 4,
         },
         {
           id: "RAZORCREST",
-          amount: 3,
+          amount: 4,
         },
         {
-          id: "TIEINTERCEPTOR",
-          amount: 3,
-        },
-        {
-          id: "EMPERORSSHUTTLE",
+          id: "CAPITALFINALIZER",
           amount: 1,
         },
         {
-          id: "BLADEOFDORIN",
+          id: "TIEFIGHTERFOSF",
           amount: 1,
         },
         {
-          id: "UWINGROGUEONE",
+          id: "GAUNTLETSTARFIGHTER",
+          amount: 1,
+        },
+        {
+          id: "IG2000",
           amount: 1,
         },
         {
           id: "OUTRIDER",
+          amount: 1,
+        },
+        {
+          id: "TIEREAPER",
           amount: 1,
         },
       ],
       lightside: [
         {
           id: "RAZORCREST",
-          amount: 12,
-        },
-        {
-          id: "YWINGCLONEWARS",
-          amount: 2,
-        },
-        {
-          id: "GHOST",
-          amount: 2,
-        },
-        {
-          id: "OUTRIDER",
-          amount: 2,
-        },
-        {
-          id: "CAPITALPROFUNDITY",
-          amount: 2,
-        },
-        {
-          id: "UWINGSCARIF",
-          amount: 1,
-        },
-        {
-          id: "CAPITALENDURANCE",
-          amount: 1,
+          amount: 6,
         },
         {
           id: "MILLENNIUMFALCON",
+          amount: 5,
+        },
+        {
+          id: "MILLENNIUMFALCONPRISTINE",
+          amount: 1,
+        },
+        {
+          id: "CAPITALNEGOTIATOR",
+          amount: 1,
+        },
+        {
+          id: "RAVENSCLAW",
+          amount: 1,
+        },
+      ],
+    },
+  },
+  {
+    phase: 4,
+    characters: {
+      requirement: {
+        type: "Relic",
+        amount: 8,
+      },
+      darkside: [
+        {
+          id: "STARKILLER",
+          amount: 6,
+        },
+        {
+          id: "LORDVADER",
+          amount: 5,
+        },
+        {
+          id: "SUPREMELEADERKYLOREN",
+          amount: 5,
+        },
+        {
+          id: "SITHPALPATINE",
+          amount: 4,
+        },
+        {
+          id: "DARTHMALAK",
+          amount: 3,
+        },
+        {
+          id: "MAULS7",
+          amount: 3,
+        },
+        {
+          id: "ASAJVENTRESS",
+          amount: 2,
+        },
+        {
+          id: "AURRA_SING",
+          amount: 2,
+        },
+        {
+          id: "DARTHMALGUS",
+          amount: 2,
+        },
+        {
+          id: "SNOWTROOPER",
+          amount: 2,
+        },
+        {
+          id: "B2SUPERBATTLEDROID",
+          amount: 1,
+        },
+        {
+          id: "BASTILASHANDARK",
+          amount: 1,
+        },
+        {
+          id: "BT1",
+          amount: 1,
+        },
+        {
+          id: "CADBANE",
+          amount: 1,
+        },
+        {
+          id: "MAUL",
+          amount: 1,
+        },
+        {
+          id: "VADER",
+          amount: 1,
+        },
+        {
+          id: "DATHCHA",
+          amount: 1,
+        },
+        {
+          id: "DENGAR",
+          amount: 1,
+        },
+        {
+          id: "DIRECTORKRENNIC",
+          amount: 1,
+        },
+        {
+          id: "EIGHTHBROTHER",
+          amount: 1,
+        },
+        {
+          id: "EMBO",
+          amount: 1,
+        },
+        {
+          id: "FIRSTORDERTROOPER",
+          amount: 1,
+        },
+        {
+          id: "FIRSTORDERTIEPILOT",
+          amount: 1,
+        },
+        {
+          id: "VEERS",
+          amount: 1,
+        },
+        {
+          id: "HK47",
+          amount: 1,
+        },
+        {
+          id: "HONDO",
+          amount: 1,
+        },
+        {
+          id: "IDENVERSIOEMPIRE",
+          amount: 1,
+        },
+        {
+          id: "IG88",
+          amount: 1,
+        },
+        {
+          id: "KRRSANTAN",
+          amount: 1,
+        },
+        {
+          id: "MARAJADE",
+          amount: 1,
+        },
+        {
+          id: "NIGHTSISTERACOLYTE",
+          amount: 1,
+        },
+        {
+          id: "NIGHTSISTERINITIATE",
+          amount: 1,
+        },
+        {
+          id: "NIGHTSISTERSPIRIT",
+          amount: 1,
+        },
+        {
+          id: "NIGHTSISTERZOMBIE",
+          amount: 1,
+        },
+        {
+          id: "RANGETROOPER",
+          amount: 1,
+        },
+        {
+          id: "SAVAGEOPRESS",
+          amount: 1,
+        },
+        {
+          id: "SECONDSISTER",
+          amount: 1,
+        },
+        {
+          id: "SEVENTHSISTER",
+          amount: 1,
+        },
+        {
+          id: "TIEFIGHTERPILOT",
+          amount: 1,
+        },
+        {
+          id: "WAMPA",
+          amount: 1,
+        },
+      ],
+      mixed: [
+        {
+          id: "STARKILLER",
+          amount: 7,
+        },
+        {
+          id: "GLREY",
+          amount: 6,
+        },
+        {
+          id: "SITHPALPATINE",
+          amount: 5,
+        },
+        {
+          id: "GENERALSKYWALKER",
+          amount: 4,
+        },
+        {
+          id: "JEDIKNIGHTLUKE",
+          amount: 4,
+        },
+        {
+          id: "BENSOLO",
+          amount: 3,
+        },
+        {
+          id: "DARTHMALAK",
+          amount: 3,
+        },
+        {
+          id: "MAULS7",
+          amount: 3,
+        },
+        {
+          id: "BOBAFETTSCION",
+          amount: 2,
+        },
+        {
+          id: "COMMANDERAHSOKA",
+          amount: 2,
+        },
+        {
+          id: "DARTHMALGUS",
+          amount: 2,
+        },
+        {
+          id: "LORDVADER",
+          amount: 2,
+        },
+        {
+          id: "NIGHTSISTERINITIATE",
+          amount: 2,
+        },
+        {
+          id: "SUPREMELEADERKYLOREN",
+          amount: 2,
+        },
+        {
+          id: "50RT",
+          amount: 1,
+        },
+        {
+          id: "ADMIRALACKBAR",
+          amount: 1,
+        },
+        {
+          id: "ASAJVENTRESS",
+          amount: 1,
+        },
+        {
+          id: "AURRA_SING",
+          amount: 1,
+        },
+        {
+          id: "BAZEMALBUS",
+          amount: 1,
+        },
+        {
+          id: "BISTAN",
+          amount: 1,
+        },
+        {
+          id: "BOKATAN",
+          amount: 1,
+        },
+        {
+          id: "CORUSCANTUNDERWORLDPOLICE",
+          amount: 1,
+        },
+        {
+          id: "BADBATCHECHO",
+          amount: 1,
+        },
+        {
+          id: "DARKTROOPER",
+          amount: 1,
+        },
+        {
+          id: "GAMORREANGUARD",
+          amount: 1,
+        },
+        {
+          id: "VEERS",
+          amount: 1,
+        },
+        {
+          id: "HOTHREBELSOLDIER",
+          amount: 1,
+        },
+        {
+          id: "IG88",
+          amount: 1,
+        },
+        {
+          id: "JEDIMASTERKENOBI",
+          amount: 1,
+        },
+        {
+          id: "KYLOREN",
+          amount: 1,
+        },
+        {
+          id: "POGGLETHELESSER",
+          amount: 1,
+        },
+        {
+          id: "SEVENTHSISTER",
+          amount: 1,
+        },
+        {
+          id: "SITHTROOPER",
+          amount: 1,
+        },
+        {
+          id: "THEMANDALORIAN",
+          amount: 1,
+        },
+      ],
+      lightside: [
+        {
+          id: "GRANDMASTERLUKE",
+          amount: 8,
+        },
+        {
+          id: "COMMANDERAHSOKA",
+          amount: 5,
+        },
+        {
+          id: "HERMITYODA",
+          amount: 5,
+        },
+        {
+          id: "HOTHLEIA",
+          amount: 4,
+        },
+        {
+          id: "BENSOLO",
+          amount: 3,
+        },
+        {
+          id: "GENERALKENOBI",
+          amount: 3,
+        },
+        {
+          id: "50RT",
+          amount: 2,
+        },
+        {
+          id: "CHEWBACCALEGENDARY",
+          amount: 2,
+        },
+        {
+          id: "HANSOLO",
+          amount: 2,
+        },
+        {
+          id: "JEDIKNIGHTREVAN",
+          amount: 2,
+        },
+        {
+          id: "JEDIMASTERKENOBI",
+          amount: 2,
+        },
+        {
+          id: "KIADIMUNDI",
+          amount: 2,
+        },
+        {
+          id: "LOGRAY",
+          amount: 2,
+        },
+        {
+          id: "PADMEAMIDALA",
+          amount: 2,
+        },
+        {
+          id: "SCARIFREBEL",
+          amount: 2,
+        },
+        {
+          id: "ZAALBAR",
+          amount: 2,
+        },
+        {
+          id: "AAYLASECURA",
+          amount: 1,
+        },
+        {
+          id: "RESISTANCETROOPER",
+          amount: 2,
+        },
+        {
+          id: "BB8",
+          amount: 1,
+        },
+        {
+          id: "BISTAN",
+          amount: 1,
+        },
+        {
+          id: "CHIEFNEBIT",
+          amount: 1,
+        },
+        {
+          id: "DASHRENDAR",
+          amount: 1,
+        },
+        {
+          id: "BADBATCHECHO",
+          amount: 1,
+        },
+        {
+          id: "EETHKOTH",
+          amount: 1,
+        },
+        {
+          id: "FINN",
+          amount: 1,
+        },
+        {
+          id: "GRANDMASTERYODA",
+          amount: 1,
+        },
+        {
+          id: "MACEWINDU",
+          amount: 1,
+        },
+        {
+          id: "HONDO",
+          amount: 1,
+        },
+        {
+          id: "JEDIKNIGHTCONSULAR",
+          amount: 1,
+        },
+        {
+          id: "SMUGGLERCHEWBACCA",
+          amount: 1,
+        },
+        {
+          id: "THEMANDALORIANBESKARARMOR",
+          amount: 1,
+        },
+        {
+          id: "BADBATCHTECH",
+          amount: 1,
+        },
+        {
+          id: "SANASTARROS",
+          amount: 1,
+        },
+        {
+          id: "REYJEDITRAINING",
+          amount: 1,
+        },
+        {
+          id: "GLREY",
+          amount: 1,
+        },
+        {
+          id: "R2D2_LEGENDARY",
+          amount: 1,
+        },
+        {
+          id: "KYLEKATARN",
+          amount: 1,
+        },
+        {
+          id: "JOLEEBINDO",
+          amount: 1,
+        },
+        {
+          id: "WICKET",
+          amount: 1,
+        },
+      ],
+    },
+    ships: {
+      requirement: {
+        type: "Stars",
+        amount: 7,
+      },
+      darkside: [
+        {
+          id: "TIEINTERCEPTOR",
+          amount: 7,
+        },
+        {
+          id: "SCYTHE",
+          amount: 5,
+        },
+        {
+          id: "CAPITALEXECUTOR",
+          amount: 4,
+        },
+        {
+          id: "EMPERORSSHUTTLE",
+          amount: 2,
+        },
+        {
+          id: "HYENABOMBER",
+          amount: 2,
+        },
+        {
+          id: "CAPITALMALEVOLENCE",
+          amount: 1,
+        },
+        {
+          id: "TIESILENCER",
+          amount: 1,
+        },
+      ],
+      mixed: [
+        {
+          id: "TIEINTERCEPTOR",
+          amount: 5,
+        },
+        {
+          id: "RAZORCREST",
+          amount: 4,
+        },
+        {
+          id: "SCYTHE",
+          amount: 3,
+        },
+        {
+          id: "CAPITALEXECUTOR",
+          amount: 2,
+        },
+        {
+          id: "EBONHAWK",
           amount: 1,
         },
         {
@@ -1750,7 +2247,53 @@ export default [
           amount: 1,
         },
         {
-          id: "XWINGBLACKONE",
+          id: "OUTRIDER",
+          amount: 1,
+        },
+        {
+          id: "YWINGREBEL",
+          amount: 1,
+        },
+        {
+          id: "ARC170REX",
+          amount: 1,
+        },
+        {
+          id: "SITHFIGHTER",
+          amount: 1,
+        },
+        {
+          id: "SLAVE1",
+          amount: 1,
+        },
+        {
+          id: "TIESILENCER",
+          amount: 1,
+        },
+      ],
+      lightside: [
+        {
+          id: "CAPITALPROFUNDITY",
+          amount: 7,
+        },
+        {
+          id: "RAZORCREST",
+          amount: 4,
+        },
+        {
+          id: "GHOST",
+          amount: 2,
+        },
+        {
+          id: "EBONHAWK",
+          amount: 1,
+        },
+        {
+          id: "MILLENNIUMFALCON",
+          amount: 1,
+        },
+        {
+          id: "OUTRIDER",
           amount: 1,
         },
         {
@@ -1758,7 +2301,11 @@ export default [
           amount: 1,
         },
         {
-          id: "EBONHAWK",
+          id: "XWINGRED2",
+          amount: 1,
+        },
+        {
+          id: "YWINGREBEL",
           amount: 1,
         },
       ],

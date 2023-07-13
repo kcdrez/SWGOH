@@ -27,6 +27,8 @@
           :unit="cell.data.unit ?? getUnit(cell.data.id)"
           :isLink="cell.data.isLink"
           :hideImage="cell.data.hideImage"
+          :level="cell.data.level"
+          :type="cell.data.type"
         />
       </template>
       <template v-else-if="cell.type === 'unitLevel'">
@@ -110,52 +112,54 @@
       <template v-else-if="cell.type === 'list'">
         <div v-if="cell.show">
           <ul :class="cell.data.classes">
-            <li v-for="el in cell.data.list" :key="el.id">
-              <Popper
-                v-if="el.popover"
-                :hover="el.popover.hover"
-                :arrow="el.popover.arrow"
-                :placement="el.popover.placement"
-              >
-                <router-link v-if="el.type === 'link'" :to="el.data">{{
-                  el.message
-                }}</router-link>
-                <template v-else>Unknown sub type</template>
-                <template #content>
-                  <div
-                    :class="el.popover.header.classes"
-                    v-if="el.popover.header"
-                  >
-                    {{ el.popover.header.message }}
-                  </div>
-                  <template v-if="el.popover.list">
+            <template v-for="el in cell.data.list" :key="el.id">
+              <li v-if="!el.hidden" :class="el.classes">
+                <Popper
+                  v-if="el.popover"
+                  :hover="el.popover.hover"
+                  :arrow="el.popover.arrow"
+                  :placement="el.popover.placement"
+                >
+                  <router-link v-if="el.type === 'link'" :to="el.data">{{
+                    el.message
+                  }}</router-link>
+                  <div v-else>{{ el.message }}</div>
+                  <template #content>
                     <div
-                      v-for="popoverEl in el.popover.list"
-                      :key="popoverEl.id"
+                      :class="el.popover.header.classes"
+                      v-if="el.popover.header"
                     >
-                      <template v-if="popoverEl.type === 'gearText'">
-                        <GearText :level="popoverEl.level" />:
-                        <span class="ml-1">{{ popoverEl.amount }}</span>
-                      </template>
-                      <template v-else>Unknown popoverEl type</template>
+                      {{ el.popover.header.message }}
+                    </div>
+                    <template v-if="el.popover.list">
+                      <div
+                        v-for="popoverEl in el.popover.list"
+                        :key="popoverEl.id"
+                      >
+                        <template v-if="popoverEl.type === 'gearText'">
+                          <GearText :level="popoverEl.level" />:
+                          <span class="ml-1">{{ popoverEl.amount }}</span>
+                        </template>
+                        <template v-else>{{ popoverEl.message }}</template>
+                      </div>
+                    </template>
+                    <template v-else-if="el.popover.body">
+                      <div :class="el.popover.body.classes">
+                        {{ el.popover.body.message }}
+                      </div>
+                    </template>
+                    <template v-else>Unknown popover type</template>
+                    <div
+                      v-if="el.popover.footer?.show"
+                      :class="el.popover.footer.classes"
+                    >
+                      {{ el.popover.footer.message }}
                     </div>
                   </template>
-                  <template v-else-if="el.popover.body">
-                    <div :class="el.popover.body.classes">
-                      {{ el.popover.body.message }}
-                    </div>
-                  </template>
-                  <template v-else>Unknown popover type</template>
-                  <div
-                    v-if="el.popover.footer?.show"
-                    :class="el.popover.footer.classes"
-                  >
-                    {{ el.popover.footer.message }}
-                  </div>
-                </template>
-              </Popper>
-              <template v-else>{{ el.message }}</template>
-            </li>
+                </Popper>
+                <template v-else>{{ el.message }}</template>
+              </li>
+            </template>
           </ul>
         </div>
       </template>
@@ -277,6 +281,8 @@
               :unit="getUnit(cell.data.childUnit.id)"
               :isLink="cell.data.isLink"
               :hideImage="cell.data.hideImage"
+              :level="cell.data.level"
+              :type="cell.data.type"
             />
             <i class="fa fa-arrow-right"></i>
           </template>
@@ -284,6 +290,8 @@
             :unit="getUnit(cell.data.childUnit.requirementId)"
             :isLink="cell.data.isLink"
             :hideImage="cell.data.hideImage"
+            :level="cell.data.level"
+            :type="cell.data.type"
           />
         </div>
       </template>

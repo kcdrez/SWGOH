@@ -8,29 +8,39 @@
       }"
     >
       <img :src="unit?.image" :alt="unit?.name" />
-      <span class="gear-level" :class="`gear-level${unit.gearLevel}`"></span>
+      <span
+        class="gear-level"
+        :class="`gear-level${type === 'Relic' ? maxGearLevel : unit.gearLevel}`"
+        v-if="!unit.isShip"
+      ></span>
       <span v-for="index in 7" :key="index" :class="starClasses(index)"></span>
       <span
-        v-for="index in unit.stars"
+        v-for="index in type === 'Stars' ? level : unit.stars"
         :key="index"
         :class="`star-level-${index}`"
       ></span>
-      <RelicLevelIcon
-        v-if="unit.relicLevel"
-        :relicLevel="unit.relicLevel"
-        :size="size"
-        :alignment="unit.alignment"
-      />
-      <span class="zetas" v-if="unit.zetas.length > 0">
-        <span>{{ unit.zetas.length }}</span>
-      </span>
-      <span class="omicrons" v-if="unit.omicrons.length > 0">
-        <span>{{ unit.omicrons.length }}</span>
-      </span>
+      <template v-if="!unit.isShip">
+        <RelicLevelIcon
+          v-if="(!!level && type === 'Relic') || unit.relicLevel"
+          :relicLevel="level ?? unit.relicLevel"
+          :size="size"
+          :alignment="unit.alignment"
+        />
+        <span class="zetas" v-if="unit.zetas.length > 0">
+          <span>{{ unit.zetas.length }}</span>
+        </span>
+        <span class="omicrons" v-if="unit.omicrons.length > 0">
+          <span>{{ unit.omicrons.length }}</span>
+        </span>
+      </template>
     </div>
     <GearText
-      :level="unit.gearLevel"
-      v-if="unit.gearLevel < maxGearLevel && showGearLevel"
+      :level="type === 'Relic' ? maxGearLevel : unit.gearLevel"
+      v-if="
+        (type === 'Relic' ? maxGearLevel : unit.gearLevel) < maxGearLevel &&
+        showGearLevel &&
+        !unit.isShip
+      "
     />
     <div class="unit-name">{{ unit?.name }}</div>
   </div>
@@ -60,21 +70,32 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    type: {
+      type: String,
+      default: null,
+      validator(val) {
+        return val === "Relic" || val === "Gear" || val === "Stars";
+      },
+    },
+    level: {
+      type: Number,
+      default: null,
+    },
   },
   data() {
     return {
       maxGearLevel,
-    };
+    } as any;
   },
   computed: {
-    zetasCount() {
+    zetasCount(): number {
       return this.unit.zetas.length;
     },
   },
   methods: {
-    starClasses(index: number) {
+    starClasses(index: number): string[] {
       const classes = ["star-level"];
-      if (index <= this.unit.stars) {
+      if (index <= (this.type === "Stars" ? this.level : this.unit.stars)) {
         classes.push("star-level-full", `star-level-${index}`);
       } else {
         classes.push("star-level-empty", `star-level-${index}`);
