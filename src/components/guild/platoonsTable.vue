@@ -246,7 +246,6 @@ export default defineComponent({
                       char.players.length < char.total + 3
                         ? "text-warning"
                         : "text-success",
-
                     message: `Redundant Coverage: ${Math.max(
                       char.players.length - char.total,
                       0
