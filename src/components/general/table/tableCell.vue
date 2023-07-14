@@ -119,11 +119,15 @@
                   :hover="el.popover.hover"
                   :arrow="el.popover.arrow"
                   :placement="el.popover.placement"
+                  :class="el.popover.containerClasses"
                 >
-                  <router-link v-if="el.type === 'link'" :to="el.data">{{
-                    el.message
-                  }}</router-link>
-                  <div v-else>{{ el.message }}</div>
+                  <router-link
+                    v-if="el.type === 'link'"
+                    :to="el.data"
+                    :class="el.popover.classes"
+                    >{{ el.message }}</router-link
+                  >
+                  <div v-else :class="el.popover.classes">{{ el.message }}</div>
                   <template #content>
                     <div
                       :class="el.popover.header.classes"
