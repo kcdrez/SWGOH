@@ -17,6 +17,15 @@ interface dataModel {
   redundancyCoverageAmount: number;
 }
 
+type platoonType = {
+  id: string;
+  requirement: { amount: number; type: string };
+  total: number;
+  players: any[];
+  closePlayerList: any[];
+  difficulty: number;
+};
+
 const storageKey = "PlatoonsTable";
 
 export default defineComponent({
@@ -47,7 +56,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState("guild", ["players"]),
-    filteredList(): any[] {
+    platoonDataList(): platoonType[] {
       const phaseData = platoonData.find((x) => x.phase === this.phase);
 
       if (phaseData) {
@@ -76,7 +85,7 @@ export default defineComponent({
         ];
 
         return [...characterList, ...shipsList].reduce(
-          (acc: any[], char: any) => {
+          (acc: platoonType[], char: any) => {
             const exists: any = acc.find((x: any) => x.id === char.id);
             const requirement = char.isShip
               ? phaseData.ships.requirement
@@ -199,31 +208,37 @@ export default defineComponent({
       };
     },
     body(): iTableBody {
-      const fullList = this.filteredList.sort((a, b) => {
-        if (this.sortMethod === "coverage") {
-          return sortValues(
-            a.players.length,
-            b.players.length,
-            this.sortDir,
-            this.sortMethod
-          );
-        } else if (this.sortMethod === "redundancy") {
-          return sortValues(
-            Math.max(a.players.length - a.total, 0),
-            Math.max(b.players.length - b.total, 0),
-            this.sortDir,
-            this.sortMethod
-          );
-        } else if (this.sortMethod === "closest") {
-          return sortValues(
-            Math.max(a.closePlayerList.length - a.total, 0),
-            Math.max(b.closePlayerList.length - b.total, 0),
-            this.sortDir,
-            this.sortMethod
-          );
-        }
-        return sortValues(a, b, this.sortDir, this.sortMethod);
-      });
+      const fullList = this.platoonDataList
+        .filter((platoon) => {
+          const name = platoon.id.toLowerCase().replace(/\s/g, "");
+          const compare = this.searchText.toLowerCase().replace(/\s/g, "");
+          return name.includes(compare);
+        })
+        .sort((a, b) => {
+          if (this.sortMethod === "coverage") {
+            return sortValues(
+              a.players.length,
+              b.players.length,
+              this.sortDir,
+              this.sortMethod
+            );
+          } else if (this.sortMethod === "redundancy") {
+            return sortValues(
+              Math.max(a.players.length - a.total, 0),
+              Math.max(b.players.length - b.total, 0),
+              this.sortDir,
+              this.sortMethod
+            );
+          } else if (this.sortMethod === "closest") {
+            return sortValues(
+              Math.max(a.closePlayerList.length - a.total, 0),
+              Math.max(b.closePlayerList.length - b.total, 0),
+              this.sortDir,
+              this.sortMethod
+            );
+          }
+          return sortValues(a, b, this.sortDir, this.sortMethod);
+        });
 
       return {
         classes: "align-middle text-center",
@@ -244,6 +259,7 @@ export default defineComponent({
               {
                 show: true,
                 type: "list",
+                label: "Requirements Needed:",
                 data: {
                   classes: "text-left",
                   list: [
@@ -266,6 +282,7 @@ export default defineComponent({
               {
                 show: true,
                 type: "list",
+                label: "Players Completed:",
                 data: {
                   classes: "mb-0 text-left player-list",
                   list: char.players.map((x) => {
@@ -300,6 +317,7 @@ export default defineComponent({
               {
                 show: true,
                 type: "list",
+                label: "Players Closest to Completion:",
                 data: {
                   classes: "mb-0 text-left player-list",
                   list: char.closePlayerList.map((player) => {
@@ -311,6 +329,7 @@ export default defineComponent({
               },
               {
                 show: true,
+                label: "Difficulty Rating:",
                 data: {
                   message: char.difficulty,
                 },

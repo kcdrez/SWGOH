@@ -124,7 +124,7 @@ import { mapActions, mapState } from "vuex";
 import { loadingState } from "types/loading";
 import { iTableBody, iTableHead } from "types/general";
 import platoonData from "resources/tbPlatoons";
-import { setupColumnEvents, setupSorting, sortValues } from "utils";
+import { setupSorting, sortValues } from "utils";
 import { iGoalPlayer } from "types/goals";
 import PlatoonsTable from "components/guild/platoonsTable.vue";
 
@@ -245,9 +245,15 @@ export default defineComponent({
       };
     },
     body(): iTableBody {
+      const filteredData = this.playerData.filter((player) => {
+        const name = player.name.toLowerCase().replace(/\s/g, "");
+        const compare = this.searchText.toLowerCase().replace(/\s/g, "");
+        return name.includes(compare);
+      });
+
       return {
         classes: "align-middle text-center",
-        rows: this.playerData.map((player: any) => {
+        rows: filteredData.map((player: any) => {
           return {
             cells: [
               {
@@ -256,6 +262,7 @@ export default defineComponent({
               },
               {
                 show: true,
+                label: "Phase 1 Platoons:",
                 data: {
                   classes: "c-pointer",
                   label: player.phaseMapping.phase1.length,
@@ -271,6 +278,7 @@ export default defineComponent({
               },
               {
                 show: true,
+                label: "Phase 2 Platoons:",
                 data: {
                   classes: "c-pointer",
                   label: player.phaseMapping.phase2.length,
@@ -286,6 +294,7 @@ export default defineComponent({
               },
               {
                 show: true,
+                label: "Phase 3 Platoons:",
                 data: {
                   classes: "c-pointer",
                   label: player.phaseMapping.phase3.length,
@@ -301,6 +310,7 @@ export default defineComponent({
               },
               {
                 show: true,
+                label: "Phase 4 Platoons:",
                 data: {
                   classes: "c-pointer",
                   label: player.phaseMapping.phase4.length,
@@ -316,6 +326,7 @@ export default defineComponent({
               },
               {
                 show: true,
+                label: "Phase 5 Platoons:",
                 data: {
                   classes: "c-pointer",
                   label: player.phaseMapping.phase5.length,
@@ -331,6 +342,7 @@ export default defineComponent({
               },
               {
                 show: true,
+                label: "Phase 6 Platoons:",
                 data: {
                   classes: "c-pointer",
                   label: player.phaseMapping.phase6.length,
@@ -346,6 +358,7 @@ export default defineComponent({
               },
               {
                 show: true,
+                label: "Total Platoons:",
                 data: {
                   classes: "",
                   message: player.phaseMapping.total,
