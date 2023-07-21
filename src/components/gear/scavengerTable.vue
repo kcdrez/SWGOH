@@ -212,9 +212,9 @@ export default defineComponent({
     },
     list(): tScavenger[] {
       return this.gearList
-        .reduce((acc: any[], gear: Gear) => {
+        .reduce((acc: tScavenger[], gear: Gear) => {
           const match = gear.scavenger.find(
-            (x: any) => x.id === this.scavengerId
+            (x: IScavenger) => x.id === this.scavengerId
           );
           if (match && match.priority) {
             acc.push({
