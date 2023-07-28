@@ -359,6 +359,7 @@ export default defineComponent({
         headers: [
           {
             cells: [
+              { show: true, rowspan: "2", minWidth: "50px" },
               {
                 label: "Player Name",
                 show: this.showCol("player"),
@@ -402,7 +403,7 @@ export default defineComponent({
     },
     body(): iTableBody {
       const rows: iTableRow[] = this.filteredPlayers.reduce(
-        (list: iTableRow[], player: iGoalPlayer) => {
+        (list: iTableRow[], player: iGoalPlayer, index: number) => {
           const unitCells: iTableCell[] = this.goal.list.reduce(
             (acc: iTableCell[], unit: IPrerequisite) => {
               const match = player.units.find((u) => u.base_id === unit.id);
@@ -440,6 +441,10 @@ export default defineComponent({
 
           list.push({
             cells: [
+              {
+                show: true,
+                data: index + 1,
+              },
               {
                 label: "Player",
                 show: this.showCol("player"),

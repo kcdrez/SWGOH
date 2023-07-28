@@ -5,6 +5,7 @@ interface iHeaderCell {
   classes?: string;
   containerClass?: string;
   maxWidth?: string;
+  minWidth?: string;
   input?: {
     type:
       | "button"
