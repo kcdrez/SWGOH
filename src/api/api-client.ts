@@ -15,7 +15,6 @@ import {
   iRaidEvent,
 } from "types/guild";
 import { IDailyCurrency, IWallet } from "types/currency";
-import { chunk } from "lodash";
 
 class ApiClient {
   baseUrl = "https://wb0l29fz82.execute-api.us-east-1.amazonaws.com/dev";
