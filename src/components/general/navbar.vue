@@ -129,6 +129,11 @@ export default defineComponent({
           show: this.isLoggedIn,
         },
         {
+          label: "Compare Gear",
+          to: { name: "GLCompare" },
+          show: true,
+        },
+        {
           label: "Goals List",
           to: { name: "GoalsPage" },
           show: this.isLoggedIn,
