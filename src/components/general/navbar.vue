@@ -129,6 +129,11 @@ export default defineComponent({
           show: this.isLoggedIn,
         },
         {
+          label: "Compare Gear",
+          to: { name: "GLCompare" },
+          show: true,
+        },
+        {
           label: "Goals List",
           to: { name: "GoalsPage" },
           show: this.isLoggedIn,
@@ -156,6 +161,14 @@ export default defineComponent({
           label: "Guild Stats",
           to: {
             name: "GuildStats",
+            params: this.isLoggedIn ? { guildId: this.player.guild_id } : {},
+          },
+          show: true,
+        },
+        {
+          label: "TB Platoons",
+          to: {
+            name: "TBPlatoons",
             params: this.isLoggedIn ? { guildId: this.player.guild_id } : {},
           },
           show: true,

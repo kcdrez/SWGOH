@@ -4,7 +4,10 @@
       <th
         :key="index"
         v-if="cell.show"
-        :max-width="cell?.maxWidth ?? 'auto'"
+        :style="{
+          'max-width': cell?.maxWidth ?? 'auto',
+          'min-width': cell?.minWidth ?? 'auto',
+        }"
         :class="[cell.click && !cell.input ? 'c-pointer' : '', cell.classes]"
         :title="cell.title"
         @click="handleClick(cell, !cell.input)"
@@ -138,7 +141,7 @@
                 :key="index"
                 :class="button.classes"
                 :title="button.title"
-                @click="button.click()"
+                @click="button?.click ? button.click() : null"
               ></i>
             </template>
           </div>

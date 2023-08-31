@@ -16,16 +16,10 @@
       "types": ["types/*"],
       "utils": ["utils"],
       "store": ["vuex-store"],
-      "@/*": [
-        "*"
-      ],
+      "resources": ["resources/*"],
+      "@/*": ["*"]
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ],
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "resolveJsonModule": true,
     "noImplicitAny": false
   },
@@ -38,16 +32,14 @@
     "src/api/swgoh.gg.ts",
     "src/enums"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
 
 // {
 //   "compilerOptions": {
-//     //... 
+//     //...
 //     "baseUrl": "src",
-//     "paths": { 
+//     "paths": {
 //       "utils": ["utils/*"]
 //     }
 //   }

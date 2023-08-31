@@ -88,7 +88,7 @@ export default defineComponent({
         },
         {
           label: "Amount Needed",
-          value: "needed",
+          value: "totalAmount",
         },
         {
           label: "Progress",

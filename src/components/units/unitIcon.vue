@@ -2,7 +2,13 @@
   <div v-if="unit">
     <Popper hover arrow placement="right" v-if="'name' in unit">
       <template #content v-if="hideImage">
-        <UnitPortrait :unit="unit" :size="size" showGearLevel />
+        <UnitPortrait
+          :unit="unit"
+          :size="size"
+          showGearLevel
+          :level="level"
+          :type="type"
+        />
       </template>
       <div>
         <router-link
@@ -15,6 +21,8 @@
             :unit="unit"
             :size="size"
             :class="{ 'hidden-sm': hideImgOnMobile }"
+            :level="level"
+            :type="type"
           />
         </router-link>
         <template v-else>
@@ -24,6 +32,8 @@
             :unit="unit"
             :size="size"
             :class="{ 'hidden-sm': hideImgOnMobile }"
+            :level="level"
+            :type="type"
           />
           <slot />
         </template>
@@ -65,6 +75,17 @@ export default defineComponent({
     size: {
       type: String,
       default: "md",
+    },
+    type: {
+      type: String,
+      default: null,
+      validator(val) {
+        return val === "Relic" || val === "Gear" || val === "Stars";
+      },
+    },
+    level: {
+      type: Number,
+      default: null,
     },
   },
 });

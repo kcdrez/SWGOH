@@ -235,7 +235,7 @@ const store = {
         if (match) {
           player.units.forEach((unit) => {
             const unitMatch = match.units.find(
-              (u) => u.base_id === unit.base_id
+              (u) => u?.base_id === unit?.base_id
             );
             if (!unitMatch) {
               match.units.push(unit);
@@ -365,7 +365,7 @@ const store = {
                 return true;
               }
               const exists = player.units.some(
-                (unit) => unit.base_id === unitId
+                (unit) => unit?.base_id === unitId
               );
               return exists;
             });
@@ -386,7 +386,7 @@ const store = {
               acc.exists = true;
             }
             const unitMatch = units.find(
-              (unit) => unit.base_id === data.unitId
+              (unit) => unit?.base_id === data.unitId
             );
             acc.exists = !!unitMatch || acc.exists;
             acc.list.push({

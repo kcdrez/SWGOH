@@ -181,7 +181,7 @@ export class Unit {
     }
   }
   public get image() {
-    return this._image;
+    return this._image || `./images/person_light.png`;
   }
   public get alignment() {
     return this._alignment;

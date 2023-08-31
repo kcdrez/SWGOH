@@ -18,6 +18,7 @@ module.exports = {
       components: path.resolve(__dirname, "../src/components"),
       pages: path.resolve(__dirname, "../src/pages"),
       types: path.resolve(__dirname, "../src/types"),
+      resources: path.resolve(__dirname, "../src/resources"),
       "vuex-store": path.resolve(__dirname, "../src/vuex-store"),
       utils: path.resolve(__dirname, "../src/utils"),
       styles: path.resolve(__dirname, "../src/styles"),

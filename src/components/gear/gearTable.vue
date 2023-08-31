@@ -323,6 +323,7 @@ export default defineComponent({
                           show: unit.gearLevels.length > 1,
                           message: `Total: ${unit.totalAmount}`,
                         },
+                        containerClasses: "border-0 m-0",
                       },
                       type: "link",
                       data: { name: "UnitPage", params: { unitId: unit.id } },

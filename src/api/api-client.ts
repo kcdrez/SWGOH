@@ -17,7 +17,7 @@ import {
 import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
-  baseUrl = "https://vkpnob5w55.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "https://wb0l29fz82.execute-api.us-east-1.amazonaws.com/dev";
   // baseUrl = "http://localhost:3001/dev";
 
   constructor() {}
@@ -333,13 +333,32 @@ class ApiClient {
     guildId: string,
     unitIds: string[] | undefined
   ): Promise<iGoalPlayer[]> {
-    const response = await axios.post(
-      `${this.baseUrl}/guild/${guildId}/units`,
-      {
-        unitIds,
+    const chunks: string[][] = [];
+    if (Array.isArray(unitIds)) {
+      for (let i = 0; i < unitIds.length; i += 20) {
+        chunks.push(unitIds.slice(i, i + 20));
       }
-    );
-    return response.data;
+      const responses = await Promise.all(
+        chunks.map((x) =>
+          axios.post(`${this.baseUrl}/guild/${guildId}/units`, {
+            unitIds: x,
+          })
+        )
+      );
+
+      return responses.reduce((arr: iGoalPlayer[], response) => {
+        arr.push(...response.data);
+        return arr;
+      }, []);
+    } else {
+      const response = await axios.post(
+        `${this.baseUrl}/guild/${guildId}/units`,
+        {
+          unitIds,
+        }
+      );
+      return response.data;
+    }
   }
   async fetchGuildStats(guildId: string) {
     const response = await axios.post(`${this.baseUrl}/guild/${guildId}/stats`);
