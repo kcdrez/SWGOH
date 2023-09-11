@@ -2,10 +2,10 @@ import { v4 as uuid } from "uuid";
 
 import { iAbility, iUniqueAbility } from "types/gameEngine/abilities";
 
-const aayla: Record<string, iAbility | iUniqueAbility> = {
-  basicskill_AAYLASECURA: {
-    name: "Inspiring Strike",
-    id: "basicskill_AAYLASECURA",
+const ackbar: Record<string, iAbility | iUniqueAbility> = {
+  basicskill_ADMIRALACKBAR: {
+    name: "Quick Shot",
+    id: "basicskill_ADMIRALACKBAR",
     actions: [
       {
         targets: {
@@ -16,54 +16,62 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
           {
             damage: {
               modifier: {
-                value: 1.645,
+                value: 1.745,
               },
               damageType: "physical",
             },
           },
-        ],
-      },
-      {
-        targets: {
-          filters: [{ allies: true }, { tags: ["Jedi & !Self"] }],
-          targetCount: 1,
-        },
-        effects: [
           {
-            assist: {
-              chance: 0.35,
-              modifier: {
-                stats: {
-                  amount: 0.5,
-                  modifiedType: "multiplicative",
-                  statToModify: "offense",
-                },
+            buffs: [
+              {
+                name: "TM Increase",
+                duration: 0.45,
+                chance: 0.55,
+                id: uuid(),
               },
-            },
+            ],
           },
         ],
       },
     ],
   },
-  specialskill_AAYLASECURA01: {
-    id: "specialskill_AAYLASECURA01",
-    name: "Survivor",
-    cooldown: 3,
+  specialskill_ADMIRALACKBAR01: {
+    id: "specialskill_ADMIRALACKBAR01",
+    name: "It's a Trap!",
+    cooldown: 5,
     turnsRemaining: 0,
     actions: [
       {
         targets: {
-          filters: [{ allies: false }],
-          targetCount: 1,
+          filters: [{ allies: true }],
         },
         effects: [
           {
-            damage: {
-              modifier: {
-                value: 3.008,
-              },
-              damageType: "physical",
+            dispel: {
+              debuffs: ["all"],
             },
+            triggers: [
+              {
+                id: uuid(),
+                triggerType: "dispelDebuff",
+                actions: [
+                  {
+                    targets: {
+                      filters: [{ allies: true }],
+                    },
+                    effects: [
+                      {
+                        heal: {
+                          healthType: "health",
+                          amount: 0.09,
+                          amountType: "multiplicative",
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
@@ -198,4 +206,4 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
   },
 };
 
-export default aayla;
+export default ackbar;

@@ -172,16 +172,11 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
-import { v4 as uuid } from "uuid";
 
-import { Team } from "types/teams";
-import TeamTable from "components/teams/teamTable.vue";
-import MatchTable from "components/teams/matchTable.vue";
-import { randomNumber, unvue, numbersOnly, round } from "utils";
-import { random } from "lodash";
+import { randomNumber, numbersOnly, round } from "utils";
 import abilities from "types/abilities";
-import { Character, iStatusEffect, iAbility, format } from "types/characters";
-// import characterMapping from "types/characters"
+import { Character, format } from "types/gameEngine/characters";
+import { Engine } from "types/gameEngine/gameEngine";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
 
@@ -283,93 +278,6 @@ export default defineComponent({
         })
       );
     },
-    initializeMatch() {
-      const allCharacters: Character[] = [
-        ...this.playerTeam,
-        ...this.opponentTeam,
-      ] as Character[];
-      allCharacters.forEach((x) => x.initialize());
-
-      const startTriggers: Character[] = allCharacters
-        .filter((char) => {
-          return char.triggers.some((trigger) => {
-            return trigger.triggerType === "start";
-          });
-        })
-        .sort((a, b) => {
-          if (
-            (a.id === "HANSOLO" && b.id === "HANSOLO") ||
-            (a.id !== "HANSOLO" && b.id !== "HANSOLO")
-          ) {
-            if (a.speed > b.speed) {
-              return 1;
-            } else if (b.speed > a.speed) {
-              return -1;
-            } else {
-              return randomNumber(0, 1) === 0 ? 1 : -1;
-            }
-          } else if (a.id === "HANSOLO") {
-            return 1;
-          } else if (b.id === "HANSOLO") {
-            return -1;
-          }
-          return 0;
-        });
-
-      const pregameTriggers = allCharacters.filter((char) => {
-        return char.triggers.some((trigger) => {
-          return trigger.triggerType === "pregame";
-        });
-      });
-
-      let i = 0;
-
-      pregameTriggers.forEach((char) => {
-        const pregameLogs = char.executePassiveTriggers([
-          { triggerType: "pregame" },
-        ]);
-
-        if (pregameLogs.length > 0) {
-          this.logs.push(
-            `${format.characterName(char.name, char.owner)} - Match Set Up`
-          );
-          this.logs.push(...pregameLogs);
-        }
-      });
-
-      startTriggers.forEach((char) => {
-        const startLogs = char.executePassiveTriggers([
-          {
-            triggerType: "start",
-            ability: null,
-            target: char as Character,
-          },
-        ]);
-
-        if (startLogs.length > 0) {
-          i++;
-          this.logs.push(
-            `Turn 0.${i}`,
-            `${format.characterName(char.name, char.owner)} - Start of Match`
-          );
-          this.logs.push(...startLogs);
-        }
-      });
-    },
-    reset() {
-      this.playerTeam.forEach((x) =>
-        x.reset(
-          this.playerTeam as Character[],
-          this.opponentTeam as Character[]
-        )
-      );
-      this.opponentTeam.forEach((x) =>
-        x.reset(
-          this.opponentTeam as Character[],
-          this.playerTeam as Character[]
-        )
-      );
-    },
     start() {
       const maxRoundCount = 1000; //to prevent infinite loops
       this.logs = [];
@@ -377,60 +285,23 @@ export default defineComponent({
       this.simulation.opponentWins = 0;
       this.simulation.count = Math.min(this.simulation.count, 100);
       for (let i = 0; i < this.simulation.count; i++) {
-        this.reset();
-        this.initializeMatch();
-        let j = 0;
-        do {
-          j++;
-          this.nextTurn(j);
-          const playerLost = this.playerTeam.every((x) => x.health <= 0);
-          const opponentList = this.opponentTeam.every((x) => x.health <= 0);
-          if (playerLost || opponentList || j > maxRoundCount) {
-            const winner = playerLost ? this.opponent : this.player;
-            this.logs.push(`Match ends: ${winner.name} is the winner!`);
-            if (playerLost) {
-              this.simulation.opponentWins++;
-            } else {
-              this.simulation.playerWins++;
-            }
-            break;
-          }
-        } while (true);
-      }
-      this.reset();
-    },
-    nextTurn(turnNumber: number) {
-      const allChars: Character[] = [
-        ...this.playerTeam,
-        ...this.opponentTeam,
-      ] as Character[];
+        const match = new Engine(
+          this.playerTeam as Character[],
+          this.opponentTeam as Character[]
+        );
+        const { playerWins } = match.start(maxRoundCount);
+        match.logs.push(
+          `Match ends: ${
+            playerWins ? this.player.name : this.opponent.name
+          } is the winner!`
+        );
+        this.logs = match.logs;
 
-      const { character, tmAmount } = allChars.reduce(
-        (acc: { tmAmount: number; character: null | Character }, char) => {
-          if (!char?.isDead) {
-            if (!acc.character) {
-              acc.character = char;
-            } else {
-              const results = acc.character.compareTm(char);
-              acc.character = results.character;
-              acc.tmAmount = results.amount;
-            }
-          }
-
-          return acc;
-        },
-        { tmAmount: 0, character: null }
-      );
-
-      if (character !== null) {
-        allChars.forEach((char) => {
-          if (!char.isDead) {
-            char.changeTurnMeter((tmAmount / character.speed) * char.speed);
-          }
-        });
-
-        this.logs.push(`Turn ${turnNumber}`);
-        this.logs.push(...character.takeAction());
+        if (playerWins) {
+          this.simulation.playerWins++;
+        } else {
+          this.simulation.opponentWins++;
+        }
       }
     },
     removeOpponent() {

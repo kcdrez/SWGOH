@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
 
-import { iAbility, iUniqueAbility } from "types/characters";
-import effects from "chart.js/dist/helpers/helpers.easing";
+import { iAbility, iUniqueAbility } from "types/gameEngine/abilities";
 
 const chewy: Record<string, iAbility | iUniqueAbility> = {
   basicskill_CHEWBACCALEGENDARY: {

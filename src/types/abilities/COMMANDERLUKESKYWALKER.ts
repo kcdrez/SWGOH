@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 
-import { iAbility, iUniqueAbility } from "types/characters";
+import { iAbility, iUniqueAbility } from "types/gameEngine/abilities";
 
 const cls: Record<string, iAbility | iUniqueAbility> = {
   specialskill_COMMANDERLUKESKYWALKER02: {

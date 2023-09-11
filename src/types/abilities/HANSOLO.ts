@@ -4,7 +4,7 @@ import {
   iBasicAbility,
   iUniqueAbility,
   iSpecialAbility,
-} from "types/characters";
+} from "types/gameEngine/abilities";
 
 const quickDrawActionId = uuid();
 

@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 
-import { iAbility, iUniqueAbility } from "types/characters";
+import { iAbility, iUniqueAbility } from "types/gameEngine/abilities";
 
 const oldBen: Record<string, iAbility | iUniqueAbility> = {
   basicskill_OLDBENKENOBI: {

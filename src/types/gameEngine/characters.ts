@@ -1,11 +1,32 @@
 import { v4 as uuid } from "uuid";
-import { filter, round, template } from "lodash";
+import { round } from "lodash";
 import _ from "lodash";
 
 import { randomNumber, unvue } from "utils";
 import abilities from "types/abilities";
 import { Ability, IUnit, Unit } from "types/unit";
-import { scales } from "chart.js";
+import {
+  iBuff,
+  iDebuff,
+  iStatusEffect,
+  tStatusEffect,
+  tBuff,
+  tDebuff,
+} from "./statusEffects";
+import {
+  iBasicAbility,
+  iSpecialAbility,
+  iUniqueAbility,
+  iGeneralAbility,
+  iAbility,
+} from "./abilities";
+import {
+  iTrigger,
+  iEffect,
+  iCondition,
+  iTriggerData,
+  iAction,
+} from "./gameEngine";
 
 export interface iStats {
   /** The maximum amount of health */
@@ -62,431 +83,7 @@ export interface iStats {
   healthSteal: number;
 }
 
-type tDebuff =
-  | "Ability Block"
-  | "Accuracy Down"
-  | "Anguish" //todo
-  | "Blind"
-  | "Breach" //
-  | "Buff Immunity"
-  | "Burning" //
-  | "Buzz Droids" //
-  | "Captive" //
-  | "Cooldown Increase"
-  | "Concussion Mine" //
-  | "Confuse" //
-  | "Corrupted Battle Meditation" //
-  | "Critical Chance Down"
-  | "Critical Damage Down"
-  | "Damage Over Time" //
-  | "Daze" //
-  | "Deathmark" //
-  | "Deceived" //
-  | "Defense Down" //
-  | "Defense Penetration Down"
-  | "Demoralized" //
-  | "Disarm" //
-  | "Doubt" //
-  | "Evasion Down"
-  | "Expose" //
-  | "Fear" //
-  | "Ferocity" //
-  | "Force Influence" //
-  | "Fracture" //
-  | "Healing Immunity" //
-  | "Health Down" //add check when its applied so current health doesnt exceed it
-  | "Health Steal Down"
-  | "Hunted" //
-  | "Inevitable Failure" //
-  | "Marked"
-  | "Offense Down"
-  | "Overconfident" //
-  | "Pain" //
-  | "Plague" //
-  | "Potency Down"
-  | "Protection Disruption" //
-  | "Provoked" //
-  | "Purge" //
-  | "Shatterpoint" //
-  | "Shield Disruption" //
-  | "Shock" //
-  | "Speed Down"
-  | "Stagger" //
-  | "Stranded" //
-  | "Stun"
-  | "Target Lock" //
-  | "Tenacity Down"
-  | "TM Decrease"
-  | "Torture" //
-  | "Useful Pawn" //
-  | "Vulnerable"
-  | "all"; //
-type tBuff =
-  | "Accuracy Up"
-  | "Advantage"
-  | "Call to Action"
-  | "Critical Chance Up"
-  | "Critical Damage Up"
-  | "Critical Hit Immunity"
-  | "Cooldown Decrease"
-  | "Defense Penetration Up"
-  | "Defense Up"
-  | "Evasion Up"
-  | "Health Up"
-  | "Health Steal Up"
-  | "Potency Up"
-  | "Offense Up"
-  | "Speed Up"
-  | "Taunt"
-  | "Tenacity Up"
-  | "Translation"
-  | "TM Increase"
-  | "all";
-type tStatusEffect = "Guard";
-
-/** A generic status effect, usually a buff or debuff */
-export interface iStatusEffect {
-  /** The name of the effect */
-  name: tBuff | tDebuff | tStatusEffect;
-  /** How many turns the effect will last */
-  duration: number;
-  /** Determines if the effect is new so that it will not be removed at the end of the turn */
-  isNew?: boolean;
-  /** The likelihood of the effect being applied (as decimal) */
-  chance?: number;
-  /** Determines if the effect cannot be resisted */
-  cantResist?: boolean;
-  /** Determines if the effect cannot be prevented (such as with Buff Immunity) */
-  cantPrevent?: boolean;
-  /** Determines if the effect cannot be dispelled */
-  cantDispel?: boolean;
-  // cantMiss?: boolean;
-  /** Determines if the effect is unique */
-  unique?: boolean;
-  /** Triggers that will occur at a certain time */
-  triggers?: iTrigger[];
-  /** Unique identifier */
-  id: string;
-  /** The original source of the effect */
-  sourceAbility?: iAbility | null;
-  /** Determines if more than one of the effect can be applied to a target */
-  isStackable?: boolean;
-  /** How many stacks of the effect the unit has */
-  stacks?: number;
-}
-
-interface iBuff extends iStatusEffect {
-  name: tBuff;
-}
-
-interface iDebuff extends iStatusEffect {
-  name: tDebuff;
-}
-
-// export interface iEffects {
-//   ignoreTaunt: boolean;
-// }
-
-/** A generic ability container that all abilities share */
-interface iGeneralAbility {
-  /** A unique identifier */
-  id: string;
-  /** The name of the ability */
-  name: string;
-  /** Anything that will happen based on various states or actions being done (such as taking damage) */
-  triggers?: iTrigger[];
-  /** Sort the ability before or after other abilities */
-  sort?: number;
-  /** This ability is targeting various other units and causing effects on them (such as buffs or damage) */
-  actions?: iAction[];
-}
-export interface iBasicAbility extends iGeneralAbility {}
-
-/** Special Abilities */
-export interface iSpecialAbility extends iGeneralAbility {
-  /** How many turns are left before this ability can be used */
-  turnsRemaining: number;
-  /** Maximum amount that determines how many turns must pass before the ability can be used again */
-  cooldown: number;
-}
-export interface iAbility
-  extends iBasicAbility,
-    iSpecialAbility,
-    iUniqueAbility {}
-
-export interface iUniqueAbility extends iGeneralAbility {}
-
-/** An effect that happens when something else happens */
-interface iTrigger {
-  /**
-   * Determines when the effect will occur
-   *
-   * always: An effect that will always be present
-   *
-   * criticalHit: Triggers whenever a criticalHit is scored
-   *
-   * dealDamage: Triggers whenever damage is dealt
-   *
-   * death: Triggers whenever the target is defeated
-   *
-   * defeat: Triggers whenever the target defeats another target
-   *
-   * dodge: Triggers whenever the target dodges an effect/attack
-   *
-   * expires: Triggers whenever an effect expires
-   *
-   * inflictDebuff: Triggers whenever the target inflicts a debuff
-   *
-   * pregame: Triggers before the game begins
-   *
-   * receiveDamage: Triggers whenever the target receives damage
-   *
-   * resistDetrimentalEffect: Triggers whenever the target resists an effect
-   *
-   * revive: Triggers whenever the target is revived
-   *
-   * start: Triggers at the start of the game (after pregame)
-   *
-   * useAbility: Triggers whenever the target uses an ability
-   */
-  triggerType:
-    | "always"
-    | "criticalHit"
-    | "dealDamage"
-    | "death"
-    | "defeat"
-    | "dodge"
-    | "expires"
-    | "inflictDebuff"
-    | "pregame"
-    | "receiveDamage"
-    | "resistDetrimentalEffect"
-    | "revive"
-    | "start"
-    | "useAbility";
-  /** A list of filters, in order, which will be applied to determine who to add the triggers to */
-  targets?: iTargetData;
-  /** This trigger is targeting various other units and causing effects on them (such as buffs or damage) */
-  actions: iAction[];
-  /** Misc data to be used for various effects */
-  data?: any;
-  /** Unique identifier */
-  id: string;
-  /** The original source that caused the effect(s) to happen */
-  srcAbility?: iAbility | null;
-  /** Used to determine how often the trigger should happen */
-  triggerData?: {
-    /** The maximum number of times the effect can trigger in a given frequency */
-    limit?: number;
-    /** A tracker on how many times the trigger has already happened */
-    count?: number;
-    /** The timing of when a trigger should check if it has reached the limit */
-    frequency?: "match" | "turn" | "turn-unit";
-    /** The list of units' ids affected by this ability and how many times theyve been affected */
-    units?: { count: number; id: string }[];
-    /** List of ability ids that cannot cause this to trigger */
-    excludeAbilities?: string[];
-  };
-}
-
-interface iTriggerData {
-  triggerType: iTrigger["triggerType"];
-  damageDealt?: number;
-  isCrit?: boolean;
-  ability?: iAbility | null;
-  target?: Character | null;
-  debuff?: iDebuff;
-}
-
-/** Determines who is being targeted and what is happening to them */
-interface iAction {
-  /** An optional Identifier */
-  id?: string;
-  /** A list of filters, in order, which will be applied to determine who to target */
-  targets: iTargetData;
-  /** The actions themselves that will be applied to the target(s) in order */
-  effects?: iEffect[];
-  /** The actions will repeat until the conditions are no longer met */
-  repeats?: {
-    /** How many times the action has been done */
-    count: number;
-    /** The maximum number of times this action can be done */
-    limit: number;
-    /** The method in which to set the limit, if a variable amount */
-    limitCounter?: "deadOpponents";
-    /** When the count should be reset */
-    reset: "turn";
-  };
-}
-
-/** Various filters used to determine who should be targeted */
-interface iTargetData {
-  filters?: {
-    /** A list of specific characters that should be targeted */
-    targetIds?: string[];
-    /** A list of tags (such as Rebel or Light Side) used to determine who should be targetted. Can use '!' (not) or '&' (and) to combine with any other tags */
-    tags?: string[];
-    /** Determines if only the allies or opponents should be targeted */
-    allies?: boolean;
-    /** Determines if any units should be targeted with specific status effects */
-    statusEffects?: tStatusEffect[];
-    /** Determines if any units should be targeted with specific debuffs */
-    debuffs?: tDebuff[];
-    /** Determines if any units should be targeted with specific buffs */
-    buffs?: tBuff[];
-    /** Determines if the target is the leader or not */
-    isLeader?: boolean;
-  }[];
-  /** Determines if the weakest unit should be targeted */
-  weakest?: boolean;
-  /** Determines how many units of the given filters should be selected */
-  targetCount?: number;
-  /** Determines if the filtering should ignore any taunt effects */
-  ignoreTaunt?: boolean;
-}
-
-/** Data used to determine certain things */
-interface iCondition {
-  /** Checks if a debuff is present */
-  debuffs?: tDebuff[];
-  /** Checks if a buff is present */
-  buffs?: tBuff[];
-  /** Checks if a specific stat meets a threshold */
-  stats?: iStatsCheck;
-  /** Inverts the logic so that all conditions are "Not" */
-  inverted?: boolean;
-  /** Checks if an effect is new */
-  isNew?: boolean;
-  /** Checks if a tag is present. Can use '!' (not) or '&' (and) to combine with any other tags */
-  tags?: string[];
-  /** Checks if turn meter is at a certain threshold */
-  tm?: {
-    /** The amount of turn meter to check. Use whole numbers (so 100% turn meter would be '100') */
-    amount: number;
-    /** Checks if the current turn meter should be greater than the amount (true) or less than the amount (false) */
-    greaterThan: boolean;
-  };
-}
-/** Various effects that will be applied */
-interface iEffect {
-  /** Who the effect should target */
-  // targets?: iTargetData[];
-  /** The optional condition to check before applying any of the effects */
-  condition?: iCondition;
-  /** Determines if the effct cannot miss */
-  cantMiss?: boolean;
-  /** The debuffs being inflicted */
-  debuffs?: iDebuff[];
-  /** The buffs being granted */
-  buffs?: iBuff[];
-  /** The status effects (blue effects) being granted */
-  statusEffects?: iStatusEffect[];
-  /** The (de)buffs being removed */
-  dispel?: {
-    debuffs?: tDebuff[] | tDebuff;
-    buffs?: tBuff[] | tBuff;
-  };
-  /** Manipulate the cooldown of an ability */
-  cooldown?: {
-    /** The ID of the ability being manipulated */
-    id: string;
-    /** The amount the ability is being manipulated. Positive number increases the cooldown, negative number increases the cooldown */
-    amount: number;
-    /** The target that the ability belongs to */
-    target: iTargetData;
-  };
-  /** Heal the target */
-  heal?: {
-    /** Health or Protection */
-    healthType: "health" | "protection";
-    /** Determines if the amound should be added to the current health, or scale from the unit's maxHealth/Protection */
-    amountType?: "additive" | "multiplicative";
-    /** The amount to heal. For percentages, keep the amount a decimal (e.g. 0.4 would be a 40% heal) */
-    amount?: number;
-    // scale?: number;
-  };
-  /** Call another unit to assist */
-  assist?: iAssist;
-  /** Change the target's stats */
-  stats?: iStatsCheck;
-  /** Deal damage to the target */
-  damage?: {
-    /** The modifier data used to determine how to calculate damage */
-    modifier: {
-      /** The amount this ability will scale with offense */
-      value: number;
-      /** The condition to check if a modifier to the status should be applied */
-      condition?: iCondition;
-      /** The stats to be applied to modify the damage */
-      stats?: iStatsCheck;
-    };
-    /** The variance amount of damage (usually 5 or 10) */
-    variance?: number;
-    /** The type of damage being dealt */
-    damageType: "physical" | "special" | "true";
-  };
-  /** Use an ability */
-  ability?: {
-    abilityTrigger?: string;
-    /** The id of the ability that should be used */
-    abilityToUse: string;
-    /** The id of the action that should be modified */
-    actionId?: string;
-    /** The stats modification */
-    stats?: iStatsCheck;
-    /** Any additional effects to add to the use of the ability */
-    effects?: iEffect[];
-  };
-  /** Set the target immune to certain effects */
-  immune?: {
-    /** The negative status effects or debuffs that cannot be given to the target */
-    negativeStatusEffects?: (tDebuff | tStatusEffect)[];
-    /** The positive status effects or buffs that cannot be given to the target */
-    positiveStatusEffects?: (tBuff | tStatusEffect)[];
-    /** The target cannot assist */
-    assists?: boolean;
-    /** The target cannot counter attack */
-    counterAttack?: boolean;
-  };
-  /** Scale the above effects with various data */
-  scalesBy?: {
-    /** Scales the effect based on how many stacks of the listed buffs */
-    buffs?: tBuff[];
-    /** Scales the effect based on how many stacks of the listed debuffs */
-    debuffs?: tDebuff[];
-    /** Scales the effect based on a certain stat */
-    stat?: {
-      /** Determines if the physical or special attribute should be used */
-      type?: "physical" | "special";
-      /** The name of the stat to use as the scale */
-      name: string;
-      /** How much of the user's stat should be used as the scale (i.e. .3 would be 30% of the user's stat) */
-      percent?: number;
-      /** Who should be the target used by the scaling (i.e. opponent's health, user's health, etc.) */
-      // targets?: iTargetData;
-    };
-    /** Scales the data based on how much damage was dealt */
-    damage?: boolean;
-    /** Who to target to check the scale */
-    targets?: iTargetData;
-  };
-  /** Triggers to add to the target that will occur at a later time */
-  triggers?: iTrigger[];
-  /** Misc. data used for checking various effects */
-  revive?: {
-    health: {
-      amount: number;
-      percent: boolean;
-    };
-    protection?: {
-      amount: number;
-      percent: boolean;
-    };
-  };
-  data?: any;
-}
-
-interface iStatsCheck {
+export interface iStatsCheck {
   /** The stat that will be modified
    *
    * armor: Increases the amount of offense to mitigate
@@ -520,6 +117,7 @@ interface iStatsCheck {
     | "critAvoid"
     | "critChance"
     | "dodge"
+    | "defense"
     | "health"
     | "maxHealth"
     | "maxProtection"
@@ -545,7 +143,7 @@ interface iStatsCheck {
 }
 
 /** Used to determine if another unit should assist */
-interface iAssist {
+export interface iAssist {
   /** The condition in which the assist should occur */
   condition?: iCondition;
   /** The chance that the assist will occur. Use a decimal (e.g. 0.4 would be a 40% chance of assisting) */
@@ -559,6 +157,32 @@ interface iAssist {
   };
   /** Who are valid targets to call for the assist */
   targets?: iTargetData;
+}
+
+/** Various filters used to determine who should be targeted */
+export interface iTargetData {
+  filters?: {
+    /** A list of specific characters that should be targeted */
+    targetIds?: string[];
+    /** A list of tags (such as Rebel or Light Side) used to determine who should be targetted. Can use '!' (not) or '&' (and) to combine with any other tags */
+    tags?: string[];
+    /** Determines if only the allies or opponents should be targeted */
+    allies?: boolean;
+    /** Determines if any units should be targeted with specific status effects */
+    statusEffects?: tStatusEffect[];
+    /** Determines if any units should be targeted with specific debuffs */
+    debuffs?: tDebuff[];
+    /** Determines if any units should be targeted with specific buffs */
+    buffs?: tBuff[];
+    /** Determines if the target is the leader or not */
+    isLeader?: boolean;
+  }[];
+  /** Determines if the weakest unit should be targeted */
+  weakest?: boolean;
+  /** Determines how many units of the given filters should be selected */
+  targetCount?: number;
+  /** Determines if the filtering should ignore any taunt effects */
+  ignoreTaunt?: boolean;
 }
 
 export class Character {
@@ -1709,10 +1333,11 @@ export class Character {
             } removed`
           );
         }
+
         listOfRemovedDebuffs.forEach((buff) => {
           buff.triggers?.forEach((trigger) => {
             if (trigger.triggerType === "expires") {
-              // logs.push(...this.executeTrigger(trigger));
+              logs.push(...this.executeTrigger(trigger));
             }
           });
         });
@@ -2505,6 +2130,18 @@ export class Character {
               this
             )
           );
+
+          if (effect.dispel.debuffs) {
+            logs.push(
+              ...this.executePassiveTriggers([
+                {
+                  triggerType: "dispelDebuff",
+                  ability,
+                  target: targetCharacter,
+                },
+              ])
+            );
+          }
         }
 
         if (effect.cooldown) {
@@ -2610,7 +2247,6 @@ export class Character {
         }
 
         if (effect.ability) {
-          console.log("using ability", this.id, effect.ability, ability?.name);
           const { abilityTrigger, abilityToUse } = effect.ability;
           if (abilityTrigger === ability?.id || !abilityTrigger) {
             if (abilityToUse) {
