@@ -96,8 +96,6 @@ export default defineComponent({
     ...mapActions("guild", ["fetchGuildUnitData"]),
   },
   async created() {
-    console.log(this.$router);
-    console.log(this.$route);
     const { guildId } = this.$route.params;
     if (typeof guildId === "string" && this.preloadFunctions) {
       this.loading = loadingState.loading;

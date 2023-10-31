@@ -275,9 +275,9 @@ export function getSortOrder(
     if (valueA === valueB) {
       return 0;
     } else if (sortDir === "asc") {
-      return valueA - valueB;
+      return valueA > valueB ? 1 : -1;
     } else {
-      return valueB - valueA;
+      return valueB > valueA ? 1 : -1;
     }
   } else if (typeof valueA === "boolean" && typeof valueB === "boolean") {
     if (valueA === valueB) {

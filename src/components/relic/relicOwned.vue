@@ -37,6 +37,11 @@ export default defineComponent({
       this.item.owned = this.owned;
     }, 1000),
   },
+  watch: {
+    item(newVal) {
+      this.owned = unvue(newVal.owned);
+    },
+  },
 });
 </script>
 

@@ -698,7 +698,9 @@ export default defineComponent({
             const matchB = b.units.find((x) => x.base_id === unitId);
 
             if (matchA && matchB) {
-              if (matchA.relic_tier > -1 || matchB.relic_tier > -1) {
+              if (method === "stars") {
+                return sortValues(matchA, matchB, this.sortDir, "stars");
+              } else if (matchA.relic_tier > -1 || matchB.relic_tier > -1) {
                 return sortValues(matchA, matchB, this.sortDir, "relic_tier");
               } else {
                 return sortValues(matchA, matchB, this.sortDir, "gear_level");
