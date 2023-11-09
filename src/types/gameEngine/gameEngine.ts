@@ -1,3 +1,4 @@
+import store from "vuex-store/store";
 import { iAbility } from "./abilities";
 import {
   iDebuff,
@@ -15,7 +16,8 @@ import {
   format,
 } from "./characters";
 import { Unit } from "types/unit";
-import { randomNumber } from "utils";
+import { randomNumber, round } from "utils";
+import { Player } from "types/player";
 
 /** An effect that happens when something else happens */
 export interface iTrigger {
@@ -263,13 +265,136 @@ export interface iEffect {
   data?: any;
 }
 
+export class Turn {
+  public logs: string[] = [];
+  public endOfTurnLogs: string[] = [];
+  private _turnNumber: number = 0;
+  private _character: Character | null = null;
+  private _label: string | null = null;
+
+  constructor(
+    turnNumber: number,
+    character: Character | null,
+    logs: string[],
+    endOfTurnLogs?: string[],
+    label?: string | null
+  ) {
+    this._turnNumber = turnNumber;
+    this._character = character;
+    this.logs = logs;
+    this.endOfTurnLogs = endOfTurnLogs ?? [];
+    this._label = label ?? null;
+  }
+
+  get turnNumber() {
+    return this._turnNumber;
+  }
+  get character() {
+    return this._character;
+  }
+
+  addLogs(logs: string[]) {
+    this.logs.push(...logs.filter((l) => !!l));
+  }
+  addEndOfTurnLogs(logs: string[]) {
+    this.endOfTurnLogs.push(...logs.filter((l) => !!l));
+  }
+  copy() {
+    return new Turn(
+      this._turnNumber,
+      this._character,
+      this.logs,
+      this.endOfTurnLogs,
+      this._label
+    );
+  }
+}
+
+interface iSimulation {
+  total: number;
+  playerWins: number;
+  opponentWins: number;
+  matchHistory: Turn[][];
+}
 export class Engine {
   private _playerCharacters: Character[] = [];
   private _opponentCharacters: Character[] = [];
   private _triggers: iTrigger[] = [];
-  public logs: string[] = [];
+  private _simulationData: iSimulation = {
+    total: 1,
+    playerWins: 0,
+    opponentWins: 0,
+    matchHistory: [],
+  };
+  public turns: Turn[] = [];
 
-  constructor(playerUnits: Character[], opponentUnits: Character[]) {
+  constructor() {}
+
+  private get allCharacters() {
+    return [...this._playerCharacters, ...this._opponentCharacters];
+  }
+  public get totalSimulations() {
+    return this._simulationData.total;
+  }
+  public set totalSimulations(val: number) {
+    if (val <= 10) {
+      this._simulationData.total = val;
+    }
+  }
+  public get matchHistory() {
+    return this._simulationData.matchHistory;
+  }
+  public get playerWins() {
+    return this._simulationData.playerWins;
+  }
+  public get opponentWins() {
+    return this._simulationData.opponentWins;
+  }
+  public get playerWinRate(): number {
+    return (
+      round(this.playerWins / (this.playerWins + this.opponentWins), 2) * 100
+    );
+  }
+  public get opponentWinRate(): number {
+    return (
+      round(this.opponentWins / (this.playerWins + this.opponentWins), 2) * 100
+    );
+  }
+
+  public startSimulation(playerUnits: Character[], opponentUnits: Character[]) {
+    this._simulationData.matchHistory = [];
+    this._simulationData.opponentWins = 0;
+    this._simulationData.playerWins = 0;
+
+    for (let i = 0; i < this._simulationData.total; i++) {
+      this.initializeMatch(playerUnits, opponentUnits);
+
+      let turnNumber = 0;
+      do {
+        turnNumber++;
+        this.nextTurn(turnNumber);
+        if (turnNumber === 1) {
+          console.log(this.turns);
+        }
+        if (this.checkMatchEnd(turnNumber, 1000)) {
+          this._simulationData.matchHistory.push(
+            this.turns //.map((x) => x.copy())
+          );
+          break;
+        }
+      } while (true);
+    }
+  }
+
+  private initializeMatch(
+    playerUnits: Character[],
+    opponentUnits: Character[]
+  ) {
+    this.turns = [];
+    this._playerCharacters = [];
+    this._opponentCharacters = [];
+    // this._triggers = []
+
     playerUnits.forEach((unit) => {
       if (!this._playerCharacters.some((x) => x.id === unit.id)) {
         this._playerCharacters.push(unit);
@@ -281,19 +406,23 @@ export class Engine {
       }
     });
 
-    this.logs = [];
-    this.initializeMatch();
-  }
-
-  private get allCharacters() {
-    return [...this._playerCharacters, ...this._opponentCharacters];
-  }
-
-  private initializeMatch() {
     const allCharacters: Character[] = [
       ...this._playerCharacters,
       ...this._opponentCharacters,
     ] as Character[];
+    this._playerCharacters.forEach((x) =>
+      x.reset(
+        this._playerCharacters as Character[],
+        this._opponentCharacters as Character[]
+      )
+    );
+    this._opponentCharacters.forEach((x) =>
+      x.reset(
+        this._opponentCharacters as Character[],
+        this._playerCharacters as Character[]
+      )
+    );
+
     allCharacters.forEach((x) => x.initialize());
 
     const startTriggers: Character[] = allCharacters
@@ -336,10 +465,7 @@ export class Engine {
       ]);
 
       if (pregameLogs.length > 0) {
-        this.logs.push(
-          `${format.characterName(char.name, char.owner)} - Match Set Up`
-        );
-        this.logs.push(...pregameLogs);
+        this.turns.push(new Turn(0, char, pregameLogs, [], "Match Set Up"));
       }
     });
 
@@ -354,39 +480,11 @@ export class Engine {
 
       if (startLogs.length > 0) {
         i++;
-        this.logs.push(
-          `Turn 0.${i}`,
-          `${format.characterName(char.name, char.owner)} - Start of Match`
+        this.turns.push(
+          new Turn(0 + 0.1 * i, char, startLogs, [], "Start of Match")
         );
-        this.logs.push(...startLogs);
       }
     });
-
-    this._playerCharacters.forEach((x) =>
-      x.reset(
-        this._playerCharacters as Character[],
-        this._opponentCharacters as Character[]
-      )
-    );
-    this._opponentCharacters.forEach((x) =>
-      x.reset(
-        this._opponentCharacters as Character[],
-        this._playerCharacters as Character[]
-      )
-    );
-  }
-
-  public start(maxRoundCount: number) {
-    let j = 0;
-    do {
-      j++;
-      this.nextTurn(j);
-      const playerLost = this._playerCharacters.every((x) => x.health <= 0);
-      const opponentList = this._opponentCharacters.every((x) => x.health <= 0);
-      if (playerLost || opponentList || j > maxRoundCount) {
-        return { playerWins: playerLost };
-      }
-    } while (true);
   }
 
   private nextTurn(turnNumber: number) {
@@ -414,8 +512,32 @@ export class Engine {
         }
       });
 
-      this.logs.push(`Turn ${turnNumber}`);
-      this.logs.push(...character.takeAction());
+      const { logs, endOfTurnLogs } = character.takeAction();
+      this.turns.push(new Turn(turnNumber, character, logs, endOfTurnLogs));
     }
+  }
+
+  public checkMatchEnd(currentRound: number, maxRounds: number): boolean {
+    const playerLost = this._playerCharacters.every((x) => x.health <= 0);
+    const opponentLost = this._opponentCharacters.every((x) => x.health <= 0);
+    if (playerLost || opponentLost || currentRound > maxRounds) {
+      this.turns.push(
+        new Turn(Infinity, null, [
+          `Match ends: ${
+            opponentLost
+              ? store.state.player.player?.name
+              : store.state.opponents.player?.name
+          } is the winner!`,
+        ])
+      );
+
+      if (playerLost) {
+        this._simulationData.playerWins++;
+      } else if (opponentLost) {
+        this._simulationData.opponentWins++;
+      }
+      return true;
+    }
+    return false;
   }
 }

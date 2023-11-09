@@ -287,7 +287,7 @@ export class Character {
     this._categories = data.categories;
   }
 
-  //Stats
+  /** The modified maximum amount of Protection */
   public get maxProtection() {
     return this.getModifiedStats(
       [],
@@ -298,6 +298,7 @@ export class Character {
   public set maxProtection(val) {
     this._baseStats.maxProtection = val;
   }
+  /** The modified maximum amount of Health */
   public get maxHealth() {
     return this.getModifiedStats(
       [
@@ -317,6 +318,7 @@ export class Character {
   public set maxHealth(val) {
     this._baseStats.maxHealth = val;
   }
+  /** The current Health */
   public get health() {
     return this._baseStats.health;
   }
@@ -326,6 +328,7 @@ export class Character {
       this._baseStats.health = this._baseStats.maxHealth;
     }
   }
+  /** The current Protection */
   public get protection() {
     return this._baseStats.protection;
   }
@@ -345,9 +348,16 @@ export class Character {
       this.removePassiveTriggers();
     }
   }
+  /** Is the character dead */
   public get isDead() {
     return this.health <= 0;
   }
+  /** Heals the character for a determined amount of health or protection
+   *
+   * @healData (iEffect["heal"]) - The data that determines how much and what type of healing to do
+   * @ability (iGeneralAbility | null) - The ability that has the heal effect
+   * @amountSource (number) - The amount to be healed
+   */
   public heal(
     healData: iEffect["heal"],
     ability?: iGeneralAbility | null,
@@ -395,6 +405,7 @@ export class Character {
     }
     return logs;
   }
+  /** The current Health Steal */
   public get healthSteal() {
     return this.getModifiedStats(
       [
@@ -411,6 +422,7 @@ export class Character {
       this.getTempStat("healthSteal")
     );
   }
+  /** The current Speed */
   public get speed() {
     return this.getModifiedStats(
       [
@@ -431,6 +443,7 @@ export class Character {
   public set speed(val) {
     this._baseStats.speed = val;
   }
+  /** The current Critical Damage (decimal) */
   public get critDamage() {
     return this.getModifiedStats(
       [
@@ -451,6 +464,7 @@ export class Character {
       this.getTempStat("critDamage")
     );
   }
+  /** The current Tenacity (decimal) */
   public get tenacity() {
     return this.getModifiedStats(
       [
@@ -470,6 +484,7 @@ export class Character {
   public set tenacity(val) {
     this._baseStats.tenacity = val;
   }
+  /** The current Potency (decimal) */
   public get potency() {
     return this.getModifiedStats(
       [
@@ -490,7 +505,7 @@ export class Character {
     this._baseStats.potency = val;
   }
   /**
-   * The likelyhood (in decimal, .5 is 50% chance) of counter attacking
+   * The likelyhood (decimal) of counter attacking
    */
   public get counterChance() {
     if (this.hasDebuff("Stun")) {
@@ -571,9 +586,11 @@ export class Character {
     return logs;
   }
 
+  /** The physical stats of a character */
   public get physical() {
     const self = this;
     return {
+      /** Physical Offense */
       get offense() {
         return self.getModifiedStats(
           [
@@ -588,6 +605,7 @@ export class Character {
       set offense(val) {
         self._baseStats.physical.offense = val;
       },
+      /** Physical Crit Chance (decimal) */
       get critChance() {
         return self.getModifiedStats(
           [
@@ -604,6 +622,7 @@ export class Character {
       set critChance(val) {
         self._baseStats.physical.critChance = val;
       },
+      /** Physical Armor (flat number) */
       get armor() {
         return self.getModifiedStats(
           [
@@ -618,6 +637,7 @@ export class Character {
       set armor(val) {
         self._baseStats.physical.armor = val;
       },
+      /** Physical Armor Penetration */
       get armorPen() {
         return self.getModifiedStats(
           [
@@ -634,6 +654,7 @@ export class Character {
       set armorPen(val) {
         self._baseStats.physical.armorPen = val;
       },
+      /** Physical Accuracy (decimal) */
       get accuracy() {
         return self.getModifiedStats(
           [
@@ -651,6 +672,7 @@ export class Character {
       set accuracy(val) {
         self._baseStats.physical.accuracy = val;
       },
+      /** Physical Dodge Chance (decimal) */
       get dodge() {
         return self.getModifiedStats(
           [
@@ -667,6 +689,7 @@ export class Character {
       set dodge(val) {
         self._baseStats.physical.dodge = val;
       },
+      /** Physical Critical Avoice (decimal) */
       get critAvoid() {
         return self.getModifiedStats(
           [
@@ -1164,13 +1187,13 @@ export class Character {
           logs.push(
             `${format.buff(listOfRemovedBuffs.map((x) => x.name))} ${
               listOfRemovedBuffs.length <= 1 ? "was" : "were"
-            } removed`
+            } removed from ${format.characterName(this.name, this.owner)}`
           );
         }
         listOfRemovedBuffs.forEach((buff) => {
           buff.triggers?.forEach((trigger) => {
             if (trigger.triggerType === "expires") {
-              // logs.push(...this.executeTrigger(trigger));
+              logs.push(...this.executeTrigger(trigger));
             }
           });
         });
@@ -1330,7 +1353,7 @@ export class Character {
           logs.push(
             `${format.debuff(listOfRemovedDebuffs.map((x) => x.name))} ${
               listOfRemovedDebuffs.length <= 1 ? "was" : "were"
-            } removed`
+            } removed from ${format.characterName(this.name, this.owner)}`
           );
         }
 
@@ -1986,7 +2009,7 @@ export class Character {
       debuff.isNew = false;
     });
   }
-  public takeAction() {
+  public takeAction(): { logs: string[]; endOfTurnLogs: string[] } {
     this.startOfTurn();
     this._tm = 0;
     const logs: string[] = [];
@@ -2008,8 +2031,10 @@ export class Character {
       }
     }
 
-    logs.push(...this.endOfTurn(ability));
-    return logs.filter((l) => !!l);
+    return {
+      logs,
+      endOfTurnLogs: this.endOfTurn(ability),
+    };
   }
   public useAbility(
     ability: iAbility,
@@ -2511,27 +2536,6 @@ export class Character {
     }
     return logs;
   }
-  // public removeEvents(events?: iTrigger[]): string[] {
-  //   const logs: string[] = [];
-
-  //   events?.forEach((event) => {
-  //     [...this._teammates, ...this._opponents].forEach((target) => {
-  //       event.buffs?.forEach((buff) => {
-  //         logs.push(...target.removeBuff(buff));
-  //       });
-  //       event.debuffs?.forEach((debuff) => {
-  //         logs.push(...target.removeDebuff(debuff));
-  //       });
-  //       event.statusEffects?.forEach((s) => {
-  //         logs.push(...target.removeStatusEffect(s));
-  //       });
-  //       event.triggers?.forEach((trigger) => {
-  //         logs.push(...target.removeTrigger(trigger));
-  //       });
-  //     });
-  //   });
-  //   return logs;
-  // }
   /**
    * Execute all triggers that are contained within this._triggers
    * @param types The types of triggers that should occur
@@ -2766,10 +2770,6 @@ export class Character {
       },
       []
     );
-
-    if (logs.length > 0) {
-      logs.unshift("-- End of the Turn --");
-    }
 
     return logs;
   }

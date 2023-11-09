@@ -104,15 +104,15 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
           {
             targets: { filters: [{ targetIds: ["target"] }] },
             effects: [
-              {
-                debuffs: [
-                  {
-                    duration: 1,
-                    name: "Stun",
-                    id: uuid(),
-                  },
-                ],
-              },
+              // {
+              //   debuffs: [
+              //     {
+              //       duration: 1,
+              //       name: "Stun",
+              //       id: uuid(),
+              //     },
+              //   ],
+              // },
             ],
           },
         ],

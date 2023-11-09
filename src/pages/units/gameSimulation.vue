@@ -126,9 +126,9 @@
               <input
                 class="form-control form-control-sm"
                 type="number"
-                v-model.number="simulation.count"
+                v-model.number="gameEngine.totalSimulations"
                 min="1"
-                max="1000"
+                max="10"
               />
               <button class="btn btn-sm btn-primary" @click="start()">
                 Run the Simulations
@@ -136,25 +136,71 @@
             </div>
           </div>
         </div>
-        <div class="row" v-if="logs.length > 0">
+        <div class="row" v-if="gameEngine.matchHistory.length > 0">
           <div class="col">
-            <div>{{ player.name }} Wins: {{ simulation.playerWins }}</div>
-            <div>{{ opponent.name }} Wins: {{ simulation.opponentWins }}</div>
-            <div>
-              Winrate:
-              {{
-                round(
-                  simulation.playerWins /
-                    (simulation.playerWins + simulation.opponentWins),
-                  2
-                ) * 100
-              }}%
-            </div>
-            <ol>
-              <li v-for="(log, index) in logs" :key="index">
-                <span v-html="log"></span>
+            <ul class="nav nav-tabs my-3" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link active"
+                  data-bs-toggle="tab"
+                  data-bs-target="#simulationSummary"
+                  type="button"
+                  role="tab"
+                >
+                  Summary
+                </button>
               </li>
-            </ol>
+              <li
+                class="nav-item"
+                role="presentation"
+                v-for="(match, index) in gameEngine.matchHistory"
+              >
+                <button
+                  class="nav-link"
+                  data-bs-toggle="tab"
+                  :data-bs-target="`#match-${index}`"
+                  type="button"
+                  role="tab"
+                >
+                  Match {{ index + 1 }}
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane fade show active" id="simulationSummary">
+                <div>{{ player.name }} Wins: {{ gameEngine.playerWins }}</div>
+                <div>
+                  {{ opponent.name }} Wins: {{ gameEngine.opponentWins }}
+                </div>
+                <div>
+                  Winrate:
+                  {{ gameEngine.playerWinRate }}%
+                </div>
+              </div>
+              <div
+                class="tab-pane fade"
+                :id="`match-${index}`"
+                role="tabpanel"
+                v-for="(match, index) in gameEngine.matchHistory"
+              >
+                <template
+                  v-for="(turn, turnIndex) in match"
+                  :key="`match-${index}-turn-${turnIndex}`"
+                >
+                  <h6>Turn {{ turn.turnNumber }}:</h6>
+                  <ul>
+                    <li v-for="log in turn.logs">
+                      <div v-html="log"></div>
+                    </li>
+                    <li v-if="turn.endOfTurnLogs.length">- End of Turn -</li>
+                    <li v-for="log in turn.endOfTurnLogs">
+                      <div v-html="log"></div>
+                    </li>
+                  </ul>
+                  <ul v-if="turn.endOfTurnLogs.length"></ul>
+                </template>
+              </div>
+            </div>
           </div>
         </div>
       </template>
@@ -181,14 +227,9 @@ import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
 
 interface dataModel {
-  simulation: {
-    count: number;
-    playerWins: number;
-    opponentWins: number;
-  };
+  gameEngine: Engine;
   playerTeam: Character[];
   opponentTeam: Character[];
-  logs: string[];
   showDeleteOpponentConfirm: boolean;
   allyCode: string;
 }
@@ -198,14 +239,9 @@ export default defineComponent({
   components: { UnitSearch },
   data(): dataModel {
     return {
-      simulation: {
-        count: 1,
-        playerWins: 0,
-        opponentWins: 0,
-      },
+      gameEngine: new Engine(),
       playerTeam: [],
       opponentTeam: [],
-      logs: [],
       showDeleteOpponentConfirm: false,
       allyCode: "",
     };
@@ -279,30 +315,10 @@ export default defineComponent({
       );
     },
     start() {
-      const maxRoundCount = 1000; //to prevent infinite loops
-      this.logs = [];
-      this.simulation.playerWins = 0;
-      this.simulation.opponentWins = 0;
-      this.simulation.count = Math.min(this.simulation.count, 100);
-      for (let i = 0; i < this.simulation.count; i++) {
-        const match = new Engine(
-          this.playerTeam as Character[],
-          this.opponentTeam as Character[]
-        );
-        const { playerWins } = match.start(maxRoundCount);
-        match.logs.push(
-          `Match ends: ${
-            playerWins ? this.player.name : this.opponent.name
-          } is the winner!`
-        );
-        this.logs = match.logs;
-
-        if (playerWins) {
-          this.simulation.playerWins++;
-        } else {
-          this.simulation.opponentWins++;
-        }
-      }
+      this.gameEngine.startSimulation(
+        this.playerTeam as Character[],
+        this.opponentTeam as Character[]
+      );
     },
     removeOpponent() {
       this.deleteOpponent();
@@ -311,7 +327,6 @@ export default defineComponent({
       this.saveData();
     },
     numbersOnly,
-    round,
     disableLeader(teamName: "player" | "opponent", characterId): boolean {
       if (teamName === "player") {
         return this.playerTeam.some((character) => {
