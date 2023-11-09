@@ -1,35 +1,47 @@
 import { v4 as uuid } from "uuid";
 
-import { iAbility, iUniqueAbility } from "types/characters";
+import { iAbility, iUniqueAbility } from "types/gameEngine/abilities";
 
 const oldBen: Record<string, iAbility | iUniqueAbility> = {
   basicskill_OLDBENKENOBI: {
     id: "basicskill_OLDBENKENOBI",
     name: "Elegant Form",
-    targets: [
+    actions: [
       {
-        target: { targetCount: 1, allies: false },
-        debuffs: [
+        targets: { filters: [{ allies: false }], targetCount: 1 },
+        effects: [
           {
-            name: "Evasion Down",
-            duration: 2,
-            id: uuid(),
+            damage: {
+              modifier: {
+                value: 1.758,
+              },
+              damageType: "physical",
+            },
+            cantMiss: true,
+          },
+          {
+            debuffs: [
+              {
+                name: "Evasion Down",
+                duration: 2,
+                id: uuid(),
+              },
+            ],
+            cantMiss: true,
           },
         ],
-        damage: 1.758,
-        damageType: "physical",
-        cantMiss: true,
       },
       {
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        buffs: [
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        effects: [
           {
-            name: "Potency Up",
-            duration: 2,
-            id: uuid(),
+            buffs: [
+              {
+                name: "Potency Up",
+                duration: 2,
+                id: uuid(),
+              },
+            ],
           },
         ],
       },
@@ -40,43 +52,111 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
     name: "Mind Tricks",
     cooldown: 5,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        target: {
-          allies: false,
-        },
-        cantMiss: true,
-        debuffs: [
+        targets: { filters: [{ allies: false }] },
+        effects: [
           {
-            name: "Ability Block",
-            duration: 1,
-            id: uuid(),
-          },
-          {
-            name: "Offense Down",
-            duration: 2,
-            id: uuid(),
-          },
-          {
-            name: "TM Decrease",
-            duration: -60,
-            chance: 0.8,
-            id: uuid(),
-          },
-        ],
-      },
-      //todo: add the following to an event
-      {
-        target: {
-          tags: ["Jedi", "Rebel"],
-          allies: true,
-          scale: "Resisted",
-        },
-        buffs: [
-          {
-            duration: 3,
-            name: "TM Increase",
-            id: uuid(),
+            cantMiss: true,
+            debuffs: [
+              {
+                name: "Ability Block",
+                duration: 1,
+                id: uuid(),
+                triggers: [
+                  {
+                    id: uuid(),
+                    triggerType: "resistDetrimentalEffect",
+                    actions: [
+                      {
+                        targets: {
+                          filters: [
+                            { allies: true },
+                            { tags: ["Jedi", "Rebel"] },
+                          ],
+                        },
+                        effects: [
+                          {
+                            buffs: [
+                              {
+                                name: "TM Increase",
+                                duration: 3,
+                                id: uuid(),
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: "Offense Down",
+                duration: 2,
+                id: uuid(),
+                triggers: [
+                  {
+                    id: uuid(),
+                    triggerType: "resistDetrimentalEffect",
+                    actions: [
+                      {
+                        targets: {
+                          filters: [
+                            { allies: true },
+                            { tags: ["Jedi", "Rebel"] },
+                          ],
+                        },
+                        effects: [
+                          {
+                            buffs: [
+                              {
+                                name: "TM Increase",
+                                duration: 3,
+                                id: uuid(),
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: "TM Decrease",
+                duration: -60,
+                chance: 0.8,
+                id: uuid(),
+                triggers: [
+                  {
+                    id: uuid(),
+                    triggerType: "resistDetrimentalEffect",
+                    actions: [
+                      {
+                        targets: {
+                          filters: [
+                            { allies: true },
+                            { tags: ["Jedi", "Rebel"] },
+                          ],
+                        },
+                        effects: [
+                          {
+                            buffs: [
+                              {
+                                name: "TM Increase",
+                                duration: 3,
+                                id: uuid(),
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
@@ -87,40 +167,50 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
     name: "Devoted Protector",
     cooldown: 4,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        buffs: [
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        effects: [
           {
-            name: "Taunt",
-            duration: 2,
-            id: uuid(),
-            expires: {
-              target: {
-                tags: ["Self"],
-                allies: true,
+            buffs: [
+              {
+                name: "Taunt",
+                duration: 2,
+                id: uuid(),
+                triggers: [
+                  {
+                    id: uuid(),
+                    triggerType: "expires",
+                    actions: [
+                      {
+                        targets: {
+                          filters: [{ allies: true }, { tags: ["Self"] }],
+                        },
+                        effects: [
+                          {
+                            buffs: [{ name: "Taunt", duration: 1, id: uuid() }],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
               },
-              buffs: [
-                {
-                  name: "Taunt",
-                  duration: 1,
-                  id: uuid(),
-                },
-              ],
-            },
+            ],
           },
         ],
       },
       {
-        target: { allies: true },
-        buffs: [
+        targets: { filters: [{ allies: true }] },
+        effects: [
           {
-            name: "Defense Up",
-            id: uuid(),
-            duration: 2,
+            buffs: [
+              {
+                name: "Defense Up",
+                id: uuid(),
+                duration: 2,
+              },
+            ],
           },
         ],
       },
@@ -133,21 +223,26 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "receiveDamage",
         id: uuid(),
-        target: {
-          tags: ["Jedi & !Self", "Rebel & !Self"],
-          allies: true,
+        targets: {
+          filters: [
+            { allies: true },
+            { tags: ["Jedi & !Self", "Rebel & !Self"] },
+          ],
         },
-        events: [
+        actions: [
           {
-            target: {
-              targetIds: ["OLDBENKENOBI"],
-              allies: true,
+            targets: {
+              filters: [{ allies: true }, { targetIds: ["OLDBENKENOBI"] }],
             },
-            buffs: [
+            effects: [
               {
-                duration: 5,
-                name: "TM Increase",
-                id: uuid(),
+                buffs: [
+                  {
+                    duration: 5,
+                    name: "TM Increase",
+                    id: uuid(),
+                  },
+                ],
               },
             ],
           },
@@ -155,51 +250,48 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       },
       {
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         triggerType: "death",
-        events: [
+        triggerData: {
+          limit: 1,
+          frequency: "match",
+          count: 1,
+        },
+        actions: [
           {
-            triggerData: {
-              limit: 1,
-              frequency: "match",
-              count: 1,
-            },
-            target: {
-              allies: true,
-            },
-            buffs: [
+            targets: { filters: [{ allies: true }] },
+            effects: [
               {
-                duration: 2,
-                name: "Offense Up",
-                id: uuid(),
+                buffs: [
+                  {
+                    duration: 2,
+                    name: "Offense Up",
+                    id: uuid(),
+                  },
+                  {
+                    duration: 2,
+                    name: "Speed Up",
+                    id: uuid(),
+                  },
+                  {
+                    duration: 25,
+                    name: "TM Increase",
+                    id: uuid(),
+                  },
+                ],
               },
-              {
-                duration: 2,
-                name: "Speed Up",
-                id: uuid(),
-              },
-              {
-                duration: 25,
-                name: "TM Increase",
-                id: uuid(),
-              },
-            ],
-            actions: [
               {
                 heal: {
                   healthType: "protection",
                   amount: 0.5,
-                  type: "percent",
+                  amountType: "multiplicative",
                 },
               },
               {
                 heal: {
                   healthType: "health",
                   amount: 0.5,
-                  type: "percent",
+                  amountType: "multiplicative",
                 },
               },
             ],
@@ -215,32 +307,30 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          allies: true,
-        },
+        targets: { filters: [{ allies: true }] },
         actions: [
           {
-            stats: {
-              type: "flat",
-              statToModify: "dodge",
-              amount: 0.15,
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  modifiedType: "additive",
+                  statToModify: "dodge",
+                  amount: 0.15,
+                },
+              },
+            ],
           },
         ],
       },
       {
         triggerType: "dodge",
         id: uuid(),
-        target: {
-          allies: true,
-        },
-        events: [
+        targets: { filters: [{ allies: true }] },
+        actions: [
           {
-            target: {
-              tags: ["Self"],
-              allies: true,
-            },
-            actions: [
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
               {
                 buffs: [
                   {

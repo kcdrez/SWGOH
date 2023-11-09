@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 
-import { iAbility, iUniqueAbility } from "types/characters";
+import { iAbility, iUniqueAbility } from "types/gameEngine/abilities";
 
 const cls: Record<string, iAbility | iUniqueAbility> = {
   specialskill_COMMANDERLUKESKYWALKER02: {
@@ -8,17 +8,16 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
     name: "Call to Action",
     cooldown: 4,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        actions: [
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        effects: [
           {
             dispel: {
               debuffs: "all",
             },
+          },
+          {
             buffs: [
               {
                 duration: 100,
@@ -26,17 +25,19 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
                 id: uuid(),
               },
             ],
-            heal: {
-              healthType: "health",
-              amount: 0.4,
-              type: "percent",
-            },
           },
           {
             heal: {
               healthType: "protection",
               amount: 0.4,
-              type: "percent",
+              amountType: "multiplicative",
+            },
+          },
+          {
+            heal: {
+              healthType: "health",
+              amount: 0.4,
+              amountType: "multiplicative",
             },
           },
           {
@@ -73,39 +74,42 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
     name: "Use the Force",
     cooldown: 4,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        target: { targetCount: 1, allies: false },
-        actions: [
+        targets: { filters: [{ allies: false }], targetCount: 1 },
+        effects: [
           {
             dispel: {
               buffs: "all",
             },
           },
-        ],
-        debuffs: [
-          { name: "TM Decrease", duration: -100, id: uuid() },
-          { name: "Buff Immunity", duration: 2, id: uuid() },
-          { name: "Tenacity Down", duration: 2, id: uuid() },
-        ],
-        damage: 2.978,
-        damageType: "physical",
-      },
-      {
-        target: { targetCount: 1, allies: false },
-        actions: [
           {
-            cooldown: {
-              id: "specialskill_COMMANDERLUKESKYWALKER01",
-              amount: -1,
-              target: "Self",
+            debuffs: [
+              { name: "TM Decrease", duration: -100, id: uuid() },
+              { name: "Buff Immunity", duration: 2, id: uuid() },
+              { name: "Tenacity Down", duration: 2, id: uuid() },
+            ],
+          },
+          {
+            damage: {
+              damageType: "physical",
+              modifier: {
+                value: 2.978,
+              },
             },
+          },
+          {
             condition: {
               stats: {
                 statToModify: "health",
                 amount: 1,
-                type: "percent",
+                modifiedType: "multiplicative",
               },
+            },
+            cooldown: {
+              id: "specialskill_COMMANDERLUKESKYWALKER01",
+              amount: -1,
+              target: { filters: [{ allies: true }, { tags: ["Self"] }] },
             },
           },
         ],
@@ -115,22 +119,18 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
   basicskill_COMMANDERLUKESKYWALKER: {
     id: "basicskill_COMMANDERLUKESKYWALKER",
     name: "Destined Strike",
-    targets: [
+    actions: [
       {
-        target: { targetCount: 1, allies: false },
-        debuffs: [
+        targets: { filters: [{ allies: false }], targetCount: 1 },
+        effects: [
           {
-            name: "Speed Down",
-            duration: 1,
-            id: uuid(),
+            damage: {
+              damageType: "physical",
+              modifier: {
+                value: 1.781,
+              },
+            },
           },
-          {
-            name: "Defense Down",
-            duration: 1,
-            id: uuid(),
-          },
-        ],
-        actions: [
           {
             condition: {
               debuffs: ["Speed Down"],
@@ -155,9 +155,21 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
               },
             ],
           },
+          {
+            debuffs: [
+              {
+                name: "Speed Down",
+                duration: 2,
+                id: uuid(),
+              },
+              {
+                name: "Defense Down",
+                duration: 2,
+                id: uuid(),
+              },
+            ],
+          },
         ],
-        damage: 1.781,
-        damageType: "physical",
       },
     ],
   },
@@ -168,71 +180,71 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
         actions: [
           {
-            condition: {
-              buffs: ["Call to Action"],
-              inverted: true,
-            },
-            stats: {
-              amount: 0.5,
-              statToModify: "critAvoid",
-              type: "flat",
-            },
-          },
-          {
-            condition: {
-              buffs: ["Call to Action"],
-              inverted: true,
-            },
-            stats: {
-              amount: 1,
-              statToModify: "tenacity",
-              type: "flat",
-            },
-          },
-          {
-            condition: {
-              buffs: ["Call to Action"],
-              inverted: true,
-            },
-            stats: {
-              amount: 0.5,
-              statToModify: "counter",
-              type: "flat",
-            },
-          },
-          {
-            condition: {
-              buffs: ["Call to Action"],
-              inverted: true,
-            },
-            stats: {
-              amount: 0.5,
-              statToModify: "defense",
-              type: "percent",
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                condition: {
+                  buffs: ["Call to Action"],
+                  inverted: true,
+                },
+                stats: {
+                  amount: 0.5,
+                  statToModify: "critAvoid",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                condition: {
+                  buffs: ["Call to Action"],
+                  inverted: true,
+                },
+                stats: {
+                  amount: 1,
+                  statToModify: "tenacity",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                condition: {
+                  buffs: ["Call to Action"],
+                  inverted: true,
+                },
+                stats: {
+                  amount: 0.5,
+                  statToModify: "counterChance",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                condition: {
+                  buffs: ["Call to Action"],
+                  inverted: true,
+                },
+                stats: {
+                  amount: 0.5,
+                  statToModify: "defense",
+                  modifiedType: "multiplicative",
+                },
+              },
+            ],
           },
         ],
       },
       {
         triggerType: "receiveDamage",
         id: uuid(),
-        target: {
-          tags: ["Rebel & !Self"],
-          allies: true,
-        },
-        events: [
+        targets: { filters: [{ allies: true }, { tags: ["Rebel & !Self"] }] },
+        actions: [
           {
-            target: {
-              targetIds: ["COMMANDERLUKESKYWALKER"],
-              allies: true,
+            targets: {
+              filters: [
+                { allies: true },
+                { targetIds: ["COMMANDERLUKESKYWALKER"] },
+              ],
             },
-            actions: [
+            effects: [
               {
                 buffs: [
                   {
@@ -255,58 +267,42 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
         actions: [
           {
-            stats: {
-              amount: 0.4,
-              statToModify: "potency",
-              type: "flat",
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  amount: 0.4,
+                  statToModify: "potency",
+                  modifiedType: "additive",
+                },
+              },
+            ],
           },
         ],
       },
       {
         triggerType: "resistDetrimentalEffect",
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
         actions: [
           {
-            heal: {
-              healthType: "health",
-              amount: 0.05,
-              type: "percent",
-            },
-          },
-          {
-            heal: {
-              healthType: "protection",
-              amount: 0.05,
-              type: "percent",
-            },
-          },
-        ],
-      },
-      {
-        triggerType: "inflictDebuff",
-        id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        actions: [
-          {
-            buffs: [
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
               {
-                name: "TM Increase",
-                duration: 10,
-                id: uuid(),
+                heal: {
+                  healthType: "protection",
+                  amount: 0.05,
+                  amountType: "multiplicative",
+                },
+              },
+              {
+                heal: {
+                  healthType: "health",
+                  amount: 0.05,
+                  amountType: "multiplicative",
+                },
               },
             ],
           },
@@ -315,17 +311,32 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "inflictDebuff",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        events: [
+        targets: { filters: [{ tags: ["Self"], allies: true }] },
+        actions: [
           {
-            target: {
-              tags: ["!Self"],
-              allies: true,
-            },
-            actions: [
+            targets: { filters: [{ tags: ["Self"], allies: true }] },
+            effects: [
+              {
+                buffs: [
+                  {
+                    name: "TM Increase",
+                    duration: 10,
+                    id: uuid(),
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        triggerType: "inflictDebuff",
+        id: uuid(),
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        actions: [
+          {
+            targets: { filters: [{ allies: true }, { tags: ["!Self"] }] },
+            effects: [
               {
                 buffs: [
                   {
@@ -348,47 +359,43 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          allies: true,
-          tags: ["Rebel"],
-        },
         actions: [
           {
-            stats: {
-              amount: 0.5,
-              statToModify: "counter",
-              type: "flat",
-            },
-          },
-          {
-            stats: {
-              amount: 0.5,
-              statToModify: "defense",
-              type: "percent",
-            },
-          },
-          {
-            stats: {
-              amount: 0.15,
-              statToModify: "offense",
-              type: "percent",
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Rebel"] }] },
+            effects: [
+              {
+                stats: {
+                  amount: 0.5,
+                  statToModify: "counterChance",
+                  modifiedType: "additive",
+                },
+              },
+              {
+                stats: {
+                  amount: 0.5,
+                  statToModify: "defense",
+                  modifiedType: "multiplicative",
+                },
+              },
+              {
+                stats: {
+                  amount: 0.15,
+                  statToModify: "offense",
+                  modifiedType: "multiplicative",
+                },
+              },
+            ],
           },
         ],
       },
       {
-        target: {
-          allies: false,
-        },
+        targets: { filters: [{ allies: false }] },
         triggerType: "resistDetrimentalEffect",
         id: uuid(),
-        events: [
+        actions: [
           {
-            target: {
-              allies: false,
-              tags: ["Rebel"],
-            },
-            actions: [
+            targets: { filters: [{ allies: false }, { tags: ["Rebel"] }] },
+            effects: [
               {
                 buffs: [
                   {

@@ -1,24 +1,34 @@
 import { v4 as uuid } from "uuid";
 
-import { iAbility, iUniqueAbility } from "types/characters";
+import { iAbility, iUniqueAbility } from "types/gameEngine/abilities";
 
 const chewy: Record<string, iAbility | iUniqueAbility> = {
   basicskill_CHEWBACCALEGENDARY: {
     id: "basicskill_CHEWBACCALEGENDARY",
     name: "Overcharged Shot",
     sort: 0,
-    targets: [
+    actions: [
       {
-        target: { targetCount: 1, allies: false },
-        debuffs: [
+        targets: { filters: [{ allies: false }], targetCount: 1 },
+        effects: [
           {
-            name: "Tenacity Down",
-            duration: 2,
-            id: uuid(),
+            damage: {
+              damageType: "physical",
+              modifier: {
+                value: 1.4,
+              },
+            },
+          },
+          {
+            debuffs: [
+              {
+                name: "Tenacity Down",
+                duration: 2,
+                id: uuid(),
+              },
+            ],
           },
         ],
-        damage: 1.4,
-        damageType: "physical",
       },
     ],
   },
@@ -27,78 +37,88 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
     name: "Pulverize",
     cooldown: 4,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        target: { allies: false },
-        actions: [
+        targets: { filters: [{ allies: false }] },
+        effects: [
           {
             dispel: {
               buffs: "all",
             },
           },
+          {
+            damage: {
+              damageType: "physical",
+              modifier: {
+                value: 0.9,
+                stats: {
+                  statToModify: "armor",
+                  amount: 0,
+                  modifiedType: "multiplicative",
+                },
+              },
+            },
+          },
         ],
       },
       {
-        target: { allies: false },
-        damage: 0.9,
-        damageType: "physical",
-        stats: {
-          statToModify: "armor",
-          amount: 0,
-          type: "percent",
-        },
-      },
-      {
-        target: { tags: ["Self"], allies: true },
-        buffs: [
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        effects: [
           {
-            name: "Offense Up",
-            duration: 2,
-            id: uuid(),
-          },
-          {
-            name: "Critical Chance Up",
-            duration: 2,
-            id: uuid(),
+            buffs: [
+              {
+                name: "Offense Up",
+                duration: 2,
+                id: uuid(),
+              },
+              {
+                name: "Critical Chance Up",
+                duration: 2,
+                id: uuid(),
+              },
+            ],
           },
         ],
       },
     ],
   },
   specialskill_CHEWBACCALEGENDARY02: {
-    id: "specialskill_CHEWBACCALEGENDARY01",
+    id: "specialskill_CHEWBACCALEGENDARY02",
     name: "Furious Bowcaster",
     cooldown: 3,
     turnsRemaining: 0,
-    targets: [
+    actions: [
       {
-        target: {
-          targetCount: 1,
-          allies: false,
-        },
-        cantMiss: true,
-        debuffs: [
+        targets: { filters: [{ allies: false }], targetCount: 1 },
+        effects: [
           {
-            name: "Stun",
-            duration: 1,
-            id: uuid(),
+            cantMiss: true,
+            damage: {
+              modifier: {
+                value: 2.4,
+              },
+              damageType: "physical",
+            },
+            debuffs: [
+              {
+                name: "Stun",
+                duration: 1,
+                id: uuid(),
+              },
+            ],
           },
-        ],
-        damage: 2.4,
-        damageType: "physical",
-        actions: [
           {
             condition: {
               stats: {
                 statToModify: "protection",
-                type: "flat",
+                modifiedType: "additive",
                 amount: 1,
                 amountType: "less",
               },
             },
             cooldown: {
-              amount: 0,
-              target: "Self",
+              amount: -Infinity,
+              target: { filters: [{ allies: true }, { tags: ["Self"] }] },
               id: "specialskill_CHEWBACCALEGENDARY01",
             },
           },
@@ -113,103 +133,121 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
       {
         id: uuid(),
         triggerType: "pregame",
-        triggerData: {
-          limit: 1,
-          count: 1,
-          frequency: "match",
-        },
-        target: {
-          tags: ["Self"],
-        },
-        events: [
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        actions: [
           {
-            target: {
-              weakest: true,
-              allies: true,
-              tags: ["!Self"],
-              targetIds: ["!HANSOLO"],
+            targets: {
+              filters: [
+                { allies: true },
+                { tags: ["!Self"] },
+                { targetIds: ["!HANSOLO"] },
+              ],
               targetCount: 1,
+              weakest: true,
             },
-            statusEffects: [
+            effects: [
               {
-                name: "Guard",
-                duration: Infinity,
-                id: uuid(),
-              },
-            ],
-            triggers: [
-              {
-                triggerType: "useAbility",
-                id: uuid(),
-                target: { targetIds: ["target"] },
-                triggerData: {
-                  frequency: "turn",
-                  count: 1,
-                  limit: 1,
-                },
-                actions: [
+                statusEffects: [
                   {
-                    assist: {
-                      chance: 1,
-                      target: {
-                        target: {
-                          allies: true,
-                          targetIds: ["CHEWBACCALEGENDARY"],
-                        },
-                      },
-                      modifier: {
-                        stats: {
-                          type: "percent",
-                          statToModify: "offense",
-                          amount: 0.8,
-                        },
-                      },
+                    name: "Guard",
+                    duration: Infinity,
+                    id: uuid(),
+                  },
+                ],
+                triggers: [
+                  {
+                    triggerType: "useAbility",
+                    id: uuid(),
+                    triggerData: {
+                      frequency: "turn",
+                      count: 1,
+                      limit: 1,
                     },
+                    actions: [
+                      {
+                        targets: { filters: [{ targetIds: ["target"] }] },
+                        effects: [
+                          {
+                            assist: {
+                              chance: 1,
+                              targets: {
+                                filters: [
+                                  { allies: true },
+                                  { targetIds: ["CHEWBACCALEGENDARY"] },
+                                ],
+                              },
+                              modifier: {
+                                stats: {
+                                  modifiedType: "multiplicative",
+                                  statToModify: "offense",
+                                  amount: 0.8,
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    ],
                   },
                 ],
               },
             ],
           },
+        ],
+      },
+      {
+        id: uuid(),
+        triggerType: "pregame",
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        actions: [
           {
-            target: {
-              targetIds: ["HANSOLO"],
-              allies: true,
+            targets: {
+              filters: [{ allies: true }, { targetIds: ["HANSOLO"] }],
             },
-            statusEffects: [
+            effects: [
               {
-                name: "Guard",
-                duration: Infinity,
-                id: uuid(),
-              },
-            ],
-            triggers: [
-              {
-                triggerType: "useAbility",
-                id: uuid(),
-                target: { targetIds: ["target"] },
-                triggerData: {
-                  frequency: "turn",
-                  count: 1,
-                  limit: 1,
-                },
-                actions: [
+                statusEffects: [
                   {
-                    assist: {
-                      chance: 1,
-                      target: {
-                        target: {
-                          allies: true,
-                          targetIds: ["CHEWBACCALEGENDARY"],
-                        },
-                      },
-                      modifier: {
-                        stats: {
-                          type: "percent",
-                          statToModify: "offense",
-                          amount: 0.8,
-                        },
-                      },
+                    name: "Guard",
+                    duration: Infinity,
+                    id: uuid(),
+                  },
+                ],
+                triggers: [
+                  {
+                    triggerType: "useAbility",
+                    id: uuid(),
+
+                    triggerData: {
+                      frequency: "turn",
+                      count: 1,
+                      limit: 1,
                     },
+                    actions: [
+                      {
+                        targets: { filters: [{ targetIds: ["target"] }] },
+                        effects: [
+                          {
+                            assist: {
+                              chance: 1,
+                              targets: {
+                                filters: [
+                                  { allies: true },
+                                  { targetIds: ["CHEWBACCALEGENDARY"] },
+                                ],
+                              },
+                              modifier: {
+                                stats: {
+                                  modifiedType: "multiplicative",
+                                  statToModify: "offense",
+                                  amount: 0.8,
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    ],
                   },
                 ],
               },
@@ -220,51 +258,25 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "dealDamage",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        events: [
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        actions: [
           {
-            target: {
-              statusEffects: ["Guard"],
-              allies: true,
+            targets: {
+              filters: [{ allies: true }, { statusEffects: ["Guard"] }],
             },
-            actions: [
-              {
-                heal: {
-                  healthType: "health",
-                  amount: 0.03,
-                  type: "percent",
-                },
-              },
+            effects: [
               {
                 heal: {
                   healthType: "protection",
                   amount: 0.03,
-                  type: "percent",
+                  amountType: "multiplicative",
                 },
               },
-            ],
-          },
-          {
-            target: {
-              allies: true,
-              tags: ["Self"],
-            },
-            actions: [
               {
                 heal: {
                   healthType: "health",
                   amount: 0.03,
-                  type: "percent",
-                },
-              },
-              {
-                heal: {
-                  healthType: "protection",
-                  amount: 0.03,
-                  type: "percent",
+                  amountType: "multiplicative",
                 },
               },
             ],
@@ -281,39 +293,44 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         actions: [
           {
-            immune: {
-              negativeStatusEffects: ["Ability Block", "Cooldown Increase"],
-            },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                immune: {
+                  negativeStatusEffects: ["Ability Block", "Cooldown Increase"],
+                },
+              },
+            ],
           },
         ],
       },
       {
         id: uuid(),
         triggerType: "dealDamage",
-        target: {
-          tags: ["Self"],
-          allies: true,
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        triggerData: {
+          excludeAbilities: ["uniqueskill_CHEWBACCALEGENDARY02"],
         },
-        events: [
+        actions: [
           {
-            target: { targetIds: ["target"] },
-            actions: [
+            targets: { filters: [{ targetIds: ["target"] }] },
+            effects: [
               {
                 damage: {
-                  scale: {
-                    target: { target: { targetIds: ["target"] } },
-                    stats: {
-                      statToModify: "maxHealth",
-                      type: "percent",
-                      amount: 0.2,
-                    },
+                  damageType: "true",
+                  modifier: {
+                    value: 1,
                   },
+                },
+                scalesBy: {
+                  stat: {
+                    name: "maxHealth",
+                    percent: 0.2,
+                  },
+                  targets: { filters: [{ targetIds: ["target"] }] },
                 },
               },
             ],
@@ -323,76 +340,85 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "receiveDamage",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         actions: [
           {
-            stats: {
-              statToModify: "offense",
-              type: "percent",
-              amount: 0.25,
-              expires: {
-                frequency: "turn",
-                count: 1,
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            effects: [
+              {
+                stats: {
+                  statToModify: "offense",
+                  modifiedType: "multiplicative",
+                  amount: 0.25,
+                  expires: {
+                    frequency: "turn",
+                    count: 1,
+                  },
+                  stacking: false,
+                },
               },
-            },
-          },
-          {
-            stats: {
-              statToModify: "critChance",
-              type: "flat",
-              amount: 0.25,
-              expires: {
-                frequency: "turn",
-                count: 1,
+              {
+                stats: {
+                  statToModify: "critChance",
+                  modifiedType: "multiplicative",
+                  amount: 0.25,
+                  expires: {
+                    frequency: "turn",
+                    count: 1,
+                  },
+                  stacking: false,
+                },
               },
-            },
-          },
-          {
-            cooldown: {
-              id: "specialskill_CHEWBACCALEGENDARY01",
-              amount: -1,
-              target: "Self",
-            },
+              {
+                cooldown: {
+                  id: "specialskill_CHEWBACCALEGENDARY02",
+                  amount: -1,
+                  target: { filters: [{ allies: true }, { tags: ["Self"] }] },
+                },
+              },
+            ],
           },
         ],
       },
       {
         triggerType: "pregame",
         id: uuid(),
-        target: {
-          tags: ["Self"],
-          allies: true,
-        },
-        events: [
+        actions: [
           {
-            target: {
-              statusEffects: ["Guard"],
-              allies: true,
+            targets: {
+              filters: [{ allies: true }, { statusEffects: ["Guard"] }],
             },
-            triggers: [
+            effects: [
               {
-                triggerType: "receiveDamage",
-                id: uuid(),
-                target: {
-                  tags: ["Self"],
-                  allies: true,
-                },
-                events: [
+                triggers: [
                   {
-                    target: {
-                      targetIds: ["CHEWBACCALEGENDARY"],
-                      allies: true,
+                    triggerType: "receiveDamage",
+                    id: uuid(),
+                    targets: {
+                      filters: [{ allies: true }, { tags: ["Self"] }],
                     },
                     actions: [
                       {
-                        cooldown: {
-                          id: "specialskill_CHEWBACCALEGENDARY01",
-                          amount: -1,
-                          target: 1,
+                        targets: {
+                          filters: [
+                            { allies: true },
+                            { targetIds: ["CHEWBACCALEGENDARY"] },
+                          ],
                         },
+                        effects: [
+                          {
+                            cooldown: {
+                              id: "specialskill_CHEWBACCALEGENDARY02",
+                              amount: -1,
+                              target: {
+                                filters: [
+                                  { allies: true },
+                                  { targetIds: ["CHEWBACCALEGENDARY"] },
+                                ],
+                              },
+                            },
+                          },
+                        ],
                       },
                     ],
                   },
