@@ -417,6 +417,7 @@ export default defineComponent({
                   value: match?.stars ?? 0,
                 },
               });
+
               acc.push({
                 show: this.showCol("relic_tier"),
                 type: "unitLevel",
@@ -696,10 +697,21 @@ export default defineComponent({
             const matchA = a.units.find((x) => x.base_id === unitId);
             const matchB = b.units.find((x) => x.base_id === unitId);
 
-            const valueA = matchA ? matchA[method] : 0;
-            const valueB = matchB ? matchB[method] : 0;
-
-            return sortValues(valueA, valueB, this.sortDir, this.sortMethod);
+            if (matchA && matchB) {
+              if (method === "stars") {
+                return sortValues(matchA, matchB, this.sortDir, "stars");
+              } else if (matchA.relic_tier > -1 || matchB.relic_tier > -1) {
+                return sortValues(matchA, matchB, this.sortDir, "relic_tier");
+              } else {
+                return sortValues(matchA, matchB, this.sortDir, "gear_level");
+              }
+            } else if (matchA) {
+              return sortValues(matchA.gear_level, 0, this.sortDir);
+            } else if (matchB) {
+              return sortValues(0, matchB.gear_level, this.sortDir);
+            } else {
+              return sortValues(0, 0, this.sortDir);
+            }
           }
         });
     },
