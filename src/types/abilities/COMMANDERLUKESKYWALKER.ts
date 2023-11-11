@@ -3,9 +3,70 @@ import { v4 as uuid } from "uuid";
 import { iAbility, iUniqueAbility } from "types/gameEngine/abilities";
 
 const cls: Record<string, iAbility | iUniqueAbility> = {
+  basicskill_COMMANDERLUKESKYWALKER: {
+    id: "basicskill_COMMANDERLUKESKYWALKER",
+    name: "Destined Strike",
+    gameText:
+      "Deal Physical damage to target enemy and inflict Speed Down and Defense Down for 2 turns. If the target already had Speed Down, remove 30% Turn Meter. If the target already had Defense Down, inflict Stun for 1 turn.",
+    actions: [
+      {
+        targets: { filters: [{ allies: false }], targetCount: 1 },
+        effects: [
+          {
+            damage: {
+              damageType: "physical",
+              modifier: {
+                value: 1.781,
+              },
+            },
+          },
+          {
+            condition: {
+              debuffs: ["Speed Down"],
+            },
+            debuffs: [
+              {
+                name: "TM Decrease",
+                duration: -30,
+                id: uuid(),
+              },
+            ],
+          },
+          {
+            condition: {
+              debuffs: ["Defense Down"],
+            },
+            debuffs: [
+              {
+                name: "Stun",
+                duration: 1,
+                id: uuid(),
+              },
+            ],
+          },
+          {
+            debuffs: [
+              {
+                name: "Speed Down",
+                duration: 2,
+                id: uuid(),
+              },
+              {
+                name: "Defense Down",
+                duration: 2,
+                id: uuid(),
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
   specialskill_COMMANDERLUKESKYWALKER02: {
     id: "specialskill_COMMANDERLUKESKYWALKER02",
     name: "Call to Action",
+    gameText: `Dispel all debuffs on Luke. Luke gains 100% Turn Meter and recovers 40% Health and Protection. If Luke doesn't have Call to Action, he gains it until the next time this ability is used, which can't be copied, dispelled, or prevented. If Luke already had Call to Action, he removes it.\n\n
+    Call to Action: This character ignores Taunt during their turn and has +50% Accuracy, Critical Chance, and Critical Damage`,
     cooldown: 4,
     turnsRemaining: 0,
     actions: [
@@ -72,6 +133,8 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
   specialskill_COMMANDERLUKESKYWALKER01: {
     id: "specialskill_COMMANDERLUKESKYWALKER01",
     name: "Use the Force",
+    gameText:
+      "Deal Physical damage to target enemy, Dispel all buffs on them, remove 100% Turn Meter, and inflict Buff Immunity and Tenacity Down for 2 turns. Reduce the cooldown of this ability by 1 if the target didn't have full Health.",
     cooldown: 4,
     turnsRemaining: 0,
     actions: [
@@ -116,70 +179,16 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       },
     ],
   },
-  basicskill_COMMANDERLUKESKYWALKER: {
-    id: "basicskill_COMMANDERLUKESKYWALKER",
-    name: "Destined Strike",
-    actions: [
-      {
-        targets: { filters: [{ allies: false }], targetCount: 1 },
-        effects: [
-          {
-            damage: {
-              damageType: "physical",
-              modifier: {
-                value: 1.781,
-              },
-            },
-          },
-          {
-            condition: {
-              debuffs: ["Speed Down"],
-            },
-            debuffs: [
-              {
-                name: "TM Decrease",
-                duration: -30,
-                id: uuid(),
-              },
-            ],
-          },
-          {
-            condition: {
-              debuffs: ["Defense Down"],
-            },
-            debuffs: [
-              {
-                name: "Stun",
-                duration: 1,
-                id: uuid(),
-              },
-            ],
-          },
-          {
-            debuffs: [
-              {
-                name: "Speed Down",
-                duration: 2,
-                id: uuid(),
-              },
-              {
-                name: "Defense Down",
-                duration: 2,
-                id: uuid(),
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
   uniqueskill_COMMANDERLUKESKYWALKER01: {
     name: "Learn Control",
     id: "uniqueskill_COMMANDERLUKESKYWALKER01",
+    gameText:
+      "While Luke doesn't have Call to Action, he has +50% Counter Chance, +50% Critical Avoidance, +50% Defense, +100% Tenacity, and gains 10% Turn Meter whenever another Rebel ally takes damage.",
     triggers: [
       {
         triggerType: "always",
         id: uuid(),
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         actions: [
           {
             targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
@@ -224,7 +233,18 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
                 },
                 stats: {
                   amount: 0.5,
-                  statToModify: "defense",
+                  statToModify: "armor",
+                  modifiedType: "multiplicative",
+                },
+              },
+              {
+                condition: {
+                  buffs: ["Call to Action"],
+                  inverted: true,
+                },
+                stats: {
+                  amount: 0.5,
+                  statToModify: "resistance",
                   modifiedType: "multiplicative",
                 },
               },
@@ -263,10 +283,13 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
   uniqueskill_COMMANDERLUKESKYWALKER02: {
     name: "It Binds All Things",
     id: "uniqueskill_COMMANDERLUKESKYWALKER02",
+    gameText:
+      "Luke has +40% Potency. Whenever Luke Resists a detrimental effect he recovers 5% Health and 5% Protection. Whenever Luke inflicts a debuff he gains 10% Turn Meter and other allies gain half that amount.",
     triggers: [
       {
         triggerType: "always",
         id: uuid(),
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         actions: [
           {
             targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
@@ -311,10 +334,10 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "inflictDebuff",
         id: uuid(),
-        targets: { filters: [{ tags: ["Self"], allies: true }] },
+        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         actions: [
           {
-            targets: { filters: [{ tags: ["Self"], allies: true }] },
+            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
             effects: [
               {
                 buffs: [
@@ -355,10 +378,13 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
   leaderskill_COMMANDERLUKESKYWALKER: {
     name: "Rebel Maneuvers",
     id: "leaderskill_COMMANDERLUKESKYWALKER",
+    gameText:
+      "Rebel allies have +50% Counter Chance, +50% Defense, and +15% Offense. Whenever an enemy Resists a detrimental effect, Rebel allies gain 5% Turn Meter.",
     triggers: [
       {
         triggerType: "always",
         id: uuid(),
+        targets: { filters: [{ allies: true }, { tags: ["Rebel"] }] },
         actions: [
           {
             targets: { filters: [{ allies: true }, { tags: ["Rebel"] }] },
@@ -373,7 +399,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
               {
                 stats: {
                   amount: 0.5,
-                  statToModify: "defense",
+                  statToModify: "armor",
                   modifiedType: "multiplicative",
                 },
               },

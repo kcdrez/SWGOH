@@ -1,22 +1,42 @@
 $primary: #2378a9;
-$primary-dark-1: darken($primary, 5%);
+$primary-dark-1: darken($primary, 10%);
+$primary-dark-2: darken($primary, 20%);
+$primary-dark-3: darken($primary, 30%);
+$primary-dark-4: darken($primary, 40%);
+$primary-dark-5: darken($primary, 50%);
 $primary-light-1: lighten($primary, 10%);
 $primary-light-2: lighten($primary, 20%);
+$primary-light-3: lighten($primary, 30%);
+$primary-light-4: lighten($primary, 40%);
+$primary-light-5: lighten($primary, 50%);
 $primary-text-light: lighten($primary, 50%);
 $primary-text-dark: darken($primary, 10%);
 
 $secondary: #0bc9cd;
-$secondary-dark-1: darken($secondary, 5%);
+$secondary-dark-1: darken($secondary, 10%);
+$secondary-dark-2: darken($secondary, 20%);
+$secondary-dark-3: darken($secondary, 30%);
+$secondary-dark-4: darken($secondary, 40%);
+$secondary-dark-5: darken($secondary, 50%);
 $secondary-light-1: lighten($secondary, 10%);
 $secondary-light-2: lighten($secondary, 20%);
+$secondary-light-3: lighten($secondary, 30%);
+$secondary-light-4: lighten($secondary, 40%);
+$secondary-light-5: lighten($secondary, 50%);
 $secondary-text-light: lighten($secondary, 50%);
 $secondary-text-dark: darken($secondary, 10%);
 
 $success: #009975;
 $success-dark-1: darken($success, 10%);
 $success-dark-2: darken($success, 20%);
+$success-dark-3: darken($success, 30%);
+$success-dark-4: darken($success, 40%);
+$success-dark-5: darken($success, 50%);
 $success-light-1: lighten($success, 10%);
 $success-light-2: lighten($success, 20%);
+$success-light-3: lighten($success, 30%);
+$success-light-4: lighten($success, 40%);
+$success-light-5: lighten($success, 50%);
 $success-text-light: lighten($success, 50%);
 $success-text-dark: darken($success, 15%);
 
@@ -24,15 +44,27 @@ $danger: #c66c7e;
 $danger-dark-1: darken($danger, 10%);
 $danger-dark-2: darken($danger, 20%);
 $danger-dark-3: darken($danger, 30%);
+$danger-dark-4: darken($danger, 40%);
+$danger-dark-5: darken($danger, 50%);
 $danger-light-1: lighten($danger, 10%);
 $danger-light-2: lighten($danger, 20%);
+$danger-light-3: lighten($danger, 30%);
+$danger-light-4: lighten($danger, 40%);
+$danger-light-5: lighten($danger, 50%);
 $danger-text-light: lighten($danger, 50%);
 $danger-text-dark: darken($danger, 20%);
 
 $warning: #dbb957;
-$warning-dark-1: darken($warning, 5%);
+$warning-dark-1: darken($warning, 10%);
+$warning-dark-2: darken($warning, 20%);
+$warning-dark-3: darken($warning, 30%);
+$warning-dark-4: darken($warning, 40%);
+$warning-dark-5: darken($warning, 50%);
 $warning-light-1: lighten($warning, 10%);
 $warning-light-2: lighten($warning, 20%);
+$warning-light-3: lighten($warning, 30%);
+$warning-light-4: lighten($warning, 40%);
+$warning-light-5: lighten($warning, 50%);
 $warning-text-light: lighten($warning, 50%);
 $warning-text-dark: darken($warning, 30%);
 
@@ -47,14 +79,16 @@ $gray-5: lighten($dark, 50%);
 $gray-6: lighten($dark, 60%);
 $gray-7: lighten($dark, 70%);
 $gray-8: lighten($dark, 80%);
+$gray-9: lighten($dark, 90%);
 
 $background: $gray-3;
 $background-dark-1: darken($background, 5%);
 $background-light-1: lighten($background, 10%);
 $background-light-2: lighten($background, 20%);
-$background-light-3: lighten($background, 35%);
-$background-light-4: lighten($background, 45%);
-$background-light-5: lighten($background, 58%);
+$background-light-3: lighten($background, 30%);
+$background-light-4: lighten($background, 40%);
+$background-light-5: lighten($background, 50%);
+$background-light-6: lighten($background, 60%);
 
 :export {
   primary: $primary;
