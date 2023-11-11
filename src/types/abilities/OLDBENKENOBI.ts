@@ -6,6 +6,8 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
   basicskill_OLDBENKENOBI: {
     id: "basicskill_OLDBENKENOBI",
     name: "Elegant Form",
+    gameText:
+      "Deal Physical damage to target enemy, inflict Evasion Down for 2 turns, then gain Potency Up for 2 turns. This attack can't be Evaded.",
     actions: [
       {
         targets: { filters: [{ allies: false }], targetCount: 1 },
@@ -50,6 +52,8 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
   specialskill_OLDBENKENOBI01: {
     id: "specialskill_OLDBENKENOBI01",
     name: "Mind Tricks",
+    gameText:
+      "Inflict Ability Block on all enemies for 1 turn and Offense Down for 2 turns, with an 80% chance to remove 60% Turn Meter. Jedi and Rebel allies gain 3% Turn Meter for each effect Resisted. This attack can't be Evaded.",
     cooldown: 5,
     turnsRemaining: 0,
     actions: [
@@ -67,6 +71,9 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
                   {
                     id: uuid(),
                     triggerType: "resistDetrimentalEffect",
+                    targets: {
+                      filters: [{ allies: true }, { tags: ["Jedi", "Rebel"] }],
+                    },
                     actions: [
                       {
                         targets: {
@@ -99,6 +106,9 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
                   {
                     id: uuid(),
                     triggerType: "resistDetrimentalEffect",
+                    targets: {
+                      filters: [{ allies: true }, { tags: ["Jedi", "Rebel"] }],
+                    },
                     actions: [
                       {
                         targets: {
@@ -132,6 +142,9 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
                   {
                     id: uuid(),
                     triggerType: "resistDetrimentalEffect",
+                    targets: {
+                      filters: [{ allies: true }, { tags: ["Jedi", "Rebel"] }],
+                    },
                     actions: [
                       {
                         targets: {
@@ -165,6 +178,8 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
   specialskill_OLDBENKENOBI02: {
     id: "specialskill_OLDBENKENOBI02",
     name: "Devoted Protector",
+    gameText:
+      "Old Ben gains Taunt for 2 turns. When this Taunt expires, Old Ben gains Taunt for 1 turn. All allies gain Defense Up for 2 turns.",
     cooldown: 4,
     turnsRemaining: 0,
     actions: [
@@ -177,10 +192,14 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
                 name: "Taunt",
                 duration: 2,
                 id: uuid(),
+
                 triggers: [
                   {
                     id: uuid(),
                     triggerType: "expires",
+                    targets: {
+                      filters: [{ allies: true }, { tags: ["Self"] }],
+                    },
                     actions: [
                       {
                         targets: {
@@ -219,6 +238,8 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
   uniqueskill_OLDBENKENOBI01: {
     id: "uniqueskill_OLDBENKENOBI01",
     name: "If You Strike Me Down",
+    gameText:
+      "Whenever another Jedi or Rebel ally takes damage, Old Ben gains 5% Turn Meter. The first time Old Ben is defeated, all allies gain Offense Up and Speed Up for 2 turns, recover 50% Health and 50% Protection, and gain 25% Turn Meter.",
     triggers: [
       {
         triggerType: "receiveDamage",
@@ -303,6 +324,8 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
   leaderskill_OLDBENKENOBI: {
     id: "leaderskill_OLDBENKENOBI",
     name: "Old Jedi Knight",
+    gameText:
+      "All allies gain 15% Evasion and gain 30% Turn Meter whenever they Evade an attack.",
     triggers: [
       {
         triggerType: "always",

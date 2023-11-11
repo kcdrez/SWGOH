@@ -6,6 +6,8 @@ export interface iGeneralAbility {
   id: string;
   /** The name of the ability */
   name: string;
+  /** The text of the ability that appears in game */
+  gameText: string;
   /** Anything that will happen based on various states or actions being done (such as taking damage) */
   triggers?: iTrigger[];
   /** Sort the ability before or after other abilities */

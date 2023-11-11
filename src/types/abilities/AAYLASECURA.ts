@@ -6,6 +6,8 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
   basicskill_AAYLASECURA: {
     name: "Inspiring Strike",
     id: "basicskill_AAYLASECURA",
+    gameText:
+      "Deal Physical damage to target enemy with a 35% chance to call an ally to Assist. If the assisting ally is a Jedi, they deal 50% more damage.",
     actions: [
       {
         targets: {
@@ -15,20 +17,10 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
         effects: [
           {
             damage: {
-              modifier: {
-                value: 1.645,
-              },
+              modifier: { value: 1.645 },
               damageType: "physical",
             },
           },
-        ],
-      },
-      {
-        targets: {
-          filters: [{ allies: true }, { tags: ["Jedi & !Self"] }],
-          targetCount: 1,
-        },
-        effects: [
           {
             assist: {
               chance: 0.35,
@@ -38,6 +30,13 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
                   modifiedType: "multiplicative",
                   statToModify: "offense",
                 },
+                condition: {
+                  tags: ["Jedi"],
+                },
+              },
+              targets: {
+                filters: [{ allies: true }, { tags: ["!Self"] }],
+                targetCount: 1,
               },
             },
           },
@@ -48,39 +47,26 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
   specialskill_AAYLASECURA01: {
     id: "specialskill_AAYLASECURA01",
     name: "Survivor",
+    gameText:
+      "Deal Physical damage to target enemy and recover Health equal to 65% of the damage dealt.",
     cooldown: 3,
     turnsRemaining: 0,
-    actions: [
-      {
-        targets: {
-          filters: [{ allies: false }],
-          targetCount: 1,
-        },
-        effects: [
-          {
-            damage: {
-              modifier: {
-                value: 3.008,
-              },
-              damageType: "physical",
-            },
-          },
-        ],
-      },
-    ],
     triggers: [
       {
-        triggerType: "dealDamage",
         id: uuid(),
+        triggerType: "dealDamage",
+        targets: {
+          filters: [{ allies: true }, { tags: ["Self"] }],
+        },
         actions: [
           {
             targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
             effects: [
               {
                 heal: {
+                  amountType: "multiplicative",
                   healthType: "health",
                   amount: 0.65,
-                  amountType: "multiplicative",
                 },
                 scalesBy: {
                   damage: true,
@@ -91,28 +77,48 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
     ],
+    actions: [
+      {
+        targets: {
+          filters: [{ allies: false }],
+          targetCount: 1,
+        },
+        effects: [
+          {
+            damage: {
+              modifier: { value: 3.008 },
+              damageType: "physical",
+            },
+          },
+        ],
+      },
+    ],
   },
   uniqueskill_AAYLASECURA01: {
     id: "uniqueskill_AAYLASECURA01",
     name: "Superior Riposte",
+    gameText:
+      "Aayla has +10% Critical Chance, 65% Counter Chance and +50% Counter Damage. In addition, she Stuns her target for 1 turn whenever she critically hits.",
     triggers: [
       {
         triggerType: "criticalHit",
         id: uuid(),
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: {
+          filters: [{ tags: ["Self"] }, { allies: true }],
+        },
         actions: [
           {
             targets: { filters: [{ targetIds: ["target"] }] },
             effects: [
-              // {
-              //   debuffs: [
-              //     {
-              //       duration: 1,
-              //       name: "Stun",
-              //       id: uuid(),
-              //     },
-              //   ],
-              // },
+              {
+                debuffs: [
+                  {
+                    duration: 1,
+                    name: "Stun",
+                    id: uuid(),
+                  },
+                ],
+              },
             ],
           },
         ],
@@ -134,15 +140,15 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
               },
               {
                 stats: {
-                  amount: 0.65,
-                  statToModify: "counterChance",
+                  amount: 0.5,
+                  statToModify: "counterDamage",
                   modifiedType: "additive",
                 },
               },
               {
                 stats: {
-                  amount: 0.5,
-                  statToModify: "counterDamage",
+                  amount: 0.65,
+                  statToModify: "counterChance",
                   modifiedType: "additive",
                 },
               },
@@ -155,20 +161,26 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
   leaderskill_AAYLASECURA: {
     id: "leaderskill_AAYLASECURA",
     name: "Jedi Valor",
+    gameText:
+      "Jedi allies gain 40% Tenacity and recover 10% of their Max Health when they resist an effect.",
     triggers: [
       {
-        id: uuid(),
         triggerType: "always",
-        targets: { filters: [{ allies: true }, { tags: ["Jedi"] }] },
+        id: uuid(),
+        targets: {
+          filters: [{ allies: true }, { tags: ["Jedi"] }],
+        },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: {
+              filters: [{ allies: true }, { tags: ["Self"] }],
+            },
             effects: [
               {
                 stats: {
-                  modifiedType: "additive",
-                  statToModify: "tenacity",
                   amount: 0.4,
+                  statToModify: "tenacity",
+                  modifiedType: "additive",
                 },
               },
             ],
@@ -176,18 +188,22 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
       {
-        id: uuid(),
         triggerType: "resistDetrimentalEffect",
-        targets: { filters: [{ allies: true }, { tags: ["Jedi"] }] },
+        id: uuid(),
+        targets: {
+          filters: [{ allies: true }, { tags: ["Jedi"] }],
+        },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: {
+              filters: [{ allies: true }, { tags: ["Self"] }],
+            },
             effects: [
               {
                 heal: {
-                  healthType: "health",
                   amount: 0.1,
                   amountType: "multiplicative",
+                  healthType: "health",
                 },
               },
             ],

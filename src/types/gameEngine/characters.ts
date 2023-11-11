@@ -117,13 +117,13 @@ export interface iStatsCheck {
     | "critAvoid"
     | "critChance"
     | "dodge"
-    | "defense"
     | "health"
     | "maxHealth"
     | "maxProtection"
     | "offense"
     | "potency"
     | "protection"
+    | "resistance"
     | "tenacity";
   /** The amount that the stat will be modified */
   amount: number;
@@ -515,7 +515,7 @@ export class Character {
     const chance = this.getModifiedStats(
       [],
       0,
-      this.getTempStat("counterDamage")
+      this.getTempStat("counterChance")
     );
     return chance;
   }
@@ -664,6 +664,10 @@ export class Character {
             },
             { hasEffect: self.hasBuff("Accuracy Up"), value: 0.15 },
             { hasEffect: self.hasDebuff("Blind"), value: -999 },
+            {
+              hasEffect: self.hasBuff("Call to Action"),
+              value: 0.5,
+            },
           ],
           self._baseStats.physical.accuracy,
           self.getTempStat("accuracy")
@@ -869,6 +873,7 @@ export class Character {
       },
       tempStatMapping
     );
+
     return finalMapping[statName] ?? [];
   }
   private get immunity(): Record<string, boolean> {
@@ -1726,17 +1731,11 @@ export class Character {
     );
 
     logs.push(
-      ...this.heal(
-        {
-          amountType: "additive",
-          amount: damageTotal * this.healthSteal,
-          healthType: "health",
-        },
-        {
-          name: "Health Steal",
-          id: "healthSteal",
-        }
-      )
+      ...this.heal({
+        amountType: "additive",
+        amount: damageTotal * this.healthSteal,
+        healthType: "health",
+      })
     );
 
     logs.push(
@@ -1862,14 +1861,15 @@ export class Character {
     const { buffs, debuffs, stats, inverted, isNew, tags, tm } = condition;
     let results = false;
     if (buffs) {
-      const hasBuffs = buffs.every((status) => {
-        const match = this._buffs.find((x) => x.name === status);
-        if (match) {
+      const hasBuffs = buffs.every((buff) => {
+        const match = this._buffs.find((x) => x.name === buff);
+        if (inverted) {
+          return !match;
+        } else if (match) {
           return isNew === false ? !match.isNew : true;
-        }
-        return false;
+        } else return false;
       });
-      results = (hasBuffs && !inverted) || (!hasBuffs && inverted) || results;
+      results = hasBuffs || results;
     }
     if (debuffs) {
       const hasDebuffs = debuffs.every((status) => {
@@ -1973,7 +1973,7 @@ export class Character {
           return `${format.characterName(
             this.name,
             this.owner
-          )}'s ${format.ability(ability.name)}'s cooldown was ${
+          )}'s ${format.ability(ability)}'s cooldown was ${
             finalAmount > 0 ? "increased" : "decreased"
           } by ${Math.abs(finalAmount)} ${format.abilitySource(srcAbility)} (${
             ability.turnsRemaining
@@ -2043,7 +2043,7 @@ export class Character {
     canBeCountered: boolean = true
   ): string[] {
     const logs: string[] = [];
-    logs.push(format.useAbility(this.name, ability.name, this.owner));
+    logs.push(format.useAbility(this.name, ability, this.owner));
 
     ability.actions?.forEach((action) => {
       logs.push(
@@ -2207,7 +2207,7 @@ export class Character {
               `${format.characterName(
                 targetCharacter.name,
                 targetCharacter.owner
-              )} was dealt bonus damage from ${format.ability(ability?.name)}`
+              )} was dealt bonus damage from ${format.ability(ability)}`
             );
 
             const scalarTargets = this.findTargets(
@@ -2816,6 +2816,175 @@ export class Character {
       }
     });
   }
+  public getLogs() {
+    return {
+      name: this.name,
+      owner: this.owner,
+      health: {
+        current: this.health,
+        max: this.maxHealth,
+      },
+      protection: {
+        current: this.protection,
+        max: this.maxProtection,
+      },
+      buffs: unvue(this._buffs),
+      debuffs: unvue(this._debuffs),
+      physical: [
+        {
+          label: "Offense",
+          value: round(this.physical.offense, 2),
+          base: round(this._baseStats.physical.offense, 2),
+        },
+        {
+          label: "Crit Chance",
+          value: round(this.physical.critChance * 100, 2),
+          base: round(this._baseStats.physical.critChance * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Armor",
+          value: round(
+            (this.physical.armor * 100) / (this.physical.armor + 637.5),
+            2
+          ),
+          base: round(
+            (this._baseStats.physical.armor * 100) /
+              (this._baseStats.physical.armor + 637.5),
+            2
+          ),
+          isPercent: true,
+        },
+        {
+          label: "Armor Pen",
+          value: round(this.physical.armorPen, 2),
+          base: round(this._baseStats.physical.armorPen, 2),
+        },
+        {
+          label: "Accuracy",
+          value: round(this.physical.accuracy * 100, 2),
+          base: round(this._baseStats.physical.accuracy * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Dodge (Evasion)",
+          value: round(this.physical.dodge * 100, 2),
+          base: round(this._baseStats.physical.dodge * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Crit Avoidance",
+          value: round(this.physical.critAvoid * 100, 2),
+          base: round(this._baseStats.physical.critAvoid * 100, 2),
+          isPercent: true,
+        },
+      ],
+      special: [
+        {
+          label: "Offense",
+          value: round(this.special.offense, 2),
+          base: round(this._baseStats.special.offense, 2),
+        },
+        {
+          label: "Crit Chance",
+          value: round(this.special.critChance * 100, 2),
+          base: round(this._baseStats.special.critChance * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Resistance",
+          value: round(
+            (this.special.armor * 100) / (this.special.armor + 637.5),
+            2
+          ),
+          base: round(
+            (this._baseStats.special.armor * 100) /
+              (this._baseStats.special.armor + 637.5),
+            2
+          ),
+          isPercent: true,
+        },
+        {
+          label: "Resistance Pen",
+          value: round(this.special.armorPen, 2),
+          base: round(this._baseStats.special.armorPen, 2),
+        },
+        {
+          label: "Accuracy",
+          value: round(this.special.accuracy * 100, 2),
+          base: round(this._baseStats.special.accuracy * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Deflection (Evasion)",
+          value: round(this.special.dodge * 100, 2),
+          base: round(this._baseStats.special.dodge * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Crit Avoidance",
+          value: round(this.special.critAvoid * 100, 2),
+          base: round(this._baseStats.special.critAvoid * 100, 2),
+          isPercent: true,
+        },
+      ],
+      general: [
+        {
+          label: "Speed",
+          value: round(this.speed, 2),
+          base: round(this._baseStats.speed, 2),
+        },
+        {
+          label: "Mastery",
+          value: 0,
+          base: 0,
+        },
+        {
+          label: "Crit Damage",
+          value: round(this.critDamage * 100, 2),
+          base: round(this._baseStats.critDamage * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Tenacity",
+          value: round(this.tenacity * 100, 2),
+          base: round(this._baseStats.tenacity * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Potency",
+          value: round(this.potency * 100, 2),
+          base: round(this._baseStats.potency * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Health Steal",
+          value: round(this.healthSteal * 100, 2),
+          base: round(this._baseStats.healthSteal * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Defense Pen",
+          value: 0,
+          base: 0,
+          isPercent: true,
+        },
+        {
+          label: "Counter Chance",
+          value: round(this.counterChance * 100, 2),
+          base: 0,
+          isPercent: true,
+        },
+        {
+          label: "Counter Damage",
+          value: round(this.counterDamage * 100, 2),
+          base: 100,
+          isPercent: true,
+        },
+      ],
+      triggers: unvue(this._triggers),
+    };
+  }
 }
 
 //todo: combine these functions with /teams.js
@@ -2905,16 +3074,16 @@ export const format = {
   crit(isCrit: boolean) {
     return isCrit ? " <span class='crit'>(Crit)</span>" : "";
   },
-  useAbility(charName: string, abilityName: string, owner: string) {
+  useAbility(charName: string, ability: iGeneralAbility, owner: string) {
     return `${this.characterName(charName, owner)} used ${this.ability(
-      abilityName
+      ability
     )}`;
   },
-  ability(name) {
-    return `<span class="ability">${name}</span>`;
+  ability(ability: iGeneralAbility | null) {
+    return `<span class="ability" title="${ability?.gameText}">${ability?.name}</span>`;
   },
   abilitySource(ability: iGeneralAbility | null) {
-    return ability ? ` (src: ${format.ability(ability.name)})` : "";
+    return ability ? ` (src: ${this.ability(ability)})` : "";
   },
 };
 

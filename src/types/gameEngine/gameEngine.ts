@@ -69,7 +69,7 @@ export interface iTrigger {
     | "start"
     | "useAbility";
   /** A list of filters, in order, which will be applied to determine who to add the triggers to */
-  targets?: iTargetData;
+  targets: iTargetData;
   /** This trigger is targeting various other units and causing effects on them (such as buffs or damage) */
   actions: iAction[];
   /** Misc data to be used for various effects */
@@ -271,6 +271,37 @@ export class Turn {
   private _turnNumber: number = 0;
   private _character: Character | null = null;
   private _label: string | null = null;
+  public characterLogData?: {
+    health: {
+      current: number;
+      max: number;
+    };
+    protection: {
+      current: number;
+      max: number;
+    };
+    buffs: iBuff[];
+    debuffs: iDebuff[];
+    physical: {
+      label: string;
+      value: number;
+      base: number;
+      isPercent?: boolean;
+    }[];
+    special: {
+      label: string;
+      value: number;
+      base: number;
+      isPercent?: boolean;
+    }[];
+    general: {
+      label: string;
+      value: number;
+      base: number;
+      isPercent?: boolean;
+    }[];
+    triggers: iTrigger[];
+  };
 
   constructor(
     turnNumber: number,
@@ -284,6 +315,8 @@ export class Turn {
     this.logs = logs;
     this.endOfTurnLogs = endOfTurnLogs ?? [];
     this._label = label ?? null;
+
+    this.characterLogData = this._character?.getLogs();
   }
 
   get turnNumber() {
@@ -292,6 +325,9 @@ export class Turn {
   get character() {
     return this._character;
   }
+  get label() {
+    return this._label ?? `Turn ${this.turnNumber}`;
+  }
 
   addLogs(logs: string[]) {
     this.logs.push(...logs.filter((l) => !!l));
@@ -299,14 +335,30 @@ export class Turn {
   addEndOfTurnLogs(logs: string[]) {
     this.endOfTurnLogs.push(...logs.filter((l) => !!l));
   }
-  copy() {
-    return new Turn(
-      this._turnNumber,
-      this._character,
-      this.logs,
-      this.endOfTurnLogs,
-      this._label
-    );
+  getStatusEffectText(effect: iBuff | iDebuff | iStatusEffect): string {
+    const textLines: string[] = [effect.name];
+    if (effect.cantDispel) {
+      textLines.push("Cant be Dispeled");
+    }
+    if (effect.cantPrevent) {
+      textLines.push("Cant be Prevented");
+    }
+    if (effect.cantResist) {
+      textLines.push("Cant be Resisted");
+    }
+    if (effect.duration) {
+      textLines.push("Turns Remaining: " + effect.duration);
+    }
+    if (effect.unique) {
+      textLines.push("Is Unique");
+    }
+    if (effect.isStackable) {
+      textLines.push("Stacks: " + effect.stacks);
+    }
+    return textLines.join("\n");
+  }
+  getStatusEffectImgSrc(effect: iBuff | iDebuff | iStatusEffect) {
+    return `/images/statusEffects/${effect.name.replace(/\s/g, "_")}.png`;
   }
 }
 
@@ -374,7 +426,6 @@ export class Engine {
         turnNumber++;
         this.nextTurn(turnNumber);
         if (turnNumber === 1) {
-          console.log(this.turns);
         }
         if (this.checkMatchEnd(turnNumber, 1000)) {
           this._simulationData.matchHistory.push(
@@ -512,8 +563,11 @@ export class Engine {
         }
       });
 
+      const turn = new Turn(turnNumber, character, []);
       const { logs, endOfTurnLogs } = character.takeAction();
-      this.turns.push(new Turn(turnNumber, character, logs, endOfTurnLogs));
+      turn.addLogs(logs);
+      turn.addEndOfTurnLogs(endOfTurnLogs);
+      this.turns.push(turn);
     }
   }
 
