@@ -470,11 +470,11 @@ export class Character {
       [
         {
           hasEffect: this.hasDebuff("Tenacity Down"),
-          value: -1000,
+          value: -Infinity,
         },
         {
           hasEffect: this.hasBuff("Tenacity Up"),
-          value: 99999,
+          value: Infinity,
         },
       ],
       this._baseStats.tenacity,
@@ -699,13 +699,13 @@ export class Character {
           [
             {
               hasEffect: self.hasDebuff("Vulnerable"),
-              value: -999,
+              value: -Infinity,
             },
             {
               hasEffect:
                 self.hasBuff("Critical Hit Immunity") ||
                 self.hasStatusEffect("Guard"),
-              value: 1000000,
+              value: Infinity,
             },
           ],
           self._baseStats.physical.critAvoid,
@@ -816,13 +816,13 @@ export class Character {
           [
             {
               hasEffect: self.hasDebuff("Vulnerable"),
-              value: -999,
+              value: -Infinity,
             },
             {
               hasEffect:
                 self.hasBuff("Critical Hit Immunity") ||
                 self.hasStatusEffect("Guard"),
-              value: 1000000,
+              value: Infinity,
             },
           ],
           self._baseStats.special.critAvoid,
@@ -1389,9 +1389,13 @@ export class Character {
       ) {
         this._statusEffects.push(effect);
         return [
-          `${format.characterName(this.name, this.owner)} gained ${format.buff([
-            effect.name,
-          ])} ${format.abilitySource(ability)}`,
+          `${format.characterName(
+            this.name,
+            this.owner
+          )} gained ${format.statusEffects(
+            [effect.name],
+            "statusEffect"
+          )} ${format.abilitySource(ability)}`,
         ];
       }
     }
@@ -2527,7 +2531,7 @@ export class Character {
   }
   public removeTrigger(trigger: iTrigger): string[] {
     const logs: string[] = [];
-    // logs.push(...this.removeEvents([trigger]));
+    // logs.push(...this.removeEvents([trigger])); //todo
     // logs.push(...this.removeEvents(trigger?.events));
 
     const index = this._triggers.findIndex((t) => t.id === trigger.id);
@@ -2753,7 +2757,7 @@ export class Character {
 
     this._activeAbilities.forEach((a) => {
       if (ability?.id !== a.id && "turnsRemaining" in a) {
-        a.turnsRemaining--;
+        a.turnsRemaining = Math.max(a.turnsRemaining - 1, 0);
       }
     });
 
@@ -2828,8 +2832,10 @@ export class Character {
         current: this.protection,
         max: this.maxProtection,
       },
+      activeAbilities: unvue(this._activeAbilities),
       buffs: unvue(this._buffs),
       debuffs: unvue(this._debuffs),
+      statusEffects: unvue(this._statusEffects),
       physical: [
         {
           label: "Offense",

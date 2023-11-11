@@ -26,8 +26,8 @@ module.exports = {
   },
   devServer: {
     hot: true,
-    watchOptions: {
-      poll: true,
+    static: {
+      watch: true,
     },
   },
   module: {
@@ -85,7 +85,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
+    // new webpack.HotModuleReplacementPlugin(),
     new VueLoaderPlugin(),
     new HtmlWebpackPlugin({
       filename: "index.html",

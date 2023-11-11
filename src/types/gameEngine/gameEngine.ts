@@ -280,8 +280,10 @@ export class Turn {
       current: number;
       max: number;
     };
+    activeAbilities: iAbility[];
     buffs: iBuff[];
     debuffs: iDebuff[];
+    statusEffects: iStatusEffect[];
     physical: {
       label: string;
       value: number;
