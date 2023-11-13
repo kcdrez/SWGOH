@@ -191,7 +191,7 @@
                 >
                   <Popper arrow placement="right">
                     <h6 class="turn-label">{{ turn.label }}:</h6>
-                    <template #content>
+                    <template #content v-if="turn.character">
                       <div>
                         <div class="text-decoration-underline">
                           {{ turn.character?.name }}
@@ -239,6 +239,17 @@
                               role="tab"
                             >
                               Triggers
+                            </button>
+                          </li>
+                          <li class="nav-item" role="presentation">
+                            <button
+                              class="nav-link"
+                              data-bs-toggle="tab"
+                              :data-bs-target="`#popover-match${index}_${turnIndex}-other`"
+                              type="button"
+                              role="tab"
+                            >
+                              Other Effects
                             </button>
                           </li>
                         </ul>
@@ -442,258 +453,22 @@
                             class="tab-pane fade"
                             :id="`popover-match${index}_${turnIndex}-triggers`"
                           >
+                            <Trigger
+                              v-for="trigger in turn.characterLogData?.triggers"
+                              :key="trigger.id"
+                              :trigger="trigger"
+                            />
+                          </div>
+                          <div
+                            class="tab-pane fade"
+                            :id="`popover-match${index}_${turnIndex}-other`"
+                          >
                             <div>
-                              <div
-                                class="trigger-container"
-                                v-for="trigger in turn.characterLogData
-                                  ?.triggers"
-                                :key="trigger.id"
-                              >
-                                <div class="trigger-header">
-                                  <div
-                                    :title="trigger.srcAbility?.gameText"
-                                    class="c-help"
-                                  >
-                                    {{ trigger.srcAbility?.name }}
-                                  </div>
-                                  <div
-                                    title="The type of event that will cause this to happen"
-                                    class="c-help"
-                                  >
-                                    {{ trigger.triggerType }}
-                                  </div>
-                                </div>
-                                <hr class="bg-dark w-100 mt-0 mb-1" />
-                                <div
-                                  class="trigger-effect"
-                                  v-for="action in trigger.actions"
-                                  :key="action.id"
-                                >
-                                  <div>
-                                    Target: {{ action.targets.filters }}
-                                  </div>
-                                  <div
-                                    v-for="effect in action.effects"
-                                    :key="effect.id"
-                                  >
-                                    <span v-if="effect.condition">
-                                      <span v-if="effect.condition">
-                                        <span>If Target </span>
-                                        <span
-                                          class="text-warning"
-                                          v-if="effect.condition.inverted"
-                                          >does NOT have </span
-                                        ><span class="text-danger" v-else
-                                          >has
-                                        </span>
-                                        <span>{{
-                                          effect.condition.buffs
-                                        }}</span>
-                                        <span>{{
-                                          effect.condition.debuffs
-                                        }}</span>
-                                        <span v-if="effect.condition.stats"
-                                          >{{ effect.condition.stats.amount }}
-                                          {{
-                                            effect.condition.stats.statToModify
-                                          }}
-                                        </span>
-                                        <span v-if="effect.condition.tm"
-                                          >{{ effect.condition.tm }} Turn
-                                          Meter</span
-                                        >, then
-                                      </span>
-                                    </span>
-                                    <span v-if="effect.stats">
-                                      <span v-if="effect.stats.amount > 0"
-                                        >Gain
-                                      </span>
-                                      <span v-else>Lose </span>
-                                      <span v-if="effect.stats.amount <= 1">
-                                        {{
-                                          Math.abs(effect.stats.amount) * 100
-                                        }}%
-                                      </span>
-                                      <span v-else>
-                                        {{ Math.abs(effect.stats.amount) }}
-                                      </span>
-                                      {{ effect.stats.statToModify }}
-                                    </span>
-                                    <span v-if="effect.heal">
-                                      <span
-                                        >Heal for
-                                        <span
-                                          v-if="(effect.heal?.amount ?? 0) <= 1"
-                                        >
-                                          {{
-                                            Math.abs(effect.heal?.amount ?? 0) *
-                                            100
-                                          }}%
-                                        </span>
-                                        <span v-else>{{
-                                          effect.heal.amount
-                                        }}</span>
-                                        <span class="text-capitalize">{{
-                                          effect.heal.healthType
-                                        }}</span></span
-                                      >
-                                    </span>
-                                    <span
-                                      v-for="buff in effect.buffs"
-                                      :key="buff.name"
-                                    >
-                                      <div v-if="buff.chance">
-                                        There's a {{ buff.chance * 100 }}%
-                                        chance to:
-                                      </div>
-                                      <span v-if="buff.name === 'TM Increase'"
-                                        >Gain {{ buff.duration }}% Turn
-                                        Meter</span
-                                      >
-                                      <div v-else>
-                                        Gain {{ buff.name }} for
-                                        {{ buff.duration }} turn{{
-                                          buff.duration > 1 ? "s" : ""
-                                        }}
-                                        >
-                                      </div>
-                                      <div v-if="buff.cantDispel">
-                                        Cant Be Dispelled
-                                      </div>
-                                      <div v-if="buff.cantPrevent">
-                                        Cant Be Prevented
-                                      </div>
-                                      <div v-if="buff.cantResist">
-                                        Cant Be Resisted
-                                      </div>
-                                      <div v-if="buff.unique">Is Unique</div>
-                                    </span>
-                                    <span
-                                      v-for="debuff in effect.debuffs"
-                                      :key="debuff.name"
-                                    >
-                                      <div v-if="debuff.chance">
-                                        There's a {{ debuff.chance * 100 }}%
-                                        chance to:
-                                      </div>
-                                      <span v-if="debuff.name === 'TM Decrease'"
-                                        >Lose {{ debuff.duration }}% Turn
-                                        Meter</span
-                                      >
-                                      <div v-else>
-                                        Inflict {{ debuff.name }} for
-                                        {{ debuff.duration }} turn{{
-                                          debuff.duration > 1 ? "s" : ""
-                                        }}
-                                      </div>
-                                      <div v-if="debuff.cantDispel">
-                                        Cant Be Dispelled
-                                      </div>
-                                      <div v-if="debuff.cantPrevent">
-                                        Cant Be Prevented
-                                      </div>
-                                      <div v-if="debuff.cantResist">
-                                        Cant Be Resisted
-                                      </div>
-                                      <div v-if="debuff.unique">Is Unique</div>
-                                    </span>
-                                    <span
-                                      v-for="statusEffect in effect.statusEffects"
-                                      :key="statusEffect.name"
-                                    >
-                                      <div v-if="statusEffect.chance">
-                                        There's a
-                                        {{ statusEffect.chance * 100 }}% chance
-                                        to:
-                                      </div>
-                                      <span
-                                        v-if="
-                                          statusEffect.name === 'TM Decrease'
-                                        "
-                                        >Lose {{ statusEffect.duration }}% Turn
-                                        Meter</span
-                                      >
-                                      <div v-else>
-                                        Add {{ statusEffect.name }} for
-                                        {{ statusEffect.duration }} turn{{
-                                          statusEffect.duration > 1 ? "s" : ""
-                                        }}
-                                      </div>
-                                      <div v-if="statusEffect.cantDispel">
-                                        Cant Be Dispelled
-                                      </div>
-                                      <div v-if="statusEffect.cantPrevent">
-                                        Cant Be Prevented
-                                      </div>
-                                      <div v-if="statusEffect.cantResist">
-                                        Cant Be Resisted
-                                      </div>
-                                      <div v-if="statusEffect.unique">
-                                        Is Unique
-                                      </div>
-                                    </span>
-                                    <span v-if="effect.dispel"
-                                      >TODO: {{ effect.dispel }}</span
-                                    >
-                                    <span v-if="effect.immune">
-                                      Immune to:
-                                      <span
-                                        v-for="debuff in effect.immune
-                                          .negativeStatusEffects"
-                                        :key="debuff"
-                                      >
-                                        <div class="debuff">{{ debuff }}</div>
-                                      </span>
-                                      <div
-                                        v-for="buff in effect.immune
-                                          .positiveStatusEffects"
-                                        :key="buff"
-                                      >
-                                        <span class="buff">{{ buff }}</span>
-                                      </div>
-                                      <div v-if="effect.immune.assists">
-                                        Assisting
-                                      </div>
-                                      <div v-if="effect.immune.counterAttack">
-                                        Counter Attacking
-                                      </div>
-                                    </span>
-                                    <span v-if="effect.damage">
-                                      Deal
-                                      {{ effect.damage.damageType }}
-                                      damage</span
-                                    >
-                                    <div v-if="effect.scalesBy">
-                                      <span>Equal to </span>
-                                      <span>
-                                        <span
-                                          v-if="
-                                            effect.scalesBy.stat.percent <= 1
-                                          "
-                                        >
-                                          {{
-                                            Math.abs(
-                                              effect.scalesBy.stat.percent
-                                            ) * 100
-                                          }}%
-                                        </span>
-                                        <span v-else>
-                                          {{
-                                            Math.abs(
-                                              effect.scalesBy.stat.percent
-                                            )
-                                          }}
-                                        </span>
-                                        {{ effect.scalesBy.stat.name }}
-                                      </span>
-                                      <span>
-                                        of this Target:
-                                        <div>{{ effect.scalesBy.targets }}</div>
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
+                              {{
+                                turn.characterLogData?.otherEffects.ignoreTaunt
+                                  ? "Ignores Taunt"
+                                  : "-"
+                              }}
                             </div>
                           </div>
                         </div>
@@ -731,12 +506,13 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
-import { randomNumber, numbersOnly, round } from "utils";
+import { randomNumber, numbersOnly } from "utils";
 import abilities from "types/abilities";
 import { Character, format } from "types/gameEngine/characters";
 import { Engine } from "types/gameEngine/gameEngine";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
+import Trigger from "components/gameEngine/trigger.vue";
 
 interface dataModel {
   gameEngine: Engine;
@@ -748,7 +524,7 @@ interface dataModel {
 
 export default defineComponent({
   name: "GameSimulationPage",
-  components: { UnitSearch },
+  components: { UnitSearch, Trigger },
   data(): dataModel {
     return {
       gameEngine: new Engine(),
@@ -945,19 +721,7 @@ export default defineComponent({
     text-decoration: underline;
   }
 }
-.trigger-container {
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  background-color: $light;
-  color: $dark;
-  border: 1px solid $dark;
-  margin-bottom: 0.25rem;
-}
-.trigger-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.25rem;
-}
+
 .tab-pane {
   max-height: 300px;
   overflow: scroll;

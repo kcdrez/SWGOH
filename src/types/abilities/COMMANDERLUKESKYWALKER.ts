@@ -65,8 +65,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
   specialskill_COMMANDERLUKESKYWALKER02: {
     id: "specialskill_COMMANDERLUKESKYWALKER02",
     name: "Call to Action",
-    gameText: `Dispel all debuffs on Luke. Luke gains 100% Turn Meter and recovers 40% Health and Protection. If Luke doesn't have Call to Action, he gains it until the next time this ability is used, which can't be copied, dispelled, or prevented. If Luke already had Call to Action, he removes it.\n\n
-    Call to Action: This character ignores Taunt during their turn and has +50% Accuracy, Critical Chance, and Critical Damage`,
+    gameText: `Dispel all debuffs on Luke. Luke gains 100% Turn Meter and recovers 40% Health and Protection. If Luke doesn't have Call to Action, he gains it until the next time this ability is used, which can't be copied, dispelled, or prevented. If Luke already had Call to Action, he removes it.\n\nCall to Action: This character ignores Taunt during their turn and has +50% Accuracy, Critical Chance, and Critical Damage`,
     cooldown: 4,
     turnsRemaining: 0,
     actions: [
