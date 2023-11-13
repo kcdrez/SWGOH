@@ -280,8 +280,10 @@ export class Turn {
       current: number;
       max: number;
     };
+    activeAbilities: iAbility[];
     buffs: iBuff[];
     debuffs: iDebuff[];
+    statusEffects: iStatusEffect[];
     physical: {
       label: string;
       value: number;
@@ -301,6 +303,7 @@ export class Turn {
       isPercent?: boolean;
     }[];
     triggers: iTrigger[];
+    otherEffects: { ignoreTaunt: boolean };
   };
 
   constructor(
@@ -576,13 +579,19 @@ export class Engine {
     const opponentLost = this._opponentCharacters.every((x) => x.health <= 0);
     if (playerLost || opponentLost || currentRound > maxRounds) {
       this.turns.push(
-        new Turn(Infinity, null, [
-          `Match ends: ${
-            opponentLost
-              ? store.state.player.player?.name
-              : store.state.opponents.player?.name
-          } is the winner!`,
-        ])
+        new Turn(
+          Infinity,
+          null,
+          [
+            `Match ends: ${
+              opponentLost
+                ? store.state.player.player?.name
+                : store.state.opponents.player?.name
+            } is the winner!`,
+          ],
+          [],
+          "Final Score"
+        )
       );
 
       if (playerLost) {
