@@ -282,40 +282,9 @@ export class Turn {
   private _turnNumber: number = 0;
   private _character: Character | null = null;
   private _label: string | null = null;
-  public characterLogData?: {
-    health: {
-      current: number;
-      max: number;
-    };
-    protection: {
-      current: number;
-      max: number;
-    };
-    activeAbilities: iAbility[];
-    buffs: iBuff[];
-    debuffs: iDebuff[];
-    statusEffects: iStatusEffect[];
-    physical: {
-      label: string;
-      value: number;
-      base: number;
-      isPercent?: boolean;
-    }[];
-    special: {
-      label: string;
-      value: number;
-      base: number;
-      isPercent?: boolean;
-    }[];
-    general: {
-      label: string;
-      value: number;
-      base: number;
-      isPercent?: boolean;
-    }[];
-    triggers: iTrigger[];
-    otherEffects: { ignoreTaunt: boolean };
-  };
+  public characterLogData?: tLogData;
+  public characterList: { name: string; owner: string; turnMeter: number }[] =
+    [];
 
   constructor(
     turnNumber: number,
@@ -331,6 +300,19 @@ export class Turn {
     this._label = label ?? null;
 
     this.characterLogData = this._character?.getLogs();
+
+    this.characterList = gameEngine.allCharacters
+      .map((c) => {
+        const logs = c.getLogs();
+        return {
+          name: c.name,
+          owner: c.owner,
+          turnMeter: round(logs.turnMeter, 2),
+        };
+      })
+      .sort((a, b) => {
+        return a.turnMeter > b.turnMeter ? -1 : 1;
+      });
   }
 
   get turnNumber() {
@@ -348,31 +330,6 @@ export class Turn {
   }
   addEndOfTurnLogs(logs: Log[]) {
     this.endOfTurnLogs.push(...logs.filter((l) => !!l));
-  }
-  getStatusEffectText(effect: iBuff | iDebuff | iStatusEffect): string {
-    const textLines: string[] = [effect.name];
-    if (effect.cantDispel) {
-      textLines.push("Cant be Dispeled");
-    }
-    if (effect.cantPrevent) {
-      textLines.push("Cant be Prevented");
-    }
-    if (effect.cantResist) {
-      textLines.push("Cant be Resisted");
-    }
-    if (effect.duration) {
-      textLines.push("Turns Remaining: " + effect.duration);
-    }
-    if (effect.unique) {
-      textLines.push("Is Unique");
-    }
-    if (effect.isStackable) {
-      textLines.push("Stacks: " + effect.stacks);
-    }
-    return textLines.join("\n");
-  }
-  getStatusEffectImgSrc(effect: iBuff | iDebuff | iStatusEffect) {
-    return `/images/statusEffects/${effect.name.replace(/\s/g, "_")}.png`;
   }
 }
 
@@ -406,7 +363,7 @@ type tLogEffects = {
     amount: number;
   };
   defeated?: boolean;
-  matchEnds?: string;
+  winner?: string;
   stunned?: boolean;
 };
 
@@ -444,45 +401,18 @@ export type tLogData = {
     isPercent?: boolean;
   }[];
   triggers: iTrigger[];
-  otherEffects: { ignoreTaunt: boolean };
+  otherEffects: { ignoreTaunt: boolean; immunity: Record<string, boolean> };
+  turnMeter: number;
 };
 
 export class Log {
-  public character: Character | null = null;
-  public target: Character | null = null;
-  public ability: tLogAbility = {
-    used: null,
-    source: null,
-  };
-  public damage: tLogDamage = {
-    isCrit: false,
-    amount: 0,
-    evaded: false,
-  };
-  public statusEffects: tLogStatusEffect = {
-    type: null,
-    list: [],
-    resisted: false,
-    removed: false,
-    duration: 0,
-    immune: false,
-    prevented: false,
-  };
-  public heal: tLogHeal = {
-    amount: 0,
-    type: null,
-  };
-  public effects: tLogEffects = {
-    assisted: false,
-    countered: false,
-    turnMeter: 0,
-    cooldown: {
-      ability: null,
-      amount: 0,
-    },
-    defeated: false,
-    stunned: false,
-  };
+  public character?: Character;
+  public target?: Character;
+  public ability?: tLogAbility;
+  public damage?: tLogDamage;
+  public statusEffects?: tLogStatusEffect;
+  public heal?: tLogHeal;
+  public effects?: tLogEffects;
   public characterLogData?: tLogData;
   public targetLogData?: tLogData;
 
@@ -495,13 +425,13 @@ export class Log {
     heal?: tLogHeal;
     effects?: tLogEffects;
   }) {
-    this.character = data?.character ?? null;
-    this.target = data?.target ?? null;
-    this.statusEffects = data?.statusEffects ?? this.statusEffects;
-    this.ability = data?.ability ?? this.ability;
-    this.damage = data?.damage ?? this.damage;
-    this.heal = data?.heal ?? this.heal;
-    this.effects = data?.effects ?? this.effects;
+    this.character = data?.character;
+    this.target = data?.target;
+    this.statusEffects = data?.statusEffects;
+    this.ability = data?.ability;
+    this.damage = data?.damage;
+    this.heal = data?.heal;
+    this.effects = data?.effects;
 
     if (this.character) {
       this.characterLogData = this.character.getLogs();
@@ -521,7 +451,6 @@ interface iSimulation {
 export class Engine {
   private _playerCharacters: Character[] = [];
   private _opponentCharacters: Character[] = [];
-  private _triggers: iTrigger[] = [];
   private _simulationData: iSimulation = {
     total: 1,
     playerWins: 0,
@@ -532,7 +461,7 @@ export class Engine {
 
   constructor() {}
 
-  private get allCharacters() {
+  public get allCharacters() {
     return [...this._playerCharacters, ...this._opponentCharacters];
   }
   public get totalSimulations() {
@@ -749,7 +678,7 @@ export class Engine {
           [
             new Log({
               effects: {
-                matchEnds: opponentLost
+                winner: opponentLost
                   ? store.state.player.player?.name
                   : store.state.opponents.player?.name,
               },
@@ -761,9 +690,9 @@ export class Engine {
       );
 
       if (playerLost) {
-        this._simulationData.playerWins++;
-      } else if (opponentLost) {
         this._simulationData.opponentWins++;
+      } else if (opponentLost) {
+        this._simulationData.playerWins++;
       }
       return true;
     }

@@ -191,297 +191,32 @@
                 >
                   <Popper arrow placement="right">
                     <h6 class="turn-label">{{ turn.label }}:</h6>
-                    <template #content v-if="turn.character">
+                    <template #content>
                       <div>
-                        <div class="text-decoration-underline">
-                          {{ turn.character?.name }}
-                        </div>
-                        <ul class="nav nav-tabs my-3" role="tablist">
-                          <li class="nav-item" role="presentation">
-                            <button
-                              class="nav-link active"
-                              data-bs-toggle="tab"
-                              :data-bs-target="`#popover-match${index}_${turnIndex}-general`"
-                              type="button"
-                              role="tab"
-                            >
-                              General
-                            </button>
-                          </li>
-                          <li class="nav-item" role="presentation">
-                            <button
-                              class="nav-link"
-                              data-bs-toggle="tab"
-                              :data-bs-target="`#popover-match${index}_${turnIndex}-stats`"
-                              type="button"
-                              role="tab"
-                            >
-                              Stats
-                            </button>
-                          </li>
-                          <li class="nav-item" role="presentation">
-                            <button
-                              class="nav-link"
-                              data-bs-toggle="tab"
-                              :data-bs-target="`#popover-match${index}_${turnIndex}-statusEffects`"
-                              type="button"
-                              role="tab"
-                            >
-                              Status Effects
-                            </button>
-                          </li>
-                          <li class="nav-item" role="presentation">
-                            <button
-                              class="nav-link"
-                              data-bs-toggle="tab"
-                              :data-bs-target="`#popover-match${index}_${turnIndex}-triggers`"
-                              type="button"
-                              role="tab"
-                            >
-                              Triggers
-                            </button>
-                          </li>
-                          <li class="nav-item" role="presentation">
-                            <button
-                              class="nav-link"
-                              data-bs-toggle="tab"
-                              :data-bs-target="`#popover-match${index}_${turnIndex}-other`"
-                              type="button"
-                              role="tab"
-                            >
-                              Other Effects
-                            </button>
-                          </li>
-                        </ul>
-                        <div class="tab-content">
-                          <div
-                            class="tab-pane fade show active"
-                            :id="`popover-match${index}_${turnIndex}-general`"
+                        <div
+                          class="input-group input-group-sm"
+                          v-for="character in turn.characterList"
+                        >
+                          <span class="input-group-text character-name"
+                            >{{ character.name }} ({{ character.owner }})</span
                           >
-                            <div class="input-group input-group-sm">
-                              <span class="input-group-text">Protection:</span>
-                              <span class="input-group-text fill"
-                                ><span
-                                  :class="{
-                                    'text-danger':
-                                      (turn.characterLogData?.protection
-                                        .current ?? 0) <
-                                      (turn.characterLogData?.protection.max ??
-                                        0),
-                                  }"
-                                  >{{
-                                    turn.characterLogData?.protection.current
-                                  }}</span
-                                >
-                                <span class="mx-1">/</span>
-                                {{
-                                  turn.characterLogData?.protection.max
-                                }}</span
-                              >
-                            </div>
-                            <div class="input-group input-group-sm mt-1">
-                              <span class="input-group-text">Health:</span>
-                              <span class="input-group-text fill"
-                                ><span
-                                  :class="{
-                                    'text-warning':
-                                      (turn.characterLogData?.health.current ??
-                                        0) <
-                                      (turn.characterLogData?.health.max ?? 0),
-                                  }"
-                                  >{{
-                                    turn.characterLogData?.health.current
-                                  }}</span
-                                ><span class="mx-1">/</span>
-                                {{ turn.characterLogData?.health.max }}</span
-                              >
-                            </div>
-                            <div
-                              v-for="ability in turn.characterLogData
-                                ?.activeAbilities"
-                              :key="ability.id"
-                              class="mt-1"
-                            >
-                              <div v-if="ability.cooldown">
-                                {{ ability.name }} - Cooldown:
-                                {{ ability.turnsRemaining }}
-                              </div>
-                              <div v-else>{{ ability.name }} (Basic)</div>
-                            </div>
-                          </div>
-                          <div
-                            class="tab-pane fade stats"
-                            :id="`popover-match${index}_${turnIndex}-stats`"
-                          >
-                            <div class="row">
-                              <div class="col">
-                                <u>General Stats:</u>
-                                <div
-                                  v-for="stat in turn.characterLogData?.general"
-                                  :key="stat.label"
-                                >
-                                  <span class="me-1">{{ stat.label }}:</span>
-                                  <span
-                                    :class="{
-                                      'text-success': stat.value > stat.base,
-                                      'text-warning': stat.value < stat.base,
-                                    }"
-                                    :title="`Current ${stat.label}`"
-                                    >{{ stat.value
-                                    }}{{ stat.isPercent ? "%" : "" }}
-                                  </span>
-                                  <span
-                                    class="ms-1"
-                                    v-if="stat.value !== stat.base"
-                                    :title="`Base ${stat.label}`"
-                                    >({{ stat.base
-                                    }}{{ stat.isPercent ? "%" : "" }})</span
-                                  >
-                                </div>
-                              </div>
-                              <div class="col">
-                                <u>Physical Stats:</u>
-                                <div
-                                  v-for="stat in turn.characterLogData
-                                    ?.physical"
-                                  :key="stat.label"
-                                >
-                                  <span class="me-1">{{ stat.label }}:</span>
-                                  <span
-                                    :class="{
-                                      'text-success': stat.value > stat.base,
-                                      'text-warning': stat.value < stat.base,
-                                    }"
-                                    :title="`Current ${stat.label}`"
-                                    >{{ stat.value
-                                    }}{{ stat.isPercent ? "%" : "" }}
-                                  </span>
-                                  <span
-                                    class="ms-1"
-                                    v-if="stat.value !== stat.base"
-                                    :title="`Base ${stat.label}`"
-                                    >({{ stat.base
-                                    }}{{ stat.isPercent ? "%" : "" }})</span
-                                  >
-                                </div>
-                              </div>
-                              <div class="col">
-                                <u>Special Stats:</u>
-                                <div
-                                  v-for="stat in turn.characterLogData?.special"
-                                  :key="stat.label"
-                                >
-                                  <span class="me-1">{{ stat.label }}:</span>
-                                  <span
-                                    :class="{
-                                      'text-success': stat.value > stat.base,
-                                      'text-warning': stat.value < stat.base,
-                                    }"
-                                    :title="`Current ${stat.label}`"
-                                    >{{ stat.value
-                                    }}{{ stat.isPercent ? "%" : "" }}
-                                  </span>
-                                  <span
-                                    class="ms-1"
-                                    v-if="stat.value !== stat.base"
-                                    :title="`Base ${stat.label}`"
-                                    >({{ stat.base
-                                    }}{{ stat.isPercent ? "%" : "" }})</span
-                                  >
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            class="tab-pane fade"
-                            :id="`popover-match${index}_${turnIndex}-statusEffects`"
-                          >
-                            <div>Buffs:</div>
-                            <template
-                              v-if="turn.characterLogData?.buffs.length === 0"
-                              >-</template
-                            >
-                            <template
-                              v-for="buff in turn.characterLogData?.buffs"
-                              :key="buff.name"
-                            >
-                              <img
-                                class="statusEffect"
-                                :src="turn.getStatusEffectImgSrc(buff)"
-                                alt="images/statusEffects/Default.png"
-                                :title="turn.getStatusEffectText(buff)"
-                              />
-                            </template>
-                            <div>Debuffs:</div>
-                            <template
-                              v-if="turn.characterLogData?.debuffs.length === 0"
-                              >-</template
-                            >
-                            <template
-                              v-for="debuff in turn.characterLogData?.debuffs"
-                              :key="debuff.name"
-                            >
-                              <img
-                                class="statusEffect"
-                                :src="turn.getStatusEffectImgSrc(debuff)"
-                                alt="images/statusEffects/Default.png"
-                                :title="turn.getStatusEffectText(debuff)"
-                              />
-                            </template>
-                            <div>Other Status Effects:</div>
-                            <template
-                              v-if="
-                                turn.characterLogData?.statusEffects.length ===
-                                0
-                              "
-                              >-</template
-                            >
-                            <template
-                              v-for="statusEffect in turn.characterLogData
-                                ?.statusEffects"
-                              :key="statusEffect.name"
-                            >
-                              <img
-                                class="statusEffect"
-                                :src="turn.getStatusEffectImgSrc(statusEffect)"
-                                alt="images/statusEffects/Default.png"
-                                :title="turn.getStatusEffectText(statusEffect)"
-                              />
-                            </template>
-                          </div>
-                          <div
-                            class="tab-pane fade"
-                            :id="`popover-match${index}_${turnIndex}-triggers`"
-                          >
-                            <Trigger
-                              v-for="trigger in turn.characterLogData?.triggers"
-                              :key="trigger.id"
-                              :trigger="trigger"
+                          <span class="input-group-text fill turn-meter">
+                            <ProgressBar
+                              :percent="character.turnMeter"
+                              class="w-100"
                             />
-                          </div>
-                          <div
-                            class="tab-pane fade"
-                            :id="`popover-match${index}_${turnIndex}-other`"
-                          >
-                            <div>
-                              {{
-                                turn.characterLogData?.otherEffects.ignoreTaunt
-                                  ? "Ignores Taunt"
-                                  : "-"
-                              }}
-                            </div>
-                          </div>
+                          </span>
                         </div>
                       </div>
                     </template>
                   </Popper>
                   <ul>
                     <li v-for="(log, index) in turn.logs" :key="index">
-                      <Log :log="log" />
+                      <Log :log="(log as any)" />
                     </li>
                     <li v-if="turn.endOfTurnLogs.length">- End of Turn -</li>
                     <li v-for="(log, index) in turn.endOfTurnLogs" :key="index">
-                      <Log :log="log" />
+                      <Log :log="(log as any)" />
                     </li>
                   </ul>
                   <ul v-if="turn.endOfTurnLogs.length"></ul>
@@ -653,46 +388,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "styles/variables.scss";
 
-::v-deep(em) {
-  color: $dark;
-}
-::v-deep(.damage) {
-  color: $danger-dark-3;
-}
-::v-deep(.crit) {
-  color: $warning;
-}
-::v-deep(.buff) {
-  color: $success-dark-2;
-  text-shadow: 0px 0px 3px $success-light-3;
-}
-::v-deep(.debuff) {
-  color: $danger-dark-3;
-  text-shadow: 0px 0px 3px $danger-light-2;
-}
-::v-deep(.statusEffect) {
-  color: $primary-dark-3;
-  text-shadow: 0px 0px 3px $primary-light-2;
-}
-::v-deep(.ability) {
-  color: $secondary-dark-3;
-  text-shadow: 0px 0px 3px $secondary-light-3;
-
-  &:hover {
-    color: $primary-dark-2;
-    text-decoration: underline;
-    cursor: help;
-  }
-}
-::v-deep(.protection) {
-  color: $gray-1;
-  text-shadow: 0px 0px 3px $gray-9;
-}
-::v-deep(.health) {
-  color: $success-light-2;
-  text-shadow: 0px 0px 3px $gray-1;
-}
-
 .character-list {
   list-style-type: none;
   .character-element {
@@ -707,12 +402,6 @@ export default defineComponent({
 .input-group-text.fill {
   flex: 1 1 auto;
 }
-::v-deep(.popper) .stats .row {
-  width: 700px;
-}
-.statusEffect {
-  max-width: 30px;
-}
 .turn-label {
   cursor: pointer;
   color: $secondary-dark-3;
@@ -722,9 +411,12 @@ export default defineComponent({
     text-decoration: underline;
   }
 }
-
-.popper .tab-pane {
-  max-height: 300px;
-  overflow: scroll;
+.character-name {
+  max-width: 150px;
+  width: 150px;
+  white-space: unset;
+}
+.turn-meter {
+  width: 150px;
 }
 </style>

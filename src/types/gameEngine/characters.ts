@@ -878,22 +878,22 @@ export class Character {
   private get immunity(): Record<string, boolean> {
     return this._triggers.reduce(
       (immuneMapping, trigger) => {
-        if (trigger.triggerType === "always") {
-          trigger.actions?.forEach((action) => {
-            action.effects?.forEach((effect) => {
-              if (effect.immune) {
-                if (this.checkCondition(effect.condition, this)) {
-                  effect.immune.negativeStatusEffects?.forEach((x) => {
-                    immuneMapping[x] = true;
-                  });
-                  effect.immune.positiveStatusEffects?.forEach((x) => {
-                    immuneMapping[x] = true;
-                  });
-                }
-              }
-            });
-          });
-        }
+        // if (trigger.triggerType === "always") {
+        //   trigger.actions?.forEach((action) => {
+        //     action.effects?.forEach((effect) => {
+        //       if (effect.immune) {
+        //         if (this.checkCondition(effect.condition, this)) {
+        //           effect.immune.negativeStatusEffects?.forEach((x) => {
+        //             immuneMapping[x] = true;
+        //           });
+        //           effect.immune.positiveStatusEffects?.forEach((x) => {
+        //             immuneMapping[x] = true;
+        //           });
+        //         }
+        //       }
+        //     });
+        //   });
+        // }
         return immuneMapping;
       },
       {
@@ -1115,7 +1115,10 @@ export class Character {
         }),
       ];
     } else if (!this.hasDebuff("Buff Immunity")) {
-      if ((!this.hasBuff(buff) || buff.isStackable) && !this.isImmune(buff)) {
+      if (
+        (!this.hasBuff(buff.name) || buff.isStackable) &&
+        !this.isImmune(buff)
+      ) {
         if (scalar > 0) {
           this._buffs.push({
             ...buff,
@@ -1180,7 +1183,7 @@ export class Character {
 
       if (listOfRemovedBuffs.length > 0) {
         if (opponent && !this.isSelf(opponent)) {
-          //opponent removed them from this
+          //opponent removed them
           logs.push(
             new Log({
               character: opponent,
@@ -1196,7 +1199,7 @@ export class Character {
           //was naturally removed
           logs.push(
             new Log({
-              target: this,
+              character: this,
               statusEffects: {
                 type: "buff",
                 list: listOfRemovedBuffs,
@@ -1427,6 +1430,7 @@ export class Character {
             statusEffects: {
               list: [effect],
               type: "statusEffect",
+              duration: effect.duration,
             },
             ability: {
               source: ability,
@@ -1690,7 +1694,7 @@ export class Character {
   //Methods
   public getCombatStats(
     damageType?: "physical" | "special" | "true",
-    stats?: iStatsCheck | null
+    stats?: iStatsCheck[]
   ) {
     if (damageType === "physical") {
       const baseStat = this.physical;
@@ -1742,7 +1746,7 @@ export class Character {
   public dealDamageWithAttack(
     targetCharacter: Character,
     damageData: iEffect["damage"],
-    stats?: iStatsCheck | null,
+    stats?: iStatsCheck[],
     srcAbility?: iAbility | null
   ) {
     const logs: Log[] = [];
@@ -1883,7 +1887,7 @@ export class Character {
   private calculateDamage(
     targetCharacter: Character,
     damageData: iEffect["damage"],
-    stats?: iStatsCheck | null
+    stats?: iStatsCheck[]
   ): { isCrit: boolean; damageTotal: number } {
     const abilityModifier = damageData?.modifier.value ?? 0;
     const variance = damageData?.variance ?? 5;
@@ -1911,6 +1915,40 @@ export class Character {
       1
     );
     return { isCrit, damageTotal };
+  }
+  private combineStats(statsList: (iStatsCheck | undefined)[]): iStatsCheck[] {
+    return statsList.reduce(
+      (list: iStatsCheck[], stats: iStatsCheck | undefined) => {
+        if (stats) {
+          const exists = list.find(
+            (x) => x.statToModify === stats.statToModify
+          );
+          if (exists) {
+            if (
+              exists.modifiedType === "multiplicative" &&
+              stats.modifiedType === "multiplicative"
+            ) {
+              exists.amount *= stats.amount;
+            } else if (
+              exists.modifiedType === "additive" &&
+              stats.modifiedType === "additive"
+            ) {
+              exists.amount += stats.amount;
+            } else {
+              console.warn(
+                "Cannot combine two kinds of stat changes",
+                exists,
+                stats
+              );
+            }
+          } else {
+            list.push(stats);
+          }
+        }
+        return list;
+      },
+      []
+    );
   }
   private checkDeath(targetCharacter: Character): Log[] {
     const logs: Log[] = [];
@@ -1988,7 +2026,6 @@ export class Character {
         if (inverted) {
           return !match;
         } else if (match) {
-          console.log(buffs, isNew, match);
           return isNew === false ? !match.isNew : true;
         } else return false;
       });
@@ -2058,10 +2095,10 @@ export class Character {
       }
     }
     if (onTurn) {
+      console.log(gameEngine.currentCharactersTurn);
       results =
         this.isSelf(gameEngine.currentCharactersTurn ?? undefined) || results;
     }
-    console.log(results);
     return results;
   }
   /**
@@ -2120,7 +2157,11 @@ export class Character {
     }
     return null;
   }
-  public checkEvade(effect: iEffect, opponent: Character, stats?: iStatsCheck) {
+  public checkEvade(
+    effect: iEffect,
+    opponent: Character,
+    stats?: iStatsCheck[]
+  ) {
     if (effect.cantMiss || this.isSelf(opponent)) {
       return false;
     } else {
@@ -2177,7 +2218,9 @@ export class Character {
         action,
         ability,
         targetCharacter,
-        canBeCountered
+        canBeCountered,
+        undefined,
+        stats
       );
       logs.push(...actionResults.logs);
       logs.push(
@@ -2200,7 +2243,8 @@ export class Character {
     ability: iAbility | null,
     targetCharacter?: Character | null,
     canBeCountered: boolean = true,
-    data?: iTriggerData
+    data?: iTriggerData,
+    stats?: iStatsCheck
   ): { logs: Log[]; primaryTarget: Character | null } {
     const logs: Log[] = [];
 
@@ -2215,7 +2259,7 @@ export class Character {
           logs: effectLogs,
           targetTriggers,
           characterTriggers,
-        } = this.processEffect(effect, target, ability, data);
+        } = this.processEffect(effect, target, ability, data, stats);
         logs.push(...effectLogs);
         logs.push(...target.executePassiveTriggers(targetTriggers));
         logs.push(...this.executeAbilityTriggers(ability, characterTriggers));
@@ -2231,7 +2275,8 @@ export class Character {
     effect: iEffect,
     targetCharacter: Character,
     ability: iAbility | null,
-    data?: iTriggerData
+    data?: iTriggerData,
+    stats?: iStatsCheck
   ) {
     const logs: Log[] = [];
     const characterTriggers: iTriggerData[] = [];
@@ -2241,7 +2286,7 @@ export class Character {
       const attackMissed = targetCharacter.checkEvade(
         effect,
         this,
-        effect.stats
+        this.combineStats([effect?.stats, stats])
       );
 
       if (attackMissed) {
@@ -2331,14 +2376,10 @@ export class Character {
               logs.push(...damageLogs);
             });
           } else {
-            const {
-              logs: damageLogs,
-              isCrit,
-              damageTotal,
-            } = this.dealDamageWithAttack(
+            const { logs: damageLogs } = this.dealDamageWithAttack(
               targetCharacter,
               effect.damage,
-              effect.damage.modifier.stats,
+              this.combineStats([effect.damage.modifier.stats, stats]),
               ability
             );
 
@@ -2549,7 +2590,7 @@ export class Character {
               logs.push(
                 ...this.executeTrigger(
                   trigger,
-                  ability ?? trigger.srcAbility ?? type.ability,
+                  ability ?? type.ability ?? trigger.srcAbility, //order is important
                   type
                 )
               );
@@ -2921,7 +2962,8 @@ export class Character {
         },
       ],
       triggers: unvue(this._triggers),
-      otherEffects: unvue(this.effects),
+      otherEffects: unvue({ ...this.effects, immunity: this.immunity }),
+      turnMeter: round(this.turnMeter, 0),
     };
   }
 }
@@ -2948,16 +2990,21 @@ export function anyTagsMatch(
 function modifyStat(
   baseStat: number,
   statType: string,
-  stats?: iStatsCheck | null
+  stats?: iStatsCheck[] | null
 ) {
-  if (statType === stats?.statToModify) {
-    if (stats.modifiedType === "multiplicative") {
-      return baseStat * stats.amount;
-    } else if (stats.modifiedType === "additive") {
-      return baseStat + stats.amount;
-    }
+  let modifiedStat = baseStat;
+  if (stats) {
+    stats.forEach((s) => {
+      if (statType === s?.statToModify) {
+        if (s.modifiedType === "multiplicative") {
+          modifiedStat *= s.amount;
+        } else if (s.modifiedType === "additive") {
+          modifiedStat += s.amount;
+        }
+      }
+    });
   }
-  return baseStat;
+  return modifiedStat;
 }
 
 export const format = {

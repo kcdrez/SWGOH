@@ -243,7 +243,9 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
                   {
                     triggerType: "useAbility",
                     id: uuid(),
-                    targets: {},
+                    targets: {
+                      filters: [{ allies: true }, { tags: ["Self"] }],
+                    },
                     triggerData: {
                       frequency: "turn",
                       count: 1,
