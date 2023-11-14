@@ -2,6 +2,19 @@ import { v4 as uuid } from "uuid";
 
 import { iAbility, iUniqueAbility } from "types/gameEngine/abilities";
 
+const weakest = {
+  targets: {
+    filters: [
+      { allies: true },
+      { tags: ["!Self"] },
+      { targetIds: ["!HANSOLO"] },
+    ],
+    targetCount: 1,
+    weakest: true,
+  },
+};
+const hanSolo = {};
+
 const chewy: Record<string, iAbility | iUniqueAbility> = {
   basicskill_CHEWBACCALEGENDARY: {
     id: "basicskill_CHEWBACCALEGENDARY",
@@ -173,6 +186,9 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
                       count: 1,
                       limit: 1,
                     },
+                    condition: {
+                      onTurn: true,
+                    },
                     actions: [
                       {
                         targets: { filters: [{ targetIds: ["target"] }] },
@@ -227,11 +243,14 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
                   {
                     triggerType: "useAbility",
                     id: uuid(),
-                    targets: {}, //todo
+                    targets: {},
                     triggerData: {
                       frequency: "turn",
                       count: 1,
                       limit: 1,
+                    },
+                    condition: {
+                      onTurn: true,
                     },
                     actions: [
                       {
@@ -321,7 +340,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
       },
       {
         id: uuid(),
-        triggerType: "dealDamage",
+        triggerType: "dealDamageWithAttack",
         targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         triggerData: {
           excludeAbilities: ["uniqueskill_CHEWBACCALEGENDARY02"],
@@ -350,7 +369,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
       {
-        triggerType: "receiveDamage",
+        triggerType: "receiveDamageFromAttack",
         id: uuid(),
         targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
         actions: [
@@ -393,54 +412,85 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
       {
-        triggerType: "pregame",
+        triggerType: "receiveDamageFromAttack",
         id: uuid(),
-        targets: {}, //todo
+        targets: {
+          filters: [{ allies: true }, { tags: ["Self"] }],
+        },
         actions: [
           {
             targets: {
-              filters: [{ allies: true }, { statusEffects: ["Guard"] }],
+              filters: [{ allies: true }, { tags: ["Self"] }],
             },
             effects: [
               {
-                triggers: [
-                  {
-                    triggerType: "receiveDamage",
-                    id: uuid(),
-                    targets: {
-                      filters: [{ allies: true }, { tags: ["Self"] }],
-                    },
-                    actions: [
-                      {
-                        targets: {
-                          filters: [
-                            { allies: true },
-                            { targetIds: ["CHEWBACCALEGENDARY"] },
-                          ],
-                        },
-                        effects: [
-                          {
-                            cooldown: {
-                              id: "specialskill_CHEWBACCALEGENDARY02",
-                              amount: -1,
-                              target: {
-                                filters: [
-                                  { allies: true },
-                                  { targetIds: ["CHEWBACCALEGENDARY"] },
-                                ],
-                              },
-                            },
-                          },
-                        ],
-                      },
+                cooldown: {
+                  id: "specialskill_CHEWBACCALEGENDARY02",
+                  amount: -1,
+                  target: {
+                    filters: [
+                      { allies: true },
+                      { targetIds: ["CHEWBACCALEGENDARY"] },
                     ],
                   },
-                ],
+                },
               },
             ],
           },
         ],
       },
+      // {
+      //   triggerType: "pregame",
+      //   id: uuid(),
+      //   targets: {
+      //     filters: [{ allies: true }],
+      //   },
+      //   actions: [
+      //     {
+      //       targets: {
+      //         filters: [{ allies: true }],
+      //       },
+      //       effects: [
+      //         {
+      //           triggers: [
+      //             {
+      //               triggerType: "receiveDamageFromAttack",
+      //               id: uuid(),
+      //               targets: {
+      //                 filters: [{ allies: true }, { tags: ["Self"] }],
+      //               },
+
+      //               actions: [
+      //                 {
+      //                   targets: {
+      //                     filters: [
+      //                       { allies: true },
+      //                       { targetIds: ["CHEWBACCALEGENDARY"] },
+      //                     ],
+      //                   },
+      //                   effects: [
+      //                     {
+      //                       cooldown: {
+      //                         id: "specialskill_CHEWBACCALEGENDARY02",
+      //                         amount: -1,
+      //                         target: {
+      //                           filters: [
+      //                             { allies: true },
+      //                             { targetIds: ["CHEWBACCALEGENDARY"] },
+      //                           ],
+      //                         },
+      //                       },
+      //                     },
+      //                   ],
+      //                 },
+      //               ],
+      //             },
+      //           ],
+      //         },
+      //       ],
+      //     },
+      //   ],
+      // },
     ],
   },
 };

@@ -18,7 +18,7 @@
       :key="action.id"
     >
       <div>Target: {{ action.targets.filters }}</div>
-      <div v-for="effect in action.effects" :key="effect.id">
+      <div v-for="(effect, index) in action.effects" :key="index">
         <span v-if="effect.condition">
           <span v-if="effect.condition">
             <span>If Target </span>
@@ -68,7 +68,7 @@
           type="buff"
         />
         <StatusEffect
-          v-for="debuff in effect.debuff"
+          v-for="debuff in effect.debuffs"
           :key="debuff.name"
           :statusEffect="debuff"
           type="debuff"
@@ -102,13 +102,13 @@
         <div v-if="effect.scalesBy">
           <span>Equal to </span>
           <span>
-            <span v-if="effect.scalesBy.stat.percent <= 1">
-              {{ Math.abs(effect.scalesBy.stat.percent) * 100 }}%
+            <span v-if="(effect.scalesBy.stat?.percent ?? 0) <= 1">
+              {{ Math.abs(effect.scalesBy.stat?.percent ?? 0) * 100 }}%
             </span>
             <span v-else>
-              {{ Math.abs(effect.scalesBy.stat.percent) }}
+              {{ Math.abs(effect.scalesBy.stat?.percent ?? 0) }}
             </span>
-            {{ effect.scalesBy.stat.name }}
+            {{ effect.scalesBy.stat?.name }}
           </span>
           <span>
             of this Target:
@@ -127,6 +127,13 @@
             >Dealing {{ effect.assist.modifier.stats.amount * 100 }}%
             damage</span
           >
+        </span>
+        <span v-if="effect.cooldown">
+          <div>
+            {{ effect.cooldown.amount > 0 ? "Increase" : "Reduce" }} the
+            cooldown of <span class="ability">{{ effect.cooldown.id }}</span> by
+            {{ Math.abs(effect.cooldown.amount) }}
+          </div>
         </span>
       </div>
     </div>
@@ -150,6 +157,7 @@ export default defineComponent({
   props: {
     trigger: {
       type: Object as () => iTrigger,
+      required: true,
     },
   },
 });

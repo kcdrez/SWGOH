@@ -509,7 +509,7 @@ import { mapState, mapActions, mapGetters } from "vuex";
 import { randomNumber, numbersOnly } from "utils";
 import abilities from "types/abilities";
 import { Character, format } from "types/gameEngine/characters";
-import { Engine } from "types/gameEngine/gameEngine";
+import { gameEngine, Engine } from "types/gameEngine/gameEngine";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
 import Trigger from "components/gameEngine/trigger.vue";
@@ -527,7 +527,7 @@ export default defineComponent({
   components: { UnitSearch, Trigger },
   data(): dataModel {
     return {
-      gameEngine: new Engine(),
+      gameEngine,
       playerTeam: [],
       opponentTeam: [],
       showDeleteOpponentConfirm: false,
@@ -722,7 +722,7 @@ export default defineComponent({
   }
 }
 
-.tab-pane {
+.popper .tab-pane {
   max-height: 300px;
   overflow: scroll;
 }
