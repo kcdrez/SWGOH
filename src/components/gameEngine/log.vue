@@ -1,83 +1,121 @@
 <template>
   <div>
+    <template v-if="log.effects.matchEnds">
+      Match ends: {{ log.effects.matchEnds }} is the winner!
+    </template>
     <CharacterLog v-if="log.character" :character="log.character" />
-    <span
-      v-if="log.ability.used"
-      class="ability"
-      :title="log.ability.used.gameText"
-      >used {{ log.ability.used.name }}</span
+    <template v-if="log.ability.used"
+      >used
+      <span class="ability" :title="log.ability.used.gameText">{{
+        log.ability.used.name
+      }}</span></template
     >
-    <template v-if="log.effects.immune">is immune to</template>
-    <template v-if="log.statusEffects.resisted">resisted</template>
-    <template v-if="log.statusEffects.list.length > 0">
-      <template v-if="log.statusEffects.removed"
-        >Removed
-        <template :class="log.statusEffects.type">{{
-          log.statusEffects.list.join(", ")
-        }}</template>
+    <template v-if="log.statusEffects">
+      <template v-if="log.statusEffects.immune"
+        >is immune to
+        <span :class="log.statusEffects.type">{{
+          log.statusEffects.list.map((x) => x.name).join(", ")
+        }}</span></template
+      >
+      <template v-else-if="log.statusEffects.resisted"
+        >resisted
+        <span :class="log.statusEffects.type">{{
+          log.statusEffects.list.map((x) => x.name).join(", ")
+        }}</span>
+      </template>
+      <template v-else-if="log.statusEffects.prevented"
+        >could not gain
+        <span :class="log.statusEffects.type">{{
+          log.statusEffects.list.map((x) => x.name).join(", ")
+        }}</span>
+        due to <span class="debuff">Buff Immunity</span>
+      </template>
+      <template v-else-if="log.statusEffects.removed"
+        >removed
+        <span :class="log.statusEffects.type">{{
+          log.statusEffects.list.map((x) => x.name).join(", ")
+        }}</span>
         <template v-if="log.target">
           from
-          <CharacterLog :character="log.target" />
-        </template>
+          <CharacterLog :character="log.target"
+        /></template>
       </template>
-      <template v-else>
-        {{ log.statusEffects.type === "debuff" ? "Inflicted" : "Gained" }}
+      <template v-else-if="log.statusEffects.list.length > 0">
+        {{
+          log.statusEffects.type === "debuff"
+            ? "was inflicted with "
+            : "gained "
+        }}
         <span :class="log.statusEffects.type">{{
-          log.statusEffects.list.join(", ")
+          log.statusEffects.list.map((x) => x.name).join(", ")
         }}</span>
         <template v-if="log.target">
           on
           <CharacterLog :character="log.target" />
         </template>
+        <template v-if="log.statusEffects.duration">
+          for {{ log.statusEffects.duration }} turns</template
+        >
       </template>
-
-      <template v-if="log.statusEffects.duration"
-        >for {{ log.statusEffects.duration }} turns</template
-      >
     </template>
     <template v-if="log.effects.turnMeter">
       {{ log.effects.turnMeter > 0 ? "gained" : "lost" }}
-      {{ log.effects.turnMeter }}% turn meter
+      {{ Math.abs(log.effects.turnMeter) }}% turn meter
     </template>
     <template v-if="log.heal.amount > 0"
       >recovered <span :class="log.heal.type">{{ log.heal.amount }}</span>
-      {{ log.heal.type }}</template
-    >
+      <span class="text-capitalize ms-1">{{ log.heal.type }}</span>
+    </template>
     <template v-if="log.effects.assisted">
-      <template v-if="log.character?.hasDebuff('Stun')"
+      <template v-if="log.characterLogData?.debuffs.includes('Stun')"
         >cannot assist because they are
         <span class="debuff">Stunned</span></template
       >
-      <template v-else-if="log.character?.hasDebuff('Daze')"
+      <template v-else-if="log.characterLogData?.debuffs.includes('Daze')"
         >cannot assist because they are
         <span class="debuff">Dazed</span></template
       >
       <template v-else>is called to assist</template>
     </template>
     <template v-if="log.effects.countered">counter attacked</template>
-    <span
-      v-if="log.effects.cooldown?.ability"
-      class="ability"
-      :title="log.effects.cooldown.ability.gameText"
-    >
-      cooldown stuff
-    </span>
-    <template v-if="log.damage.amount">
-      <span class="damage"
-        >{{ log.damage.amount }} damage was dealt to
-        <CharacterLog v-if="log.damage.target" :character="log.damage.target" />
-        <span v-if="log.damage.isCrit" class="crit">(Crit)</span>
+    <template v-if="log.effects.cooldown?.ability">
+      <span class="ability" :title="log.effects.cooldown.ability?.gameText">
+        {{ log.effects.cooldown?.ability?.name }}'s
       </span>
+      cooldown was
+      {{ log.effects.cooldown.amount > 0 ? "increased" : "decreased" }} by
+      {{ Math.abs(log.effects.cooldown.amount) }}
     </template>
-    <template v-if="log.damage.evaded">evaded</template>
+    <template v-if="log.damage">
+      <template v-if="log.damage.evaded"
+        ><CharacterLog
+          v-if="log.target"
+          :character="log.target"
+        />evaded</template
+      >
+      <template v-else-if="log.damage.bonus"
+        ><CharacterLog v-if="log.target" :character="log.target" /> was dealt
+        <span class="damage">{{ log.damage.amount }}</span> bonus damage
+        from</template
+      >
+      <template v-else-if="log.damage.amount">
+        <span class="damage">{{ log.damage.amount }}</span> damage was dealt to
+        <CharacterLog v-if="log.target" :character="log.target" />
+        <span v-if="log.damage.isCrit" class="crit">(Crit)</span>
+      </template>
+    </template>
     <template v-if="log.effects.defeated"
       >defeated <CharacterLog v-if="log.target" :character="log.target"
     /></template>
-    <template v-if="log.character?.hasDebuff('Stun')"
+    <template v-if="log.effects.stunned"
       >is stunned and took no action</template
     >
-    <template v-if="log.ability.source"
-      >(src: {{ log.ability.source.name }})</template
+    <template v-if="log.ability.source">
+      (src:
+      <span class="ability" :title="log.ability.source.gameText">{{
+        log.ability.source.name
+      }}</span
+      >)</template
     >
   </div>
 </template>

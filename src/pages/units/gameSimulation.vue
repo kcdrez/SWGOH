@@ -477,11 +477,11 @@
                   </Popper>
                   <ul>
                     <li v-for="(log, index) in turn.logs" :key="index">
-                      <div v-html="log"></div>
+                      <Log :log="log" />
                     </li>
                     <li v-if="turn.endOfTurnLogs.length">- End of Turn -</li>
                     <li v-for="(log, index) in turn.endOfTurnLogs" :key="index">
-                      <div v-html="log"></div>
+                      <Log :log="log" />
                     </li>
                   </ul>
                   <ul v-if="turn.endOfTurnLogs.length"></ul>
@@ -513,6 +513,7 @@ import { gameEngine, Engine } from "types/gameEngine/gameEngine";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
 import Trigger from "components/gameEngine/trigger.vue";
+import Log from "components/gameEngine/log.vue";
 
 interface dataModel {
   gameEngine: Engine;
@@ -524,7 +525,7 @@ interface dataModel {
 
 export default defineComponent({
   name: "GameSimulationPage",
-  components: { UnitSearch, Trigger },
+  components: { UnitSearch, Trigger, Log },
   data(): dataModel {
     return {
       gameEngine,

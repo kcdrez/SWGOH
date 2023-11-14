@@ -383,6 +383,7 @@ type tLogStatusEffect = {
   removed?: boolean;
   duration?: number;
   immune?: boolean;
+  prevented?: boolean;
 };
 
 type tLogAbility = { used?: null | iAbility; source?: null | iAbility };
@@ -391,7 +392,7 @@ type tLogDamage = {
   isCrit?: boolean;
   amount?: number;
   evaded?: boolean;
-  target?: null | Character;
+  bonus?: boolean;
 };
 
 type tLogHeal = { amount: number; type: "health" | "protection" | null };
@@ -405,6 +406,45 @@ type tLogEffects = {
     amount: number;
   };
   defeated?: boolean;
+  matchEnds?: string;
+  stunned?: boolean;
+};
+
+export type tLogData = {
+  name: string;
+  owner: string;
+  health: {
+    current: number;
+    max: number;
+  };
+  protection: {
+    current: number;
+    max: number;
+  };
+  activeAbilities: iAbility[];
+  buffs: iBuff[];
+  debuffs: iDebuff[];
+  statusEffects: iStatusEffect[];
+  physical: {
+    label: string;
+    value: number;
+    base: number;
+    isPercent?: boolean;
+  }[];
+  special: {
+    label: string;
+    value: number;
+    base: number;
+    isPercent?: boolean;
+  }[];
+  general: {
+    label: string;
+    value: number;
+    base: number;
+    isPercent?: boolean;
+  }[];
+  triggers: iTrigger[];
+  otherEffects: { ignoreTaunt: boolean };
 };
 
 export class Log {
@@ -418,7 +458,6 @@ export class Log {
     isCrit: false,
     amount: 0,
     evaded: false,
-    target: null,
   };
   public statusEffects: tLogStatusEffect = {
     type: null,
@@ -427,6 +466,7 @@ export class Log {
     removed: false,
     duration: 0,
     immune: false,
+    prevented: false,
   };
   public heal: tLogHeal = {
     amount: 0,
@@ -441,7 +481,10 @@ export class Log {
       amount: 0,
     },
     defeated: false,
+    stunned: false,
   };
+  public characterLogData?: tLogData;
+  public targetLogData?: tLogData;
 
   constructor(data: {
     character?: Character;
@@ -459,6 +502,13 @@ export class Log {
     this.damage = data?.damage ?? this.damage;
     this.heal = data?.heal ?? this.heal;
     this.effects = data?.effects ?? this.effects;
+
+    if (this.character) {
+      this.characterLogData = this.character.getLogs();
+    }
+    if (this.target) {
+      this.targetLogData = this.target.getLogs();
+    }
   }
 }
 
@@ -532,8 +582,6 @@ export class Engine {
       do {
         turnNumber++;
         this.nextTurn(turnNumber);
-        if (turnNumber === 1) {
-        }
         if (this.checkMatchEnd(turnNumber, 1000)) {
           this._simulationData.matchHistory.push(
             this.turns //.map((x) => x.copy())
@@ -683,10 +731,10 @@ export class Engine {
       });
 
       const turn = new Turn(turnNumber, character, []);
+      this.turns.push(turn);
       const { logs, endOfTurnLogs } = character.takeAction();
       turn.addLogs(logs);
       turn.addEndOfTurnLogs(endOfTurnLogs);
-      this.turns.push(turn);
     }
   }
 
@@ -699,11 +747,13 @@ export class Engine {
           Infinity,
           null,
           [
-            `Match ends: ${
-              opponentLost
-                ? store.state.player.player?.name
-                : store.state.opponents.player?.name
-            } is the winner!`,
+            new Log({
+              effects: {
+                matchEnds: opponentLost
+                  ? store.state.player.player?.name
+                  : store.state.opponents.player?.name,
+              },
+            }),
           ],
           [],
           "Final Score"
