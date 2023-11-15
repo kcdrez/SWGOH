@@ -2095,7 +2095,6 @@ export class Character {
       }
     }
     if (onTurn) {
-      console.log(gameEngine.currentCharactersTurn);
       results =
         this.isSelf(gameEngine.currentCharactersTurn ?? undefined) || results;
     }
@@ -2233,8 +2232,6 @@ export class Character {
         ])
       );
     });
-
-    this.resetTriggers();
 
     return logs;
   }
@@ -2418,7 +2415,7 @@ export class Character {
 
         if (effect.ability) {
           const { abilityTrigger, abilityToUse } = effect.ability;
-          if (abilityTrigger === ability?.id || !abilityTrigger) {
+          if (abilityTrigger === data?.ability?.id || !abilityTrigger) {
             if (abilityToUse) {
               const abilityMatch = this.chooseAbility(abilityToUse);
               if (abilityMatch) {
@@ -2590,7 +2587,7 @@ export class Character {
               logs.push(
                 ...this.executeTrigger(
                   trigger,
-                  ability ?? type.ability ?? trigger.srcAbility, //order is important
+                  ability ?? trigger.srcAbility, //order is important
                   type
                 )
               );
@@ -2621,32 +2618,34 @@ export class Character {
     return logs;
   }
   private checkTriggerCount(
-    { triggerData }: iTrigger,
+    trigger: iTrigger,
     target?: Character | null,
     ability?: iAbility | null
   ): boolean {
-    if (triggerData?.count !== undefined) {
-      if (triggerData.count >= 1) {
-        triggerData.count--;
+    if (trigger.triggerData?.count !== undefined) {
+      if (trigger.triggerData.count >= 1) {
+        trigger.triggerData.count--;
       } else {
         return false;
       }
-    } else if (triggerData?.units && target?.id) {
-      const exists = triggerData.units.find((u) => u.id === target?.id);
+    } else if (trigger.triggerData?.units && target?.id) {
+      const exists = trigger.triggerData.units.find((u) => u.id === target?.id);
       if (exists) {
-        if (exists.count >= (triggerData?.limit ?? 0)) {
+        if (exists.count >= (trigger.triggerData?.limit ?? 0)) {
           return false;
         } else {
           exists.count++;
         }
       } else {
-        triggerData.units.push({
+        trigger.triggerData.units.push({
           count: 1,
           id: target?.id,
         });
       }
-    } else if (triggerData?.excludeAbilities) {
-      return !triggerData?.excludeAbilities.some((a) => a === ability?.id);
+    } else if (trigger.triggerData?.excludeAbilities) {
+      return !trigger.triggerData?.excludeAbilities.some(
+        (a) => a === ability?.id
+      );
     }
     return true;
   }
@@ -2663,10 +2662,10 @@ export class Character {
       });
     });
   }
-  private resetTriggers() {
+  public resetTriggers(type: string) {
     this._triggers.forEach((t) => {
       if (t.triggerData) {
-        if (t.triggerData.frequency === "turn") {
+        if (t.triggerData.frequency === type) {
           t.triggerData.count = t.triggerData.limit;
         }
         if (t.triggerData.units) {

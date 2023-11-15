@@ -223,7 +223,10 @@
               <div>
                 {{ character.otherEffects.ignoreTaunt ? "Ignores Taunt" : "" }}
                 Immune to:
-                <ul v-for="(val, key) in character.otherEffects.immunity">
+                <ul
+                  v-for="(val, key) in character.otherEffects.immunity"
+                  :key="key"
+                >
                   <li v-if="val">{{ key }}</li>
                 </ul>
               </div>

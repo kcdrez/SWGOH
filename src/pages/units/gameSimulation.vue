@@ -196,6 +196,7 @@
                         <div
                           class="input-group input-group-sm"
                           v-for="character in turn.characterList"
+                          :key="character.id"
                         >
                           <span class="input-group-text character-name"
                             >{{ character.name }} ({{ character.owner }})</span
@@ -212,11 +213,11 @@
                   </Popper>
                   <ul>
                     <li v-for="(log, index) in turn.logs" :key="index">
-                      <Log :log="(log as any)" />
+                      <Log :log="log" />
                     </li>
                     <li v-if="turn.endOfTurnLogs.length">- End of Turn -</li>
                     <li v-for="(log, index) in turn.endOfTurnLogs" :key="index">
-                      <Log :log="(log as any)" />
+                      <Log :log="log" />
                     </li>
                   </ul>
                   <ul v-if="turn.endOfTurnLogs.length"></ul>

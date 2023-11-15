@@ -512,9 +512,7 @@ export class Engine {
         turnNumber++;
         this.nextTurn(turnNumber);
         if (this.checkMatchEnd(turnNumber, 1000)) {
-          this._simulationData.matchHistory.push(
-            this.turns //.map((x) => x.copy())
-          );
+          this._simulationData.matchHistory.push(this.turns);
           break;
         }
       } while (true);
@@ -528,7 +526,6 @@ export class Engine {
     this.turns = [];
     this._playerCharacters = [];
     this._opponentCharacters = [];
-    // this._triggers = []
 
     playerUnits.forEach((unit) => {
       if (!this._playerCharacters.some((x) => x.id === unit.id)) {
@@ -601,36 +598,29 @@ export class Engine {
     let i = 0;
 
     pregameTriggers.forEach((char) => {
+      const t = new Turn(0, char, [], [], "Match Set Up");
       const logs = char.executePassiveTriggers([{ triggerType: "pregame" }]);
-
-      if (logs.length > 0) {
-        this.turns.push(new Turn(0, char, logs, [], "Match Set Up"));
-      }
+      t.addLogs(logs);
     });
 
     setupTriggers.forEach((char) => {
+      const t = new Turn(0, char, [], [], "Match Set Up2");
       const logs = char.executePassiveTriggers([{ triggerType: "setup" }]);
-
-      if (logs.length > 0) {
-        this.turns.push(new Turn(0, char, logs, [], "Match Set Up"));
-      }
+      t.addLogs(logs);
     });
 
     startTriggers.forEach((char) => {
+      const t = new Turn(0 + 0.1, char, [], [], "Start of Match");
+      this.turns.push(t);
       const logs = char.executePassiveTriggers([
         {
           triggerType: "start",
           ability: null,
-          target: char as Character,
+          target: char,
         },
       ]);
 
-      if (logs.length > 0) {
-        i++;
-        this.turns.push(
-          new Turn(0 + 0.1 * i, char, logs, [], "Start of Match")
-        );
-      }
+      t.addLogs(logs);
     });
   }
 
@@ -664,6 +654,8 @@ export class Engine {
       const { logs, endOfTurnLogs } = character.takeAction();
       turn.addLogs(logs);
       turn.addEndOfTurnLogs(endOfTurnLogs);
+
+      this.allCharacters.forEach((c) => c.resetTriggers("turn"));
     }
   }
 
