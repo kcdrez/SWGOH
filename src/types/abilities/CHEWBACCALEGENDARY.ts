@@ -191,7 +191,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
                     },
                     actions: [
                       {
-                        targets: { filters: [{ targetIds: ["target"] }] },
+                        targets: { filters: [{ primary: true }] },
                         effects: [
                           {
                             assist: {
@@ -256,7 +256,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
                     },
                     actions: [
                       {
-                        targets: { filters: [{ targetIds: ["target"] }] },
+                        targets: { filters: [{ primary: true }] },
                         effects: [
                           {
                             assist: {
@@ -349,7 +349,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
         },
         actions: [
           {
-            targets: { filters: [{ targetIds: ["target"] }] },
+            targets: { filters: [{ primary: true }] },
             effects: [
               {
                 damage: {
@@ -363,7 +363,7 @@ const chewy: Record<string, iAbility | iUniqueAbility> = {
                     name: "maxHealth",
                     percent: 0.2,
                   },
-                  targets: { filters: [{ targetIds: ["target"] }] },
+                  targets: { filters: [{ primary: true }] },
                 },
               },
             ],

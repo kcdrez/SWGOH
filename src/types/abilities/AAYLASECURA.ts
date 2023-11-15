@@ -108,7 +108,7 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
         },
         actions: [
           {
-            targets: { filters: [{ targetIds: ["target"] }] },
+            targets: { filters: [{ primary: true }] },
             effects: [
               {
                 debuffs: [

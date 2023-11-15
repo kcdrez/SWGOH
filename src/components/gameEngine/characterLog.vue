@@ -79,12 +79,6 @@
                   {{ character.protection.max }}</span
                 >
               </div>
-              <div class="input-group input-group-sm">
-                <span class="input-group-text">Turn Meter</span>
-                <span class="input-group-text fill">
-                  <ProgressBar :percent="character.turnMeter" class="w-100" />
-                </span>
-              </div>
               <div class="input-group input-group-sm mt-1">
                 <span class="input-group-text">Health:</span>
                 <span class="input-group-text fill"
@@ -97,6 +91,12 @@
                     >{{ character.health.current }}</span
                   ><span class="mx-1">/</span> {{ character.health.max }}</span
                 >
+              </div>
+              <div class="input-group input-group-sm mt-1">
+                <span class="input-group-text">Turn Meter</span>
+                <span class="input-group-text fill">
+                  <ProgressBar :percent="character.turnMeter" class="w-100" />
+                </span>
               </div>
               <div
                 v-for="ability in character.activeAbilities"
@@ -245,7 +245,7 @@ import { v4 as uuid } from "uuid";
 
 import { tLogData } from "types/gameEngine/gameEngine";
 import { iBuff, iDebuff, iStatusEffect } from "types/gameEngine/statusEffects";
-import Trigger from "components/gameEngine/trigger.vue";
+import Trigger from "components/gameEngine/triggers/trigger.vue";
 
 export default defineComponent({
   name: "CharacterLog",

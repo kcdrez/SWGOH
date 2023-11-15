@@ -226,6 +226,8 @@ export interface iEffect {
     stats?: iStatsCheck;
     /** Any additional effects to add to the use of the ability */
     effects?: iEffect[];
+    /** Replaces the target data if new targets should be used rather than the original ability's target */
+    replaceTargets?: iTargetData;
   };
   /** Set the target immune to certain effects */
   immune?: {
@@ -599,12 +601,14 @@ export class Engine {
 
     pregameTriggers.forEach((char) => {
       const t = new Turn(0, char, [], [], "Match Set Up");
+      this.turns.push(t);
       const logs = char.executePassiveTriggers([{ triggerType: "pregame" }]);
       t.addLogs(logs);
     });
 
     setupTriggers.forEach((char) => {
       const t = new Turn(0, char, [], [], "Match Set Up2");
+      this.turns.push(t);
       const logs = char.executePassiveTriggers([{ triggerType: "setup" }]);
       t.addLogs(logs);
     });

@@ -204,13 +204,18 @@ const hansolo: Record<
         },
         actions: [
           {
-            targets: { filters: [{ targetIds: ["target"] }] },
+            targets: {
+              filters: [{ primary: true }],
+            },
             effects: [
               {
                 ability: {
                   abilityToUse: "basicskill_HANSOLO",
                   abilityTrigger: "basicskill_HANSOLO",
                   actionId: quickDrawActionId,
+                  replaceTargets: {
+                    filters: [{ primary: true }],
+                  },
                 },
                 stats: {
                   modifiedType: "multiplicative",

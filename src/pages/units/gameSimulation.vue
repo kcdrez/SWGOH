@@ -195,8 +195,8 @@
                       <div>
                         <div
                           class="input-group input-group-sm"
-                          v-for="character in turn.characterList"
-                          :key="character.id"
+                          v-for="(character, index) in turn.characterList"
+                          :key="index"
                         >
                           <span class="input-group-text character-name"
                             >{{ character.name }} ({{ character.owner }})</span
@@ -248,7 +248,7 @@ import { Character, format } from "types/gameEngine/characters";
 import { gameEngine, Engine } from "types/gameEngine/gameEngine";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
-import Trigger from "components/gameEngine/trigger.vue";
+import Trigger from "components/gameEngine/triggers/trigger.vue";
 import Log from "components/gameEngine/log.vue";
 
 interface dataModel {

@@ -84,6 +84,8 @@ export interface iStats {
   potency: number;
   /** The amount of health that will be healed when dealing damage (decimal) */
   healthSteal: number;
+  /** The amount of mastery that a unit has which will scale other stats based on role */
+  mastery: number;
 }
 
 export interface iStatsCheck {
@@ -179,6 +181,8 @@ export interface iTargetData {
     buffs?: tBuff[];
     /** Determines if the target is the leader or not */
     isLeader?: boolean;
+    /** Determines if the primary target should be targetted again */
+    primary?: boolean;
   }[];
   /** Determines if the weakest unit should be targeted */
   weakest?: boolean;
@@ -202,6 +206,8 @@ export class Character {
   private _owner: string;
   private _tempStats: iStatsCheck[] = [];
   private _alignment: IUnit["alignment"];
+  private _role: IUnit["role"];
+  private _primaryStat: IUnit["primaryStat"];
   private _categories: string[];
   private _triggers: iTrigger[] = [];
   private _teammates: Character[] = [];
@@ -237,6 +243,7 @@ export class Character {
       tenacity: data.tenacity / 100,
       potency: data.potency / 100,
       healthSteal: data.healthSteal,
+      mastery: data.mastery,
     };
 
     this._name = data.name;
@@ -288,21 +295,46 @@ export class Character {
     this._owner = owner;
     this._alignment = data.alignment;
     this._categories = data.categories;
+    this._role = data.role;
+    this._primaryStat = data.primaryStat;
   }
 
   /** The modified maximum amount of Protection */
   public get maxProtection() {
-    return this.getModifiedStats(
-      [],
-      this._baseStats.maxProtection,
-      this.getTempStat("maxProtection")
-    );
+    let stat = this._baseStats.maxProtection;
+
+    if (this.role === "Tank") {
+      if (this._primaryStat === "str") {
+        stat += 220 * this.mastery;
+      } else if (this._primaryStat === "agi") {
+        stat += 200 * this.mastery;
+      } else if (this._primaryStat === "tac") {
+        stat += 230 * this.mastery;
+      }
+    }
+    return this.getModifiedStats([], stat, this.getTempStat("maxProtection"));
   }
   public set maxProtection(val) {
     this._baseStats.maxProtection = val;
   }
   /** The modified maximum amount of Health */
   public get maxHealth() {
+    let stat = this._baseStats.maxHealth;
+
+    if (this.role === "Tank") {
+      if (this._primaryStat === "agi") {
+        stat += 120 * this.mastery;
+      }
+    } else if (this.role === "Healer") {
+      if (this._primaryStat === "str") {
+        stat += 420 * this.mastery;
+      } else if (this._primaryStat === "agi") {
+        stat += 225 * this.mastery;
+      } else if (this._primaryStat === "tac") {
+        stat += 300 * this.mastery;
+      }
+    }
+
     return this.getModifiedStats(
       [
         {
@@ -314,7 +346,7 @@ export class Character {
           value: 0.15,
         },
       ],
-      this._baseStats.maxHealth,
+      stat,
       this.getTempStat("maxHealth")
     );
   }
@@ -403,8 +435,20 @@ export class Character {
     }
     return logs;
   }
-  /** The current Health Steal */
+  /** The current Health Steal (decimal) */
   public get healthSteal() {
+    let stat = this._baseStats.healthSteal;
+
+    if (this.role === "Tank") {
+      if (this._primaryStat === "str") {
+        stat += 0.0015 * this.mastery;
+      }
+    } else if (this.role === "Healer") {
+      if (this._primaryStat === "str") {
+        stat *= 0.0015 * this.mastery;
+      }
+    }
+
     return this.getModifiedStats(
       [
         {
@@ -416,7 +460,7 @@ export class Character {
           value: 0.5,
         },
       ],
-      this._baseStats.healthSteal,
+      stat,
       this.getTempStat("healthSteal")
     );
   }
@@ -441,8 +485,23 @@ export class Character {
   public set speed(val) {
     this._baseStats.speed = val;
   }
+  public get mastery() {
+    return this._baseStats.mastery;
+  }
   /** The current Critical Damage (decimal) */
   public get critDamage() {
+    let stat = this._baseStats.critDamage;
+
+    if (this.role === "Attacker") {
+      if (this._primaryStat === "agi") {
+        stat += 0.003 * this.mastery;
+      }
+    } else if (this.role === "Support") {
+      if (this._primaryStat === "agi") {
+        stat *= 0.003 * this.mastery;
+      }
+    }
+
     return this.getModifiedStats(
       [
         {
@@ -458,7 +517,7 @@ export class Character {
           value: 0.5,
         },
       ],
-      this._baseStats.critDamage,
+      stat,
       this.getTempStat("critDamage")
     );
   }
@@ -566,7 +625,7 @@ export class Character {
       if (!modifier || this.checkCondition(modifier.condition, this)) {
         const basicAbility: iAbility = unvue(this.basicAbility);
         basicAbility.actions?.forEach((action) => {
-          action.targets = { filters: [{ targetIds: ["target"] }] };
+          action.targets = { filters: [{ primary: true }] };
         });
 
         logs.push(new Log({ character: this, effects: { assisted: true } }));
@@ -591,12 +650,28 @@ export class Character {
     return {
       /** Physical Offense */
       get offense() {
+        let stat = self._baseStats.physical.offense;
+
+        if (self.role === "Attacker") {
+          if (self._primaryStat === "str") {
+            stat += 26 * self.mastery;
+          } else if (self._primaryStat === "agi") {
+            stat += 26 * self.mastery;
+          } else if (self._primaryStat === "tac") {
+            stat += 27 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "tac") {
+            stat += 12 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             { hasEffect: self.hasDebuff("Offense Down"), value: -0.5 },
             { hasEffect: self.hasBuff("Offense Up"), value: 0.5 },
           ],
-          self._baseStats.physical.offense,
+          stat,
           self.getTempStat("offense"),
           true
         );
@@ -606,6 +681,24 @@ export class Character {
       },
       /** Physical Crit Chance (decimal) */
       get critChance() {
+        let stat = self._baseStats.physical.critChance;
+
+        if (self.role === "Attacker") {
+          if (self._primaryStat === "agi") {
+            stat += 0.003 * self.mastery;
+          } else if (self._primaryStat === "tac") {
+            stat += 0.003 * self.mastery;
+          }
+        } else if (self.role === "Healer") {
+          if (self._primaryStat === "agi") {
+            stat += 0.0045 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "agi") {
+            stat += 0.003 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             { hasEffect: self.hasDebuff("Critical Chance Down"), value: -0.25 },
@@ -614,7 +707,7 @@ export class Character {
             { hasEffect: self.hasStatusEffect("Guard"), value: 0.25 },
             { hasEffect: self.hasBuff("Advantage"), value: 100 },
           ],
-          self._baseStats.physical.critChance,
+          stat,
           self.getTempStat("critChance")
         );
       },
@@ -623,12 +716,24 @@ export class Character {
       },
       /** Physical Armor (flat number) */
       get armor() {
+        let stat = self._baseStats.physical.armor;
+
+        if (self.role === "Tank") {
+          if (self._primaryStat === "str") {
+            stat *= 0.1 * self.mastery;
+          }
+        } else if (self.role === "Healer") {
+          if (self._primaryStat === "str") {
+            stat *= 0.06 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             { hasEffect: self.hasDebuff("Defense Down"), value: -0.5 },
             { hasEffect: self.hasBuff("Defense Up"), value: 0.5 },
           ],
-          self._baseStats.physical.armor,
+          stat,
           self.getTempStat("armor"),
           true
         );
@@ -638,6 +743,18 @@ export class Character {
       },
       /** Physical Armor Penetration */
       get armorPen() {
+        let stat = self._baseStats.physical.armorPen;
+
+        if (self.role === "Attacker") {
+          if (self._primaryStat === "str") {
+            stat += 2 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "str") {
+            stat += 2 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             {
@@ -646,7 +763,7 @@ export class Character {
             },
             { hasEffect: self.hasBuff("Defense Penetration Up"), value: 150 },
           ],
-          self._baseStats.physical.armorPen,
+          stat,
           self.getTempStat("armorPen")
         );
       },
@@ -655,6 +772,22 @@ export class Character {
       },
       /** Physical Accuracy (decimal) */
       get accuracy() {
+        let stat = self._baseStats.physical.accuracy;
+
+        if (self.role === "Attacker") {
+          if (self._primaryStat === "str") {
+            stat += 0.003 * self.mastery;
+          } else if (self._primaryStat === "tac") {
+            stat += 0.003 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "str") {
+            stat += 0.003 * self.mastery;
+          } else if (self._primaryStat === "tac") {
+            stat += 0.003 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             {
@@ -668,7 +801,7 @@ export class Character {
               value: 0.5,
             },
           ],
-          self._baseStats.physical.accuracy,
+          stat,
           self.getTempStat("accuracy")
         );
       },
@@ -677,6 +810,22 @@ export class Character {
       },
       /** Physical Dodge Chance (decimal) */
       get dodge() {
+        let stat = self._baseStats.physical.dodge;
+
+        if (self.role === "Tank") {
+          if (self._primaryStat === "agi") {
+            stat += 0.0035 * self.mastery;
+          }
+        } else if (self.role === "Healer") {
+          if (self._primaryStat === "agi") {
+            stat += 0.0035 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "agi") {
+            stat += 0.0035 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             {
@@ -685,7 +834,7 @@ export class Character {
             },
             { hasEffect: self.hasBuff("Evasion Up"), value: 0.15 },
           ],
-          self._baseStats.physical.dodge,
+          stat,
           self.getTempStat("dodge")
         );
       },
@@ -694,6 +843,22 @@ export class Character {
       },
       /** Physical Critical Avoice (decimal) */
       get critAvoid() {
+        let stat = self._baseStats.physical.critAvoid;
+
+        if (self.role === "Tank") {
+          if (self._primaryStat === "tac") {
+            stat += 0.0045 * self.mastery;
+          }
+        } else if (self.role === "Healer") {
+          if (self._primaryStat === "tac") {
+            stat += 0.003 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "tac") {
+            stat += 0.003 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             {
@@ -707,7 +872,7 @@ export class Character {
               value: Infinity,
             },
           ],
-          self._baseStats.physical.critAvoid,
+          stat,
           self.getTempStat("critAvoid")
         );
       },
@@ -720,12 +885,28 @@ export class Character {
     const self = this;
     return {
       get offense() {
+        let stat = self._baseStats.special.offense;
+
+        if (self.role === "Attacker") {
+          if (self._primaryStat === "str") {
+            stat += 26 * self.mastery;
+          } else if (self._primaryStat === "agi") {
+            stat += 26 * self.mastery;
+          } else if (self._primaryStat === "tac") {
+            stat += 27 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "tac") {
+            stat += 12 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             { hasEffect: self.hasDebuff("Offense Down"), value: -0.5 },
             { hasEffect: self.hasBuff("Offense Up"), value: 0.5 },
           ],
-          self._baseStats.special.offense,
+          stat,
           self.getTempStat("offense"),
           true
         );
@@ -734,6 +915,24 @@ export class Character {
         self._baseStats.special.offense = val;
       },
       get critChance() {
+        let stat = self._baseStats.special.critChance;
+
+        if (self.role === "Attacker") {
+          if (self._primaryStat === "agi") {
+            stat += 0.003 * self.mastery;
+          } else if (self._primaryStat === "tac") {
+            stat += 0.003 * self.mastery;
+          }
+        } else if (self.role === "Healer") {
+          if (self._primaryStat === "agi") {
+            stat += 0.0045 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "agi") {
+            stat += 0.003 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             { hasEffect: self.hasDebuff("Critical Chance Down"), value: -0.25 },
@@ -741,7 +940,7 @@ export class Character {
             { hasEffect: self.hasBuff("Call to Action"), value: 0.5 },
             { hasEffect: self.hasStatusEffect("Guard"), value: 0.25 },
           ],
-          self._baseStats.special.critChance,
+          stat,
           self.getTempStat("critChance")
         );
       },
@@ -749,12 +948,24 @@ export class Character {
         self._baseStats.physical.critChance = val;
       },
       get armor() {
+        let stat = self._baseStats.physical.armor;
+
+        if (self.role === "Tank") {
+          if (self._primaryStat === "tac") {
+            stat *= 0.1 * self.mastery;
+          }
+        } else if (self.role === "Healer") {
+          if (self._primaryStat === "tac") {
+            stat *= 0.1 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             { hasEffect: self.hasDebuff("Defense Down"), value: -0.5 },
             { hasEffect: self.hasBuff("Defense Up"), value: 0.5 },
           ],
-          self._baseStats.special.armor,
+          stat,
           self.getTempStat("armor"),
           true
         );
@@ -763,6 +974,18 @@ export class Character {
         self._baseStats.special.armor = val;
       },
       get armorPen() {
+        let stat = self._baseStats.special.armorPen;
+
+        if (self.role === "Attacker") {
+          if (self._primaryStat === "str") {
+            stat += 2 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "str") {
+            stat += 2 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             {
@@ -771,7 +994,7 @@ export class Character {
             },
             { hasEffect: self.hasBuff("Defense Penetration Up"), value: 150 },
           ],
-          self._baseStats.special.armorPen,
+          stat,
           self.getTempStat("armorPen")
         );
       },
@@ -779,6 +1002,22 @@ export class Character {
         self._baseStats.special.armorPen = val;
       },
       get accuracy() {
+        let stat = self._baseStats.special.accuracy;
+
+        if (self.role === "Attacker") {
+          if (self._primaryStat === "str") {
+            stat += 0.003 * self.mastery;
+          } else if (self._primaryStat === "tac") {
+            stat += 0.003 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "str") {
+            stat += 0.003 * self.mastery;
+          } else if (self._primaryStat === "tac") {
+            stat += 0.003 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             {
@@ -787,7 +1026,7 @@ export class Character {
             },
             { hasEffect: self.hasBuff("Accuracy Up"), value: 0.15 },
           ],
-          self._baseStats.special.accuracy,
+          stat,
           self.getTempStat("accuracy")
         );
       },
@@ -795,6 +1034,22 @@ export class Character {
         self._baseStats.special.accuracy = val;
       },
       get dodge() {
+        let stat = self._baseStats.special.dodge;
+
+        if (self.role === "Tank") {
+          if (self._primaryStat === "agi") {
+            stat += 0.0035 * self.mastery;
+          }
+        } else if (self.role === "Healer") {
+          if (self._primaryStat === "agi") {
+            stat += 0.0035 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "agi") {
+            stat += 0.0035 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             {
@@ -803,7 +1058,7 @@ export class Character {
             },
             { hasEffect: self.hasBuff("Evasion Up"), value: 0.15 },
           ],
-          self._baseStats.special.dodge,
+          stat,
           self.getTempStat("dodge")
         );
       },
@@ -811,6 +1066,22 @@ export class Character {
         self._baseStats.special.dodge = val;
       },
       get critAvoid() {
+        let stat = self._baseStats.special.critAvoid;
+
+        if (self.role === "Tank") {
+          if (self._primaryStat === "tac") {
+            stat += 0.0045 * self.mastery;
+          }
+        } else if (self.role === "Healer") {
+          if (self._primaryStat === "tac") {
+            stat += 0.003 * self.mastery;
+          }
+        } else if (self.role === "Support") {
+          if (self._primaryStat === "tac") {
+            stat += 0.003 * self.mastery;
+          }
+        }
+
         return self.getModifiedStats(
           [
             {
@@ -824,7 +1095,7 @@ export class Character {
               value: Infinity,
             },
           ],
-          self._baseStats.special.critAvoid,
+          stat,
           self.getTempStat("critAvoid")
         );
       },
@@ -878,22 +1149,22 @@ export class Character {
   private get immunity(): Record<string, boolean> {
     return this._triggers.reduce(
       (immuneMapping, trigger) => {
-        // if (trigger.triggerType === "always") {
-        //   trigger.actions?.forEach((action) => {
-        //     action.effects?.forEach((effect) => {
-        //       if (effect.immune) {
-        //         if (this.checkCondition(effect.condition, this)) {
-        //           effect.immune.negativeStatusEffects?.forEach((x) => {
-        //             immuneMapping[x] = true;
-        //           });
-        //           effect.immune.positiveStatusEffects?.forEach((x) => {
-        //             immuneMapping[x] = true;
-        //           });
-        //         }
-        //       }
-        //     });
-        //   });
-        // }
+        if (trigger.triggerType === "always") {
+          trigger.actions?.forEach((action) => {
+            action.effects?.forEach((effect) => {
+              if (effect.immune) {
+                if (this.checkCondition(effect.condition, this)) {
+                  effect.immune.negativeStatusEffects?.forEach((x) => {
+                    immuneMapping[x] = true;
+                  });
+                  effect.immune.positiveStatusEffects?.forEach((x) => {
+                    immuneMapping[x] = true;
+                  });
+                }
+              }
+            });
+          });
+        }
         return immuneMapping;
       },
       {
@@ -1037,44 +1308,71 @@ export class Character {
   /** Checks to see if the character has any of the listed debuffs
    *
    * @name - The list of debuffs to check. If an array, checks that ALL of the ones listed are present
+   *
    */
-  public hasDebuff(name: tDebuff | tDebuff[] | iDebuff | iDebuff[]): boolean {
+  public hasDebuff(
+    name: tDebuff | tDebuff[] | iDebuff | iDebuff[],
+    duration?: number
+  ): boolean {
     if (Array.isArray(name)) {
-      return (name as (tDebuff | iDebuff)[]).every((x) => this.hasDebuff(x));
+      return (name as (tDebuff | iDebuff)[]).every((x) =>
+        this.hasDebuff(x, duration)
+      );
     } else {
       return this.debuffs.some((d) => {
         if (typeof name === "string") {
-          return d.name === name;
+          if (d.name === name) {
+            if (duration) {
+              return duration <= d.duration;
+            }
+            return true;
+          }
+          return false;
         } else {
           return d.id === name.id;
         }
       });
     }
   }
-  public hasBuff(name: tBuff | tBuff[] | iBuff | iBuff[]) {
+  public hasBuff(name: tBuff | tBuff[] | iBuff | iBuff[], duration?: number) {
     if (Array.isArray(name)) {
-      return (name as (tBuff | iBuff)[]).every((x) => this.hasBuff(x));
+      return (name as (tBuff | iBuff)[]).every((x) =>
+        this.hasBuff(x, duration)
+      );
     } else {
-      return this.buffs.some((d) => {
+      return this.buffs.some((b) => {
         if (typeof name === "string") {
-          return d.name === name;
+          if (b.name === name) {
+            if (duration) {
+              return duration <= b.duration;
+            }
+            return true;
+          }
+          return false;
         } else {
-          return d.id === name.id;
+          return b.id === name.id;
         }
       });
     }
   }
   public hasStatusEffect(
-    name: tStatusEffect | tStatusEffect[] | iStatusEffect | iStatusEffect[]
+    name: tStatusEffect | tStatusEffect[] | iStatusEffect | iStatusEffect[],
+    duration?: number
   ): boolean {
     if (Array.isArray(name)) {
       return (name as (tStatusEffect | iStatusEffect)[]).every((x) =>
-        this.hasStatusEffect(x)
+        this.hasStatusEffect(x, duration)
       );
     } else {
       return this._statusEffects.some((d) => {
         if (typeof name === "string") {
-          return d.name === name;
+          if (d.name === name) {
+            if (duration) {
+              return duration <= d.duration;
+            }
+            return true;
+          }
+          return false;
         } else {
           return d.id === name.id;
         }
@@ -1116,16 +1414,25 @@ export class Character {
       ];
     } else if (!this.hasDebuff("Buff Immunity")) {
       if (
-        (!this.hasBuff(buff.name) || buff.isStackable) &&
+        (!this.hasBuff(buff.name, buff.duration) || buff.isStackable) &&
         !this.isImmune(buff)
       ) {
         if (scalar > 0) {
-          this._buffs.push({
-            ...buff,
-            duration: buff.duration * scalar,
-            isNew,
-            sourceAbility: ability,
-          });
+          const newDuration = buff.duration * scalar;
+
+          const match = this.buffs.find((x) => x.name === buff.name);
+
+          if (buff.isStackable || !match) {
+            this._buffs.push({
+              ...unvue(buff),
+              duration: newDuration,
+              isNew: true,
+            });
+          } else {
+            match.duration = newDuration;
+            match.isNew = true;
+          }
+
           return [
             new Log({
               character: this,
@@ -1133,7 +1440,7 @@ export class Character {
               statusEffects: {
                 type: "buff",
                 list: [buff],
-                duration: buff.duration * scalar,
+                duration: newDuration,
               },
             }),
           ];
@@ -1156,25 +1463,26 @@ export class Character {
         }, [])
       );
     } else {
-      let buffData: iBuff | null = null;
+      let buffToRemove: iBuff | null = null;
       if (typeof buff === "string") {
-        buffData = {
+        buffToRemove = {
           name: buff,
           id: uuid(),
           duration: 1,
         };
       } else {
-        buffData = buff;
+        buffToRemove = buff;
       }
 
       this._buffs = this._buffs.filter((b) => {
         if (
-          (b.name === buffData?.name ||
-            buffData?.name === "all" ||
-            b.id === buffData?.id) &&
-          !this.isSelf(opponent) &&
-          !b.cantDispel
+          b.name === buffToRemove?.name ||
+          buffToRemove?.name === "all" ||
+          b.id === buffToRemove?.id
         ) {
+          if (b.cantDispel && !this.isSelf(opponent)) {
+            return true;
+          }
           listOfRemovedBuffs.push(b);
           return false;
         }
@@ -1244,7 +1552,7 @@ export class Character {
           })
         );
       } else if (
-        !targetCharacter.hasDebuff(debuff.name) ||
+        !targetCharacter.hasDebuff(debuff.name, debuff.duration) ||
         debuff.isStackable
       ) {
         const resistedChance = Math.max(
@@ -1269,20 +1577,32 @@ export class Character {
               logs.push(log);
             }
           } else {
-            if (!targetCharacter.hasDebuff(debuff) || debuff.isStackable) {
-              const amount = debuff.duration * scalar;
+            const newDuration = debuff.duration * scalar;
+            if (
+              !targetCharacter.hasDebuff(debuff.name, newDuration) ||
+              debuff.isStackable
+            ) {
+              const match = targetCharacter.debuffs.find(
+                (x) => x.name === debuff.name
+              );
 
-              targetCharacter.debuffs.push({
-                ...unvue(debuff),
-                isNew: true,
-              });
+              if (debuff.isStackable || !match) {
+                targetCharacter.debuffs.push({
+                  ...unvue(debuff),
+                  duration: newDuration,
+                  isNew: true,
+                });
+              } else {
+                match.duration = newDuration;
+                match.isNew = true;
+              }
 
               logs.push(
                 new Log({
                   character: targetCharacter,
                   statusEffects: {
                     list: [debuff],
-                    duration: amount,
+                    duration: newDuration,
                     type: "debuff",
                   },
                   ability: {
@@ -1420,9 +1740,22 @@ export class Character {
       }, []);
     } else {
       if (
-        (!this.hasStatusEffect(effect) || effect.isStackable) &&
+        (!this.hasStatusEffect(effect, effect.duration) ||
+          effect.isStackable) &&
         !this.isImmune(effect)
       ) {
+        const match = this._statusEffects.find((x) => x.name === effect.name);
+
+        if (effect.isStackable || !match) {
+          this._buffs.push({
+            ...unvue(effect),
+            isNew: true,
+          });
+        } else {
+          match.duration = effect.duration;
+          match.isNew = true;
+        }
+
         this._statusEffects.push(effect);
         return [
           new Log({
@@ -1548,13 +1881,13 @@ export class Character {
    *
    * @param targetData - The target data used to determine how to find valid targets
    * @param target - Used in the case that the targetData should use an already selected target (such as for an assist)
-   * @param ignore - Used to ignore specific attributes, such as dead characters. By default, these characters are not considered for selection
+   * @param include - Used to ignore specific attributes, such as dead characters. By default, these characters are not considered for selection
    * @returns targetList - List of valid targets, primaryTarget - primary opponent target
    */
   public findTargets(
     targetData: iTargetData,
     target?: Character | null,
-    ignore?: {
+    include?: {
       // paralysisDebuff?: boolean;
       // daze?: boolean;
       // noAssist?: boolean;
@@ -1567,10 +1900,10 @@ export class Character {
       ...this._teammates,
       ...this._opponents,
     ].filter((char: Character) => {
-      let shouldExclude = false;
+      let shouldInclude = true;
 
-      if (char.isDead && !ignore?.dead) {
-        shouldExclude = true;
+      if (char.isDead) {
+        shouldInclude = include?.dead ?? false;
       }
       // if (ignore?.paralysisDebuff) {
       //   shouldExclude = char.hasDebuff("Stun") || shouldExclude;
@@ -1578,7 +1911,7 @@ export class Character {
       // if (ignore?.daze) {
       //   shouldExclude = char.hasDebuff("Daze") || shouldExclude;
       // }
-      return !shouldExclude;
+      return shouldInclude;
     });
 
     let filteredList = validTargets.filter((char) => {
@@ -1607,16 +1940,12 @@ export class Character {
           return char.hasStatusEffect(targetFilter.statusEffects);
         } else if (targetFilter.tags) {
           return anyTagsMatch(char, targetFilter.tags, this.id);
+        } else if (targetFilter.primary) {
+          return char.isSelf(target ?? undefined);
         } else if (targetFilter.targetIds) {
-          let shouldInclude = false;
-          if (target instanceof Character) {
-            shouldInclude =
-              targetFilter.targetIds.includes("target") && char.isSelf(target);
-          }
-          return (
-            anyTagsMatch(char, targetFilter.targetIds, this.id) || shouldInclude
-          );
+          return anyTagsMatch(char, targetFilter.targetIds, this.id);
         }
+        return false;
       });
     });
 
@@ -1681,6 +2010,9 @@ export class Character {
   }
   public get alignment() {
     return this._alignment;
+  }
+  public get role() {
+    return this._role;
   }
   public get effects() {
     const self = this;
@@ -1991,7 +2323,7 @@ export class Character {
 
         const basicAbility: iAbility = unvue(this.basicAbility);
         basicAbility.actions?.forEach((action) => {
-          action.targets = { filters: [{ targetIds: ["target"] }] };
+          action.targets = { filters: [{ primary: true }] };
         });
         logs.push(
           ...this.useAbility(
@@ -2023,9 +2355,7 @@ export class Character {
     if (buffs) {
       const hasBuffs = buffs.every((buff) => {
         const match = this._buffs.find((x) => x.name === buff);
-        if (inverted) {
-          return !match;
-        } else if (match) {
+        if (match) {
           return isNew === false ? !match.isNew : true;
         } else return false;
       });
@@ -2040,8 +2370,7 @@ export class Character {
         return false;
       });
 
-      results =
-        (hasDebuffs && !inverted) || (!hasDebuffs && inverted) || results;
+      results = hasDebuffs || results;
     }
     if (stats) {
       let meetsStatRequirement = false;
@@ -2079,10 +2408,7 @@ export class Character {
         );
       }
 
-      results =
-        (meetsStatRequirement && !inverted) ||
-        (!meetsStatRequirement && inverted) ||
-        results;
+      results = meetsStatRequirement || results;
     }
     if (tags) {
       results = anyTagsMatch(targetCharacter, tags, this.id) || results;
@@ -2098,7 +2424,7 @@ export class Character {
       results =
         this.isSelf(gameEngine.currentCharactersTurn ?? undefined) || results;
     }
-    return results;
+    return inverted ? !results : results;
   }
   /**
    * Change an ability's cooldown
@@ -2359,7 +2685,7 @@ export class Character {
           if (effect.damage.damageType === "true") {
             const { targetList } = this.findTargets(
               effect.scalesBy?.targets ?? {
-                filters: [{ targetIds: ["target"] }],
+                filters: [{ primary: true }],
               },
               targetCharacter
             );
@@ -2420,21 +2746,25 @@ export class Character {
               const abilityMatch = this.chooseAbility(abilityToUse);
               if (abilityMatch) {
                 const copyAbility: iAbility = unvue(abilityMatch);
-                if (effect.ability.effects) {
-                  if (copyAbility?.actions && effect.ability?.actionId) {
-                    const matchAction = copyAbility.actions.find(
-                      (a) => a.id === effect.ability?.actionId
-                    );
-                    if (matchAction) {
+                if (copyAbility?.actions && effect.ability?.actionId) {
+                  const matchAction = copyAbility.actions.find(
+                    (a) => a.id === effect.ability?.actionId
+                  );
+                  if (matchAction) {
+                    if (effect.ability.effects) {
                       matchAction.effects?.push(...effect.ability.effects);
                     }
-                  } else {
-                    console.warn(
-                      "Unknown action to modify",
-                      copyAbility,
-                      effect.ability
-                    );
+
+                    if (effect.ability.replaceTargets) {
+                      matchAction.targets = effect.ability.replaceTargets;
+                    }
                   }
+                } else {
+                  console.warn(
+                    "Unknown action to modify",
+                    copyAbility,
+                    effect.ability
+                  );
                 }
                 logs.push(
                   ...this.useAbility(copyAbility, effect.stats, targetCharacter)
@@ -2604,7 +2934,6 @@ export class Character {
     triggerData?: iTriggerData
   ): Log[] {
     const logs: Log[] = [];
-
     trigger.actions.forEach((action) => {
       const actionData = this.processAction(
         action,

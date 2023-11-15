@@ -36,7 +36,7 @@
 import { defineComponent } from "vue";
 
 import { iTrigger } from "types/gameEngine/gameEngine";
-import Effect from "./triggers/effect.vue";
+import Effect from "./effect.vue";
 
 export default defineComponent({
   name: "Trigger",

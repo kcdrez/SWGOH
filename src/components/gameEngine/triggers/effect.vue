@@ -27,9 +27,9 @@
       <div v-if="effect.ability.effects">
         With these additional effects:
         <Effect
-          v-for="(effect, index) in effect.ability.effects"
+          v-for="(childEffect, index) in effect.ability.effects"
           :key="index"
-          :effect="effect"
+          :effect="childEffect"
         />
       </div>
     </div>
@@ -44,20 +44,19 @@
         {{ effect.stats.statToModify }} is multiplied by
         {{ Math.abs(effect.stats.amount * 100) }}%
       </template>
-      <template v-else>something else i guess</template>
     </template>
     <template v-if="effect.heal">
-      <template
-        >Heal for
-        <template v-if="(effect.heal?.amount ?? 0) <= 1">
-          {{ Math.abs(effect.heal?.amount ?? 0) * 100 }}%
-        </template>
-        <template v-else>{{ effect.heal.amount }}</template>
-        <span
-          class="text-capitalize"
-          :class="effect.heal.healthType.toLowerCase()"
-          >{{ effect.heal.healthType }}</span
-        ></template
+      Heal for
+      <span v-if="effect.heal.amountType === 'additive'">{{
+        effect.heal.amount
+      }}</span>
+      <span v-else-if="effect.heal.amountType === 'multiplicative'"
+        >{{ (effect.heal.amount ?? 0) * 100 }}%</span
+      >
+      <span
+        class="text-capitalize ms-1"
+        :class="effect.heal.healthType.toLowerCase()"
+        >{{ effect.heal.healthType }}</span
       >
     </template>
     <StatusEffect
@@ -143,7 +142,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { iEffect } from "../../../types/gameEngine/gameEngine";
+import { iEffect } from "types/gameEngine/gameEngine";
 import StatusEffect from "../statusEffect.vue";
 
 export default defineComponent({
