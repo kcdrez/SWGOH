@@ -13,7 +13,6 @@ const weakest = {
     weakest: true,
   },
 };
-const hanSolo = {};
 
 const chewy: Record<string, iAbility | iUniqueAbility> = {
   basicskill_CHEWBACCALEGENDARY: {

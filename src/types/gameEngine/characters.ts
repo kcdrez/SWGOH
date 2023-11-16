@@ -705,7 +705,7 @@ export class Character {
             { hasEffect: self.hasBuff("Critical Chance Up"), value: 0.25 },
             { hasEffect: self.hasBuff("Call to Action"), value: 0.5 },
             { hasEffect: self.hasStatusEffect("Guard"), value: 0.25 },
-            { hasEffect: self.hasBuff("Advantage"), value: 100 },
+            { hasEffect: self.hasBuff("Advantage"), value: Infinity },
           ],
           stat,
           self.getTempStat("critChance")
@@ -1935,6 +1935,7 @@ export class Character {
         } else if (targetFilter.debuffs) {
           return char.hasDebuff(targetFilter.debuffs);
         } else if (targetFilter.isLeader) {
+          console.log("is leader?", char.isLeader);
           return char.isLeader;
         } else if (targetFilter.statusEffects) {
           return char.hasStatusEffect(targetFilter.statusEffects);

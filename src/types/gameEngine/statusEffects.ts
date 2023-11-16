@@ -121,4 +121,5 @@ export interface iStatusEffect {
   isStackable?: boolean;
   /** How many stacks of the effect the unit has */
   stacks?: number;
+  maxStacks?: number;
 }

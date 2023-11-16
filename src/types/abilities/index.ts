@@ -1,6 +1,6 @@
 import { iAbility, iUniqueAbility } from "types/gameEngine/abilities";
 
-// import C3POCHEWBACCA from "./C3POCHEWBACCA";
+import C3POCHEWBACCA from "./C3POCHEWBACCA";
 import AAYLASECURA from "./AAYLASECURA";
 import CHEWBACCALEGENDARY from "./CHEWBACCALEGENDARY";
 import COMMANDERLUKESKYWALKER from "./COMMANDERLUKESKYWALKER";
@@ -17,7 +17,7 @@ const characterMapping: Record<
   AAYLASECURA,
   HANSOLO,
   CHEWBACCALEGENDARY,
-  // C3POCHEWBACCA,
+  C3POCHEWBACCA,
 };
 
 export default characterMapping;
