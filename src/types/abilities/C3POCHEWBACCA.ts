@@ -10,7 +10,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
       "Deal Physical damage to target enemy and inflict Evasion Down for 2 turns.",
     actions: [
       {
-        targets: { filters: [{ allies: false }], targetCount: 1 },
+        targets: { allies: false, targetCount: 1 },
         effects: [
           {
             damage: {
@@ -38,9 +38,11 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
     name: "Shining Distraction",
     gameText:
       "Dispel all debuffs on Threepio & Chewie. Rebel allies recover 15% Protection and gain Advantage for 2 turns. Dispel all buffs from all enemies and Blind them for 2 turns. This ability can't be evaded.",
+    cooldown: 2,
+    turnsRemaining: 0,
     actions: [
       {
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         effects: [
           {
             dispel: {
@@ -50,7 +52,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
       {
-        targets: { filters: [{ allies: true }, { tags: ["Rebel"] }] },
+        targets: { allies: true, filters: [{ tags: ["Rebel"] }] },
         effects: [
           {
             heal: {
@@ -71,9 +73,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
       {
-        targets: {
-          filters: [{ allies: false }],
-        },
+        targets: { allies: true },
         effects: [
           {
             cantMiss: true,
@@ -100,9 +100,11 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
     name: "Chewie's Rage",
     gameText:
       "Deal Physical damage to all enemies. Deal damage an additional time (up to 5 additional times) for each enemy that has been defeated during the battle. Threepio & Chewie gain 10% Offense (stacking) until the end of battle whenever this ability defeats an enemy.",
+    cooldown: 3,
+    turnsRemaining: 0,
     actions: [
       {
-        targets: { filters: [{ allies: false }] },
+        targets: { allies: false },
         effects: [
           {
             damage: {
@@ -127,7 +129,7 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
       //   triggerType: "defeat",
       //   actions: [
       //     {
-      //       targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+      //       targets: { self: true },
       //       effects: [
       //         {
       //           stats: {
@@ -143,24 +145,20 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
       // },
     ],
   },
-  uniqueskill_C3POCHEWBACCA01: {
-    id: "uniqueskill_C3POCHEWBACCA01",
+  uniqueskill_C3POCHEWBACCA: {
+    id: "uniqueskill_C3POCHEWBACCA",
     name: "I Must Tell The Others",
-    gameText: `If the allied Leader is a non-Galactic Legend Rebel, Threepio & Chewie gain 40% of the Leader's Max Health, Max Protection, Offense, Defense, Potency, and Tenacity at the start of the first encounter, and Rebel allies gain half that amount. Rebel allies have +15% Critical Avoidance.
-
-    Whenever another Rebel ally uses an ability, Threepio & Chewie are called to assist, dealing 30% less damage (limit once per turn). If they were defeated, Threepio & Chewie are revived with 50% Health and Protection whenever another Rebel ally is revived.
-    
-    While enemies are Blinded, they have -50% Tenacity and can't attack out of turn.`,
+    gameText: `If the allied Leader is a non-Galactic Legend Rebel, Threepio & Chewie gain 40% of the Leader's Max Health, Max Protection, Offense, Defense, Potency, and Tenacity at the start of the first encounter, and Rebel allies gain half that amount. Rebel allies have +15% Critical Avoidance.\n\nWhenever another Rebel ally uses an ability, Threepio & Chewie are called to assist, dealing 30% less damage (limit once per turn). If they were defeated, Threepio & Chewie are revived with 50% Health and Protection whenever another Rebel ally is revived.\n\nWhile enemies are Blinded, they have -50% Tenacity and can't attack out of turn.`,
     triggers: [
       {
         id: uuid(),
         triggerType: "pregame",
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         actions: [
           {
             targets: {
+              allies: true,
               filters: [
-                { allies: true },
                 { isLeader: true },
                 { tags: ["Rebel & !Galactic Legend"] },
               ],
@@ -172,20 +170,61 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
                     triggerType: "always",
                     id: uuid(),
                     targets: {
-                      filters: [
-                        { allies: true },
-                        { targetIds: ["C3POCHEWBACCA"] },
-                      ],
+                      allies: true,
+                      filters: [{ targetIds: ["C3POCHEWBACCA"] }],
                     },
                     actions: [
                       {
                         targets: {
-                          filters: [
-                            { allies: true },
-                            { targetIds: ["C3POCHEWBACCA"] },
-                          ],
-                        }, //not sure?
+                          allies: true,
+                          filters: [{ targetIds: ["C3POCHEWBACCA"] }],
+                        },
                         effects: [
+                          {
+                            stats: {
+                              statToModify: "maxHealth",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseHealth",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "maxProtection",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseProtection",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "tenacity",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseTenacity",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
                           {
                             stats: {
                               statToModify: "potency",
@@ -194,7 +233,223 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
                             },
                             scalesBy: {
                               stat: {
-                                name: "potency",
+                                name: "basePotency",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "offense",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseOffense",
+                                type: "physical",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "offense",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseOffense",
+                                type: "special",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "armor",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseArmor",
+                                type: "physical",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "armor",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseArmor",
+                                type: "special",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+
+                  {
+                    triggerType: "always",
+                    id: uuid(),
+                    targets: {
+                      allies: true,
+                      filters: [
+                        { targetIds: ["!C3POCHEWBACCA"] },
+                        { tags: ["Rebel"] },
+                      ],
+                    },
+                    actions: [
+                      {
+                        targets: {
+                          allies: true,
+                          filters: [
+                            { targetIds: ["!C3POCHEWBACCA"] },
+                            { tags: ["Rebel"] },
+                          ],
+                        },
+                        effects: [
+                          {
+                            stats: {
+                              statToModify: "maxProtection",
+                              amount: 0.2,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseHealth",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "maxProtection",
+                              amount: 0.2,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseProtection",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "tenacity",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseTenacity",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "potency",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "basePotency",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "offense",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseOffense",
+                                type: "physical",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "offense",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseOffense",
+                                type: "special",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "armor",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseArmor",
+                                type: "physical",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
+                              },
+                            },
+                          },
+                          {
+                            stats: {
+                              statToModify: "armor",
+                              amount: 0.4,
+                              modifiedType: "multiplicative",
+                            },
+                            scalesBy: {
+                              stat: {
+                                name: "baseArmor",
+                                type: "special",
+                              },
+                              targets: {
+                                self: true, //note this is from the leader's perspective
                               },
                             },
                           },
@@ -208,217 +463,137 @@ const chewpio: Record<string, iAbility | iUniqueAbility> = {
           },
         ],
       },
-      // {
-      //   id: uuid(),
-      //   triggerType: "always",
-      //   targets: { filters: [{ allies: false }] },
-      //   actions: [
-      //     {
-      //       targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
-      //       effects: [
-      //         {
-      //           condition: { debuffs: ["Blind"] },
-      //           stats: {
-      //             modifiedType: "additive",
-      //             amount: -0.4,
-      //             statToModify: "tenacity",
-      //           },
-      //         },
-      //         {
-      //           condition: { debuffs: ["Blind"] },
-      //           immune: {
-      //             assists: true,
-      //             counterAttack: true,
-      //           },
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
-      // {
-      //   id: uuid(),
-      //   triggerType: "useAbility",
-      //   triggerData: {
-      //     limit: 1,
-      //     count: 0,
-      //     frequency: "turn",
-      //   },
-      //   targets: { filters: [{ allies: true }, { tags: ["Rebel & !Self"] }] },
-      //   actions: [
-      //     {
-      //       targets: {
-      //         filters: [{ allies: true }, { targetIds: ["C3POCHEWBACCA"] }],
-      //       },
-      //       effects: [
-      //         {
-      //           assist: {
-      //             chance: 1,
-      //             modifier: {
-      //               stats: {
-      //                 statToModify: "offense",
-      //                 amount: 0.7,
-      //                 modifiedType: "multiplicative",
-      //               },
-      //             },
-      //           },
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
-      // {
-      //   id: uuid(),
-      //   triggerType: "revive",
-      //   targets: { filters: [{ allies: true }, { tags: ["Rebel & !Self"] }] },
-      //   actions: [
-      //     {
-      //       targets: {
-      //         filters: [{ allies: true }, { targetIds: ["C3POCHEWBACCA"] }],
-      //       },
-      //       effects: [
-      //         {
-      //           revive: {
-      //             health: {
-      //               amount: 0.5,
-      //               percent: true,
-      //             },
-      //             protection: {
-      //               amount: 0.5,
-      //               percent: true,
-      //             },
-      //           },
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
-      // {
-      //   id: uuid(),
-      //   triggerType: "always",
-      //   targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
-      //   actions: [
-      //     {
-      //       targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
-      //       effects: [
-      //         {
-      //           stats: {
-      //             statToModify: "maxHealth",
-      //             amount: 0.4,
-      //             modifiedType: "multiplicative",
-      //           },
-      //           scalesBy: {
-      //             targets: {
-      //               filters: [
-      //                 { allies: true },
-      //                 { tags: ["Rebel"] },
-      //                 { isLeader: true },
-      //               ],
-      //             },
-      //           },
-      //         },
-      //         {
-      //           stats: {
-      //             statToModify: "maxProtection",
-      //             amount: 0.4,
-      //             modifiedType: "multiplicative",
-      //           },
-      //           scalesBy: {
-      //             targets: {
-      //               filters: [
-      //                 { allies: true },
-      //                 { tags: ["Rebel"] },
-      //                 { isLeader: true },
-      //               ],
-      //             },
-      //           },
-      //         },
-      //         {
-      //           stats: {
-      //             statToModify: "offense",
-      //             amount: 0.4,
-      //             modifiedType: "multiplicative",
-      //           },
-      //           scalesBy: {
-      //             targets: {
-      //               filters: [
-      //                 { allies: true },
-      //                 { tags: ["Rebel"] },
-      //                 { isLeader: true },
-      //               ],
-      //             },
-      //           },
-      //         },
-      //         {
-      //           // stats: {
-      //           //   statToModify: "defense",
-      //           //   amount: 0.4,
-      //           //   modifiedType: "multiplicative",
-      //           // },
-      //           scalesBy: {
-      //             targets: {
-      //               filters: [
-      //                 { allies: true },
-      //                 { tags: ["Rebel"] },
-      //                 { isLeader: true },
-      //               ],
-      //             },
-      //           },
-      //         },
-      //         {
-      //           stats: {
-      //             statToModify: "potency",
-      //             amount: 0.4,
-      //             modifiedType: "multiplicative",
-      //           },
-      //           scalesBy: {
-      //             targets: {
-      //               filters: [
-      //                 { allies: true },
-      //                 { tags: ["Rebel"] },
-      //                 { isLeader: true },
-      //               ],
-      //             },
-      //           },
-      //         },
-      //         {
-      //           stats: {
-      //             statToModify: "tenacity",
-      //             amount: 0.4,
-      //             modifiedType: "multiplicative",
-      //           },
-      //           scalesBy: {
-      //             targets: {
-      //               filters: [
-      //                 { allies: true },
-      //                 { tags: ["Rebel"] },
-      //                 { isLeader: true },
-      //               ],
-      //             },
-      //           },
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
-      // {
-      //   id: uuid(),
-      //   triggerType: "always",
-      //   targets: { filters: [{ allies: true }, { tags: ["Rebel"] }] },
-      //   actions: [
-      //     {
-      //       targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
-      //       effects: [
-      //         {
-      //           stats: {
-      //             statToModify: "critAvoid",
-      //             amount: 0.15,
-      //             modifiedType: "additive",
-      //           },
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
+      {
+        id: uuid(),
+        triggerType: "always",
+        targets: { allies: false },
+        actions: [
+          {
+            targets: { allies: false },
+            effects: [
+              {
+                condition: { debuffs: ["Blind"] },
+                stats: {
+                  modifiedType: "additive",
+                  amount: -0.5,
+                  statToModify: "tenacity",
+                },
+              },
+              {
+                condition: { debuffs: ["Blind"] },
+                immune: {
+                  assisting: true,
+                  counterAttacking: true,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: uuid(),
+        triggerType: "always",
+        targets: { allies: true, filters: [{ tags: ["Rebel"] }] },
+        actions: [
+          {
+            targets: { allies: true, filters: [{ tags: ["Rebel"] }] },
+            effects: [
+              {
+                stats: {
+                  modifiedType: "additive",
+                  amount: 0.15,
+                  statToModify: "critAvoid",
+                },
+              },
+            ],
+          },
+        ],
+      },
+
+      {
+        id: uuid(),
+        triggerType: "pregame",
+        targets: { self: true },
+        actions: [
+          {
+            targets: {
+              self: false,
+              allies: true,
+              filters: [{ tags: ["Rebel"] }],
+            },
+            effects: [
+              {
+                triggers: [
+                  {
+                    triggerType: "useAbility",
+                    id: uuid(),
+                    targets: { self: true },
+                    triggerData: {
+                      frequency: "turn",
+                      count: 1,
+                      limit: 1,
+                    },
+                    actions: [
+                      {
+                        targets: { filters: [{ primary: true }] },
+                        effects: [
+                          {
+                            assist: {
+                              chance: 1,
+                              targets: {
+                                allies: true,
+                                filters: [{ targetIds: ["C3POCHEWBACCA"] }],
+                              },
+                              modifier: {
+                                stats: {
+                                  modifiedType: "multiplicative",
+                                  statToModify: "offense",
+                                  amount: 0.7,
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: uuid(),
+        triggerType: "revive",
+        targets: {
+          self: false,
+          allies: true,
+          filters: [{ tags: ["Rebel"] }],
+        },
+        actions: [
+          {
+            targets: {
+              allies: true,
+              filters: [{ targetIds: ["C3POCHEWBACCA"] }],
+            },
+            effects: [
+              {
+                revive: {
+                  health: {
+                    amount: 0.5,
+                    percent: true,
+                  },
+                  protection: {
+                    amount: 0.5,
+                    percent: true,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
 };

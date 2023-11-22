@@ -10,7 +10,7 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       "Deal Physical damage to target enemy, inflict Evasion Down for 2 turns, then gain Potency Up for 2 turns. This attack can't be Evaded.",
     actions: [
       {
-        targets: { filters: [{ allies: false }], targetCount: 1 },
+        targets: { allies: false, targetCount: 1 },
         effects: [
           {
             damage: {
@@ -34,7 +34,7 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
       {
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         effects: [
           {
             buffs: [
@@ -58,7 +58,7 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
     turnsRemaining: 0,
     actions: [
       {
-        targets: { filters: [{ allies: false }] },
+        targets: { allies: false },
         effects: [
           {
             cantMiss: true,
@@ -72,15 +72,14 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
                     id: uuid(),
                     triggerType: "resistDetrimentalEffect",
                     targets: {
-                      filters: [{ allies: true }, { tags: ["Jedi", "Rebel"] }],
+                      allies: true,
+                      filters: [{ tags: ["Jedi", "Rebel"] }],
                     },
                     actions: [
                       {
                         targets: {
-                          filters: [
-                            { allies: true },
-                            { tags: ["Jedi", "Rebel"] },
-                          ],
+                          allies: true,
+                          filters: [{ tags: ["Jedi", "Rebel"] }],
                         },
                         effects: [
                           {
@@ -107,15 +106,14 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
                     id: uuid(),
                     triggerType: "resistDetrimentalEffect",
                     targets: {
-                      filters: [{ allies: true }, { tags: ["Jedi", "Rebel"] }],
+                      allies: true,
+                      filters: [{ tags: ["Jedi", "Rebel"] }],
                     },
                     actions: [
                       {
                         targets: {
-                          filters: [
-                            { allies: true },
-                            { tags: ["Jedi", "Rebel"] },
-                          ],
+                          allies: true,
+                          filters: [{ tags: ["Jedi", "Rebel"] }],
                         },
                         effects: [
                           {
@@ -143,15 +141,14 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
                     id: uuid(),
                     triggerType: "resistDetrimentalEffect",
                     targets: {
-                      filters: [{ allies: true }, { tags: ["Jedi", "Rebel"] }],
+                      allies: true,
+                      filters: [{ tags: ["Jedi", "Rebel"] }],
                     },
                     actions: [
                       {
                         targets: {
-                          filters: [
-                            { allies: true },
-                            { tags: ["Jedi", "Rebel"] },
-                          ],
+                          allies: true,
+                          filters: [{ tags: ["Jedi", "Rebel"] }],
                         },
                         effects: [
                           {
@@ -184,7 +181,7 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
     turnsRemaining: 0,
     actions: [
       {
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         effects: [
           {
             buffs: [
@@ -197,14 +194,10 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
                   {
                     id: uuid(),
                     triggerType: "expires",
-                    targets: {
-                      filters: [{ allies: true }, { tags: ["Self"] }],
-                    },
+                    targets: { self: true },
                     actions: [
                       {
-                        targets: {
-                          filters: [{ allies: true }, { tags: ["Self"] }],
-                        },
+                        targets: { self: true },
                         effects: [
                           {
                             buffs: [{ name: "Taunt", duration: 1, id: uuid() }],
@@ -220,7 +213,7 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
       {
-        targets: { filters: [{ allies: true }] },
+        targets: { allies: true },
         effects: [
           {
             buffs: [
@@ -245,15 +238,15 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
         triggerType: "receiveDamage",
         id: uuid(),
         targets: {
-          filters: [
-            { allies: true },
-            { tags: ["Jedi & !Self", "Rebel & !Self"] },
-          ],
+          self: false,
+          allies: true,
+          filters: [{ tags: ["Jedi", "Rebel"] }],
         },
         actions: [
           {
             targets: {
-              filters: [{ allies: true }, { targetIds: ["OLDBENKENOBI"] }],
+              allies: true,
+              filters: [{ targetIds: ["OLDBENKENOBI"] }],
             },
             effects: [
               {
@@ -271,7 +264,7 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       },
       {
         id: uuid(),
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         triggerType: "death",
         triggerData: {
           limit: 1,
@@ -280,7 +273,7 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
         },
         actions: [
           {
-            targets: { filters: [{ allies: true }] },
+            targets: { allies: true },
             effects: [
               {
                 buffs: [
@@ -330,10 +323,10 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        targets: { filters: [{ allies: true }] },
+        targets: { allies: true },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: { self: true },
             effects: [
               {
                 stats: {
@@ -349,10 +342,10 @@ const oldBen: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "dodge",
         id: uuid(),
-        targets: { filters: [{ allies: true }] },
+        targets: { allies: true },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: { self: true },
             effects: [
               {
                 buffs: [

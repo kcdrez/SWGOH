@@ -17,7 +17,9 @@
       v-for="action in trigger.actions"
       :key="action.id"
     >
-      <div>Target: {{ action.targets.filters }}</div>
+      <div>
+        <Target :targetData="action.targets" classes="fw-bold" />
+      </div>
       <Effect
         v-for="(effect, index) in action.effects"
         :key="index"
@@ -37,10 +39,11 @@ import { defineComponent } from "vue";
 
 import { iTrigger } from "types/gameEngine/gameEngine";
 import Effect from "./effect.vue";
+import Target from "./target.vue";
 
 export default defineComponent({
   name: "Trigger",
-  components: { Effect },
+  components: { Effect, Target },
   props: {
     trigger: {
       type: Object as () => iTrigger,
@@ -72,4 +75,8 @@ export default defineComponent({
   color: $success-dark-1 !important;
   text-shadow: none !important;
 }
+
+// ::v-deep(.target) {
+//   color: $primary-dark-1;
+// }
 </style>

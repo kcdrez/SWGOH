@@ -52,7 +52,7 @@
           <div>Your Team:</div>
           <UnitSearch
             :list="playerUnitList"
-            @select="addToTeam('player', $event)"
+            @select="addToTeam('player', $event, false)"
           />
           <ul class="character-list">
             <li
@@ -87,7 +87,7 @@
           <div>Opponent's Team:</div>
           <UnitSearch
             :list="opponentUnitList"
-            @select="addToTeam('opponent', $event)"
+            @select="addToTeam('opponent', $event, false)"
           />
           <ul class="character-list">
             <li
@@ -242,9 +242,9 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
-import { randomNumber, numbersOnly } from "utils";
+import { numbersOnly } from "utils";
 import abilities from "types/abilities";
-import { Character, format } from "types/gameEngine/characters";
+import { Character } from "types/gameEngine/characters";
 import { gameEngine, Engine } from "types/gameEngine/gameEngine";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
@@ -262,14 +262,14 @@ interface dataModel {
 export default defineComponent({
   name: "GameSimulationPage",
   components: { UnitSearch, Trigger, Log },
-  data(): dataModel {
+  data() {
     return {
       gameEngine,
       playerTeam: [],
       opponentTeam: [],
       showDeleteOpponentConfirm: false,
       allyCode: "",
-    };
+    } as dataModel;
   },
   computed: {
     ...mapState("opponents", {
@@ -308,15 +308,19 @@ export default defineComponent({
       refreshMatches: "refreshMatches",
       removeMatch: "removeMatch",
     }),
-    addToTeam(teamName: "player" | "opponent", unit: Unit) {
+    addToTeam(teamName: "player" | "opponent", unit: Unit, isLeader: boolean) {
       if (unit instanceof Unit) {
         if (teamName === "player") {
           if (!this.playerTeam.some((x) => x.id === unit.id)) {
-            this.playerTeam.push(new Character(unit, this.player.name));
+            this.playerTeam.push(
+              new Character(unit, this.player.name, isLeader)
+            );
           }
         } else {
           if (!this.opponentTeam.some((x) => x.id === unit.id)) {
-            this.opponentTeam.push(new Character(unit, this.opponent.name));
+            this.opponentTeam.push(
+              new Character(unit, this.opponent.name, isLeader)
+            );
           }
         }
         this.saveData();
@@ -334,8 +338,12 @@ export default defineComponent({
       window.localStorage.setItem(
         "simulation",
         JSON.stringify({
-          playerUnits: this.playerTeam.map((x) => x.id),
-          opponentUnits: this.opponentTeam.map((x) => x.id),
+          playerUnits: this.playerTeam.map(({ id, isLeader }) => {
+            return { id, isLeader };
+          }),
+          opponentUnits: this.opponentTeam.map(({ id, isLeader }) => {
+            return { id, isLeader };
+          }),
         })
       );
     },
@@ -369,16 +377,16 @@ export default defineComponent({
       window.localStorage.getItem("simulation") ?? "{}"
     );
     if (teamData?.playerUnits) {
-      teamData.playerUnits.forEach((id) => {
+      teamData.playerUnits.forEach(({ id, isLeader }) => {
         const unit: Unit = this.getPlayerUnitData(id);
         if (unit) {
-          this.addToTeam("player", unit);
+          this.addToTeam("player", unit, isLeader);
         }
       });
-      teamData.opponentUnits.forEach((id) => {
+      teamData.opponentUnits.forEach(({ id, isLeader }) => {
         const unit: Unit = this.getOpponentUnitData(id);
         if (unit) {
-          this.addToTeam("opponent", unit);
+          this.addToTeam("opponent", unit, isLeader);
         }
       });
     }

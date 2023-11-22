@@ -82,7 +82,7 @@
 //         id: uuid(),
 //         actions: [
 //           {
-//             targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+//             targets: { self: true },
 //             effects: [
 //               {
 //                 heal: {
@@ -107,7 +107,7 @@
 //       {
 //         triggerType: "criticalHit",
 //         id: uuid(),
-//         targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+//         targets: { self: true },
 //         actions: [
 //           {
 //             targets: { filters: [{ targetIds: ["target"] }] },
@@ -128,10 +128,10 @@
 //       {
 //         triggerType: "always",
 //         id: uuid(),
-//         targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+//         targets: { self: true },
 //         actions: [
 //           {
-//             targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+//             targets: { self: true },
 //             effects: [
 //               {
 //                 stats: {
@@ -170,7 +170,7 @@
 //         targets: { filters: [{ allies: true }, { tags: ["Jedi"] }] },
 //         actions: [
 //           {
-//             targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+//             targets: { self: true },
 //             effects: [
 //               {
 //                 stats: {
@@ -189,7 +189,7 @@
 //         targets: { filters: [{ allies: true }, { tags: ["Jedi"] }] },
 //         actions: [
 //           {
-//             targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+//             targets: { self: true },
 //             effects: [
 //               {
 //                 heal: {

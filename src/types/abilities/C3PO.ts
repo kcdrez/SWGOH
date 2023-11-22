@@ -40,7 +40,7 @@
 //           {
 //             scalesBy: {
 //               buffs: ["Translation"],
-//               targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+//               targets: { self: true },
 //             },
 //             debuffs: [
 //               {

@@ -20,7 +20,7 @@ const hansolo: Record<
     actions: [
       {
         id: quickDrawActionId,
-        targets: { filters: [{ allies: false }], targetCount: 1 },
+        targets: { allies: false, targetCount: 1 },
         effects: [
           {
             damage: {
@@ -70,7 +70,7 @@ const hansolo: Record<
     turnsRemaining: 0,
     actions: [
       {
-        targets: { filters: [{ allies: false }], targetCount: 1 },
+        targets: { allies: false, targetCount: 1 },
         effects: [
           {
             damage: {
@@ -92,7 +92,7 @@ const hansolo: Record<
         ],
       },
       {
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         effects: [
           {
             buffs: [
@@ -123,7 +123,7 @@ const hansolo: Record<
     cooldown: 4,
     actions: [
       {
-        targets: { filters: [{ allies: true }] },
+        targets: { allies: true },
         effects: [
           {
             buffs: [
@@ -142,7 +142,7 @@ const hansolo: Record<
         ],
       },
       {
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         effects: [
           {
             buffs: [
@@ -170,10 +170,10 @@ const hansolo: Record<
       {
         triggerType: "always",
         id: uuid(),
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: { self: true },
             effects: [
               {
                 stats: {
@@ -196,7 +196,7 @@ const hansolo: Record<
       {
         triggerType: "useAbility",
         id: uuid(),
-        targets: { filters: [{ tags: ["Self"], allies: true }] },
+        targets: { self: true },
         triggerData: {
           limit: 1,
           count: 1,
@@ -235,11 +235,11 @@ const hansolo: Record<
           count: 1,
           frequency: "match",
         },
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         actions: [
           {
             targets: {
-              filters: [{ allies: false }],
+              allies: false,
               ignoreTaunt: true,
               targetCount: 1,
             },

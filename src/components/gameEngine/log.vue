@@ -90,8 +90,7 @@
     </template>
     <template v-if="log.damage">
       <template v-if="log.damage.evaded">
-        <CharacterLog :character="log.targetLogData" />
-        evaded
+        <CharacterLog :character="log.targetLogData" />evaded
       </template>
       <template v-else-if="log.damage.bonus">
         <CharacterLog :character="log.targetLogData" />was dealt
@@ -120,7 +119,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { PropType, defineComponent } from "vue";
 
 import { Log } from "types/gameEngine/gameEngine";
 import { Character } from "types/gameEngine/characters";
@@ -131,7 +130,7 @@ export default defineComponent({
   components: { CharacterLog },
   props: {
     log: {
-      type: Object as () => Log,
+      type: [Object] as PropType<Log>,
       required: true,
     },
   },
