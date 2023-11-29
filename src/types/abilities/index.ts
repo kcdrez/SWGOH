@@ -6,6 +6,7 @@ import CHEWBACCALEGENDARY from "./CHEWBACCALEGENDARY";
 import COMMANDERLUKESKYWALKER from "./COMMANDERLUKESKYWALKER";
 import HANSOLO from "./HANSOLO";
 import OLDBENKENOBI from "./OLDBENKENOBI";
+import C3POLEGENDARY from "./C3POLEGENDARY";
 // import ADMIRALACKBAR from "./ADMIRALACKBAR";
 
 const characterMapping: Record<
@@ -18,6 +19,7 @@ const characterMapping: Record<
   HANSOLO,
   CHEWBACCALEGENDARY,
   C3POCHEWBACCA,
+  C3POLEGENDARY,
 };
 
 export default characterMapping;

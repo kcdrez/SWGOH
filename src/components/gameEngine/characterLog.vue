@@ -318,9 +318,6 @@ export default defineComponent({
       if (effect.unique) {
         textLines.push("Is Unique");
       }
-      if (effect.isStackable) {
-        textLines.push("Stacks: " + effect.stacks);
-      }
       return textLines.join("\n");
     },
   },

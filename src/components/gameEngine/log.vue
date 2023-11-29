@@ -28,7 +28,7 @@
         <span :class="log.statusEffects.type">{{
           log.statusEffects.list.map((x) => x.name).join(", ")
         }}</span>
-        due to <span class="debuff">Buff Immunity</span>
+        due to <span class="debuff">{{ log.statusEffects.prevented }}</span>
       </template>
       <template v-else-if="log.statusEffects.removed"
         >removed
@@ -39,6 +39,12 @@
           from
           <CharacterLog :character="log.targetLogData" />
         </template>
+      </template>
+      <template v-else-if="log.statusEffects.reset">
+        <span :class="log.statusEffects.type">{{
+          log.statusEffects.list.map((x) => x.name).join(", ")
+        }}</span>
+        was reset to {{ log.statusEffects.reset }} turns
       </template>
       <template v-else-if="log.statusEffects.list.length > 0">
         {{

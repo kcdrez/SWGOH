@@ -159,8 +159,6 @@ export interface iCondition {
 
 /** Various effects that will be applied */
 export interface iEffect {
-  /** Who the effect should target */
-  // targets?: iTargetData[];
   /** The optional condition to check before applying any of the effects */
   condition?: iCondition;
   /** Determines if the effct cannot miss */
@@ -179,11 +177,13 @@ export interface iEffect {
   /** Manipulate the cooldown of an ability */
   cooldown?: {
     /** The ID of the ability being manipulated */
-    id: string;
+    id?: string;
     /** The amount the ability is being manipulated. Positive number increases the cooldown, negative number increases the cooldown */
     amount: number;
     /** The target that the ability belongs to */
     target: iTargetData;
+    /** Determines if the effect cannot be resisted */
+    cantResist?: boolean;
   };
   /** Heal the target */
   heal?: {
@@ -264,7 +264,6 @@ export interface iEffect {
   };
   /** Triggers to add to the target that will occur at a later time */
   triggers?: iTrigger[];
-  /** Misc. data used for checking various effects */
   revive?: {
     health: {
       amount: number;
@@ -275,6 +274,12 @@ export interface iEffect {
       percent: boolean;
     };
   };
+  /** Resets the number of turns a status effect should be applied */
+  reset?: {
+    debuffs?: tDebuff[];
+    duration?: number;
+  };
+  /** Misc. data used for checking various effects */
   data?: any;
 }
 
@@ -342,7 +347,8 @@ type tLogStatusEffect = {
   removed?: boolean;
   duration?: number;
   immune?: boolean;
-  prevented?: boolean;
+  prevented?: string;
+  reset?: number;
 };
 
 type tLogAbility = { used?: null | iAbility; source?: null | iAbility };
@@ -516,7 +522,7 @@ export class Engine {
       do {
         turnNumber++;
         this.nextTurn(turnNumber);
-        if (this.checkMatchEnd(turnNumber, 1000)) {
+        if (this.checkMatchEnd(turnNumber, 10)) {
           this._simulationData.matchHistory.push(this.turns);
           break;
         }
