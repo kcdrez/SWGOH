@@ -159,8 +159,6 @@ export interface iCondition {
 
 /** Various effects that will be applied */
 export interface iEffect {
-  /** Who the effect should target */
-  // targets?: iTargetData[];
   /** The optional condition to check before applying any of the effects */
   condition?: iCondition;
   /** Determines if the effct cannot miss */
@@ -179,11 +177,13 @@ export interface iEffect {
   /** Manipulate the cooldown of an ability */
   cooldown?: {
     /** The ID of the ability being manipulated */
-    id: string;
+    id?: string;
     /** The amount the ability is being manipulated. Positive number increases the cooldown, negative number increases the cooldown */
     amount: number;
     /** The target that the ability belongs to */
     target: iTargetData;
+    /** Determines if the effect cannot be resisted */
+    cantResist?: boolean;
   };
   /** Heal the target */
   heal?: {
@@ -236,9 +236,9 @@ export interface iEffect {
     /** The positive status effects or buffs that cannot be given to the target */
     positiveStatusEffects?: (tBuff | tStatusEffect)[];
     /** The target cannot assist */
-    assists?: boolean;
+    assisting?: boolean;
     /** The target cannot counter attack */
-    counterAttack?: boolean;
+    counterAttacking?: boolean;
   };
   /** Scale the above effects with various data */
   scalesBy?: {
@@ -251,7 +251,7 @@ export interface iEffect {
       /** Determines if the physical or special attribute should be used */
       type?: "physical" | "special";
       /** The name of the stat to use as the scale */
-      name: string;
+      name: iStatsCheck["statToModify"];
       /** How much of the user's stat should be used as the scale (i.e. .3 would be 30% of the user's stat) */
       percent?: number;
       /** Who should be the target used by the scaling (i.e. opponent's health, user's health, etc.) */
@@ -264,7 +264,6 @@ export interface iEffect {
   };
   /** Triggers to add to the target that will occur at a later time */
   triggers?: iTrigger[];
-  /** Misc. data used for checking various effects */
   revive?: {
     health: {
       amount: number;
@@ -275,6 +274,12 @@ export interface iEffect {
       percent: boolean;
     };
   };
+  /** Resets the number of turns a status effect should be applied */
+  reset?: {
+    debuffs?: tDebuff[];
+    duration?: number;
+  };
+  /** Misc. data used for checking various effects */
   data?: any;
 }
 
@@ -342,7 +347,8 @@ type tLogStatusEffect = {
   removed?: boolean;
   duration?: number;
   immune?: boolean;
-  prevented?: boolean;
+  prevented?: string;
+  reset?: number;
 };
 
 type tLogAbility = { used?: null | iAbility; source?: null | iAbility };
@@ -375,10 +381,12 @@ export type tLogData = {
   health: {
     current: number;
     max: number;
+    base: number;
   };
   protection: {
     current: number;
     max: number;
+    base: number;
   };
   activeAbilities: iAbility[];
   buffs: iBuff[];
@@ -450,6 +458,7 @@ interface iSimulation {
   opponentWins: number;
   matchHistory: Turn[][];
 }
+
 export class Engine {
   private _playerCharacters: Character[] = [];
   private _opponentCharacters: Character[] = [];
@@ -474,7 +483,7 @@ export class Engine {
       this._simulationData.total = val;
     }
   }
-  public get matchHistory() {
+  public get matchHistory(): Turn[][] {
     return this._simulationData.matchHistory;
   }
   public get playerWins() {
@@ -513,7 +522,7 @@ export class Engine {
       do {
         turnNumber++;
         this.nextTurn(turnNumber);
-        if (this.checkMatchEnd(turnNumber, 1000)) {
+        if (this.checkMatchEnd(turnNumber, 10)) {
           this._simulationData.matchHistory.push(this.turns);
           break;
         }
@@ -597,13 +606,15 @@ export class Engine {
       });
     });
 
-    let i = 0;
-
     pregameTriggers.forEach((char) => {
       const t = new Turn(0, char, [], [], "Match Set Up");
-      this.turns.push(t);
+      this.turns.push(t); //this must exist for the current turn logic to work
       const logs = char.executePassiveTriggers([{ triggerType: "pregame" }]);
-      t.addLogs(logs);
+      if (logs.length) {
+        t.addLogs(logs);
+      } else {
+        this.turns.pop();
+      }
     });
 
     setupTriggers.forEach((char) => {
@@ -626,6 +637,8 @@ export class Engine {
 
       t.addLogs(logs);
     });
+
+    allCharacters.forEach((x) => x.resetHealth());
   }
 
   private nextTurn(turnNumber: number) {

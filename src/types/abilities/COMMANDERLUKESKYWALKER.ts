@@ -10,7 +10,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       "Deal Physical damage to target enemy and inflict Speed Down and Defense Down for 2 turns. If the target already had Speed Down, remove 30% Turn Meter. If the target already had Defense Down, inflict Stun for 1 turn.",
     actions: [
       {
-        targets: { filters: [{ allies: false }], targetCount: 1 },
+        targets: { allies: false, targetCount: 1 },
         effects: [
           {
             damage: {
@@ -70,7 +70,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
     turnsRemaining: 0,
     actions: [
       {
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         effects: [
           {
             dispel: {
@@ -138,7 +138,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
     turnsRemaining: 0,
     actions: [
       {
-        targets: { filters: [{ allies: false }], targetCount: 1 },
+        targets: { allies: false, targetCount: 1 },
         effects: [
           {
             dispel: {
@@ -171,7 +171,7 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
             cooldown: {
               id: "specialskill_COMMANDERLUKESKYWALKER01",
               amount: -1,
-              target: { filters: [{ allies: true }, { tags: ["Self"] }] },
+              target: { self: true },
             },
           },
         ],
@@ -187,10 +187,10 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: { self: true },
             effects: [
               {
                 condition: {
@@ -254,14 +254,16 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "receiveDamage",
         id: uuid(),
-        targets: { filters: [{ allies: true }, { tags: ["Rebel & !Self"] }] },
+        targets: {
+          self: false,
+          allies: true,
+          filters: [{ tags: ["Rebel"] }],
+        },
         actions: [
           {
             targets: {
-              filters: [
-                { allies: true },
-                { targetIds: ["COMMANDERLUKESKYWALKER"] },
-              ],
+              allies: true,
+              filters: [{ targetIds: ["COMMANDERLUKESKYWALKER"] }],
             },
             effects: [
               {
@@ -288,10 +290,10 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: { self: true },
             effects: [
               {
                 stats: {
@@ -306,11 +308,11 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       },
       {
         triggerType: "resistDetrimentalEffect",
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         id: uuid(),
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: { self: true },
             effects: [
               {
                 heal: {
@@ -333,10 +335,10 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "inflictDebuff",
         id: uuid(),
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: { self: true },
             effects: [
               {
                 buffs: [
@@ -354,10 +356,10 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "inflictDebuff",
         id: uuid(),
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["!Self"] }] },
+            targets: { self: false, allies: true },
             effects: [
               {
                 buffs: [
@@ -383,10 +385,10 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        targets: { filters: [{ allies: true }, { tags: ["Rebel"] }] },
+        targets: { allies: true, filters: [{ tags: ["Rebel"] }] },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Rebel"] }] },
+            targets: { allies: true, filters: [{ tags: ["Rebel"] }] },
             effects: [
               {
                 stats: {
@@ -414,12 +416,12 @@ const cls: Record<string, iAbility | iUniqueAbility> = {
         ],
       },
       {
-        targets: { filters: [{ allies: false }] },
+        targets: { allies: false },
         triggerType: "resistDetrimentalEffect",
         id: uuid(),
         actions: [
           {
-            targets: { filters: [{ allies: false }, { tags: ["Rebel"] }] },
+            targets: { allies: false, filters: [{ tags: ["Rebel"] }] },
             effects: [
               {
                 buffs: [

@@ -28,7 +28,7 @@
         <span :class="log.statusEffects.type">{{
           log.statusEffects.list.map((x) => x.name).join(", ")
         }}</span>
-        due to <span class="debuff">Buff Immunity</span>
+        due to <span class="debuff">{{ log.statusEffects.prevented }}</span>
       </template>
       <template v-else-if="log.statusEffects.removed"
         >removed
@@ -39,6 +39,12 @@
           from
           <CharacterLog :character="log.targetLogData" />
         </template>
+      </template>
+      <template v-else-if="log.statusEffects.reset">
+        <span :class="log.statusEffects.type">{{
+          log.statusEffects.list.map((x) => x.name).join(", ")
+        }}</span>
+        was reset to {{ log.statusEffects.reset }} turns
       </template>
       <template v-else-if="log.statusEffects.list.length > 0">
         {{
@@ -90,8 +96,7 @@
     </template>
     <template v-if="log.damage">
       <template v-if="log.damage.evaded">
-        <CharacterLog :character="log.targetLogData" />
-        evaded
+        <CharacterLog :character="log.targetLogData" />evaded
       </template>
       <template v-else-if="log.damage.bonus">
         <CharacterLog :character="log.targetLogData" />was dealt
@@ -120,7 +125,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { PropType, defineComponent } from "vue";
 
 import { Log } from "types/gameEngine/gameEngine";
 import { Character } from "types/gameEngine/characters";
@@ -131,7 +136,7 @@ export default defineComponent({
   components: { CharacterLog },
   props: {
     log: {
-      type: Object as () => Log,
+      type: [Object] as PropType<Log>,
       required: true,
     },
   },

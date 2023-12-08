@@ -11,7 +11,7 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
     actions: [
       {
         targets: {
-          filters: [{ allies: false }],
+          allies: false,
           targetCount: 1,
         },
         effects: [
@@ -35,8 +35,9 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
                 },
               },
               targets: {
-                filters: [{ allies: true }, { tags: ["!Self"] }],
+                allies: true,
                 targetCount: 1,
+                self: false,
               },
             },
           },
@@ -55,12 +56,10 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
       {
         id: uuid(),
         triggerType: "dealDamage",
-        targets: {
-          filters: [{ allies: true }, { tags: ["Self"] }],
-        },
+        targets: { self: true },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: { self: true },
             effects: [
               {
                 heal: {
@@ -80,7 +79,7 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
     actions: [
       {
         targets: {
-          filters: [{ allies: false }],
+          allies: false,
           targetCount: 1,
         },
         effects: [
@@ -103,9 +102,7 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "criticalHit",
         id: uuid(),
-        targets: {
-          filters: [{ tags: ["Self"] }, { allies: true }],
-        },
+        targets: { self: true },
         actions: [
           {
             targets: { filters: [{ primary: true }] },
@@ -126,10 +123,10 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
       {
         triggerType: "always",
         id: uuid(),
-        targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+        targets: { self: true },
         actions: [
           {
-            targets: { filters: [{ allies: true }, { tags: ["Self"] }] },
+            targets: { self: true },
             effects: [
               {
                 stats: {
@@ -168,13 +165,12 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
         triggerType: "always",
         id: uuid(),
         targets: {
-          filters: [{ allies: true }, { tags: ["Jedi"] }],
+          allies: true,
+          filters: [{ tags: ["Jedi"] }],
         },
         actions: [
           {
-            targets: {
-              filters: [{ allies: true }, { tags: ["Self"] }],
-            },
+            targets: { self: true },
             effects: [
               {
                 stats: {
@@ -191,13 +187,12 @@ const aayla: Record<string, iAbility | iUniqueAbility> = {
         triggerType: "resistDetrimentalEffect",
         id: uuid(),
         targets: {
-          filters: [{ allies: true }, { tags: ["Jedi"] }],
+          allies: true,
+          filters: [{ tags: ["Jedi"] }],
         },
         actions: [
           {
-            targets: {
-              filters: [{ allies: true }, { tags: ["Self"] }],
-            },
+            targets: { self: true },
             effects: [
               {
                 heal: {

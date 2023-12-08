@@ -70,13 +70,23 @@
                   ><span
                     :class="{
                       'text-danger':
-                        (character.protection.current ?? 0) <
-                        (character.protection.max ?? 0),
+                        character.protection.current < character.protection.max,
                     }"
                     >{{ character.protection.current }}</span
                   >
                   <span class="mx-1">/</span>
-                  {{ character.protection.max }}</span
+                  {{ character.protection.max }}
+                  <span
+                    :class="{
+                      'text-danger':
+                        character.protection.max < character.protection.base,
+                      'text-success':
+                        character.protection.max > character.protection.base,
+                    }"
+                    class="mx-1"
+                    title="Unmodified base protection"
+                    >({{ character.protection.base }})</span
+                  ></span
                 >
               </div>
               <div class="input-group input-group-sm mt-1">
@@ -89,7 +99,18 @@
                         (character.health.max ?? 0),
                     }"
                     >{{ character.health.current }}</span
-                  ><span class="mx-1">/</span> {{ character.health.max }}</span
+                  ><span class="mx-1">/</span> {{ character.health.max }}
+                  <span
+                    :class="{
+                      'text-danger':
+                        character.health.max < character.health.base,
+                      'text-success':
+                        character.health.max > character.health.base,
+                    }"
+                    class="mx-1"
+                    title="Unmodified base healh"
+                    >({{ character.health.base }})</span
+                  ></span
                 >
               </div>
               <div class="input-group input-group-sm mt-1">
@@ -102,6 +123,7 @@
                 v-for="ability in character.activeAbilities"
                 :key="ability.id"
                 class="mt-1"
+                :title="ability.gameText"
               >
                 <div v-if="ability.cooldown">
                   {{ ability.name }} - Cooldown:
@@ -220,16 +242,31 @@
               />
             </div>
             <div class="tab-pane fade" :id="`other-${id}`">
-              <div>
-                {{ character.otherEffects.ignoreTaunt ? "Ignores Taunt" : "" }}
-                Immune to:
-                <ul
-                  v-for="(val, key) in character.otherEffects.immunity"
-                  :key="key"
+              <div
+                v-if="
+                  character.otherEffects.ignoreTaunt ||
+                  Object.keys(character.otherEffects?.immunity ?? {}).length > 0
+                "
+              >
+                <div v-if="character.otherEffects.ignoreTaunt">
+                  Ignores Taunt
+                </div>
+                <template
+                  v-if="
+                    Object.keys(character.otherEffects?.immunity ?? {}).length >
+                    0
+                  "
                 >
-                  <li v-if="val">{{ key }}</li>
-                </ul>
+                  Immune to:
+                  <ul
+                    v-for="(val, key) in character.otherEffects.immunity"
+                    :key="key"
+                  >
+                    <li v-if="val">{{ key }}</li>
+                  </ul>
+                </template>
               </div>
+              <div v-else>None</div>
             </div>
           </div>
         </div>
@@ -280,9 +317,6 @@ export default defineComponent({
       }
       if (effect.unique) {
         textLines.push("Is Unique");
-      }
-      if (effect.isStackable) {
-        textLines.push("Stacks: " + effect.stacks);
       }
       return textLines.join("\n");
     },

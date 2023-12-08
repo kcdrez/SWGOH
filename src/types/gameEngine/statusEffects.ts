@@ -85,6 +85,7 @@ export type tBuff =
   | "Potency Up"
   | "Offense Up"
   | "Speed Up"
+  | "Stealth"
   | "Taunt"
   | "Tenacity Up"
   | "Translation"
@@ -119,6 +120,6 @@ export interface iStatusEffect {
   sourceAbility?: iAbility | null;
   /** Determines if more than one of the effect can be applied to a target */
   isStackable?: boolean;
-  /** How many stacks of the effect the unit has */
-  stacks?: number;
+  /** The maximum number of stacks of this effect */
+  maxStacks?: number;
 }
