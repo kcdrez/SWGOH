@@ -85,6 +85,7 @@ export type tBuff =
   | "Potency Up"
   | "Offense Up"
   | "Speed Up"
+  | "Stealth"
   | "Taunt"
   | "Tenacity Up"
   | "Translation"

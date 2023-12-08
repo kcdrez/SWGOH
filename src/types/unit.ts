@@ -666,22 +666,22 @@ export class Unit {
           ultMats: 0,
         },
         tier4: {
-          tickets: 60, //unknown
+          tickets: 70,
           count: 2,
           shards: 55,
           ultMats: 0,
         },
         tier5: {
-          tickets: 60, //unknown
-          count: 1,
-          shards: 0,
-          ultMats: 0,
-        },
-        tier6: {
-          tickets: 60, //unknown
+          tickets: 70,
           count: 6,
           shards: 0,
-          ultMats: 1,
+          ultMats: 6,
+        },
+        tier6: {
+          tickets: 70,
+          count: 6,
+          shards: 0,
+          ultMats: 6,
         },
       },
     };

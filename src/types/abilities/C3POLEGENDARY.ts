@@ -25,6 +25,7 @@ const c3po: Record<string, iAbility | iUniqueAbility> = {
           },
         ],
       },
+      //todo: add galactic legend stacking defense removal
       {
         targets: { allies: false, targetCount: 1 },
         effects: [
@@ -68,6 +69,103 @@ const c3po: Record<string, iAbility | iUniqueAbility> = {
                 id: uuid(),
               },
             ],
+          },
+        ],
+      },
+      {
+        targets: {
+          allies: true,
+          filters: [{ buffs: ["Translation"], stacks: 3 }],
+        },
+        effects: [
+          {
+            cooldown: {
+              amount: -1,
+              target: {},
+            },
+          },
+        ],
+      },
+    ],
+  },
+  specialskill_C3POLEGENDARY01: {
+    id: "specialskill_C3POLEGENDARY01",
+    name: "Oh My Goodness!",
+    gameText: `C-3PO gains Potency Up and Stealth for 2 turns, then he and target other ally gain Translation for 3 turns. C-3PO inflicts Confuse twice on target enemy for 3 turns, then calls all other allies with Translation to assist, dealing 50% less damage.\n\n(See Protocol Droid for a description of Translation.)`,
+    actions: [
+      {
+        targets: { self: true },
+        effects: [
+          {
+            buffs: [
+              {
+                id: uuid(),
+                name: "Potency Up",
+                duration: 2,
+              },
+              {
+                id: uuid(),
+                name: "Stealth",
+                duration: 2,
+              },
+              {
+                id: uuid(),
+                name: "Translation",
+                duration: 3,
+                isStackable: true,
+                maxStacks: 3,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        targets: { allies: true, targetCount: 1, self: false },
+        effects: [
+          {
+            buffs: [
+              {
+                id: uuid(),
+                name: "Translation",
+                duration: 3,
+                isStackable: true,
+                maxStacks: 3,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        targets: { targetCount: 1, allies: false },
+        effects: [
+          {
+            debuffs: [
+              {
+                id: uuid(),
+                name: "Confuse",
+                duration: 3,
+                isStackable: true,
+                maxStacks: 3,
+              },
+            ],
+          },
+          {
+            assist: {
+              chance: 1,
+              targets: {
+                allies: true,
+                targetCount: 1,
+                self: false,
+                filters: [{ buffs: ["Translation"] }],
+              },
+              modifier: {
+                stats: {
+                  statToModify: "offense",
+                  amount: 0.5,
+                  modifiedType: "multiplicative",
+                },
+              },
+            },
           },
         ],
       },

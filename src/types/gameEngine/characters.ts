@@ -348,6 +348,10 @@ export class Character {
           hasEffect: this.hasBuff("Health Up"),
           value: 0.15,
         },
+        {
+          hasEffect: this.hasBuff("Translation"),
+          value: 0.3,
+        },
       ],
       this.baseHealth,
       this.getTempStat("maxHealth")
@@ -587,11 +591,11 @@ export class Character {
       [
         {
           hasEffect: this.hasDebuff("Potency Down"),
-          value: -50,
+          value: -0.5,
         },
         {
           hasEffect: this.hasBuff("Potency Up"),
-          value: 50,
+          value: 0.5,
         },
       ],
       this._baseStats.potency,
@@ -734,6 +738,10 @@ export class Character {
             { hasEffect: self.hasBuff("Call to Action"), value: 0.5 },
             { hasEffect: self.hasStatusEffect("Guard"), value: 0.25 },
             { hasEffect: self.hasBuff("Advantage"), value: Infinity },
+            {
+              hasEffect: self.hasBuff("Translation", undefined, 2),
+              value: 0.15,
+            },
           ],
           this.baseCritChance,
           self.getTempStat("critChance")
@@ -2113,8 +2121,15 @@ export class Character {
             return false;
           }
         }
+
         if (!targetData.filters) {
           return true;
+        }
+        //todo i dont think this will work if we're looking for opponents with filters but its still an aoe
+        if (char.owner !== this.owner && char.hasBuff("Stealth")) {
+          if (!this._opponents.every((x) => x.hasBuff("Stealth"))) {
+            return false;
+          }
         }
 
         return targetData.filters?.every((targetFilter) => {
