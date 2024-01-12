@@ -1759,7 +1759,7 @@ export default [
           difficulty: 1,
         },
         {
-          id: "FIFTHBROTHER",
+          id: "TUSKENCHIEFTAIN",
           amount: 1,
           difficulty: 4,
         },
@@ -2825,7 +2825,7 @@ export default [
           difficulty: 2,
         },
         {
-          id: "GHOST",
+          id: "BLADEOFDORIN",
           amount: 2,
           difficulty: 4,
         },
