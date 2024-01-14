@@ -299,3 +299,16 @@ export function numbersOnly(e: any) {
     e.preventDefault();
   }
 }
+
+/**
+ * Checks the likelihood of something happening
+ *
+ * @param percentChance - The chances of something happening (can be either decimal or whole number)
+ * @returns Whether the event has occurred
+ */
+export function chanceOfEvent(percentChance: number): boolean {
+  if (percentChance < 1) {
+    percentChance *= 100;
+  }
+  return percentChance >= randomNumber(1, 100);
+}

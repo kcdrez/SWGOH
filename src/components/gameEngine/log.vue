@@ -122,8 +122,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { Log } from "types/gameEngine/gameEngine";
-import { Character } from "types/gameEngine/characters";
+import { Log } from "types/gameEngine/characters/log";
+import { Character } from "types/gameEngine/characters/index";
 import CharacterLog from "./characterLog.vue";
 
 export default defineComponent({

@@ -35,7 +35,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { iTrigger } from "types/gameEngine/gameEngine";
+// import { iTrigger } from "types/gameEngine/gameEngine";
 import Effect from "./effect.vue";
 
 export default defineComponent({
@@ -43,7 +43,7 @@ export default defineComponent({
   components: { Effect },
   props: {
     trigger: {
-      type: Object as () => iTrigger,
+      type: Object as () => any,
       required: true,
     },
   },

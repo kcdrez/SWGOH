@@ -142,7 +142,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { iEffect } from "types/gameEngine/gameEngine";
+// import { iEffect } from "types/gameEngine/gameEngine";
 import StatusEffect from "../statusEffect.vue";
 
 export default defineComponent({
@@ -150,7 +150,7 @@ export default defineComponent({
   components: { StatusEffect },
   props: {
     effect: {
-      type: Object as () => iEffect,
+      type: Object as () => any,
       required: true,
     },
   },

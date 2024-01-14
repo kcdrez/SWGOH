@@ -243,8 +243,12 @@
 import { PropType, defineComponent } from "vue";
 import { v4 as uuid } from "uuid";
 
-import { tLogData } from "types/gameEngine/gameEngine";
-import { iBuff, iDebuff, iStatusEffect } from "types/gameEngine/statusEffects";
+import { tLogData } from "types/gameEngine/characters/log";
+import {
+  iBuff,
+  iDebuff,
+  iStatusEffect,
+} from "types/gameEngine/characters/statusEffects";
 import Trigger from "components/gameEngine/triggers/trigger.vue";
 
 export default defineComponent({

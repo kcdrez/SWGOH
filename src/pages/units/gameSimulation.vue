@@ -243,13 +243,13 @@ import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
 import { randomNumber, numbersOnly } from "utils";
-import abilities from "types/abilities";
-import { Character, format } from "types/gameEngine/characters";
+import { Character } from "types/gameEngine/characters/index";
 import { gameEngine, Engine } from "types/gameEngine/gameEngine";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
 import Trigger from "components/gameEngine/triggers/trigger.vue";
 import Log from "components/gameEngine/log.vue";
+import characterList from "types/gameEngine/characterScripts";
 
 interface dataModel {
   gameEngine: Engine;
@@ -284,14 +284,15 @@ export default defineComponent({
     playerUnitList(): Unit[] {
       return this.player?.units.filter((unit: Unit) => {
         return (
-          unit.id in abilities && !this.playerTeam.some((x) => x.id === unit.id)
+          unit.id in characterList &&
+          !this.playerTeam.some((x) => x.id === unit.id)
         );
       });
     },
     opponentUnitList(): Unit[] {
       return this.opponent?.units.filter((unit: Unit) => {
         return (
-          unit.id in abilities &&
+          unit.id in characterList &&
           !this.opponentTeam.some((x) => x.id === unit.id)
         );
       });
