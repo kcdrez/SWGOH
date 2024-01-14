@@ -6,7 +6,7 @@
     <CharacterLog :character="log.characterLogData" />
     <template v-if="log?.ability?.used"
       >used
-      <span class="ability" :title="log.ability.used.gameText">{{
+      <span class="ability" :title="log.ability.used.text">{{
         log.ability.used.name
       }}</span>
     </template>
@@ -81,7 +81,7 @@
     </template>
     <template v-if="log?.effects?.countered">counter attacked</template>
     <template v-if="log?.effects?.cooldown?.ability">
-      <span class="ability" :title="log.effects.cooldown.ability?.gameText">
+      <span class="ability" :title="log.effects.cooldown.ability?.text">
         {{ log.effects.cooldown?.ability?.name }}'s
       </span>
       cooldown was
@@ -111,7 +111,7 @@
     >
     <template v-if="log?.ability?.source">
       (src:
-      <span class="ability" :title="log.ability.source.gameText">{{
+      <span class="ability" :title="log.ability.source.text">{{
         log.ability.source.name
       }}</span
       >)</template

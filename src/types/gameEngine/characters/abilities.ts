@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid";
+
 import { Character } from "./index";
 import { iStats, iStatsCheck, Stats } from "./stats";
 import { tBuff, tDebuff, tStatusEffect } from "./statusEffects";
@@ -175,6 +177,21 @@ export abstract class ActiveAbility extends Ability {
     return { targetList: filteredList, primaryTarget };
   }
 
+  public checkEvade(
+    damageType: "physical" | "special",
+    opponent: Character,
+    stats?: iStatsCheck[]
+  ) {
+    if (this._character?.isSelf(opponent)) {
+      return false;
+    } else if (this._character) {
+      const { dodge } = this._character.stats.getCombatStats(damageType, stats);
+      const { accuracy } = opponent.stats.getCombatStats(damageType, stats);
+
+      return chanceOfEvent(dodge - accuracy * 100);
+    }
+  }
+
   /** Deals damage to a target
    *
    * @damageType - The type of damage being dealt (physical, special, or true)
@@ -195,6 +212,7 @@ export abstract class ActiveAbility extends Ability {
         this._character.stats.getCombatStats(damageType, stats);
       const varianceOffense =
         offense * (1 - randomNumber(0 - variance, variance) / 100);
+
       const { isCrit, damageTotal } = targetCharacter.receiveDamage(
         damageType,
         varianceOffense * abilityModifier,
@@ -206,7 +224,6 @@ export abstract class ActiveAbility extends Ability {
 
       gameEngine.addLogs([
         new Log({
-          character: this._character,
           target: targetCharacter,
           damage: {
             amount: damageTotal,
@@ -214,6 +231,35 @@ export abstract class ActiveAbility extends Ability {
           },
         }),
       ]);
+
+      this._character.heal(
+        {
+          amountType: "additive",
+          amount: damageTotal * this._character.stats.healthSteal,
+          healthType: "health",
+        },
+        {
+          id: uuid(),
+          name: "Health Steal",
+          text: "The percentage amount of the damage that this character heals whenever they deal damage.",
+        }
+      );
+
+      //   //   logs.push(
+      //   //     ...this.heal(
+      //   //       {
+      //   //         amountType: "additive",
+      //   //         amount: damageTotal * this.healthSteal,
+      //   //         healthType: "health",
+      //   //       },
+      //   //       {
+      //   //         id: uuid(),
+      //   //         name: "Health Steal",
+      //   //         gameText:
+      //   //           "The percentage amount of the damage that this character heals whenever they deal damage.",
+      //   //       }
+      //   //     )
+      //   //   );
     }
   }
 }

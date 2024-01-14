@@ -84,7 +84,7 @@
                 <span class="input-group-text fill"
                   ><span
                     :class="{
-                      'text-warning':
+                      'text-danger':
                         (character.health.current ?? 0) <
                         (character.health.max ?? 0),
                     }"
@@ -213,11 +213,11 @@
               </template>
             </div>
             <div class="tab-pane fade" :id="`triggers-${id}`">
-              <Trigger
+              <!-- <Trigger
                 v-for="trigger in character.triggers"
                 :key="trigger.id"
                 :trigger="trigger"
-              />
+              /> -->
             </div>
             <div class="tab-pane fade" :id="`other-${id}`">
               <div>

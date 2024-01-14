@@ -4,6 +4,8 @@ import { Character } from "./index";
 import { Ability } from "./abilities";
 import { unvue, chanceOfEvent } from "utils";
 import statusEffectVue from "@/components/gameEngine/statusEffect.vue";
+import { gameEngine } from "../gameEngine";
+import { Log } from "./log";
 
 export class StatusEffect {
   private _buffs: iBuff[] = [];
@@ -85,9 +87,18 @@ export class StatusEffect {
       { statusEffectsRemoved: [] }
     );
 
-    // debuffsRemoved.forEach((debuff) => {
-    //   logs.push(...this.statusEffect.removeDebuff(debuff));
-    // });
+    // gameEngine.addLogs(debuffsRemoved.map(debuff => {
+    //   return new Log()
+    // }))
+    debuffsRemoved.forEach((debuff) => {
+      this.removeDebuff(debuff);
+    });
+    buffsRemoved.forEach((buff) => {
+      this.removeBuff(buff);
+    });
+    statusEffectsRemoved.forEach((effect) => {
+      this.removeStatusEffect(effect);
+    });
     // buffsRemoved.forEach((buff) => {
     //   logs.push(...this.statusEffect.removeBuff(buff));
     // });
@@ -102,7 +113,7 @@ export class StatusEffect {
     return this._buffs;
   }
   /* A list of status effects */
-  public get statusEfects() {
+  public get statusEffects() {
     return this._statusEffects;
   }
   /** Checks to see if the character has any of the listed debuffs
@@ -216,12 +227,12 @@ export class StatusEffect {
         this.addBuff(someBuff, scalar, sourceAbility);
       });
     } else if (this.hasDebuff("Buff Immunity") && !buff.cantPrevent) {
-      return [
-        // new Log({
-        //   character: this,
-        //   statusEffects: { prevented: true, list: [buff], type: "buff" },
-        // }),
-      ];
+      gameEngine.addLogs(
+        new Log({
+          character: this._character,
+          statusEffects: { prevented: true, list: [buff], type: "buff" },
+        })
+      );
     } else if (!this.hasDebuff("Buff Immunity")) {
       if (
         (!this.hasBuff(buff.name, buff.duration) || buff.isStackable) &&
@@ -243,34 +254,35 @@ export class StatusEffect {
             match.isNew = true;
           }
 
-          return [
-            // new Log({
-            //   character: this,
-            //   ability: { source: sourceAbility },
-            //   statusEffects: {
-            //     type: "buff",
-            //     list: [buff],
-            //     duration: newDuration,
-            //   },
-            // }),
-          ];
+          gameEngine.addLogs(
+            new Log({
+              character: this._character,
+              ability: { source: sourceAbility },
+              statusEffects: {
+                type: "buff",
+                list: [buff],
+                duration: newDuration,
+              },
+            })
+          );
         }
       }
     }
-    return [];
   }
   /** Removes a buff from the character
    *
    * @buff - The buff being added
    * @character - The character that is causing the removal
+   * @param sourceAbility - The ability that is causing the removal
    */
   public removeBuff(
     buff: iBuff | iBuff[] | tBuff | tBuff[] | null,
-    character?: Character
+    character?: Character,
+    sourceAbility?: Ability
   ) {
     const listOfRemovedBuffs: iBuff[] = [];
     if (Array.isArray(buff)) {
-      buff.forEach((b) => this.removeBuff(b));
+      buff.forEach((b) => this.removeBuff(b, character, sourceAbility));
     } else {
       let buffToRemove: iBuff | null = null;
       if (typeof buff === "string") {
@@ -301,29 +313,32 @@ export class StatusEffect {
       if (listOfRemovedBuffs.length > 0) {
         if (character && !this._character.isSelf(character)) {
           //opponent removed them
-          // logs.push(
-          //   new Log({
-          //     character,
-          //     target: this,
-          //     statusEffects: {
-          //       type: "buff",
-          //       list: listOfRemovedBuffs,
-          //       removed: true,
-          //     },
-          //   })
-          // );
+          gameEngine.addLogs(
+            new Log({
+              character,
+              target: this._character,
+              ability: { source: sourceAbility },
+              statusEffects: {
+                type: "buff",
+                list: listOfRemovedBuffs,
+                removed: true,
+              },
+            })
+          );
         } else {
           //was naturally removed
-          // logs.push(
-          //   new Log({
-          //     character: this,
-          //     statusEffects: {
-          //       type: "buff",
-          //       list: listOfRemovedBuffs,
-          //       removed: true,
-          //     },
-          //   })
-          // );
+          gameEngine.addLogs(
+            new Log({
+              character: this._character,
+              ability: { source: sourceAbility },
+              statusEffects: {
+                type: "buff",
+                list: listOfRemovedBuffs,
+                removed: true,
+              },
+            }),
+            character == undefined
+          );
         }
         // listOfRemovedBuffs.forEach((buff) => {
         //   buff.triggers?.forEach((trigger) => {
@@ -334,7 +349,6 @@ export class StatusEffect {
         // });
       }
     }
-    // return logs;
   }
   /** Inflicts debuffs on the target character
    *
@@ -343,7 +357,7 @@ export class StatusEffect {
    * @scalar - The amount the duration should be scaled by (usually 1)
    * @sourceAbility - The source ability that is adding the debuff
    */
-  private inflictDebuff(
+  public inflictDebuff(
     debuffs: iDebuff[],
     targetCharacter: Character,
     scalar: number = 1,
@@ -355,16 +369,16 @@ export class StatusEffect {
 
     debuffs.forEach((debuff) => {
       if (targetCharacter.statusEffect.isImmune(debuff)) {
-        // logs.push(
-        //   new Log({
-        //     character: targetCharacter,
-        //     statusEffects: {
-        //       type: "debuff",
-        //       immune: true,
-        //       list: [debuff],
-        //     },
-        //   })
-        // );
+        gameEngine.addLogs(
+          new Log({
+            character: targetCharacter,
+            statusEffects: {
+              type: "debuff",
+              immune: true,
+              list: [debuff],
+            },
+          })
+        );
       } else if (
         !targetCharacter.statusEffect.hasDebuff(debuff.name, debuff.duration) ||
         debuff.isStackable
@@ -383,70 +397,58 @@ export class StatusEffect {
             return;
           }
 
-          if (debuff.name === "TM Decrease") {
-            // const log = targetCharacter.changeTurnMeter(
-            //   debuff.duration * scalar
-            // );
-            // if (log) {
-            //   logs.push(log);
-            // }
-          } else {
-            const newDuration = debuff.duration * scalar;
-            if (
-              !targetCharacter.statusEffect.hasDebuff(
-                debuff.name,
-                newDuration
-              ) ||
-              debuff.isStackable
-            ) {
-              const match = targetCharacter.statusEffect.debuffs.find(
-                (x) => x.name === debuff.name
-              );
+          const newDuration = debuff.duration * scalar;
+          if (
+            !targetCharacter.statusEffect.hasDebuff(debuff.name, newDuration) ||
+            debuff.isStackable
+          ) {
+            const match = targetCharacter.statusEffect.debuffs.find(
+              (x) => x.name === debuff.name
+            );
 
-              if (debuff.isStackable || !match) {
-                targetCharacter.statusEffect.debuffs.push({
-                  ...unvue(debuff),
-                  duration: newDuration,
-                  isNew: true,
-                });
-              } else {
-                match.duration = newDuration;
-                match.isNew = true;
-              }
-
-              // logs
-              //   .push
-              // new Log({
-              //   character: targetCharacter,
-              //   statusEffects: {
-              //     list: [debuff],
-              //     duration: newDuration,
-              //     type: "debuff",
-              //   },
-              //   ability: {
-              //     source: ability,
-              //   },
-              // })
-              // ();
-              // logs.push(
-              //   ...this.executeTriggers(this._triggers, [
-              //     {
-              //       triggerType: "inflictDebuff",
-              //       ability: ability ?? null,
-              //       target: targetCharacter,
-              //       debuff,
-              //     },
-              //   ])
-              // );
+            if (debuff.isStackable || !match) {
+              targetCharacter.statusEffect.debuffs.push({
+                ...unvue(debuff),
+                duration: newDuration,
+                isNew: true,
+              });
+            } else {
+              match.duration = newDuration;
+              match.isNew = true;
             }
+
+            gameEngine.addLogs(
+              new Log({
+                character: targetCharacter,
+                statusEffects: {
+                  list: [debuff],
+                  duration: newDuration,
+                  type: "debuff",
+                },
+                ability: {
+                  source: sourceAbility,
+                },
+              })
+            );
+
+            // logs.push(
+            //   ...this.executeTriggers(this._triggers, [
+            //     {
+            //       triggerType: "inflictDebuff",
+            //       ability: ability ?? null,
+            //       target: targetCharacter,
+            //       debuff,
+            //     },
+            //   ])
+            // );
           }
         } else {
-          // logs.push(
-          //   new Log({
-          //     character: targetCharacter,
-          //     statusEffects: { resisted: true, list: [debuff], type: "debuff" },
-          //   })
-          // );
+          gameEngine.addLogs(
+            new Log({
+              character: targetCharacter,
+              statusEffects: { resisted: true, list: [debuff], type: "debuff" },
+            })
+          );
           // const triggerList: iTriggerData[] = [
           //   {
           //     triggerType: "resistDetrimentalEffect",
@@ -473,24 +475,17 @@ export class StatusEffect {
    *
    * @debuff - The debuff being removed
    * @opponent - The character that is causing the removal
+   * @param sourceAbility - The ability that is causing the removal
    */
   public removeDebuff(
     debuff: iDebuff | iDebuff[] | tDebuff | tDebuff[] | null,
-    opponent?: Character
+    opponent?: Character,
+    sourceAbility?: Ability
   ) {
     const listOfRemovedDebuffs: iDebuff[] = [];
 
     if (Array.isArray(debuff)) {
-      debuff.forEach((d) => this.removeDebuff(d));
-      // logs.push(
-      //   ...(debuff as (iDebuff | tDebuff)[]).reduce(
-      //     (arr: Log[], d: iDebuff | tDebuff) => {
-      //       arr.push(...this.removeDebuff(d, opponent));
-      //       return arr;
-      //     },
-      //     []
-      //   )
-      // );
+      debuff.forEach((d) => this.removeDebuff(d, opponent, sourceAbility));
     } else {
       let debuffData: iDebuff | null = null;
       if (typeof debuff === "string") {
@@ -517,28 +512,32 @@ export class StatusEffect {
 
       if (listOfRemovedDebuffs.length > 0) {
         if (opponent && !this._character.isSelf(opponent)) {
-          // logs.push(
-          //   new Log({
-          //     character: opponent,
-          //     target: this,
-          //     statusEffects: {
-          //       list: listOfRemovedDebuffs,
-          //       removed: true,
-          //       type: "debuff",
-          //     },
-          //   })
-          // );
+          gameEngine.addLogs(
+            new Log({
+              character: opponent,
+              target: this._character,
+              ability: { source: sourceAbility },
+              statusEffects: {
+                list: listOfRemovedDebuffs,
+                removed: true,
+                type: "debuff",
+              },
+            }),
+            false
+          );
         } else {
-          // logs.push(
-          //   new Log({
-          //     character: this,
-          //     statusEffects: {
-          //       list: listOfRemovedDebuffs,
-          //       removed: true,
-          //       type: "debuff",
-          //     },
-          //   })
-          // );
+          gameEngine.addLogs(
+            new Log({
+              character: this._character,
+              ability: { source: sourceAbility },
+              statusEffects: {
+                list: listOfRemovedDebuffs,
+                removed: true,
+                type: "debuff",
+              },
+            }),
+            opponent === undefined
+          );
         }
 
         // listOfRemovedDebuffs.forEach((buff) => {
@@ -550,7 +549,6 @@ export class StatusEffect {
         // });
       }
     }
-    // return logs;
   }
   /** Adds a status effect to the character
    *
@@ -563,10 +561,6 @@ export class StatusEffect {
   ) {
     if (Array.isArray(effect)) {
       effect.forEach((e) => this.addStatusEffect(e, sourceAbility));
-      // return effect.reduce((arr: Log[], e) => {
-      //   arr.push(...this.addStatusEffect(e, sourceAbility));
-      //   return arr;
-      // }, []);
     } else {
       if (
         (!this.hasStatusEffect(effect, effect.duration) ||
@@ -586,26 +580,26 @@ export class StatusEffect {
         }
 
         this._statusEffects.push(effect);
-        // return [
-        // new Log({
-        //   character: this,
-        //   statusEffects: {
-        //     list: [effect],
-        //     type: "statusEffect",
-        //     duration: effect.duration,
-        //   },
-        //   ability: {
-        //     source: ability,
-        //   },
-        // }),
-        // ];
+        gameEngine.addLogs(
+          new Log({
+            character: this._character,
+            statusEffects: {
+              list: [effect],
+              type: "statusEffect",
+              duration: effect.duration,
+            },
+            ability: {
+              source: sourceAbility,
+            },
+          })
+        );
       }
     }
-    // return [];
   }
   /** Removes a status effect from the character
    *
    * @statusEffect - The status effect being removed
+   * @param sourceAbility - The ability that is causing the removal
    */
   private removeStatusEffect(
     statusEffect:
@@ -613,20 +607,11 @@ export class StatusEffect {
       | iStatusEffect[]
       | tStatusEffect
       | tStatusEffect[]
-      | null
+      | null,
+    sourceAbility?: Ability
   ) {
-    // const logs: Log[] = [];
     if (Array.isArray(statusEffect)) {
-      statusEffect.forEach((e) => this.removeStatusEffect(e));
-      // logs.push(
-      //   ...(statusEffect as (iStatusEffect | tStatusEffect)[]).reduce(
-      //     (arr: Log[], d) => {
-      //       arr.push(...this.removeStatusEffect(d));
-      //       return arr;
-      //     },
-      //     []
-      //   )
-      // );
+      statusEffect.forEach((e) => this.removeStatusEffect(e, sourceAbility));
     } else {
       const listOfRemovedStatusEffects: iStatusEffect[] = [];
       let statusEffectData: iStatusEffect | null = null;
@@ -655,16 +640,17 @@ export class StatusEffect {
       );
 
       if (listOfRemovedStatusEffects.length > 0) {
-        // logs.push(
-        //   new Log({
-        //     target: this,
-        //     statusEffects: {
-        //       list: listOfRemovedStatusEffects,
-        //       removed: true,
-        //       type: "debuff",
-        //     },
-        //   })
-        // );
+        gameEngine.addLogs(
+          new Log({
+            target: this._character,
+            ability: { source: sourceAbility },
+            statusEffects: {
+              list: listOfRemovedStatusEffects,
+              removed: true,
+              type: "debuff",
+            },
+          })
+        );
         // listOfRemovedStatusEffects.forEach((buff) => {
         //   buff.triggers?.forEach((trigger) => {
         //     if (trigger.triggerType === "expires") {
@@ -674,7 +660,6 @@ export class StatusEffect {
         // });
       }
     }
-    // return logs;
   }
   /** A mapping of status effects that the character cannot gain */
   public get immunity(): Record<string, boolean> {
@@ -725,7 +710,6 @@ export type tDebuff =
   | "Burning" //
   | "Buzz Droids" //
   | "Captive" //
-  | "Cooldown Increase"
   | "Concussion Mine" //
   | "Confuse" //
   | "Corrupted Battle Meditation" //
@@ -769,7 +753,6 @@ export type tDebuff =
   | "Stun"
   | "Target Lock" //
   | "Tenacity Down"
-  | "TM Decrease"
   | "Torture" //
   | "Useful Pawn" //
   | "Vulnerable"
@@ -782,7 +765,6 @@ export type tBuff =
   | "Critical Chance Up"
   | "Critical Damage Up"
   | "Critical Hit Immunity"
-  | "Cooldown Decrease"
   | "Defense Penetration Up"
   | "Defense Up"
   | "Evasion Up"
@@ -794,7 +776,6 @@ export type tBuff =
   | "Taunt"
   | "Tenacity Up"
   | "Translation"
-  | "TM Increase"
   | "all";
 export type tStatusEffect = "Guard";
 

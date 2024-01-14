@@ -118,7 +118,7 @@ export interface iStatsCheck {
 }
 
 export class Stats {
-  private _baseStats: iStats;
+  public baseStats: iStats;
   private _tempStats: iStatsCheck[] = [];
   private _role: IUnit["role"];
   private _primaryStat: IUnit["primaryStat"];
@@ -130,7 +130,7 @@ export class Stats {
     this._character = parentCharacter;
     this._role = data.role;
     this._primaryStat = data.primaryStat;
-    this._baseStats = {
+    this.baseStats = {
       maxHealth: data.health,
       health: data.health,
       maxProtection: data.protection,
@@ -165,13 +165,13 @@ export class Stats {
   }
 
   public initialize() {
-    this._curHealth = this._baseStats.maxHealth;
-    this._curProtection = this._baseStats.maxProtection;
+    this._curHealth = this.baseStats.maxHealth;
+    this._curProtection = this.baseStats.maxProtection;
   }
 
   /** The modified maximum amount of Protection */
   public get maxProtection() {
-    let stat = this._baseStats.maxProtection;
+    let stat = this.baseStats.maxProtection;
 
     if (this._role === "Tank") {
       if (this._primaryStat === "str") {
@@ -185,11 +185,11 @@ export class Stats {
     return this.getModifiedStats([], stat, this.getTempStat("maxProtection"));
   }
   public set maxProtection(val) {
-    this._baseStats.maxProtection = val;
+    this.baseStats.maxProtection = val;
   }
   /** The modified maximum amount of Health */
   public get maxHealth() {
-    let stat = this._baseStats.maxHealth;
+    let stat = this.baseStats.maxHealth;
 
     if (this._role === "Tank") {
       if (this._primaryStat === "agi") {
@@ -221,7 +221,7 @@ export class Stats {
     );
   }
   public set maxHealth(val) {
-    this._baseStats.maxHealth = val;
+    this.baseStats.maxHealth = val;
   }
   /** The current amount of Health */
   public get health() {
@@ -262,18 +262,18 @@ export class Stats {
           value: 0.25,
         },
       ],
-      this._baseStats.speed,
+      this.baseStats.speed,
       this.getTempStat("speed"),
       true
     );
   }
   /** The current mastery of the character */
   public get mastery() {
-    return this._baseStats.mastery;
+    return this.baseStats.mastery;
   }
   /** The current Critical Damage (decimal) */
   public get critDamage() {
-    let stat = this._baseStats.critDamage;
+    let stat = this.baseStats.critDamage;
 
     if (this._role === "Attacker") {
       if (this._primaryStat === "agi") {
@@ -319,12 +319,12 @@ export class Stats {
           value: Infinity,
         },
       ],
-      this._baseStats.tenacity,
+      this.baseStats.tenacity,
       this.getTempStat("tenacity")
     );
   }
   public set tenacity(val) {
-    this._baseStats.tenacity = val;
+    this.baseStats.tenacity = val;
   }
   /** The current Potency (decimal) */
   public get potency() {
@@ -339,12 +339,12 @@ export class Stats {
           value: 50,
         },
       ],
-      this._baseStats.potency,
+      this.baseStats.potency,
       this.getTempStat("potency")
     );
   }
   public set potency(val) {
-    this._baseStats.potency = val;
+    this.baseStats.potency = val;
   }
   /* The likelyhood (decimal) of counter attacking */
   public get counterChance() {
@@ -369,12 +369,12 @@ export class Stats {
     return damageAmount;
   }
   /** The modified physical stats of a character */
-  private get physical() {
+  public get physical() {
     const self = this;
     return {
       /** Physical Offense */
       get offense() {
-        let stat = self._baseStats.physical.offense;
+        let stat = self.baseStats.physical.offense;
 
         if (self._role === "Attacker") {
           if (self._primaryStat === "str") {
@@ -407,11 +407,11 @@ export class Stats {
         );
       },
       set offense(val) {
-        self._baseStats.physical.offense = val;
+        self.baseStats.physical.offense = val;
       },
       /** Physical Crit Chance (decimal) */
       get critChance() {
-        let stat = self._baseStats.physical.critChance;
+        let stat = self.baseStats.physical.critChance;
 
         if (self._role === "Attacker") {
           if (self._primaryStat === "agi") {
@@ -460,11 +460,11 @@ export class Stats {
         );
       },
       set critChance(val) {
-        self._baseStats.physical.critChance = val;
+        self.baseStats.physical.critChance = val;
       },
       /** Physical Armor (flat number) */
       get armor() {
-        let stat = self._baseStats.physical.armor;
+        let stat = self.baseStats.physical.armor;
 
         if (self._role === "Tank") {
           if (self._primaryStat === "str") {
@@ -493,11 +493,11 @@ export class Stats {
         );
       },
       set armor(val) {
-        self._baseStats.physical.armor = val;
+        self.baseStats.physical.armor = val;
       },
       /** Physical Armor Penetration */
       get armorPen() {
-        let stat = self._baseStats.physical.armorPen;
+        let stat = self.baseStats.physical.armorPen;
 
         if (self._role === "Attacker") {
           if (self._primaryStat === "str") {
@@ -529,11 +529,11 @@ export class Stats {
         );
       },
       set armorPen(val) {
-        self._baseStats.physical.armorPen = val;
+        self.baseStats.physical.armorPen = val;
       },
       /** Physical Accuracy (decimal) */
       get accuracy() {
-        let stat = self._baseStats.physical.accuracy;
+        let stat = self.baseStats.physical.accuracy;
 
         if (self._role === "Attacker") {
           if (self._primaryStat === "str") {
@@ -574,11 +574,11 @@ export class Stats {
         );
       },
       set accuracy(val) {
-        self._baseStats.physical.accuracy = val;
+        self.baseStats.physical.accuracy = val;
       },
       /** Physical Dodge Chance (decimal) */
       get dodge() {
-        let stat = self._baseStats.physical.dodge;
+        let stat = self.baseStats.physical.dodge;
 
         if (self._role === "Tank") {
           if (self._primaryStat === "agi") {
@@ -610,11 +610,11 @@ export class Stats {
         );
       },
       set dodge(val) {
-        self._baseStats.physical.dodge = val;
+        self.baseStats.physical.dodge = val;
       },
       /** Physical Critical Avoice (decimal) */
       get critAvoid() {
-        let stat = self._baseStats.physical.critAvoid;
+        let stat = self.baseStats.physical.critAvoid;
 
         if (self._role === "Tank") {
           if (self._primaryStat === "tac") {
@@ -648,16 +648,16 @@ export class Stats {
         );
       },
       set critAvoid(val) {
-        self._baseStats.physical.critAvoid = val;
+        self.baseStats.physical.critAvoid = val;
       },
     };
   }
   /** The modified special stats of a character */
-  private get special() {
+  public get special() {
     const self = this;
     return {
       get offense() {
-        let stat = self._baseStats.special.offense;
+        let stat = self.baseStats.special.offense;
 
         if (self._role === "Attacker") {
           if (self._primaryStat === "str") {
@@ -690,10 +690,10 @@ export class Stats {
         );
       },
       set offense(val) {
-        self._baseStats.special.offense = val;
+        self.baseStats.special.offense = val;
       },
       get critChance() {
-        let stat = self._baseStats.special.critChance;
+        let stat = self.baseStats.special.critChance;
 
         if (self._role === "Attacker") {
           if (self._primaryStat === "agi") {
@@ -738,10 +738,10 @@ export class Stats {
         );
       },
       set critChance(val) {
-        self._baseStats.physical.critChance = val;
+        self.baseStats.physical.critChance = val;
       },
       get armor() {
-        let stat = self._baseStats.physical.armor;
+        let stat = self.baseStats.physical.armor;
 
         if (self._role === "Tank") {
           if (self._primaryStat === "tac") {
@@ -770,10 +770,10 @@ export class Stats {
         );
       },
       set armor(val) {
-        self._baseStats.special.armor = val;
+        self.baseStats.special.armor = val;
       },
       get armorPen() {
-        let stat = self._baseStats.special.armorPen;
+        let stat = self.baseStats.special.armorPen;
 
         if (self._role === "Attacker") {
           if (self._primaryStat === "str") {
@@ -805,10 +805,10 @@ export class Stats {
         );
       },
       set armorPen(val) {
-        self._baseStats.special.armorPen = val;
+        self.baseStats.special.armorPen = val;
       },
       get accuracy() {
-        let stat = self._baseStats.special.accuracy;
+        let stat = self.baseStats.special.accuracy;
 
         if (self._role === "Attacker") {
           if (self._primaryStat === "str") {
@@ -835,16 +835,20 @@ export class Stats {
               hasEffect: self._character.statusEffect.hasBuff("Accuracy Up"),
               value: 0.15,
             },
+            {
+              hasEffect: self._character.statusEffect.hasBuff("Call to Action"),
+              value: 0.5,
+            },
           ],
           stat,
           self.getTempStat("accuracy")
         );
       },
       set accuracy(val) {
-        self._baseStats.special.accuracy = val;
+        self.baseStats.special.accuracy = val;
       },
       get dodge() {
-        let stat = self._baseStats.special.dodge;
+        let stat = self.baseStats.special.dodge;
 
         if (self._role === "Tank") {
           if (self._primaryStat === "agi") {
@@ -876,10 +880,10 @@ export class Stats {
         );
       },
       set dodge(val) {
-        self._baseStats.special.dodge = val;
+        self.baseStats.special.dodge = val;
       },
       get critAvoid() {
-        let stat = self._baseStats.special.critAvoid;
+        let stat = self.baseStats.special.critAvoid;
 
         if (self._role === "Tank") {
           if (self._primaryStat === "tac") {
@@ -913,13 +917,13 @@ export class Stats {
         );
       },
       set critAvoid(val) {
-        self._baseStats.special.critAvoid = val;
+        self.baseStats.special.critAvoid = val;
       },
     };
   }
   /** The current Health Steal (decimal) */
   public get healthSteal() {
-    let stat = this._baseStats.healthSteal;
+    let stat = this.baseStats.healthSteal;
 
     if (this._role === "Tank") {
       if (this._primaryStat === "str") {
@@ -1048,52 +1052,21 @@ export class Stats {
     damageType?: "physical" | "special" | "true",
     stats?: iStatsCheck[]
   ) {
-    if (damageType === "physical") {
-      const baseStat = this.physical;
-      return {
-        offense: modifyStat(baseStat.offense, "offense", stats),
-        critChance: modifyStat(baseStat.critChance, "critChance", stats),
-        armorPen: modifyStat(baseStat.armorPen, "armorPen", stats),
-        armor: modifyStat(baseStat.armor, "armor", stats),
-        dodge: modifyStat(baseStat.dodge, "dodge", stats),
-        accuracy: modifyStat(baseStat.accuracy, "accuracy", stats),
-        critAvoid: modifyStat(baseStat.critAvoid, "critAvoid", stats),
-        maxHealth: this.maxHealth,
-        health: this.health,
-        maxProtection: this.maxProtection,
-        protection: this.protection,
-      };
-    } else if (damageType === "special") {
-      const baseStat = this.special;
-      return {
-        offense: modifyStat(baseStat.offense, "offense", stats),
-        critChance: modifyStat(baseStat.critChance, "critChance", stats),
-        armorPen: modifyStat(baseStat.armorPen, "armorPen", stats),
-        armor: modifyStat(baseStat.armor, "armor", stats),
-        dodge: modifyStat(baseStat.dodge, "dodge", stats),
-        accuracy: modifyStat(baseStat.accuracy, "accuracy", stats),
-        critAvoid: modifyStat(baseStat.critAvoid, "critAvoid", stats),
-        maxHealth: this.maxHealth,
-        health: this.health,
-        maxProtection: this.maxProtection,
-        protection: this.protection,
-      };
-    } else {
-      //todo: handle true damage
-      return {
-        offense: 0,
-        critChance: 0,
-        armorPen: 0,
-        armor: 0,
-        dodge: 0,
-        accuracy: 0,
-        critAvoid: 0,
-        maxHealth: this.maxHealth,
-        health: this.health,
-        maxProtection: this.maxProtection,
-        protection: this.protection,
-      };
-    }
+    const baseStat = damageType === "physical" ? this.physical : this.special;
+
+    return {
+      offense: modifyStat(baseStat.offense, "offense", stats),
+      critChance: modifyStat(baseStat.critChance, "critChance", stats),
+      armorPen: modifyStat(baseStat.armorPen, "armorPen", stats),
+      armor: modifyStat(baseStat.armor, "armor", stats),
+      dodge: modifyStat(baseStat.dodge, "dodge", stats),
+      accuracy: modifyStat(baseStat.accuracy, "accuracy", stats),
+      critAvoid: modifyStat(baseStat.critAvoid, "critAvoid", stats),
+      maxHealth: this.maxHealth,
+      health: this.health,
+      maxProtection: this.maxProtection,
+      protection: this.protection,
+    };
   }
 }
 
@@ -1103,7 +1076,7 @@ export class Stats {
  * @statType - The type of stat used to modify the starting stat (e.g. offense, health, etc.)
  * @stats - An array of stats to modify the starting stat value
  */
-function modifyStat(
+export function modifyStat(
   startingStatValue: number,
   statType: string,
   stats?: iStatsCheck[] | null
@@ -1121,4 +1094,73 @@ function modifyStat(
     });
   }
   return modifiedStat;
+}
+
+export interface iStatsCheck {
+  /** The stat that will be modified
+   *
+   * armor: Increases the amount of offense to mitigate
+   *
+   * counterChance: The chances of counter attacking (as a decimal)
+   *
+   * counterDamage: The amount of damage used to scale offense (as a decimal; e.g. 1.5 would be 150% damage)
+   *
+   * critAvoid: The chances to mitigate a critical hit (as a decimal)
+   *
+   * critChance: The chances of getting a critical hit (as a decimal)
+   *
+   * dodge: The chances of missing an attack/effect
+   *
+   * health: The amount of health
+   *
+   * maxHealth/maxProtection: The max health or protection
+   *
+   * offense: The amount of damage an attack deals
+   *
+   * potency: The chances a negative status effect will successful be inflicted
+   *
+   * protection: The amount of protection
+   *
+   * tenacity: The chances to mitigate a negative status effect
+   */
+  statToModify:
+    | "armor"
+    | "counterChance"
+    | "counterDamage"
+    | "critAvoid"
+    | "critChance"
+    | "dodge"
+    | "health"
+    | "maxHealth"
+    | "maxProtection"
+    | "offense"
+    | "potency"
+    | "protection"
+    | "resistance"
+    | "tenacity";
+  /** The amount that the stat will be modified */
+  amount: number;
+  /** Determines if the stat will added to the existing stat (additive) or multiplied together (multiplicative) */
+  modifiedType: "additive" | "multiplicative";
+  /** Todo: whats this? */
+  amountType?: "greater" | "less";
+  /** Determines when the effect will expire and thus be removed */
+  expires?: {
+    /** How many cycles before the effect is removed */
+    count: number;
+    /** How often the effect is checked to see if it should be removed */
+    frequency: "turn";
+  };
+  /** Todo: whats this for? */
+  stacking?: boolean;
+}
+
+export interface iHeal {
+  /** Health or Protection */
+  healthType: "health" | "protection";
+  /** Determines if the amound should be added to the current health, or scale from the unit's maxHealth/Protection */
+  amountType?: "additive" | "multiplicative";
+  /** The amount to heal. For percentages, keep the amount a decimal (e.g. 0.4 would be a 40% heal) */
+  amount?: number;
+  // scale?: number;
 }

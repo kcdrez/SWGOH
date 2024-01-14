@@ -6,7 +6,8 @@ import { Unit } from "types/unit";
 import { randomNumber, round, unvue } from "utils";
 import { Player } from "types/player";
 import { Log } from "./characters/log";
-import { isArray } from "util";
+import { tBuff, tDebuff } from "./characters/statusEffects";
+import { iStatsCheck } from "./characters/stats";
 
 /** An effect that happens when something else happens */
 // export interface iTrigger {
@@ -122,29 +123,29 @@ import { isArray } from "util";
 // }
 
 /** Data used to determine certain things */
-// export interface iCondition {
-//   /** Checks if a debuff is present */
-//   debuffs?: tDebuff[];
-//   /** Checks if a buff is present */
-//   buffs?: tBuff[];
-//   /** Checks if a specific stat meets a threshold */
-//   stats?: iStatsCheck;
-//   /** Inverts the logic so that all conditions are "Not" */
-//   inverted?: boolean;
-//   /** Checks if an effect is new */
-//   isNew?: boolean;
-//   /** Checks if a tag is present. Can use '!' (not) or '&' (and) to combine with any other tags */
-//   tags?: string[];
-//   /** Checks if turn meter is at a certain threshold */
-//   tm?: {
-//     /** The amount of turn meter to check. Use whole numbers (so 100% turn meter would be '100') */
-//     amount: number;
-//     /** Checks if the current turn meter should be greater than the amount (true) or less than the amount (false) */
-//     greaterThan: boolean;
-//   };
-//   /** Checks if its the current character's turn. or something todo */
-//   onTurn?: boolean;
-// }
+export interface iCondition {
+  /** Checks if a debuff is present */
+  debuffs?: tDebuff[];
+  /** Checks if a buff is present */
+  buffs?: tBuff[];
+  /** Checks if a specific stat meets a threshold */
+  stats?: iStatsCheck;
+  /** Inverts the logic so that all conditions are "Not" */
+  inverted?: boolean;
+  /** Checks if an effect is new */
+  isNew?: boolean;
+  /** Checks if a tag is present. Can use '!' (not) or '&' (and) to combine with any other tags */
+  tags?: string[];
+  /** Checks if turn meter is at a certain threshold */
+  tm?: {
+    /** The amount of turn meter to check. Use whole numbers (so 100% turn meter would be '100') */
+    amount: number;
+    /** Checks if the current turn meter should be greater than the amount (true) or less than the amount (false) */
+    greaterThan: boolean;
+  };
+  /** Checks if its the current character's turn. or something todo */
+  onTurn?: boolean;
+}
 
 /** Various effects that will be applied */
 // export interface iEffect {
@@ -280,17 +281,15 @@ export class Turn {
   constructor(
     turnNumber: number,
     character: Character | null,
-    // logs: Log[],
-    // endOfTurnLogs?: Log[],
+    logs?: Log[],
+    endOfTurnLogs?: Log[],
     label?: string | null
   ) {
     this._turnNumber = turnNumber;
     this._character = character;
-    // this.logs = logs;
-    // this.endOfTurnLogs = endOfTurnLogs ?? [];
+    this.logs = logs ?? [];
+    this.endOfTurnLogs = endOfTurnLogs ?? [];
     this._label = label ?? null;
-
-    // this.characterLogData = this._character?.getLogs();
 
     this.characterList = gameEngine.allCharacters
       .map((c) => {
@@ -316,11 +315,12 @@ export class Turn {
     return this._label ?? `Turn ${this.turnNumber}`;
   }
 
-  addLogs(logs: Log[]) {
-    this.logs.push(...logs.filter((l) => !!l));
-  }
-  addEndOfTurnLogs(logs: Log[]) {
-    this.endOfTurnLogs.push(...logs.filter((l) => !!l));
+  addLogs(logs: Log[], endOfTurn?: boolean) {
+    if (endOfTurn) {
+      this.endOfTurnLogs.push(...logs.filter((l) => !!l));
+    } else {
+      this.logs.push(...logs.filter((l) => !!l));
+    }
   }
 }
 
@@ -555,16 +555,16 @@ export class Engine {
         new Turn(
           Infinity,
           null,
-          // [
-          //   new Log({
-          //     effects: {
-          //       winner: opponentLost
-          //         ? store.state.player.player?.name
-          //         : store.state.opponents.player?.name,
-          //     },
-          //   }),
-          // ],
-          // [],
+          [
+            new Log({
+              effects: {
+                winner: opponentLost
+                  ? store.state.player.player?.name
+                  : store.state.opponents.player?.name,
+              },
+            }),
+          ],
+          [],
           "Final Score"
         )
       );
@@ -579,12 +579,12 @@ export class Engine {
     return false;
   }
 
-  public addLogs(logs: Log | Log[]) {
+  public addLogs(logs: Log | Log[], endOfTurn?: boolean) {
     const currentTurn = this.turns[this.turns.length - 1];
     if (Array.isArray(logs)) {
-      currentTurn.addLogs(logs);
+      currentTurn.addLogs(logs, endOfTurn);
     } else {
-      currentTurn.addLogs([logs]);
+      currentTurn.addLogs([logs], endOfTurn);
     }
   }
 }

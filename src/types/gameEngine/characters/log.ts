@@ -1,10 +1,10 @@
-import { ActiveAbility } from "./abilities";
+import { ActiveAbility, Ability } from "./abilities";
 import { iBuff, iDebuff, iStatusEffect } from "./statusEffects";
 import { Character } from "./index";
 
 type tLogAbility = {
   used?: null | ActiveAbility;
-  source?: null | ActiveAbility;
+  source?: null | Ability;
 };
 
 type tLogDamage = {

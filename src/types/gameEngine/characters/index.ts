@@ -2,14 +2,14 @@ import { round } from "lodash";
 
 import { chanceOfEvent, randomNumber, unvue } from "utils";
 
-import { iStats, iStatsCheck, Stats } from "./stats";
+import { iHeal, iStats, iStatsCheck, Stats } from "./stats";
 import { StatusEffect } from "./statusEffects";
 import { Ability, ActiveAbility } from "./abilities";
 import { IUnit, Unit } from "types/unit";
 import characterList from "../characterScripts";
-import { Log } from "./log";
+import { Log, tLogData } from "./log";
 
-import { gameEngine } from "../gameEngine";
+import { gameEngine, iCondition } from "../gameEngine";
 
 export class Character {
   public stats: Stats;
@@ -102,15 +102,19 @@ export class Character {
       this._tm = 0;
     }
 
-    // return new Log({
-    //   character: this,
-    //   effects: {
-    //     turnMeter: round(amount > 0 ? diff : 0 - diff, 2),
-    //   },
-    //   ability: {
-    //     source: srcAbility,
-    //   },
-    // });
+    if (srcAbility) {
+      gameEngine.addLogs(
+        new Log({
+          character: this,
+          effects: {
+            turnMeter: round(amount > 0 ? diff : 0 - diff, 2),
+          },
+          ability: {
+            source: srcAbility,
+          },
+        })
+      );
+    }
   }
   public compareTm(opponent: Character): {
     character: Character;
@@ -197,26 +201,25 @@ export class Character {
     return this.stats.health <= 0;
   }
   /** Checks if the character is dead and if so removes any related effects todo */
-  private checkDeath(targetCharacter: Character) {
-    // if (targetCharacter.stats.health <= 0) {
-    //   logs
-    //     .push
-    //     // new Log({
-    //     //   character: this,
-    //     //   target: targetCharacter,
-    //     //   effects: { defeated: true },
-    //     // })
-    //     ();
-    //   // logs.push(
-    //   //   ...targetCharacter.executePassiveTriggers([
-    //   //     {
-    //   //       triggerType: "death",
-    //   //     },
-    //   //   ])
-    //   // );
-    //   // targetCharacter.removePassiveTriggers();
-    // }
-    // return logs;
+  public checkDeath(targetCharacter: Character) {
+    if (targetCharacter.isDead) {
+      gameEngine.addLogs(
+        new Log({
+          character: this,
+          target: targetCharacter,
+          effects: { defeated: true },
+        })
+      );
+
+      // logs.push(
+      //   ...targetCharacter.executePassiveTriggers([
+      //     {
+      //       triggerType: "death",
+      //     },
+      //   ])
+      // );
+      // targetCharacter.removePassiveTriggers();
+    }
   }
   /** Does the character have any effect that is forcing them to be targeted */
   public get hasTauntEffect(): boolean {
@@ -237,18 +240,9 @@ export class Character {
     } else {
       ability = this.chooseAbility();
       ability?.execute();
-
-      // if (ability) {
-      //   logs.push(...this.useAbility(ability));
-      // } else {
-      //   console.warn("no ability");
-      // }
     }
 
-    // return {
-    //   logs,
-    //   endOfTurnLogs: this.endOfTurn(ability),
-    // };
+    this.endOfTurn(ability);
   }
 
   public startOfTurn() {
@@ -262,55 +256,6 @@ export class Character {
 
   public endOfTurn(ability: ActiveAbility | null) {
     this.statusEffect.endOfTurn();
-    // const logs: Log[] = [];
-    // const { debuffsRemoved } = this.statusEffect.debuffs.reduce(
-    //   (
-    //     acc: {
-    //       debuffsRemoved: tDebuff[];
-    //     },
-    //     debuff: iDebuff
-    //   ) => {
-    //     if (debuff.isNew) {
-    //       debuff.isNew = false;
-    //     } else {
-    //       debuff.duration--;
-    //     }
-
-    //     if (debuff.duration <= 0) {
-    //       acc.debuffsRemoved.push(debuff.name);
-    //     }
-    //     return acc;
-    //   },
-    //   { debuffsRemoved: [] }
-    // );
-
-    // const { buffsRemoved } = this.statusEffect.buffs.reduce(
-    //   (
-    //     acc: {
-    //       buffsRemoved: tBuff[];
-    //     },
-    //     buff: iBuff
-    //   ) => {
-    //     if (buff.isNew) {
-    //       buff.isNew = false;
-    //     } else {
-    //       buff.duration--;
-    //     }
-
-    //     if (buff.duration <= 0) {
-    //       acc.buffsRemoved.push(buff.name);
-    //     }
-    //     return acc;
-    //   },
-    //   { buffsRemoved: [] }
-    // );
-
-    // debuffsRemoved.forEach((debuff) => {
-    //   logs.push(...this.statusEffect.removeDebuff(debuff));
-    // });
-    // buffsRemoved.forEach((buff) => {
-    //   logs.push(...this.statusEffect.removeBuff(buff));
-    // });
 
     this.specialAbilities.forEach((a) => {
       if (ability?.id !== a.id && "turnsRemaining" in a) {
@@ -362,57 +307,54 @@ export class Character {
 
   /** Heals the character for a determined amount of health or protection
    *
-   * @healData (iEffect["heal"]) - The data that determines how much and what type of healing to do
-   * @ability (iGeneralAbility | null) - The ability that has the heal effect
-   * @amountSource (number) - The amount to be healed
+   * @healData - The data that determines how much and what type of healing to do
+   * @sourceAbility - The ability that has the heal effect
+   * @amountSource - The source value when healing a multiplicative amount (defaults to max value)
    */
-  // public heal(
-  //   healData: iEffect["heal"],
-  //   ability?: iGeneralAbility | null,
-  //   amountSource?: number
-  // ): Log[] {
-  //   const logs: Log[] = [];
+  public heal(
+    healData: iHeal,
+    sourceAbility?: Ability | null,
+    amountSource?: number
+  ) {
+    if (healData && !this.isDead) {
+      const { healthType, amountType, amount } = healData;
 
-  //   if (healData && !this.isDead) {
-  //     const { healthType, amountType, amount: healAmount } = healData;
+      if (!amountSource) {
+        amountSource =
+          healthType === "health"
+            ? this.stats.maxHealth
+            : this.stats.maxProtection;
+      }
 
-  //     if (!amountSource) {
-  //       amountSource =
-  //         healthType === "health"
-  //           ? this.stats.maxHealth
-  //           : this.stats.maxProtection;
-  //     }
+      const maxStat =
+        healthType === "health"
+          ? this.stats.maxHealth
+          : this.stats.maxProtection;
 
-  //     const maxStat =
-  //       healthType === "health"
-  //         ? this.stats.maxHealth
-  //         : this.stats.maxProtection;
+      const finalAmount =
+        amountType === "multiplicative"
+          ? (amount ?? 1) * amountSource
+          : amount ?? 0;
 
-  //     const finalAmount =
-  //       amountType === "multiplicative"
-  //         ? (healAmount ?? 1) * amountSource
-  //         : healAmount ?? 0;
+      let diff = 0;
+      if (this.stats[healthType] + finalAmount > maxStat) {
+        diff = maxStat - this.stats[healthType];
+      } else {
+        diff = finalAmount;
+      }
+      this.stats[healthType] += finalAmount;
 
-  //     let diff = 0;
-  //     if (this[healthType] + finalAmount > maxStat) {
-  //       diff = maxStat - this[healthType];
-  //     } else {
-  //       diff = finalAmount;
-  //     }
-  //     this[healthType] += finalAmount;
-
-  //     if (diff > 0) {
-  //       // logs.push(
-  //       //   new Log({
-  //       //     character: this,
-  //       //     heal: { amount: round(diff), type: healthType },
-  //       //     ability: { source: ability as iAbility },
-  //       //   })
-  //       // );
-  //     }
-  //   }
-  //   return logs;
-  // }
+      if (diff > 0) {
+        gameEngine.addLogs(
+          new Log({
+            character: this,
+            heal: { amount: round(diff), type: healthType },
+            ability: { source: sourceAbility },
+          })
+        );
+      }
+    }
+  }
   public counterAttack(
     targetCharacter: Character,
     canBeCountered: boolean = true
@@ -482,7 +424,93 @@ export class Character {
       Math.round(damageTaken * (isCrit ? critDamage : 1)),
       1
     );
+
+    this.stats.protection -= damageTotal;
     return { isCrit, damageTotal };
+  }
+
+  public checkCondition(
+    condition: iCondition
+    // targetCharacter: Character
+  ): boolean {
+    if (!condition) {
+      return true;
+    }
+
+    const { buffs, debuffs, stats, inverted, isNew, tags, tm, onTurn } =
+      condition;
+    let results = false;
+    if (buffs) {
+      const hasBuffs = buffs.every((buff) => {
+        const match = this.statusEffect.buffs.find((x) => x.name === buff);
+        if (match) {
+          return isNew === false ? !match.isNew : true;
+        } else return false;
+      });
+      results = hasBuffs || results;
+    }
+    if (debuffs) {
+      const hasDebuffs = debuffs.every((status) => {
+        const match = this.statusEffect.debuffs.find((x) => x.name === status);
+        if (match) {
+          return isNew ? match.isNew : true;
+        }
+        return false;
+      });
+
+      results = hasDebuffs || results;
+    }
+    if (stats) {
+      let meetsStatRequirement = false;
+      const stat = this.stats[stats.statToModify];
+      if (!isNaN(stat)) {
+        //if it is a number
+        const num = Number(stat);
+        if (
+          stats.statToModify === "health" &&
+          stats.modifiedType === "multiplicative"
+        ) {
+          const percent = num / this.stats.maxHealth;
+          meetsStatRequirement =
+            stats.amountType === "greater"
+              ? stats.amount < percent
+              : stats.amount > percent;
+        } else if (
+          stats.statToModify === "protection" &&
+          stats.modifiedType === "multiplicative"
+        ) {
+          const percent = num / this.stats.maxProtection;
+          meetsStatRequirement =
+            stats.amountType === "greater"
+              ? stats.amount > percent
+              : stats.amount < percent;
+        } else {
+          meetsStatRequirement =
+            stats.amountType === "greater"
+              ? stats.amount < num
+              : stats.amount > num;
+        }
+      } else {
+        console.warn(`Could not find stat ${stat.type} on ${this.name}`);
+      }
+
+      results = meetsStatRequirement || results;
+    }
+    if (tags) {
+      results = anyTagsMatch(this, tags, this.id) || results;
+    }
+    if (tm) {
+      if (tm.greaterThan) {
+        results = this.turnMeter > tm.amount || results;
+      } else {
+        results = this.turnMeter < tm.amount || results;
+      }
+    }
+    if (onTurn) {
+      results =
+        this.isSelf(gameEngine.currentCharactersTurn ?? undefined) || results;
+    }
+    return inverted ? !results : results;
   }
 
   public hasTags(tag: string, id: string): boolean {
@@ -501,196 +529,201 @@ export class Character {
     }
   }
 
-  public getLogs(): any {
+  public getLogs(): tLogData {
     return {
       name: this.name,
       owner: this.owner,
-      health: { current: this.stats.health, max: this.stats.maxHealth },
+      health: {
+        current: round(this.stats.health, 0),
+        max: round(this.stats.maxHealth, 0),
+      },
       protection: {
-        current: this.stats.protection,
-        max: this.stats.maxProtection,
+        current: round(this.stats.protection, 0),
+        max: round(this.stats.maxProtection, 0),
       },
       activeAbilities: [],
-      buffs: [],
-      debuffs: [],
-      statusEffects: [],
-      physical: [],
-      special: [],
-      general: [],
+      buffs: unvue(this.statusEffect.buffs),
+      debuffs: unvue(this.statusEffect.debuffs),
+      statusEffects: unvue(this.statusEffect.statusEffects),
+      physical: [
+        {
+          label: "Offense",
+          value: round(this.stats.physical.offense, 2),
+          base: round(this.stats.baseStats.physical.offense, 2),
+        },
+        {
+          label: "Crit Chance",
+          value: round(this.stats.physical.critChance * 100, 2),
+          base: round(this.stats.baseStats.physical.critChance * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Armor",
+          value: round(
+            (this.stats.physical.armor * 100) /
+              (this.stats.physical.armor + 637.5),
+            2
+          ),
+          base: round(
+            (this.stats.baseStats.physical.armor * 100) /
+              (this.stats.baseStats.physical.armor + 637.5),
+            2
+          ),
+          isPercent: true,
+        },
+        {
+          label: "Armor Pen",
+          value: round(this.stats.physical.armorPen, 2),
+          base: round(this.stats.baseStats.physical.armorPen, 2),
+        },
+        {
+          label: "Accuracy",
+          value: round(this.stats.physical.accuracy * 100, 2),
+          base: round(this.stats.baseStats.physical.accuracy * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Dodge (Evasion)",
+          value: round(this.stats.physical.dodge * 100, 2),
+          base: round(this.stats.baseStats.physical.dodge * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Crit Avoidance",
+          value: round(this.stats.physical.critAvoid * 100, 2),
+          base: round(this.stats.baseStats.physical.critAvoid * 100, 2),
+          isPercent: true,
+        },
+      ],
+      special: [
+        {
+          label: "Offense",
+          value: round(this.stats.special.offense, 2),
+          base: round(this.stats.baseStats.special.offense, 2),
+        },
+        {
+          label: "Crit Chance",
+          value: round(this.stats.special.critChance * 100, 2),
+          base: round(this.stats.baseStats.special.critChance * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Resistance",
+          value: round(
+            (this.stats.special.armor * 100) /
+              (this.stats.special.armor + 637.5),
+            2
+          ),
+          base: round(
+            (this.stats.baseStats.special.armor * 100) /
+              (this.stats.baseStats.special.armor + 637.5),
+            2
+          ),
+          isPercent: true,
+        },
+        {
+          label: "Resistance Pen",
+          value: round(this.stats.special.armorPen, 2),
+          base: round(this.stats.baseStats.special.armorPen, 2),
+        },
+        {
+          label: "Accuracy",
+          value: round(this.stats.special.accuracy * 100, 2),
+          base: round(this.stats.baseStats.special.accuracy * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Deflection (Evasion)",
+          value: round(this.stats.special.dodge * 100, 2),
+          base: round(this.stats.baseStats.special.dodge * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Crit Avoidance",
+          value: round(this.stats.special.critAvoid * 100, 2),
+          base: round(this.stats.baseStats.special.critAvoid * 100, 2),
+          isPercent: true,
+        },
+      ],
+      general: [
+        {
+          label: "Speed",
+          value: round(this.stats.speed, 2),
+          base: round(this.stats.baseStats.speed, 2),
+        },
+        {
+          label: "Mastery",
+          value: 0,
+          base: 0,
+        },
+        {
+          label: "Crit Damage",
+          value: round(this.stats.critDamage * 100, 2),
+          base: round(this.stats.baseStats.critDamage * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Tenacity",
+          value: round(this.stats.tenacity * 100, 2),
+          base: round(this.stats.baseStats.tenacity * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Potency",
+          value: round(this.stats.potency * 100, 2),
+          base: round(this.stats.baseStats.potency * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Health Steal",
+          value: round(this.stats.healthSteal * 100, 2),
+          base: round(this.stats.baseStats.healthSteal * 100, 2),
+          isPercent: true,
+        },
+        {
+          label: "Defense Pen",
+          value: 0,
+          base: 0,
+          isPercent: true,
+        },
+        {
+          label: "Counter Chance",
+          value: round(this.stats.counterChance * 100, 2),
+          base: 0,
+          isPercent: true,
+        },
+        {
+          label: "Counter Damage",
+          value: round(this.stats.counterDamage * 100, 2),
+          base: 100,
+          isPercent: true,
+        },
+      ],
       // triggers: [],
-      otherEffects: { ignoreTaunt: false, immunity: {} },
-      turnMeter: this.turnMeter,
+      otherEffects: unvue({
+        ...this.effects,
+        immunity: this.statusEffect.immunity,
+      }),
+      turnMeter: round(this.turnMeter, 0),
     };
-    // return {
-    //   name: this.name,
-    //   owner: this.owner,
-    //   health: {
-    //     current: round(this.health, 0),
-    //     max: round(this.maxHealth, 0),
-    //   },
-    //   protection: {
-    //     current: round(this.protection, 0),
-    //     max: round(this.maxProtection, 0),
-    //   },
-    //   activeAbilities: unvue(this._activeAbilities),
-    //   buffs: unvue(this._buffs),
-    //   debuffs: unvue(this._debuffs),
-    //   statusEffects: unvue(this._statusEffects),
-    //   physical: [
-    //     {
-    //       label: "Offense",
-    //       value: round(this.physical.offense, 2),
-    //       base: round(this._baseStats.physical.offense, 2),
-    //     },
-    //     {
-    //       label: "Crit Chance",
-    //       value: round(this.physical.critChance * 100, 2),
-    //       base: round(this._baseStats.physical.critChance * 100, 2),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Armor",
-    //       value: round(
-    //         (this.physical.armor * 100) / (this.physical.armor + 637.5),
-    //         2
-    //       ),
-    //       base: round(
-    //         (this._baseStats.physical.armor * 100) /
-    //           (this._baseStats.physical.armor + 637.5),
-    //         2
-    //       ),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Armor Pen",
-    //       value: round(this.physical.armorPen, 2),
-    //       base: round(this._baseStats.physical.armorPen, 2),
-    //     },
-    //     {
-    //       label: "Accuracy",
-    //       value: round(this.physical.accuracy * 100, 2),
-    //       base: round(this._baseStats.physical.accuracy * 100, 2),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Dodge (Evasion)",
-    //       value: round(this.physical.dodge * 100, 2),
-    //       base: round(this._baseStats.physical.dodge * 100, 2),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Crit Avoidance",
-    //       value: round(this.physical.critAvoid * 100, 2),
-    //       base: round(this._baseStats.physical.critAvoid * 100, 2),
-    //       isPercent: true,
-    //     },
-    //   ],
-    //   special: [
-    //     {
-    //       label: "Offense",
-    //       value: round(this.special.offense, 2),
-    //       base: round(this._baseStats.special.offense, 2),
-    //     },
-    //     {
-    //       label: "Crit Chance",
-    //       value: round(this.special.critChance * 100, 2),
-    //       base: round(this._baseStats.special.critChance * 100, 2),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Resistance",
-    //       value: round(
-    //         (this.special.armor * 100) / (this.special.armor + 637.5),
-    //         2
-    //       ),
-    //       base: round(
-    //         (this._baseStats.special.armor * 100) /
-    //           (this._baseStats.special.armor + 637.5),
-    //         2
-    //       ),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Resistance Pen",
-    //       value: round(this.special.armorPen, 2),
-    //       base: round(this._baseStats.special.armorPen, 2),
-    //     },
-    //     {
-    //       label: "Accuracy",
-    //       value: round(this.special.accuracy * 100, 2),
-    //       base: round(this._baseStats.special.accuracy * 100, 2),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Deflection (Evasion)",
-    //       value: round(this.special.dodge * 100, 2),
-    //       base: round(this._baseStats.special.dodge * 100, 2),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Crit Avoidance",
-    //       value: round(this.special.critAvoid * 100, 2),
-    //       base: round(this._baseStats.special.critAvoid * 100, 2),
-    //       isPercent: true,
-    //     },
-    //   ],
-    //   general: [
-    //     {
-    //       label: "Speed",
-    //       value: round(this.speed, 2),
-    //       base: round(this._baseStats.speed, 2),
-    //     },
-    //     {
-    //       label: "Mastery",
-    //       value: 0,
-    //       base: 0,
-    //     },
-    //     {
-    //       label: "Crit Damage",
-    //       value: round(this.critDamage * 100, 2),
-    //       base: round(this._baseStats.critDamage * 100, 2),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Tenacity",
-    //       value: round(this.tenacity * 100, 2),
-    //       base: round(this._baseStats.tenacity * 100, 2),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Potency",
-    //       value: round(this.potency * 100, 2),
-    //       base: round(this._baseStats.potency * 100, 2),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Health Steal",
-    //       value: round(this.stats.healthSteal * 100, 2),
-    //       base: round(this.stats._baseStats.healthSteal * 100, 2),
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Defense Pen",
-    //       value: 0,
-    //       base: 0,
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Counter Chance",
-    //       value: round(this.stats.counterChance * 100, 2),
-    //       base: 0,
-    //       isPercent: true,
-    //     },
-    //     {
-    //       label: "Counter Damage",
-    //       value: round(this.stats.counterDamage * 100, 2),
-    //       base: 100,
-    //       isPercent: true,
-    //     },
-    //   ],
-    //   triggers: [],
-    //   otherEffects: unvue({ ...this.effects, immunity: this.statusEffect.immunity }),
-    //   turnMeter: round(this.turnMeter, 0),
-    // };
   }
+}
+
+//todo: combine these functions with /teams.js
+export function anyTagsMatch(
+  character: Character,
+  tagsList: string[],
+  id: string
+): boolean {
+  return tagsList.some((tag) => {
+    if (tag.includes("&")) {
+      const split = tag.split("&");
+      return split.every((x) => anyTagsMatch(character, [x.trim()], id));
+    } else if (tag.charAt(0) === "!") {
+      const value = tag.substring(1);
+      return !character.hasTags(value, id);
+    } else {
+      return character.hasTags(tag, id);
+    }
+  });
 }
