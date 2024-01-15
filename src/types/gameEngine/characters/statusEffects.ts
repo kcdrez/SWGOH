@@ -430,17 +430,7 @@ export class StatusEffect {
                 },
               })
             );
-
-            // logs.push(
-            //   ...this.executeTriggers(this._triggers, [
-            //     {
-            //       triggerType: "inflictDebuff",
-            //       ability: ability ?? null,
-            //       target: targetCharacter,
-            //       debuff,
-            //     },
-            //   ])
-            // );
+            this._character.dispatchEvent("inflicted", { debuff });
           }
         } else {
           gameEngine.addLogs(
@@ -449,27 +439,10 @@ export class StatusEffect {
               statusEffects: { resisted: true, list: [debuff], type: "debuff" },
             })
           );
-          // const triggerList: iTriggerData[] = [
-          //   {
-          //     triggerType: "resistDetrimentalEffect",
-          //     debuff,
-          //     target: targetCharacter,
-          //     ability: ability ?? null,
-          //   },
-          // ];
-          // logs.push(
-          //   ...targetCharacter.executeTriggers(
-          //     targetCharacter.triggers,
-          //     triggerList
-          //   )
-          // );
-          // logs.push(
-          //   ...this.executeTriggers(debuff.triggers ?? [], triggerList)
-          // );
+          targetCharacter.dispatchEvent("resisted", { debuff });
         }
       }
     });
-    // return logs;
   }
   /** Removes a debuff from the character
    *
@@ -782,7 +755,12 @@ export type tStatusEffect = "Guard";
 /** A generic status effect, usually a buff or debuff */
 export interface iStatusEffect {
   /** The name of the effect */
-  name: tBuff | tDebuff | tStatusEffect;
+  name:
+    | tBuff
+    | tDebuff
+    | tStatusEffect
+    | "Cooldown Increase"
+    | "Cooldown Decrease";
   /** How many turns the effect will last */
   duration: number;
   /** Determines if the effect is new so that it will not be removed at the end of the turn */

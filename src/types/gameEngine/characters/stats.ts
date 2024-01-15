@@ -105,7 +105,7 @@ export interface iStatsCheck {
   /** Determines if the stat will added to the existing stat (additive) or multiplied together (multiplicative) */
   modifiedType: "additive" | "multiplicative";
   /** Todo: whats this? */
-  amountType?: "greater" | "less";
+  // amountType?: "greater" | "less";
   /** Determines when the effect will expire and thus be removed */
   expires?: {
     /** How many cycles before the effect is removed */
@@ -114,12 +114,12 @@ export interface iStatsCheck {
     frequency: "turn";
   };
   /** Todo: whats this for? */
-  stacking?: boolean;
+  // stacking?: boolean;
 }
 
 export class Stats {
   public baseStats: iStats;
-  private _tempStats: iStatsCheck[] = [];
+  public tempStats: iStatsCheck[] = [];
   private _role: IUnit["role"];
   private _primaryStat: IUnit["primaryStat"];
   private _character: Character;
@@ -953,16 +953,17 @@ export class Stats {
   }
 
   private getTempStat(statName: string): iStatsCheck[] {
-    return [];
-    // const tempStatMapping: Record<string, iStatsCheck[]> =
-    //   this._tempStats.reduce((statsMapping, stat) => {
-    //     if (stat.statToModify in statsMapping) {
-    //       statsMapping[stat.statToModify].push(stat);
-    //     } else {
-    //       statsMapping[stat.statToModify] = [stat];
-    //     }
-    //     return statsMapping;
-    //   }, {});
+    const tempStatMapping: Record<string, iStatsCheck[]> =
+      this.tempStats.reduce((statsMapping, stat) => {
+        if (stat.statToModify in statsMapping) {
+          statsMapping[stat.statToModify].push(stat);
+        } else {
+          statsMapping[stat.statToModify] = [stat];
+        }
+        return statsMapping;
+      }, {});
+
+    return tempStatMapping[statName] ?? [];
 
     // const finalMapping: Record<string, iStatsCheck[]> = this._triggers.reduce(
     //   (statsMapping, trigger) => {

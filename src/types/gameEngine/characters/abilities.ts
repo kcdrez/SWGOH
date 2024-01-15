@@ -27,8 +27,8 @@ export class Ability {
 }
 
 export abstract class ActiveAbility extends Ability {
-  public turnsRemaining: number = 0;
-  public cooldown: number = 0;
+  public turnsRemaining: number | null = null;
+  public cooldown: number | null = null;
   constructor(
     id: string,
     name: string,
@@ -39,7 +39,9 @@ export abstract class ActiveAbility extends Ability {
   }
 
   public initialize() {
-    this.turnsRemaining = 0;
+    if (this.cooldown) {
+      this.turnsRemaining = 0;
+    }
   }
 
   /** Executes all the effects of the ability */
@@ -192,6 +194,55 @@ export abstract class ActiveAbility extends Ability {
     }
   }
 
+  /**
+   * Change an ability's cooldown
+   *
+   * @param amount The amount that the cooldown should be manipulated
+   * @param srcAbility The source ability that is causing the cooldown change
+   */
+  public changeCooldown(amount: number, srcAbility: Ability) {
+    if (this.turnsRemaining === null) {
+      return;
+    }
+
+    const name = amount > 0 ? "Cooldown Increase" : "Cooldown Decrease";
+    if (
+      this._character?.statusEffect.isImmune({
+        name,
+        id: uuid(),
+        duration: amount,
+      })
+    ) {
+      gameEngine.addLogs(
+        new Log({
+          character: this._character,
+          statusEffects: {
+            immune: true,
+            type: amount > 0 ? "debuff" : "buff",
+            list: [{ name, duration: amount, id: uuid() }],
+          },
+        })
+      );
+    } else {
+      let finalAmount = amount;
+      if (amount < 0) {
+        if (this.turnsRemaining <= 0) {
+          return;
+        }
+        finalAmount = Math.max(amount, 0 - this.turnsRemaining);
+      }
+      this.turnsRemaining += finalAmount;
+
+      gameEngine.addLogs(
+        new Log({
+          character: this._character,
+          ability: { source: srcAbility },
+          effects: { cooldown: { ability: this, amount: finalAmount } },
+        })
+      );
+    }
+  }
+
   /** Deals damage to a target
    *
    * @damageType - The type of damage being dealt (physical, special, or true)
@@ -244,27 +295,11 @@ export abstract class ActiveAbility extends Ability {
           text: "The percentage amount of the damage that this character heals whenever they deal damage.",
         }
       );
-
-      //   //   logs.push(
-      //   //     ...this.heal(
-      //   //       {
-      //   //         amountType: "additive",
-      //   //         amount: damageTotal * this.healthSteal,
-      //   //         healthType: "health",
-      //   //       },
-      //   //       {
-      //   //         id: uuid(),
-      //   //         name: "Health Steal",
-      //   //         gameText:
-      //   //           "The percentage amount of the damage that this character heals whenever they deal damage.",
-      //   //       }
-      //   //     )
-      //   //   );
     }
   }
 }
 
-export class PassiveAbility extends Ability {
+export abstract class PassiveAbility extends Ability {
   constructor(
     id: string,
     name: string,
@@ -273,6 +308,8 @@ export class PassiveAbility extends Ability {
   ) {
     super(id, name, text, parentCharacter);
   }
+
+  public addListener() {}
 }
 
 //todo: combine these functions with /teams.js

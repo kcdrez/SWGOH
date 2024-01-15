@@ -4,12 +4,14 @@ import { chanceOfEvent, randomNumber, unvue } from "utils";
 
 import { iHeal, iStats, iStatsCheck, Stats } from "./stats";
 import { StatusEffect } from "./statusEffects";
-import { Ability, ActiveAbility } from "./abilities";
+import { Ability, ActiveAbility, PassiveAbility } from "./abilities";
 import { IUnit, Unit } from "types/unit";
 import characterList from "../characterScripts";
 import { Log, tLogData } from "./log";
 
 import { gameEngine, iCondition } from "../gameEngine";
+
+type tEventType = "resisted" | "inflicted";
 
 export class Character {
   public stats: Stats;
@@ -19,9 +21,8 @@ export class Character {
   private _tm: number = 0;
   private basicAbility: ActiveAbility | null = null;
   private specialAbilities: ActiveAbility[] = [];
-  // private _activeAbilities: (iBasicAbility | iSpecialAbility)[] = [];
-  // private _uniqueAbilities: iUniqueAbility[] = [];
-  // private _leaderAbility: iUniqueAbility | null = null;
+  private _uniqueAbilities: PassiveAbility[] = [];
+  private _leaderAbility: PassiveAbility | null = null;
   public owner: string;
   private _alignment: IUnit["alignment"];
   // private _role: IUnit["role"];
@@ -31,6 +32,8 @@ export class Character {
   public teammates: Character[] = [];
   public opponents: Character[] = [];
   public isLeader: boolean = false;
+  public events: { eventType: tEventType; id: string; callback: Function }[] =
+    [];
 
   constructor(data: Unit, owner: string) {
     this.stats = new Stats(data, this);
@@ -44,12 +47,20 @@ export class Character {
 
     const abilityList = characterList[this.id];
     data.abilities.forEach((x) => {
-      const abilityClass = abilityList.get(x.id);
-      if (abilityClass) {
-        if (x.id.includes("basic")) {
+      if (x.id.includes("basic")) {
+        const abilityClass = abilityList.basicAbility.get(x.id);
+        if (abilityClass) {
           this.basicAbility = new abilityClass(this);
-        } else {
+        }
+      } else if (x.id.includes("special")) {
+        const abilityClass = abilityList.specialAbilities.get(x.id);
+        if (abilityClass) {
           this.specialAbilities.push(new abilityClass(this));
+        }
+      } else if (x.id.includes("unique")) {
+        const abilityClass = abilityList.uniqueAbilities.get(x.id);
+        if (abilityClass) {
+          this._uniqueAbilities.push(new abilityClass(this));
         }
       }
     });
@@ -60,6 +71,15 @@ export class Character {
   /** Checks if the provided character is the same as this character */
   public isSelf(char?: Character) {
     return this.id === char?.id && this.owner === char?.owner;
+  }
+
+  public get activeAbilities() {
+    const arr: ActiveAbility[] = [];
+    if (this.basicAbility) {
+      arr.push(this.basicAbility);
+    }
+    arr.push(...this.specialAbilities);
+    return arr;
   }
 
   /** A map of different effects that may exist on the character */
@@ -82,9 +102,10 @@ export class Character {
   }
   /** Manipulates the unit's turn meter by a certain amount
    *
-   * @amount - The amount the turn meter will be changed. Positive number will add turn meter, negative number will remove turn meter
+   * @param amount - The amount the turn meter will be changed. Positive number will add turn meter, negative number will remove turn meter
+   * @param srcAbility - The ability source that is causing the turn meter to change
    */
-  public changeTurnMeter(amount: number, srcAbility?: ActiveAbility) {
+  public changeTurnMeter(amount: number, srcAbility?: Ability) {
     if (amount === 0) {
       return null;
     }
@@ -103,6 +124,7 @@ export class Character {
     }
 
     if (srcAbility) {
+      console.log("tm change", amount);
       gameEngine.addLogs(
         new Log({
           character: this,
@@ -258,7 +280,7 @@ export class Character {
     this.statusEffect.endOfTurn();
 
     this.specialAbilities.forEach((a) => {
-      if (ability?.id !== a.id && "turnsRemaining" in a) {
+      if (ability?.id !== a.id && a.turnsRemaining !== null) {
         a.turnsRemaining = Math.max(a.turnsRemaining - 1, 0);
       }
     });
@@ -287,7 +309,11 @@ export class Character {
       return this.basicAbility;
     } else if (abilityId === this.basicAbility?.id) {
       return this.basicAbility;
-    } else if (this.specialAbilities.every((a) => a.turnsRemaining > 0)) {
+    } else if (
+      this.specialAbilities.every(
+        (a) => a.turnsRemaining !== null && a.turnsRemaining > 0
+      )
+    ) {
       return this.basicAbility;
     }
 
@@ -295,7 +321,7 @@ export class Character {
       if (abilityId) {
         return a.id === abilityId;
       } else {
-        return a.turnsRemaining <= 0;
+        return a.turnsRemaining !== null && a.turnsRemaining <= 0;
       }
     });
 
@@ -303,6 +329,10 @@ export class Character {
       ability.turnsRemaining = ability.cooldown;
     }
     return ability ?? null;
+  }
+
+  public get hasLeaderAbility() {
+    return !!this._leaderAbility;
   }
 
   /** Heals the character for a determined amount of health or protection
@@ -429,6 +459,14 @@ export class Character {
     return { isCrit, damageTotal };
   }
 
+  public dispatchEvent(eventType: tEventType, context: any) {
+    this.events.forEach((event) => {
+      if (event.eventType === eventType) {
+        event.callback(context);
+      }
+    });
+  }
+
   public checkCondition(
     condition: iCondition
     // targetCharacter: Character
@@ -541,7 +579,9 @@ export class Character {
         current: round(this.stats.protection, 0),
         max: round(this.stats.maxProtection, 0),
       },
-      activeAbilities: [],
+      activeAbilities: this.activeAbilities.map((a) => {
+        return { id: a.id, name: a.name, cooldown: a.turnsRemaining };
+      }),
       buffs: unvue(this.statusEffect.buffs),
       debuffs: unvue(this.statusEffect.debuffs),
       statusEffects: unvue(this.statusEffect.statusEffects),

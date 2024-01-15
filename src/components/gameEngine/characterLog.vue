@@ -103,9 +103,9 @@
                 :key="ability.id"
                 class="mt-1"
               >
-                <div v-if="ability.cooldown">
+                <div v-if="ability.cooldown !== undefined">
                   {{ ability.name }} - Cooldown:
-                  {{ ability.turnsRemaining }}
+                  {{ ability.cooldown }}
                 </div>
                 <div v-else>{{ ability.name }} (Basic)</div>
               </div>
