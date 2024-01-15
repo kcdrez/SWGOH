@@ -6,7 +6,8 @@ import {
   PassiveAbility,
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
-import { Dictionary } from "lodash";
+import { iStatsCheck } from "../characters/stats";
+import { iCondition } from "../gameEngine";
 
 class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
   constructor(character: Character) {
@@ -18,17 +19,24 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
     );
   }
 
-  public execute(): void {
-    super.execute();
+  public execute(
+    targetCharacter?: Character,
+    stats?: iStatsCheck[],
+    canBeCountered: boolean = true
+  ): void {
+    super.execute(targetCharacter);
 
-    const { targetList } = this.findTargets({
-      filters: [{ allies: false }],
-      targetCount: 1,
-    });
+    const { targetList } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
 
     targetList.forEach((target) => {
       if (!this.checkEvade("physical", target)) {
-        this.dealDamage("physical", target, 1.781);
+        this.dealDamage("physical", target, 1.781, 5, stats, canBeCountered);
         if (
           target.checkCondition({
             debuffs: ["Speed Down"],
@@ -138,13 +146,16 @@ class specialskill_COMMANDERLUKESKYWALKER01 extends ActiveAbility {
     this.cooldown = 4;
   }
 
-  public execute(): void {
-    super.execute();
+  public execute(targetCharacter?: Character, stats?: iStatsCheck[]): void {
+    super.execute(targetCharacter, stats);
 
-    const { targetList } = this.findTargets({
-      filters: [{ allies: false }],
-      targetCount: 1,
-    });
+    const { targetList } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
 
     targetList.forEach((target) => {
       if (target.stats.health < target.stats.maxHealth) {
@@ -180,6 +191,10 @@ class uniqueskill_COMMANDERLUKESKYWALKER02 extends PassiveAbility {
       character
     );
 
+    this.activate();
+  }
+
+  public override activate(): void {
     this._character?.stats.tempStats.push({
       statToModify: "potency",
       amount: 0.4,
@@ -188,7 +203,7 @@ class uniqueskill_COMMANDERLUKESKYWALKER02 extends PassiveAbility {
 
     this._character?.events.push(
       {
-        id: this._character.id,
+        characterSourceId: this._character.uniqueId,
         eventType: "resisted",
         callback: () => {
           this._character?.heal(
@@ -210,10 +225,9 @@ class uniqueskill_COMMANDERLUKESKYWALKER02 extends PassiveAbility {
         },
       },
       {
-        id: this._character.id,
+        characterSourceId: this._character.uniqueId,
         eventType: "inflicted",
         callback: () => {
-          console.log("inflicted");
           this._character?.changeTurnMeter(5, this);
           this._character?.teammates.forEach((target) => {
             target.changeTurnMeter(5, this);
@@ -221,8 +235,6 @@ class uniqueskill_COMMANDERLUKESKYWALKER02 extends PassiveAbility {
         },
       }
     );
-
-    this.addListener();
   }
 }
 
@@ -230,53 +242,124 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
   constructor(character: Character) {
     super(
       "uniqueskill_COMMANDERLUKESKYWALKER01",
-      "It Binds All Things",
-      `Luke has +40% Potency. Whenever Luke Resists a detrimental effect he recovers 5% Health and 5% Protection. Whenever Luke inflicts a debuff he gains 10% Turn Meter and other allies gain half that amount.`,
+      "Learn Control",
+      `While Luke doesn't have Call to Action, he has +50% Counter Chance, +50% Critical Avoidance, +50% Defense, +100% Tenacity, and gains 10% Turn Meter whenever another Rebel ally takes damage.`,
       character
     );
+    this.activate();
+  }
+
+  public override activate(): void {
+    const doesntHaveCallToAction: iCondition = {
+      buffs: ["Call to Action"],
+      inverted: true,
+    };
 
     this._character?.stats.tempStats.push({
-      statToModify: "potency",
-      amount: 0.4,
+      statToModify: "counterChance",
+      amount: 0.5,
       modifiedType: "additive",
+      condition: doesntHaveCallToAction,
+      characterSourceId: this._character.uniqueId,
     });
 
-    this._character?.events.push(
-      {
-        id: this._character.id,
-        eventType: "resisted",
-        callback: () => {
-          this._character?.heal(
-            {
-              amount: 0.05,
-              healthType: "protection",
-              amountType: "multiplicative",
-            },
-            this
-          );
-          this._character?.heal(
-            {
-              amount: 0.05,
-              healthType: "protection",
-              amountType: "multiplicative",
-            },
-            this
-          );
-        },
-      },
-      {
-        id: this._character.id,
-        eventType: "inflicted",
+    this._character?.stats.tempStats.push({
+      statToModify: "critAvoid",
+      amount: 0.5,
+      modifiedType: "additive",
+      condition: doesntHaveCallToAction,
+      characterSourceId: this._character.uniqueId,
+    });
+
+    this._character?.stats.tempStats.push({
+      statToModify: "armor",
+      amount: 0.5,
+      modifiedType: "multiplicative",
+      condition: doesntHaveCallToAction,
+      characterSourceId: this._character.uniqueId,
+    });
+
+    this._character?.stats.tempStats.push({
+      statToModify: "resistance",
+      amount: 0.5,
+      modifiedType: "multiplicative",
+      condition: doesntHaveCallToAction,
+      characterSourceId: this._character.uniqueId,
+    });
+
+    this._character?.stats.tempStats.push({
+      statToModify: "tenacity",
+      amount: 1,
+      modifiedType: "additive",
+      condition: doesntHaveCallToAction,
+      characterSourceId: this._character.uniqueId,
+    });
+
+    const { targetList } = this.findTargets({
+      filters: [{ allies: true }, { tags: ["Rebel & !Self"] }],
+    });
+
+    targetList.forEach((target) => {
+      target.events.push({
+        characterSourceId: this._character?.uniqueId,
+        eventType: "receiveDamage",
         callback: () => {
           this._character?.changeTurnMeter(10, this);
-          this._character?.teammates.forEach((target) => {
-            target.changeTurnMeter(5, this);
-          });
         },
-      }
-    );
+      });
+    });
+  }
+}
 
-    this.addListener();
+class leaderskill_COMMANDERLUKESKYWALKER extends PassiveAbility {
+  constructor(character: Character) {
+    super(
+      "leaderskill_COMMANDERLUKESKYWALKER",
+      "Rebel Maneuvers",
+      `Rebel allies have +50% Counter Chance, +50% Defense, and +15% Offense. Whenever an enemy Resists a detrimental effect, Rebel allies gain 5% Turn Meter.`,
+      character
+    );
+  }
+
+  public override activate() {
+    const { targetList } = this.findTargets({
+      filters: [{ allies: true }, { tags: ["Rebel"] }],
+    });
+
+    targetList.forEach((target) => {
+      target.stats.tempStats.push({
+        statToModify: "counterChance",
+        amount: 0.5,
+        modifiedType: "additive",
+        characterSourceId: this._character?.uniqueId,
+      });
+      target.stats.tempStats.push({
+        statToModify: "armor",
+        amount: 0.5,
+        modifiedType: "multiplicative",
+        characterSourceId: this._character?.uniqueId,
+      });
+      target.stats.tempStats.push({
+        statToModify: "resistance",
+        amount: 0.5,
+        modifiedType: "multiplicative",
+        characterSourceId: this._character?.uniqueId,
+      });
+      target.stats.tempStats.push({
+        statToModify: "offense",
+        amount: 0.15,
+        modifiedType: "multiplicative",
+        characterSourceId: this._character?.uniqueId,
+      });
+
+      target.events.push({
+        characterSourceId: this._character?.uniqueId ?? "",
+        eventType: "resisted",
+        callback: () => {
+          target.changeTurnMeter(5, this);
+        },
+      });
+    });
   }
 }
 
@@ -293,6 +376,10 @@ const specialAbilities = new Map([
 
 const uniqueAbilities = new Map([
   [
+    "uniqueskill_COMMANDERLUKESKYWALKER01",
+    uniqueskill_COMMANDERLUKESKYWALKER01,
+  ],
+  [
     "uniqueskill_COMMANDERLUKESKYWALKER02",
     uniqueskill_COMMANDERLUKESKYWALKER02,
   ],
@@ -302,7 +389,16 @@ const basicAbility = new Map([
   ["basicskill_COMMANDERLUKESKYWALKER", basicskill_COMMANDERLUKESKYWALKER],
 ]);
 
-export default { specialAbilities, uniqueAbilities, basicAbility };
+const leaderAbility = new Map([
+  ["leaderskill_COMMANDERLUKESKYWALKER", leaderskill_COMMANDERLUKESKYWALKER],
+]);
+
+export default {
+  specialAbilities,
+  uniqueAbilities,
+  basicAbility,
+  leaderAbility,
+};
 // const x: Map<string, Ability> = new Map({
 //   meow: basicskill_COMMANDERLUKESKYWALKER
 // })

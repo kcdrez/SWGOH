@@ -7,7 +7,7 @@ import { chanceOfEvent, randomNumber, unvue } from "utils";
 import { gameEngine } from "types/gameEngine/gameEngine";
 import { Log } from "./log";
 
-export class Ability {
+export abstract class Ability {
   public id: string;
   public name: string;
   public text: string;
@@ -26,9 +26,7 @@ export class Ability {
   }
 }
 
-export abstract class ActiveAbility extends Ability {
-  public turnsRemaining: number | null = null;
-  public cooldown: number | null = null;
+abstract class CharacterAbility extends Ability {
   constructor(
     id: string,
     name: string,
@@ -38,33 +36,17 @@ export abstract class ActiveAbility extends Ability {
     super(id, name, text, parentCharacter);
   }
 
-  public initialize() {
-    if (this.cooldown) {
-      this.turnsRemaining = 0;
-    }
-  }
-
-  /** Executes all the effects of the ability */
-  public execute() {
-    gameEngine.addLogs(
-      new Log({ character: this._character, ability: { used: this } })
-    );
-  }
-
   /**
    *
    * @param targetData - The target data used to determine how to find valid targets
-   * @param target - Used in the case that the targetData should use an already selected target (such as for an assist)
+   * @param forcedTarget - Used in the case that the targetData should use an already selected target (such as for an assist)
    * @param include - Used to ignore specific attributes, such as dead characters. By default, these characters are not considered for selection
    * @returns targetList - List of valid targets, primaryTarget - primary opponent target
    */
   public findTargets(
     targetData: iTargetData,
-    target?: Character | null,
+    forcedTarget?: Character | null,
     include?: {
-      // paralysisDebuff?: boolean;
-      // daze?: boolean;
-      // noAssist?: boolean;
       dead?: boolean;
     }
   ): { targetList: Character[]; primaryTarget: Character | null } {
@@ -79,12 +61,6 @@ export abstract class ActiveAbility extends Ability {
       if (char.isDead) {
         shouldInclude = include?.dead ?? false;
       }
-      // if (ignore?.paralysisDebuff) {
-      //   shouldExclude = char.hasDebuff("Stun") || shouldExclude;
-      // }
-      // if (ignore?.daze) {
-      //   shouldExclude = char.hasDebuff("Daze") || shouldExclude;
-      // }
       return shouldInclude;
     });
 
@@ -115,7 +91,7 @@ export abstract class ActiveAbility extends Ability {
         } else if (targetFilter.tags) {
           return anyTagsMatch(char, targetFilter.tags, this.id);
         } else if (targetFilter.primary) {
-          return char.isSelf(target ?? undefined);
+          return char.isSelf(forcedTarget ?? undefined);
         } else if (targetFilter.targetIds) {
           return anyTagsMatch(char, targetFilter.targetIds, this.id);
         }
@@ -178,6 +154,35 @@ export abstract class ActiveAbility extends Ability {
     }
     return { targetList: filteredList, primaryTarget };
   }
+}
+export abstract class ActiveAbility extends CharacterAbility {
+  public turnsRemaining: number | null = null;
+  public cooldown: number | null = null;
+  constructor(
+    id: string,
+    name: string,
+    text: string,
+    parentCharacter: Character
+  ) {
+    super(id, name, text, parentCharacter);
+  }
+
+  public initialize() {
+    if (this.cooldown) {
+      this.turnsRemaining = 0;
+    }
+  }
+
+  /** Executes all the effects of the ability */
+  public execute(
+    targetCharacter?: Character,
+    stats?: iStatsCheck[],
+    canBeCountered: boolean = true
+  ) {
+    gameEngine.addLogs(
+      new Log({ character: this._character, ability: { used: this } })
+    );
+  }
 
   public checkEvade(
     damageType: "physical" | "special",
@@ -197,10 +202,15 @@ export abstract class ActiveAbility extends Ability {
   /**
    * Change an ability's cooldown
    *
-   * @param amount The amount that the cooldown should be manipulated
-   * @param srcAbility The source ability that is causing the cooldown change
+   * @param amount - The amount that the cooldown should be manipulated
+   * @param srcAbility - The source ability that is causing the cooldown change
+   * @param srcCharacter - The Character that is causing the cooldown change
    */
-  public changeCooldown(amount: number, srcAbility: Ability) {
+  public changeCooldown(
+    amount: number,
+    srcAbility: Ability,
+    srcCharacter?: Character
+  ) {
     if (this.turnsRemaining === null) {
       return;
     }
@@ -224,6 +234,16 @@ export abstract class ActiveAbility extends Ability {
         })
       );
     } else {
+      if (amount > 0 && !!srcCharacter) {
+        const resistedChance = Math.max(
+          (this._character?.stats.tenacity ?? 0) - srcCharacter?.stats.potency,
+          0.15
+        );
+        if (chanceOfEvent(resistedChance)) {
+          this._character?.dispatchEvent("resisted", {});
+        }
+      }
+
       let finalAmount = amount;
       if (amount < 0) {
         if (this.turnsRemaining <= 0) {
@@ -256,7 +276,8 @@ export abstract class ActiveAbility extends Ability {
     targetCharacter: Character,
     abilityModifier: number = 0,
     variance: number = 5,
-    stats?: iStatsCheck[]
+    stats?: iStatsCheck[],
+    canBeCountered: boolean = true
   ) {
     if (this._character) {
       const { offense, critChance, armorPen } =
@@ -295,11 +316,19 @@ export abstract class ActiveAbility extends Ability {
           text: "The percentage amount of the damage that this character heals whenever they deal damage.",
         }
       );
+
+      targetCharacter.dispatchEvent("receiveDamage", {
+        damageAmount: damageTotal,
+        isCrit,
+        damageType,
+      });
+
+      targetCharacter.counterAttack(this._character, canBeCountered);
     }
   }
 }
 
-export abstract class PassiveAbility extends Ability {
+export abstract class PassiveAbility extends CharacterAbility {
   constructor(
     id: string,
     name: string,
@@ -309,7 +338,29 @@ export abstract class PassiveAbility extends Ability {
     super(id, name, text, parentCharacter);
   }
 
-  public addListener() {}
+  /** Adds all of the given events, stat increases, and other effects */
+  public activate() {}
+
+  /** Removes all of the given events, stat increases, and other effects from all teammates and opponents */
+  public deactivate() {
+    this._character?.teammates.forEach((target) => {
+      target.events = target.events.filter((event) => {
+        return event.characterSourceId !== this._character?.uniqueId;
+      });
+      target.stats.tempStats = target.stats.tempStats.filter((stat) => {
+        return stat.characterSourceId !== this._character?.uniqueId;
+      });
+    });
+
+    this._character?.opponents.forEach((target) => {
+      target.events = target.events.filter((event) => {
+        return event.characterSourceId !== this._character?.uniqueId;
+      });
+      target.stats.tempStats = target.stats.tempStats.filter((stat) => {
+        return stat.characterSourceId !== this._character?.uniqueId;
+      });
+    });
+  }
 }
 
 //todo: combine these functions with /teams.js

@@ -663,6 +663,12 @@ export class StatusEffect {
     //   }
     // );
   }
+
+  public reset() {
+    this._buffs = [];
+    this._debuffs = [];
+    this._statusEffects = [];
+  }
 }
 
 export interface iBuff extends iStatusEffect {

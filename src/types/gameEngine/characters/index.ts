@@ -11,7 +11,7 @@ import { Log, tLogData } from "./log";
 
 import { gameEngine, iCondition } from "../gameEngine";
 
-type tEventType = "resisted" | "inflicted";
+type tEventType = "resisted" | "inflicted" | "receiveDamage";
 
 export class Character {
   public stats: Stats;
@@ -19,8 +19,8 @@ export class Character {
   public id: string;
   public name: string;
   private _tm: number = 0;
-  private basicAbility: ActiveAbility | null = null;
-  private specialAbilities: ActiveAbility[] = [];
+  private _basicAbility: ActiveAbility | null = null;
+  private _specialAbilities: ActiveAbility[] = [];
   private _uniqueAbilities: PassiveAbility[] = [];
   private _leaderAbility: PassiveAbility | null = null;
   public owner: string;
@@ -32,10 +32,13 @@ export class Character {
   public teammates: Character[] = [];
   public opponents: Character[] = [];
   public isLeader: boolean = false;
-  public events: { eventType: tEventType; id: string; callback: Function }[] =
-    [];
+  public events: {
+    eventType: tEventType;
+    characterSourceId?: string;
+    callback: Function;
+  }[] = [];
 
-  constructor(data: Unit, owner: string) {
+  constructor(data: Unit, owner: string, isLeader?: boolean) {
     this.stats = new Stats(data, this);
     this.statusEffect = new StatusEffect(this);
 
@@ -44,28 +47,39 @@ export class Character {
     this.owner = owner;
     this._alignment = data.alignment;
     this._categories = data.categories;
+    this.isLeader = isLeader ?? false;
 
     const abilityList = characterList[this.id];
     data.abilities.forEach((x) => {
       if (x.id.includes("basic")) {
         const abilityClass = abilityList.basicAbility.get(x.id);
         if (abilityClass) {
-          this.basicAbility = new abilityClass(this);
+          this._basicAbility = new abilityClass(this);
         }
       } else if (x.id.includes("special")) {
         const abilityClass = abilityList.specialAbilities.get(x.id);
         if (abilityClass) {
-          this.specialAbilities.push(new abilityClass(this));
+          this._specialAbilities.push(new abilityClass(this));
         }
       } else if (x.id.includes("unique")) {
         const abilityClass = abilityList.uniqueAbilities.get(x.id);
         if (abilityClass) {
           this._uniqueAbilities.push(new abilityClass(this));
         }
+      } else if (x.id.includes("leader")) {
+        const abilityClass = abilityList.leaderAbility.get(x.id);
+        if (abilityClass) {
+          this._leaderAbility = new abilityClass(this);
+        }
       }
     });
     // this._role = data.role;
     // this._primaryStat = data.primaryStat;
+  }
+
+  /** A unique identifier based on the character id and owner */
+  public get uniqueId() {
+    return this.id + this.owner;
   }
 
   /** Checks if the provided character is the same as this character */
@@ -75,10 +89,10 @@ export class Character {
 
   public get activeAbilities() {
     const arr: ActiveAbility[] = [];
-    if (this.basicAbility) {
-      arr.push(this.basicAbility);
+    if (this._basicAbility) {
+      arr.push(this._basicAbility);
     }
-    arr.push(...this.specialAbilities);
+    arr.push(...this._specialAbilities);
     return arr;
   }
 
@@ -124,7 +138,6 @@ export class Character {
     }
 
     if (srcAbility) {
-      console.log("tm change", amount);
       gameEngine.addLogs(
         new Log({
           character: this,
@@ -177,15 +190,24 @@ export class Character {
   }
 
   public reset(teammates: Character[], opponents: Character[]) {
-    // this._triggers = [];
     this.teammates = teammates;
     this.opponents = opponents;
+    this._uniqueAbilities.forEach((a) => a.deactivate());
+    this._leaderAbility?.deactivate();
+    this.stats.reset();
+    this.statusEffect.reset();
   }
   public initialize() {
     this.stats.initialize();
-    this.specialAbilities.forEach((ability) => {
+    this._specialAbilities.forEach((ability) => {
       ability.initialize();
     });
+    this._uniqueAbilities.forEach((ability) => {
+      ability.activate();
+    });
+    if (this.isLeader) {
+      this._leaderAbility?.activate();
+    }
     this.statusEffect.initialize();
 
     this._tm = 0;
@@ -232,15 +254,7 @@ export class Character {
           effects: { defeated: true },
         })
       );
-
-      // logs.push(
-      //   ...targetCharacter.executePassiveTriggers([
-      //     {
-      //       triggerType: "death",
-      //     },
-      //   ])
-      // );
-      // targetCharacter.removePassiveTriggers();
+      this._uniqueAbilities.forEach((a) => a.deactivate());
     }
   }
   /** Does the character have any effect that is forcing them to be targeted */
@@ -279,7 +293,7 @@ export class Character {
   public endOfTurn(ability: ActiveAbility | null) {
     this.statusEffect.endOfTurn();
 
-    this.specialAbilities.forEach((a) => {
+    this._specialAbilities.forEach((a) => {
       if (ability?.id !== a.id && a.turnsRemaining !== null) {
         a.turnsRemaining = Math.max(a.turnsRemaining - 1, 0);
       }
@@ -306,18 +320,18 @@ export class Character {
     if (this.statusEffect.hasDebuff("Stun")) {
       return null;
     } else if (this.statusEffect.hasDebuff("Ability Block")) {
-      return this.basicAbility;
-    } else if (abilityId === this.basicAbility?.id) {
-      return this.basicAbility;
+      return this._basicAbility;
+    } else if (abilityId === this._basicAbility?.id) {
+      return this._basicAbility;
     } else if (
-      this.specialAbilities.every(
+      this._specialAbilities.every(
         (a) => a.turnsRemaining !== null && a.turnsRemaining > 0
       )
     ) {
-      return this.basicAbility;
+      return this._basicAbility;
     }
 
-    const ability = this.specialAbilities.find((a) => {
+    const ability = this._specialAbilities.find((a) => {
       if (abilityId) {
         return a.id === abilityId;
       } else {
@@ -395,30 +409,24 @@ export class Character {
         !this.isDead &&
         this.owner !== targetCharacter.owner
       ) {
-        // logs.push(
-        //   new Log({
-        //     character: this,
-        //     effects: { countered: true },
-        //   })
-        // );
+        gameEngine.addLogs(
+          new Log({
+            character: this,
+            effects: { countered: true },
+          })
+        );
 
-        // const basicAbility: iAbility = unvue(this.basicAbility);
-        // basicAbility.actions?.forEach((action) => {
-        //   action.targets = { filters: [{ primary: true }] };
-        // });
-        this.basicAbility?.execute();
-        // logs.push(
-        //   ...this.useAbility(
-        //     basicAbility,
-        //     {
-        //       statToModify: "offense",
-        //       amount: this.counterDamage,
-        //       modifiedType: "multiplicative",
-        //     },
-        //     targetCharacter,
-        //     false
-        //   )
-        // );
+        this._basicAbility?.execute(
+          targetCharacter,
+          [
+            {
+              statToModify: "offense",
+              amount: this.stats.counterDamage,
+              modifiedType: "multiplicative",
+            },
+          ],
+          false
+        );
       }
     }
   }
@@ -467,10 +475,7 @@ export class Character {
     });
   }
 
-  public checkCondition(
-    condition: iCondition
-    // targetCharacter: Character
-  ): boolean {
+  public checkCondition(condition?: iCondition): boolean {
     if (!condition) {
       return true;
     }
@@ -739,7 +744,6 @@ export class Character {
           isPercent: true,
         },
       ],
-      // triggers: [],
       otherEffects: unvue({
         ...this.effects,
         immunity: this.statusEffect.immunity,

@@ -309,15 +309,19 @@ export default defineComponent({
       refreshMatches: "refreshMatches",
       removeMatch: "removeMatch",
     }),
-    addToTeam(teamName: "player" | "opponent", unit: Unit) {
+    addToTeam(teamName: "player" | "opponent", unit: Unit, isLeader?: boolean) {
       if (unit instanceof Unit) {
         if (teamName === "player") {
           if (!this.playerTeam.some((x) => x.id === unit.id)) {
-            this.playerTeam.push(new Character(unit, this.player.name));
+            this.playerTeam.push(
+              new Character(unit, this.player.name, isLeader)
+            );
           }
         } else {
           if (!this.opponentTeam.some((x) => x.id === unit.id)) {
-            this.opponentTeam.push(new Character(unit, this.opponent.name));
+            this.opponentTeam.push(
+              new Character(unit, this.opponent.name, isLeader)
+            );
           }
         }
         this.saveData();
@@ -335,8 +339,12 @@ export default defineComponent({
       window.localStorage.setItem(
         "simulation",
         JSON.stringify({
-          playerUnits: this.playerTeam.map((x) => x.id),
-          opponentUnits: this.opponentTeam.map((x) => x.id),
+          playerUnits: this.playerTeam.map(({ id, isLeader }) => {
+            return { id, isLeader };
+          }),
+          opponentUnits: this.opponentTeam.map(({ id, isLeader }) => {
+            return { id, isLeader };
+          }),
         })
       );
     },
@@ -354,6 +362,7 @@ export default defineComponent({
     },
     numbersOnly,
     disableLeader(teamName: "player" | "opponent", characterId): boolean {
+      this.saveData();
       if (teamName === "player") {
         return this.playerTeam.some((character) => {
           return character.isLeader && character.id !== characterId;
@@ -369,17 +378,18 @@ export default defineComponent({
     const teamData = JSON.parse(
       window.localStorage.getItem("simulation") ?? "{}"
     );
+    console.log(teamData);
     if (teamData?.playerUnits) {
-      teamData.playerUnits.forEach((id) => {
-        const unit: Unit = this.getPlayerUnitData(id);
+      teamData.playerUnits.forEach((playerUnit) => {
+        const unit: Unit = this.getPlayerUnitData(playerUnit.id);
         if (unit) {
-          this.addToTeam("player", unit);
+          this.addToTeam("player", unit, playerUnit.isLeader);
         }
       });
-      teamData.opponentUnits.forEach((id) => {
-        const unit: Unit = this.getOpponentUnitData(id);
+      teamData.opponentUnits.forEach((opponentUnit) => {
+        const unit: Unit = this.getOpponentUnitData(opponentUnit.id);
         if (unit) {
-          this.addToTeam("opponent", unit);
+          this.addToTeam("opponent", unit, opponentUnit.isLeader);
         }
       });
     }

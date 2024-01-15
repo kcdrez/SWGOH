@@ -1,5 +1,6 @@
 import { Ability, IUnit, Unit } from "types/unit";
 import { Character } from "./index";
+import { iCondition } from "../gameEngine";
 
 export interface iStats {
   /** The maximum amount of health */
@@ -104,8 +105,6 @@ export interface iStatsCheck {
   amount: number;
   /** Determines if the stat will added to the existing stat (additive) or multiplied together (multiplicative) */
   modifiedType: "additive" | "multiplicative";
-  /** Todo: whats this? */
-  // amountType?: "greater" | "less";
   /** Determines when the effect will expire and thus be removed */
   expires?: {
     /** How many cycles before the effect is removed */
@@ -113,8 +112,8 @@ export interface iStatsCheck {
     /** How often the effect is checked to see if it should be removed */
     frequency: "turn";
   };
-  /** Todo: whats this for? */
-  // stacking?: boolean;
+  condition?: iCondition;
+  characterSourceId?: string;
 }
 
 export class Stats {
@@ -738,10 +737,10 @@ export class Stats {
         );
       },
       set critChance(val) {
-        self.baseStats.physical.critChance = val;
+        self.baseStats.special.critChance = val;
       },
       get armor() {
-        let stat = self.baseStats.physical.armor;
+        let stat = self.baseStats.special.armor;
 
         if (self._role === "Tank") {
           if (self._primaryStat === "tac") {
@@ -955,10 +954,12 @@ export class Stats {
   private getTempStat(statName: string): iStatsCheck[] {
     const tempStatMapping: Record<string, iStatsCheck[]> =
       this.tempStats.reduce((statsMapping, stat) => {
-        if (stat.statToModify in statsMapping) {
-          statsMapping[stat.statToModify].push(stat);
-        } else {
-          statsMapping[stat.statToModify] = [stat];
+        if (this._character.checkCondition(stat.condition)) {
+          if (stat.statToModify in statsMapping) {
+            statsMapping[stat.statToModify].push(stat);
+          } else {
+            statsMapping[stat.statToModify] = [stat];
+          }
         }
         return statsMapping;
       }, {});
@@ -1068,6 +1069,10 @@ export class Stats {
       maxProtection: this.maxProtection,
       protection: this.protection,
     };
+  }
+
+  public reset() {
+    this.tempStats = [];
   }
 }
 
