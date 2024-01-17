@@ -1,4 +1,5 @@
 import { round } from "lodash";
+import { v4 as uuid } from "uuid";
 
 import { chanceOfEvent, randomNumber, unvue } from "utils";
 
@@ -11,7 +12,13 @@ import { Log, tLogData } from "./log";
 
 import { gameEngine, iCondition } from "../gameEngine";
 
-type tEventType = "resisted" | "inflicted" | "receiveDamage";
+type tEventType =
+  | "endOfTurn"
+  | "inflicted"
+  | "matchStart"
+  | "receiveDamage"
+  | "resisted"
+  | "useAbility";
 
 export class Character {
   public stats: Stats;
@@ -118,16 +125,41 @@ export class Character {
    *
    * @param amount - The amount the turn meter will be changed. Positive number will add turn meter, negative number will remove turn meter
    * @param srcAbility - The ability source that is causing the turn meter to change
+   * @param srcCharacter - The character that is causing the turn meter to change
    */
-  public changeTurnMeter(amount: number, srcAbility?: Ability) {
+  public changeTurnMeter(
+    amount: number,
+    srcAbility?: Ability,
+    srcCharacter?: Character
+  ) {
     if (amount === 0) {
       return null;
     }
     let diff = 0;
 
     if (this._tm >= 100 && amount < 0) {
+      const resistedChance = Math.max(
+        this.stats.tenacity - (srcCharacter?.stats.potency ?? 0),
+        0.15
+      );
+      if (chanceOfEvent(resistedChance)) {
+        console.log(amount, srcCharacter?.uniqueId, srcAbility?.id);
+        gameEngine.addLogs(
+          new Log({
+            character: this,
+            statusEffects: {
+              resisted: true,
+              list: [{ name: "TM Decrease", duration: amount, id: uuid() }],
+              type: "debuff",
+            },
+          })
+        );
+        this.dispatchEvent("resisted", { effect: "TM Decrease" });
+        return;
+      }
+
       diff = Math.abs(amount);
-      this._tm = 100 + amount; //note this will remove tm since val is a negative number
+      this._tm = 100 + amount; //note this will remove tm since amount is a negative number
     } else {
       diff = amount < 0 ? Math.min(Math.abs(amount), this._tm) : amount;
       this._tm += amount;
@@ -299,6 +331,8 @@ export class Character {
       }
     });
 
+    this.dispatchEvent("endOfTurn");
+
     // this._tempStats = this._tempStats.reduce(
     //   (list: iStatsCheck[], t: iStatsCheck) => {
     //     if (t.expires && t.expires.frequency === "turn") {
@@ -467,7 +501,7 @@ export class Character {
     return { isCrit, damageTotal };
   }
 
-  public dispatchEvent(eventType: tEventType, context: any) {
+  public dispatchEvent(eventType: tEventType, context?: any) {
     this.events.forEach((event) => {
       if (event.eventType === eventType) {
         event.callback(context);

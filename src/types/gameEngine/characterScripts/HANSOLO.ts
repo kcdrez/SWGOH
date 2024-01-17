@@ -1,0 +1,259 @@
+import { v4 as uuid } from "uuid";
+
+import {
+  Ability,
+  ActiveAbility,
+  PassiveAbility,
+} from "types/gameEngine/characters/abilities";
+import { Character } from "../characters/index";
+import { iStats, iStatsCheck } from "../characters/stats";
+import { gameEngine } from "types/gameEngine/gameEngine";
+import { Log } from "../characters/log";
+
+class basicskill_HANSOLO extends ActiveAbility {
+  constructor(character: Character) {
+    super(
+      "basicskill_HANSOLO",
+      "Quick Draw",
+      `Deal Physical damage to target enemy. If the target has less than 50% Turn Meter, deal 75% more damage. Otherwise, remove 35% Turn Meter. This attack can't be Evaded.`,
+      character
+    );
+  }
+
+  public override execute(
+    targetCharacter?: Character,
+    stats?: iStatsCheck[],
+    canBeCountered: boolean = true,
+    additionalEffects: Function = () => {}
+  ): void {
+    gameEngine.addLogs(
+      new Log({ character: this._character, ability: { used: this } })
+    );
+
+    const { targetList } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
+
+    targetList.forEach((target) => {
+      additionalEffects();
+      //note: Cannot be evaded so no evade check
+      if (target.turnMeter < 50) {
+        this.dealDamage(
+          "physical",
+          target,
+          2.6, //1.85 (standard ability modifier) + .75 (additional 75% damage)
+          5,
+          stats,
+          canBeCountered
+        );
+      } else {
+        this.dealDamage("physical", target, 1.85, 5, stats, canBeCountered);
+        target.changeTurnMeter(-35, this);
+      }
+    });
+
+    this._character.dispatchEvent("useAbility", {
+      abilityId: this.id,
+      target: targetCharacter,
+    });
+  }
+}
+
+class specialskill_HANSOLO01 extends ActiveAbility {
+  constructor(character: Character) {
+    super(
+      "specialskill_HANSOLO01",
+      "Deadeye",
+      `Deal Physical damage to target enemy and Stun them for 1 turn. Gain Turn Meter equal to Han's Critical Chance.`,
+      character
+    );
+    this.cooldown = 3;
+  }
+
+  public execute(
+    targetCharacter?: Character,
+    stats?: iStatsCheck[],
+    canBeCountered: boolean = true
+  ): void {
+    super.execute();
+
+    const { targetList } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
+
+    this._character.changeTurnMeter(
+      this._character.stats.physical.critChance * 100,
+      this
+    );
+
+    targetList.forEach((target) => {
+      if (!this.checkEvade("physical", target)) {
+        this._character?.statusEffect.inflictDebuff(
+          [{ name: "Stun", duration: 1, id: uuid() }],
+          target,
+          1,
+          this
+        );
+        this.dealDamage("physical", target, 3.699, 5, stats, canBeCountered);
+      }
+    });
+  }
+}
+
+class specialskill_HANSOLO02 extends ActiveAbility {
+  constructor(character: Character) {
+    super(
+      "specialskill_HANSOLO02",
+      "Never Tell Me the Odds",
+      `All allies gain Critical Chance Up and Evasion Up for 2 turns. Han gains 50% Turn Meter and Critical Damage Up for 2 turns.`,
+      character
+    );
+    this.cooldown = 4;
+  }
+
+  public execute(
+    targetCharacter?: Character,
+    stats?: iStatsCheck[],
+    canBeCountered: boolean = true
+  ): void {
+    super.execute();
+
+    this._character.changeTurnMeter(50, this);
+    this._character.statusEffect.addBuff(
+      { name: "Critical Damage Up", duration: 2, id: uuid() },
+      1,
+      this
+    );
+
+    const { targetList } = this.findTargets(
+      { filters: [{ allies: true }] },
+      targetCharacter
+    );
+
+    targetList.forEach((target) => {
+      target.statusEffect.addBuff(
+        [
+          { name: "Critical Chance Up", duration: 2, id: uuid() },
+          { name: "Evasion Up", duration: 2, id: uuid() },
+        ],
+        1,
+        this
+      );
+    });
+  }
+}
+
+class uniqueskill_HANSOLO01 extends PassiveAbility {
+  private triggerCount = 0;
+
+  constructor(character: Character) {
+    super(
+      "uniqueskill_HANSOLO01",
+      "Shoots First",
+      `Han has +35% Counter Chance and +20% Critical Chance. The first time each turn Han uses his Basic attack, he attacks again dealing 50% less damage.\n\nHan takes a bonus turn at the start of each encounter. During this turn Han ignores Taunts and he can only use his Basic ability, but it will Stun the target for 1 turn and can't be Resisted.`,
+      character
+    );
+
+    this.activate();
+  }
+
+  public override activate(): void {
+    this.triggerCount = 0;
+
+    this._character?.stats.tempStats.push(
+      {
+        statToModify: "counterChance",
+        amount: 0.35,
+        modifiedType: "additive",
+      },
+      {
+        statToModify: "critChance",
+        amount: 0.2,
+        modifiedType: "additive",
+      }
+    );
+
+    this._character?.events.push(
+      {
+        characterSourceId: this._character.uniqueId,
+        eventType: "useAbility",
+        callback: ({ abilityId, target }) => {
+          if (abilityId === "basicskill_HANSOLO" && this.triggerCount < 1) {
+            this.triggerCount++;
+            const ability = this._character.chooseAbility(abilityId);
+            ability?.execute(
+              target,
+              [
+                {
+                  statToModify: "offense",
+                  amount: 0.5,
+                  modifiedType: "multiplicative",
+                },
+              ],
+              true
+            );
+          }
+        },
+      },
+      {
+        characterSourceId: this._character.uniqueId,
+        eventType: "endOfTurn",
+        callback: () => {
+          this.triggerCount = 0;
+        },
+      },
+      {
+        characterSourceId: this._character.uniqueId,
+        eventType: "matchStart",
+        callback: () => {
+          const ability = this._character.chooseAbility("basicskill_HANSOLO");
+
+          const { targetList } = this.findTargets({
+            filters: [{ allies: false }],
+            ignoreTaunt: true,
+            targetCount: 1,
+          });
+
+          targetList.forEach((target) => {
+            ability?.execute(target, [], true, () => {
+              this._character.statusEffect.inflictDebuff(
+                [{ name: "Stun", duration: 1, id: uuid(), cantResist: true }],
+                target,
+                1,
+                this
+              );
+            });
+          });
+        },
+      }
+    );
+  }
+}
+
+const basicAbility = new Map([["basicskill_HANSOLO", basicskill_HANSOLO]]);
+
+const specialAbilities = new Map([
+  ["specialskill_HANSOLO01", specialskill_HANSOLO01],
+  ["specialskill_HANSOLO02", specialskill_HANSOLO02],
+]);
+
+const uniqueAbilities = new Map([
+  ["uniqueskill_HANSOLO01", uniqueskill_HANSOLO01],
+]);
+
+const leaderAbility = new Map([]);
+
+export default {
+  specialAbilities,
+  uniqueAbilities,
+  basicAbility,
+  leaderAbility,
+};

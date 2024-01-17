@@ -378,7 +378,6 @@ export default defineComponent({
     const teamData = JSON.parse(
       window.localStorage.getItem("simulation") ?? "{}"
     );
-    console.log(teamData);
     if (teamData?.playerUnits) {
       teamData.playerUnits.forEach((playerUnit) => {
         const unit: Unit = this.getPlayerUnitData(playerUnit.id);

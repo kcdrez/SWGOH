@@ -66,7 +66,7 @@
     </template>
     <template v-if="log?.heal"
       >recovered <span :class="log.heal.type">{{ log.heal.amount }}</span>
-      <span class="text-capitalize ms-1">{{ log.heal.type }}</span>
+      <span class="ms-1">{{ log.heal.type }}</span>
     </template>
     <template v-if="log?.effects?.assisted">
       <template v-if="isStunned"
@@ -188,9 +188,19 @@ export default defineComponent({
 .protection {
   color: $gray-1;
   text-shadow: 0px 0px 3px $gray-9;
+
+  & + span {
+    text-transform: capitalize;
+    display: inline-block;
+  }
 }
 .health {
   color: $success-light-2;
   text-shadow: 0px 0px 3px $gray-1;
+
+  & + span {
+    text-transform: capitalize;
+    display: inline-block;
+  }
 }
 </style>

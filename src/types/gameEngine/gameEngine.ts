@@ -439,6 +439,37 @@ export class Engine {
 
     allCharacters.forEach((x) => x.initialize());
 
+    allCharacters
+      .filter((char) => {
+        return char.events.some((x) => x.eventType === "matchStart");
+      })
+      .sort((a, b) => {
+        if (
+          (a.id === "HANSOLO" && b.id === "HANSOLO") ||
+          (a.id !== "HANSOLO" && b.id !== "HANSOLO")
+        ) {
+          if (a.stats.speed > b.stats.speed) {
+            return 1;
+          } else if (b.stats.speed > a.stats.speed) {
+            return -1;
+          } else {
+            return randomNumber(0, 1) === 0 ? 1 : -1;
+          }
+        } else if (a.id === "HANSOLO") {
+          return 1;
+        } else if (b.id === "HANSOLO") {
+          return -1;
+        }
+        return 0;
+      })
+      .forEach((char, index) => {
+        this.turns.push(
+          new Turn(0 + 0.1 * index, char, [], [], "Start of Match")
+        );
+
+        char.dispatchEvent("matchStart");
+      });
+
     // const startTriggers: Character[] = allCharacters
     //   .filter((char) => {
     //     return char.triggers.some((trigger) => {

@@ -430,7 +430,7 @@ export class StatusEffect {
                 },
               })
             );
-            this._character.dispatchEvent("inflicted", { debuff });
+            this._character.dispatchEvent("inflicted", { effect: debuff.name });
           }
         } else {
           gameEngine.addLogs(
@@ -439,7 +439,7 @@ export class StatusEffect {
               statusEffects: { resisted: true, list: [debuff], type: "debuff" },
             })
           );
-          targetCharacter.dispatchEvent("resisted", { debuff });
+          targetCharacter.dispatchEvent("resisted", { effect: debuff.name });
         }
       }
     });
@@ -754,6 +754,8 @@ export type tBuff =
   | "Speed Up"
   | "Taunt"
   | "Tenacity Up"
+  | "TM Decrease"
+  | "TM Increase"
   | "Translation"
   | "all";
 export type tStatusEffect = "Guard";

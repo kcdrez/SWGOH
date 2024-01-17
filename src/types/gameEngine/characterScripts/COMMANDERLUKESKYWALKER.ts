@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
 
 import {
-  Ability,
   ActiveAbility,
   PassiveAbility,
 } from "types/gameEngine/characters/abilities";
@@ -14,7 +13,7 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
     super(
       "basicskill_COMMANDERLUKESKYWALKER",
       "Destined Strike",
-      "Deal Physical damage to target enemy and inflict Speed Down and Defense Down for 2 turns. If the target already had Speed Down, remove 30% Turn Meter. If the target already had Defense Down, inflict Stun for 1 turn.",
+      `Deal Physical damage to target enemy and inflict Speed Down and Defense Down for 2 turns. If the target already had Speed Down, remove 30% Turn Meter. If the target already had Defense Down, inflict Stun for 1 turn.`,
       character
     );
   }
@@ -67,8 +66,6 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
           1,
           this
         );
-
-        this._character?.checkDeath(target);
       }
     });
   }
@@ -177,7 +174,6 @@ class specialskill_COMMANDERLUKESKYWALKER01 extends ActiveAbility {
         1,
         this
       );
-      this._character?.checkDeath(target);
     });
   }
 }
@@ -217,7 +213,7 @@ class uniqueskill_COMMANDERLUKESKYWALKER02 extends PassiveAbility {
           this._character?.heal(
             {
               amount: 0.05,
-              healthType: "protection",
+              healthType: "health",
               amountType: "multiplicative",
             },
             this
@@ -228,9 +224,11 @@ class uniqueskill_COMMANDERLUKESKYWALKER02 extends PassiveAbility {
         characterSourceId: this._character.uniqueId,
         eventType: "inflicted",
         callback: () => {
-          this._character?.changeTurnMeter(5, this);
+          this._character?.changeTurnMeter(10, this);
           this._character?.teammates.forEach((target) => {
-            target.changeTurnMeter(5, this);
+            if (!target.isSelf(this._character)) {
+              target.changeTurnMeter(5, this);
+            }
           });
         },
       }
@@ -363,6 +361,10 @@ class leaderskill_COMMANDERLUKESKYWALKER extends PassiveAbility {
   }
 }
 
+const basicAbility = new Map([
+  ["basicskill_COMMANDERLUKESKYWALKER", basicskill_COMMANDERLUKESKYWALKER],
+]);
+
 const specialAbilities = new Map([
   [
     "specialskill_COMMANDERLUKESKYWALKER02",
@@ -385,10 +387,6 @@ const uniqueAbilities = new Map([
   ],
 ]);
 
-const basicAbility = new Map([
-  ["basicskill_COMMANDERLUKESKYWALKER", basicskill_COMMANDERLUKESKYWALKER],
-]);
-
 const leaderAbility = new Map([
   ["leaderskill_COMMANDERLUKESKYWALKER", leaderskill_COMMANDERLUKESKYWALKER],
 ]);
@@ -399,12 +397,3 @@ export default {
   basicAbility,
   leaderAbility,
 };
-// const x: Map<string, Ability> = new Map({
-//   meow: basicskill_COMMANDERLUKESKYWALKER
-// })
-
-// const characterMapping: Record<string, Ability> = {
-//   basicskill_COMMANDERLUKESKYWALKER
-// };
-
-// export default characterMapping;

@@ -12,12 +12,12 @@ export abstract class Ability {
   public name: string;
   public text: string;
 
-  protected _character?: Character;
+  protected _character: Character;
   constructor(
     id: string,
     name: string,
     text: string,
-    parentCharacter?: Character
+    parentCharacter: Character
   ) {
     this.id = id;
     this.name = name;
@@ -177,11 +177,17 @@ export abstract class ActiveAbility extends CharacterAbility {
   public execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered: boolean = true,
+    additionalEffects: Function = () => {}
   ) {
     gameEngine.addLogs(
       new Log({ character: this._character, ability: { used: this } })
     );
+    additionalEffects();
+    this._character.dispatchEvent("useAbility", {
+      abilityId: this.id,
+      target: targetCharacter,
+    });
   }
 
   public checkEvade(
@@ -239,8 +245,22 @@ export abstract class ActiveAbility extends CharacterAbility {
           (this._character?.stats.tenacity ?? 0) - srcCharacter?.stats.potency,
           0.15
         );
+
         if (chanceOfEvent(resistedChance)) {
-          this._character?.dispatchEvent("resisted", {});
+          gameEngine.addLogs(
+            new Log({
+              character: this._character,
+              statusEffects: {
+                resisted: true,
+                list: [{ name, duration: 0, id: uuid() }],
+                type: "debuff",
+              },
+            })
+          );
+          this._character?.dispatchEvent("resisted", {
+            effect: "Cooldown Increase",
+          });
+          return;
         }
       }
 
@@ -310,12 +330,10 @@ export abstract class ActiveAbility extends CharacterAbility {
           amount: damageTotal * this._character.stats.healthSteal,
           healthType: "health",
         },
-        {
-          id: uuid(),
-          name: "Health Steal",
-          text: "The percentage amount of the damage that this character heals whenever they deal damage.",
-        }
+        new HealthSteal(this._character)
       );
+
+      this._character?.checkDeath(targetCharacter);
 
       targetCharacter.dispatchEvent("receiveDamage", {
         damageAmount: damageTotal,
@@ -360,6 +378,17 @@ export abstract class PassiveAbility extends CharacterAbility {
         return stat.characterSourceId !== this._character?.uniqueId;
       });
     });
+  }
+}
+
+class HealthSteal extends Ability {
+  constructor(character: Character) {
+    super(
+      "healthSteal",
+      "Health Steal",
+      "The percentage amount of the damage that this character heals whenever they deal damage.",
+      character
+    );
   }
 }
 
