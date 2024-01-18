@@ -1,12 +1,16 @@
 import { v4 as uuid } from "uuid";
 
 import { Character } from "./index";
-import { iStats, iStatsCheck, Stats } from "./stats";
+import { iStatsCheck } from "./stats";
 import { tBuff, tDebuff, tStatusEffect } from "./statusEffects";
-import { chanceOfEvent, randomNumber, unvue } from "utils";
+import { chanceOfEvent, randomNumber } from "utils";
 import { gameEngine } from "types/gameEngine/gameEngine";
 import { Log } from "./log";
 
+/**
+ * A generic abstract class for any type of ability
+ * @abstract @class Ability
+ */
 export abstract class Ability {
   public id: string;
   public name: string;
@@ -26,6 +30,11 @@ export abstract class Ability {
   }
 }
 
+/**
+ * A generic abstract class for any type of ability that can exist on a character
+ * @abstract @class CharacterAbility
+ * @extends Ability
+ */
 abstract class CharacterAbility extends Ability {
   constructor(
     id: string,
@@ -89,11 +98,11 @@ abstract class CharacterAbility extends Ability {
         } else if (targetFilter.statusEffects) {
           return char.statusEffect.hasStatusEffect(targetFilter.statusEffects);
         } else if (targetFilter.tags) {
-          return anyTagsMatch(char, targetFilter.tags, this.id);
+          return anyTagsMatch(char, targetFilter.tags, this._character.id);
         } else if (targetFilter.primary) {
           return char.isSelf(forcedTarget ?? undefined);
         } else if (targetFilter.targetIds) {
-          return anyTagsMatch(char, targetFilter.targetIds, this.id);
+          return anyTagsMatch(char, targetFilter.targetIds, this._character.id);
         }
         return false;
       });
@@ -154,7 +163,85 @@ abstract class CharacterAbility extends Ability {
     }
     return { targetList: filteredList, primaryTarget };
   }
+
+  /** Deals damage to a target
+   *
+   * @param damageType - The type of damage being dealt (physical, special, or true)
+   * @param targetCharacter - The character to receive the damage
+   * @param abilityModifier - The modifier for the specific ability which will be multplied by the variance to determine the amount of damage dealt
+   * @param variance - The amount of variance that the damage can be
+   * @param stats - An array of stats to modify the starting stat value
+   */
+  public dealDamage(
+    damageType: "physical" | "special" | "true",
+    targetCharacter: Character,
+    abilityModifier: number = 0,
+    variance: number = 5,
+    stats?: iStatsCheck[],
+    canBeCountered: boolean = true
+  ) {
+    if (this._character) {
+      const { offense, critChance, armorPen } =
+        this._character.stats.getCombatStats(damageType, stats);
+      const varianceOffense =
+        damageType === "true"
+          ? 1
+          : offense * (1 - randomNumber(0 - variance, variance) / 100);
+
+      const { isCrit, damageTotal } = targetCharacter.receiveDamage(
+        damageType,
+        varianceOffense * abilityModifier,
+        armorPen,
+        critChance,
+        this._character.stats.critDamage,
+        stats
+      );
+
+      gameEngine.addLogs([
+        new Log({
+          target: targetCharacter,
+          damage: {
+            amount: damageTotal,
+            isCrit,
+          },
+        }),
+      ]);
+
+      this._character.heal(
+        {
+          amountType: "additive",
+          amount: damageTotal * this._character.stats.healthSteal,
+          healthType: "health",
+        },
+        new HealthSteal(this._character)
+      );
+
+      this._character?.checkDeath(targetCharacter);
+
+      this._character.dispatchEvent("dealDamage", {
+        damageAmount: damageTotal,
+        isCrit,
+        damageType,
+        target: targetCharacter,
+      });
+
+      targetCharacter.dispatchEvent("receiveDamage", {
+        damageAmount: damageTotal,
+        isCrit,
+        damageType,
+        attackSource: this.id,
+      });
+
+      targetCharacter.counterAttack(this._character, canBeCountered);
+    }
+  }
 }
+
+/**
+ * A generic abstract class for any type of ability can be activated (such as basic or special abilities)
+ * @abstract @class ActiveAbility
+ * @extends CharacterAbility
+ */
 export abstract class ActiveAbility extends CharacterAbility {
   public turnsRemaining: number | null = null;
   public cooldown: number | null = null;
@@ -282,70 +369,13 @@ export abstract class ActiveAbility extends CharacterAbility {
       );
     }
   }
-
-  /** Deals damage to a target
-   *
-   * @damageType - The type of damage being dealt (physical, special, or true)
-   * @targetCharacter - The character to receive the damage
-   * @abilityModifier - The modifier for the specific ability
-   * @variance - The amount of variance that the damage can be
-   * @stats - An array of stats to modify the starting stat value
-   */
-  public dealDamage(
-    damageType: "physical" | "special" | "true",
-    targetCharacter: Character,
-    abilityModifier: number = 0,
-    variance: number = 5,
-    stats?: iStatsCheck[],
-    canBeCountered: boolean = true
-  ) {
-    if (this._character) {
-      const { offense, critChance, armorPen } =
-        this._character.stats.getCombatStats(damageType, stats);
-      const varianceOffense =
-        offense * (1 - randomNumber(0 - variance, variance) / 100);
-
-      const { isCrit, damageTotal } = targetCharacter.receiveDamage(
-        damageType,
-        varianceOffense * abilityModifier,
-        armorPen,
-        critChance,
-        this._character.stats.critDamage,
-        stats
-      );
-
-      gameEngine.addLogs([
-        new Log({
-          target: targetCharacter,
-          damage: {
-            amount: damageTotal,
-            isCrit,
-          },
-        }),
-      ]);
-
-      this._character.heal(
-        {
-          amountType: "additive",
-          amount: damageTotal * this._character.stats.healthSteal,
-          healthType: "health",
-        },
-        new HealthSteal(this._character)
-      );
-
-      this._character?.checkDeath(targetCharacter);
-
-      targetCharacter.dispatchEvent("receiveDamage", {
-        damageAmount: damageTotal,
-        isCrit,
-        damageType,
-      });
-
-      targetCharacter.counterAttack(this._character, canBeCountered);
-    }
-  }
 }
 
+/**
+ * A generic abstract class for any type of ability is passive and cannot be activated (such as unique or leader)
+ * @abstract @class PassiveAbility
+ * @extends CharacterAbility
+ */
 export abstract class PassiveAbility extends CharacterAbility {
   constructor(
     id: string,
@@ -381,6 +411,11 @@ export abstract class PassiveAbility extends CharacterAbility {
   }
 }
 
+/**
+ * A class specifically used for the Health Steal mechanic when dealing damage
+ * @class PassiveAbility
+ * @extends CharacterAbility
+ */
 class HealthSteal extends Ability {
   constructor(character: Character) {
     super(

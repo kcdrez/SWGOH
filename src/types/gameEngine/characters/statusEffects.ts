@@ -12,6 +12,11 @@ export class StatusEffect {
   private _debuffs: iDebuff[] = [];
   private _statusEffects: iStatusEffect[] = [];
   private _character: Character;
+  private _immunity: {
+    sourceId: string;
+    value: boolean;
+    effect: string;
+  }[] = [];
 
   constructor(parentCharacter: Character) {
     this._character = parentCharacter;
@@ -528,7 +533,7 @@ export class StatusEffect {
    * @effect - The status effect being added
    * @sourceAbility - The source ability that is adding the buff
    */
-  private addStatusEffect(
+  public addStatusEffect(
     effect: iStatusEffect | iStatusEffect[],
     sourceAbility: Ability | null
   ) {
@@ -543,7 +548,7 @@ export class StatusEffect {
         const match = this._statusEffects.find((x) => x.name === effect.name);
 
         if (effect.isStackable || !match) {
-          this._buffs.push({
+          this._statusEffects.push({
             ...unvue(effect),
             isNew: true,
           });
@@ -552,7 +557,6 @@ export class StatusEffect {
           match.isNew = true;
         }
 
-        this._statusEffects.push(effect);
         gameEngine.addLogs(
           new Log({
             character: this._character,
@@ -574,7 +578,7 @@ export class StatusEffect {
    * @statusEffect - The status effect being removed
    * @param sourceAbility - The ability that is causing the removal
    */
-  private removeStatusEffect(
+  public removeStatusEffect(
     statusEffect:
       | iStatusEffect
       | iStatusEffect[]
@@ -636,38 +640,39 @@ export class StatusEffect {
   }
   /** A mapping of status effects that the character cannot gain */
   public get immunity(): Record<string, boolean> {
-    return {};
-    // return this._triggers.reduce(
-    //   (immuneMapping, trigger) => {
-    //     if (trigger.triggerType === "always") {
-    //       trigger.actions?.forEach((action) => {
-    //         action.effects?.forEach((effect) => {
-    //           if (effect.immune) {
-    //             if (this.checkCondition(effect.condition, this)) {
-    //               effect.immune.negativeStatusEffects?.forEach((x) => {
-    //                 immuneMapping[x] = true;
-    //               });
-    //               effect.immune.positiveStatusEffects?.forEach((x) => {
-    //                 immuneMapping[x] = true;
-    //               });
-    //             }
-    //           }
-    //         });
-    //       });
-    //     }
-    //     return immuneMapping;
-    //   },
-    //   {
-    //     Daze: this.hasStatusEffect("Guard"),
-    //     Stun: this.hasStatusEffect("Guard"),
-    //   }
-    // );
+    return this._immunity.reduce(
+      (map, el) => {
+        if (el.effect in map) {
+          map[el.effect] = true;
+        }
+        return map;
+      },
+      {
+        Daze: this.hasStatusEffect("Guard"),
+        Stun: this.hasStatusEffect("Guard"),
+      }
+    );
+  }
+
+  public addImmune(sourceId: string, effect: string) {
+    this._immunity.push({ sourceId, value: true, effect });
+  }
+
+  public removeImmune(sourceId: string, effect: string) {
+    const index = this._immunity.findIndex(
+      (x) => x.sourceId === sourceId && effect === x.effect
+    );
+
+    if (index > -1) {
+      this._immunity.splice(index, 1);
+    }
   }
 
   public reset() {
     this._buffs = [];
     this._debuffs = [];
     this._statusEffects = [];
+    this._immunity = [];
   }
 }
 

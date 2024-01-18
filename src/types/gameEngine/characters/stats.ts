@@ -88,6 +88,7 @@ export interface iStatsCheck {
    */
   statToModify:
     | "armor"
+    | "armorPen"
     | "counterChance"
     | "counterDamage"
     | "critAvoid"
@@ -1071,6 +1072,21 @@ export class Stats {
     };
   }
 
+  public endOfTurn() {
+    this.tempStats = this.tempStats.reduce(
+      (list: iStatsCheck[], stat: iStatsCheck) => {
+        if (stat.expires?.frequency === "turn") {
+          stat.expires.count--;
+          if (stat.expires.count > 0) {
+            list.push(stat);
+          }
+        }
+        return list;
+      },
+      []
+    );
+  }
+
   public reset() {
     this.tempStats = [];
   }
@@ -1100,65 +1116,6 @@ export function modifyStat(
     });
   }
   return modifiedStat;
-}
-
-export interface iStatsCheck {
-  /** The stat that will be modified
-   *
-   * armor: Increases the amount of offense to mitigate
-   *
-   * counterChance: The chances of counter attacking (as a decimal)
-   *
-   * counterDamage: The amount of damage used to scale offense (as a decimal; e.g. 1.5 would be 150% damage)
-   *
-   * critAvoid: The chances to mitigate a critical hit (as a decimal)
-   *
-   * critChance: The chances of getting a critical hit (as a decimal)
-   *
-   * dodge: The chances of missing an attack/effect
-   *
-   * health: The amount of health
-   *
-   * maxHealth/maxProtection: The max health or protection
-   *
-   * offense: The amount of damage an attack deals
-   *
-   * potency: The chances a negative status effect will successful be inflicted
-   *
-   * protection: The amount of protection
-   *
-   * tenacity: The chances to mitigate a negative status effect
-   */
-  statToModify:
-    | "armor"
-    | "counterChance"
-    | "counterDamage"
-    | "critAvoid"
-    | "critChance"
-    | "dodge"
-    | "health"
-    | "maxHealth"
-    | "maxProtection"
-    | "offense"
-    | "potency"
-    | "protection"
-    | "resistance"
-    | "tenacity";
-  /** The amount that the stat will be modified */
-  amount: number;
-  /** Determines if the stat will added to the existing stat (additive) or multiplied together (multiplicative) */
-  modifiedType: "additive" | "multiplicative";
-  /** Todo: whats this? */
-  amountType?: "greater" | "less";
-  /** Determines when the effect will expire and thus be removed */
-  expires?: {
-    /** How many cycles before the effect is removed */
-    count: number;
-    /** How often the effect is checked to see if it should be removed */
-    frequency: "turn";
-  };
-  /** Todo: whats this for? */
-  stacking?: boolean;
 }
 
 export interface iHeal {

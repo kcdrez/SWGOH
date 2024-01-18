@@ -13,8 +13,10 @@ import { Log, tLogData } from "./log";
 import { gameEngine, iCondition } from "../gameEngine";
 
 type tEventType =
+  | "dealDamage"
   | "endOfTurn"
   | "inflicted"
+  | "matchSetup"
   | "matchStart"
   | "receiveDamage"
   | "resisted"
@@ -143,7 +145,6 @@ export class Character {
         0.15
       );
       if (chanceOfEvent(resistedChance)) {
-        console.log(amount, srcCharacter?.uniqueId, srcAbility?.id);
         gameEngine.addLogs(
           new Log({
             character: this,
@@ -324,6 +325,7 @@ export class Character {
 
   public endOfTurn(ability: ActiveAbility | null) {
     this.statusEffect.endOfTurn();
+    this.stats.endOfTurn();
 
     this._specialAbilities.forEach((a) => {
       if (ability?.id !== a.id && a.turnsRemaining !== null) {
@@ -331,7 +333,7 @@ export class Character {
       }
     });
 
-    this.dispatchEvent("endOfTurn");
+    // this.dispatchEvent("endOfTurn");
 
     // this._tempStats = this._tempStats.reduce(
     //   (list: iStatsCheck[], t: iStatsCheck) => {
@@ -383,11 +385,39 @@ export class Character {
     return !!this._leaderAbility;
   }
 
+  /** Assists with their basic attack
+   *
+   * @param modifiers - A list of stats to change the outcome of the damage
+   * @param targetCharacter - The character in which is being attacked
+   * @param srcAbility - The ability source that is calling the assist
+   */
+  public assist(
+    modifiers: iStatsCheck[],
+    targetCharacter?: Character,
+    srcAbility?: Ability
+  ) {
+    if (this._basicAbility) {
+      if (
+        !this.statusEffect.hasDebuff("Stun") &&
+        !this.statusEffect.hasDebuff("Daze")
+      ) {
+        gameEngine.addLogs(
+          new Log({
+            character: this,
+            effects: { assisted: true },
+            ability: { source: srcAbility },
+          })
+        );
+        this._basicAbility.execute(targetCharacter, modifiers, false);
+      }
+    }
+  }
+
   /** Heals the character for a determined amount of health or protection
    *
-   * @healData - The data that determines how much and what type of healing to do
-   * @sourceAbility - The ability that has the heal effect
-   * @amountSource - The source value when healing a multiplicative amount (defaults to max value)
+   * @param healData - The data that determines how much and what type of healing to do
+   * @param sourceAbility - The ability that has the heal effect
+   * @param amountSource - The source value when healing a multiplicative amount (defaults to max value)
    */
   public heal(
     healData: iHeal,
@@ -481,24 +511,26 @@ export class Character {
     critDamage: number,
     stats?: iStatsCheck[]
   ): { isCrit: boolean; damageTotal: number } {
-    const { armor, critAvoid } = this.stats.getCombatStats(damageType, stats);
-    const modifiedArmor = Math.max(armor - armorPen, 0);
-    const damageReduction =
-      (modifiedArmor * 100) / (modifiedArmor + 637.5) / 100;
-    const damageTaken = damageAmount * (1 - damageReduction);
+    if (damageType === "true") {
+      this.stats.protection -= damageAmount;
+      return { isCrit: false, damageTotal: damageAmount };
+    } else {
+      const { armor, critAvoid } = this.stats.getCombatStats(damageType, stats);
+      const modifiedArmor = Math.max(armor - armorPen, 0);
+      const damageReduction =
+        (modifiedArmor * 100) / (modifiedArmor + 637.5) / 100;
+      const damageTaken = damageAmount * (1 - damageReduction);
 
-    const isCrit =
-      damageType === "true"
-        ? false
-        : chanceOfEvent((critChance - critAvoid) * 100);
+      const isCrit = chanceOfEvent((critChance - critAvoid) * 100);
 
-    const damageTotal = Math.max(
-      Math.round(damageTaken * (isCrit ? critDamage : 1)),
-      1
-    );
+      const damageTotal = Math.max(
+        Math.round(damageTaken * (isCrit ? critDamage : 1)),
+        1
+      );
 
-    this.stats.protection -= damageTotal;
-    return { isCrit, damageTotal };
+      this.stats.protection -= damageTotal;
+      return { isCrit, damageTotal };
+    }
   }
 
   public dispatchEvent(eventType: tEventType, context?: any) {
@@ -548,24 +580,24 @@ export class Character {
           stats.modifiedType === "multiplicative"
         ) {
           const percent = num / this.stats.maxHealth;
-          meetsStatRequirement =
-            stats.amountType === "greater"
-              ? stats.amount < percent
-              : stats.amount > percent;
+          // meetsStatRequirement =
+          //   stats.amountType === "greater"
+          //     ? stats.amount < percent
+          //     : stats.amount > percent;
         } else if (
           stats.statToModify === "protection" &&
           stats.modifiedType === "multiplicative"
         ) {
           const percent = num / this.stats.maxProtection;
-          meetsStatRequirement =
-            stats.amountType === "greater"
-              ? stats.amount > percent
-              : stats.amount < percent;
+          // meetsStatRequirement =
+          //   stats.amountType === "greater"
+          //     ? stats.amount > percent
+          //     : stats.amount < percent;
         } else {
-          meetsStatRequirement =
-            stats.amountType === "greater"
-              ? stats.amount < num
-              : stats.amount > num;
+          // meetsStatRequirement =
+          //   stats.amountType === "greater"
+          //     ? stats.amount < num
+          //     : stats.amount > num;
         }
       } else {
         console.warn(`Could not find stat ${stat.type} on ${this.name}`);

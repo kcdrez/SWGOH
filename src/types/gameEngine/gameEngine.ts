@@ -420,10 +420,6 @@ export class Engine {
       }
     });
 
-    const allCharacters: Character[] = [
-      ...this._playerCharacters,
-      ...this._opponentCharacters,
-    ] as Character[];
     this._playerCharacters.forEach((x) =>
       x.reset(
         this._playerCharacters as Character[],
@@ -437,9 +433,20 @@ export class Engine {
       )
     );
 
-    allCharacters.forEach((x) => x.initialize());
+    this.allCharacters.forEach((character) => character.initialize());
 
-    allCharacters
+    this.allCharacters
+      .filter((char) => {
+        return char.events.some((x) => x.eventType === "matchSetup");
+      })
+      .forEach((character, index) => {
+        this.turns.push(
+          new Turn(0 + 0.1 * index, character, [], [], "Match Set Up")
+        );
+        character.dispatchEvent("matchSetup");
+      });
+
+    this.allCharacters
       .filter((char) => {
         return char.events.some((x) => x.eventType === "matchStart");
       })
@@ -464,79 +471,13 @@ export class Engine {
       })
       .forEach((char, index) => {
         this.turns.push(
-          new Turn(0 + 0.1 * index, char, [], [], "Start of Match")
+          new Turn(0 + 0.2 * index, char, [], [], "Start of Match")
         );
 
         char.dispatchEvent("matchStart");
       });
 
-    // const startTriggers: Character[] = allCharacters
-    //   .filter((char) => {
-    //     return char.triggers.some((trigger) => {
-    //       return trigger.triggerType === "start";
-    //     });
-    //   })
-    //   .sort((a, b) => {
-    //     if (
-    //       (a.id === "HANSOLO" && b.id === "HANSOLO") ||
-    //       (a.id !== "HANSOLO" && b.id !== "HANSOLO")
-    //     ) {
-    //       if (a.speed > b.speed) {
-    //         return 1;
-    //       } else if (b.speed > a.speed) {
-    //         return -1;
-    //       } else {
-    //         return randomNumber(0, 1) === 0 ? 1 : -1;
-    //       }
-    //     } else if (a.id === "HANSOLO") {
-    //       return 1;
-    //     } else if (b.id === "HANSOLO") {
-    //       return -1;
-    //     }
-    //     return 0;
-    //   });
-
-    // const pregameTriggers = allCharacters.filter((char) => {
-    //   return char.triggers.some((trigger) => {
-    //     return trigger.triggerType === "pregame";
-    //   });
-    // });
-
-    // const setupTriggers = allCharacters.filter((char) => {
-    //   return char.triggers.some((trigger) => {
-    //     return trigger.triggerType === "setup";
-    //   });
-    // });
-
-    // let i = 0;
-
-    // pregameTriggers.forEach((char) => {
-    //   const t = new Turn(0, char, [], [], "Match Set Up");
-    //   this.turns.push(t);
-    //   const logs = char.executePassiveTriggers([{ triggerType: "pregame" }]);
-    //   t.addLogs(logs);
-    // });
-
-    // setupTriggers.forEach((char) => {
-    //   const t = new Turn(0, char, [], [], "Match Set Up2");
-    //   this.turns.push(t);
-    //   const logs = char.executePassiveTriggers([{ triggerType: "setup" }]);
-    //   t.addLogs(logs);
-    // });
-
-    // startTriggers.forEach((char) => {
-    //   const t = new Turn(0 + 0.1, char, [], [], "Start of Match");
-    //   this.turns.push(t);
-    //   const logs = char.executePassiveTriggers([
-    //     {
-    //       triggerType: "start",
-    //       ability: null,
-    //       target: char,
-    //     },
-    //   ]);
-
-    //   t.addLogs(logs);
-    // });
+    this.allCharacters.forEach((c) => c.dispatchEvent("endOfTurn"));
   }
 
   private nextTurn(turnNumber: number) {
@@ -566,13 +507,9 @@ export class Engine {
         }
       });
 
-      const turn = new Turn(turnNumber, character);
-      this.turns.push(turn);
+      this.turns.push(new Turn(turnNumber, character));
       character.takeAction();
-      // turn.addLogs(logs);
-      // turn.addEndOfTurnLogs(endOfTurnLogs);
-
-      // this.allCharacters.forEach((c) => c.resetTriggers("turn"));
+      this.allCharacters.forEach((c) => c.dispatchEvent("endOfTurn"));
     }
   }
 

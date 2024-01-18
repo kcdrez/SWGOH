@@ -23,50 +23,50 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute(targetCharacter);
+    super.execute(targetCharacter, stats, canBeCountered, () => {
+      const { targetList } = this.findTargets(
+        {
+          filters: [{ allies: false }],
+          targetCount: 1,
+        },
+        targetCharacter
+      );
 
-    const { targetList } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
+      targetList.forEach((target) => {
+        if (!this.checkEvade("physical", target)) {
+          this.dealDamage("physical", target, 1.781, 5, stats, canBeCountered);
+          if (
+            target.checkCondition({
+              debuffs: ["Speed Down"],
+            })
+          ) {
+            target.changeTurnMeter(-30, this);
+          }
 
-    targetList.forEach((target) => {
-      if (!this.checkEvade("physical", target)) {
-        this.dealDamage("physical", target, 1.781, 5, stats, canBeCountered);
-        if (
-          target.checkCondition({
-            debuffs: ["Speed Down"],
-          })
-        ) {
-          target.changeTurnMeter(-30, this);
-        }
+          if (
+            target.checkCondition({
+              debuffs: ["Defense Down"],
+            })
+          ) {
+            this._character?.statusEffect.inflictDebuff(
+              [{ name: "Stun", duration: 1, id: uuid() }],
+              target,
+              1,
+              this
+            );
+          }
 
-        if (
-          target.checkCondition({
-            debuffs: ["Defense Down"],
-          })
-        ) {
           this._character?.statusEffect.inflictDebuff(
-            [{ name: "Stun", duration: 1, id: uuid() }],
+            [
+              { name: "Speed Down", duration: 2, id: uuid() },
+              { name: "Defense Down", duration: 2, id: uuid() },
+            ],
             target,
             1,
             this
           );
         }
-
-        this._character?.statusEffect.inflictDebuff(
-          [
-            { name: "Speed Down", duration: 2, id: uuid() },
-            { name: "Defense Down", duration: 2, id: uuid() },
-          ],
-          target,
-          1,
-          this
-        );
-      }
+      });
     });
   }
 }
@@ -83,52 +83,52 @@ class specialskill_COMMANDERLUKESKYWALKER02 extends ActiveAbility {
   }
 
   public execute(): void {
-    super.execute();
-
-    this._character?.statusEffect.removeDebuff("all", this._character);
-    this._character?.changeTurnMeter(100, this);
-    this._character?.heal(
-      {
-        healthType: "protection",
-        amountType: "multiplicative",
-        amount: 0.4,
-      },
-      this
-    );
-    this._character?.heal(
-      {
-        healthType: "health",
-        amountType: "multiplicative",
-        amount: 0.4,
-      },
-      this
-    );
-
-    if (
-      this._character?.checkCondition({
-        buffs: ["Call to Action"],
-      })
-    ) {
-      this._character?.statusEffect.removeBuff(
-        "Call to Action",
-        this._character
-      );
-    } else {
-      this._character?.statusEffect.addBuff(
-        [
-          {
-            name: "Call to Action",
-            duration: Infinity,
-            id: uuid(),
-            cantDispel: true,
-            cantResist: true,
-            unique: true,
-          },
-        ],
-        1,
+    super.execute(undefined, [], false, () => {
+      this._character?.statusEffect.removeDebuff("all", this._character);
+      this._character?.changeTurnMeter(100, this);
+      this._character?.heal(
+        {
+          healthType: "protection",
+          amountType: "multiplicative",
+          amount: 0.4,
+        },
         this
       );
-    }
+      this._character?.heal(
+        {
+          healthType: "health",
+          amountType: "multiplicative",
+          amount: 0.4,
+        },
+        this
+      );
+
+      if (
+        this._character?.checkCondition({
+          buffs: ["Call to Action"],
+        })
+      ) {
+        this._character?.statusEffect.removeBuff(
+          "Call to Action",
+          this._character
+        );
+      } else {
+        this._character?.statusEffect.addBuff(
+          [
+            {
+              name: "Call to Action",
+              duration: Infinity,
+              id: uuid(),
+              cantDispel: true,
+              cantResist: true,
+              unique: true,
+            },
+          ],
+          1,
+          this
+        );
+      }
+    });
   }
 }
 
@@ -143,37 +143,48 @@ class specialskill_COMMANDERLUKESKYWALKER01 extends ActiveAbility {
     this.cooldown = 4;
   }
 
-  public execute(targetCharacter?: Character, stats?: iStatsCheck[]): void {
-    super.execute(targetCharacter, stats);
-
-    const { targetList } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
-
-    targetList.forEach((target) => {
-      if (target.stats.health < target.stats.maxHealth) {
-        this.changeCooldown(-1, this);
-      }
-
-      target.statusEffect.removeBuff("all");
-      this._character?.statusEffect.inflictDebuff(
-        [{ name: "Buff Immunity", duration: 2, id: uuid() }],
-        target,
-        1,
-        this
+  public execute(
+    targetCharacter?: Character,
+    stats?: iStatsCheck[],
+    canBeCountered?: boolean
+  ): void {
+    super.execute(targetCharacter, stats, canBeCountered, () => {
+      const { targetList } = this.findTargets(
+        {
+          filters: [{ allies: false }],
+          targetCount: 1,
+        },
+        targetCharacter
       );
-      this.dealDamage("physical", target, 2.978);
-      target.changeTurnMeter(-100, this);
-      this._character?.statusEffect.inflictDebuff(
-        [{ name: "Tenacity Down", duration: 2, id: uuid(), cantResist: true }],
-        target,
-        1,
-        this
-      );
+
+      targetList.forEach((target) => {
+        if (target.stats.health < target.stats.maxHealth) {
+          this.changeCooldown(-1, this);
+        }
+
+        target.statusEffect.removeBuff("all");
+        this._character?.statusEffect.inflictDebuff(
+          [{ name: "Buff Immunity", duration: 2, id: uuid() }],
+          target,
+          1,
+          this
+        );
+        this.dealDamage("physical", target, 2.978);
+        target.changeTurnMeter(-100, this);
+        this._character?.statusEffect.inflictDebuff(
+          [
+            {
+              name: "Tenacity Down",
+              duration: 2,
+              id: uuid(),
+              cantResist: true,
+            },
+          ],
+          target,
+          1,
+          this
+        );
+      });
     });
   }
 }
@@ -186,8 +197,6 @@ class uniqueskill_COMMANDERLUKESKYWALKER02 extends PassiveAbility {
       `Luke has +40% Potency. Whenever Luke Resists a detrimental effect he recovers 5% Health and 5% Protection. Whenever Luke inflicts a debuff he gains 10% Turn Meter and other allies gain half that amount.`,
       character
     );
-
-    this.activate();
   }
 
   public override activate(): void {
@@ -244,7 +253,6 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
       `While Luke doesn't have Call to Action, he has +50% Counter Chance, +50% Critical Avoidance, +50% Defense, +100% Tenacity, and gains 10% Turn Meter whenever another Rebel ally takes damage.`,
       character
     );
-    this.activate();
   }
 
   public override activate(): void {

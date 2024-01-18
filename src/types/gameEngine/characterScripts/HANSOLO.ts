@@ -1,14 +1,11 @@
 import { v4 as uuid } from "uuid";
 
 import {
-  Ability,
   ActiveAbility,
   PassiveAbility,
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
-import { iStats, iStatsCheck } from "../characters/stats";
-import { gameEngine } from "types/gameEngine/gameEngine";
-import { Log } from "../characters/log";
+import { iStatsCheck } from "../characters/stats";
 
 class basicskill_HANSOLO extends ActiveAbility {
   constructor(character: Character) {
@@ -26,39 +23,32 @@ class basicskill_HANSOLO extends ActiveAbility {
     canBeCountered: boolean = true,
     additionalEffects: Function = () => {}
   ): void {
-    gameEngine.addLogs(
-      new Log({ character: this._character, ability: { used: this } })
-    );
+    super.execute(targetCharacter, stats, canBeCountered, () => {
+      const { targetList } = this.findTargets(
+        {
+          filters: [{ allies: false }],
+          targetCount: 1,
+        },
+        targetCharacter
+      );
 
-    const { targetList } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
-
-    targetList.forEach((target) => {
-      additionalEffects();
-      //note: Cannot be evaded so no evade check
-      if (target.turnMeter < 50) {
-        this.dealDamage(
-          "physical",
-          target,
-          2.6, //1.85 (standard ability modifier) + .75 (additional 75% damage)
-          5,
-          stats,
-          canBeCountered
-        );
-      } else {
-        this.dealDamage("physical", target, 1.85, 5, stats, canBeCountered);
-        target.changeTurnMeter(-35, this);
-      }
-    });
-
-    this._character.dispatchEvent("useAbility", {
-      abilityId: this.id,
-      target: targetCharacter,
+      targetList.forEach((target) => {
+        additionalEffects();
+        //note: Cannot be evaded so no evade check
+        if (target.turnMeter < 50) {
+          this.dealDamage(
+            "physical",
+            target,
+            2.6, //1.85 (standard ability modifier) + .75 (additional 75% damage)
+            5,
+            stats,
+            canBeCountered
+          );
+        } else {
+          this.dealDamage("physical", target, 1.85, 5, stats, canBeCountered);
+          target.changeTurnMeter(-35, this);
+        }
+      });
     });
   }
 }
@@ -79,31 +69,31 @@ class specialskill_HANSOLO01 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute();
+    super.execute(targetCharacter, stats, canBeCountered, () => {
+      const { targetList } = this.findTargets(
+        {
+          filters: [{ allies: false }],
+          targetCount: 1,
+        },
+        targetCharacter
+      );
 
-    const { targetList } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
+      this._character.changeTurnMeter(
+        this._character.stats.physical.critChance * 100,
+        this
+      );
 
-    this._character.changeTurnMeter(
-      this._character.stats.physical.critChance * 100,
-      this
-    );
-
-    targetList.forEach((target) => {
-      if (!this.checkEvade("physical", target)) {
-        this._character?.statusEffect.inflictDebuff(
-          [{ name: "Stun", duration: 1, id: uuid() }],
-          target,
-          1,
-          this
-        );
-        this.dealDamage("physical", target, 3.699, 5, stats, canBeCountered);
-      }
+      targetList.forEach((target) => {
+        if (!this.checkEvade("physical", target)) {
+          this._character?.statusEffect.inflictDebuff(
+            [{ name: "Stun", duration: 1, id: uuid() }],
+            target,
+            1,
+            this
+          );
+          this.dealDamage("physical", target, 3.699, 5, stats, canBeCountered);
+        }
+      });
     });
   }
 }
@@ -124,29 +114,29 @@ class specialskill_HANSOLO02 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute();
-
-    this._character.changeTurnMeter(50, this);
-    this._character.statusEffect.addBuff(
-      { name: "Critical Damage Up", duration: 2, id: uuid() },
-      1,
-      this
-    );
-
-    const { targetList } = this.findTargets(
-      { filters: [{ allies: true }] },
-      targetCharacter
-    );
-
-    targetList.forEach((target) => {
-      target.statusEffect.addBuff(
-        [
-          { name: "Critical Chance Up", duration: 2, id: uuid() },
-          { name: "Evasion Up", duration: 2, id: uuid() },
-        ],
+    super.execute(targetCharacter, stats, canBeCountered, () => {
+      this._character.changeTurnMeter(50, this);
+      this._character.statusEffect.addBuff(
+        { name: "Critical Damage Up", duration: 2, id: uuid() },
         1,
         this
       );
+
+      const { targetList } = this.findTargets(
+        { filters: [{ allies: true }] },
+        targetCharacter
+      );
+
+      targetList.forEach((target) => {
+        target.statusEffect.addBuff(
+          [
+            { name: "Critical Chance Up", duration: 2, id: uuid() },
+            { name: "Evasion Up", duration: 2, id: uuid() },
+          ],
+          1,
+          this
+        );
+      });
     });
   }
 }
@@ -161,8 +151,6 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
       `Han has +35% Counter Chance and +20% Critical Chance. The first time each turn Han uses his Basic attack, he attacks again dealing 50% less damage.\n\nHan takes a bonus turn at the start of each encounter. During this turn Han ignores Taunts and he can only use his Basic ability, but it will Stun the target for 1 turn and can't be Resisted.`,
       character
     );
-
-    this.activate();
   }
 
   public override activate(): void {
@@ -188,7 +176,9 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
         callback: ({ abilityId, target }) => {
           if (abilityId === "basicskill_HANSOLO" && this.triggerCount < 1) {
             this.triggerCount++;
-            const ability = this._character.chooseAbility(abilityId);
+            const ability = this._character.activeAbilities.find(
+              (x) => x.id === "basicskill_HANSOLO"
+            );
             ability?.execute(
               target,
               [
