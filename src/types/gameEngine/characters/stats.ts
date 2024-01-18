@@ -2,6 +2,7 @@ import { Ability, IUnit, Unit } from "types/unit";
 import { Character } from "./index";
 import { iCondition } from "../gameEngine";
 
+/** A generic interface that contains all of the base stats for a character */
 export interface iStats {
   /** The maximum amount of health */
   maxHealth: number;
@@ -59,6 +60,7 @@ export interface iStats {
   mastery: number;
 }
 
+/** An interface that contains any information used manipulate a character's stats */
 export interface iStatsCheck {
   /** The stat that will be modified
    *
@@ -117,6 +119,7 @@ export interface iStatsCheck {
   characterSourceId?: string;
 }
 
+/** A container class used to hold all of a character's status any utility functions */
 export class Stats {
   public baseStats: iStats;
   public tempStats: iStatsCheck[] = [];
@@ -164,6 +167,7 @@ export class Stats {
     this._curProtection = data.protection;
   }
 
+  /** An initializer function that resets various properties */
   public initialize() {
     this._curHealth = this.baseStats.maxHealth;
     this._curProtection = this.baseStats.maxProtection;
@@ -306,6 +310,7 @@ export class Stats {
       this.getTempStat("critDamage")
     );
   }
+
   /** The current Tenacity (decimal) */
   public get tenacity() {
     return this.getModifiedStats(
@@ -326,6 +331,7 @@ export class Stats {
   public set tenacity(val) {
     this.baseStats.tenacity = val;
   }
+
   /** The current Potency (decimal) */
   public get potency() {
     return this.getModifiedStats(
@@ -346,6 +352,7 @@ export class Stats {
   public set potency(val) {
     this.baseStats.potency = val;
   }
+
   /* The likelyhood (decimal) of counter attacking */
   public get counterChance() {
     if (this._character.statusEffect.hasDebuff("Stun")) {
@@ -359,6 +366,7 @@ export class Stats {
     );
     return chance;
   }
+
   /* The amount of damage dealt when counter attacking (decimal) */
   public get counterDamage() {
     const damageAmount = this.getModifiedStats(
@@ -368,6 +376,7 @@ export class Stats {
     );
     return damageAmount;
   }
+
   /** The modified physical stats of a character */
   public get physical() {
     const self = this;
@@ -652,6 +661,7 @@ export class Stats {
       },
     };
   }
+
   /** The modified special stats of a character */
   public get special() {
     const self = this;
@@ -921,6 +931,7 @@ export class Stats {
       },
     };
   }
+
   /** The current Health Steal (decimal) */
   public get healthSteal() {
     let stat = this.baseStats.healthSteal;
@@ -952,6 +963,11 @@ export class Stats {
     );
   }
 
+  /**
+   * Gets an array of stats that are currently being changed through various effects
+   * @param statName
+   * @returns An array of stats that should be changed
+   */
   private getTempStat(statName: string): iStatsCheck[] {
     const tempStatMapping: Record<string, iStatsCheck[]> =
       this.tempStats.reduce((statsMapping, stat) => {
@@ -966,45 +982,22 @@ export class Stats {
       }, {});
 
     return tempStatMapping[statName] ?? [];
-
-    // const finalMapping: Record<string, iStatsCheck[]> = this._triggers.reduce(
-    //   (statsMapping, trigger) => {
-    //     if (trigger.triggerType === "always") {
-    //       trigger.actions?.forEach((action) => {
-    //         const { targetList } = this.findTargets(action.targets);
-    //         targetList.forEach((target) => {
-    //           if (target.id === this.id) {
-    //             action.effects?.forEach(({ condition, stats }) => {
-    //               if (
-    //                 stats &&
-    //                 stats.statToModify &&
-    //                 this.checkCondition(condition, this)
-    //               ) {
-    //                 if (stats.statToModify in statsMapping) {
-    //                   statsMapping[stats.statToModify].push(stats);
-    //                 } else {
-    //                   statsMapping[stats.statToModify] = [stats];
-    //                 }
-    //               }
-    //             });
-    //           }
-    //         });
-    //       });
-    //     }
-    //     return statsMapping;
-    //   },
-    //   tempStatMapping
-    // );
-
-    // return finalMapping[statName] ?? [];
   }
 
+  /**
+   * Gets the modified stats based on if an effect is present (such as Offense Up)
+   * @param statusEffectConfig - An object containing if an effect is present and by how much the stat should be adjusted
+   * @param baseStat - The base value of the stat to be used
+   * @param tempStats - An array of any temporary stats that may exist
+   * @param isMultiplicative - Determines if the stat should be multiplied (true) or added to gether (false)
+   * @returns The number of the new value for the stat
+   */
   private getModifiedStats(
     statusEffectConfig: { hasEffect: boolean; value: number }[],
     baseStat: number,
     tempStats: iStatsCheck[],
     isMultiplicative: boolean = false
-  ) {
+  ): number {
     let newStat = baseStat;
 
     tempStats
@@ -1044,12 +1037,10 @@ export class Stats {
     }
   }
 
-  /** Gets the combat stats of the character
-   *
-   * @damageType - The type of damage being dealt (physical, special, or true)
-   * @stats - An array of stats to modify the starting stat value
-   *
-   * @returns - A map of the stats
+  /** Gets the current combat stats of the character after all effects have been applied
+   * @param damageType - The type of damage being dealt (physical, special, or true)
+   * @param stats - An array of stats to modify the starting stat value
+   * @returns - A map of the stats and their current values
    */
   public getCombatStats(
     damageType?: "physical" | "special" | "true",
@@ -1072,6 +1063,7 @@ export class Stats {
     };
   }
 
+  /** Removes any stats that shouldnt be present any more after the turn has ended */
   public endOfTurn() {
     this.tempStats = this.tempStats.reduce(
       (list: iStatsCheck[], stat: iStatsCheck) => {
@@ -1087,16 +1079,17 @@ export class Stats {
     );
   }
 
+  /** Resets all temporary stats and effects  */
   public reset() {
     this.tempStats = [];
   }
 }
 
 /** Modifies the stat based on a flat amount of multimplicative value
- *
- * @startingStatValue - The starting stat value
- * @statType - The type of stat used to modify the starting stat (e.g. offense, health, etc.)
- * @stats - An array of stats to modify the starting stat value
+ * @param startingStatValue - The starting stat value
+ * @param statType - The type of stat used to modify the starting stat (e.g. offense, health, etc.)
+ * @param stats - An array of stats to modify the starting stat value
+ * @returns The modified value of the stat
  */
 export function modifyStat(
   startingStatValue: number,
@@ -1118,6 +1111,7 @@ export function modifyStat(
   return modifiedStat;
 }
 
+/** An interface used to allow how much should be healed and what type of healing */
 export interface iHeal {
   /** Health or Protection */
   healthType: "health" | "protection";
@@ -1125,5 +1119,4 @@ export interface iHeal {
   amountType?: "additive" | "multiplicative";
   /** The amount to heal. For percentages, keep the amount a decimal (e.g. 0.4 would be a 40% heal) */
   amount?: number;
-  // scale?: number;
 }

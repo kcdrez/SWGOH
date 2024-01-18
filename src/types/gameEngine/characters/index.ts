@@ -12,6 +12,10 @@ import { Log, tLogData } from "./log";
 
 import { gameEngine, iCondition } from "../gameEngine";
 
+/**
+ * A type to determine what events are supported
+ * @type tEventType
+ */
 type tEventType =
   | "dealDamage"
   | "endOfTurn"
@@ -22,6 +26,10 @@ type tEventType =
   | "resisted"
   | "useAbility";
 
+/**
+ * A Character, otherwise known as unit or toon, that can have abilities and affect the flow of the game
+ * @class Character
+ */
 export class Character {
   public stats: Stats;
   public statusEffect: StatusEffect;
@@ -34,10 +42,7 @@ export class Character {
   private _leaderAbility: PassiveAbility | null = null;
   public owner: string;
   private _alignment: IUnit["alignment"];
-  // private _role: IUnit["role"];
-  // private _primaryStat: IUnit["primaryStat"];
   private _categories: string[];
-  // private _triggers: iTrigger[] = [];
   public teammates: Character[] = [];
   public opponents: Character[] = [];
   public isLeader: boolean = false;
@@ -82,8 +87,6 @@ export class Character {
         }
       }
     });
-    // this._role = data.role;
-    // this._primaryStat = data.primaryStat;
   }
 
   /** A unique identifier based on the character id and owner */
@@ -96,6 +99,7 @@ export class Character {
     return this.id === char?.id && this.owner === char?.owner;
   }
 
+  /** A list of abilities including the basic ability and specials */
   public get activeAbilities() {
     const arr: ActiveAbility[] = [];
     if (this._basicAbility) {
@@ -119,12 +123,13 @@ export class Character {
   public get turnMeter() {
     return this._tm;
   }
+
   /* The ratio of turn meter. Used to compare to other characters' turn meter ratio to determine who goes next */
   public get turnMeterRatio() {
     return (100 - this._tm) / this.stats.speed;
   }
+
   /** Manipulates the unit's turn meter by a certain amount
-   *
    * @param amount - The amount the turn meter will be changed. Positive number will add turn meter, negative number will remove turn meter
    * @param srcAbility - The ability source that is causing the turn meter to change
    * @param srcCharacter - The character that is causing the turn meter to change
@@ -184,6 +189,11 @@ export class Character {
       );
     }
   }
+  /**
+   * A utility function to determine who's turn meter is higher: This character or the provided opponent
+   * @param opponent - The opponent to compare turn meter to
+   * @returns An object containing the character who's turm meter is higher (either this character or the provided opponent) and the amount of turn meter that is gained
+   */
   public compareTm(opponent: Character): {
     character: Character;
     amount: number;
@@ -222,6 +232,11 @@ export class Character {
     return results;
   }
 
+  /**
+   * Resets all abilities, stats, and other effects
+   * @param teammates - A list of characters that are this character's teammates
+   * @param opponents - A list of characters that are this character's opponents
+   */
   public reset(teammates: Character[], opponents: Character[]) {
     this.teammates = teammates;
     this.opponents = opponents;
@@ -230,6 +245,10 @@ export class Character {
     this.stats.reset();
     this.statusEffect.reset();
   }
+
+  /**
+   * An initializer function that resets various properties and applies passive abilities
+   */
   public initialize() {
     this.stats.initialize();
     this._specialAbilities.forEach((ability) => {
@@ -244,40 +263,16 @@ export class Character {
     this.statusEffect.initialize();
 
     this._tm = 0;
-
-    // this._uniqueAbilities.forEach((ability) => {
-    //   ability.triggers?.forEach((trigger) => {
-    //     const { targetList } = this.findTargets(trigger?.targets ?? {});
-    //     targetList.forEach((target) => {
-    //       target.addTrigger(trigger, ability as iAbility);
-    //     });
-    //   });
-    // });
-
-    // if (this.isLeader && this._leaderAbility) {
-    //   this._leaderAbility.triggers?.forEach((trigger) => {
-    //     const { targetList } = this.findTargets(trigger?.targets ?? {});
-    //     targetList.forEach((target) => {
-    //       target.addTrigger(trigger, this._leaderAbility as iAbility);
-    //     });
-    //   });
-    // }
-
-    // this._triggers.forEach((trigger) => {
-    //   if (trigger?.triggerData?.count !== undefined) {
-    //     trigger.triggerData.count = trigger.triggerData.limit;
-    //   }
-    //   if (trigger.triggerData?.units) {
-    //     trigger.triggerData.units = [];
-    //   }
-    // });
   }
 
-  /** Is the character dead */
+  /** Is the character's health at 0 or less */
   public get isDead() {
     return this.stats.health <= 0;
   }
-  /** Checks if the character is dead and if so removes any related effects todo */
+
+  /** Checks if the character is dead and if so removes any related effects
+   * @param targetCharacter - Checks if the character is dead and removes any effects
+   */
   public checkDeath(targetCharacter: Character) {
     if (targetCharacter.isDead) {
       gameEngine.addLogs(
@@ -298,6 +293,7 @@ export class Character {
     );
   }
 
+  /** The character takes an action and uses an ability if possible */
   public takeAction() {
     this.startOfTurn();
     this._tm = 0;
@@ -314,6 +310,7 @@ export class Character {
     this.endOfTurn(ability);
   }
 
+  /** Triggers any effects at the start of the turn */
   public startOfTurn() {
     this.statusEffect.debuffs.forEach((debuff) => {
       debuff.isNew = false;
@@ -323,6 +320,10 @@ export class Character {
     });
   }
 
+  /**
+   * Triggers all end of turn effects and resets various pieces of data
+   * @param ability - The ability that was used on the turn
+   */
   public endOfTurn(ability: ActiveAbility | null) {
     this.statusEffect.endOfTurn();
     this.stats.endOfTurn();
@@ -332,26 +333,13 @@ export class Character {
         a.turnsRemaining = Math.max(a.turnsRemaining - 1, 0);
       }
     });
-
-    // this.dispatchEvent("endOfTurn");
-
-    // this._tempStats = this._tempStats.reduce(
-    //   (list: iStatsCheck[], t: iStatsCheck) => {
-    //     if (t.expires && t.expires.frequency === "turn") {
-    //       if (t.expires.count > 1) {
-    //         list.push(t);
-    //       }
-    //     } else {
-    //       list.push(t);
-    //     }
-    //     return list;
-    //   },
-    //   []
-    // );
-
-    // return logs;
   }
 
+  /**
+   * Picks an ability that is able to be used
+   * @param abilityId - The ability ID that must be used if able
+   * @returns An ability that can be used
+   */
   public chooseAbility(abilityId?: string): ActiveAbility | null {
     if (this.statusEffect.hasDebuff("Stun")) {
       return null;
@@ -381,12 +369,12 @@ export class Character {
     return ability ?? null;
   }
 
+  /** Checks if the user has any leader abilities */
   public get hasLeaderAbility() {
     return !!this._leaderAbility;
   }
 
   /** Assists with their basic attack
-   *
    * @param modifiers - A list of stats to change the outcome of the damage
    * @param targetCharacter - The character in which is being attacked
    * @param srcAbility - The ability source that is calling the assist
@@ -414,7 +402,6 @@ export class Character {
   }
 
   /** Heals the character for a determined amount of health or protection
-   *
    * @param healData - The data that determines how much and what type of healing to do
    * @param sourceAbility - The ability that has the heal effect
    * @param amountSource - The source value when healing a multiplicative amount (defaults to max value)
@@ -463,6 +450,11 @@ export class Character {
       }
     }
   }
+  /**
+   * Counter attacks, using the character's basic ability if able
+   * @param targetCharacter - The target character that is being attacked
+   * @param canBeCountered - Determines if this character is allowed to counter attack
+   */
   public counterAttack(
     targetCharacter: Character,
     canBeCountered: boolean = true
@@ -494,14 +486,14 @@ export class Character {
       }
     }
   }
+
   /** Recieves damage mitigated by armor
-   *
-   * @damageType - The type of damage being dealt (physical, special, or true)
-   * @damageAmount - The amount of damage being dealt (before armor or other reductions)
-   * @armorPen - The amount of armor that is ignored (armor penetration)
-   * @critChance - The chance of receving a critical hit
-   * @critDamage - The amount to be modified on a critical hit (decimal)
-   * @stats - An array of stats to modify the starting stat value
+   * @param damageType - The type of damage being dealt (physical, special, or true)
+   * @param damageAmount - The amount of damage being dealt (before armor or other reductions)
+   * @param armorPen - The amount of armor that is ignored (armor penetration)
+   * @param critChance - The chance of receving a critical hit
+   * @param critDamage - The amount to be modified on a critical hit (decimal)
+   * @param stats - An array of stats to modify the starting stat value
    */
   public receiveDamage(
     damageType: "physical" | "special" | "true",
@@ -533,6 +525,11 @@ export class Character {
     }
   }
 
+  /**
+   * Triggers any events on the character that matches a particular event type
+   * @param eventType - The type of event that should be triggered
+   * @param context - Additional data that can be used to pass down to the event
+   */
   public dispatchEvent(eventType: tEventType, context?: any) {
     this.events.forEach((event) => {
       if (event.eventType === eventType) {
@@ -541,6 +538,11 @@ export class Character {
     });
   }
 
+  /**
+   * Checks whether a condition is true
+   * @param condition - The data that is used to determine if it is true or not
+   * @returns True if the condition has been met, otherwise false
+   */
   public checkCondition(condition?: iCondition): boolean {
     if (!condition) {
       return true;
@@ -622,6 +624,12 @@ export class Character {
     return inverted ? !results : results;
   }
 
+  /**
+   * Checks whether the character has any of the provided tags (including character id, categories, or alignment)
+   * @param tag - The string used to check
+   * @param id - The id used to check if this is the same as this character's id
+   * @returns true if this character has the tag or has otherwise been met
+   */
   public hasTags(tag: string, id: string): boolean {
     if (this._categories.includes(tag)) {
       return true;
@@ -638,6 +646,10 @@ export class Character {
     }
   }
 
+  /**
+   * A utility function used to output the current state of the character stats
+   * @returns A map of various pieces of data used to log out the characters stats
+   */
   public getLogs(): tLogData {
     return {
       name: this.name,
@@ -820,6 +832,13 @@ export class Character {
 }
 
 //todo: combine these functions with /teams.js
+/**
+ * Checks if any of the tags provided match with a character. Can use `&` or `!` notation too
+ * @param character - The character to check the tags on
+ * @param tagsList - The list of tags that should be checked
+ * @param id - The ID used to check if its the same as the character
+ * @returns True if the tags match, false if they dont
+ */
 export function anyTagsMatch(
   character: Character,
   tagsList: string[],

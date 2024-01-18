@@ -2,11 +2,13 @@ import { ActiveAbility, Ability } from "./abilities";
 import { iBuff, iDebuff, iStatusEffect } from "./statusEffects";
 import { Character } from "./index";
 
+/** A type used to log any ability information */
 type tLogAbility = {
   used?: null | ActiveAbility;
   source?: null | Ability;
 };
 
+/** A type used to log any damage information */
 type tLogDamage = {
   isCrit?: boolean;
   amount?: number;
@@ -14,8 +16,10 @@ type tLogDamage = {
   bonus?: boolean;
 };
 
+/** A type used to log any healing information */
 type tLogHeal = { amount: number; type: "health" | "protection" | null };
 
+/** A type used to log any misc. effects that may have occured */
 type tLogEffects = {
   assisted?: boolean;
   countered?: boolean;
@@ -29,6 +33,7 @@ type tLogEffects = {
   stunned?: boolean;
 };
 
+/** A type used to log any status effects (such as buffs or debuffs) that may have been applied or removed */
 type tLogStatusEffect = {
   type: "buff" | "debuff" | "statusEffect" | null;
   list: iBuff[] | iDebuff[] | iStatusEffect[];
@@ -39,6 +44,7 @@ type tLogStatusEffect = {
   prevented?: boolean;
 };
 
+/** A container type that has all the logging information of what has occured */
 export type tLogData = {
   name: string;
   owner: string;
@@ -77,6 +83,10 @@ export type tLogData = {
   turnMeter: number;
 };
 
+/**
+ * A class object that contains any log information
+ * @class Log
+ */
 export class Log {
   public character?: Character;
   public target?: Character;

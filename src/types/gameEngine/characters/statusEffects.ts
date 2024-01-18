@@ -3,10 +3,10 @@ import { v4 as uuid } from "uuid";
 import { Character } from "./index";
 import { Ability } from "./abilities";
 import { unvue, chanceOfEvent } from "utils";
-import statusEffectVue from "@/components/gameEngine/statusEffect.vue";
 import { gameEngine } from "../gameEngine";
 import { Log } from "./log";
 
+/** A container class used to hold all of a character's status effects (buffs, debuffs, etc.) any utility functions */
 export class StatusEffect {
   private _buffs: iBuff[] = [];
   private _debuffs: iDebuff[] = [];
@@ -22,12 +22,14 @@ export class StatusEffect {
     this._character = parentCharacter;
   }
 
+  /** An initializer function that resets various properties */
   public initialize() {
     this._debuffs = [];
     this._buffs = [];
     this._statusEffects = [];
   }
 
+  /** Removes any effects that shouldnt be present any more after the turn has ended */
   public endOfTurn() {
     const { debuffsRemoved } = this.debuffs.reduce(
       (
@@ -109,35 +111,38 @@ export class StatusEffect {
     // });
   }
 
-  /* A list of debuffs */
+  /* A list of debuffs currently on the character */
   public get debuffs() {
     return this._debuffs;
   }
-  /* A list of buffs */
+
+  /* A list of buffs currently on the character */
   public get buffs() {
     return this._buffs;
   }
-  /* A list of status effects */
+
+  /* A list of status effects currently on the character */
   public get statusEffects() {
     return this._statusEffects;
   }
+
   /** Checks to see if the character has any of the listed debuffs
-   *
-   * @name - The list of debuffs to check. If an array, checks that ALL of the ones listed are present
-   * @duration - The duration to check if there are any remaining turns left on the debuff
+   * @param debuffs - The list of debuffs to check. If an array, checks that ALL of the ones listed are present
+   * @param duration - The duration to check if there are any remaining turns left on the debuff
+   * @returns true if the character has the debuffs
    */
   public hasDebuff(
-    name: tDebuff | tDebuff[] | iDebuff | iDebuff[],
+    debuffs: tDebuff | tDebuff[] | iDebuff | iDebuff[],
     duration?: number
   ): boolean {
-    if (Array.isArray(name)) {
-      return (name as (tDebuff | iDebuff)[]).every((x) =>
+    if (Array.isArray(debuffs)) {
+      return (debuffs as (tDebuff | iDebuff)[]).every((x) =>
         this.hasDebuff(x, duration)
       );
     } else {
       return this.debuffs.some((d) => {
-        if (typeof name === "string") {
-          if (d.name === name) {
+        if (typeof debuffs === "string") {
+          if (d.name === debuffs) {
             if (duration) {
               return duration <= d.duration;
             }
@@ -145,25 +150,26 @@ export class StatusEffect {
           }
           return false;
         } else {
-          return d.id === name.id;
+          return d.id === debuffs.id;
         }
       });
     }
   }
+
   /** Checks to see if the character has any of the listed buffs
-   *
-   * @name - The list of buffs to check. If an array, checks that ALL of the ones listed are present
-   * @duration - The duration to check if there are any remaining turns left on the debuff
+   * @param buffs - The list of buffs to check. If an array, checks that ALL of the ones listed are present
+   * @param duration - The duration to check if there are any remaining turns left on the debuff
+   * @returns true if the character has the buffs
    */
-  public hasBuff(name: tBuff | tBuff[] | iBuff | iBuff[], duration?: number) {
-    if (Array.isArray(name)) {
-      return (name as (tBuff | iBuff)[]).every((x) =>
+  public hasBuff(buffs: tBuff | tBuff[] | iBuff | iBuff[], duration?: number) {
+    if (Array.isArray(buffs)) {
+      return (buffs as (tBuff | iBuff)[]).every((x) =>
         this.hasBuff(x, duration)
       );
     } else {
       return this.buffs.some((b) => {
-        if (typeof name === "string") {
-          if (b.name === name) {
+        if (typeof buffs === "string") {
+          if (b.name === buffs) {
             if (duration) {
               return duration <= b.duration;
             }
@@ -171,28 +177,32 @@ export class StatusEffect {
           }
           return false;
         } else {
-          return b.id === name.id;
+          return b.id === buffs.id;
         }
       });
     }
   }
+
   /** Checks to see if the character has any of the listed status effects
-   *
-   * @name - The list of status effects to check. If an array, checks that ALL of the ones listed are present
-   * @duration - The duration to check if there are any remaining turns left on the debuff
+   * @param statusEffects - The list of status effects to check. If an array, checks that ALL of the ones listed are present
+   * @param duration - The duration to check if there are any remaining turns left on the debuff
    */
   public hasStatusEffect(
-    name: tStatusEffect | tStatusEffect[] | iStatusEffect | iStatusEffect[],
+    statusEffects:
+      | tStatusEffect
+      | tStatusEffect[]
+      | iStatusEffect
+      | iStatusEffect[],
     duration?: number
   ): boolean {
-    if (Array.isArray(name)) {
-      return (name as (tStatusEffect | iStatusEffect)[]).every((x) =>
+    if (Array.isArray(statusEffects)) {
+      return (statusEffects as (tStatusEffect | iStatusEffect)[]).every((x) =>
         this.hasStatusEffect(x, duration)
       );
     } else {
       return this._statusEffects.some((d) => {
-        if (typeof name === "string") {
-          if (d.name === name) {
+        if (typeof statusEffects === "string") {
+          if (d.name === statusEffects) {
             if (duration) {
               return duration <= d.duration;
             }
@@ -200,14 +210,14 @@ export class StatusEffect {
           }
           return false;
         } else {
-          return d.id === name.id;
+          return d.id === statusEffects.id;
         }
       });
     }
   }
   /** Checks to see if the character is immune to the effect
-   *
-   * @statusEffect - The status effect to check
+   * @param statusEffect - The status effect to check
+   * @returns true if the character is currently immune to the effect
    */
   public isImmune(statusEffect: iStatusEffect | tStatusEffect): boolean {
     if (typeof statusEffect === "string") {
@@ -216,11 +226,11 @@ export class StatusEffect {
       return this.immunity[statusEffect.name];
     }
   }
+
   /** Adds a buff to the character
-   *
-   * @buff - The buff being added
-   * @scalar - The amount the duration should be scaled by (usually 1)
-   * @sourceAbility - The source ability that is adding the buff
+   * @param buff - The buff being added
+   * @param scalar - The amount the duration should be scaled by (usually 1)
+   * @param sourceAbility - The source ability that is adding the buff
    */
   public addBuff(
     buff: iBuff | iBuff[],
@@ -274,10 +284,10 @@ export class StatusEffect {
       }
     }
   }
+
   /** Removes a buff from the character
-   *
-   * @buff - The buff being added
-   * @character - The character that is causing the removal
+   * @param buff - The buff being added
+   * @param character - The character that is causing the removal
    * @param sourceAbility - The ability that is causing the removal
    */
   public removeBuff(
@@ -355,12 +365,12 @@ export class StatusEffect {
       }
     }
   }
+
   /** Inflicts debuffs on the target character
-   *
-   * @debuffs - A list of debuffs to be added
-   * @targetCharacter - The character receiving the debuffs
-   * @scalar - The amount the duration should be scaled by (usually 1)
-   * @sourceAbility - The source ability that is adding the debuff
+   * @param debuffs - A list of debuffs to be added
+   * @param targetCharacter - The character receiving the debuffs
+   * @param scalar - The amount the duration should be scaled by (usually 1)
+   * @param sourceAbility - The source ability that is adding the debuff
    */
   public inflictDebuff(
     debuffs: iDebuff[],
@@ -449,10 +459,10 @@ export class StatusEffect {
       }
     });
   }
+
   /** Removes a debuff from the character
-   *
-   * @debuff - The debuff being removed
-   * @opponent - The character that is causing the removal
+   * @param debuff - The debuff being removed
+   * @param opponent - The character that is causing the removal
    * @param sourceAbility - The ability that is causing the removal
    */
   public removeDebuff(
@@ -528,17 +538,17 @@ export class StatusEffect {
       }
     }
   }
+
   /** Adds a status effect to the character
-   *
-   * @effect - The status effect being added
-   * @sourceAbility - The source ability that is adding the buff
+   * @param effect - The status effect being added
+   * @param srcAbility - The source ability that is adding the buff
    */
   public addStatusEffect(
     effect: iStatusEffect | iStatusEffect[],
-    sourceAbility: Ability | null
+    srcAbility: Ability | null
   ) {
     if (Array.isArray(effect)) {
-      effect.forEach((e) => this.addStatusEffect(e, sourceAbility));
+      effect.forEach((e) => this.addStatusEffect(e, srcAbility));
     } else {
       if (
         (!this.hasStatusEffect(effect, effect.duration) ||
@@ -566,17 +576,17 @@ export class StatusEffect {
               duration: effect.duration,
             },
             ability: {
-              source: sourceAbility,
+              source: srcAbility,
             },
           })
         );
       }
     }
   }
+
   /** Removes a status effect from the character
-   *
-   * @statusEffect - The status effect being removed
-   * @param sourceAbility - The ability that is causing the removal
+   * @param statusEffect - The status effect being removed
+   * @param srcAbility - The ability that is causing the removal
    */
   public removeStatusEffect(
     statusEffect:
@@ -585,10 +595,10 @@ export class StatusEffect {
       | tStatusEffect
       | tStatusEffect[]
       | null,
-    sourceAbility?: Ability
+    srcAbility?: Ability
   ) {
     if (Array.isArray(statusEffect)) {
-      statusEffect.forEach((e) => this.removeStatusEffect(e, sourceAbility));
+      statusEffect.forEach((e) => this.removeStatusEffect(e, srcAbility));
     } else {
       const listOfRemovedStatusEffects: iStatusEffect[] = [];
       let statusEffectData: iStatusEffect | null = null;
@@ -620,7 +630,7 @@ export class StatusEffect {
         gameEngine.addLogs(
           new Log({
             target: this._character,
-            ability: { source: sourceAbility },
+            ability: { source: srcAbility },
             statusEffects: {
               list: listOfRemovedStatusEffects,
               removed: true,
@@ -628,16 +638,10 @@ export class StatusEffect {
             },
           })
         );
-        // listOfRemovedStatusEffects.forEach((buff) => {
-        //   buff.triggers?.forEach((trigger) => {
-        //     if (trigger.triggerType === "expires") {
-        //       // logs.push(...this.executeTrigger(trigger));
-        //     }
-        //   });
-        // });
       }
     }
   }
+
   /** A mapping of status effects that the character cannot gain */
   public get immunity(): Record<string, boolean> {
     return this._immunity.reduce(
@@ -654,10 +658,20 @@ export class StatusEffect {
     );
   }
 
+  /**
+   * Add an effect that the character is now immune to
+   * @param sourceId - The unique key that is used to reference the immunity
+   * @param effect - The effect that the user is now immune to
+   */
   public addImmune(sourceId: string, effect: string) {
     this._immunity.push({ sourceId, value: true, effect });
   }
 
+  /**
+   * Remove an existing effect that the character is now no longer immune to
+   * @param sourceId - The unique key that is used to reference the immunity
+   * @param effect - The effect that the user should no longer be immune to
+   */
   public removeImmune(sourceId: string, effect: string) {
     const index = this._immunity.findIndex(
       (x) => x.sourceId === sourceId && effect === x.effect
@@ -668,6 +682,7 @@ export class StatusEffect {
     }
   }
 
+  /** Resets all temporary status effect lists and immunities  */
   public reset() {
     this._buffs = [];
     this._debuffs = [];
@@ -676,14 +691,16 @@ export class StatusEffect {
   }
 }
 
+/** An interface used to hold various buff data */
 export interface iBuff extends iStatusEffect {
   name: tBuff;
 }
 
+/** An interface used to hold various debuff data */
 export interface iDebuff extends iStatusEffect {
   name: tDebuff;
 }
-
+/** A type for all of the available debuff names */
 export type tDebuff =
   | "Ability Block"
   | "Accuracy Down"
@@ -742,6 +759,7 @@ export type tDebuff =
   | "Vulnerable"
   | "all"; //
 
+/** A type for all of the available buff names */
 export type tBuff =
   | "Accuracy Up"
   | "Advantage"
@@ -763,9 +781,11 @@ export type tBuff =
   | "TM Increase"
   | "Translation"
   | "all";
+
+/** A type for all of the available status effect names */
 export type tStatusEffect = "Guard";
 
-/** A generic status effect, usually a buff or debuff */
+/** A generic status effect, usually a buff or debuff, that contains various data used to apply it correctly */
 export interface iStatusEffect {
   /** The name of the effect */
   name:

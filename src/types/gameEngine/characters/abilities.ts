@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 
-import { Character } from "./index";
+import { Character, anyTagsMatch } from "./index";
 import { iStatsCheck } from "./stats";
 import { tBuff, tDebuff, tStatusEffect } from "./statusEffects";
 import { chanceOfEvent, randomNumber } from "utils";
@@ -46,7 +46,6 @@ abstract class CharacterAbility extends Ability {
   }
 
   /**
-   *
    * @param targetData - The target data used to determine how to find valid targets
    * @param forcedTarget - Used in the case that the targetData should use an already selected target (such as for an assist)
    * @param include - Used to ignore specific attributes, such as dead characters. By default, these characters are not considered for selection
@@ -165,7 +164,6 @@ abstract class CharacterAbility extends Ability {
   }
 
   /** Deals damage to a target
-   *
    * @param damageType - The type of damage being dealt (physical, special, or true)
    * @param targetCharacter - The character to receive the damage
    * @param abilityModifier - The modifier for the specific ability which will be multplied by the variance to determine the amount of damage dealt
@@ -254,13 +252,19 @@ export abstract class ActiveAbility extends CharacterAbility {
     super(id, name, text, parentCharacter);
   }
 
+  /** Initializes the ability */
   public initialize() {
     if (this.cooldown) {
       this.turnsRemaining = 0;
     }
   }
 
-  /** Executes all the effects of the ability */
+  /** Executes all the effects of the ability
+   * @param targetCharacter - The character that the ability is affecting
+   * @param stats - A list of stats what will affect the results of the ability (such as damage)
+   * @param canBeCountered - Determines if the ability can be countered or not
+   * @param additionalEffects - A callback funtion on any additional effects that should be ran
+   */
   public execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
@@ -277,25 +281,34 @@ export abstract class ActiveAbility extends CharacterAbility {
     });
   }
 
+  /** Checks if the effect should be evaded
+   * @param damageType - Used to determine if physical or special stats should be used
+   * @param targetCharacter - The character that the ability is affecting
+   * @param stats - A list of stats what will affect the results of the ability (such as damage)
+   * @returns True if the effect is evaded, false if it is not evaded
+   */
   public checkEvade(
     damageType: "physical" | "special",
-    opponent: Character,
+    targetCharacter: Character,
     stats?: iStatsCheck[]
   ) {
-    if (this._character?.isSelf(opponent)) {
+    if (this._character?.isSelf(targetCharacter)) {
       return false;
     } else if (this._character) {
       const { dodge } = this._character.stats.getCombatStats(damageType, stats);
-      const { accuracy } = opponent.stats.getCombatStats(damageType, stats);
+      const { accuracy } = targetCharacter.stats.getCombatStats(
+        damageType,
+        stats
+      );
 
       return chanceOfEvent(dodge - accuracy * 100);
     }
+    return false;
   }
 
   /**
    * Change an ability's cooldown
-   *
-   * @param amount - The amount that the cooldown should be manipulated
+   * @param amount - The amount that the cooldown should be manipulated (negative number decreases the cooldown, positive number increases the cooldown)
    * @param srcAbility - The source ability that is causing the cooldown change
    * @param srcCharacter - The Character that is causing the cooldown change
    */
@@ -386,7 +399,7 @@ export abstract class PassiveAbility extends CharacterAbility {
     super(id, name, text, parentCharacter);
   }
 
-  /** Adds all of the given events, stat increases, and other effects */
+  /** Applies all of the given events, stat increases, and other effects */
   public activate() {}
 
   /** Removes all of the given events, stat increases, and other effects from all teammates and opponents */
@@ -427,26 +440,9 @@ class HealthSteal extends Ability {
   }
 }
 
-//todo: combine these functions with /teams.js
-export function anyTagsMatch(
-  character: Character,
-  tagsList: string[],
-  id: string
-): boolean {
-  return tagsList.some((tag) => {
-    if (tag.includes("&")) {
-      const split = tag.split("&");
-      return split.every((x) => anyTagsMatch(character, [x.trim()], id));
-    } else if (tag.charAt(0) === "!") {
-      const value = tag.substring(1);
-      return !character.hasTags(value, id);
-    } else {
-      return character.hasTags(tag, id);
-    }
-  });
-}
-
-/** Various filters used to determine who should be targeted */
+/** Various filters used to determine how to target a specific character(s)
+ * @interface iTargetData
+ */
 export interface iTargetData {
   filters?: {
     /** A list of specific characters that should be targeted */
