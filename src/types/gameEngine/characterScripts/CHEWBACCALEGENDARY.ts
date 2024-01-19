@@ -23,15 +23,15 @@ class basicskill_CHEWBACCALEGENDARY extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
-      const { targetList } = this.findTargets(
-        {
-          filters: [{ allies: false }],
-          targetCount: 1,
-        },
-        targetCharacter
-      );
+    const { targetList, primaryTarget } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
 
+    super.execute(primaryTarget, stats, canBeCountered, () => {
       targetList.forEach((target) => {
         if (!this.checkEvade("physical", target)) {
           this.dealDamage("physical", target, 1.4, 5, stats, canBeCountered);
@@ -63,12 +63,12 @@ class specialskill_CHEWBACCALEGENDARY01 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
-      const { targetList } = this.findTargets(
-        { filters: [{ allies: false }] },
-        targetCharacter
-      );
+    const { targetList, primaryTarget } = this.findTargets(
+      { filters: [{ allies: false }] },
+      targetCharacter
+    );
 
+    super.execute(primaryTarget, stats, canBeCountered, () => {
       targetList.forEach((target) => {
         if (!this.checkEvade("physical", target)) {
           target.statusEffect.removeBuff("all", this._character, this);
@@ -80,7 +80,7 @@ class specialskill_CHEWBACCALEGENDARY01 extends ActiveAbility {
             5,
             [
               {
-                statToModify: "armorPen",
+                statToModify: "physicalArmorPen",
                 amount: Infinity,
                 modifiedType: "additive",
               },
@@ -117,15 +117,15 @@ class specialskill_CHEWBACCALEGENDARY02 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
-      const { targetList } = this.findTargets(
-        {
-          filters: [{ allies: false }],
-          targetCount: 1,
-        },
-        targetCharacter
-      );
+    const { targetList, primaryTarget } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
 
+    super.execute(primaryTarget, stats, canBeCountered, () => {
       targetList.forEach((target) => {
         //no evade check
         this._character.statusEffect.inflictDebuff(
@@ -195,7 +195,12 @@ class uniqueskill_CHEWBACCALEGENDARY01 extends PassiveAbility {
                   this._character.assist(
                     [
                       {
-                        statToModify: "offense",
+                        statToModify: "physicalOffense",
+                        amount: 0.8,
+                        modifiedType: "multiplicative",
+                      },
+                      {
+                        statToModify: "specialOffense",
                         amount: 0.8,
                         modifiedType: "multiplicative",
                       },
@@ -307,7 +312,7 @@ class uniqueskill_CHEWBACCALEGENDARY02 extends PassiveAbility {
           if (attackSource) {
             this._character.stats.tempStats.push(
               {
-                statToModify: "offense",
+                statToModify: "physicalOffense",
                 amount: 0.25,
                 modifiedType: "multiplicative",
                 expires: {
@@ -316,7 +321,25 @@ class uniqueskill_CHEWBACCALEGENDARY02 extends PassiveAbility {
                 },
               },
               {
-                statToModify: "critChance",
+                statToModify: "specialOffense",
+                amount: 0.25,
+                modifiedType: "multiplicative",
+                expires: {
+                  count: 1,
+                  frequency: "turn",
+                },
+              },
+              {
+                statToModify: "physicalCritChance",
+                amount: 0.25,
+                modifiedType: "additive",
+                expires: {
+                  count: 1,
+                  frequency: "turn",
+                },
+              },
+              {
+                statToModify: "specialCritChance",
                 amount: 0.25,
                 modifiedType: "additive",
                 expires: {

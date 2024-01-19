@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import { Character } from "./index";
 import { Ability } from "./abilities";
 import { unvue, chanceOfEvent } from "utils";
-import { gameEngine } from "../gameEngine";
+import { gameEngine, iCondition } from "../gameEngine";
 import { Log } from "./log";
 
 /** A container class used to hold all of a character's status effects (buffs, debuffs, etc.) any utility functions */
@@ -16,6 +16,7 @@ export class StatusEffect {
     sourceId: string;
     value: boolean;
     effect: string;
+    condition?: iCondition;
   }[] = [];
 
   constructor(parentCharacter: Character) {
@@ -219,7 +220,7 @@ export class StatusEffect {
    * @param statusEffect - The status effect to check
    * @returns true if the character is currently immune to the effect
    */
-  public isImmune(statusEffect: iStatusEffect | tStatusEffect): boolean {
+  public isImmune(statusEffect: iStatusEffect | string): boolean {
     if (typeof statusEffect === "string") {
       return this.immunity[statusEffect];
     } else {
@@ -647,13 +648,17 @@ export class StatusEffect {
     return this._immunity.reduce(
       (map, el) => {
         if (el.effect in map) {
-          map[el.effect] = true;
+          if (this._character.checkCondition(el.condition)) {
+            map[el.effect] = true;
+          }
         }
         return map;
       },
       {
         Daze: this.hasStatusEffect("Guard"),
         Stun: this.hasStatusEffect("Guard"),
+        Assisting: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
+        CounterAttacking: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
       }
     );
   }
@@ -663,8 +668,8 @@ export class StatusEffect {
    * @param sourceId - The unique key that is used to reference the immunity
    * @param effect - The effect that the user is now immune to
    */
-  public addImmune(sourceId: string, effect: string) {
-    this._immunity.push({ sourceId, value: true, effect });
+  public addImmune(sourceId: string, effect: string, condition?: iCondition) {
+    this._immunity.push({ sourceId, value: true, effect, condition });
   }
 
   /**

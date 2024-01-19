@@ -64,45 +64,56 @@ export interface iStats {
 export interface iStatsCheck {
   /** The stat that will be modified
    *
-   * armor: Increases the amount of offense to mitigate
-   *
    * counterChance: The chances of counter attacking (as a decimal)
-   *
    * counterDamage: The amount of damage used to scale offense (as a decimal; e.g. 1.5 would be 150% damage)
-   *
-   * critAvoid: The chances to mitigate a critical hit (as a decimal)
-   *
-   * critChance: The chances of getting a critical hit (as a decimal)
-   *
-   * dodge: The chances of missing an attack/effect
-   *
+   * critDamage: The amount that damage is increased on a critical hit
    * health: The amount of health
-   *
+   * healthSteal: The percentage (decimal) amount that is healed when dealing damage with an attack
    * maxHealth/maxProtection: The max health or protection
-   *
-   * offense: The amount of damage an attack deals
-   *
+   * physicalAccuracy: The percentage (decimal) that decrease the chance of the physical attack missing
+   * physicalArmor: The amount of armor used to mitigate damage from a physical attack
+   * physicalArmorPen: The amount of armor that is ignored when dealing damage with a physical attack
+   * physicalCritAvoid: The percentage (decimal) that reduces the chance of getting a critical hit from a physical attack
+   * physicalCritChance: The percentage (decimal) that increases the chance of getting a critical hit from a physical attack
+   * physicalDodge: The percentage (decimal) chance of a physical attack missing
+   * physicalOffense: The amount of damage dealt on a physical attack
    * potency: The chances a negative status effect will successful be inflicted
-   *
    * protection: The amount of protection
-   *
+   * specialAccuracy: The percentage (decimal) that decrease the chance of the physical attack missing
+   * specialArmor: The amount of armor used to mitigate damage from a special attack
+   * specialArmorPen: The amount of armor that is ignored when dealing damage with a special attack
+   * specialCritAvoid: The percentage (decimal) that reduces the chance of getting a critical hit from a special attack
+   * specialCritChance: The percentage (decimal) that increases the chance of getting a critical hit from a special attack
+   * specialDodge: The percentage (decimal) chance of a special attack missing
+   * specialOffense: The amount of damage dealt on a special attack
+   * speed: The rate at which this user takes a turn
    * tenacity: The chances to mitigate a negative status effect
    */
   statToModify:
-    | "armor"
-    | "armorPen"
     | "counterChance"
     | "counterDamage"
-    | "critAvoid"
-    | "critChance"
-    | "dodge"
+    | "critDamage"
     | "health"
+    | "healthSteal"
     | "maxHealth"
     | "maxProtection"
-    | "offense"
+    | "physicalAccuracy"
+    | "physicalArmor"
+    | "physicalArmorPen"
+    | "physicalCritAvoid"
+    | "physicalCritChance"
+    | "physicalDodge"
+    | "physicalOffense"
     | "potency"
     | "protection"
-    | "resistance"
+    | "specialAccuracy"
+    | "specialArmor"
+    | "specialArmorPen"
+    | "specialCritAvoid"
+    | "specialCritChance"
+    | "specialDodge"
+    | "specialOffense"
+    | "speed"
     | "tenacity";
   /** The amount that the stat will be modified */
   amount: number;
@@ -169,8 +180,8 @@ export class Stats {
 
   /** An initializer function that resets various properties */
   public initialize() {
-    this._curHealth = this.baseStats.maxHealth;
-    this._curProtection = this.baseStats.maxProtection;
+    this._curHealth = this.maxHealth;
+    this._curProtection = this.maxProtection;
   }
 
   /** The modified maximum amount of Protection */
@@ -411,7 +422,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("offense"),
+          self.getTempStat("physicalOffense"),
           true
         );
       },
@@ -465,7 +476,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("critChance")
+          self.getTempStat("physicalCritChance")
         );
       },
       set critChance(val) {
@@ -497,7 +508,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("armor"),
+          self.getTempStat("physicalArmor"),
           true
         );
       },
@@ -534,7 +545,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("armorPen")
+          self.getTempStat("physicalArmorPen")
         );
       },
       set armorPen(val) {
@@ -571,7 +582,7 @@ export class Stats {
             },
             {
               hasEffect: self._character.statusEffect.hasDebuff("Blind"),
-              value: -999,
+              value: -Infinity,
             },
             {
               hasEffect: self._character.statusEffect.hasBuff("Call to Action"),
@@ -579,7 +590,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("accuracy")
+          self.getTempStat("physicalAccuracy")
         );
       },
       set accuracy(val) {
@@ -615,7 +626,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("dodge")
+          self.getTempStat("physicalDodge")
         );
       },
       set dodge(val) {
@@ -653,7 +664,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("critAvoid")
+          self.getTempStat("physicalCritAvoid")
         );
       },
       set critAvoid(val) {
@@ -695,7 +706,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("offense"),
+          self.getTempStat("specialOffense"),
           true
         );
       },
@@ -744,7 +755,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("critChance")
+          self.getTempStat("specialCritChance")
         );
       },
       set critChance(val) {
@@ -775,7 +786,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("armor"),
+          self.getTempStat("specialArmor"),
           true
         );
       },
@@ -811,7 +822,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("armorPen")
+          self.getTempStat("specialArmorPen")
         );
       },
       set armorPen(val) {
@@ -851,7 +862,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("accuracy")
+          self.getTempStat("specialAccuracy")
         );
       },
       set accuracy(val) {
@@ -886,7 +897,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("dodge")
+          self.getTempStat("specialDodge")
         );
       },
       set dodge(val) {
@@ -923,7 +934,7 @@ export class Stats {
             },
           ],
           stat,
-          self.getTempStat("critAvoid")
+          self.getTempStat("specialCritAvoid")
         );
       },
       set critAvoid(val) {
@@ -968,7 +979,7 @@ export class Stats {
    * @param statName
    * @returns An array of stats that should be changed
    */
-  private getTempStat(statName: string): iStatsCheck[] {
+  private getTempStat(statName: iStatsCheck["statToModify"]): iStatsCheck[] {
     const tempStatMapping: Record<string, iStatsCheck[]> =
       this.tempStats.reduce((statsMapping, stat) => {
         if (this._character.checkCondition(stat.condition)) {
@@ -989,7 +1000,7 @@ export class Stats {
    * @param statusEffectConfig - An object containing if an effect is present and by how much the stat should be adjusted
    * @param baseStat - The base value of the stat to be used
    * @param tempStats - An array of any temporary stats that may exist
-   * @param isMultiplicative - Determines if the stat should be multiplied (true) or added to gether (false)
+   * @param isMultiplicative - Determines if the stat should be multiplied (true) or added together (false)
    * @returns The number of the new value for the stat
    */
   private getModifiedStats(
@@ -1048,19 +1059,58 @@ export class Stats {
   ) {
     const baseStat = damageType === "physical" ? this.physical : this.special;
 
-    return {
-      offense: modifyStat(baseStat.offense, "offense", stats),
-      critChance: modifyStat(baseStat.critChance, "critChance", stats),
-      armorPen: modifyStat(baseStat.armorPen, "armorPen", stats),
-      armor: modifyStat(baseStat.armor, "armor", stats),
-      dodge: modifyStat(baseStat.dodge, "dodge", stats),
-      accuracy: modifyStat(baseStat.accuracy, "accuracy", stats),
-      critAvoid: modifyStat(baseStat.critAvoid, "critAvoid", stats),
+    const mapping = {
+      offense: baseStat.offense,
+      critChance: baseStat.critChance,
+      armorPen: baseStat.armorPen,
+      armor: baseStat.armor,
+      dodge: baseStat.dodge,
+      accuracy: baseStat.accuracy,
+      critAvoid: baseStat.critAvoid,
       maxHealth: this.maxHealth,
       health: this.health,
       maxProtection: this.maxProtection,
       protection: this.protection,
     };
+
+    if (damageType === "physical" || damageType === "special") {
+      mapping.offense = modifyStat(
+        baseStat.offense,
+        (damageType + "Offense") as iStatsCheck["statToModify"],
+        stats
+      );
+      mapping.critChance = modifyStat(
+        baseStat.critChance,
+        (damageType + "CritChance") as iStatsCheck["statToModify"],
+        stats
+      );
+      mapping.armorPen = modifyStat(
+        baseStat.armorPen,
+        (damageType + "ArmorPen") as iStatsCheck["statToModify"],
+        stats
+      );
+      mapping.armor = modifyStat(
+        baseStat.armor,
+        (damageType + "Armor") as iStatsCheck["statToModify"],
+        stats
+      );
+      mapping.dodge = modifyStat(
+        baseStat.dodge,
+        (damageType + "Dodge") as iStatsCheck["statToModify"],
+        stats
+      );
+      mapping.accuracy = modifyStat(
+        baseStat.accuracy,
+        (damageType + "Accuracy") as iStatsCheck["statToModify"],
+        stats
+      );
+      mapping.critAvoid = modifyStat(
+        baseStat.critAvoid,
+        (damageType + "CritAvoid") as iStatsCheck["statToModify"],
+        stats
+      );
+    }
+    return mapping;
   }
 
   /** Removes any stats that shouldnt be present any more after the turn has ended */
@@ -1093,7 +1143,7 @@ export class Stats {
  */
 export function modifyStat(
   startingStatValue: number,
-  statType: string,
+  statType: iStatsCheck["statToModify"],
   stats?: iStatsCheck[] | null
 ) {
   let modifiedStat = startingStatValue;

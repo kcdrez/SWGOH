@@ -68,18 +68,16 @@
       >recovered <span :class="log.heal.type">{{ log.heal.amount }}</span>
       <span class="ms-1">{{ log.heal.type }}</span>
     </template>
-    <template v-if="log?.effects?.assisted">
-      <template v-if="isStunned"
-        >cannot assist because they are
-        <span class="debuff">Stunned</span></template
-      >
-      <template v-else-if="isDazed"
-        >cannot assist because they are
-        <span class="debuff">Dazed</span></template
-      >
+    <template v-if="log?.effects?.assisted !== undefined">
+      <template v-if="log?.effects?.assisted === false">cannot assist</template>
       <template v-else>is called to assist</template>
     </template>
-    <template v-if="log?.effects?.countered">counter attacked</template>
+    <template v-if="log?.effects?.countered !== undefined">
+      <template v-if="log?.effects?.countered === false"
+        >cannot counter attack</template
+      >
+      <template v-else>counter attacked</template>
+    </template>
     <template v-if="log?.effects?.cooldown?.ability">
       <span class="ability" :title="log.effects.cooldown.ability?.text">
         {{ log.effects.cooldown?.ability?.name }}'s
@@ -109,6 +107,13 @@
     <template v-if="log?.effects?.stunned"
       >is stunned and took no action</template
     >
+    <template v-if="log?.effects?.revived">
+      revived with
+      <span class="protection">{{ log.characterLogData?.protection }}</span>
+      <span class="ms-1">protection</span> and
+      <span class="health">{{ log.characterLogData?.health }}</span>
+      <span class="ms-1">health</span></template
+    >
     <template v-if="log?.ability?.source">
       (src:
       <span class="ability" :title="log.ability.source.text">{{
@@ -133,14 +138,6 @@ export default defineComponent({
     log: {
       type: Object as () => Log,
       required: true,
-    },
-  },
-  computed: {
-    isStunned() {
-      return this.log.characterLogData?.debuffs.some((d) => d.name === "Stun");
-    },
-    isDazed() {
-      return this.log.characterLogData?.debuffs.some((d) => d.name === "Daze");
     },
   },
   methods: {

@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import _ from "lodash";
 
 import { Character, anyTagsMatch } from "./index";
 import { iStatsCheck } from "./stats";
@@ -58,7 +59,7 @@ abstract class CharacterAbility extends Ability {
       dead?: boolean;
     }
   ): { targetList: Character[]; primaryTarget: Character | null } {
-    let primaryTarget: Character | null = null;
+    let primaryTarget: Character | null = forcedTarget ?? null;
 
     const validTargets: Character[] = [
       ...(this._character?.teammates ?? []),
@@ -150,6 +151,8 @@ abstract class CharacterAbility extends Ability {
     if (tauntingList.length > 0 && !targetData.ignoreTaunt) {
       const randIndex = randomNumber(0, tauntingList.length - 1);
       primaryTarget = tauntingList[randIndex];
+    } else if (forcedTarget) {
+      primaryTarget = forcedTarget;
     } else if (opponentsList.length > 0) {
       const randIndex = randomNumber(0, opponentsList.length - 1);
       primaryTarget = opponentsList[randIndex];
@@ -178,60 +181,58 @@ abstract class CharacterAbility extends Ability {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ) {
-    if (this._character) {
-      const { offense, critChance, armorPen } =
-        this._character.stats.getCombatStats(damageType, stats);
-      const varianceOffense =
-        damageType === "true"
-          ? 1
-          : offense * (1 - randomNumber(0 - variance, variance) / 100);
+    const { offense, critChance, armorPen } =
+      this._character.stats.getCombatStats(damageType, stats);
+    const varianceOffense =
+      damageType === "true"
+        ? 1
+        : offense * (1 - randomNumber(0 - variance, variance) / 100);
 
-      const { isCrit, damageTotal } = targetCharacter.receiveDamage(
-        damageType,
-        varianceOffense * abilityModifier,
-        armorPen,
-        critChance,
-        this._character.stats.critDamage,
-        stats
-      );
+    const { isCrit, damageTotal } = targetCharacter.receiveDamage(
+      damageType,
+      varianceOffense * abilityModifier,
+      armorPen,
+      critChance,
+      this._character.stats.critDamage,
+      stats
+    );
 
-      gameEngine.addLogs([
-        new Log({
-          target: targetCharacter,
-          damage: {
-            amount: damageTotal,
-            isCrit,
-          },
-        }),
-      ]);
-
-      this._character.heal(
-        {
-          amountType: "additive",
-          amount: damageTotal * this._character.stats.healthSteal,
-          healthType: "health",
-        },
-        new HealthSteal(this._character)
-      );
-
-      this._character?.checkDeath(targetCharacter);
-
-      this._character.dispatchEvent("dealDamage", {
-        damageAmount: damageTotal,
-        isCrit,
-        damageType,
+    gameEngine.addLogs([
+      new Log({
         target: targetCharacter,
-      });
+        damage: {
+          amount: _.round(damageTotal, 0),
+          isCrit,
+        },
+      }),
+    ]);
 
-      targetCharacter.dispatchEvent("receiveDamage", {
-        damageAmount: damageTotal,
-        isCrit,
-        damageType,
-        attackSource: this.id,
-      });
+    this._character.heal(
+      {
+        amountType: "additive",
+        amount: damageTotal * this._character.stats.healthSteal,
+        healthType: "health",
+      },
+      new HealthSteal(this._character)
+    );
 
-      targetCharacter.counterAttack(this._character, canBeCountered);
-    }
+    this._character?.checkDeath(targetCharacter);
+
+    this._character.dispatchEvent("dealDamage", {
+      damageAmount: damageTotal,
+      isCrit,
+      damageType,
+      target: targetCharacter,
+    });
+
+    targetCharacter.dispatchEvent("receiveDamage", {
+      damageAmount: damageTotal,
+      isCrit,
+      damageType,
+      attackSource: this.id,
+    });
+
+    targetCharacter.counterAttack(this._character, canBeCountered);
   }
 }
 
@@ -266,7 +267,7 @@ export abstract class ActiveAbility extends CharacterAbility {
    * @param additionalEffects - A callback funtion on any additional effects that should be ran
    */
   public execute(
-    targetCharacter?: Character,
+    targetCharacter?: Character | null,
     stats?: iStatsCheck[],
     canBeCountered: boolean = true,
     additionalEffects: Function = () => {}
@@ -274,7 +275,17 @@ export abstract class ActiveAbility extends CharacterAbility {
     gameEngine.addLogs(
       new Log({ character: this._character, ability: { used: this } })
     );
+
     additionalEffects();
+
+    if (!targetCharacter) {
+      const { primaryTarget } = this.findTargets({
+        filters: [{ allies: false }],
+        targetCount: 1,
+      });
+      targetCharacter = primaryTarget;
+    }
+
     this._character.dispatchEvent("useAbility", {
       abilityId: this.id,
       target: targetCharacter,
@@ -283,7 +294,7 @@ export abstract class ActiveAbility extends CharacterAbility {
 
   /** Checks if the effect should be evaded
    * @param damageType - Used to determine if physical or special stats should be used
-   * @param targetCharacter - The character that the ability is affecting
+   * @param targetCharacter - The character that is the target for the attack
    * @param stats - A list of stats what will affect the results of the ability (such as damage)
    * @returns True if the effect is evaded, false if it is not evaded
    */
@@ -295,14 +306,15 @@ export abstract class ActiveAbility extends CharacterAbility {
     if (this._character?.isSelf(targetCharacter)) {
       return false;
     } else if (this._character) {
-      const { dodge } = this._character.stats.getCombatStats(damageType, stats);
-      const { accuracy } = targetCharacter.stats.getCombatStats(
+      const { dodge } = targetCharacter.stats.getCombatStats(damageType, stats);
+      const { accuracy } = this._character.stats.getCombatStats(
         damageType,
         stats
       );
 
       return chanceOfEvent(dodge - accuracy * 100);
     }
+    //todo add logging if it misses
     return false;
   }
 
@@ -429,7 +441,7 @@ export abstract class PassiveAbility extends CharacterAbility {
  * @class PassiveAbility
  * @extends CharacterAbility
  */
-class HealthSteal extends Ability {
+export class HealthSteal extends Ability {
   constructor(character: Character) {
     super(
       "healthSteal",

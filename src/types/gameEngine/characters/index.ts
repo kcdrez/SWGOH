@@ -23,6 +23,7 @@ type tEventType =
   | "matchSetup"
   | "matchStart"
   | "receiveDamage"
+  | "revive"
   | "resisted"
   | "useAbility";
 
@@ -385,10 +386,15 @@ export class Character {
     srcAbility?: Ability
   ) {
     if (this._basicAbility) {
-      if (
-        !this.statusEffect.hasDebuff("Stun") &&
-        !this.statusEffect.hasDebuff("Daze")
-      ) {
+      if (this.statusEffect.isImmune("Assisting")) {
+        gameEngine.addLogs(
+          new Log({
+            character: this,
+            effects: { assisted: false },
+            ability: { source: srcAbility },
+          })
+        );
+      } else {
         gameEngine.addLogs(
           new Log({
             character: this,
@@ -455,34 +461,45 @@ export class Character {
    * @param targetCharacter - The target character that is being attacked
    * @param canBeCountered - Determines if this character is allowed to counter attack
    */
-  public counterAttack(
-    targetCharacter: Character,
-    canBeCountered: boolean = true
-  ) {
+  public counterAttack(targetCharacter: Character, canBeCountered: boolean) {
     if (canBeCountered && !targetCharacter.isDead) {
       if (
         chanceOfEvent(this.stats.counterChance * 100) &&
         !this.isDead &&
         this.owner !== targetCharacter.owner
       ) {
-        gameEngine.addLogs(
-          new Log({
-            character: this,
-            effects: { countered: true },
-          })
-        );
+        if (this.statusEffect.isImmune("CounterAttacking")) {
+          gameEngine.addLogs(
+            new Log({
+              character: this,
+              effects: { countered: false },
+            })
+          );
+        } else {
+          gameEngine.addLogs(
+            new Log({
+              character: this,
+              effects: { countered: true },
+            })
+          );
 
-        this._basicAbility?.execute(
-          targetCharacter,
-          [
-            {
-              statToModify: "offense",
-              amount: this.stats.counterDamage,
-              modifiedType: "multiplicative",
-            },
-          ],
-          false
-        );
+          this._basicAbility?.execute(
+            targetCharacter,
+            [
+              {
+                statToModify: "physicalOffense",
+                amount: this.stats.counterDamage,
+                modifiedType: "multiplicative",
+              },
+              {
+                statToModify: "specialOffense",
+                amount: this.stats.counterDamage,
+                modifiedType: "multiplicative",
+              },
+            ],
+            false
+          );
+        }
       }
     }
   }
@@ -522,6 +539,27 @@ export class Character {
 
       this.stats.protection -= damageTotal;
       return { isCrit, damageTotal };
+    }
+  }
+
+  /**
+   * Revives the character with a certain amount of protection and health
+   * @param protection - The amount of protection that should be set as the current amount
+   * @param health - The amount of health that should be set as the current amount
+   */
+  public revive(protection: number, health: number) {
+    if (this.isDead) {
+      this.stats.protection = protection;
+      this.stats.health = health;
+
+      gameEngine.addLogs(
+        new Log({
+          character: this,
+          effects: { revived: true },
+        })
+      );
+
+      this.dispatchEvent("revive", { target: this });
     }
   }
 
@@ -824,7 +862,7 @@ export class Character {
       ],
       otherEffects: unvue({
         ...this.effects,
-        immunity: this.statusEffect.immunity,
+        immunity: unvue(this.statusEffect.immunity),
       }),
       turnMeter: round(this.turnMeter, 0),
     };

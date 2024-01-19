@@ -23,32 +23,39 @@ class basicskill_HANSOLO extends ActiveAbility {
     canBeCountered: boolean = true,
     additionalEffects: Function = () => {}
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
-      const { targetList } = this.findTargets(
-        {
-          filters: [{ allies: false }],
-          targetCount: 1,
-        },
-        targetCharacter
-      );
+    const { primaryTarget } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
 
-      targetList.forEach((target) => {
-        additionalEffects();
-        //note: Cannot be evaded so no evade check
-        if (target.turnMeter < 50) {
+    super.execute(primaryTarget, stats, canBeCountered, () => {
+      additionalEffects();
+      //note: Cannot be evaded so no evade check
+      if (primaryTarget) {
+        if (primaryTarget.turnMeter < 50) {
           this.dealDamage(
             "physical",
-            target,
+            primaryTarget,
             2.6, //1.85 (standard ability modifier) + .75 (additional 75% damage)
             5,
             stats,
             canBeCountered
           );
         } else {
-          this.dealDamage("physical", target, 1.85, 5, stats, canBeCountered);
-          target.changeTurnMeter(-35, this);
+          this.dealDamage(
+            "physical",
+            primaryTarget,
+            1.85,
+            5,
+            stats,
+            canBeCountered
+          );
+          primaryTarget.changeTurnMeter(-35, this);
         }
-      });
+      }
     });
   }
 }
@@ -69,15 +76,15 @@ class specialskill_HANSOLO01 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
-      const { targetList } = this.findTargets(
-        {
-          filters: [{ allies: false }],
-          targetCount: 1,
-        },
-        targetCharacter
-      );
+    const { targetList, primaryTarget } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
 
+    super.execute(primaryTarget, stats, canBeCountered, () => {
       this._character.changeTurnMeter(
         this._character.stats.physical.critChance * 100,
         this
@@ -114,17 +121,17 @@ class specialskill_HANSOLO02 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
+    const { targetList, primaryTarget } = this.findTargets(
+      { filters: [{ allies: true }] },
+      targetCharacter
+    );
+
+    super.execute(primaryTarget, stats, canBeCountered, () => {
       this._character.changeTurnMeter(50, this);
       this._character.statusEffect.addBuff(
         { name: "Critical Damage Up", duration: 2, id: uuid() },
         1,
         this
-      );
-
-      const { targetList } = this.findTargets(
-        { filters: [{ allies: true }] },
-        targetCharacter
       );
 
       targetList.forEach((target) => {
@@ -163,7 +170,12 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
         modifiedType: "additive",
       },
       {
-        statToModify: "critChance",
+        statToModify: "physicalCritChance",
+        amount: 0.2,
+        modifiedType: "additive",
+      },
+      {
+        statToModify: "specialCritChance",
         amount: 0.2,
         modifiedType: "additive",
       }
@@ -183,7 +195,12 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
               target,
               [
                 {
-                  statToModify: "offense",
+                  statToModify: "physicalOffense",
+                  amount: 0.5,
+                  modifiedType: "multiplicative",
+                },
+                {
+                  statToModify: "specialOffense",
                   amount: 0.5,
                   modifiedType: "multiplicative",
                 },

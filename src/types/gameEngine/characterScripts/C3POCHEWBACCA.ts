@@ -3,10 +3,14 @@ import { v4 as uuid } from "uuid";
 import {
   ActiveAbility,
   PassiveAbility,
+  HealthSteal,
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
 import { iStatsCheck } from "../characters/stats";
 import { gameEngine } from "../gameEngine";
+import { randomNumber } from "utils";
+import { Log } from "../characters/log";
+import { anyTagsMatch } from "../characters/index";
 
 class basicskill_C3POCHEWBACCA extends ActiveAbility {
   constructor(character: Character) {
@@ -23,16 +27,18 @@ class basicskill_C3POCHEWBACCA extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
-      const { targetList } = this.findTargets(
-        {
-          filters: [{ allies: false }],
-          targetCount: 1,
-        },
-        targetCharacter
-      );
+    const { targetList, primaryTarget } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
 
+    super.execute(primaryTarget, stats, canBeCountered, () => {
       targetList.forEach((target) => {
+        console.log("threepio");
+
         if (!this.checkEvade("physical", target)) {
           this.dealDamage("physical", target, 2, 5, stats, canBeCountered);
           this._character.statusEffect.inflictDebuff(
@@ -63,7 +69,11 @@ class specialskill_C3POCHEWBACCA01 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
+    const { targetList: enemies, primaryTarget } = this.findTargets({
+      filters: [{ allies: false }],
+    });
+
+    super.execute(primaryTarget, stats, canBeCountered, () => {
       this._character.statusEffect.removeDebuff("all", undefined, this);
 
       const { targetList } = this.findTargets({
@@ -71,20 +81,20 @@ class specialskill_C3POCHEWBACCA01 extends ActiveAbility {
       });
 
       targetList.forEach((target) => {
-        target.heal({
-          healthType: "protection",
-          amount: 0.15,
-          amountType: "multiplicative",
-        });
+        target.heal(
+          {
+            healthType: "protection",
+            amount: 0.15,
+            amountType: "multiplicative",
+          },
+          this
+        );
+
         target.statusEffect.addBuff(
           [{ name: "Advantage", duration: 2, id: uuid() }],
           1,
           this
         );
-      });
-
-      const { targetList: enemies } = this.findTargets({
-        filters: [{ allies: false }],
       });
 
       enemies.forEach((target) => {
@@ -116,245 +126,316 @@ class specialskill_C3POCHEWBACCA02 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
-      const { targetList } = this.findTargets({
-        filters: [{ allies: false }],
-      });
+    const { targetList, primaryTarget } = this.findTargets({
+      filters: [{ allies: false }],
+    });
 
-      const deadOpponents = this._character.opponents.filter(
-        (c) => c.isDead
-      ).length;
+    super.execute(primaryTarget, stats, canBeCountered, () => {
+      const deadOpponents = this._character.opponents.filter((c) => c.isDead);
+
+      let defeatedByAbility = 0;
 
       targetList.forEach((target) => {
         if (!this.checkEvade("physical", target)) {
-          //deal damage a number of times equal to deadOpponents
-          for (let i = 0; i < deadOpponents + 1; i++) {
-            this.dealDamage("physical", target, 2, 5, [], canBeCountered);
+          for (let i = 0; i < deadOpponents.length + 1; i++) {
+            //custom logic instead of the standard dealDamage method
+            const { offense, critChance, armorPen } =
+              this._character.stats.getCombatStats("physical", stats);
+            const varianceOffense =
+              offense * (1 - randomNumber(0 - 5, 5) / 100);
+
+            const { isCrit, damageTotal } = target.receiveDamage(
+              "physical",
+              varianceOffense * 2,
+              armorPen,
+              critChance,
+              this._character.stats.critDamage,
+              stats
+            );
+
+            gameEngine.addLogs([
+              new Log({
+                target: targetCharacter,
+                damage: {
+                  amount: damageTotal,
+                  isCrit,
+                },
+              }),
+            ]);
+
+            this._character?.checkDeath(target);
+
+            if (target.isDead) {
+              defeatedByAbility++;
+            }
+
+            this._character.dispatchEvent("dealDamage", {
+              damageAmount: damageTotal,
+              isCrit,
+              damageType: "physical",
+              target,
+            });
+
+            target.dispatchEvent("receiveDamage", {
+              damageAmount: damageTotal,
+              isCrit,
+              damageType: "physical",
+              attackSource: this.id,
+            });
+
+            target.counterAttack(
+              this._character,
+              i === 0 ? canBeCountered : false
+            );
           }
         }
       });
 
-      //todo add stacking offense
+      for (let i = 0; i < defeatedByAbility; i++) {
+        this._character.stats.tempStats.push(
+          {
+            statToModify: "physicalOffense",
+            modifiedType: "multiplicative",
+            amount: 0.1,
+            characterSourceId: this._character.uniqueId,
+          },
+          {
+            statToModify: "specialOffense",
+            modifiedType: "multiplicative",
+            amount: 0.1,
+            characterSourceId: this._character.uniqueId,
+          }
+        );
+      }
     });
   }
 }
 
-class uniqueskill_CHEWBACCALEGENDARY01 extends PassiveAbility {
+class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
   constructor(character: Character) {
     super(
-      "uniqueskill_CHEWBACCALEGENDARY01",
-      "Loyal Friend",
-      `At the start of the battle, grant Guard to the weakest ally and Han Solo until Chewbacca is defeated. Chewbacca Assists when a Guarded ally uses any ability during their turn, doing 20% less damage, limited once per turn. When Chewbacca deals damage to an enemy, Chewbacca and all Guarded allies recover 3% Health and 3% Protection.\n\nGuard: Can't be Critically Hit, immune to Daze and Stun, +25% Critical Chance`,
+      "uniqueskill_C3POCHEWBACCA",
+      "I Must Tell The Others",
+      `If the allied Leader is a non-Galactic Legend Rebel, Threepio & Chewie gain 40% of the Leader's Max Health, Max Protection, Offense, Defense, Potency, and Tenacity at the start of the first encounter, and Rebel allies gain half that amount. Rebel allies have +15% Critical Avoidance.\n\nWhenever another Rebel ally uses an ability, Threepio & Chewie are called to assist, dealing 30% less damage (limit once per turn). If they were defeated, Threepio & Chewie are revived with 50% Health and Protection whenever another Rebel ally is revived.\n\nWhile enemies are Blinded, they have -50% Tenacity and can't attack out of turn.`,
       character
     );
   }
 
   public override activate(): void {
+    const teamLeader = this._character.teammates.find((c) => c.isLeader);
+    const { targetList: otherRebels } = this.findTargets({
+      filters: [{ allies: true }, { tags: ["Rebel & !Self"] }],
+    });
+    const { targetList: enemies } = this.findTargets({
+      filters: [{ allies: false }],
+    });
     let triggerCount = 0;
 
-    this._character?.events.push(
-      {
-        characterSourceId: this._character.uniqueId,
-        eventType: "matchSetup",
-        callback: () => {
-          const { targetList: weakest } = this.findTargets({
-            filters: [
-              { allies: true },
-              { tags: ["!Self"] },
-              { targetIds: ["!HANSOLO"] },
-            ],
-            targetCount: 1,
-            weakest: true,
-          });
-
-          const { targetList: hansolo } = this.findTargets({
-            filters: [{ allies: true }, { targetIds: ["HANSOLO"] }],
-          });
-
-          [...weakest, ...hansolo].forEach((target) => {
-            target.statusEffect.addStatusEffect(
-              { name: "Guard", duration: Infinity, id: uuid() },
-              this
-            );
-            target.events.push({
-              eventType: "useAbility",
-              characterSourceId: this._character.uniqueId,
-              callback: ({ target }) => {
-                if (triggerCount < 1) {
-                  triggerCount++;
-                  this._character.assist(
-                    [
-                      {
-                        statToModify: "offense",
-                        amount: 0.8,
-                        modifiedType: "multiplicative",
-                      },
-                    ],
-                    target,
-                    this
-                  );
-                }
-              },
-            });
-          });
+    if (
+      teamLeader &&
+      anyTagsMatch(teamLeader, ["Rebel & !Galactic Legend"], teamLeader.id)
+    ) {
+      this._character.stats.tempStats.push(
+        {
+          statToModify: "maxHealth",
+          amount: 0.4 * teamLeader.stats.baseStats.maxHealth,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
         },
-      },
-      {
-        characterSourceId: this._character.uniqueId,
-        eventType: "endOfTurn",
-        callback: () => {
-          triggerCount = 0;
+        {
+          statToModify: "maxProtection",
+          amount: 0.4 * teamLeader.stats.baseStats.maxProtection,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
         },
-      },
-      {
-        characterSourceId: this._character.uniqueId,
-        eventType: "dealDamage",
-        callback: () => {
-          const { targetList: guardedAllies } = this.findTargets({
-            filters: [{ allies: true }, { statusEffects: ["Guard"] }],
-          });
-
-          [...guardedAllies, this._character].forEach((target) => {
-            target.heal(
-              {
-                healthType: "protection",
-                amount: 0.03,
-                amountType: "multiplicative",
-              },
-              this
-            );
-            target.heal(
-              {
-                healthType: "health",
-                amount: 0.03,
-                amountType: "multiplicative",
-              },
-              this
-            );
-          });
+        {
+          statToModify: "physicalOffense",
+          amount: 0.4 * teamLeader.stats.baseStats.physical.offense,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
         },
-      }
-    );
-  }
+        {
+          statToModify: "specialOffense",
+          amount: 0.4 * teamLeader.stats.baseStats.special.offense,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          statToModify: "physicalArmor",
+          amount: 0.4 * teamLeader.stats.baseStats.physical.armor,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          statToModify: "specialArmor",
+          amount: 0.4 * teamLeader.stats.baseStats.special.armor,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          statToModify: "potency",
+          amount: 0.4 * teamLeader.stats.baseStats.potency,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          statToModify: "tenacity",
+          amount: 0.4 * teamLeader.stats.baseStats.tenacity,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          statToModify: "physicalCritAvoid",
+          amount: 0.15,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          statToModify: "specialCritAvoid",
+          amount: 0.15,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
+        }
+      );
+      this._character.stats.initialize();
 
-  public override deactivate(): void {
-    super.deactivate();
+      otherRebels.forEach((character) => {
+        character.stats.tempStats.push(
+          {
+            statToModify: "maxHealth",
+            amount: 0.2 * teamLeader.stats.baseStats.maxHealth,
+            modifiedType: "additive",
+            characterSourceId: this._character.uniqueId,
+          },
+          {
+            statToModify: "maxProtection",
+            amount: 0.2 * teamLeader.stats.baseStats.maxProtection,
+            modifiedType: "additive",
+            characterSourceId: this._character.uniqueId,
+          },
+          {
+            statToModify: "physicalOffense",
+            amount: 0.2 * teamLeader.stats.baseStats.physical.offense,
+            modifiedType: "additive",
+            characterSourceId: this._character.uniqueId,
+          },
+          {
+            statToModify: "specialOffense",
+            amount: 0.2 * teamLeader.stats.baseStats.special.offense,
+            modifiedType: "additive",
+            characterSourceId: this._character.uniqueId,
+          },
+          {
+            statToModify: "physicalArmor",
+            amount: 0.2 * teamLeader.stats.baseStats.physical.armor,
+            modifiedType: "additive",
+            characterSourceId: this._character.uniqueId,
+          },
+          {
+            statToModify: "specialArmor",
+            amount: 0.2 * teamLeader.stats.baseStats.special.armor,
+            modifiedType: "additive",
+            characterSourceId: this._character.uniqueId,
+          },
+          {
+            statToModify: "potency",
+            amount: 0.2 * teamLeader.stats.baseStats.potency,
+            modifiedType: "additive",
+            characterSourceId: this._character.uniqueId,
+          },
+          {
+            statToModify: "tenacity",
+            amount: 0.2 * teamLeader.stats.baseStats.tenacity,
+            modifiedType: "additive",
+            characterSourceId: this._character.uniqueId,
+          },
+          {
+            statToModify: "physicalCritAvoid",
+            amount: 0.15,
+            modifiedType: "additive",
+            characterSourceId: this._character.uniqueId,
+          },
+          {
+            statToModify: "specialCritAvoid",
+            amount: 0.15,
+            modifiedType: "additive",
+            characterSourceId: this._character.uniqueId,
+          }
+        );
+        character.stats.initialize();
+      });
+    }
 
-    const { targetList } = this.findTargets({
-      filters: [{ allies: true }, { statusEffects: ["Guard"] }],
+    otherRebels.forEach((target) => {
+      target.events.push(
+        {
+          eventType: "useAbility",
+          characterSourceId: this._character.uniqueId,
+          callback: ({ target: opponent }: { target: Character }) => {
+            if (triggerCount < 1) {
+              triggerCount++;
+              this._character.assist(
+                [
+                  {
+                    statToModify: "physicalOffense",
+                    amount: 0.7,
+                    modifiedType: "multiplicative",
+                  },
+                  {
+                    statToModify: "specialOffense",
+                    amount: 0.7,
+                    modifiedType: "multiplicative",
+                  },
+                ],
+                opponent,
+                this
+              );
+            }
+          },
+        },
+        {
+          eventType: "revive",
+          characterSourceId: this._character.uniqueId,
+          callback: () => {
+            if (this._character.isDead) {
+              this._character.revive(
+                this._character.stats.maxProtection * 0.5,
+                this._character.stats.maxHealth * 0.5
+              );
+            }
+          },
+        }
+      );
     });
 
-    targetList.forEach((target) => {
-      target.statusEffect.removeStatusEffect("Guard", this);
+    enemies.forEach((target) => {
+      target.stats.tempStats.push({
+        statToModify: "tenacity",
+        amount: -0.5,
+        modifiedType: "additive",
+        condition: {
+          debuffs: ["Blind"],
+        },
+      });
+      target.statusEffect.addImmune(this._character.uniqueId, "Assisting", {
+        debuffs: ["Blind"],
+      });
+      target.statusEffect.addImmune(
+        this._character.uniqueId,
+        "CounterAttacking",
+        {
+          debuffs: ["Blind"],
+        }
+      );
     });
-  }
-}
 
-class uniqueskill_CHEWBACCALEGENDARY02 extends PassiveAbility {
-  constructor(character: Character) {
-    super(
-      "uniqueskill_CHEWBACCALEGENDARY02",
-      "Raging Wookie",
-      `Chewbacca is immune to Ability Block and Cooldown Increase. When Chewbacca deals damage to an enemy with an attack, he deals bonus damage equal to 20% of their Max Health. When Chewbacca takes damage from an attack, he gains +25% Offense and +25% Critical Chance until the end of his next turn. When Chewbacca or a Guarded ally takes damage from an attack, reduce Furious Bowcaster's cooldown by 1.`,
-      character
-    );
-  }
-
-  public override activate(): void {
-    let triggerCount = 0;
-
-    this._character.statusEffect.addImmune(
-      this._character.uniqueId,
-      "Ability Block"
-    );
-    this._character.statusEffect.addImmune(
-      this._character.uniqueId,
-      "Cooldown Increase"
-    );
-
-    this._character.events.push(
-      {
-        eventType: "dealDamage",
-        characterSourceId: this._character.uniqueId,
-        callback: ({ target }: { target: Character }) => {
-          if (triggerCount < 1) {
-            triggerCount++;
-            this.dealDamage(
-              "true",
-              target,
-              target.stats.maxHealth * 0.2,
-              0,
-              [],
-              false
-            );
-          }
-        },
+    this._character.events.push({
+      characterSourceId: this._character.uniqueId,
+      eventType: "endOfTurn",
+      callback: () => {
+        triggerCount = 0;
       },
-      {
-        eventType: "receiveDamage",
-        characterSourceId: this._character.uniqueId,
-        callback: ({ attackSource }) => {
-          if (attackSource) {
-            this._character.stats.tempStats.push(
-              {
-                statToModify: "offense",
-                amount: 0.25,
-                modifiedType: "multiplicative",
-                expires: {
-                  count: 1,
-                  frequency: "turn",
-                },
-              },
-              {
-                statToModify: "critChance",
-                amount: 0.25,
-                modifiedType: "additive",
-                expires: {
-                  count: 1,
-                  frequency: "turn",
-                },
-              }
-            );
-          }
-        },
-      },
-      {
-        eventType: "matchSetup",
-        characterSourceId: this._character.uniqueId,
-        callback: () => {
-          const { targetList } = this.findTargets({
-            filters: [{ allies: true }, { statusEffects: ["Guard"] }],
-          });
-
-          targetList.forEach((target) => {
-            target.events.push({
-              eventType: "receiveDamage",
-              characterSourceId: this._character.uniqueId,
-              callback: ({ attackSource }) => {
-                if (attackSource) {
-                  const furiousBowcasterAbility =
-                    this._character.activeAbilities.find(
-                      (ability) =>
-                        ability.id === "specialskill_CHEWBACCALEGENDARY02"
-                    );
-
-                  if (furiousBowcasterAbility) {
-                    furiousBowcasterAbility.changeCooldown(-1, this);
-                  }
-                }
-              },
-            });
-          });
-        },
-      },
-      {
-        eventType: "endOfTurn",
-        characterSourceId: this._character.uniqueId,
-        callback: () => {
-          triggerCount = 0;
-        },
-      }
-    );
+    });
   }
 }
 
@@ -368,8 +449,7 @@ const specialAbilities = new Map([
 ]);
 
 const uniqueAbilities = new Map([
-  ["uniqueskill_CHEWBACCALEGENDARY01", uniqueskill_CHEWBACCALEGENDARY01],
-  ["uniqueskill_CHEWBACCALEGENDARY02", uniqueskill_CHEWBACCALEGENDARY02],
+  ["uniqueskill_C3POCHEWBACCA", uniqueskill_C3POCHEWBACCA],
 ]);
 
 const leaderAbility = new Map([]);

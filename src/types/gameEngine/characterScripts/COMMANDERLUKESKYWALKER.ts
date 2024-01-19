@@ -23,15 +23,15 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
-      const { targetList } = this.findTargets(
-        {
-          filters: [{ allies: false }],
-          targetCount: 1,
-        },
-        targetCharacter
-      );
+    const { targetList, primaryTarget } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
 
+    super.execute(primaryTarget, stats, canBeCountered, () => {
       targetList.forEach((target) => {
         if (!this.checkEvade("physical", target)) {
           this.dealDamage("physical", target, 1.781, 5, stats, canBeCountered);
@@ -83,7 +83,7 @@ class specialskill_COMMANDERLUKESKYWALKER02 extends ActiveAbility {
   }
 
   public execute(): void {
-    super.execute(undefined, [], false, () => {
+    super.execute(null, [], false, () => {
       this._character?.statusEffect.removeDebuff("all", this._character);
       this._character?.changeTurnMeter(100, this);
       this._character?.heal(
@@ -148,15 +148,15 @@ class specialskill_COMMANDERLUKESKYWALKER01 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered?: boolean
   ): void {
-    super.execute(targetCharacter, stats, canBeCountered, () => {
-      const { targetList } = this.findTargets(
-        {
-          filters: [{ allies: false }],
-          targetCount: 1,
-        },
-        targetCharacter
-      );
+    const { targetList, primaryTarget } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
 
+    super.execute(primaryTarget, stats, canBeCountered, () => {
       targetList.forEach((target) => {
         if (target.stats.health < target.stats.maxHealth) {
           this.changeCooldown(-1, this);
@@ -269,29 +269,39 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
       characterSourceId: this._character.uniqueId,
     });
 
-    this._character?.stats.tempStats.push({
-      statToModify: "critAvoid",
-      amount: 0.5,
-      modifiedType: "additive",
-      condition: doesntHaveCallToAction,
-      characterSourceId: this._character.uniqueId,
-    });
+    this._character?.stats.tempStats.push(
+      {
+        statToModify: "physicalCritAvoid",
+        amount: 0.5,
+        modifiedType: "additive",
+        condition: doesntHaveCallToAction,
+        characterSourceId: this._character.uniqueId,
+      },
+      {
+        statToModify: "specialCritAvoid",
+        amount: 0.5,
+        modifiedType: "additive",
+        condition: doesntHaveCallToAction,
+        characterSourceId: this._character.uniqueId,
+      }
+    );
 
-    this._character?.stats.tempStats.push({
-      statToModify: "armor",
-      amount: 0.5,
-      modifiedType: "multiplicative",
-      condition: doesntHaveCallToAction,
-      characterSourceId: this._character.uniqueId,
-    });
-
-    this._character?.stats.tempStats.push({
-      statToModify: "resistance",
-      amount: 0.5,
-      modifiedType: "multiplicative",
-      condition: doesntHaveCallToAction,
-      characterSourceId: this._character.uniqueId,
-    });
+    this._character?.stats.tempStats.push(
+      {
+        statToModify: "physicalArmor",
+        amount: 0.5,
+        modifiedType: "multiplicative",
+        condition: doesntHaveCallToAction,
+        characterSourceId: this._character.uniqueId,
+      },
+      {
+        statToModify: "specialArmor",
+        amount: 0.5,
+        modifiedType: "multiplicative",
+        condition: doesntHaveCallToAction,
+        characterSourceId: this._character.uniqueId,
+      }
+    );
 
     this._character?.stats.tempStats.push({
       statToModify: "tenacity",
@@ -333,30 +343,38 @@ class leaderskill_COMMANDERLUKESKYWALKER extends PassiveAbility {
     });
 
     targetList.forEach((target) => {
-      target.stats.tempStats.push({
-        statToModify: "counterChance",
-        amount: 0.5,
-        modifiedType: "additive",
-        characterSourceId: this._character?.uniqueId,
-      });
-      target.stats.tempStats.push({
-        statToModify: "armor",
-        amount: 0.5,
-        modifiedType: "multiplicative",
-        characterSourceId: this._character?.uniqueId,
-      });
-      target.stats.tempStats.push({
-        statToModify: "resistance",
-        amount: 0.5,
-        modifiedType: "multiplicative",
-        characterSourceId: this._character?.uniqueId,
-      });
-      target.stats.tempStats.push({
-        statToModify: "offense",
-        amount: 0.15,
-        modifiedType: "multiplicative",
-        characterSourceId: this._character?.uniqueId,
-      });
+      target.stats.tempStats.push(
+        {
+          statToModify: "counterChance",
+          amount: 0.5,
+          modifiedType: "additive",
+          characterSourceId: this._character?.uniqueId,
+        },
+        {
+          statToModify: "physicalArmor",
+          amount: 0.5,
+          modifiedType: "multiplicative",
+          characterSourceId: this._character?.uniqueId,
+        },
+        {
+          statToModify: "specialArmor",
+          amount: 0.5,
+          modifiedType: "multiplicative",
+          characterSourceId: this._character?.uniqueId,
+        },
+        {
+          statToModify: "physicalOffense",
+          amount: 0.15,
+          modifiedType: "multiplicative",
+          characterSourceId: this._character?.uniqueId,
+        },
+        {
+          statToModify: "specialOffense",
+          amount: 0.15,
+          modifiedType: "multiplicative",
+          characterSourceId: this._character?.uniqueId,
+        }
+      );
 
       target.events.push({
         characterSourceId: this._character?.uniqueId ?? "",

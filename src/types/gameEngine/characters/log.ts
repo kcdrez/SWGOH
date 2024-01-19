@@ -31,6 +31,7 @@ type tLogEffects = {
   defeated?: boolean;
   winner?: string;
   stunned?: boolean;
+  revived?: boolean;
 };
 
 /** A type used to log any status effects (such as buffs or debuffs) that may have been applied or removed */
