@@ -126,17 +126,21 @@ abstract class CharacterAbility extends Ability {
       filteredList = tempList;
     } else if (targetData.targetCount) {
       const tempList: Character[] = [];
-      do {
+      if (forcedTarget) {
+        tempList.push(forcedTarget);
+      }
+
+      while (
+        tempList.length < targetData.targetCount &&
+        filteredList.length >= targetData.targetCount
+      ) {
         const rand: number = randomNumber(0, filteredList.length - 1);
         const el = filteredList[rand];
         const exists = tempList.some((x) => x.id === el.id);
         if (!exists) {
           tempList.push(filteredList[rand]);
         }
-      } while (
-        tempList.length < targetData.targetCount &&
-        filteredList.length >= targetData.targetCount
-      );
+      }
       filteredList = tempList;
     }
 
@@ -172,6 +176,7 @@ abstract class CharacterAbility extends Ability {
    * @param abilityModifier - The modifier for the specific ability which will be multplied by the variance to determine the amount of damage dealt
    * @param variance - The amount of variance that the damage can be
    * @param stats - An array of stats to modify the starting stat value
+   * @param srcAbility - The optional ability that is causing the damage
    */
   public dealDamage(
     damageType: "physical" | "special" | "true",
@@ -179,7 +184,8 @@ abstract class CharacterAbility extends Ability {
     abilityModifier: number = 0,
     variance: number = 5,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered: boolean = true,
+    srcAbility?: Ability
   ) {
     const { offense, critChance, armorPen } =
       this._character.stats.getCombatStats(damageType, stats);
@@ -204,6 +210,7 @@ abstract class CharacterAbility extends Ability {
           amount: _.round(damageTotal, 0),
           isCrit,
         },
+        ability: { source: srcAbility },
       }),
     ]);
 

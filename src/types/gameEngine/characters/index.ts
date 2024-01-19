@@ -395,6 +395,7 @@ export class Character {
           })
         );
       } else {
+        console.log(this.uniqueId, "is assisting", targetCharacter?.uniqueId);
         gameEngine.addLogs(
           new Log({
             character: this,

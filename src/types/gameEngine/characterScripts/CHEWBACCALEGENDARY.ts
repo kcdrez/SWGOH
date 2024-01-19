@@ -276,12 +276,13 @@ class uniqueskill_CHEWBACCALEGENDARY02 extends PassiveAbility {
   }
 
   public override activate(): void {
-    let triggerCount = 0;
+    let triggers: string[] = [];
 
     this._character.statusEffect.addImmune(
       this._character.uniqueId,
       "Ability Block"
     );
+
     this._character.statusEffect.addImmune(
       this._character.uniqueId,
       "Cooldown Increase"
@@ -292,15 +293,17 @@ class uniqueskill_CHEWBACCALEGENDARY02 extends PassiveAbility {
         eventType: "dealDamage",
         characterSourceId: this._character.uniqueId,
         callback: ({ target }: { target: Character }) => {
-          if (triggerCount < 1) {
-            triggerCount++;
+          const alreadyTriggered = triggers.some((t) => t === target.uniqueId);
+          if (!alreadyTriggered) {
+            triggers.push(target.uniqueId);
             this.dealDamage(
               "true",
               target,
               target.stats.maxHealth * 0.2,
               0,
               [],
-              false
+              false,
+              this
             );
           }
         },
@@ -384,7 +387,7 @@ class uniqueskill_CHEWBACCALEGENDARY02 extends PassiveAbility {
         eventType: "endOfTurn",
         characterSourceId: this._character.uniqueId,
         callback: () => {
-          triggerCount = 0;
+          triggers = [];
         },
       }
     );

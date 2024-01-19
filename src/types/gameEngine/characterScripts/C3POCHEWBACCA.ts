@@ -37,8 +37,6 @@ class basicskill_C3POCHEWBACCA extends ActiveAbility {
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
       targetList.forEach((target) => {
-        console.log("threepio");
-
         if (!this.checkEvade("physical", target)) {
           this.dealDamage("physical", target, 2, 5, stats, canBeCountered);
           this._character.statusEffect.inflictDebuff(
