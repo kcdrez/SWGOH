@@ -395,7 +395,6 @@ export class Character {
           })
         );
       } else {
-        console.log(this.uniqueId, "is assisting", targetCharacter?.uniqueId);
         gameEngine.addLogs(
           new Log({
             character: this,
@@ -815,8 +814,8 @@ export class Character {
         },
         {
           label: "Mastery",
-          value: 0,
-          base: 0,
+          value: round(this.stats.mastery, 2),
+          base: round(this.stats.baseStats.mastery, 2),
         },
         {
           label: "Crit Damage",
@@ -842,12 +841,12 @@ export class Character {
           base: round(this.stats.baseStats.healthSteal * 100, 2),
           isPercent: true,
         },
-        {
-          label: "Defense Pen",
-          value: 0,
-          base: 0,
-          isPercent: true,
-        },
+        // {
+        //   label: "Defense Pen",
+        //   value: 0,
+        //   base: 0,
+        //   isPercent: true,
+        // },
         {
           label: "Counter Chance",
           value: round(this.stats.counterChance * 100, 2),

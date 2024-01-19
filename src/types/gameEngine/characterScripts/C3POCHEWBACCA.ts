@@ -153,7 +153,7 @@ class specialskill_C3POCHEWBACCA02 extends ActiveAbility {
 
             gameEngine.addLogs([
               new Log({
-                target: targetCharacter,
+                target,
                 damage: {
                   amount: damageTotal,
                   isCrit,
