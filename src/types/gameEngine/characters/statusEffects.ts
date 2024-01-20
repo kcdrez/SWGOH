@@ -216,6 +216,43 @@ export class StatusEffect {
       });
     }
   }
+
+  /** Changes the duration of all stacks of a particular status effect
+   * @param effect - The name of the effect that should be changed
+   * @param duration - The duration to change the effect to
+   * @param type - The type of effect (buff, debuff, or status effect)
+   */
+  public resetDuration(
+    effect: iStatusEffect["name"],
+    duration: number,
+    type: "buff" | "debuff" | "statusEffect",
+    srcAbility?: Ability
+  ) {
+    let shouldLog: iStatusEffect[] = [];
+    [...this._buffs, ...this._debuffs, ...this._statusEffects].forEach(
+      (statusEffect) => {
+        if (statusEffect.name === effect) {
+          statusEffect.duration = duration;
+          shouldLog.push(statusEffect);
+        }
+      }
+    );
+
+    if (shouldLog.length > 0) {
+      gameEngine.addLogs(
+        new Log({
+          character: this._character,
+          statusEffects: {
+            type,
+            list: shouldLog,
+            reset: duration,
+          },
+          ability: { source: srcAbility },
+        })
+      );
+    }
+  }
+
   /** Checks to see if the character is immune to the effect
    * @param statusEffect - The status effect to check
    * @returns true if the character is currently immune to the effect
@@ -238,15 +275,29 @@ export class StatusEffect {
     scalar: number,
     sourceAbility: Ability | null
   ) {
+    const hasBuffImmunity = this.hasDebuff("Buff Immunity");
+    const hasConfuse = this.hasDebuff("Confuse");
+
     if (Array.isArray(buff)) {
       buff.forEach((someBuff) => {
         this.addBuff(someBuff, scalar, sourceAbility);
       });
-    } else if (this.hasDebuff("Buff Immunity") && !buff.cantPrevent) {
+    } else if ((hasBuffImmunity || hasConfuse) && !buff.cantPrevent) {
+      let preventedSource = "";
+      if (hasBuffImmunity) {
+        preventedSource = "Buff Immunity";
+      } else if (hasConfuse) {
+        preventedSource = "Confused";
+      }
+
       gameEngine.addLogs(
         new Log({
           character: this._character,
-          statusEffects: { prevented: true, list: [buff], type: "buff" },
+          statusEffects: {
+            prevented: preventedSource,
+            list: [buff],
+            type: "buff",
+          },
         })
       );
     } else if (!this.hasDebuff("Buff Immunity")) {
@@ -403,6 +454,7 @@ export class StatusEffect {
           targetCharacter.stats.tenacity - this._character.stats.potency,
           0.15
         );
+
         if (
           !chanceOfEvent(resistedChance) ||
           debuff.cantResist ||
@@ -780,6 +832,7 @@ export type tBuff =
   | "Potency Up"
   | "Offense Up"
   | "Speed Up"
+  | "Stealth"
   | "Taunt"
   | "Tenacity Up"
   | "TM Decrease"

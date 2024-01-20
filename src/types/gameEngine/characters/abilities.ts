@@ -85,6 +85,14 @@ abstract class CharacterAbility extends Ability {
               });
               if (anyForced) {
                 return char.hasTauntEffect;
+              } else if (char.statusEffect.hasBuff("Stealth")) {
+                const allAlliesHaveStealth = char.teammates.every((ally) => {
+                  return (
+                    ally.uniqueId === char.uniqueId ||
+                    ally.statusEffect.hasBuff("Stealth")
+                  );
+                });
+                return allAlliesHaveStealth ? true : false;
               }
             }
           }

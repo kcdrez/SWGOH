@@ -6,7 +6,8 @@ import {
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
 import { iStatsCheck } from "../characters/stats";
-import { iCondition } from "../gameEngine";
+import { gameEngine, iCondition } from "../gameEngine";
+import { Log } from "../characters/log";
 
 class basicskill_C3POLEGENDARY extends ActiveAbility {
   constructor(character: Character) {
@@ -23,11 +24,7 @@ class basicskill_C3POLEGENDARY extends ActiveAbility {
     );
   }
 
-  public execute(
-    targetCharacter?: Character,
-    stats?: iStatsCheck[],
-    canBeCountered: boolean = true
-  ): void {
+  public execute(targetCharacter?: Character, stats?: iStatsCheck[]): void {
     const { targetList, primaryTarget } = this.findTargets(
       {
         filters: [{ allies: false }],
@@ -36,103 +33,149 @@ class basicskill_C3POLEGENDARY extends ActiveAbility {
       targetCharacter
     );
 
-    super.execute(primaryTarget, stats, canBeCountered, () => {
+    super.execute(primaryTarget, stats, false, () => {
       targetList.forEach((target) => {
-        if (!this.checkEvade("physical", target)) {
-          this.dealDamage("physical", target, 1.781, 5, stats, canBeCountered);
-          if (
-            target.checkCondition({
-              debuffs: ["Speed Down"],
-            })
-          ) {
-            target.changeTurnMeter(-30, this);
-          }
+        target.statusEffect.resetDuration("Confuse", 3, "debuff");
 
-          if (
-            target.checkCondition({
-              debuffs: ["Defense Down"],
-            })
-          ) {
-            this._character?.statusEffect.inflictDebuff(
-              [{ name: "Stun", duration: 1, id: uuid() }],
-              target,
-              1,
-              this
-            );
-          }
-
-          this._character?.statusEffect.inflictDebuff(
+        if (
+          target.statusEffect.debuffs.filter((d) => d.name === "Confuse")
+            .length < 3
+        ) {
+          this._character.statusEffect.inflictDebuff(
             [
-              { name: "Speed Down", duration: 2, id: uuid() },
-              { name: "Defense Down", duration: 2, id: uuid() },
+              {
+                name: "Confuse",
+                duration: 3,
+                id: uuid(),
+                unique: true,
+                isStackable: true,
+              },
             ],
             target,
             1,
             this
           );
         }
+
+        const translationCount = this._character.statusEffect.buffs.filter(
+          (b) => b.name === "Translation"
+        ).length;
+
+        target.changeTurnMeter(
+          -6 + translationCount * -3,
+          this,
+          this._character
+        );
       });
     });
   }
 }
 
-class specialskill_COMMANDERLUKESKYWALKER02 extends ActiveAbility {
+class specialskill_C3POLEGENDARY01 extends ActiveAbility {
   constructor(character: Character) {
     super(
-      "specialskill_COMMANDERLUKESKYWALKER02",
-      "Call to Action",
-      `Dispel all debuffs on Luke. Luke gains 100% Turn Meter and recovers 40% Health and Protection. If Luke doesn't have Call to Action, he gains it until the next time this ability is used, which can't be copied, dispelled, or prevented. If Luke already had Call to Action, he removes it.\n\nCall to Action: This character ignores Taunt during their turn and has +50% Accuracy, Critical Chance, and Critical Damage`,
+      "specialability_C3POLEGENDARY01",
+      "Oh My Goodness!",
+      `C-3PO gains Potency Up and Stealth for 2 turns, then he and target other ally gain Translation for 3 turns. C-3PO inflicts Confuse twice on target enemy for 3 turns, then calls all other allies with Translation to assist, dealing 50% less damage.
+      \n\n
+      (See Protocol Droid for a description of Translation.)`,
       character
     );
-    this.cooldown = 4;
+    this.cooldown = 3;
   }
 
-  public execute(): void {
-    super.execute(null, [], false, () => {
-      this._character?.statusEffect.removeDebuff("all", this._character);
-      this._character?.changeTurnMeter(100, this);
-      this._character?.heal(
-        {
-          healthType: "protection",
-          amountType: "multiplicative",
-          amount: 0.4,
-        },
-        this
-      );
-      this._character?.heal(
-        {
-          healthType: "health",
-          amountType: "multiplicative",
-          amount: 0.4,
-        },
+  public execute(targetCharacter?: Character, stats?: iStatsCheck[]): void {
+    const { targetList: enemies, primaryTarget } = this.findTargets(
+      {
+        filters: [{ allies: false }],
+        targetCount: 1,
+      },
+      targetCharacter
+    );
+
+    const { targetList: targetAllies } = this.findTargets({
+      filters: [{ allies: true }, { tags: ["!Self"] }],
+      targetCount: 1,
+    });
+
+    super.execute(primaryTarget, stats, false, () => {
+      this._character.statusEffect.addBuff(
+        [
+          { name: "Potency Up", id: uuid(), duration: 2 },
+          { name: "Stealth", id: uuid(), duration: 2 },
+          {
+            name: "Translation",
+            id: uuid(),
+            duration: 3,
+            unique: true,
+            isStackable: true,
+          },
+        ],
+        1,
         this
       );
 
-      if (
-        this._character?.checkCondition({
-          buffs: ["Call to Action"],
-        })
-      ) {
-        this._character?.statusEffect.removeBuff(
-          "Call to Action",
-          this._character
-        );
-      } else {
-        this._character?.statusEffect.addBuff(
+      targetAllies.forEach((target) => {
+        target.statusEffect.addBuff(
           [
             {
-              name: "Call to Action",
-              duration: Infinity,
+              name: "Translation",
               id: uuid(),
-              cantDispel: true,
-              cantResist: true,
+              duration: 3,
               unique: true,
+              isStackable: true,
             },
           ],
           1,
           this
         );
-      }
+      });
+
+      const { targetList: allTranslationAllies } = this.findTargets({
+        filters: [
+          { allies: true },
+          { tags: ["!Self"] },
+          { buffs: ["Translation"] },
+        ],
+      });
+
+      allTranslationAllies.forEach((target) => {
+        target.assist(
+          [
+            {
+              statToModify: "physicalOffense",
+              modifiedType: "multiplicative",
+              amount: 0.5,
+            },
+            {
+              statToModify: "specialOffense",
+              modifiedType: "multiplicative",
+              amount: 0.5,
+            },
+          ],
+          primaryTarget ?? targetCharacter,
+          this
+        );
+      });
+
+      enemies.forEach((target) => {
+        this._character.statusEffect.inflictDebuff(
+          [
+            {
+              name: "Confuse",
+              duration: 3,
+              id: uuid(),
+              unique: true,
+              isStackable: true,
+              stacks: 2,
+              maxStacks: 3,
+            },
+          ],
+          target,
+          1,
+          this
+        );
+      });
     });
   }
 }
@@ -280,21 +323,18 @@ const basicAbility = new Map([
 ]);
 
 const specialAbilities = new Map([
-  [
-    "specialskill_COMMANDERLUKESKYWALKER02",
-    specialskill_COMMANDERLUKESKYWALKER02,
-  ],
+  ["specialskill_C3POLEGENDARY01", specialskill_C3POLEGENDARY01],
 ]);
 
 const uniqueAbilities = new Map([
-  [
-    "uniqueskill_COMMANDERLUKESKYWALKER01",
-    uniqueskill_COMMANDERLUKESKYWALKER01,
-  ],
-  [
-    "uniqueskill_COMMANDERLUKESKYWALKER02",
-    uniqueskill_COMMANDERLUKESKYWALKER02,
-  ],
+  // [
+  //   "uniqueskill_COMMANDERLUKESKYWALKER01",
+  //   uniqueskill_COMMANDERLUKESKYWALKER01,
+  // ],
+  // [
+  //   "uniqueskill_COMMANDERLUKESKYWALKER02",
+  //   uniqueskill_COMMANDERLUKESKYWALKER02,
+  // ],
 ]);
 
 const leaderAbility = new Map([]);

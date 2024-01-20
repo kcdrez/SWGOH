@@ -42,7 +42,8 @@ type tLogStatusEffect = {
   removed?: boolean;
   duration?: number;
   immune?: boolean;
-  prevented?: boolean;
+  prevented?: string;
+  reset?: number;
 };
 
 /** A container type that has all the logging information of what has occured */
