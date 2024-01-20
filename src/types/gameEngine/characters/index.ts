@@ -695,10 +695,12 @@ export class Character {
       health: {
         current: round(this.stats.health, 0),
         max: round(this.stats.maxHealth, 0),
+        base: round(this.stats.baseStats.maxHealth, 0),
       },
       protection: {
         current: round(this.stats.protection, 0),
         max: round(this.stats.maxProtection, 0),
+        base: round(this.stats.baseStats.maxProtection, 0),
       },
       activeAbilities: this.activeAbilities.map((a) => {
         return { id: a.id, name: a.name, cooldown: a.turnsRemaining };

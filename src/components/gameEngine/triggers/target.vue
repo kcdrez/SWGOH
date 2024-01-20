@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { iTargetData } from "types/gameEngine/characters";
+import { iTargetData } from "types/gameEngine/characters/abilities";
 
 export default defineComponent({
   name: "Target",

@@ -52,10 +52,12 @@ export type tLogData = {
   health: {
     current: number;
     max: number;
+    base: number;
   };
   protection: {
     current: number;
     max: number;
+    base: number;
   };
   activeAbilities: { name: string; cooldown?: number | null; id: string }[];
   buffs: iBuff[];

@@ -39,17 +39,7 @@
                 Status Effects
               </button>
             </li>
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link"
-                data-bs-toggle="tab"
-                :data-bs-target="`#triggers-${id}`"
-                type="button"
-                role="tab"
-              >
-                Triggers
-              </button>
-            </li>
+
             <li class="nav-item" role="presentation">
               <button
                 class="nav-link"
@@ -234,13 +224,6 @@
                 />
               </template>
             </div>
-            <div class="tab-pane fade" :id="`triggers-${id}`">
-              <!-- <Trigger
-                v-for="trigger in character.triggers"
-                :key="trigger.id"
-                :trigger="trigger"
-              /> -->
-            </div>
             <div class="tab-pane fade" :id="`other-${id}`">
               <div
                 v-if="
@@ -342,7 +325,6 @@ export default defineComponent({
 
 .popper .tab-pane {
   max-height: 300px;
-  overflow: scroll;
 }
 
 ::v-deep(.popper) .stats .row {
