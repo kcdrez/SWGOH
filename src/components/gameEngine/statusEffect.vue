@@ -25,7 +25,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { iStatusEffect } from "types/gameEngine/statusEffects";
+import { iStatusEffect } from "types/gameEngine/characters/statusEffects";
 
 export default defineComponent({
   name: "StatusEffect",

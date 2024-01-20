@@ -52,7 +52,7 @@
           <div>Your Team:</div>
           <UnitSearch
             :list="playerUnitList"
-            @select="addToTeam('player', $event)"
+            @select="addToTeam('player', $event, false)"
           />
           <ul class="character-list">
             <li
@@ -87,7 +87,7 @@
           <div>Opponent's Team:</div>
           <UnitSearch
             :list="opponentUnitList"
-            @select="addToTeam('opponent', $event)"
+            @select="addToTeam('opponent', $event, false)"
           />
           <ul class="character-list">
             <li
@@ -136,358 +136,106 @@
             </div>
           </div>
         </div>
-        <div class="row" v-if="gameEngine.matchHistory.length > 0">
+        <div class="row">
           <div class="col">
-            <ul class="nav nav-tabs my-3" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link active"
-                  data-bs-toggle="tab"
-                  data-bs-target="#simulationSummary"
-                  type="button"
-                  role="tab"
+            <Loading
+              :state="gameEngine.status"
+              message="Loading match results"
+              size="lg"
+              displayText="Please wait...This may take a few minutes."
+            >
+              <ul class="nav nav-tabs my-3" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link active"
+                    data-bs-toggle="tab"
+                    data-bs-target="#simulationSummary"
+                    type="button"
+                    role="tab"
+                  >
+                    Summary
+                  </button>
+                </li>
+                <li
+                  class="nav-item"
+                  role="presentation"
+                  v-for="(match, index) in gameEngine.matchHistory"
+                  :key="index"
                 >
-                  Summary
-                </button>
-              </li>
-              <li
-                class="nav-item"
-                role="presentation"
-                v-for="(match, index) in gameEngine.matchHistory"
-                :key="index"
-              >
-                <button
-                  class="nav-link"
-                  data-bs-toggle="tab"
-                  :data-bs-target="`#match-${index}`"
-                  type="button"
-                  role="tab"
-                >
-                  Match {{ index + 1 }}
-                </button>
-              </li>
-            </ul>
-            <div class="tab-content">
-              <div class="tab-pane fade show active" id="simulationSummary">
-                <div>{{ player.name }} Wins: {{ gameEngine.playerWins }}</div>
-                <div>
-                  {{ opponent.name }} Wins: {{ gameEngine.opponentWins }}
+                  <button
+                    class="nav-link"
+                    data-bs-toggle="tab"
+                    :data-bs-target="`#match-${index}`"
+                    type="button"
+                    role="tab"
+                  >
+                    Match {{ index + 1 }}
+                  </button>
+                </li>
+              </ul>
+              <div class="tab-content">
+                <div class="tab-pane fade show active" id="simulationSummary">
+                  <div>{{ player.name }} Wins: {{ gameEngine.playerWins }}</div>
+                  <div>
+                    {{ opponent.name }} Wins: {{ gameEngine.opponentWins }}
+                  </div>
+                  <div>
+                    Winrate:
+                    {{ gameEngine.playerWinRate }}%
+                  </div>
                 </div>
-                <div>
-                  Winrate:
-                  {{ gameEngine.playerWinRate }}%
-                </div>
-              </div>
-              <div
-                class="tab-pane fade"
-                :id="`match-${index}`"
-                role="tabpanel"
-                v-for="(match, index) in gameEngine.matchHistory"
-                :key="index"
-              >
-                <template
-                  v-for="(turn, turnIndex) in match"
-                  :key="`match-${index}-turn-${turnIndex}`"
+                <div
+                  class="tab-pane fade"
+                  :id="`match-${index}`"
+                  role="tabpanel"
+                  v-for="(match, index) in gameEngine.matchHistory"
+                  :key="index"
                 >
-                  <Popper arrow placement="right">
-                    <h6 class="turn-label">{{ turn.label }}:</h6>
-                    <template #content v-if="turn.character">
-                      <div>
-                        <div class="text-decoration-underline">
-                          {{ turn.character?.name }}
-                        </div>
-                        <ul class="nav nav-tabs my-3" role="tablist">
-                          <li class="nav-item" role="presentation">
-                            <button
-                              class="nav-link active"
-                              data-bs-toggle="tab"
-                              :data-bs-target="`#popover-match${index}_${turnIndex}-general`"
-                              type="button"
-                              role="tab"
-                            >
-                              General
-                            </button>
-                          </li>
-                          <li class="nav-item" role="presentation">
-                            <button
-                              class="nav-link"
-                              data-bs-toggle="tab"
-                              :data-bs-target="`#popover-match${index}_${turnIndex}-stats`"
-                              type="button"
-                              role="tab"
-                            >
-                              Stats
-                            </button>
-                          </li>
-                          <li class="nav-item" role="presentation">
-                            <button
-                              class="nav-link"
-                              data-bs-toggle="tab"
-                              :data-bs-target="`#popover-match${index}_${turnIndex}-statusEffects`"
-                              type="button"
-                              role="tab"
-                            >
-                              Status Effects
-                            </button>
-                          </li>
-                          <li class="nav-item" role="presentation">
-                            <button
-                              class="nav-link"
-                              data-bs-toggle="tab"
-                              :data-bs-target="`#popover-match${index}_${turnIndex}-triggers`"
-                              type="button"
-                              role="tab"
-                            >
-                              Triggers
-                            </button>
-                          </li>
-                          <li class="nav-item" role="presentation">
-                            <button
-                              class="nav-link"
-                              data-bs-toggle="tab"
-                              :data-bs-target="`#popover-match${index}_${turnIndex}-other`"
-                              type="button"
-                              role="tab"
-                            >
-                              Other Effects
-                            </button>
-                          </li>
-                        </ul>
-                        <div class="tab-content">
+                  <template
+                    v-for="(turn, turnIndex) in match"
+                    :key="`match-${index}-turn-${turnIndex}`"
+                  >
+                    <Popper arrow placement="right">
+                      <h6 class="turn-label">{{ turn.label }}:</h6>
+                      <template #content>
+                        <div>
                           <div
-                            class="tab-pane fade show active"
-                            :id="`popover-match${index}_${turnIndex}-general`"
+                            class="input-group input-group-sm"
+                            v-for="(character, index) in turn.characterList"
+                            :key="index"
                           >
-                            <div class="input-group input-group-sm">
-                              <span class="input-group-text">Protection:</span>
-                              <span class="input-group-text fill"
-                                ><span
-                                  :class="{
-                                    'text-danger':
-                                      (turn.characterLogData?.protection
-                                        .current ?? 0) <
-                                      (turn.characterLogData?.protection.max ??
-                                        0),
-                                  }"
-                                  >{{
-                                    turn.characterLogData?.protection.current
-                                  }}</span
-                                >
-                                <span class="mx-1">/</span>
-                                {{
-                                  turn.characterLogData?.protection.max
-                                }}</span
-                              >
-                            </div>
-                            <div class="input-group input-group-sm mt-1">
-                              <span class="input-group-text">Health:</span>
-                              <span class="input-group-text fill"
-                                ><span
-                                  :class="{
-                                    'text-warning':
-                                      (turn.characterLogData?.health.current ??
-                                        0) <
-                                      (turn.characterLogData?.health.max ?? 0),
-                                  }"
-                                  >{{
-                                    turn.characterLogData?.health.current
-                                  }}</span
-                                ><span class="mx-1">/</span>
-                                {{ turn.characterLogData?.health.max }}</span
-                              >
-                            </div>
-                            <div
-                              v-for="ability in turn.characterLogData
-                                ?.activeAbilities"
-                              :key="ability.id"
-                              class="mt-1"
+                            <span class="input-group-text character-name"
+                              >{{ character.name }} ({{
+                                character.owner
+                              }})</span
                             >
-                              <div v-if="ability.cooldown">
-                                {{ ability.name }} - Cooldown:
-                                {{ ability.turnsRemaining }}
-                              </div>
-                              <div v-else>{{ ability.name }} (Basic)</div>
-                            </div>
-                          </div>
-                          <div
-                            class="tab-pane fade stats"
-                            :id="`popover-match${index}_${turnIndex}-stats`"
-                          >
-                            <div class="row">
-                              <div class="col">
-                                <u>General Stats:</u>
-                                <div
-                                  v-for="stat in turn.characterLogData?.general"
-                                  :key="stat.label"
-                                >
-                                  <span class="me-1">{{ stat.label }}:</span>
-                                  <span
-                                    :class="{
-                                      'text-success': stat.value > stat.base,
-                                      'text-warning': stat.value < stat.base,
-                                    }"
-                                    :title="`Current ${stat.label}`"
-                                    >{{ stat.value
-                                    }}{{ stat.isPercent ? "%" : "" }}
-                                  </span>
-                                  <span
-                                    class="ms-1"
-                                    v-if="stat.value !== stat.base"
-                                    :title="`Base ${stat.label}`"
-                                    >({{ stat.base
-                                    }}{{ stat.isPercent ? "%" : "" }})</span
-                                  >
-                                </div>
-                              </div>
-                              <div class="col">
-                                <u>Physical Stats:</u>
-                                <div
-                                  v-for="stat in turn.characterLogData
-                                    ?.physical"
-                                  :key="stat.label"
-                                >
-                                  <span class="me-1">{{ stat.label }}:</span>
-                                  <span
-                                    :class="{
-                                      'text-success': stat.value > stat.base,
-                                      'text-warning': stat.value < stat.base,
-                                    }"
-                                    :title="`Current ${stat.label}`"
-                                    >{{ stat.value
-                                    }}{{ stat.isPercent ? "%" : "" }}
-                                  </span>
-                                  <span
-                                    class="ms-1"
-                                    v-if="stat.value !== stat.base"
-                                    :title="`Base ${stat.label}`"
-                                    >({{ stat.base
-                                    }}{{ stat.isPercent ? "%" : "" }})</span
-                                  >
-                                </div>
-                              </div>
-                              <div class="col">
-                                <u>Special Stats:</u>
-                                <div
-                                  v-for="stat in turn.characterLogData?.special"
-                                  :key="stat.label"
-                                >
-                                  <span class="me-1">{{ stat.label }}:</span>
-                                  <span
-                                    :class="{
-                                      'text-success': stat.value > stat.base,
-                                      'text-warning': stat.value < stat.base,
-                                    }"
-                                    :title="`Current ${stat.label}`"
-                                    >{{ stat.value
-                                    }}{{ stat.isPercent ? "%" : "" }}
-                                  </span>
-                                  <span
-                                    class="ms-1"
-                                    v-if="stat.value !== stat.base"
-                                    :title="`Base ${stat.label}`"
-                                    >({{ stat.base
-                                    }}{{ stat.isPercent ? "%" : "" }})</span
-                                  >
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            class="tab-pane fade"
-                            :id="`popover-match${index}_${turnIndex}-statusEffects`"
-                          >
-                            <div>Buffs:</div>
-                            <template
-                              v-if="turn.characterLogData?.buffs.length === 0"
-                              >-</template
-                            >
-                            <template
-                              v-for="buff in turn.characterLogData?.buffs"
-                              :key="buff.name"
-                            >
-                              <img
-                                class="statusEffect"
-                                :src="turn.getStatusEffectImgSrc(buff)"
-                                alt="images/statusEffects/Default.png"
-                                :title="turn.getStatusEffectText(buff)"
+                            <span class="input-group-text fill turn-meter">
+                              <ProgressBar
+                                :percent="character.turnMeter"
+                                class="w-100"
                               />
-                            </template>
-                            <div>Debuffs:</div>
-                            <template
-                              v-if="turn.characterLogData?.debuffs.length === 0"
-                              >-</template
-                            >
-                            <template
-                              v-for="debuff in turn.characterLogData?.debuffs"
-                              :key="debuff.name"
-                            >
-                              <img
-                                class="statusEffect"
-                                :src="turn.getStatusEffectImgSrc(debuff)"
-                                alt="images/statusEffects/Default.png"
-                                :title="turn.getStatusEffectText(debuff)"
-                              />
-                            </template>
-                            <div>Other Status Effects:</div>
-                            <template
-                              v-if="
-                                turn.characterLogData?.statusEffects.length ===
-                                0
-                              "
-                              >-</template
-                            >
-                            <template
-                              v-for="statusEffect in turn.characterLogData
-                                ?.statusEffects"
-                              :key="statusEffect.name"
-                            >
-                              <img
-                                class="statusEffect"
-                                :src="turn.getStatusEffectImgSrc(statusEffect)"
-                                alt="images/statusEffects/Default.png"
-                                :title="turn.getStatusEffectText(statusEffect)"
-                              />
-                            </template>
-                          </div>
-                          <div
-                            class="tab-pane fade"
-                            :id="`popover-match${index}_${turnIndex}-triggers`"
-                          >
-                            <Trigger
-                              v-for="trigger in turn.characterLogData?.triggers"
-                              :key="trigger.id"
-                              :trigger="trigger"
-                            />
-                          </div>
-                          <div
-                            class="tab-pane fade"
-                            :id="`popover-match${index}_${turnIndex}-other`"
-                          >
-                            <div>
-                              {{
-                                turn.characterLogData?.otherEffects.ignoreTaunt
-                                  ? "Ignores Taunt"
-                                  : "-"
-                              }}
-                            </div>
+                            </span>
                           </div>
                         </div>
-                      </div>
-                    </template>
-                  </Popper>
-                  <ul>
-                    <li v-for="(log, index) in turn.logs" :key="index">
-                      <div v-html="log"></div>
-                    </li>
-                    <li v-if="turn.endOfTurnLogs.length">- End of Turn -</li>
-                    <li v-for="(log, index) in turn.endOfTurnLogs" :key="index">
-                      <div v-html="log"></div>
-                    </li>
-                  </ul>
-                  <ul v-if="turn.endOfTurnLogs.length"></ul>
-                </template>
+                      </template>
+                    </Popper>
+                    <ul>
+                      <li v-for="(log, index) in turn.logs" :key="index">
+                        <Log :log="log" />
+                      </li>
+                      <li v-if="turn.endOfTurnLogs.length">- End of Turn -</li>
+                      <li
+                        v-for="(log, index) in turn.endOfTurnLogs"
+                        :key="index"
+                      >
+                        <Log :log="log" />
+                      </li>
+                    </ul>
+                    <ul v-if="turn.endOfTurnLogs.length"></ul>
+                  </template>
+                </div>
               </div>
-            </div>
+            </Loading>
           </div>
         </div>
       </template>
@@ -506,13 +254,15 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
-import { randomNumber, numbersOnly } from "utils";
-import abilities from "types/abilities";
-import { Character, format } from "types/gameEngine/characters";
-import { Engine } from "types/gameEngine/gameEngine";
+import { numbersOnly } from "utils";
+import { Character } from "types/gameEngine/characters/index";
+import { gameEngine, Engine } from "types/gameEngine/gameEngine";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
-import Trigger from "components/gameEngine/trigger.vue";
+import Trigger from "components/gameEngine/triggers/trigger.vue";
+import Log from "components/gameEngine/log.vue";
+import characterList from "types/gameEngine/characterScripts";
+import { loadingState } from "types/loading";
 
 interface dataModel {
   gameEngine: Engine;
@@ -524,15 +274,15 @@ interface dataModel {
 
 export default defineComponent({
   name: "GameSimulationPage",
-  components: { UnitSearch, Trigger },
-  data(): dataModel {
+  components: { UnitSearch, Trigger, Log },
+  data() {
     return {
-      gameEngine: new Engine(),
+      gameEngine,
       playerTeam: [],
       opponentTeam: [],
       showDeleteOpponentConfirm: false,
       allyCode: "",
-    };
+    } as dataModel;
   },
   computed: {
     ...mapState("opponents", {
@@ -547,14 +297,15 @@ export default defineComponent({
     playerUnitList(): Unit[] {
       return this.player?.units.filter((unit: Unit) => {
         return (
-          unit.id in abilities && !this.playerTeam.some((x) => x.id === unit.id)
+          unit.id in characterList &&
+          !this.playerTeam.some((x) => x.id === unit.id)
         );
       });
     },
     opponentUnitList(): Unit[] {
       return this.opponent?.units.filter((unit: Unit) => {
         return (
-          unit.id in abilities &&
+          unit.id in characterList &&
           !this.opponentTeam.some((x) => x.id === unit.id)
         );
       });
@@ -571,18 +322,23 @@ export default defineComponent({
       refreshMatches: "refreshMatches",
       removeMatch: "removeMatch",
     }),
-    addToTeam(teamName: "player" | "opponent", unit: Unit) {
+    addToTeam(teamName: "player" | "opponent", unit: Unit, isLeader?: boolean) {
       if (unit instanceof Unit) {
         if (teamName === "player") {
           if (!this.playerTeam.some((x) => x.id === unit.id)) {
-            this.playerTeam.push(new Character(unit, this.player.name));
+            this.playerTeam.push(
+              new Character(unit, this.player.name, isLeader)
+            );
           }
         } else {
           if (!this.opponentTeam.some((x) => x.id === unit.id)) {
-            this.opponentTeam.push(new Character(unit, this.opponent.name));
+            this.opponentTeam.push(
+              new Character(unit, this.opponent.name, isLeader)
+            );
           }
         }
         this.saveData();
+        gameEngine.status = loadingState.initial;
       }
     },
     removeCharacter(teamName: "player" | "opponent", index: number) {
@@ -597,8 +353,12 @@ export default defineComponent({
       window.localStorage.setItem(
         "simulation",
         JSON.stringify({
-          playerUnits: this.playerTeam.map((x) => x.id),
-          opponentUnits: this.opponentTeam.map((x) => x.id),
+          playerUnits: this.playerTeam.map(({ id, isLeader }) => {
+            return { id, isLeader };
+          }),
+          opponentUnits: this.opponentTeam.map(({ id, isLeader }) => {
+            return { id, isLeader };
+          }),
         })
       );
     },
@@ -616,6 +376,7 @@ export default defineComponent({
     },
     numbersOnly,
     disableLeader(teamName: "player" | "opponent", characterId): boolean {
+      this.saveData();
       if (teamName === "player") {
         return this.playerTeam.some((character) => {
           return character.isLeader && character.id !== characterId;
@@ -632,16 +393,16 @@ export default defineComponent({
       window.localStorage.getItem("simulation") ?? "{}"
     );
     if (teamData?.playerUnits) {
-      teamData.playerUnits.forEach((id) => {
-        const unit: Unit = this.getPlayerUnitData(id);
+      teamData.playerUnits.forEach((playerUnit) => {
+        const unit: Unit = this.getPlayerUnitData(playerUnit.id);
         if (unit) {
-          this.addToTeam("player", unit);
+          this.addToTeam("player", unit, playerUnit.isLeader);
         }
       });
-      teamData.opponentUnits.forEach((id) => {
-        const unit: Unit = this.getOpponentUnitData(id);
+      teamData.opponentUnits.forEach((opponentUnit) => {
+        const unit: Unit = this.getOpponentUnitData(opponentUnit.id);
         if (unit) {
-          this.addToTeam("opponent", unit);
+          this.addToTeam("opponent", unit, opponentUnit.isLeader);
         }
       });
     }
@@ -651,46 +412,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "styles/variables.scss";
-
-::v-deep(em) {
-  color: $dark;
-}
-::v-deep(.damage) {
-  color: $danger-dark-3;
-}
-::v-deep(.crit) {
-  color: $warning;
-}
-::v-deep(.buff) {
-  color: $success-dark-2;
-  text-shadow: 0px 0px 3px $success-light-3;
-}
-::v-deep(.debuff) {
-  color: $danger-dark-3;
-  text-shadow: 0px 0px 3px $danger-light-2;
-}
-::v-deep(.statusEffect) {
-  color: $primary-dark-3;
-  text-shadow: 0px 0px 3px $primary-light-2;
-}
-::v-deep(.ability) {
-  color: $secondary-dark-3;
-  text-shadow: 0px 0px 3px $secondary-light-3;
-
-  &:hover {
-    color: $primary-dark-2;
-    text-decoration: underline;
-    cursor: help;
-  }
-}
-::v-deep(.protection) {
-  color: $gray-1;
-  text-shadow: 0px 0px 3px $gray-9;
-}
-::v-deep(.health) {
-  color: $success-light-2;
-  text-shadow: 0px 0px 3px $gray-1;
-}
 
 .character-list {
   list-style-type: none;
@@ -706,12 +427,6 @@ export default defineComponent({
 .input-group-text.fill {
   flex: 1 1 auto;
 }
-::v-deep(.popper) .stats .row {
-  width: 700px;
-}
-.statusEffect {
-  max-width: 30px;
-}
 .turn-label {
   cursor: pointer;
   color: $secondary-dark-3;
@@ -721,9 +436,12 @@ export default defineComponent({
     text-decoration: underline;
   }
 }
-
-.tab-pane {
-  max-height: 300px;
-  overflow: scroll;
+.character-name {
+  max-width: 150px;
+  width: 150px;
+  white-space: unset;
+}
+.turn-meter {
+  width: 150px;
 }
 </style>

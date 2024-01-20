@@ -44,9 +44,10 @@ export interface IUnit {
   gear_levels?: UnitTier[]; //doesnt exist on ships
   categories: string[];
   ability_classes: string[];
-  role: string;
+  role: "Attacker" | "Tank" | "Support" | "Healer";
   alignment: "Light Side" | "Dark Side" | "Neutral";
   statMultipliers?: IStatMultiplier;
+  primaryStat: "str" | "agi" | "tac";
 
   //attributes that only exist when the character is unlocked
   gear_level?: number;
@@ -83,8 +84,9 @@ export class Unit {
   private _level: number;
   private _categories: string[];
   private _ability_classes: string[];
-  private _role: string;
+  private _role: IUnit["role"];
   private _alignment: IUnit["alignment"];
+  private _primaryStat: IUnit["primaryStat"];
   private _is_ship: boolean;
   private _id: string;
   private _image: string;
@@ -126,6 +128,7 @@ export class Unit {
     this._stat_diffs = payload.stat_diffs ?? null;
     this._crew = payload.crew ?? [];
     this._stat_multipliers = payload.statMultipliers;
+    this._primaryStat = payload.primaryStat;
   }
 
   public get id() {
@@ -180,11 +183,29 @@ export class Unit {
       return this._relic_tier < 0 ? 0 : this._relic_tier;
     }
   }
+  public get mastery(): number {
+    const masteryMapping = {
+      0: 0,
+      1: 5,
+      2: 10,
+      3: 15,
+      4: 20,
+      5: 25,
+      6: 35,
+      7: 45,
+      8: 60,
+      9: 70,
+    };
+    return masteryMapping[this.relicLevel];
+  }
   public get image() {
     return this._image || `./images/person_light.png`;
   }
   public get alignment() {
     return this._alignment;
+  }
+  public get primaryStat() {
+    return this._primaryStat;
   }
   public get isShip() {
     return this._is_ship;
@@ -474,7 +495,7 @@ export class Unit {
         },
       },
       GRANDMASTERLUKE: {
-        1: {
+        tier1: {
           tickets: 15,
           count: 8,
           shards: 10,
@@ -623,6 +644,44 @@ export class Unit {
           count: 10,
           shards: 0,
           ultMats: 1,
+        },
+      },
+      GLLEIA: {
+        tier1: {
+          tickets: 15,
+          count: 6,
+          shards: 10,
+          ultMats: 0,
+        },
+        tier2: {
+          tickets: 30,
+          count: 3,
+          shards: 20,
+          ultMats: 0,
+        },
+        tier3: {
+          tickets: 60,
+          count: 2,
+          shards: 50,
+          ultMats: 0,
+        },
+        tier4: {
+          tickets: 70,
+          count: 2,
+          shards: 55,
+          ultMats: 0,
+        },
+        tier5: {
+          tickets: 70,
+          count: 6,
+          shards: 0,
+          ultMats: 6,
+        },
+        tier6: {
+          tickets: 70,
+          count: 6,
+          shards: 0,
+          ultMats: 6,
         },
       },
     };
