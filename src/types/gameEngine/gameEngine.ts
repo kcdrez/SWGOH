@@ -158,7 +158,7 @@ export class Engine {
       do {
         turnNumber++;
         this.nextTurn(turnNumber);
-        if (this.checkMatchEnd(turnNumber, 10)) {
+        if (this.checkMatchEnd(turnNumber, 99999)) {
           this._simulationData.matchHistory.push(this.turns);
           break;
         }
