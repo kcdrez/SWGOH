@@ -5,6 +5,7 @@
       <div v-if="displayText">{{ displayText }}</div>
     </div>
     <slot name="error" v-else-if="state === 'ERROR'" />
+    <slot name="initial" v-else-if="state === 'INITIAL'" />
     <slot v-else />
   </div>
 </template>

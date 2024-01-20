@@ -136,94 +136,106 @@
             </div>
           </div>
         </div>
-        <div class="row" v-if="gameEngine.matchHistory.length > 0">
+        <div class="row">
           <div class="col">
-            <ul class="nav nav-tabs my-3" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link active"
-                  data-bs-toggle="tab"
-                  data-bs-target="#simulationSummary"
-                  type="button"
-                  role="tab"
+            <Loading
+              :state="gameEngine.status"
+              message="Loading match results"
+              size="lg"
+              displayText="Please wait...This may take a few minutes."
+            >
+              <ul class="nav nav-tabs my-3" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link active"
+                    data-bs-toggle="tab"
+                    data-bs-target="#simulationSummary"
+                    type="button"
+                    role="tab"
+                  >
+                    Summary
+                  </button>
+                </li>
+                <li
+                  class="nav-item"
+                  role="presentation"
+                  v-for="(match, index) in gameEngine.matchHistory"
+                  :key="index"
                 >
-                  Summary
-                </button>
-              </li>
-              <li
-                class="nav-item"
-                role="presentation"
-                v-for="(match, index) in gameEngine.matchHistory"
-                :key="index"
-              >
-                <button
-                  class="nav-link"
-                  data-bs-toggle="tab"
-                  :data-bs-target="`#match-${index}`"
-                  type="button"
-                  role="tab"
-                >
-                  Match {{ index + 1 }}
-                </button>
-              </li>
-            </ul>
-            <div class="tab-content">
-              <div class="tab-pane fade show active" id="simulationSummary">
-                <div>{{ player.name }} Wins: {{ gameEngine.playerWins }}</div>
-                <div>
-                  {{ opponent.name }} Wins: {{ gameEngine.opponentWins }}
+                  <button
+                    class="nav-link"
+                    data-bs-toggle="tab"
+                    :data-bs-target="`#match-${index}`"
+                    type="button"
+                    role="tab"
+                  >
+                    Match {{ index + 1 }}
+                  </button>
+                </li>
+              </ul>
+              <div class="tab-content">
+                <div class="tab-pane fade show active" id="simulationSummary">
+                  <div>{{ player.name }} Wins: {{ gameEngine.playerWins }}</div>
+                  <div>
+                    {{ opponent.name }} Wins: {{ gameEngine.opponentWins }}
+                  </div>
+                  <div>
+                    Winrate:
+                    {{ gameEngine.playerWinRate }}%
+                  </div>
                 </div>
-                <div>
-                  Winrate:
-                  {{ gameEngine.playerWinRate }}%
-                </div>
-              </div>
-              <div
-                class="tab-pane fade"
-                :id="`match-${index}`"
-                role="tabpanel"
-                v-for="(match, index) in gameEngine.matchHistory"
-                :key="index"
-              >
-                <template
-                  v-for="(turn, turnIndex) in match"
-                  :key="`match-${index}-turn-${turnIndex}`"
+                <div
+                  class="tab-pane fade"
+                  :id="`match-${index}`"
+                  role="tabpanel"
+                  v-for="(match, index) in gameEngine.matchHistory"
+                  :key="index"
                 >
-                  <Popper arrow placement="right">
-                    <h6 class="turn-label">{{ turn.label }}:</h6>
-                    <template #content>
-                      <div>
-                        <div
-                          class="input-group input-group-sm"
-                          v-for="(character, index) in turn.characterList"
-                          :key="index"
-                        >
-                          <span class="input-group-text character-name"
-                            >{{ character.name }} ({{ character.owner }})</span
+                  <template
+                    v-for="(turn, turnIndex) in match"
+                    :key="`match-${index}-turn-${turnIndex}`"
+                  >
+                    <Popper arrow placement="right">
+                      <h6 class="turn-label">{{ turn.label }}:</h6>
+                      <template #content>
+                        <div>
+                          <div
+                            class="input-group input-group-sm"
+                            v-for="(character, index) in turn.characterList"
+                            :key="index"
                           >
-                          <span class="input-group-text fill turn-meter">
-                            <ProgressBar
-                              :percent="character.turnMeter"
-                              class="w-100"
-                            />
-                          </span>
+                            <span class="input-group-text character-name"
+                              >{{ character.name }} ({{
+                                character.owner
+                              }})</span
+                            >
+                            <span class="input-group-text fill turn-meter">
+                              <ProgressBar
+                                :percent="character.turnMeter"
+                                class="w-100"
+                              />
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </template>
-                  </Popper>
-                  <ul>
-                    <li v-for="(log, index) in turn.logs" :key="index">
-                      <Log :log="log" />
-                    </li>
-                    <li v-if="turn.endOfTurnLogs.length">- End of Turn -</li>
-                    <li v-for="(log, index) in turn.endOfTurnLogs" :key="index">
-                      <Log :log="log" />
-                    </li>
-                  </ul>
-                  <ul v-if="turn.endOfTurnLogs.length"></ul>
-                </template>
+                      </template>
+                    </Popper>
+                    <ul>
+                      <li v-for="(log, index) in turn.logs" :key="index">
+                        <Log :log="log" />
+                      </li>
+                      <li v-if="turn.endOfTurnLogs.length">- End of Turn -</li>
+                      <li
+                        v-for="(log, index) in turn.endOfTurnLogs"
+                        :key="index"
+                      >
+                        <Log :log="log" />
+                      </li>
+                    </ul>
+                    <ul v-if="turn.endOfTurnLogs.length"></ul>
+                  </template>
+                </div>
               </div>
-            </div>
+            </Loading>
           </div>
         </div>
       </template>
@@ -243,13 +255,14 @@ import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
 
 import { numbersOnly } from "utils";
-import abilities from "types/abilities";
-import { Character } from "types/gameEngine/characters";
+import { Character } from "types/gameEngine/characters/index";
 import { gameEngine, Engine } from "types/gameEngine/gameEngine";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
 import Trigger from "components/gameEngine/triggers/trigger.vue";
 import Log from "components/gameEngine/log.vue";
+import characterList from "types/gameEngine/characterScripts";
+import { loadingState } from "types/loading";
 
 interface dataModel {
   gameEngine: Engine;
@@ -284,14 +297,15 @@ export default defineComponent({
     playerUnitList(): Unit[] {
       return this.player?.units.filter((unit: Unit) => {
         return (
-          unit.id in abilities && !this.playerTeam.some((x) => x.id === unit.id)
+          unit.id in characterList &&
+          !this.playerTeam.some((x) => x.id === unit.id)
         );
       });
     },
     opponentUnitList(): Unit[] {
       return this.opponent?.units.filter((unit: Unit) => {
         return (
-          unit.id in abilities &&
+          unit.id in characterList &&
           !this.opponentTeam.some((x) => x.id === unit.id)
         );
       });
@@ -308,7 +322,7 @@ export default defineComponent({
       refreshMatches: "refreshMatches",
       removeMatch: "removeMatch",
     }),
-    addToTeam(teamName: "player" | "opponent", unit: Unit, isLeader: boolean) {
+    addToTeam(teamName: "player" | "opponent", unit: Unit, isLeader?: boolean) {
       if (unit instanceof Unit) {
         if (teamName === "player") {
           if (!this.playerTeam.some((x) => x.id === unit.id)) {
@@ -324,6 +338,7 @@ export default defineComponent({
           }
         }
         this.saveData();
+        gameEngine.status = loadingState.initial;
       }
     },
     removeCharacter(teamName: "player" | "opponent", index: number) {
@@ -361,6 +376,7 @@ export default defineComponent({
     },
     numbersOnly,
     disableLeader(teamName: "player" | "opponent", characterId): boolean {
+      this.saveData();
       if (teamName === "player") {
         return this.playerTeam.some((character) => {
           return character.isLeader && character.id !== characterId;
@@ -377,16 +393,16 @@ export default defineComponent({
       window.localStorage.getItem("simulation") ?? "{}"
     );
     if (teamData?.playerUnits) {
-      teamData.playerUnits.forEach(({ id, isLeader }) => {
-        const unit: Unit = this.getPlayerUnitData(id);
+      teamData.playerUnits.forEach((playerUnit) => {
+        const unit: Unit = this.getPlayerUnitData(playerUnit.id);
         if (unit) {
-          this.addToTeam("player", unit, isLeader);
+          this.addToTeam("player", unit, playerUnit.isLeader);
         }
       });
-      teamData.opponentUnits.forEach(({ id, isLeader }) => {
-        const unit: Unit = this.getOpponentUnitData(id);
+      teamData.opponentUnits.forEach((opponentUnit) => {
+        const unit: Unit = this.getOpponentUnitData(opponentUnit.id);
         if (unit) {
-          this.addToTeam("opponent", unit, isLeader);
+          this.addToTeam("opponent", unit, opponentUnit.isLeader);
         }
       });
     }

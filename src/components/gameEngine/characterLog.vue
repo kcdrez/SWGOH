@@ -94,7 +94,7 @@
                 <span class="input-group-text fill"
                   ><span
                     :class="{
-                      'text-warning':
+                      'text-danger':
                         (character.health.current ?? 0) <
                         (character.health.max ?? 0),
                     }"
@@ -125,9 +125,9 @@
                 class="mt-1"
                 :title="ability.gameText"
               >
-                <div v-if="ability.cooldown">
+                <div v-if="ability.cooldown !== undefined">
                   {{ ability.name }} - Cooldown:
-                  {{ ability.turnsRemaining }}
+                  {{ ability.cooldown }}
                 </div>
                 <div v-else>{{ ability.name }} (Basic)</div>
               </div>
@@ -235,11 +235,11 @@
               </template>
             </div>
             <div class="tab-pane fade" :id="`triggers-${id}`">
-              <Trigger
+              <!-- <Trigger
                 v-for="trigger in character.triggers"
                 :key="trigger.id"
                 :trigger="trigger"
-              />
+              /> -->
             </div>
             <div class="tab-pane fade" :id="`other-${id}`">
               <div
@@ -280,8 +280,12 @@
 import { PropType, defineComponent } from "vue";
 import { v4 as uuid } from "uuid";
 
-import { tLogData } from "types/gameEngine/gameEngine";
-import { iBuff, iDebuff, iStatusEffect } from "types/gameEngine/statusEffects";
+import { tLogData } from "types/gameEngine/characters/log";
+import {
+  iBuff,
+  iDebuff,
+  iStatusEffect,
+} from "types/gameEngine/characters/statusEffects";
 import Trigger from "components/gameEngine/triggers/trigger.vue";
 
 export default defineComponent({
