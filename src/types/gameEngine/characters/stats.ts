@@ -176,7 +176,6 @@ export class Stats {
     };
     this._curHealth = data.health;
     this._curProtection = data.protection;
-    console.log(this._character.uniqueId, data.mastery);
   }
 
   /** An initializer function that resets various properties */
