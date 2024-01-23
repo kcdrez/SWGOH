@@ -23,12 +23,9 @@ class basicskill_HANSOLO extends ActiveAbility {
     canBeCountered: boolean = true,
     additionalEffects: Function = () => {}
   ): void {
-    const { primaryTarget } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
+    const primaryTarget = this.findRandomEnemy(
+      targetCharacter,
+      !!targetCharacter
     );
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
@@ -76,13 +73,7 @@ class specialskill_HANSOLO01 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    const { targetList, primaryTarget } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
+    const primaryTarget = this.findRandomEnemy();
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
       this._character.changeTurnMeter(
@@ -90,17 +81,24 @@ class specialskill_HANSOLO01 extends ActiveAbility {
         this
       );
 
-      targetList.forEach((target) => {
-        if (!this.checkEvade("physical", target)) {
+      if (primaryTarget) {
+        if (!this.checkEvade("physical", primaryTarget)) {
           this._character?.statusEffect.inflictDebuff(
             [{ name: "Stun", duration: 1, id: uuid() }],
-            target,
+            primaryTarget,
             1,
             this
           );
-          this.dealDamage("physical", target, 3.699, 5, stats, canBeCountered);
+          this.dealDamage(
+            "physical",
+            primaryTarget,
+            3.699,
+            5,
+            stats,
+            canBeCountered
+          );
         }
-      });
+      }
     });
   }
 }
@@ -121,10 +119,7 @@ class specialskill_HANSOLO02 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    const { targetList, primaryTarget } = this.findTargets(
-      { filters: [{ allies: true }] },
-      targetCharacter
-    );
+    const primaryTarget = this.findRandomEnemy();
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
       this._character.changeTurnMeter(50, this);
@@ -134,7 +129,7 @@ class specialskill_HANSOLO02 extends ActiveAbility {
         this
       );
 
-      targetList.forEach((target) => {
+      this._character.teammates.forEach((target) => {
         target.statusEffect.addBuff(
           [
             { name: "Critical Chance Up", duration: 2, id: uuid() },
@@ -222,23 +217,18 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
         eventType: "matchStart",
         callback: () => {
           const ability = this._character.chooseAbility("basicskill_HANSOLO");
+          const primaryTarget = this.findRandomEnemy(undefined, true);
 
-          const { targetList } = this.findTargets({
-            filters: [{ allies: false }],
-            ignoreTaunt: true,
-            targetCount: 1,
-          });
-
-          targetList.forEach((target) => {
-            ability?.execute(target, [], true, () => {
+          if (primaryTarget) {
+            ability?.execute(primaryTarget, [], true, () => {
               this._character.statusEffect.inflictDebuff(
                 [{ name: "Stun", duration: 1, id: uuid(), cantResist: true }],
-                target,
+                primaryTarget,
                 1,
                 this
               );
             });
-          });
+          }
         },
       }
     );

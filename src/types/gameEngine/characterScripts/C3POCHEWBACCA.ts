@@ -27,26 +27,27 @@ class basicskill_C3POCHEWBACCA extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    const { targetList, primaryTarget } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
+    const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
-      targetList.forEach((target) => {
-        if (!this.checkEvade("physical", target)) {
-          this.dealDamage("physical", target, 2, 5, stats, canBeCountered);
+      if (primaryTarget) {
+        if (!this.checkEvade("physical", primaryTarget)) {
+          this.dealDamage(
+            "physical",
+            primaryTarget,
+            2,
+            5,
+            stats,
+            canBeCountered
+          );
           this._character.statusEffect.inflictDebuff(
             [{ name: "Evasion Down", id: uuid(), duration: 2 }],
-            target,
+            primaryTarget,
             1,
             this
           );
         }
-      });
+      }
     });
   }
 }
@@ -54,7 +55,7 @@ class basicskill_C3POCHEWBACCA extends ActiveAbility {
 class specialskill_C3POCHEWBACCA01 extends ActiveAbility {
   constructor(character: Character) {
     super(
-      "specialskill_CHEWBACCALEGENDARY01",
+      "specialskill_C3POCHEWBACCA01",
       "Shining Distraction",
       `Dispel all debuffs on Threepio & Chewie. Rebel allies recover 15% Protection and gain Advantage for 2 turns. Dispel all buffs from all enemies and Blind them for 2 turns. This ability can't be evaded.`,
       character
@@ -67,18 +68,16 @@ class specialskill_C3POCHEWBACCA01 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    const { targetList: enemies, primaryTarget } = this.findTargets({
-      filters: [{ allies: false }],
-    });
+    const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
       this._character.statusEffect.removeDebuff("all", undefined, this);
 
-      const { targetList } = this.findTargets({
-        filters: [{ allies: true, tags: ["Rebel"] }],
-      });
+      const rebelAllies = this._character.teammates.filter((ally) =>
+        ally.hasTags("Rebel", this._character.id)
+      );
 
-      targetList.forEach((target) => {
+      rebelAllies.forEach((target) => {
         target.heal(
           {
             healthType: "protection",
@@ -95,7 +94,7 @@ class specialskill_C3POCHEWBACCA01 extends ActiveAbility {
         );
       });
 
-      enemies.forEach((target) => {
+      this._character.opponents.forEach((target) => {
         target.statusEffect.removeBuff("all", this._character, this);
         this._character.statusEffect.inflictDebuff(
           [{ name: "Blind", duration: 2, id: uuid() }],
@@ -124,16 +123,14 @@ class specialskill_C3POCHEWBACCA02 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    const { targetList, primaryTarget } = this.findTargets({
-      filters: [{ allies: false }],
-    });
+    const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
       const deadOpponents = this._character.opponents.filter((c) => c.isDead);
 
       let defeatedByAbility = 0;
 
-      targetList.forEach((target) => {
+      this._character.opponents.forEach((target) => {
         if (!this.checkEvade("physical", target)) {
           for (let i = 0; i < deadOpponents.length + 1; i++) {
             //custom logic instead of the standard dealDamage method
@@ -221,11 +218,11 @@ class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
 
   public override activate(): void {
     const teamLeader = this._character.teammates.find((c) => c.isLeader);
-    const { targetList: otherRebels } = this.findTargets({
-      filters: [{ allies: true }, { tags: ["Rebel & !Self"] }],
-    });
-    const { targetList: enemies } = this.findTargets({
-      filters: [{ allies: false }],
+    const otherRebels = this._character.teammates.filter((ally) => {
+      return (
+        !ally.isSelf(this._character) &&
+        ally.hasTags("Rebel", this._character.id)
+      );
     });
     let triggerCount = 0;
 
@@ -406,7 +403,7 @@ class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
       );
     });
 
-    enemies.forEach((target) => {
+    this._character.opponents.forEach((target) => {
       target.stats.tempStats.push({
         statToModify: "tenacity",
         amount: -0.5,

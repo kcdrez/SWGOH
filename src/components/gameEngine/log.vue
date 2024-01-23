@@ -119,6 +119,7 @@
       <span class="health">{{ log.characterLogData?.health }}</span>
       <span class="ms-1">health</span></template
     >
+    <template v-if="log.customMessage">{{ log.customMessage }}</template>
     <template v-if="log?.ability?.source">
       (src:
       <span class="ability" :title="log.ability.source.text">{{

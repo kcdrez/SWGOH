@@ -230,6 +230,10 @@ export class Stats {
           hasEffect: this._character.statusEffect.hasBuff("Health Up"),
           value: 0.15,
         },
+        {
+          hasEffect: this._character.statusEffect.hasBuff("Translation"),
+          value: 0.3,
+        },
       ],
       stat,
       this.getTempStat("maxHealth")
@@ -349,11 +353,11 @@ export class Stats {
       [
         {
           hasEffect: this._character.statusEffect.hasDebuff("Potency Down"),
-          value: -50,
+          value: -0.5,
         },
         {
           hasEffect: this._character.statusEffect.hasBuff("Potency Up"),
-          value: 50,
+          value: 0.5,
         },
       ],
       this.baseStats.potency,
@@ -473,6 +477,14 @@ export class Stats {
             {
               hasEffect: self._character.statusEffect.hasBuff("Advantage"),
               value: 2,
+            },
+            {
+              hasEffect: self._character.statusEffect.hasBuff(
+                "Translation",
+                undefined,
+                2
+              ),
+              value: 0.15,
             },
           ],
           stat,
@@ -752,6 +764,18 @@ export class Stats {
             {
               hasEffect: self._character.statusEffect.hasStatusEffect("Guard"),
               value: 0.25,
+            },
+            {
+              hasEffect: self._character.statusEffect.hasBuff("Advantage"),
+              value: 2,
+            },
+            {
+              hasEffect: self._character.statusEffect.hasBuff(
+                "Translation",
+                undefined,
+                2
+              ),
+              value: 0.15,
             },
           ],
           stat,

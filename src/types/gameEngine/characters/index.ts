@@ -18,6 +18,7 @@ import { gameEngine, iCondition } from "../gameEngine";
  */
 type tEventType =
   | "dealDamage"
+  | "death"
   | "endOfTurn"
   | "inflicted"
   | "matchSetup"
@@ -25,6 +26,7 @@ type tEventType =
   | "receiveDamage"
   | "revive"
   | "resisted"
+  | "startOfTurn"
   | "useAbility";
 
 /**
@@ -100,6 +102,16 @@ export class Character {
     return this.id === char?.id && this.owner === char?.owner;
   }
 
+  /** The character's basic ability */
+  public get basicAbility() {
+    return this._basicAbility;
+  }
+
+  /** The character's special abilities */
+  public get specialAbilities() {
+    return this._specialAbilities;
+  }
+
   /** A list of abilities including the basic ability and specials */
   public get activeAbilities() {
     const arr: ActiveAbility[] = [];
@@ -108,6 +120,11 @@ export class Character {
     }
     arr.push(...this._specialAbilities);
     return arr;
+  }
+
+  /** A list of unique abilities */
+  public get uniqueAbilities() {
+    return this._uniqueAbilities;
   }
 
   /** A map of different effects that may exist on the character */
@@ -284,6 +301,7 @@ export class Character {
         })
       );
       this._uniqueAbilities.forEach((a) => a.deactivate());
+      this.dispatchEvent("death");
     }
   }
   /** Does the character have any effect that is forcing them to be targeted */
@@ -318,6 +336,10 @@ export class Character {
     });
     this.statusEffect.buffs.forEach((debuff) => {
       debuff.isNew = false;
+    });
+    this.dispatchEvent("startOfTurn", {
+      characterId: this.id,
+      owner: this.owner,
     });
   }
 
@@ -445,7 +467,7 @@ export class Character {
       }
       this.stats[healthType] += finalAmount;
 
-      if (diff > 0) {
+      if (round(diff) > 0) {
         gameEngine.addLogs(
           new Log({
             character: this,
@@ -591,10 +613,14 @@ export class Character {
     let results = false;
     if (buffs) {
       const hasBuffs = buffs.every((buff) => {
-        const match = this.statusEffect.buffs.find((x) => x.name === buff);
-        if (match) {
-          return isNew === false ? !match.isNew : true;
-        } else return false;
+        if (typeof buff === "string") {
+          const match = this.statusEffect.buffs.find((x) => x.name === buff);
+          if (match) {
+            return isNew === false ? !match.isNew : true;
+          } else return false;
+        } else {
+          return this.statusEffect.hasBuff(buff, buff.duration, buff.stacks);
+        }
       });
       results = hasBuffs || results;
     }

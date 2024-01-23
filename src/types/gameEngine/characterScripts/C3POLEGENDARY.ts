@@ -8,6 +8,7 @@ import { Character } from "../characters/index";
 import { iStatsCheck } from "../characters/stats";
 import { gameEngine, iCondition } from "../gameEngine";
 import { Log } from "../characters/log";
+import { anyTagsMatch } from "../characters/index";
 
 class basicskill_C3POLEGENDARY extends ActiveAbility {
   constructor(character: Character) {
@@ -25,20 +26,14 @@ class basicskill_C3POLEGENDARY extends ActiveAbility {
   }
 
   public execute(targetCharacter?: Character, stats?: iStatsCheck[]): void {
-    const { targetList, primaryTarget } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
+    const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, false, () => {
-      targetList.forEach((target) => {
-        target.statusEffect.resetDuration("Confuse", 3, "debuff");
+      if (primaryTarget) {
+        primaryTarget.statusEffect.resetDuration("Confuse", 3, "debuff");
 
         if (
-          target.statusEffect.debuffs.filter((d) => d.name === "Confuse")
+          primaryTarget.statusEffect.debuffs.filter((d) => d.name === "Confuse")
             .length < 3
         ) {
           this._character.statusEffect.inflictDebuff(
@@ -51,7 +46,7 @@ class basicskill_C3POLEGENDARY extends ActiveAbility {
                 isStackable: true,
               },
             ],
-            target,
+            primaryTarget,
             1,
             this
           );
@@ -61,11 +56,27 @@ class basicskill_C3POLEGENDARY extends ActiveAbility {
           (b) => b.name === "Translation"
         ).length;
 
-        target.changeTurnMeter(
+        primaryTarget.changeTurnMeter(
           -6 + translationCount * -3,
           this,
           this._character
         );
+      }
+
+      const protocolDroidAbility = this._character.uniqueAbilities.find(
+        (x) => x.id === "uniqueskill_C3POLEGENDARY01"
+      );
+      //todo, if tech is present, dont do the following
+      this._character.teammates.forEach((ally) => {
+        if (ally.statusEffect.hasBuff("Translation", undefined, 3)) {
+          ally.specialAbilities.forEach((ability) => {
+            ability.changeCooldown(
+              -1,
+              protocolDroidAbility ?? this,
+              this._character
+            );
+          });
+        }
       });
     });
   }
@@ -85,20 +96,10 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
   }
 
   public execute(targetCharacter?: Character, stats?: iStatsCheck[]): void {
-    const { targetList: enemies, primaryTarget } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
+    const primaryEnemy = this.findRandomEnemy(targetCharacter);
+    const primaryAlly = this.findRandomAlly(targetCharacter);
 
-    const { targetList: targetAllies } = this.findTargets({
-      filters: [{ allies: true }, { tags: ["!Self"] }],
-      targetCount: 1,
-    });
-
-    super.execute(primaryTarget, stats, false, () => {
+    super.execute(primaryEnemy, stats, false, () => {
       this._character.statusEffect.addBuff(
         [
           { name: "Potency Up", id: uuid(), duration: 2 },
@@ -115,8 +116,8 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
         this
       );
 
-      targetAllies.forEach((target) => {
-        target.statusEffect.addBuff(
+      if (primaryAlly) {
+        primaryAlly.statusEffect.addBuff(
           [
             {
               name: "Translation",
@@ -129,36 +130,16 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
           1,
           this
         );
-      });
+      }
 
-      const { targetList: allTranslationAllies } = this.findTargets({
-        filters: [
-          { allies: true },
-          { tags: ["!Self"] },
-          { buffs: ["Translation"] },
-        ],
-      });
-
-      allTranslationAllies.forEach((target) => {
-        target.assist(
-          [
-            {
-              statToModify: "physicalOffense",
-              modifiedType: "multiplicative",
-              amount: 0.5,
-            },
-            {
-              statToModify: "specialOffense",
-              modifiedType: "multiplicative",
-              amount: 0.5,
-            },
-          ],
-          primaryTarget ?? targetCharacter,
-          this
+      const allTranslationAllies = this._character.teammates.filter((ally) => {
+        return (
+          !ally.isSelf(this._character) &&
+          ally.statusEffect.hasBuff("Translation")
         );
       });
 
-      enemies.forEach((target) => {
+      if (primaryEnemy) {
         this._character.statusEffect.inflictDebuff(
           [
             {
@@ -171,150 +152,246 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
               maxStacks: 3,
             },
           ],
-          target,
+          primaryEnemy,
           1,
           this
         );
+
+        allTranslationAllies.forEach((target) => {
+          target.assist(
+            [
+              {
+                statToModify: "physicalOffense",
+                modifiedType: "multiplicative",
+                amount: 0.5,
+              },
+              {
+                statToModify: "specialOffense",
+                modifiedType: "multiplicative",
+                amount: 0.5,
+              },
+            ],
+            primaryEnemy ?? targetCharacter,
+            this
+          );
+        });
+      }
+    });
+  }
+}
+
+class uniqueskill_C3POLEGENDARY01 extends PassiveAbility {
+  constructor(character: Character) {
+    super(
+      "uniqueskill_C3POLEGENDARY01",
+      "Protocol Droid",
+      `C-3PO has +20 Speed. While C-3PO is active, Galactic Republic, Rebel, Resistance, and Ewok allies gain Translation for 3 turns (max 3 stacks) each time they use a Special ability. Translation cannot be copied. If the character already has Translation, the duration for all current stacks on that character resets to 3 turns. If all allies that can apply Translation are defeated, all stacks of Translation expire.
+
+      Translation - Beneficial effects build based on the cumulative number of stacks:
+      1: Gain +30% Max Health
+      2: Gain +15% Critical Chance
+      3: If only one ally who grants Translation is present, decrease this character's cooldowns by 1 when that ally uses their Basic ability (limit once per turn)`,
+      character
+    );
+  }
+
+  public override activate(): void {
+    this._character?.stats.tempStats.push({
+      statToModify: "speed",
+      amount: 20,
+      modifiedType: "additive",
+    });
+
+    const rebelAllies = this._character.teammates.filter((ally) =>
+      anyTagsMatch(ally, ["Rebel & !Self"], this._character.id)
+    );
+    const resistanceAllies = this._character.teammates.filter((ally) =>
+      anyTagsMatch(ally, ["Resistance & !Self"], this._character.id)
+    );
+    const ewokAllies = this._character.teammates.filter((ally) =>
+      anyTagsMatch(ally, ["Ewok & !Self"], this._character.id)
+    );
+
+    [
+      this._character,
+      ...rebelAllies,
+      ...resistanceAllies,
+      ...ewokAllies,
+    ].forEach((ally) => {
+      ally.events.push({
+        eventType: "useAbility",
+        characterSourceId: this._character.uniqueId,
+        callback: ({ abilityId }) => {
+          console.log(abilityId);
+          if (abilityId !== ally.basicAbility?.id) {
+            ally.statusEffect.resetDuration("Translation", 3, "buff", this);
+
+            ally.statusEffect.addBuff(
+              [
+                {
+                  name: "Translation",
+                  duration: 3,
+                  maxStacks: 3,
+                  isStackable: true,
+                  unique: true,
+                  id: uuid(),
+                },
+              ],
+              1,
+              this
+            );
+          }
+        },
       });
     });
+
+    this._character.events.push({
+      eventType: "death",
+      characterSourceId: this._character.uniqueId,
+      callback: () => {
+        const allyTech = this._character.teammates.find((x) => x.id === "TECH"); //todo
+        if (allyTech) {
+        }
+
+        this._character.teammates.forEach((ally) => {
+          ally.statusEffect.removeBuff("Translation", this._character, this);
+        });
+      },
+    });
   }
 }
 
-class uniqueskill_COMMANDERLUKESKYWALKER02 extends PassiveAbility {
+class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
   constructor(character: Character) {
     super(
-      "uniqueskill_COMMANDERLUKESKYWALKER02",
-      "It Binds All Things",
-      `Luke has +40% Potency. Whenever Luke Resists a detrimental effect he recovers 5% Health and 5% Protection. Whenever Luke inflicts a debuff he gains 10% Turn Meter and other allies gain half that amount.`,
+      "uniqueskill_C3POLEGENDARY02",
+      "Wait For Me!",
+      `C-3PO and R2-D2 have +10% Evasion for each of their own stacks of Translation. At the start of encounter, C-3PO and R2-D2 gain Translation for 3 turns. When there are no other allied combatants, C-3PO escapes from battle.`,
       character
     );
   }
 
   public override activate(): void {
-    this._character?.stats.tempStats.push({
-      statToModify: "potency",
-      amount: 0.4,
-      modifiedType: "additive",
-    });
-
-    this._character?.events.push(
-      {
-        characterSourceId: this._character.uniqueId,
-        eventType: "resisted",
-        callback: () => {
-          this._character?.heal(
-            {
-              amount: 0.05,
-              healthType: "protection",
-              amountType: "multiplicative",
-            },
-            this
-          );
-          this._character?.heal(
-            {
-              amount: 0.05,
-              healthType: "health",
-              amountType: "multiplicative",
-            },
-            this
-          );
+    const validTargets = this._character.teammates.filter(
+      (x) => x.id === "R2D2LEGENDARY" || x.id === this._character.id
+    );
+    validTargets.forEach((target) => {
+      target.stats.tempStats.push(
+        {
+          modifiedType: "additive",
+          statToModify: "physicalDodge",
+          amount: 0.1,
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+            ],
+          },
+          characterSourceId: this._character.uniqueId,
         },
-      },
-      {
-        characterSourceId: this._character.uniqueId,
-        eventType: "inflicted",
-        callback: () => {
-          this._character?.changeTurnMeter(10, this);
-          this._character?.teammates.forEach((target) => {
-            if (!target.isSelf(this._character)) {
-              target.changeTurnMeter(5, this);
-            }
-          });
+        {
+          modifiedType: "additive",
+          statToModify: "physicalDodge",
+          amount: 0.1,
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+            ],
+          },
+          characterSourceId: this._character.uniqueId,
         },
-      }
-    );
-  }
-}
+        {
+          modifiedType: "additive",
+          statToModify: "physicalDodge",
+          amount: 0.1,
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+            ],
+          },
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          modifiedType: "additive",
+          statToModify: "specialDodge",
+          amount: 0.1,
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+            ],
+          },
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          modifiedType: "additive",
+          statToModify: "specialDodge",
+          amount: 0.1,
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+            ],
+          },
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          modifiedType: "additive",
+          statToModify: "specialDodge",
+          amount: 0.1,
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+            ],
+          },
+          characterSourceId: this._character.uniqueId,
+        }
+      );
 
-class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
-  constructor(character: Character) {
-    super(
-      "uniqueskill_COMMANDERLUKESKYWALKER01",
-      "Learn Control",
-      `While Luke doesn't have Call to Action, he has +50% Counter Chance, +50% Critical Avoidance, +50% Defense, +100% Tenacity, and gains 10% Turn Meter whenever another Rebel ally takes damage.`,
-      character
-    );
-  }
-
-  public override activate(): void {
-    const doesntHaveCallToAction: iCondition = {
-      buffs: ["Call to Action"],
-      inverted: true,
-    };
-
-    this._character?.stats.tempStats.push({
-      statToModify: "counterChance",
-      amount: 0.5,
-      modifiedType: "additive",
-      condition: doesntHaveCallToAction,
-      characterSourceId: this._character.uniqueId,
-    });
-
-    this._character?.stats.tempStats.push(
-      {
-        statToModify: "physicalCritAvoid",
-        amount: 0.5,
-        modifiedType: "additive",
-        condition: doesntHaveCallToAction,
-        characterSourceId: this._character.uniqueId,
-      },
-      {
-        statToModify: "specialCritAvoid",
-        amount: 0.5,
-        modifiedType: "additive",
-        condition: doesntHaveCallToAction,
-        characterSourceId: this._character.uniqueId,
-      }
-    );
-
-    this._character?.stats.tempStats.push(
-      {
-        statToModify: "physicalArmor",
-        amount: 0.5,
-        modifiedType: "multiplicative",
-        condition: doesntHaveCallToAction,
-        characterSourceId: this._character.uniqueId,
-      },
-      {
-        statToModify: "specialArmor",
-        amount: 0.5,
-        modifiedType: "multiplicative",
-        condition: doesntHaveCallToAction,
-        characterSourceId: this._character.uniqueId,
-      }
-    );
-
-    this._character?.stats.tempStats.push({
-      statToModify: "tenacity",
-      amount: 1,
-      modifiedType: "additive",
-      condition: doesntHaveCallToAction,
-      characterSourceId: this._character.uniqueId,
-    });
-
-    const { targetList } = this.findTargets({
-      filters: [{ allies: true }, { tags: ["Rebel & !Self"] }],
-    });
-
-    targetList.forEach((target) => {
       target.events.push({
-        characterSourceId: this._character?.uniqueId,
-        eventType: "receiveDamage",
+        eventType: "matchSetup",
+        characterSourceId: this._character.uniqueId,
         callback: () => {
-          this._character?.changeTurnMeter(10, this);
+          target.statusEffect.addBuff(
+            {
+              name: "Translation",
+              duration: 3,
+              unique: true,
+              isStackable: true,
+              maxStacks: 3,
+              id: uuid(),
+            },
+            1,
+            this
+          );
         },
       });
     });
+
+    [...this._character.teammates, ...this._character.opponents].forEach(
+      (ally) => {
+        if (!ally.isSelf(this._character)) {
+          ally.events.push({
+            eventType: "startOfTurn",
+            characterSourceId: this._character.uniqueId,
+            callback: () => {
+              //todo check other passive characters
+              const aliveAllies = this._character.teammates.filter(
+                (x) => !x.isDead
+              );
+
+              if (aliveAllies.length === 1 && !this._character.isDead) {
+                this._character.stats.health = 0;
+                gameEngine.addLogs(
+                  new Log({
+                    character: this._character,
+                    customMessage: "escaped from the battle",
+                    ability: { source: this },
+                  })
+                );
+              }
+            },
+          });
+        }
+      }
+    );
   }
 }
 
@@ -327,14 +404,8 @@ const specialAbilities = new Map([
 ]);
 
 const uniqueAbilities = new Map([
-  // [
-  //   "uniqueskill_COMMANDERLUKESKYWALKER01",
-  //   uniqueskill_COMMANDERLUKESKYWALKER01,
-  // ],
-  // [
-  //   "uniqueskill_COMMANDERLUKESKYWALKER02",
-  //   uniqueskill_COMMANDERLUKESKYWALKER02,
-  // ],
+  ["uniqueskill_C3POLEGENDARY01", uniqueskill_C3POLEGENDARY01],
+  ["uniqueskill_C3POLEGENDARY02", uniqueskill_C3POLEGENDARY02],
 ]);
 
 const leaderAbility = new Map([]);

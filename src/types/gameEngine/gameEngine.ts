@@ -2,7 +2,7 @@ import store from "vuex-store/store";
 import { Character } from "./characters/index";
 import { randomNumber, round } from "utils";
 import { Log } from "./characters/log";
-import { tBuff, tDebuff } from "./characters/statusEffects";
+import { iBuff, tBuff, tDebuff } from "./characters/statusEffects";
 import { iStatsCheck } from "./characters/stats";
 import { loadingState } from "types/loading";
 
@@ -11,7 +11,7 @@ export interface iCondition {
   /** Checks if a debuff is present */
   debuffs?: tDebuff[];
   /** Checks if a buff is present */
-  buffs?: tBuff[];
+  buffs?: (tBuff | iBuff)[];
   /** Checks if a specific stat meets a threshold */
   stats?: iStatsCheck;
   /** Inverts the logic so that all conditions are "Not" */

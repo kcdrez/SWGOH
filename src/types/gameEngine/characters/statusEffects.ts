@@ -17,6 +17,7 @@ export class StatusEffect {
     value: boolean;
     effect: string;
     condition?: iCondition;
+    sourceAbility?: Ability;
   }[] = [];
 
   constructor(parentCharacter: Character) {
@@ -159,10 +160,15 @@ export class StatusEffect {
 
   /** Checks to see if the character has any of the listed buffs
    * @param buffs - The list of buffs to check. If an array, checks that ALL of the ones listed are present
-   * @param duration - The duration to check if there are any remaining turns left on the debuff
+   * @param duration - The duration to check if there are any remaining turns left on the buff
+   * @param stacks - The number to check if there are at least this many stacks of the given buffs
    * @returns true if the character has the buffs
    */
-  public hasBuff(buffs: tBuff | tBuff[] | iBuff | iBuff[], duration?: number) {
+  public hasBuff(
+    buffs: tBuff | tBuff[] | iBuff | iBuff[],
+    duration?: number,
+    stacks?: number
+  ) {
     if (Array.isArray(buffs)) {
       return (buffs as (tBuff | iBuff)[]).every((x) =>
         this.hasBuff(x, duration)
@@ -173,6 +179,8 @@ export class StatusEffect {
           if (b.name === buffs) {
             if (duration) {
               return duration <= b.duration;
+            } else if (stacks) {
+              return stacks <= (b?.stacks ?? 0);
             }
             return true;
           }
@@ -221,6 +229,7 @@ export class StatusEffect {
    * @param effect - The name of the effect that should be changed
    * @param duration - The duration to change the effect to
    * @param type - The type of effect (buff, debuff, or status effect)
+   * @param srcAbility - The source ability that is causing the effect to be reset
    */
   public resetDuration(
     effect: iStatusEffect["name"],
@@ -719,9 +728,22 @@ export class StatusEffect {
    * Add an effect that the character is now immune to
    * @param sourceId - The unique key that is used to reference the immunity
    * @param effect - The effect that the user is now immune to
+   * @param condition - A condition to check if the immune effect should be added
+   * @param sourceAbility - The ability source that is adding the immune effect
    */
-  public addImmune(sourceId: string, effect: string, condition?: iCondition) {
-    this._immunity.push({ sourceId, value: true, effect, condition });
+  public addImmune(
+    sourceId: string,
+    effect: string,
+    condition?: iCondition,
+    sourceAbility?: Ability
+  ) {
+    this._immunity.push({
+      sourceId,
+      value: true,
+      effect,
+      condition,
+      sourceAbility,
+    });
   }
 
   /**

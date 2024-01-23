@@ -23,34 +23,35 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered: boolean = true
   ): void {
-    const { targetList, primaryTarget } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
+    const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
-      targetList.forEach((target) => {
-        if (!this.checkEvade("physical", target)) {
-          this.dealDamage("physical", target, 1.781, 5, stats, canBeCountered);
+      if (primaryTarget) {
+        if (!this.checkEvade("physical", primaryTarget)) {
+          this.dealDamage(
+            "physical",
+            primaryTarget,
+            1.781,
+            5,
+            stats,
+            canBeCountered
+          );
           if (
-            target.checkCondition({
+            primaryTarget.checkCondition({
               debuffs: ["Speed Down"],
             })
           ) {
-            target.changeTurnMeter(-30, this);
+            primaryTarget.changeTurnMeter(-30, this);
           }
 
           if (
-            target.checkCondition({
+            primaryTarget.checkCondition({
               debuffs: ["Defense Down"],
             })
           ) {
             this._character?.statusEffect.inflictDebuff(
               [{ name: "Stun", duration: 1, id: uuid() }],
-              target,
+              primaryTarget,
               1,
               this
             );
@@ -61,12 +62,12 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
               { name: "Speed Down", duration: 2, id: uuid() },
               { name: "Defense Down", duration: 2, id: uuid() },
             ],
-            target,
+            primaryTarget,
             1,
             this
           );
         }
-      });
+      }
     });
   }
 }
@@ -83,7 +84,9 @@ class specialskill_COMMANDERLUKESKYWALKER02 extends ActiveAbility {
   }
 
   public execute(): void {
-    super.execute(null, [], false, () => {
+    const primaryTarget = this.findRandomEnemy();
+
+    super.execute(primaryTarget, [], false, () => {
       this._character?.statusEffect.removeDebuff("all", this._character);
       this._character?.changeTurnMeter(100, this);
       this._character?.heal(
@@ -148,29 +151,23 @@ class specialskill_COMMANDERLUKESKYWALKER01 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered?: boolean
   ): void {
-    const { targetList, primaryTarget } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
+    const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
-      targetList.forEach((target) => {
-        if (target.stats.health < target.stats.maxHealth) {
+      if (primaryTarget) {
+        if (primaryTarget.stats.health < primaryTarget.stats.maxHealth) {
           this.changeCooldown(-1, this);
         }
 
-        target.statusEffect.removeBuff("all");
+        primaryTarget.statusEffect.removeBuff("all");
         this._character?.statusEffect.inflictDebuff(
           [{ name: "Buff Immunity", duration: 2, id: uuid() }],
-          target,
+          primaryTarget,
           1,
           this
         );
-        this.dealDamage("physical", target, 2.978);
-        target.changeTurnMeter(-100, this);
+        this.dealDamage("physical", primaryTarget, 2.978);
+        primaryTarget.changeTurnMeter(-100, this);
         this._character?.statusEffect.inflictDebuff(
           [
             {
@@ -180,11 +177,11 @@ class specialskill_COMMANDERLUKESKYWALKER01 extends ActiveAbility {
               cantResist: true,
             },
           ],
-          target,
+          primaryTarget,
           1,
           this
         );
-      });
+      }
     });
   }
 }
@@ -311,8 +308,8 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
       characterSourceId: this._character.uniqueId,
     });
 
-    const { targetList } = this.findTargets({
-      filters: [{ allies: true }, { tags: ["Rebel & !Self"] }],
+    const targetList = this._character.teammates.filter((ally) => {
+      return ally.hasTags("Rebel & !Self", this._character.id);
     });
 
     targetList.forEach((target) => {
@@ -338,8 +335,8 @@ class leaderskill_COMMANDERLUKESKYWALKER extends PassiveAbility {
   }
 
   public override activate() {
-    const { targetList } = this.findTargets({
-      filters: [{ allies: true }, { tags: ["Rebel"] }],
+    const targetList = this._character.teammates.filter((ally) => {
+      return ally.hasTags("Rebel", this._character.id);
     });
 
     targetList.forEach((target) => {

@@ -101,6 +101,7 @@ export class Log {
   public effects?: tLogEffects;
   public characterLogData?: tLogData;
   public targetLogData?: tLogData;
+  public customMessage?: string;
 
   constructor(data: {
     character?: Character;
@@ -110,6 +111,7 @@ export class Log {
     damage?: tLogDamage;
     heal?: tLogHeal;
     effects?: tLogEffects;
+    customMessage?: string;
   }) {
     this.character = data?.character;
     this.target = data?.target;
@@ -118,6 +120,7 @@ export class Log {
     this.damage = data?.damage;
     this.heal = data?.heal;
     this.effects = data?.effects;
+    this.customMessage = data.customMessage;
 
     if (this.character) {
       this.characterLogData = this.character.getLogs();
