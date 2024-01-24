@@ -405,16 +405,25 @@ class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
 
     this._character.opponents.forEach((target) => {
       target.stats.tempStats.push({
+        //todo not working
         statToModify: "tenacity",
         amount: -0.5,
         modifiedType: "additive",
         condition: {
           debuffs: ["Blind"],
         },
+        characterSourceId: this._character.uniqueId,
       });
-      target.statusEffect.addImmune(this._character.uniqueId, "Assisting", {
-        debuffs: ["Blind"],
-      });
+
+      target.statusEffect.addImmune(
+        this._character.uniqueId,
+        "Assisting",
+        {
+          debuffs: ["Blind"],
+        },
+        this
+      );
+
       target.statusEffect.addImmune(
         this._character.uniqueId,
         "CounterAttacking",

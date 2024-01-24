@@ -1146,6 +1146,8 @@ export class Stats {
           if (stat.expires.count > 0) {
             list.push(stat);
           }
+        } else if (!stat.expires) {
+          list.push(stat);
         }
         return list;
       },

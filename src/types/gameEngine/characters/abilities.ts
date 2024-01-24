@@ -382,9 +382,20 @@ export abstract class ActiveAbility extends CharacterAbility {
         stats
       );
 
-      return chanceOfEvent(dodge - accuracy * 100);
+      const attackMissed = chanceOfEvent(dodge - accuracy * 100);
+
+      if (attackMissed) {
+        gameEngine.addLogs(
+          new Log({
+            character: targetCharacter,
+            damage: { evaded: true },
+          })
+        );
+        return true;
+      } else {
+        return false;
+      }
     }
-    //todo add logging if it misses
     return false;
   }
 

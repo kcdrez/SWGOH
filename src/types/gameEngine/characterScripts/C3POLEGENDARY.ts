@@ -222,7 +222,6 @@ class uniqueskill_C3POLEGENDARY01 extends PassiveAbility {
         eventType: "useAbility",
         characterSourceId: this._character.uniqueId,
         callback: ({ abilityId }) => {
-          console.log(abilityId);
           if (abilityId !== ally.basicAbility?.id) {
             ally.statusEffect.resetDuration("Translation", 3, "buff", this);
 

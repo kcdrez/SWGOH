@@ -268,9 +268,9 @@ export class StatusEffect {
    */
   public isImmune(statusEffect: iStatusEffect | string): boolean {
     if (typeof statusEffect === "string") {
-      return this.immunity[statusEffect];
+      return this.immunity[statusEffect]?.value ?? false;
     } else {
-      return this.immunity[statusEffect.name];
+      return this.immunity[statusEffect.name]?.value ?? false;
     }
   }
 
@@ -705,21 +705,26 @@ export class StatusEffect {
   }
 
   /** A mapping of status effects that the character cannot gain */
-  public get immunity(): Record<string, boolean> {
+  public get immunity(): Record<
+    string,
+    { value: boolean; sourceAbility?: Ability }
+  > {
     return this._immunity.reduce(
       (map, el) => {
         if (el.effect in map) {
           if (this._character.checkCondition(el.condition)) {
-            map[el.effect] = true;
+            map[el.effect] = { value: true, sourceAbility: el.sourceAbility };
           }
         }
         return map;
       },
       {
-        Daze: this.hasStatusEffect("Guard"),
-        Stun: this.hasStatusEffect("Guard"),
-        Assisting: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
-        CounterAttacking: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
+        Daze: { value: this.hasStatusEffect("Guard") },
+        Stun: { value: this.hasStatusEffect("Guard") },
+        Assisting: { value: this.hasDebuff("Daze") || this.hasDebuff("Stun") },
+        CounterAttacking: {
+          value: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
+        },
       }
     );
   }

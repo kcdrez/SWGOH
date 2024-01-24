@@ -413,7 +413,9 @@ export class Character {
           new Log({
             character: this,
             effects: { assisted: false },
-            ability: { source: srcAbility },
+            ability: {
+              source: this.statusEffect.immunity.Assisting.sourceAbility,
+            },
           })
         );
       } else {
@@ -625,10 +627,16 @@ export class Character {
       results = hasBuffs || results;
     }
     if (debuffs) {
-      const hasDebuffs = debuffs.every((status) => {
-        const match = this.statusEffect.debuffs.find((x) => x.name === status);
+      const hasDebuffs = debuffs.every((debuff) => {
+        const match = this.statusEffect.debuffs.find((x) => {
+          return x.name === debuff;
+        });
+
         if (match) {
+          // console.log("match", isNew, match.isNew);
           return isNew ? match.isNew : true;
+        } else {
+          // console.log("no match", debuff);
         }
         return false;
       });
@@ -729,7 +737,12 @@ export class Character {
         base: round(this.stats.baseStats.maxProtection, 0),
       },
       activeAbilities: this.activeAbilities.map((a) => {
-        return { id: a.id, name: a.name, cooldown: a.turnsRemaining };
+        return {
+          id: a.id,
+          name: a.name,
+          cooldown: a.turnsRemaining,
+          text: a.text,
+        };
       }),
       buffs: unvue(this.statusEffect.buffs),
       debuffs: unvue(this.statusEffect.debuffs),

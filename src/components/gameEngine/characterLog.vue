@@ -112,10 +112,10 @@
               <div
                 v-for="ability in character.activeAbilities"
                 :key="ability.id"
-                class="mt-1"
-                :title="ability.gameText"
+                class="mt-1 c-help"
+                :title="ability.text"
               >
-                <div v-if="ability.cooldown !== undefined">
+                <div v-if="typeof ability.cooldown === 'number'">
                   {{ ability.name }} - Cooldown:
                   {{ ability.cooldown }}
                 </div>
@@ -255,7 +255,7 @@
         </div>
       </template>
     </Popper>
-    <span class="mx-1">({{ character.owner }})</span>
+    <span class="ms-1">({{ character.owner }})</span>
   </span>
 </template>
 

@@ -60,7 +60,12 @@ export type tLogData = {
     max: number;
     base: number;
   };
-  activeAbilities: { name: string; cooldown?: number | null; id: string }[];
+  activeAbilities: {
+    name: string;
+    cooldown?: number | null;
+    id: string;
+    text: string;
+  }[];
   buffs: iBuff[];
   debuffs: iDebuff[];
   statusEffects: iStatusEffect[];
