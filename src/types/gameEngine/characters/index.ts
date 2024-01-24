@@ -17,7 +17,9 @@ import { gameEngine, iCondition } from "../gameEngine";
  * @type tEventType
  */
 type tEventType =
+  | "buffed"
   | "dealDamage"
+  | "death"
   | "endOfTurn"
   | "inflicted"
   | "matchSetup"
@@ -25,6 +27,7 @@ type tEventType =
   | "receiveDamage"
   | "revive"
   | "resisted"
+  | "startOfTurn"
   | "useAbility";
 
 /**
@@ -100,6 +103,16 @@ export class Character {
     return this.id === char?.id && this.owner === char?.owner;
   }
 
+  /** The character's basic ability */
+  public get basicAbility() {
+    return this._basicAbility;
+  }
+
+  /** The character's special abilities */
+  public get specialAbilities() {
+    return this._specialAbilities;
+  }
+
   /** A list of abilities including the basic ability and specials */
   public get activeAbilities() {
     const arr: ActiveAbility[] = [];
@@ -108,6 +121,11 @@ export class Character {
     }
     arr.push(...this._specialAbilities);
     return arr;
+  }
+
+  /** A list of unique abilities */
+  public get uniqueAbilities() {
+    return this._uniqueAbilities;
   }
 
   /** A map of different effects that may exist on the character */
@@ -140,7 +158,7 @@ export class Character {
     srcAbility?: Ability,
     srcCharacter?: Character
   ) {
-    if (amount === 0) {
+    if (amount === 0 || this.isDead) {
       return null;
     }
     let diff = 0;
@@ -283,7 +301,8 @@ export class Character {
           effects: { defeated: true },
         })
       );
-      this._uniqueAbilities.forEach((a) => a.deactivate());
+      targetCharacter._uniqueAbilities.forEach((a) => a.deactivate());
+      targetCharacter.dispatchEvent("death");
     }
   }
   /** Does the character have any effect that is forcing them to be targeted */
@@ -318,6 +337,10 @@ export class Character {
     });
     this.statusEffect.buffs.forEach((debuff) => {
       debuff.isNew = false;
+    });
+    this.dispatchEvent("startOfTurn", {
+      characterId: this.id,
+      owner: this.owner,
     });
   }
 
@@ -385,13 +408,15 @@ export class Character {
     targetCharacter?: Character,
     srcAbility?: Ability
   ) {
-    if (this._basicAbility) {
+    if (this._basicAbility && !targetCharacter?.isDead) {
       if (this.statusEffect.isImmune("Assisting")) {
         gameEngine.addLogs(
           new Log({
             character: this,
             effects: { assisted: false },
-            ability: { source: srcAbility },
+            ability: {
+              source: this.statusEffect.immunity.Assisting.sourceAbility,
+            },
           })
         );
       } else {
@@ -443,9 +468,9 @@ export class Character {
       } else {
         diff = finalAmount;
       }
-      this.stats[healthType] += finalAmount;
+      this.stats.gainHealth(finalAmount, healthType);
 
-      if (diff > 0) {
+      if (round(diff) > 0) {
         gameEngine.addLogs(
           new Log({
             character: this,
@@ -461,8 +486,8 @@ export class Character {
    * @param targetCharacter - The target character that is being attacked
    * @param canBeCountered - Determines if this character is allowed to counter attack
    */
-  public counterAttack(targetCharacter: Character, canBeCountered: boolean) {
-    if (canBeCountered && !targetCharacter.isDead) {
+  public counterAttack(targetCharacter: Character, canBeCountered?: boolean) {
+    if (canBeCountered !== false && !targetCharacter.isDead) {
       if (
         chanceOfEvent(this.stats.counterChance * 100) &&
         !this.isDead &&
@@ -473,6 +498,10 @@ export class Character {
             new Log({
               character: this,
               effects: { countered: false },
+              ability: {
+                source:
+                  this.statusEffect.immunity.CounterAttacking.sourceAbility,
+              },
             })
           );
         } else {
@@ -520,8 +549,10 @@ export class Character {
     critDamage: number,
     stats?: iStatsCheck[]
   ): { isCrit: boolean; damageTotal: number } {
-    if (damageType === "true") {
-      this.stats.protection -= damageAmount;
+    if (this.isDead) {
+      return { isCrit: false, damageTotal: 0 };
+    } else if (damageType === "true") {
+      this.stats.loseHealth(damageAmount);
       return { isCrit: false, damageTotal: damageAmount };
     } else {
       const { armor, critAvoid } = this.stats.getCombatStats(damageType, stats);
@@ -537,7 +568,7 @@ export class Character {
         1
       );
 
-      this.stats.protection -= damageTotal;
+      this.stats.loseHealth(damageTotal);
       return { isCrit, damageTotal };
     }
   }
@@ -549,8 +580,9 @@ export class Character {
    */
   public revive(protection: number, health: number) {
     if (this.isDead) {
-      this.stats.protection = protection;
-      this.stats.health = health;
+      this.initialize();
+      this.stats.gainHealth(protection, "protection");
+      this.stats.gainHealth(health, "health");
 
       gameEngine.addLogs(
         new Log({
@@ -591,16 +623,27 @@ export class Character {
     let results = false;
     if (buffs) {
       const hasBuffs = buffs.every((buff) => {
-        const match = this.statusEffect.buffs.find((x) => x.name === buff);
-        if (match) {
-          return isNew === false ? !match.isNew : true;
-        } else return false;
+        if (typeof buff === "string") {
+          const match = this.statusEffect.buffs.find((x) => x.name === buff);
+          if (match) {
+            return isNew === false ? !match.isNew : true;
+          } else return false;
+        } else {
+          return this.statusEffect.hasBuff(
+            buff.name,
+            buff.duration,
+            buff.stacks
+          );
+        }
       });
       results = hasBuffs || results;
     }
     if (debuffs) {
-      const hasDebuffs = debuffs.every((status) => {
-        const match = this.statusEffect.debuffs.find((x) => x.name === status);
+      const hasDebuffs = debuffs.every((debuff) => {
+        const match = this.statusEffect.debuffs.find((x) => {
+          return x.name === debuff;
+        });
+
         if (match) {
           return isNew ? match.isNew : true;
         }
@@ -703,7 +746,12 @@ export class Character {
         base: round(this.stats.baseStats.maxProtection, 0),
       },
       activeAbilities: this.activeAbilities.map((a) => {
-        return { id: a.id, name: a.name, cooldown: a.turnsRemaining };
+        return {
+          id: a.id,
+          name: a.name,
+          cooldown: a.turnsRemaining,
+          text: a.text,
+        };
       }),
       buffs: unvue(this.statusEffect.buffs),
       debuffs: unvue(this.statusEffect.debuffs),
@@ -746,7 +794,7 @@ export class Character {
           isPercent: true,
         },
         {
-          label: "Dodge (Evasion)",
+          label: "Dodge",
           value: round(this.stats.physical.dodge * 100, 2),
           base: round(this.stats.baseStats.physical.dodge * 100, 2),
           isPercent: true,
@@ -796,7 +844,7 @@ export class Character {
           isPercent: true,
         },
         {
-          label: "Deflection (Evasion)",
+          label: "Deflection",
           value: round(this.stats.special.dodge * 100, 2),
           base: round(this.stats.baseStats.special.dodge * 100, 2),
           isPercent: true,

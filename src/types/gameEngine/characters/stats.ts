@@ -230,6 +230,10 @@ export class Stats {
           hasEffect: this._character.statusEffect.hasBuff("Health Up"),
           value: 0.15,
         },
+        {
+          hasEffect: this._character.statusEffect.hasBuff("Translation"),
+          value: 0.3,
+        },
       ],
       stat,
       this.getTempStat("maxHealth")
@@ -242,26 +246,82 @@ export class Stats {
   public get health() {
     return this._curHealth;
   }
-  public set health(val) {
-    this._curHealth = Math.max(val, 0);
-    if (this._curHealth > this.maxHealth) {
-      this._curHealth = this.maxHealth;
-    }
-  }
+
   /** The current amount of Protection */
   public get protection() {
     return this._curProtection;
   }
-  public set protection(val) {
-    if (val < 0) {
-      this.health += val;
-      this._curProtection = 0;
-    } else {
-      this._curProtection = Math.max(val, 0);
-    }
 
-    if (this._curProtection > this.maxProtection) {
-      this._curProtection = this.maxProtection;
+  /**
+   * Calculates how much should be removed from Protection Up, Protection, or Health
+   * @param amount - The amount of health/protection that is lost
+   * @param type - The type of health lost if targetting a specific type (e.g. lose health, ignoring protection)
+   */
+  public loseHealth(amount: number, type?: "health" | "protection") {
+    if (type === "health") {
+      this._curHealth -= amount;
+      this._curHealth = Math.max(this._curHealth, 0);
+    } else if (type === "protection") {
+      this._curProtection -= amount;
+      this._curProtection = Math.max(this._curProtection, 0);
+    } else if (this._character.statusEffect.hasBuff("Protection Up")) {
+      const match = this._character.statusEffect.buffs.find(
+        (x) => x.name === "Protection Up"
+      );
+      if (match?.stacks) {
+        if (match?.stacks && match?.stacks > amount) {
+          match.stacks -= amount;
+        } else {
+          const diff = amount - match.stacks;
+          match.stacks = 0;
+          this.loseHealth(diff);
+        }
+
+        if (match?.stacks <= 0) {
+          this._character.statusEffect.removeBuff({
+            id: match.id,
+            duration: 0,
+            name: null,
+          });
+        }
+      }
+    } else if (this._curProtection > 0) {
+      if (this._curProtection > amount) {
+        this._curProtection -= amount;
+      } else {
+        const diff = amount - this._curProtection;
+        this._curProtection = 0;
+        this.loseHealth(diff);
+      }
+    } else {
+      this._curHealth -= amount;
+    }
+  }
+
+  /**
+   * Gains health or protection
+   * @param amount - The amount of health/protection that is gained
+   * @param type - The type of health or protection if needing to target a specific type
+   */
+  public gainHealth(amount: number, type?: "health" | "protection") {
+    if (type === "health") {
+      this._curHealth += amount;
+      this._curHealth = Math.min(this._curHealth, this.maxHealth);
+    } else if (type === "protection") {
+      this._curProtection += amount;
+      this._curProtection = Math.min(this._curProtection, this.maxHealth);
+    } else {
+      this._curHealth += amount;
+
+      if (this._curHealth > this.maxHealth) {
+        const diff = this._curHealth - this.maxHealth;
+        this._curProtection += diff;
+        this._curHealth = this.maxHealth;
+
+        if (this._curProtection > this.maxProtection) {
+          this._curProtection = this.maxProtection;
+        }
+      }
     }
   }
   /** The current Speed */
@@ -349,11 +409,11 @@ export class Stats {
       [
         {
           hasEffect: this._character.statusEffect.hasDebuff("Potency Down"),
-          value: -50,
+          value: -0.5,
         },
         {
           hasEffect: this._character.statusEffect.hasBuff("Potency Up"),
-          value: 50,
+          value: 0.5,
         },
       ],
       this.baseStats.potency,
@@ -473,6 +533,14 @@ export class Stats {
             {
               hasEffect: self._character.statusEffect.hasBuff("Advantage"),
               value: 2,
+            },
+            {
+              hasEffect: self._character.statusEffect.hasBuff(
+                "Translation",
+                undefined,
+                2
+              ),
+              value: 0.15,
             },
           ],
           stat,
@@ -753,6 +821,18 @@ export class Stats {
               hasEffect: self._character.statusEffect.hasStatusEffect("Guard"),
               value: 0.25,
             },
+            {
+              hasEffect: self._character.statusEffect.hasBuff("Advantage"),
+              value: 2,
+            },
+            {
+              hasEffect: self._character.statusEffect.hasBuff(
+                "Translation",
+                undefined,
+                2
+              ),
+              value: 0.15,
+            },
           ],
           stat,
           self.getTempStat("specialCritChance")
@@ -1027,9 +1107,9 @@ export class Stats {
       })
       .forEach((stat) => {
         if (stat?.modifiedType === "multiplicative") {
-          newStat *= 1 + stat?.amount ?? 0;
+          newStat += baseStat * stat.amount;
         } else {
-          newStat += stat?.amount ?? 0;
+          newStat += stat.amount;
         }
       });
 
@@ -1122,6 +1202,8 @@ export class Stats {
           if (stat.expires.count > 0) {
             list.push(stat);
           }
+        } else if (!stat.expires) {
+          list.push(stat);
         }
         return list;
       },

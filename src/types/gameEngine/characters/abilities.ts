@@ -10,9 +10,8 @@ import { Log } from "./log";
 
 /**
  * A generic abstract class for any type of ability
- * @abstract @class Ability
  */
-export abstract class Ability {
+export class Ability {
   public id: string;
   public name: string;
   public text: string;
@@ -52,122 +51,194 @@ abstract class CharacterAbility extends Ability {
    * @param include - Used to ignore specific attributes, such as dead characters. By default, these characters are not considered for selection
    * @returns targetList - List of valid targets, primaryTarget - primary opponent target
    */
+  // public findTargets(
+  //   targetData: iTargetData,
+  //   forcedTarget?: Character | null,
+  //   include?: {
+  //     dead?: boolean;
+  //   }
+  // ): { targetList: Character[]; primaryTarget: Character | null } {
+  //   let primaryTarget: Character | null = forcedTarget ?? null;
+
+  //   const validTargets: Character[] = [
+  //     ...(this._character?.teammates ?? []),
+  //     ...(this._character?.opponents ?? []),
+  //   ].filter((char: Character) => {
+  //     let shouldInclude = true;
+
+  //     if (char.isDead) {
+  //       shouldInclude = include?.dead ?? false;
+  //     }
+  //     return shouldInclude;
+  //   });
+
+  //   let filteredList = validTargets.filter((char) => {
+  //     return targetData.filters?.every((targetFilter) => {
+  //       if (targetFilter.allies) {
+  //         return char.owner === this._character?.owner;
+  //       } else if (targetFilter.allies === false) {
+  //         if (targetData.targetCount && !targetData.ignoreTaunt) {
+  //           if (char.owner !== this._character?.owner) {
+  //             const anyForced = validTargets.some((c) => {
+  //               return c.owner !== this._character?.owner && c.hasTauntEffect;
+  //             });
+  //             if (anyForced) {
+  //               return char.hasTauntEffect;
+  //             } else if (char.statusEffect.hasBuff("Stealth")) {
+  //               const allAlliesHaveStealth = char.teammates.every((ally) => {
+  //                 return (
+  //                   ally.uniqueId === char.uniqueId ||
+  //                   ally.statusEffect.hasBuff("Stealth")
+  //                 );
+  //               });
+  //               return allAlliesHaveStealth ? true : false;
+  //             }
+  //           }
+  //         }
+  //         return char.owner !== this._character?.owner;
+  //       } else if (targetFilter.buffs) {
+  //         return char.statusEffect.hasBuff(targetFilter.buffs);
+  //       } else if (targetFilter.debuffs) {
+  //         return char.statusEffect.hasDebuff(targetFilter.debuffs);
+  //       } else if (targetFilter.isLeader) {
+  //         return char.isLeader;
+  //       } else if (targetFilter.statusEffects) {
+  //         return char.statusEffect.hasStatusEffect(targetFilter.statusEffects);
+  //       } else if (targetFilter.tags) {
+  //         return anyTagsMatch(char, targetFilter.tags, this._character.id);
+  //       } else if (targetFilter.primary) {
+  //         return char.isSelf(forcedTarget ?? undefined);
+  //       } else if (targetFilter.targetIds) {
+  //         return anyTagsMatch(char, targetFilter.targetIds, this._character.id);
+  //       }
+  //       return false;
+  //     });
+  //   });
+
+  //   if (targetData.weakest) {
+  //     let tempList: Character[] = [];
+  //     filteredList.forEach((cur) => {
+  //       if (tempList.length === 0) {
+  //         tempList.push(cur);
+  //       } else {
+  //         const totalStatsCur = cur.stats.health + cur.stats.protection;
+  //         const isWeakest = tempList.every(
+  //           (c) => totalStatsCur < c.stats.health + c.stats.protection
+  //         );
+  //         if (isWeakest) {
+  //           tempList = [cur];
+  //         }
+  //       }
+  //     });
+  //     filteredList = tempList;
+  //   } else if (targetData.targetCount) {
+  //     const tempList: Character[] = [];
+  //     if (forcedTarget) {
+  //       tempList.push(forcedTarget);
+  //     }
+
+  //     while (
+  //       tempList.length < targetData.targetCount &&
+  //       filteredList.length >= targetData.targetCount
+  //     ) {
+  //       const rand: number = randomNumber(0, filteredList.length - 1);
+  //       const el = filteredList[rand];
+  //       const exists = tempList.some((x) => x.id === el.id);
+  //       if (!exists) {
+  //         tempList.push(filteredList[rand]);
+  //       }
+  //     }
+  //     filteredList = tempList;
+  //   }
+
+  //   filteredList = filteredList.filter((x) => !!x);
+  //   const opponentsList = filteredList.filter(
+  //     (x) => x.owner !== this._character?.owner
+  //   );
+  //   const tauntingList = (this._character?.opponents ?? []).filter(
+  //     (t) => t.hasTauntEffect
+  //   );
+
+  //   if (tauntingList.length > 0 && !targetData.ignoreTaunt) {
+  //     const randIndex = randomNumber(0, tauntingList.length - 1);
+  //     primaryTarget = tauntingList[randIndex];
+  //   } else if (forcedTarget) {
+  //     primaryTarget = forcedTarget;
+  //   } else if (opponentsList.length > 0) {
+  //     const randIndex = randomNumber(0, opponentsList.length - 1);
+  //     primaryTarget = opponentsList[randIndex];
+  //   } else {
+  //     const randIndex = randomNumber(
+  //       0,
+  //       (this._character?.opponents?.length ?? 0) - 1
+  //     );
+  //     primaryTarget = this._character?.opponents[randIndex] ?? null;
+  //   }
+  //   return { targetList: filteredList, primaryTarget };
+  // }
+
   public findTargets(
-    targetData: iTargetData,
-    forcedTarget?: Character | null,
-    include?: {
-      dead?: boolean;
-    }
-  ): { targetList: Character[]; primaryTarget: Character | null } {
-    let primaryTarget: Character | null = forcedTarget ?? null;
+    validTargets: Character[],
+    forcedTarget?: Character,
+    ignore: {
+      taunt?: boolean;
+      stealth?: boolean;
+      death?: boolean;
+    } = { taunt: false, stealth: false, death: false }
+  ): Character | null {
+    if (forcedTarget && (!forcedTarget.isDead || ignore.death)) {
+      if (forcedTarget.owner === this._character.owner) {
+        return forcedTarget;
+      } else {
+        const tauntingAllies = forcedTarget.teammates.filter(
+          (ally) => ally.hasTauntEffect
+        );
 
-    const validTargets: Character[] = [
-      ...(this._character?.teammates ?? []),
-      ...(this._character?.opponents ?? []),
-    ].filter((char: Character) => {
-      let shouldInclude = true;
-
-      if (char.isDead) {
-        shouldInclude = include?.dead ?? false;
-      }
-      return shouldInclude;
-    });
-
-    let filteredList = validTargets.filter((char) => {
-      return targetData.filters?.every((targetFilter) => {
-        if (targetFilter.allies) {
-          return char.owner === this._character?.owner;
-        } else if (targetFilter.allies === false) {
-          if (targetData.targetCount && !targetData.ignoreTaunt) {
-            if (char.owner !== this._character?.owner) {
-              const anyForced = validTargets.some((c) => {
-                return c.owner !== this._character?.owner && c.hasTauntEffect;
-              });
-              if (anyForced) {
-                return char.hasTauntEffect;
-              }
-            }
-          }
-          return char.owner !== this._character?.owner;
-        } else if (targetFilter.buffs) {
-          return char.statusEffect.hasBuff(targetFilter.buffs);
-        } else if (targetFilter.debuffs) {
-          return char.statusEffect.hasDebuff(targetFilter.debuffs);
-        } else if (targetFilter.isLeader) {
-          return char.isLeader;
-        } else if (targetFilter.statusEffects) {
-          return char.statusEffect.hasStatusEffect(targetFilter.statusEffects);
-        } else if (targetFilter.tags) {
-          return anyTagsMatch(char, targetFilter.tags, this._character.id);
-        } else if (targetFilter.primary) {
-          return char.isSelf(forcedTarget ?? undefined);
-        } else if (targetFilter.targetIds) {
-          return anyTagsMatch(char, targetFilter.targetIds, this._character.id);
+        if (tauntingAllies.length > 0 && !ignore.taunt) {
+          const randIndex = randomNumber(0, tauntingAllies.length - 1);
+          return tauntingAllies[randIndex];
         }
-        return false;
-      });
-    });
 
-    if (targetData.weakest) {
-      let tempList: Character[] = [];
-      filteredList.forEach((cur) => {
-        if (tempList.length === 0) {
-          tempList.push(cur);
-        } else {
-          const totalStatsCur = cur.stats.health + cur.stats.protection;
-          const isWeakest = tempList.every(
-            (c) => totalStatsCur < c.stats.health + c.stats.protection
-          );
-          if (isWeakest) {
-            tempList = [cur];
+        if (forcedTarget.statusEffect.hasBuff("Stealth") && !ignore.stealth) {
+          const alliesWithOutStealth = forcedTarget.teammates.filter((ally) => {
+            return !ally.statusEffect.hasBuff("Stealth");
+          });
+
+          if (alliesWithOutStealth.length > 0) {
+            const randIndex = randomNumber(0, alliesWithOutStealth.length - 1);
+            return alliesWithOutStealth[randIndex];
           }
         }
-      });
-      filteredList = tempList;
-    } else if (targetData.targetCount) {
-      const tempList: Character[] = [];
-      if (forcedTarget) {
-        tempList.push(forcedTarget);
       }
-
-      while (
-        tempList.length < targetData.targetCount &&
-        filteredList.length >= targetData.targetCount
-      ) {
-        const rand: number = randomNumber(0, filteredList.length - 1);
-        const el = filteredList[rand];
-        const exists = tempList.some((x) => x.id === el.id);
-        if (!exists) {
-          tempList.push(filteredList[rand]);
-        }
-      }
-      filteredList = tempList;
+      return forcedTarget;
     }
 
-    filteredList = filteredList.filter((x) => !!x);
-    const opponentsList = filteredList.filter(
-      (x) => x.owner !== this._character?.owner
-    );
-    const tauntingList = (this._character?.opponents ?? []).filter(
-      (t) => t.hasTauntEffect
-    );
+    if (validTargets.length > 0) {
+      const targetList = validTargets.filter((target) => {
+        if (target.isDead) {
+          return ignore.death;
+        }
+        return true;
+      });
 
-    if (tauntingList.length > 0 && !targetData.ignoreTaunt) {
-      const randIndex = randomNumber(0, tauntingList.length - 1);
-      primaryTarget = tauntingList[randIndex];
-    } else if (forcedTarget) {
-      primaryTarget = forcedTarget;
-    } else if (opponentsList.length > 0) {
-      const randIndex = randomNumber(0, opponentsList.length - 1);
-      primaryTarget = opponentsList[randIndex];
+      const randIndex = randomNumber(0, targetList.length - 1);
+      return targetList[randIndex];
     } else {
-      const randIndex = randomNumber(
-        0,
-        (this._character?.opponents?.length ?? 0) - 1
-      );
-      primaryTarget = this._character?.opponents[randIndex] ?? null;
+      return null;
     }
-    return { targetList: filteredList, primaryTarget };
+  }
+
+  public findRandomEnemy(forcedTarget?: Character, ignoreTaunt?: boolean) {
+    return this.findTargets(this._character.opponents, forcedTarget, {
+      taunt: ignoreTaunt ?? this._character.effects.ignoreTaunt,
+    });
+  }
+
+  public findRandomAlly(forcedTarget?: Character) {
+    return this.findTargets(this._character.teammates, forcedTarget, {
+      taunt: true,
+      stealth: true,
+    });
   }
 
   /** Deals damage to a target
@@ -184,9 +255,13 @@ abstract class CharacterAbility extends Ability {
     abilityModifier: number = 0,
     variance: number = 5,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true,
+    canBeCountered?: boolean,
     srcAbility?: Ability
   ) {
+    if (targetCharacter.isDead) {
+      return;
+    }
+
     const { offense, critChance, armorPen } =
       this._character.stats.getCombatStats(damageType, stats);
     const varianceOffense =
@@ -276,27 +351,21 @@ export abstract class ActiveAbility extends CharacterAbility {
   public execute(
     targetCharacter?: Character | null,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true,
+    canBeCountered?: boolean,
     additionalEffects: Function = () => {}
   ) {
-    gameEngine.addLogs(
-      new Log({ character: this._character, ability: { used: this } })
-    );
-
-    additionalEffects();
-
-    if (!targetCharacter) {
-      const { primaryTarget } = this.findTargets({
-        filters: [{ allies: false }],
-        targetCount: 1,
+    if (targetCharacter) {
+      gameEngine.addLogs(
+        new Log({ character: this._character, ability: { used: this } })
+      );
+      additionalEffects();
+      this._character.dispatchEvent("useAbility", {
+        abilityId: this.id,
+        target: targetCharacter,
       });
-      targetCharacter = primaryTarget;
+    } else {
+      console.error("Could not find a valid target for ", this.id);
     }
-
-    this._character.dispatchEvent("useAbility", {
-      abilityId: this.id,
-      target: targetCharacter,
-    });
   }
 
   /** Checks if the effect should be evaded
@@ -319,9 +388,20 @@ export abstract class ActiveAbility extends CharacterAbility {
         stats
       );
 
-      return chanceOfEvent(dodge - accuracy * 100);
+      const attackMissed = chanceOfEvent(dodge - accuracy * 100);
+
+      if (attackMissed) {
+        gameEngine.addLogs(
+          new Log({
+            character: targetCharacter,
+            damage: { evaded: true },
+          })
+        );
+        return true;
+      } else {
+        return false;
+      }
     }
-    //todo add logging if it misses
     return false;
   }
 

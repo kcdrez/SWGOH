@@ -2,7 +2,7 @@ import store from "vuex-store/store";
 import { Character } from "./characters/index";
 import { randomNumber, round } from "utils";
 import { Log } from "./characters/log";
-import { tBuff, tDebuff } from "./characters/statusEffects";
+import { iBuff, tBuff, tDebuff } from "./characters/statusEffects";
 import { iStatsCheck } from "./characters/stats";
 import { loadingState } from "types/loading";
 
@@ -11,7 +11,7 @@ export interface iCondition {
   /** Checks if a debuff is present */
   debuffs?: tDebuff[];
   /** Checks if a buff is present */
-  buffs?: tBuff[];
+  buffs?: (tBuff | iBuff)[];
   /** Checks if a specific stat meets a threshold */
   stats?: iStatsCheck;
   /** Inverts the logic so that all conditions are "Not" */
@@ -158,7 +158,7 @@ export class Engine {
       do {
         turnNumber++;
         this.nextTurn(turnNumber);
-        if (this.checkMatchEnd(turnNumber, 99999)) {
+        if (this.checkMatchEnd(turnNumber, 9999)) {
           this._simulationData.matchHistory.push(this.turns);
           break;
         }
@@ -316,6 +316,7 @@ export class Engine {
   public addLogs(logs: Log | Log[], endOfTurn?: boolean) {
     if (this.turns.length <= 0) {
       console.error("cannot add logs because there are no turns");
+      return;
     }
 
     const currentTurn = this.turns[this.turns.length - 1];

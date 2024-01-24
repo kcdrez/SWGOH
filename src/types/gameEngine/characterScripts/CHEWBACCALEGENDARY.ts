@@ -6,7 +6,6 @@ import {
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
 import { iStatsCheck } from "../characters/stats";
-import { gameEngine } from "../gameEngine";
 
 class basicskill_CHEWBACCALEGENDARY extends ActiveAbility {
   constructor(character: Character) {
@@ -21,28 +20,29 @@ class basicskill_CHEWBACCALEGENDARY extends ActiveAbility {
   public override execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
-    const { targetList, primaryTarget } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
+    const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
-      targetList.forEach((target) => {
-        if (!this.checkEvade("physical", target)) {
-          this.dealDamage("physical", target, 1.4, 5, stats, canBeCountered);
+      if (primaryTarget) {
+        if (!this.checkEvade("physical", primaryTarget)) {
+          this.dealDamage(
+            "physical",
+            primaryTarget,
+            1.4,
+            5,
+            stats,
+            canBeCountered
+          );
           this._character.statusEffect.inflictDebuff(
             [{ name: "Tenacity Down", id: uuid(), duration: 2 }],
-            target,
+            primaryTarget,
             1,
             this
           );
         }
-      });
+      }
     });
   }
 }
@@ -61,15 +61,13 @@ class specialskill_CHEWBACCALEGENDARY01 extends ActiveAbility {
   public override execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
-    const { targetList, primaryTarget } = this.findTargets(
-      { filters: [{ allies: false }] },
-      targetCharacter
-    );
+    const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
-      targetList.forEach((target) => {
+      const damagedCharacters: Character[] = [];
+      this._character.opponents.forEach((target) => {
         if (!this.checkEvade("physical", target)) {
           target.statusEffect.removeBuff("all", this._character, this);
 
@@ -85,17 +83,26 @@ class specialskill_CHEWBACCALEGENDARY01 extends ActiveAbility {
                 modifiedType: "additive",
               },
             ],
-            canBeCountered
+            false
           );
-          this._character.statusEffect.addBuff(
-            [
-              { name: "Offense Up", duration: 2, id: uuid() },
-              { name: "Critical Chance Up", duration: 2, id: uuid() },
-            ],
-            1,
-            this
-          );
+
+          if (canBeCountered) {
+            damagedCharacters.push(target);
+          }
         }
+      });
+
+      this._character.statusEffect.addBuff(
+        [
+          { name: "Offense Up", duration: 2, id: uuid() },
+          { name: "Critical Chance Up", duration: 2, id: uuid() },
+        ],
+        1,
+        this
+      );
+
+      damagedCharacters.forEach((character) => {
+        character.counterAttack(this._character, canBeCountered);
       });
     });
   }
@@ -115,36 +122,29 @@ class specialskill_CHEWBACCALEGENDARY02 extends ActiveAbility {
   public override execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
-    const { targetList, primaryTarget } = this.findTargets(
-      {
-        filters: [{ allies: false }],
-        targetCount: 1,
-      },
-      targetCharacter
-    );
+    const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
-      targetList.forEach((target) => {
-        //no evade check
+      if (primaryTarget) {
         this._character.statusEffect.inflictDebuff(
           [{ name: "Stun", duration: 1, id: uuid() }],
-          target,
+          primaryTarget,
           1,
           this
         );
 
-        this.dealDamage("physical", target, 2.4, 5, [], canBeCountered);
+        this.dealDamage("physical", primaryTarget, 2.4, 5, [], canBeCountered);
 
-        if (target.stats.protection <= 0) {
+        if (primaryTarget.stats.protection <= 0) {
           this._character.activeAbilities.forEach((ability) => {
             if (ability.id === "specialskill_CHEWBACCALEGENDARY01") {
               ability.changeCooldown(-Infinity, this);
             }
           });
         }
-      });
+      }
     });
   }
 }
@@ -167,50 +167,62 @@ class uniqueskill_CHEWBACCALEGENDARY01 extends PassiveAbility {
         characterSourceId: this._character.uniqueId,
         eventType: "matchSetup",
         callback: () => {
-          const { targetList: weakest } = this.findTargets({
-            filters: [
-              { allies: true },
-              { tags: ["!Self"] },
-              { targetIds: ["!HANSOLO"] },
-            ],
-            targetCount: 1,
-            weakest: true,
-          });
+          const hansolo = this._character.teammates.find(
+            (c) => c.id === "HANSOLO"
+          );
 
-          const { targetList: hansolo } = this.findTargets({
-            filters: [{ allies: true }, { targetIds: ["HANSOLO"] }],
-          });
+          const weakestCharacter = this._character.teammates.reduce(
+            (weakestCharacter: null | Character, ally: Character) => {
+              if (this._character.isSelf(ally)) {
+                return weakestCharacter;
+              } else if (ally.id === "HANSOLO") {
+                return weakestCharacter;
+              } else if (!weakestCharacter) {
+                return ally;
+              } else if (
+                ally.stats.health + ally.stats.protection <
+                weakestCharacter.stats.health +
+                  weakestCharacter.stats.protection
+              ) {
+                return ally;
+              }
+              return weakestCharacter;
+            },
+            null
+          );
 
-          [...weakest, ...hansolo].forEach((target) => {
-            target.statusEffect.addStatusEffect(
-              { name: "Guard", duration: Infinity, id: uuid() },
-              this
-            );
-            target.events.push({
-              eventType: "useAbility",
-              characterSourceId: this._character.uniqueId,
-              callback: ({ target }) => {
-                if (triggerCount < 1) {
-                  triggerCount++;
-                  this._character.assist(
-                    [
-                      {
-                        statToModify: "physicalOffense",
-                        amount: 0.8,
-                        modifiedType: "multiplicative",
-                      },
-                      {
-                        statToModify: "specialOffense",
-                        amount: 0.8,
-                        modifiedType: "multiplicative",
-                      },
-                    ],
-                    target,
-                    this
-                  );
-                }
-              },
-            });
+          [weakestCharacter, hansolo].forEach((target) => {
+            if (target) {
+              target.statusEffect.addStatusEffect(
+                { name: "Guard", duration: Infinity, id: uuid() },
+                this
+              );
+              target.events.push({
+                eventType: "useAbility",
+                characterSourceId: this._character.uniqueId,
+                callback: ({ target }) => {
+                  if (triggerCount < 1) {
+                    triggerCount++;
+                    this._character.assist(
+                      [
+                        {
+                          statToModify: "physicalOffense",
+                          amount: 0.8,
+                          modifiedType: "multiplicative",
+                        },
+                        {
+                          statToModify: "specialOffense",
+                          amount: 0.8,
+                          modifiedType: "multiplicative",
+                        },
+                      ],
+                      target,
+                      this
+                    );
+                  }
+                },
+              });
+            }
           });
         },
       },
@@ -225,11 +237,14 @@ class uniqueskill_CHEWBACCALEGENDARY01 extends PassiveAbility {
         characterSourceId: this._character.uniqueId,
         eventType: "dealDamage",
         callback: () => {
-          const { targetList: guardedAllies } = this.findTargets({
-            filters: [{ allies: true }, { statusEffects: ["Guard"] }],
+          const targetList = this._character.teammates.filter((ally) => {
+            return (
+              ally.isSelf(this._character) ||
+              ally.statusEffect.hasStatusEffect("Guard")
+            );
           });
 
-          [...guardedAllies, this._character].forEach((target) => {
+          targetList.forEach((target) => {
             target.heal(
               {
                 healthType: "protection",
@@ -255,12 +270,12 @@ class uniqueskill_CHEWBACCALEGENDARY01 extends PassiveAbility {
   public override deactivate(): void {
     super.deactivate();
 
-    const { targetList } = this.findTargets({
-      filters: [{ allies: true }, { statusEffects: ["Guard"] }],
-    });
+    const targetList = this._character.teammates.filter((ally) =>
+      ally.statusEffect.hasStatusEffect("Guard")
+    );
 
     targetList.forEach((target) => {
-      target.statusEffect.removeStatusEffect("Guard", this);
+      target.statusEffect.removeStatusEffect("Guard", this, this._character);
     });
   }
 }
@@ -358,9 +373,9 @@ class uniqueskill_CHEWBACCALEGENDARY02 extends PassiveAbility {
         eventType: "matchSetup",
         characterSourceId: this._character.uniqueId,
         callback: () => {
-          const { targetList } = this.findTargets({
-            filters: [{ allies: true }, { statusEffects: ["Guard"] }],
-          });
+          const targetList = this._character.teammates.filter((ally) =>
+            ally.statusEffect.hasStatusEffect("Guard")
+          );
 
           targetList.forEach((target) => {
             target.events.push({

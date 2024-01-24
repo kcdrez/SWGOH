@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import _ from "lodash";
 
 import { Character } from "./index";
 import { Ability } from "./abilities";
@@ -17,6 +18,7 @@ export class StatusEffect {
     value: boolean;
     effect: string;
     condition?: iCondition;
+    sourceAbility?: Ability;
   }[] = [];
 
   constructor(parentCharacter: Character) {
@@ -45,7 +47,7 @@ export class StatusEffect {
           debuff.duration--;
         }
 
-        if (debuff.duration <= 0) {
+        if (debuff.duration <= 0 && debuff.name) {
           acc.debuffsRemoved.push(debuff.name);
         }
         return acc;
@@ -66,7 +68,7 @@ export class StatusEffect {
           buff.duration--;
         }
 
-        if (buff.duration <= 0) {
+        if (buff.duration <= 0 && buff.name) {
           acc.buffsRemoved.push(buff.name);
         }
         return acc;
@@ -133,7 +135,7 @@ export class StatusEffect {
    * @returns true if the character has the debuffs
    */
   public hasDebuff(
-    debuffs: tDebuff | tDebuff[] | iDebuff | iDebuff[],
+    debuffs: tDebuff | tDebuff[] | iDebuff | iDebuff[] | null,
     duration?: number
   ): boolean {
     if (Array.isArray(debuffs)) {
@@ -151,7 +153,7 @@ export class StatusEffect {
           }
           return false;
         } else {
-          return d.id === debuffs.id;
+          return d.id === debuffs?.id;
         }
       });
     }
@@ -159,13 +161,20 @@ export class StatusEffect {
 
   /** Checks to see if the character has any of the listed buffs
    * @param buffs - The list of buffs to check. If an array, checks that ALL of the ones listed are present
-   * @param duration - The duration to check if there are any remaining turns left on the debuff
+   * @param duration - The duration to check if there are any remaining turns left on the buff
+   * @param stacks - The number to check if there are at least this many stacks of the given buffs
+   * @param isNew - Checks if the buff is new this turn or not
    * @returns true if the character has the buffs
    */
-  public hasBuff(buffs: tBuff | tBuff[] | iBuff | iBuff[], duration?: number) {
+  public hasBuff(
+    buffs: tBuff | tBuff[] | iBuff | iBuff[] | null,
+    duration?: number,
+    stacks?: number,
+    isNew?: boolean
+  ) {
     if (Array.isArray(buffs)) {
       return (buffs as (tBuff | iBuff)[]).every((x) =>
-        this.hasBuff(x, duration)
+        this.hasBuff(x, duration, stacks, isNew)
       );
     } else {
       return this.buffs.some((b) => {
@@ -173,12 +182,16 @@ export class StatusEffect {
           if (b.name === buffs) {
             if (duration) {
               return duration <= b.duration;
+            } else if (stacks) {
+              return stacks <= (b?.stacks ?? 0);
+            } else if (isNew !== undefined) {
+              return b.isNew === isNew;
             }
             return true;
           }
           return false;
         } else {
-          return b.id === buffs.id;
+          return b.id === buffs?.id;
         }
       });
     }
@@ -216,15 +229,53 @@ export class StatusEffect {
       });
     }
   }
+
+  /** Changes the duration of all stacks of a particular status effect
+   * @param effect - The name of the effect that should be changed
+   * @param duration - The duration to change the effect to
+   * @param type - The type of effect (buff, debuff, or status effect)
+   * @param srcAbility - The source ability that is causing the effect to be reset
+   */
+  public resetDuration(
+    effect: iStatusEffect["name"],
+    duration: number,
+    type: "buff" | "debuff" | "statusEffect",
+    srcAbility?: Ability
+  ) {
+    let shouldLog: iStatusEffect[] = [];
+    [...this._buffs, ...this._debuffs, ...this._statusEffects].forEach(
+      (statusEffect) => {
+        if (statusEffect.name === effect) {
+          statusEffect.duration = duration;
+          shouldLog.push(statusEffect);
+        }
+      }
+    );
+
+    if (shouldLog.length > 0) {
+      gameEngine.addLogs(
+        new Log({
+          character: this._character,
+          statusEffects: {
+            type,
+            list: shouldLog,
+            reset: duration,
+          },
+          ability: { source: srcAbility },
+        })
+      );
+    }
+  }
+
   /** Checks to see if the character is immune to the effect
    * @param statusEffect - The status effect to check
    * @returns true if the character is currently immune to the effect
    */
   public isImmune(statusEffect: iStatusEffect | string): boolean {
     if (typeof statusEffect === "string") {
-      return this.immunity[statusEffect];
+      return this.immunity[statusEffect]?.value ?? false;
     } else {
-      return this.immunity[statusEffect.name];
+      return this.immunity[statusEffect?.name ?? ""]?.value ?? false;
     }
   }
 
@@ -238,15 +289,29 @@ export class StatusEffect {
     scalar: number,
     sourceAbility: Ability | null
   ) {
+    const hasBuffImmunity = this.hasDebuff("Buff Immunity");
+    const hasConfuse = this.hasDebuff("Confuse");
+
     if (Array.isArray(buff)) {
       buff.forEach((someBuff) => {
         this.addBuff(someBuff, scalar, sourceAbility);
       });
-    } else if (this.hasDebuff("Buff Immunity") && !buff.cantPrevent) {
+    } else if ((hasBuffImmunity || hasConfuse) && !buff.cantPrevent) {
+      let preventedSource = "";
+      if (hasBuffImmunity) {
+        preventedSource = "Buff Immunity";
+      } else if (hasConfuse) {
+        preventedSource = "Confused";
+      }
+
       gameEngine.addLogs(
         new Log({
           character: this._character,
-          statusEffects: { prevented: true, list: [buff], type: "buff" },
+          statusEffects: {
+            prevented: preventedSource,
+            list: [buff],
+            type: "buff",
+          },
         })
       );
     } else if (!this.hasDebuff("Buff Immunity")) {
@@ -255,13 +320,22 @@ export class StatusEffect {
         !this.isImmune(buff)
       ) {
         if (scalar > 0) {
-          const newDuration = buff.duration * scalar;
+          if (buff.name === "Protection Up") {
+            const match = this.buffs.find(
+              (x) => x.sourceAbility?.id === buff.sourceAbility?.id
+            );
+            if (match) {
+              match.stacks = buff.stacks;
+              return;
+            }
+          }
 
+          const newDuration = buff.duration * scalar;
           const match = this.buffs.find((x) => x.name === buff.name);
 
           if (buff.isStackable || !match) {
             this._buffs.push({
-              ...unvue(buff),
+              ..._.cloneDeep(buff),
               duration: newDuration,
               isNew: true,
             });
@@ -281,6 +355,8 @@ export class StatusEffect {
               },
             })
           );
+
+          this._character.dispatchEvent("buffed", { buff });
         }
       }
     }
@@ -403,6 +479,7 @@ export class StatusEffect {
           targetCharacter.stats.tenacity - this._character.stats.potency,
           0.15
         );
+
         if (
           !chanceOfEvent(resistedChance) ||
           debuff.cantResist ||
@@ -415,7 +492,10 @@ export class StatusEffect {
 
           const newDuration = debuff.duration * scalar;
           if (
-            !targetCharacter.statusEffect.hasDebuff(debuff.name, newDuration) ||
+            !targetCharacter.statusEffect.hasDebuff(
+              debuff?.name,
+              newDuration
+            ) ||
             debuff.isStackable
           ) {
             const match = targetCharacter.statusEffect.debuffs.find(
@@ -588,6 +668,7 @@ export class StatusEffect {
   /** Removes a status effect from the character
    * @param statusEffect - The status effect being removed
    * @param srcAbility - The ability that is causing the removal
+   * @param srcCharacter - The character that is causing the removal
    */
   public removeStatusEffect(
     statusEffect:
@@ -596,7 +677,8 @@ export class StatusEffect {
       | tStatusEffect
       | tStatusEffect[]
       | null,
-    srcAbility?: Ability
+    srcAbility?: Ability,
+    srcCharacter?: Character
   ) {
     if (Array.isArray(statusEffect)) {
       statusEffect.forEach((e) => this.removeStatusEffect(e, srcAbility));
@@ -630,12 +712,13 @@ export class StatusEffect {
       if (listOfRemovedStatusEffects.length > 0) {
         gameEngine.addLogs(
           new Log({
+            character: srcCharacter,
             target: this._character,
             ability: { source: srcAbility },
             statusEffects: {
               list: listOfRemovedStatusEffects,
               removed: true,
-              type: "debuff",
+              type: "statusEffect",
             },
           })
         );
@@ -644,21 +727,56 @@ export class StatusEffect {
   }
 
   /** A mapping of status effects that the character cannot gain */
-  public get immunity(): Record<string, boolean> {
+  public get immunity(): Record<
+    string,
+    { value: boolean; sourceAbility?: Ability }
+  > {
     return this._immunity.reduce(
       (map, el) => {
         if (el.effect in map) {
           if (this._character.checkCondition(el.condition)) {
-            map[el.effect] = true;
+            map[el.effect] = { value: true, sourceAbility: el.sourceAbility };
           }
         }
         return map;
       },
       {
-        Daze: this.hasStatusEffect("Guard"),
-        Stun: this.hasStatusEffect("Guard"),
-        Assisting: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
-        CounterAttacking: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
+        Daze: {
+          value: this.hasStatusEffect("Guard"),
+          sourceAbility: new Ability(
+            "Guard",
+            "Guard",
+            "Can't be Critically Hit, immune to Daze and Stun, +25% Critical Chance",
+            this._character
+          ),
+        },
+        Stun: {
+          value: this.hasStatusEffect("Guard"),
+          sourceAbility: new Ability(
+            "Guard",
+            "Guard",
+            "Can't be Critically Hit, immune to Daze and Stun, +25% Critical Chance",
+            this._character
+          ),
+        },
+        Assisting: {
+          value: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
+          sourceAbility: new Ability(
+            this.hasDebuff("Daze") ? "Daze" : "Stun",
+            this.hasDebuff("Daze") ? "Daze" : "Stun",
+            "Can't assist, counter attack, or gain bonus Turn Meter",
+            this._character
+          ),
+        },
+        CounterAttacking: {
+          value: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
+          sourceAbility: new Ability(
+            this.hasDebuff("Daze") ? "Daze" : "Stun",
+            this.hasDebuff("Daze") ? "Daze" : "Stun",
+            "Can't assist, counter attack, or gain bonus Turn Meter",
+            this._character
+          ),
+        },
       }
     );
   }
@@ -667,9 +785,22 @@ export class StatusEffect {
    * Add an effect that the character is now immune to
    * @param sourceId - The unique key that is used to reference the immunity
    * @param effect - The effect that the user is now immune to
+   * @param condition - A condition to check if the immune effect should be added
+   * @param sourceAbility - The ability source that is adding the immune effect
    */
-  public addImmune(sourceId: string, effect: string, condition?: iCondition) {
-    this._immunity.push({ sourceId, value: true, effect, condition });
+  public addImmune(
+    sourceId: string,
+    effect: string,
+    condition?: iCondition,
+    sourceAbility?: Ability
+  ) {
+    this._immunity.push({
+      sourceId,
+      value: true,
+      effect,
+      condition,
+      sourceAbility,
+    });
   }
 
   /**
@@ -698,12 +829,12 @@ export class StatusEffect {
 
 /** An interface used to hold various buff data */
 export interface iBuff extends iStatusEffect {
-  name: tBuff;
+  name: tBuff | null;
 }
 
 /** An interface used to hold various debuff data */
 export interface iDebuff extends iStatusEffect {
-  name: tDebuff;
+  name: tDebuff | null;
 }
 /** A type for all of the available debuff names */
 export type tDebuff =
@@ -778,8 +909,10 @@ export type tBuff =
   | "Health Up"
   | "Health Steal Up"
   | "Potency Up"
+  | "Protection Up"
   | "Offense Up"
   | "Speed Up"
+  | "Stealth"
   | "Taunt"
   | "Tenacity Up"
   | "TM Decrease"
@@ -798,7 +931,8 @@ export interface iStatusEffect {
     | tDebuff
     | tStatusEffect
     | "Cooldown Increase"
-    | "Cooldown Decrease";
+    | "Cooldown Decrease"
+    | null;
   /** How many turns the effect will last */
   duration: number;
   /** Determines if the effect is new so that it will not be removed at the end of the turn */
@@ -811,18 +945,16 @@ export interface iStatusEffect {
   cantPrevent?: boolean;
   /** Determines if the effect cannot be dispelled */
   cantDispel?: boolean;
-  // cantMiss?: boolean;
   /** Determines if the effect is unique */
   unique?: boolean;
-  /** Triggers that will occur at a certain time */
-  // triggers?: iTrigger[];
   /** Unique identifier */
   id: string;
   /** The original source of the effect */
   sourceAbility?: Ability | null;
   /** Determines if more than one of the effect can be applied to a target */
   isStackable?: boolean;
-  /** How many stacks of the effect the unit has */
+  /** How many stacks of the effect the unit has. Also used for the value for Protection Up */
   stacks?: number;
+  /** The maximum number of stacks that can be present */
   maxStacks?: number;
 }

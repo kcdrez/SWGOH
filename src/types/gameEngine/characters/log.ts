@@ -42,7 +42,8 @@ type tLogStatusEffect = {
   removed?: boolean;
   duration?: number;
   immune?: boolean;
-  prevented?: boolean;
+  prevented?: string;
+  reset?: number;
 };
 
 /** A container type that has all the logging information of what has occured */
@@ -59,7 +60,12 @@ export type tLogData = {
     max: number;
     base: number;
   };
-  activeAbilities: { name: string; cooldown?: number | null; id: string }[];
+  activeAbilities: {
+    name: string;
+    cooldown?: number | null;
+    id: string;
+    text: string;
+  }[];
   buffs: iBuff[];
   debuffs: iDebuff[];
   statusEffects: iStatusEffect[];
@@ -81,8 +87,10 @@ export type tLogData = {
     base: number;
     isPercent?: boolean;
   }[];
-  // triggers: iTrigger[];
-  otherEffects: { ignoreTaunt: boolean; immunity: Record<string, boolean> };
+  otherEffects: {
+    ignoreTaunt: boolean;
+    immunity: Record<string, { value: boolean; sourceAbility?: Ability }>;
+  };
   turnMeter: number;
 };
 
@@ -100,6 +108,7 @@ export class Log {
   public effects?: tLogEffects;
   public characterLogData?: tLogData;
   public targetLogData?: tLogData;
+  public customMessage?: string;
 
   constructor(data: {
     character?: Character;
@@ -109,6 +118,7 @@ export class Log {
     damage?: tLogDamage;
     heal?: tLogHeal;
     effects?: tLogEffects;
+    customMessage?: string;
   }) {
     this.character = data?.character;
     this.target = data?.target;
@@ -117,6 +127,7 @@ export class Log {
     this.damage = data?.damage;
     this.heal = data?.heal;
     this.effects = data?.effects;
+    this.customMessage = data.customMessage;
 
     if (this.character) {
       this.characterLogData = this.character.getLogs();

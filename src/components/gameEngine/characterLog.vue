@@ -58,14 +58,18 @@
                 <span class="input-group-text">Protection:</span>
                 <span class="input-group-text fill"
                   ><span
+                    class="c-help"
                     :class="{
                       'text-danger':
                         character.protection.current < character.protection.max,
                     }"
+                    title="The current Protection"
                     >{{ character.protection.current }}</span
                   >
                   <span class="mx-1">/</span>
-                  {{ character.protection.max }}
+                  <span title="The modified max Protection" class="c-help">{{
+                    character.protection.max
+                  }}</span>
                   <span
                     :class="{
                       'text-danger':
@@ -73,8 +77,8 @@
                       'text-success':
                         character.protection.max > character.protection.base,
                     }"
-                    class="mx-1"
-                    title="Unmodified base protection"
+                    class="mx-1 c-help"
+                    title="The nmodified base Protection"
                     >({{ character.protection.base }})</span
                   ></span
                 >
@@ -112,10 +116,10 @@
               <div
                 v-for="ability in character.activeAbilities"
                 :key="ability.id"
-                class="mt-1"
-                :title="ability.gameText"
+                class="mt-1 c-help"
+                :title="ability.text"
               >
-                <div v-if="ability.cooldown !== undefined">
+                <div v-if="typeof ability.cooldown === 'number'">
                   {{ ability.name }} - Cooldown:
                   {{ ability.cooldown }}
                 </div>
@@ -234,18 +238,19 @@
                 <div v-if="character.otherEffects.ignoreTaunt">
                   Ignores Taunt
                 </div>
-                <template
-                  v-if="
-                    Object.keys(character.otherEffects?.immunity ?? {}).length >
-                    0
-                  "
-                >
+                <template v-if="shouldShowImmunity">
                   Immune to:
                   <ul
                     v-for="(val, key) in character.otherEffects.immunity"
                     :key="key"
                   >
-                    <li v-if="val">{{ key }}</li>
+                    <li
+                      v-if="val.value"
+                      :title="'Source: ' + val.sourceAbility?.name"
+                      class="c-help"
+                    >
+                      {{ key }}
+                    </li>
                   </ul>
                 </template>
               </div>
@@ -255,7 +260,7 @@
         </div>
       </template>
     </Popper>
-    <span class="mx-1">({{ character.owner }})</span>
+    <span class="ms-1">({{ character.owner }})</span>
   </span>
 </template>
 
@@ -284,12 +289,25 @@ export default defineComponent({
       id: uuid(),
     };
   },
+  computed: {
+    shouldShowImmunity(): boolean {
+      const immunity = this.character?.otherEffects.immunity;
+      for (const key in immunity) {
+        if (immunity[key].value) {
+          return true;
+        }
+      }
+      return false;
+    },
+  },
   methods: {
     getStatusEffectImgSrc(effect: iBuff | iDebuff | iStatusEffect) {
-      return `/images/statusEffects/${effect.name.replace(/\s/g, "_")}.png`;
+      return `/images/statusEffects/${effect?.name
+        ?.toString()
+        .replace(/\s/g, "_")}.png`;
     },
     getStatusEffectText(effect: iBuff | iDebuff | iStatusEffect): string {
-      const textLines: string[] = [effect.name];
+      const textLines: string[] = [effect?.name ?? ""];
       if (effect.cantDispel) {
         textLines.push("Cant be Dispeled");
       }
@@ -302,8 +320,14 @@ export default defineComponent({
       if (effect.duration) {
         textLines.push("Turns Remaining: " + effect.duration);
       }
+      if (effect.stacks) {
+        textLines.push("Stacks: " + effect.stacks);
+      }
       if (effect.unique) {
         textLines.push("Is Unique");
+      }
+      if (effect.sourceAbility) {
+        textLines.push("Ability Source: " + effect.sourceAbility.name);
       }
       return textLines.join("\n");
     },

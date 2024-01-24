@@ -195,6 +195,11 @@
                     v-for="(turn, turnIndex) in match"
                     :key="`match-${index}-turn-${turnIndex}`"
                   >
+                    <template
+                      v-if="
+                        turn.logs.length > 0 || turn.endOfTurnLogs.length > 0
+                      "
+                    >
                     <Popper arrow placement="right">
                       <h6 class="turn-label">{{ turn.label }}:</h6>
                       <template #content>
@@ -231,7 +236,7 @@
                         <Log :log="log" />
                       </li>
                     </ul>
-                    <ul v-if="turn.endOfTurnLogs.length"></ul>
+                    </template>
                   </template>
                 </div>
               </div>
