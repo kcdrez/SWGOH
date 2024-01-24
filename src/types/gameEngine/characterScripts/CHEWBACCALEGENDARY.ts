@@ -20,7 +20,7 @@ class basicskill_CHEWBACCALEGENDARY extends ActiveAbility {
   public override execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
     const primaryTarget = this.findRandomEnemy(targetCharacter);
 
@@ -61,11 +61,12 @@ class specialskill_CHEWBACCALEGENDARY01 extends ActiveAbility {
   public override execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
     const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
+      const damagedCharacters: Character[] = [];
       this._character.opponents.forEach((target) => {
         if (!this.checkEvade("physical", target)) {
           target.statusEffect.removeBuff("all", this._character, this);
@@ -82,17 +83,26 @@ class specialskill_CHEWBACCALEGENDARY01 extends ActiveAbility {
                 modifiedType: "additive",
               },
             ],
-            canBeCountered
+            false
           );
-          this._character.statusEffect.addBuff(
-            [
-              { name: "Offense Up", duration: 2, id: uuid() },
-              { name: "Critical Chance Up", duration: 2, id: uuid() },
-            ],
-            1,
-            this
-          );
+
+          if (canBeCountered) {
+            damagedCharacters.push(target);
+          }
         }
+      });
+
+      this._character.statusEffect.addBuff(
+        [
+          { name: "Offense Up", duration: 2, id: uuid() },
+          { name: "Critical Chance Up", duration: 2, id: uuid() },
+        ],
+        1,
+        this
+      );
+
+      damagedCharacters.forEach((character) => {
+        character.counterAttack(this._character, canBeCountered);
       });
     });
   }
@@ -112,7 +122,7 @@ class specialskill_CHEWBACCALEGENDARY02 extends ActiveAbility {
   public override execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
     const primaryTarget = this.findRandomEnemy(targetCharacter);
 
@@ -157,9 +167,15 @@ class uniqueskill_CHEWBACCALEGENDARY01 extends PassiveAbility {
         characterSourceId: this._character.uniqueId,
         eventType: "matchSetup",
         callback: () => {
+          const hansolo = this._character.teammates.find(
+            (c) => c.id === "HANSOLO"
+          );
+
           const weakestCharacter = this._character.teammates.reduce(
             (weakestCharacter: null | Character, ally: Character) => {
               if (this._character.isSelf(ally)) {
+                return weakestCharacter;
+              } else if (ally.id === "HANSOLO") {
                 return weakestCharacter;
               } else if (!weakestCharacter) {
                 return ally;
@@ -173,10 +189,6 @@ class uniqueskill_CHEWBACCALEGENDARY01 extends PassiveAbility {
               return weakestCharacter;
             },
             null
-          );
-
-          const hansolo = this._character.teammates.find(
-            (c) => c.id === "HANSOLO"
           );
 
           [weakestCharacter, hansolo].forEach((target) => {
@@ -263,7 +275,7 @@ class uniqueskill_CHEWBACCALEGENDARY01 extends PassiveAbility {
     );
 
     targetList.forEach((target) => {
-      target.statusEffect.removeStatusEffect("Guard", this);
+      target.statusEffect.removeStatusEffect("Guard", this, this._character);
     });
   }
 }

@@ -20,7 +20,7 @@ class basicskill_HANSOLO extends ActiveAbility {
   public override execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true,
+    canBeCountered?: boolean,
     additionalEffects: Function = () => {}
   ): void {
     const primaryTarget = this.findRandomEnemy(
@@ -71,7 +71,7 @@ class specialskill_HANSOLO01 extends ActiveAbility {
   public execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
     const primaryTarget = this.findRandomEnemy();
 
@@ -117,7 +117,7 @@ class specialskill_HANSOLO02 extends ActiveAbility {
   public execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
     const primaryTarget = this.findRandomEnemy();
 

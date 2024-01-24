@@ -10,9 +10,8 @@ import { Log } from "./log";
 
 /**
  * A generic abstract class for any type of ability
- * @abstract @class Ability
  */
-export abstract class Ability {
+export class Ability {
   public id: string;
   public name: string;
   public text: string;
@@ -187,13 +186,13 @@ abstract class CharacterAbility extends Ability {
       death?: boolean;
     } = { taunt: false, stealth: false, death: false }
   ): Character | null {
-    if (forcedTarget) {
+    if (forcedTarget && (!forcedTarget.isDead || ignore.death)) {
       if (forcedTarget.owner === this._character.owner) {
         return forcedTarget;
       } else {
-        const tauntingAllies = forcedTarget.teammates.filter((ally) => {
-          return !ally.hasTauntEffect;
-        });
+        const tauntingAllies = forcedTarget.teammates.filter(
+          (ally) => ally.hasTauntEffect
+        );
 
         if (tauntingAllies.length > 0 && !ignore.taunt) {
           const randIndex = randomNumber(0, tauntingAllies.length - 1);
@@ -216,7 +215,10 @@ abstract class CharacterAbility extends Ability {
 
     if (validTargets.length > 0) {
       const targetList = validTargets.filter((target) => {
-        return !target.isDead || ignore.death;
+        if (target.isDead) {
+          return ignore.death;
+        }
+        return true;
       });
 
       const randIndex = randomNumber(0, targetList.length - 1);
@@ -253,9 +255,13 @@ abstract class CharacterAbility extends Ability {
     abilityModifier: number = 0,
     variance: number = 5,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true,
+    canBeCountered?: boolean,
     srcAbility?: Ability
   ) {
+    if (targetCharacter.isDead) {
+      return;
+    }
+
     const { offense, critChance, armorPen } =
       this._character.stats.getCombatStats(damageType, stats);
     const varianceOffense =
@@ -345,7 +351,7 @@ export abstract class ActiveAbility extends CharacterAbility {
   public execute(
     targetCharacter?: Character | null,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true,
+    canBeCountered?: boolean,
     additionalEffects: Function = () => {}
   ) {
     if (targetCharacter) {

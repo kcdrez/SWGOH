@@ -316,6 +316,7 @@ export class Engine {
   public addLogs(logs: Log | Log[], endOfTurn?: boolean) {
     if (this.turns.length <= 0) {
       console.error("cannot add logs because there are no turns");
+      return;
     }
 
     const currentTurn = this.turns[this.turns.length - 1];

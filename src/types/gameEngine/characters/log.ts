@@ -87,8 +87,10 @@ export type tLogData = {
     base: number;
     isPercent?: boolean;
   }[];
-  // triggers: iTrigger[];
-  otherEffects: { ignoreTaunt: boolean; immunity: Record<string, boolean> };
+  otherEffects: {
+    ignoreTaunt: boolean;
+    immunity: Record<string, { value: boolean; sourceAbility?: Ability }>;
+  };
   turnMeter: number;
 };
 

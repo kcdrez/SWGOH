@@ -157,7 +157,7 @@ export class Character {
     srcAbility?: Ability,
     srcCharacter?: Character
   ) {
-    if (amount === 0) {
+    if (amount === 0 || this.isDead) {
       return null;
     }
     let diff = 0;
@@ -300,8 +300,8 @@ export class Character {
           effects: { defeated: true },
         })
       );
-      this._uniqueAbilities.forEach((a) => a.deactivate());
-      this.dispatchEvent("death");
+      targetCharacter._uniqueAbilities.forEach((a) => a.deactivate());
+      targetCharacter.dispatchEvent("death");
     }
   }
   /** Does the character have any effect that is forcing them to be targeted */
@@ -407,7 +407,7 @@ export class Character {
     targetCharacter?: Character,
     srcAbility?: Ability
   ) {
-    if (this._basicAbility) {
+    if (this._basicAbility && !targetCharacter?.isDead) {
       if (this.statusEffect.isImmune("Assisting")) {
         gameEngine.addLogs(
           new Log({
@@ -485,8 +485,8 @@ export class Character {
    * @param targetCharacter - The target character that is being attacked
    * @param canBeCountered - Determines if this character is allowed to counter attack
    */
-  public counterAttack(targetCharacter: Character, canBeCountered: boolean) {
-    if (canBeCountered && !targetCharacter.isDead) {
+  public counterAttack(targetCharacter: Character, canBeCountered?: boolean) {
+    if (canBeCountered !== false && !targetCharacter.isDead) {
       if (
         chanceOfEvent(this.stats.counterChance * 100) &&
         !this.isDead &&
@@ -497,6 +497,10 @@ export class Character {
             new Log({
               character: this,
               effects: { countered: false },
+              ability: {
+                source:
+                  this.statusEffect.immunity.CounterAttacking.sourceAbility,
+              },
             })
           );
         } else {
@@ -544,7 +548,9 @@ export class Character {
     critDamage: number,
     stats?: iStatsCheck[]
   ): { isCrit: boolean; damageTotal: number } {
-    if (damageType === "true") {
+    if (this.isDead) {
+      return { isCrit: false, damageTotal: 0 };
+    } else if (damageType === "true") {
       this.stats.protection -= damageAmount;
       return { isCrit: false, damageTotal: damageAmount };
     } else {
@@ -573,6 +579,7 @@ export class Character {
    */
   public revive(protection: number, health: number) {
     if (this.isDead) {
+      this.initialize();
       this.stats.protection = protection;
       this.stats.health = health;
 
@@ -633,10 +640,7 @@ export class Character {
         });
 
         if (match) {
-          // console.log("match", isNew, match.isNew);
           return isNew ? match.isNew : true;
-        } else {
-          // console.log("no match", debuff);
         }
         return false;
       });

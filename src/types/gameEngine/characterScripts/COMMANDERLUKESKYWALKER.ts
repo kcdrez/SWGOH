@@ -21,7 +21,7 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
   public execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
     const primaryTarget = this.findRandomEnemy(targetCharacter);
 
@@ -36,6 +36,7 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
             stats,
             canBeCountered
           );
+
           if (
             primaryTarget.checkCondition({
               debuffs: ["Speed Down"],

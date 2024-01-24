@@ -234,18 +234,19 @@
                 <div v-if="character.otherEffects.ignoreTaunt">
                   Ignores Taunt
                 </div>
-                <template
-                  v-if="
-                    Object.keys(character.otherEffects?.immunity ?? {}).length >
-                    0
-                  "
-                >
+                <template v-if="shouldShowImmunity">
                   Immune to:
                   <ul
                     v-for="(val, key) in character.otherEffects.immunity"
                     :key="key"
                   >
-                    <li v-if="val">{{ key }}</li>
+                    <li
+                      v-if="val.value"
+                      :title="'Source: ' + val.sourceAbility?.name"
+                      class="c-help"
+                    >
+                      {{ key }}
+                    </li>
                   </ul>
                 </template>
               </div>
@@ -283,6 +284,17 @@ export default defineComponent({
     return {
       id: uuid(),
     };
+  },
+  computed: {
+    shouldShowImmunity(): boolean {
+      const immunity = this.character?.otherEffects.immunity;
+      for (const key in immunity) {
+        if (immunity[key].value) {
+          return true;
+        }
+      }
+      return false;
+    },
   },
   methods: {
     getStatusEffectImgSrc(effect: iBuff | iDebuff | iStatusEffect) {

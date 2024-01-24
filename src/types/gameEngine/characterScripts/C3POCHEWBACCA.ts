@@ -25,7 +25,7 @@ class basicskill_C3POCHEWBACCA extends ActiveAbility {
   public override execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
     const primaryTarget = this.findRandomEnemy(targetCharacter);
 
@@ -66,7 +66,7 @@ class specialskill_C3POCHEWBACCA01 extends ActiveAbility {
   public override execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
     const primaryTarget = this.findRandomEnemy(targetCharacter);
 
@@ -121,7 +121,7 @@ class specialskill_C3POCHEWBACCA02 extends ActiveAbility {
   public override execute(
     targetCharacter?: Character,
     stats?: iStatsCheck[],
-    canBeCountered: boolean = true
+    canBeCountered?: boolean
   ): void {
     const primaryTarget = this.findRandomEnemy(targetCharacter);
 
@@ -429,7 +429,8 @@ class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
         "CounterAttacking",
         {
           debuffs: ["Blind"],
-        }
+        },
+        this
       );
     });
 

@@ -649,6 +649,7 @@ export class StatusEffect {
   /** Removes a status effect from the character
    * @param statusEffect - The status effect being removed
    * @param srcAbility - The ability that is causing the removal
+   * @param srcCharacter - The character that is causing the removal
    */
   public removeStatusEffect(
     statusEffect:
@@ -657,7 +658,8 @@ export class StatusEffect {
       | tStatusEffect
       | tStatusEffect[]
       | null,
-    srcAbility?: Ability
+    srcAbility?: Ability,
+    srcCharacter?: Character
   ) {
     if (Array.isArray(statusEffect)) {
       statusEffect.forEach((e) => this.removeStatusEffect(e, srcAbility));
@@ -691,12 +693,13 @@ export class StatusEffect {
       if (listOfRemovedStatusEffects.length > 0) {
         gameEngine.addLogs(
           new Log({
+            character: srcCharacter,
             target: this._character,
             ability: { source: srcAbility },
             statusEffects: {
               list: listOfRemovedStatusEffects,
               removed: true,
-              type: "debuff",
+              type: "statusEffect",
             },
           })
         );
@@ -719,11 +722,41 @@ export class StatusEffect {
         return map;
       },
       {
-        Daze: { value: this.hasStatusEffect("Guard") },
-        Stun: { value: this.hasStatusEffect("Guard") },
-        Assisting: { value: this.hasDebuff("Daze") || this.hasDebuff("Stun") },
+        Daze: {
+          value: this.hasStatusEffect("Guard"),
+          sourceAbility: new Ability(
+            "Guard",
+            "Guard",
+            "Can't be Critically Hit, immune to Daze and Stun, +25% Critical Chance",
+            this._character
+          ),
+        },
+        Stun: {
+          value: this.hasStatusEffect("Guard"),
+          sourceAbility: new Ability(
+            "Guard",
+            "Guard",
+            "Can't be Critically Hit, immune to Daze and Stun, +25% Critical Chance",
+            this._character
+          ),
+        },
+        Assisting: {
+          value: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
+          sourceAbility: new Ability(
+            this.hasDebuff("Daze") ? "Daze" : "Stun",
+            this.hasDebuff("Daze") ? "Daze" : "Stun",
+            "Can't assist, counter attack, or gain bonus Turn Meter",
+            this._character
+          ),
+        },
         CounterAttacking: {
           value: this.hasDebuff("Daze") || this.hasDebuff("Stun"),
+          sourceAbility: new Ability(
+            this.hasDebuff("Daze") ? "Daze" : "Stun",
+            this.hasDebuff("Daze") ? "Daze" : "Stun",
+            "Can't assist, counter attack, or gain bonus Turn Meter",
+            this._character
+          ),
         },
       }
     );
