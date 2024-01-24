@@ -163,16 +163,18 @@ export class StatusEffect {
    * @param buffs - The list of buffs to check. If an array, checks that ALL of the ones listed are present
    * @param duration - The duration to check if there are any remaining turns left on the buff
    * @param stacks - The number to check if there are at least this many stacks of the given buffs
+   * @param isNew - Checks if the buff is new this turn or not
    * @returns true if the character has the buffs
    */
   public hasBuff(
     buffs: tBuff | tBuff[] | iBuff | iBuff[] | null,
     duration?: number,
-    stacks?: number
+    stacks?: number,
+    isNew?: boolean
   ) {
     if (Array.isArray(buffs)) {
       return (buffs as (tBuff | iBuff)[]).every((x) =>
-        this.hasBuff(x, duration)
+        this.hasBuff(x, duration, stacks, isNew)
       );
     } else {
       return this.buffs.some((b) => {
@@ -182,6 +184,8 @@ export class StatusEffect {
               return duration <= b.duration;
             } else if (stacks) {
               return stacks <= (b?.stacks ?? 0);
+            } else if (isNew !== undefined) {
+              return b.isNew === isNew;
             }
             return true;
           }

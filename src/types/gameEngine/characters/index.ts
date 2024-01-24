@@ -629,7 +629,11 @@ export class Character {
             return isNew === false ? !match.isNew : true;
           } else return false;
         } else {
-          return this.statusEffect.hasBuff(buff, buff.duration, buff.stacks);
+          return this.statusEffect.hasBuff(
+            buff.name,
+            buff.duration,
+            buff.stacks
+          );
         }
       });
       results = hasBuffs || results;
@@ -790,7 +794,7 @@ export class Character {
           isPercent: true,
         },
         {
-          label: "Dodge (Evasion)",
+          label: "Dodge",
           value: round(this.stats.physical.dodge * 100, 2),
           base: round(this.stats.baseStats.physical.dodge * 100, 2),
           isPercent: true,
@@ -840,7 +844,7 @@ export class Character {
           isPercent: true,
         },
         {
-          label: "Deflection (Evasion)",
+          label: "Deflection",
           value: round(this.stats.special.dodge * 100, 2),
           base: round(this.stats.baseStats.special.dodge * 100, 2),
           isPercent: true,

@@ -111,6 +111,7 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
             duration: 3,
             unique: true,
             isStackable: true,
+            stacks: 1,
           },
         ],
         1,
@@ -126,6 +127,7 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
               duration: 3,
               unique: true,
               isStackable: true,
+              stacks: 1,
             },
           ],
           1,
@@ -235,6 +237,7 @@ class uniqueskill_C3POLEGENDARY01 extends PassiveAbility {
                   isStackable: true,
                   unique: true,
                   id: uuid(),
+                  stacks: 1,
                 },
               ],
               1,
@@ -357,6 +360,7 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
               isStackable: true,
               maxStacks: 3,
               id: uuid(),
+              stacks: 1,
             },
             1,
             this
@@ -412,12 +416,12 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
     this._character.teammates.forEach((ally) => {
       ally.stats.tempStats.push(
         {
-          statToModify: "physicalArmor",
+          statToModify: "physicalArmorPen",
           amount: 0.1,
           modifiedType: "multiplicative",
         },
         {
-          statToModify: "specialArmor",
+          statToModify: "specialArmorPen",
           amount: 0.1,
           modifiedType: "multiplicative",
         }
@@ -436,10 +440,18 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
         eventType: "buffed",
         characterSourceId: this._character.uniqueId,
         callback: ({ buff }: { buff: iBuff }) => {
+          console.log(buff, ally.statusEffect.buffs);
           if (
-            !ally.statusEffect.hasBuff(buff) &&
-            buff.name !== "Protection Up"
+            !ally.statusEffect.hasBuff(
+              buff.name,
+              undefined,
+              undefined,
+              false
+            ) &&
+            buff.name !== "Protection Up" &&
+            !buff.unique
           ) {
+            console.log("adding prot up");
             ally.statusEffect.addBuff(
               [
                 {
@@ -590,6 +602,127 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
   }
 }
 
+class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
+  constructor(character: Character) {
+    super(
+      "uniqueskill_C3POLEGENDARY04",
+      "Fretful Mediator",
+      `All allies have +10% Critical Damage. Whenever a Resistance or Ewok ally uses their Special ability, they inflict Offense Down on the target enemy for 2 turns which cannot be evaded. For each stack of Translation, Resistance allies have +10% Critical Damage, doubled for Ewoks.`,
+      character
+    );
+  }
+
+  public override activate(): void {
+    this._character.teammates.forEach((ally) => {
+      ally.stats.tempStats.push({
+        statToModify: "critDamage",
+        amount: 0.1,
+        modifiedType: "additive",
+      });
+    });
+
+    const ewokAllies = this._character.teammates.filter((ally) =>
+      anyTagsMatch(ally, ["Ewok"], this._character.id)
+    );
+    const resistanceAllies = this._character.teammates.filter((ally) =>
+      anyTagsMatch(ally, ["Resistance"], this._character.id)
+    );
+
+    [...ewokAllies, ...resistanceAllies].forEach((ally) => {
+      ally.events.push({
+        eventType: "useAbility",
+        characterSourceId: this._character.uniqueId,
+        callback: ({
+          abilityId,
+          target,
+        }: {
+          abilityId: string;
+          target: Character;
+        }) => {
+          if (ally.specialAbilities.some((x) => x.id === abilityId)) {
+            ally.statusEffect.inflictDebuff(
+              [{ name: "Offense Down", duration: 2, id: uuid() }],
+              target,
+              1,
+              this
+            );
+          }
+        },
+      });
+    });
+
+    ewokAllies.forEach((ally) => {
+      ally.stats.tempStats.push(
+        {
+          statToModify: "critDamage",
+          amount: 0.2,
+          modifiedType: "additive",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "critDamage",
+          amount: 0.2,
+          modifiedType: "additive",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "critDamage",
+          amount: 0.2,
+          modifiedType: "additive",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+            ],
+          },
+        }
+      );
+    });
+
+    resistanceAllies.forEach((ally) => {
+      ally.stats.tempStats.push(
+        {
+          statToModify: "critDamage",
+          amount: 0.1,
+          modifiedType: "additive",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "critDamage",
+          amount: 0.1,
+          modifiedType: "additive",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "critDamage",
+          amount: 0.1,
+          modifiedType: "additive",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+            ],
+          },
+        }
+      );
+    });
+  }
+}
+
 const basicAbility = new Map([
   ["basicskill_C3POLEGENDARY", basicskill_C3POLEGENDARY],
 ]);
@@ -601,6 +734,8 @@ const specialAbilities = new Map([
 const uniqueAbilities = new Map([
   ["uniqueskill_C3POLEGENDARY01", uniqueskill_C3POLEGENDARY01],
   ["uniqueskill_C3POLEGENDARY02", uniqueskill_C3POLEGENDARY02],
+  ["uniqueskill_C3POLEGENDARY03", uniqueskill_C3POLEGENDARY03],
+  ["uniqueskill_C3POLEGENDARY04", uniqueskill_C3POLEGENDARY04],
 ]);
 
 const leaderAbility = new Map([]);

@@ -1107,9 +1107,9 @@ export class Stats {
       })
       .forEach((stat) => {
         if (stat?.modifiedType === "multiplicative") {
-          newStat *= 1 + stat?.amount ?? 0;
+          newStat += baseStat * stat.amount;
         } else {
-          newStat += stat?.amount ?? 0;
+          newStat += stat.amount;
         }
       });
 

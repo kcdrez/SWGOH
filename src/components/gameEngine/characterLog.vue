@@ -58,14 +58,18 @@
                 <span class="input-group-text">Protection:</span>
                 <span class="input-group-text fill"
                   ><span
+                    class="c-help"
                     :class="{
                       'text-danger':
                         character.protection.current < character.protection.max,
                     }"
+                    title="The current Protection"
                     >{{ character.protection.current }}</span
                   >
                   <span class="mx-1">/</span>
-                  {{ character.protection.max }}
+                  <span title="The modified max Protection" class="c-help">{{
+                    character.protection.max
+                  }}</span>
                   <span
                     :class="{
                       'text-danger':
@@ -73,8 +77,8 @@
                       'text-success':
                         character.protection.max > character.protection.base,
                     }"
-                    class="mx-1"
-                    title="Unmodified base protection"
+                    class="mx-1 c-help"
+                    title="The nmodified base Protection"
                     >({{ character.protection.base }})</span
                   ></span
                 >
@@ -298,10 +302,12 @@ export default defineComponent({
   },
   methods: {
     getStatusEffectImgSrc(effect: iBuff | iDebuff | iStatusEffect) {
-      return `/images/statusEffects/${effect.name.replace(/\s/g, "_")}.png`;
+      return `/images/statusEffects/${effect?.name
+        ?.toString()
+        .replace(/\s/g, "_")}.png`;
     },
     getStatusEffectText(effect: iBuff | iDebuff | iStatusEffect): string {
-      const textLines: string[] = [effect.name];
+      const textLines: string[] = [effect?.name ?? ""];
       if (effect.cantDispel) {
         textLines.push("Cant be Dispeled");
       }
@@ -314,8 +320,14 @@ export default defineComponent({
       if (effect.duration) {
         textLines.push("Turns Remaining: " + effect.duration);
       }
+      if (effect.stacks) {
+        textLines.push("Stacks: " + effect.stacks);
+      }
       if (effect.unique) {
         textLines.push("Is Unique");
+      }
+      if (effect.sourceAbility) {
+        textLines.push("Ability Source: " + effect.sourceAbility.name);
       }
       return textLines.join("\n");
     },

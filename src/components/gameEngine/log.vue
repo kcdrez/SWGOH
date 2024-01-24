@@ -41,10 +41,10 @@
         </template>
       </template>
       <template v-else-if="log.statusEffects.reset">
-        <span :class="log.statusEffects.type">{{
-          log.statusEffects.list.map((x) => x.name).join(", ")
-        }}</span>
-        was reset to {{ log.statusEffects.reset }} turns
+        <span :class="log.statusEffects.type">
+          {{ log.statusEffects.list.map((x) => x.name).join(", ") }}</span
+        >
+        duration was reset to {{ log.statusEffects.reset }} turns
       </template>
       <template v-else-if="log.statusEffects.list.length > 0">
         {{
@@ -121,7 +121,9 @@
       <span class="health">{{ log.characterLogData?.health }}</span>
       <span class="ms-1">health</span></template
     >
-    <template v-if="log.customMessage">{{ log.customMessage }}</template>
+    <span v-if="log.customMessage" class="ms-1">
+      {{ log.customMessage }}
+    </span>
     <template v-if="log?.ability?.source">
       (src:
       <span class="ability" :title="log.ability.source.text">{{
