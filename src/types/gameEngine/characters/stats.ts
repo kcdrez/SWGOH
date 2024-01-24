@@ -276,6 +276,14 @@ export class Stats {
           match.stacks = 0;
           this.loseHealth(diff);
         }
+
+        if (match?.stacks <= 0) {
+          this._character.statusEffect.removeBuff({
+            id: match.id,
+            duration: 0,
+            name: null,
+          });
+        }
       }
     } else if (this._curProtection > 0) {
       if (this._curProtection > amount) {

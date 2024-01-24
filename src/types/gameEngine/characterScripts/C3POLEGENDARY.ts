@@ -436,7 +436,6 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
         eventType: "buffed",
         characterSourceId: this._character.uniqueId,
         callback: ({ buff }: { buff: iBuff }) => {
-          //todo add protection up image, and the def pen for translation stacks
           if (
             !ally.statusEffect.hasBuff(buff) &&
             buff.name !== "Protection Up"
@@ -448,6 +447,7 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
                   duration: 1,
                   stacks: 0.15 * ally.stats.maxHealth,
                   id: uuid(),
+                  sourceAbility: this,
                 },
               ],
               1,
@@ -456,6 +456,136 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           }
         },
       });
+    });
+
+    ewokAllies.forEach((ally) => {
+      ally.stats.tempStats.push(
+        {
+          statToModify: "specialArmorPen",
+          amount: 0.2,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "specialArmorPen",
+          amount: 0.2,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "specialArmorPen",
+          amount: 0.2,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "physicalArmorPen",
+          amount: 0.2,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "physicalArmorPen",
+          amount: 0.2,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "physicalArmorPen",
+          amount: 0.2,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+            ],
+          },
+        }
+      );
+    });
+
+    republicAllies.forEach((ally) => {
+      ally.stats.tempStats.push(
+        {
+          statToModify: "specialArmorPen",
+          amount: 0.1,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "specialArmorPen",
+          amount: 0.1,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "specialArmorPen",
+          amount: 0.1,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "physicalArmorPen",
+          amount: 0.1,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "physicalArmorPen",
+          amount: 0.1,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+            ],
+          },
+        },
+        {
+          statToModify: "physicalArmorPen",
+          amount: 0.1,
+          modifiedType: "multiplicative",
+          condition: {
+            buffs: [
+              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+            ],
+          },
+        }
+      );
     });
   }
 }

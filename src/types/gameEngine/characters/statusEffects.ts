@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import _ from "lodash";
 
 import { Character } from "./index";
 import { Ability } from "./abilities";
@@ -46,7 +47,7 @@ export class StatusEffect {
           debuff.duration--;
         }
 
-        if (debuff.duration <= 0) {
+        if (debuff.duration <= 0 && debuff.name) {
           acc.debuffsRemoved.push(debuff.name);
         }
         return acc;
@@ -67,7 +68,7 @@ export class StatusEffect {
           buff.duration--;
         }
 
-        if (buff.duration <= 0) {
+        if (buff.duration <= 0 && buff.name) {
           acc.buffsRemoved.push(buff.name);
         }
         return acc;
@@ -134,7 +135,7 @@ export class StatusEffect {
    * @returns true if the character has the debuffs
    */
   public hasDebuff(
-    debuffs: tDebuff | tDebuff[] | iDebuff | iDebuff[],
+    debuffs: tDebuff | tDebuff[] | iDebuff | iDebuff[] | null,
     duration?: number
   ): boolean {
     if (Array.isArray(debuffs)) {
@@ -152,7 +153,7 @@ export class StatusEffect {
           }
           return false;
         } else {
-          return d.id === debuffs.id;
+          return d.id === debuffs?.id;
         }
       });
     }
@@ -165,7 +166,7 @@ export class StatusEffect {
    * @returns true if the character has the buffs
    */
   public hasBuff(
-    buffs: tBuff | tBuff[] | iBuff | iBuff[],
+    buffs: tBuff | tBuff[] | iBuff | iBuff[] | null,
     duration?: number,
     stacks?: number
   ) {
@@ -186,7 +187,7 @@ export class StatusEffect {
           }
           return false;
         } else {
-          return b.id === buffs.id;
+          return b.id === buffs?.id;
         }
       });
     }
@@ -270,7 +271,7 @@ export class StatusEffect {
     if (typeof statusEffect === "string") {
       return this.immunity[statusEffect]?.value ?? false;
     } else {
-      return this.immunity[statusEffect.name]?.value ?? false;
+      return this.immunity[statusEffect?.name ?? ""]?.value ?? false;
     }
   }
 
@@ -315,13 +316,22 @@ export class StatusEffect {
         !this.isImmune(buff)
       ) {
         if (scalar > 0) {
-          const newDuration = buff.duration * scalar;
+          if (buff.name === "Protection Up") {
+            const match = this.buffs.find(
+              (x) => x.sourceAbility?.id === buff.sourceAbility?.id
+            );
+            if (match) {
+              match.stacks = buff.stacks;
+              return;
+            }
+          }
 
+          const newDuration = buff.duration * scalar;
           const match = this.buffs.find((x) => x.name === buff.name);
 
           if (buff.isStackable || !match) {
             this._buffs.push({
-              ...unvue(buff),
+              ..._.cloneDeep(buff),
               duration: newDuration,
               isNew: true,
             });
@@ -478,7 +488,10 @@ export class StatusEffect {
 
           const newDuration = debuff.duration * scalar;
           if (
-            !targetCharacter.statusEffect.hasDebuff(debuff.name, newDuration) ||
+            !targetCharacter.statusEffect.hasDebuff(
+              debuff?.name,
+              newDuration
+            ) ||
             debuff.isStackable
           ) {
             const match = targetCharacter.statusEffect.debuffs.find(
@@ -812,12 +825,12 @@ export class StatusEffect {
 
 /** An interface used to hold various buff data */
 export interface iBuff extends iStatusEffect {
-  name: tBuff;
+  name: tBuff | null;
 }
 
 /** An interface used to hold various debuff data */
 export interface iDebuff extends iStatusEffect {
-  name: tDebuff;
+  name: tDebuff | null;
 }
 /** A type for all of the available debuff names */
 export type tDebuff =
@@ -914,7 +927,8 @@ export interface iStatusEffect {
     | tDebuff
     | tStatusEffect
     | "Cooldown Increase"
-    | "Cooldown Decrease";
+    | "Cooldown Decrease"
+    | null;
   /** How many turns the effect will last */
   duration: number;
   /** Determines if the effect is new so that it will not be removed at the end of the turn */
@@ -927,18 +941,16 @@ export interface iStatusEffect {
   cantPrevent?: boolean;
   /** Determines if the effect cannot be dispelled */
   cantDispel?: boolean;
-  // cantMiss?: boolean;
   /** Determines if the effect is unique */
   unique?: boolean;
-  /** Triggers that will occur at a certain time */
-  // triggers?: iTrigger[];
   /** Unique identifier */
   id: string;
   /** The original source of the effect */
   sourceAbility?: Ability | null;
   /** Determines if more than one of the effect can be applied to a target */
   isStackable?: boolean;
-  /** How many stacks of the effect the unit has */
+  /** How many stacks of the effect the unit has. Also used for the value for Protection Up */
   stacks?: number;
+  /** The maximum number of stacks that can be present */
   maxStacks?: number;
 }
