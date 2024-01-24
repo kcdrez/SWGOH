@@ -17,6 +17,7 @@ import { gameEngine, iCondition } from "../gameEngine";
  * @type tEventType
  */
 type tEventType =
+  | "buffed"
   | "dealDamage"
   | "death"
   | "endOfTurn"
@@ -467,7 +468,7 @@ export class Character {
       } else {
         diff = finalAmount;
       }
-      this.stats[healthType] += finalAmount;
+      this.stats.gainHealth(finalAmount, healthType);
 
       if (round(diff) > 0) {
         gameEngine.addLogs(
@@ -551,7 +552,7 @@ export class Character {
     if (this.isDead) {
       return { isCrit: false, damageTotal: 0 };
     } else if (damageType === "true") {
-      this.stats.protection -= damageAmount;
+      this.stats.loseHealth(damageAmount);
       return { isCrit: false, damageTotal: damageAmount };
     } else {
       const { armor, critAvoid } = this.stats.getCombatStats(damageType, stats);
@@ -567,7 +568,7 @@ export class Character {
         1
       );
 
-      this.stats.protection -= damageTotal;
+      this.stats.loseHealth(damageTotal);
       return { isCrit, damageTotal };
     }
   }
@@ -580,8 +581,8 @@ export class Character {
   public revive(protection: number, health: number) {
     if (this.isDead) {
       this.initialize();
-      this.stats.protection = protection;
-      this.stats.health = health;
+      this.stats.gainHealth(protection, "protection");
+      this.stats.gainHealth(health, "health");
 
       gameEngine.addLogs(
         new Log({

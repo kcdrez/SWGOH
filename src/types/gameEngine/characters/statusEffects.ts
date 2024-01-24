@@ -341,6 +341,8 @@ export class StatusEffect {
               },
             })
           );
+
+          this._character.dispatchEvent("buffed", { buff });
         }
       }
     }
@@ -890,6 +892,7 @@ export type tBuff =
   | "Health Up"
   | "Health Steal Up"
   | "Potency Up"
+  | "Protection Up"
   | "Offense Up"
   | "Speed Up"
   | "Stealth"

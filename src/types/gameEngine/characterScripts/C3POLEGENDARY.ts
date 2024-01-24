@@ -9,6 +9,7 @@ import { iStatsCheck } from "../characters/stats";
 import { gameEngine, iCondition } from "../gameEngine";
 import { Log } from "../characters/log";
 import { anyTagsMatch } from "../characters/index";
+import { iBuff } from "../characters/statusEffects";
 
 class basicskill_C3POLEGENDARY extends ActiveAbility {
   constructor(character: Character) {
@@ -377,7 +378,10 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
               );
 
               if (aliveAllies.length === 1 && !this._character.isDead) {
-                this._character.stats.health = 0;
+                this._character.stats.loseHealth(
+                  this._character.stats.maxHealth,
+                  "health"
+                );
                 gameEngine.addLogs(
                   new Log({
                     character: this._character,
@@ -391,6 +395,68 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
         }
       }
     );
+  }
+}
+
+class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
+  constructor(character: Character) {
+    super(
+      "uniqueskill_C3POLEGENDARY03",
+      "Intermediary",
+      `All allies have +10% Defense Penetration. Each time a Galactic Republic or Ewok ally gains a different, non-unique, non-Protection buff, they gain 15% Protection Up for 2 turns (does not stack with itself). For each stack of Translation, Galactic Republic have +10% Defense Penetration, doubled for Ewoks.`,
+      character
+    );
+  }
+
+  public override activate(): void {
+    this._character.teammates.forEach((ally) => {
+      ally.stats.tempStats.push(
+        {
+          statToModify: "physicalArmor",
+          amount: 0.1,
+          modifiedType: "multiplicative",
+        },
+        {
+          statToModify: "specialArmor",
+          amount: 0.1,
+          modifiedType: "multiplicative",
+        }
+      );
+    });
+
+    const ewokAllies = this._character.teammates.filter((ally) =>
+      anyTagsMatch(ally, ["Ewok"], this._character.id)
+    );
+    const republicAllies = this._character.teammates.filter((ally) =>
+      anyTagsMatch(ally, ["Galactic Republic"], this._character.id)
+    );
+
+    [...ewokAllies, ...republicAllies].forEach((ally) => {
+      ally.events.push({
+        eventType: "buffed",
+        characterSourceId: this._character.uniqueId,
+        callback: ({ buff }: { buff: iBuff }) => {
+          //todo add protection up image, and the def pen for translation stacks
+          if (
+            !ally.statusEffect.hasBuff(buff) &&
+            buff.name !== "Protection Up"
+          ) {
+            ally.statusEffect.addBuff(
+              [
+                {
+                  name: "Protection Up",
+                  duration: 1,
+                  stacks: 0.15 * ally.stats.maxHealth,
+                  id: uuid(),
+                },
+              ],
+              1,
+              this
+            );
+          }
+        },
+      });
+    });
   }
 }
 
