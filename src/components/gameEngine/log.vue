@@ -41,7 +41,7 @@
         </template>
       </template>
       <template v-else-if="log.statusEffects.reset">
-        <span :class="log.statusEffects.type">
+        <span :class="log.statusEffects.type" class="ms-1">
           {{ log.statusEffects.list.map((x) => x.name).join(", ") }}</span
         >
         duration was reset to {{ log.statusEffects.reset }} turns

@@ -744,6 +744,7 @@ export class Character {
         current: round(this.stats.protection, 0),
         max: round(this.stats.maxProtection, 0),
         base: round(this.stats.baseStats.maxProtection, 0),
+        bonus: round(this.stats.bonusProtection, 0),
       },
       activeAbilities: this.activeAbilities.map((a) => {
         return {

@@ -54,58 +54,65 @@
           </ul>
           <div class="tab-content">
             <div class="tab-pane fade show active" :id="`general-${id}`">
-              <div class="input-group input-group-sm">
+              <div class="input-group input-group-sm mt-1">
                 <span class="input-group-text">Protection:</span>
-                <span class="input-group-text fill"
-                  ><span
-                    class="c-help"
-                    :class="{
-                      'text-danger':
-                        character.protection.current < character.protection.max,
-                    }"
-                    title="The current Protection"
-                    >{{ character.protection.current }}</span
+                <span class="input-group-text fill">
+                  <div
+                    class="progress"
+                    :title="`Bonus Protection: ${character.protection.bonus}\nCurrent Protection: ${character.protection.current}\nMax Protection: ${character.protection.max}\nBase Protection: ${character.protection.base}`"
                   >
-                  <span class="mx-1">/</span>
-                  <span title="The modified max Protection" class="c-help">{{
-                    character.protection.max
-                  }}</span>
-                  <span
-                    :class="{
-                      'text-danger':
-                        character.protection.max < character.protection.base,
-                      'text-success':
-                        character.protection.max > character.protection.base,
-                    }"
-                    class="mx-1 c-help"
-                    title="The nmodified base Protection"
-                    >({{ character.protection.base }})</span
-                  ></span
-                >
+                    <div
+                      class="progress-bar bonus-protection"
+                      role="progressbar"
+                      :style="{
+                        width: `${
+                          (character.protection.bonus /
+                            (character.protection.max +
+                              character.protection.bonus)) *
+                          100
+                        }%`,
+                      }"
+                    >
+                      {{ character.protection.bonus }}
+                    </div>
+                    <div
+                      class="progress-bar current-protection"
+                      role="progressbar"
+                      :style="{
+                        width: `${
+                          (character.protection.current /
+                            (character.protection.max +
+                              character.protection.bonus)) *
+                          100
+                        }%`,
+                      }"
+                    >
+                      {{ character.protection.current }}
+                    </div>
+                  </div>
+                </span>
               </div>
               <div class="input-group input-group-sm mt-1">
                 <span class="input-group-text">Health:</span>
-                <span class="input-group-text fill"
-                  ><span
-                    :class="{
-                      'text-danger':
-                        (character.health.current ?? 0) <
-                        (character.health.max ?? 0),
-                    }"
-                    >{{ character.health.current }}</span
-                  ><span class="mx-1">/</span> {{ character.health.max }}
-                  <span
-                    :class="{
-                      'text-danger':
-                        character.health.max < character.health.base,
-                      'text-success':
-                        character.health.max > character.health.base,
-                    }"
-                    class="mx-1"
-                    title="Unmodified base healh"
-                    >({{ character.health.base }})</span
-                  ></span
-                >
+                <span class="input-group-text fill">
+                  <div
+                    class="progress"
+                    :title="`Current Health: ${character.health.current}\nMax Health: ${character.health.max}\nBase Protection: ${character.health.base}`"
+                  >
+                    <div
+                      class="progress-bar current-health"
+                      role="progressbar"
+                      :style="{
+                        width: `${
+                          (character.health.current / character.health.max) *
+                          100
+                        }%`,
+                      }"
+                    >
+                      {{ character.health.current }}
+                    </div>
+                  </div>
+                </span>
               </div>
               <div class="input-group input-group-sm mt-1">
                 <span class="input-group-text">Turn Meter</span>
@@ -116,7 +123,7 @@
               <div
                 v-for="ability in character.activeAbilities"
                 :key="ability.id"
-                class="mt-1 c-help"
+                class="mt-1 ability-name"
                 :title="ability.text"
               >
                 <div v-if="typeof ability.cooldown === 'number'">
@@ -367,6 +374,37 @@ export default defineComponent({
   &:first-child {
     border: 0 !important;
     margin: 0 !important;
+  }
+}
+
+.progress {
+  width: 100%;
+  height: 1.5rem;
+  border: 1px solid $dark;
+  font-size: 1rem;
+
+  &:hover {
+    box-shadow: black 1px 1px 2px;
+  }
+}
+.bonus-protection {
+  background-color: #663399;
+}
+.current-protection {
+  background-color: $gray-3;
+}
+
+.current-health {
+  background-color: $success;
+}
+
+.ability-name {
+  color: $secondary;
+
+  &:hover {
+    color: $secondary-light-2;
+    text-decoration: underline;
+    cursor: help;
   }
 }
 </style>

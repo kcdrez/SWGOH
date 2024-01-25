@@ -177,13 +177,15 @@ export class StatusEffect {
         this.hasBuff(x, duration, stacks, isNew)
       );
     } else {
+      let stacksCount = 0;
       return this.buffs.some((b) => {
         if (typeof buffs === "string") {
           if (b.name === buffs) {
             if (duration) {
               return duration <= b.duration;
             } else if (stacks) {
-              return stacks <= (b?.stacks ?? 0);
+              stacksCount++;
+              return stacks <= (b?.stacks ?? 0) || stacks <= stacksCount;
             } else if (isNew !== undefined) {
               return b.isNew === isNew;
             }
@@ -314,7 +316,7 @@ export class StatusEffect {
           },
         })
       );
-    } else if (!this.hasDebuff("Buff Immunity")) {
+    } else {
       if (
         (!this.hasBuff(buff.name, buff.duration) || buff.isStackable) &&
         !this.isImmune(buff)

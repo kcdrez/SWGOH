@@ -202,6 +202,14 @@ export class Stats {
   public set maxProtection(val) {
     this.baseStats.maxProtection = val;
   }
+  public get bonusProtection() {
+    return this._character.statusEffect.buffs.reduce((total, buff) => {
+      if (buff.name === "Protection Up") {
+        total += buff.stacks ?? 0;
+      }
+      return total;
+    }, 0);
+  }
   /** The modified maximum amount of Health */
   public get maxHealth() {
     let stat = this.baseStats.maxHealth;
@@ -231,12 +239,17 @@ export class Stats {
           value: 0.15,
         },
         {
-          hasEffect: this._character.statusEffect.hasBuff("Translation"),
+          hasEffect: this._character.statusEffect.hasBuff(
+            "Translation",
+            undefined,
+            1
+          ),
           value: 0.3,
         },
       ],
       stat,
-      this.getTempStat("maxHealth")
+      this.getTempStat("maxHealth"),
+      true
     );
   }
   public set maxHealth(val) {

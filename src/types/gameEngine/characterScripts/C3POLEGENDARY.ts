@@ -6,7 +6,7 @@ import {
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
 import { iStatsCheck } from "../characters/stats";
-import { gameEngine, iCondition } from "../gameEngine";
+import { gameEngine } from "../gameEngine";
 import { Log } from "../characters/log";
 import { anyTagsMatch } from "../characters/index";
 import { iBuff } from "../characters/statusEffects";
@@ -16,12 +16,7 @@ class basicskill_C3POLEGENDARY extends ActiveAbility {
     super(
       "basicskill_C3POLEGENDARY",
       "Baffling Trick",
-      `C-3PO inflicts the unique debuff Confuse for 3 turns (max 3 stacks, can't be evaded or copied). If target is already Confused, duration of their stacks resets to 3 turns. Reduce target's Turn Meter by 6% and 3% more for each stack of Translation on C-3PO. (See Protocol Droid for Translation.)
-      \n\n
-      Confuse - Detrimental effects build based on the cumulative number of stacks:
-      1: Cannot gain buffs
-      2: Cannot counter, assist, or gain bonus Turn Meter (Raid bosses and Galactic Legends: -30% Counter Chance)
-      3: When this character uses their Basic ability, increase their cooldowns by 1, which can't be resisted (Raid bosses and Galactic Legends: -50% Defense, doesn't stack with Defense Down)`,
+      `C-3PO inflicts the unique debuff Confuse for 3 turns (max 3 stacks, can't be evaded or copied). If target is already Confused, duration of their stacks resets to 3 turns. Reduce target's Turn Meter by 6% and 3% more for each stack of Translation on C-3PO. (See Protocol Droid for Translation.)\n\nConfuse - Detrimental effects build based on the cumulative number of stacks:\n1: Cannot gain buffs\n2: Cannot counter, assist, or gain bonus Turn Meter (Raid bosses and Galactic Legends: -30% Counter Chance)\n3: When this character uses their Basic ability, increase their cooldowns by 1, which can't be resisted (Raid bosses and Galactic Legends: -50% Defense, doesn't stack with Defense Down)`,
       character
     );
   }
@@ -88,9 +83,7 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
     super(
       "specialability_C3POLEGENDARY01",
       "Oh My Goodness!",
-      `C-3PO gains Potency Up and Stealth for 2 turns, then he and target other ally gain Translation for 3 turns. C-3PO inflicts Confuse twice on target enemy for 3 turns, then calls all other allies with Translation to assist, dealing 50% less damage.
-      \n\n
-      (See Protocol Droid for a description of Translation.)`,
+      `C-3PO gains Potency Up and Stealth for 2 turns, then he and target other ally gain Translation for 3 turns. C-3PO inflicts Confuse twice on target enemy for 3 turns, then calls all other allies with Translation to assist, dealing 50% less damage.\n\n(See Protocol Droid for a description of Translation.)`,
       character
     );
     this.cooldown = 3;
@@ -188,12 +181,7 @@ class uniqueskill_C3POLEGENDARY01 extends PassiveAbility {
     super(
       "uniqueskill_C3POLEGENDARY01",
       "Protocol Droid",
-      `C-3PO has +20 Speed. While C-3PO is active, Galactic Republic, Rebel, Resistance, and Ewok allies gain Translation for 3 turns (max 3 stacks) each time they use a Special ability. Translation cannot be copied. If the character already has Translation, the duration for all current stacks on that character resets to 3 turns. If all allies that can apply Translation are defeated, all stacks of Translation expire.
-
-      Translation - Beneficial effects build based on the cumulative number of stacks:
-      1: Gain +30% Max Health
-      2: Gain +15% Critical Chance
-      3: If only one ally who grants Translation is present, decrease this character's cooldowns by 1 when that ally uses their Basic ability (limit once per turn)`,
+      `C-3PO has +20 Speed. While C-3PO is active, Galactic Republic, Rebel, Resistance, and Ewok allies gain Translation for 3 turns (max 3 stacks) each time they use a Special ability. Translation cannot be copied. If the character already has Translation, the duration for all current stacks on that character resets to 3 turns. If all allies that can apply Translation are defeated, all stacks of Translation expire.\n\nTranslation - Beneficial effects build based on the cumulative number of stacks:\n1: Gain +30% Max Health\n2: Gain +15% Critical Chance\n3: If only one ally who grants Translation is present, decrease this character's cooldowns by 1 when that ally uses their Basic ability (limit once per turn)`,
       character
     );
   }
@@ -365,6 +353,7 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
             1,
             this
           );
+          target.stats.gainHealth(Infinity, "health");
         },
       });
     });
@@ -440,7 +429,6 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
         eventType: "buffed",
         characterSourceId: this._character.uniqueId,
         callback: ({ buff }: { buff: iBuff }) => {
-          console.log(buff, ally.statusEffect.buffs);
           if (
             !ally.statusEffect.hasBuff(
               buff.name,
@@ -451,7 +439,6 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
             buff.name !== "Protection Up" &&
             !buff.unique
           ) {
-            console.log("adding prot up");
             ally.statusEffect.addBuff(
               [
                 {

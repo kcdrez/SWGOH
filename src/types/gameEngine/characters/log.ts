@@ -59,6 +59,7 @@ export type tLogData = {
     current: number;
     max: number;
     base: number;
+    bonus: number;
   };
   activeAbilities: {
     name: string;

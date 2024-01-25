@@ -3,7 +3,6 @@ import { v4 as uuid } from "uuid";
 import {
   ActiveAbility,
   PassiveAbility,
-  HealthSteal,
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
 import { iStatsCheck } from "../characters/stats";
@@ -405,7 +404,6 @@ class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
 
     this._character.opponents.forEach((target) => {
       target.stats.tempStats.push({
-        //todo not working
         statToModify: "tenacity",
         amount: -0.5,
         modifiedType: "additive",
