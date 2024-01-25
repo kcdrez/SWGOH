@@ -40,6 +40,7 @@ class basicskill_C3POLEGENDARY extends ActiveAbility {
                 id: uuid(),
                 unique: true,
                 isStackable: true,
+                sourceAbility: this,
               },
             ],
             primaryTarget,
@@ -96,8 +97,8 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
     super.execute(primaryEnemy, stats, false, () => {
       this._character.statusEffect.addBuff(
         [
-          { name: "Potency Up", id: uuid(), duration: 2 },
-          { name: "Stealth", id: uuid(), duration: 2 },
+          { name: "Potency Up", id: uuid(), duration: 2, sourceAbility: this },
+          { name: "Stealth", id: uuid(), duration: 2, sourceAbility: this },
           {
             name: "Translation",
             id: uuid(),
@@ -105,6 +106,7 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
             unique: true,
             isStackable: true,
             stacks: 1,
+            sourceAbility: this,
           },
         ],
         1,
@@ -121,6 +123,7 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
               unique: true,
               isStackable: true,
               stacks: 1,
+              sourceAbility: this,
             },
           ],
           1,
@@ -146,6 +149,7 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
               isStackable: true,
               stacks: 2,
               maxStacks: 3,
+              sourceAbility: this,
             },
           ],
           primaryEnemy,
@@ -226,6 +230,7 @@ class uniqueskill_C3POLEGENDARY01 extends PassiveAbility {
                   unique: true,
                   id: uuid(),
                   stacks: 1,
+                  sourceAbility: this,
                 },
               ],
               1,
@@ -274,7 +279,13 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           amount: 0.1,
           condition: {
             buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 1,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
           characterSourceId: this._character.uniqueId,
@@ -285,7 +296,13 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           amount: 0.1,
           condition: {
             buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 2,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
           characterSourceId: this._character.uniqueId,
@@ -296,7 +313,13 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           amount: 0.1,
           condition: {
             buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 3,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
           characterSourceId: this._character.uniqueId,
@@ -307,7 +330,13 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           amount: 0.1,
           condition: {
             buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 1,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
           characterSourceId: this._character.uniqueId,
@@ -318,7 +347,13 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           amount: 0.1,
           condition: {
             buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 2,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
           characterSourceId: this._character.uniqueId,
@@ -329,7 +364,13 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           amount: 0.1,
           condition: {
             buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 3,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
           characterSourceId: this._character.uniqueId,
@@ -349,6 +390,7 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
               maxStacks: 3,
               id: uuid(),
               stacks: 1,
+              sourceAbility: this,
             },
             1,
             this
@@ -445,7 +487,7 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
                   name: "Protection Up",
                   duration: 1,
                   stacks: 0.15 * ally.stats.maxHealth,
-                  id: uuid(),
+                  id: "uniqueskill_C3POLEGENDARY03_ProtectionUp",
                   sourceAbility: this,
                 },
               ],
@@ -465,7 +507,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 1,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -475,7 +523,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 2,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -485,7 +539,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 3,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -495,7 +555,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 1,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -505,7 +571,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 2,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -515,7 +587,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 3,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         }
@@ -530,7 +608,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 1,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -540,7 +624,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 2,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -550,7 +640,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 3,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -560,7 +656,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 1,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -570,7 +672,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 2,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -580,7 +688,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           modifiedType: "multiplicative",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 3,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         }
@@ -628,7 +742,14 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
         }) => {
           if (ally.specialAbilities.some((x) => x.id === abilityId)) {
             ally.statusEffect.inflictDebuff(
-              [{ name: "Offense Down", duration: 2, id: uuid() }],
+              [
+                {
+                  name: "Offense Down",
+                  duration: 2,
+                  id: uuid(),
+                  sourceAbility: this,
+                },
+              ],
               target,
               1,
               this
@@ -646,7 +767,13 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
           modifiedType: "additive",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 1,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -656,7 +783,13 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
           modifiedType: "additive",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 2,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -666,7 +799,13 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
           modifiedType: "additive",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 3,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         }
@@ -681,7 +820,13 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
           modifiedType: "additive",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 1,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -691,7 +836,13 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
           modifiedType: "additive",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 2,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         },
@@ -701,7 +852,13 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
           modifiedType: "additive",
           condition: {
             buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
+              {
+                name: "Translation",
+                stacks: 3,
+                id: uuid(),
+                duration: 0,
+                sourceAbility: this,
+              },
             ],
           },
         }

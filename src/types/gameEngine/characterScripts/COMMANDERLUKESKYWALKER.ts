@@ -51,7 +51,7 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
             })
           ) {
             this._character?.statusEffect.inflictDebuff(
-              [{ name: "Stun", duration: 1, id: uuid() }],
+              [{ name: "Stun", duration: 1, id: uuid(), sourceAbility: this }],
               primaryTarget,
               1,
               this
@@ -60,8 +60,18 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
 
           this._character?.statusEffect.inflictDebuff(
             [
-              { name: "Speed Down", duration: 2, id: uuid() },
-              { name: "Defense Down", duration: 2, id: uuid() },
+              {
+                name: "Speed Down",
+                duration: 2,
+                id: uuid(),
+                sourceAbility: this,
+              },
+              {
+                name: "Defense Down",
+                duration: 2,
+                id: uuid(),
+                sourceAbility: this,
+              },
             ],
             primaryTarget,
             1,
@@ -126,6 +136,7 @@ class specialskill_COMMANDERLUKESKYWALKER02 extends ActiveAbility {
               cantDispel: true,
               cantResist: true,
               unique: true,
+              sourceAbility: this,
             },
           ],
           1,
@@ -162,7 +173,14 @@ class specialskill_COMMANDERLUKESKYWALKER01 extends ActiveAbility {
 
         primaryTarget.statusEffect.removeBuff("all");
         this._character?.statusEffect.inflictDebuff(
-          [{ name: "Buff Immunity", duration: 2, id: uuid() }],
+          [
+            {
+              name: "Buff Immunity",
+              duration: 2,
+              id: uuid(),
+              sourceAbility: this,
+            },
+          ],
           primaryTarget,
           1,
           this
@@ -176,6 +194,7 @@ class specialskill_COMMANDERLUKESKYWALKER01 extends ActiveAbility {
               duration: 2,
               id: uuid(),
               cantResist: true,
+              sourceAbility: this,
             },
           ],
           primaryTarget,

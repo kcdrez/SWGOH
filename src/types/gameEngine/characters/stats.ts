@@ -297,6 +297,7 @@ export class Stats {
             id: match.id,
             duration: 0,
             name: null,
+            sourceAbility: null,
           });
         }
       }
@@ -344,7 +345,9 @@ export class Stats {
     return this.getModifiedStats(
       [
         {
-          hasEffect: this._character.statusEffect.hasDebuff("Speed Down"),
+          hasEffect:
+            this._character.statusEffect.hasDebuff("Speed Down") ||
+            this._character.statusEffect.hasDebuff("Breach"),
           value: -0.25,
         },
         {
@@ -386,6 +389,10 @@ export class Stats {
             3
           ),
           value: 0.2,
+        },
+        {
+          hasEffect: this._character.statusEffect.hasBuff("Jedi Legacy"),
+          value: 1,
         },
       ],
       stat,
@@ -611,11 +618,15 @@ export class Stats {
           }
         }
 
+        const hasDefDown =
+          self._character.statusEffect.hasDebuff("Defense Down");
+        const hasBreach = self._character.statusEffect.hasDebuff("Breach");
+
         return self.getModifiedStats(
           [
             {
-              hasEffect: self._character.statusEffect.hasDebuff("Defense Down"),
-              value: -0.5,
+              hasEffect: hasDefDown || hasBreach,
+              value: hasDefDown ? -0.5 : -0.25,
             },
             {
               hasEffect: self._character.statusEffect.hasBuff("Defense Up"),

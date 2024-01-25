@@ -133,7 +133,10 @@ export class Character {
     const self = this;
     return {
       get ignoreTaunt() {
-        return self.statusEffect.hasBuff("Call to Action");
+        return (
+          self.statusEffect.hasBuff("Call to Action") ||
+          self.statusEffect.hasBuff("Jedi Legacy")
+        );
       },
     };
   }
@@ -174,7 +177,14 @@ export class Character {
             character: this,
             statusEffects: {
               resisted: true,
-              list: [{ name: "TM Decrease", duration: amount, id: uuid() }],
+              list: [
+                {
+                  name: "TM Decrease",
+                  duration: amount,
+                  id: uuid(),
+                  sourceAbility: srcAbility ?? null,
+                },
+              ],
               type: "debuff",
             },
           })

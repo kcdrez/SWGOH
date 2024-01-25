@@ -317,50 +317,91 @@ export class StatusEffect {
         })
       );
     } else {
-      if (
-        (!this.hasBuff(buff.name, buff.duration) || buff.isStackable) &&
-        !this.isImmune(buff)
-      ) {
-        if (scalar > 0) {
-          if (buff.name === "Protection Up") {
-            const match = this.buffs.find(
-              (x) => x.sourceAbility?.id === buff.sourceAbility?.id
-            );
-            if (match) {
-              match.stacks = buff.stacks;
-              return;
-            }
-          }
+      const logAndDispatch = () => {
+        gameEngine.addLogs(
+          new Log({
+            character: this._character,
+            ability: { source: sourceAbility },
+            statusEffects: {
+              type: "buff",
+              list: [buff],
+              duration: buff.duration,
+            },
+          })
+        );
 
-          const newDuration = buff.duration * scalar;
-          const match = this.buffs.find((x) => x.name === buff.name);
+        this._character.dispatchEvent("buffed", { buff });
+      };
 
-          if (buff.isStackable || !match) {
-            this._buffs.push({
-              ..._.cloneDeep(buff),
-              duration: newDuration,
-              isNew: true,
-            });
-          } else {
-            match.duration = newDuration;
-            match.isNew = true;
-          }
-
-          gameEngine.addLogs(
-            new Log({
-              character: this._character,
-              ability: { source: sourceAbility },
-              statusEffects: {
-                type: "buff",
-                list: [buff],
-                duration: newDuration,
-              },
-            })
+      if (this.isImmune(buff)) {
+        gameEngine.addLogs(
+          new Log({
+            character: this._character,
+            statusEffects: { type: "buff", immune: true, list: [buff] },
+          })
+        );
+      } else if (this.hasBuff(buff.name)) {
+        if (buff.name === "Protection Up") {
+          const match = this.buffs.find(
+            (b) => b.sourceAbility === buff.sourceAbility
           );
+          if (match) {
+            match.stacks = Math.max(buff?.stacks ?? 0, match?.stacks ?? 0);
+            logAndDispatch();
+            return;
+          }
+        }
 
-          this._character.dispatchEvent("buffed", { buff });
+        const match = this.buffs.find((b) => b.name === buff.name);
+        if (match) {
+          if (buff.isStackable) {
+            match.stacks = (match?.stacks ?? 0) + (buff?.stacks ?? 1);
+          }
+          if (buff.duration) {
+            match.duration = Math.max(match.duration, buff.duration);
+          }
+          logAndDispatch();
+          return;
         }
       }
+
+      this._buffs.push({
+        ..._.cloneDeep(buff),
+        isNew: true,
+      });
+      logAndDispatch();
+
+      // if (
+      //   (!this.hasBuff(buff.name, buff.duration) || buff.isStackable) &&
+      //   !this.isImmune(buff)
+      // ) {
+      //   if (scalar > 0) {
+      //     if (buff.name === "Protection Up") {
+      //       const match = this.buffs.find(
+      //         (x) => x.sourceAbility?.id === buff.sourceAbility?.id
+      //       );
+      //       if (match) {
+      //         match.stacks = buff.stacks;
+      //         return;
+      //       }
+      //     }
+
+      //     const newDuration = buff.duration * scalar;
+      //     const match = this.buffs.find((x) => x.name === buff.name);
+
+      //     if (buff.isStackable || !match) {
+      //       this._buffs.push({
+      //         ..._.cloneDeep(buff),
+      //         duration: newDuration,
+      //         isNew: true,
+      //       });
+      //     } else {
+      //       match.duration = newDuration;
+      //       match.isNew = true;
+      //     }
+
+      //   }
+      // }
     }
   }
 
@@ -384,6 +425,7 @@ export class StatusEffect {
           name: buff,
           id: uuid(),
           duration: 1,
+          sourceAbility: sourceAbility ?? null,
         };
       } else {
         buffToRemove = buff;
@@ -564,6 +606,7 @@ export class StatusEffect {
           name: debuff,
           id: uuid(),
           duration: 1,
+          sourceAbility: sourceAbility ?? null,
         };
       } else {
         debuffData = debuff;
@@ -692,6 +735,7 @@ export class StatusEffect {
           name: statusEffect,
           id: uuid(),
           duration: 1,
+          sourceAbility: srcAbility ?? null,
         };
       } else {
         statusEffectData = statusEffect;
@@ -776,6 +820,15 @@ export class StatusEffect {
             this.hasDebuff("Daze") ? "Daze" : "Stun",
             this.hasDebuff("Daze") ? "Daze" : "Stun",
             "Can't assist, counter attack, or gain bonus Turn Meter",
+            this._character
+          ),
+        },
+        "Jedi Lessons": {
+          value: this.hasBuff("Jedi Legacy"),
+          sourceAbility: new Ability(
+            "Jedi Legacy",
+            "Jedi Legacy",
+            "Can't gain Jedi Lessons because this unit has Jedi Legacy",
             this._character
           ),
         },
@@ -911,6 +964,7 @@ export type tBuff =
   | "Health Up"
   | "Health Steal Up"
   | "Jedi Lessons"
+  | "Jedi Legacy"
   | "Potency Up"
   | "Protection Up"
   | "Offense Up"
@@ -953,7 +1007,7 @@ export interface iStatusEffect {
   /** Unique identifier */
   id: string;
   /** The original source of the effect */
-  sourceAbility?: Ability | null;
+  sourceAbility: Ability | null;
   /** Determines if more than one of the effect can be applied to a target */
   isStackable?: boolean;
   /** How many stacks of the effect the unit has. Also used for the value for Protection Up */
