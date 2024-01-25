@@ -97,7 +97,7 @@
                 <span class="input-group-text fill">
                   <div
                     class="progress"
-                    :title="`Current Health: ${character.health.current}\nMax Health: ${character.health.max}\nBase Protection: ${character.health.base}`"
+                    :title="`Current Health: ${character.health.current}\nMax Health: ${character.health.max}\nBase Health: ${character.health.base}`"
                   >
                     <div
                       class="progress-bar current-health"

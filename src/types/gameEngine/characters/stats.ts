@@ -70,6 +70,7 @@ export interface iStatsCheck {
    * health: The amount of health
    * healthSteal: The percentage (decimal) amount that is healed when dealing damage with an attack
    * maxHealth/maxProtection: The max health or protection
+   * mastery: The amount of mastery
    * physicalAccuracy: The percentage (decimal) that decrease the chance of the physical attack missing
    * physicalArmor: The amount of armor used to mitigate damage from a physical attack
    * physicalArmorPen: The amount of armor that is ignored when dealing damage with a physical attack
@@ -95,6 +96,7 @@ export interface iStatsCheck {
     | "critDamage"
     | "health"
     | "healthSteal"
+    | "mastery"
     | "maxHealth"
     | "maxProtection"
     | "physicalAccuracy"
@@ -357,7 +359,39 @@ export class Stats {
   }
   /** The current mastery of the character */
   public get mastery() {
-    return this.baseStats.mastery;
+    let stat = this.baseStats.mastery;
+
+    return this.getModifiedStats(
+      [
+        {
+          hasEffect: this._character.statusEffect.hasBuff(
+            "Jedi Lessons",
+            undefined,
+            1
+          ),
+          value: 0.2,
+        },
+        {
+          hasEffect: this._character.statusEffect.hasBuff(
+            "Jedi Lessons",
+            undefined,
+            2
+          ),
+          value: 0.2,
+        },
+        {
+          hasEffect: this._character.statusEffect.hasBuff(
+            "Jedi Lessons",
+            undefined,
+            3
+          ),
+          value: 0.2,
+        },
+      ],
+      stat,
+      this.getTempStat("mastery"),
+      true
+    );
   }
   /** The current Critical Damage (decimal) */
   public get critDamage() {

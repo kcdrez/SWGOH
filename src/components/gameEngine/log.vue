@@ -23,8 +23,8 @@
           log.statusEffects.list.map((x) => x.name).join(", ")
         }}</span>
       </template>
-      <template v-else-if="log.statusEffects.prevented"
-        >could not gain
+      <template v-else-if="log.statusEffects.prevented">
+        could not gain
         <span :class="log.statusEffects.type">{{
           log.statusEffects.list.map((x) => x.name).join(", ")
         }}</span>

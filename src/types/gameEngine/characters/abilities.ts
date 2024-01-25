@@ -121,10 +121,14 @@ abstract class CharacterAbility extends Ability {
    * @returns The character target or null if no valid targets exist
    */
   public findRandomAlly(forcedTarget?: Character) {
-    return this.findTargets(this._character.teammates, forcedTarget, {
-      taunt: true,
-      stealth: true,
-    });
+    return this.findTargets(
+      this._character.teammates.filter((ally) => !this._character.isSelf(ally)),
+      forcedTarget,
+      {
+        taunt: true,
+        stealth: true,
+      }
+    );
   }
 
   /** Deals damage to a target
@@ -296,11 +300,13 @@ export abstract class ActiveAbility extends CharacterAbility {
    * @param amount - The amount that the cooldown should be manipulated (negative number decreases the cooldown, positive number increases the cooldown)
    * @param srcAbility - The source ability that is causing the cooldown change
    * @param srcCharacter - The Character that is causing the cooldown change
+   * @param cantResist - The effect cannot be resisted
    */
   public changeCooldown(
     amount: number,
     srcAbility: Ability,
-    srcCharacter?: Character
+    srcCharacter?: Character,
+    cantResist?: boolean
   ) {
     if (this.turnsRemaining === null) {
       return;
@@ -331,7 +337,7 @@ export abstract class ActiveAbility extends CharacterAbility {
           0.15
         );
 
-        if (chanceOfEvent(resistedChance)) {
+        if (chanceOfEvent(resistedChance) && !cantResist) {
           gameEngine.addLogs(
             new Log({
               character: this._character,

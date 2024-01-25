@@ -910,6 +910,7 @@ export type tBuff =
   | "Evasion Up"
   | "Health Up"
   | "Health Steal Up"
+  | "Jedi Lessons"
   | "Potency Up"
   | "Protection Up"
   | "Offense Up"
