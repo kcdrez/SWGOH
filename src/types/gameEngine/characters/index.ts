@@ -20,8 +20,11 @@ type tEventType =
   | "buffed"
   | "dealDamage"
   | "death"
+  | "dispel"
   | "endOfTurn"
   | "inflicted"
+  | "loseHealth"
+  | "loseProtection"
   | "matchSetup"
   | "matchStart"
   | "receiveDamage"
@@ -126,6 +129,11 @@ export class Character {
   /** A list of unique abilities */
   public get uniqueAbilities() {
     return this._uniqueAbilities;
+  }
+
+  /** Adds a new granted ability */
+  public addGrantedAbility(ability: ActiveAbility) {
+    this._specialAbilities.push(ability);
   }
 
   /** A map of different effects that may exist on the character */
@@ -383,7 +391,7 @@ export class Character {
       return this._basicAbility;
     } else if (
       this._specialAbilities.every(
-        (a) => a.turnsRemaining !== null && a.turnsRemaining > 0
+        (a) => a.turnsRemaining !== null && a.turnsRemaining > 0 && !a.canBeUsed
       )
     ) {
       return this._basicAbility;
@@ -393,7 +401,9 @@ export class Character {
       if (abilityId) {
         return a.id === abilityId;
       } else {
-        return a.turnsRemaining !== null && a.turnsRemaining <= 0;
+        return (
+          a.turnsRemaining !== null && a.turnsRemaining <= 0 && a.canBeUsed
+        );
       }
     });
 
@@ -620,99 +630,15 @@ export class Character {
 
   /**
    * Checks whether a condition is true
-   * @param condition - The data that is used to determine if it is true or not
+   * @param condition - A function to be ran when a condition should be checked
    * @returns True if the condition has been met, otherwise false
    */
-  public checkCondition(condition?: iCondition): boolean {
+  public checkCondition(condition?: Function): boolean {
     if (!condition) {
       return true;
+    } else {
+      return condition();
     }
-
-    const { buffs, debuffs, stats, inverted, isNew, tags, tm, onTurn } =
-      condition;
-    let results = false;
-    if (buffs) {
-      const hasBuffs = buffs.every((buff) => {
-        if (typeof buff === "string") {
-          const match = this.statusEffect.buffs.find((x) => x.name === buff);
-          if (match) {
-            return isNew === false ? !match.isNew : true;
-          } else return false;
-        } else {
-          return this.statusEffect.hasBuff(
-            buff.name,
-            buff.duration,
-            buff.stacks
-          );
-        }
-      });
-      results = hasBuffs || results;
-    }
-    if (debuffs) {
-      const hasDebuffs = debuffs.every((debuff) => {
-        const match = this.statusEffect.debuffs.find((x) => {
-          return x.name === debuff;
-        });
-
-        if (match) {
-          return isNew ? match.isNew : true;
-        }
-        return false;
-      });
-
-      results = hasDebuffs || results;
-    }
-    if (stats) {
-      let meetsStatRequirement = false;
-      const stat = this.stats[stats.statToModify];
-      if (!isNaN(stat)) {
-        //if it is a number
-        const num = Number(stat);
-        if (
-          stats.statToModify === "health" &&
-          stats.modifiedType === "multiplicative"
-        ) {
-          const percent = num / this.stats.maxHealth;
-          // meetsStatRequirement =
-          //   stats.amountType === "greater"
-          //     ? stats.amount < percent
-          //     : stats.amount > percent;
-        } else if (
-          stats.statToModify === "protection" &&
-          stats.modifiedType === "multiplicative"
-        ) {
-          const percent = num / this.stats.maxProtection;
-          // meetsStatRequirement =
-          //   stats.amountType === "greater"
-          //     ? stats.amount > percent
-          //     : stats.amount < percent;
-        } else {
-          // meetsStatRequirement =
-          //   stats.amountType === "greater"
-          //     ? stats.amount < num
-          //     : stats.amount > num;
-        }
-      } else {
-        console.warn(`Could not find stat ${stat.type} on ${this.name}`);
-      }
-
-      results = meetsStatRequirement || results;
-    }
-    if (tags) {
-      results = anyTagsMatch(this, tags, this.id) || results;
-    }
-    if (tm) {
-      if (tm.greaterThan) {
-        results = this.turnMeter > tm.amount || results;
-      } else {
-        results = this.turnMeter < tm.amount || results;
-      }
-    }
-    if (onTurn) {
-      results =
-        this.isSelf(gameEngine.currentCharactersTurn ?? undefined) || results;
-    }
-    return inverted ? !results : results;
   }
 
   /**

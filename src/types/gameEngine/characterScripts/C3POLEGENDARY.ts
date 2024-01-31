@@ -45,7 +45,8 @@ class basicskill_C3POLEGENDARY extends ActiveAbility {
             ],
             primaryTarget,
             1,
-            this
+            this,
+            3
           );
         }
 
@@ -105,7 +106,6 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
             duration: 3,
             unique: true,
             isStackable: true,
-            stacks: 1,
             sourceAbility: this,
           },
         ],
@@ -122,7 +122,6 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
               duration: 3,
               unique: true,
               isStackable: true,
-              stacks: 1,
               sourceAbility: this,
             },
           ],
@@ -147,14 +146,21 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
               id: uuid(),
               unique: true,
               isStackable: true,
-              stacks: 2,
-              maxStacks: 3,
+              sourceAbility: this,
+            },
+            {
+              name: "Confuse",
+              duration: 3,
+              id: uuid(),
+              unique: true,
+              isStackable: true,
               sourceAbility: this,
             },
           ],
           primaryEnemy,
           1,
-          this
+          this,
+          3
         );
 
         allTranslationAllies.forEach((target) => {
@@ -225,16 +231,15 @@ class uniqueskill_C3POLEGENDARY01 extends PassiveAbility {
                 {
                   name: "Translation",
                   duration: 3,
-                  maxStacks: 3,
                   isStackable: true,
                   unique: true,
                   id: uuid(),
-                  stacks: 1,
                   sourceAbility: this,
                 },
               ],
               1,
-              this
+              this,
+              3
             );
           }
         },
@@ -277,16 +282,8 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           modifiedType: "additive",
           statToModify: "physicalDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 1,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation");
           },
           characterSourceId: this._character.uniqueId,
         },
@@ -294,16 +291,8 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           modifiedType: "additive",
           statToModify: "physicalDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 2,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation", undefined, 2);
           },
           characterSourceId: this._character.uniqueId,
         },
@@ -311,16 +300,8 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           modifiedType: "additive",
           statToModify: "physicalDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 3,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation", undefined, 3);
           },
           characterSourceId: this._character.uniqueId,
         },
@@ -328,16 +309,8 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           modifiedType: "additive",
           statToModify: "specialDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 1,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation");
           },
           characterSourceId: this._character.uniqueId,
         },
@@ -345,16 +318,8 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           modifiedType: "additive",
           statToModify: "specialDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 2,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation", undefined, 2);
           },
           characterSourceId: this._character.uniqueId,
         },
@@ -362,16 +327,8 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           modifiedType: "additive",
           statToModify: "specialDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 3,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation", undefined, 3);
           },
           characterSourceId: this._character.uniqueId,
         }
@@ -387,13 +344,12 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
               duration: 3,
               unique: true,
               isStackable: true,
-              maxStacks: 3,
               id: uuid(),
-              stacks: 1,
               sourceAbility: this,
             },
             1,
-            this
+            this,
+            3
           );
           target.stats.gainHealth(Infinity, "health");
         },
@@ -486,7 +442,7 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
                 {
                   name: "Protection Up",
                   duration: 1,
-                  stacks: 0.15 * ally.stats.maxHealth,
+                  value: 0.15 * ally.stats.maxHealth,
                   id: "uniqueskill_C3POLEGENDARY03_ProtectionUp",
                   sourceAbility: this,
                 },
@@ -505,96 +461,48 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           statToModify: "specialArmorPen",
           amount: 0.2,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 1,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation");
           },
         },
         {
           statToModify: "specialArmorPen",
           amount: 0.2,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 2,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 2);
           },
         },
         {
           statToModify: "specialArmorPen",
           amount: 0.2,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 3,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 3);
           },
         },
         {
           statToModify: "physicalArmorPen",
           amount: 0.2,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 1,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation");
           },
         },
         {
           statToModify: "physicalArmorPen",
           amount: 0.2,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 2,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 2);
           },
         },
         {
           statToModify: "physicalArmorPen",
           amount: 0.2,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 3,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 3);
           },
         }
       );
@@ -606,96 +514,48 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
           statToModify: "specialArmorPen",
           amount: 0.1,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 1,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation");
           },
         },
         {
           statToModify: "specialArmorPen",
           amount: 0.1,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 2,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 2);
           },
         },
         {
           statToModify: "specialArmorPen",
           amount: 0.1,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 3,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 3);
           },
         },
         {
           statToModify: "physicalArmorPen",
           amount: 0.1,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 1,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation");
           },
         },
         {
           statToModify: "physicalArmorPen",
           amount: 0.1,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 2,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 2);
           },
         },
         {
           statToModify: "physicalArmorPen",
           amount: 0.1,
           modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 3,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 3);
           },
         }
       );
@@ -765,48 +625,24 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
           statToModify: "critDamage",
           amount: 0.2,
           modifiedType: "additive",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 1,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation");
           },
         },
         {
           statToModify: "critDamage",
           amount: 0.2,
           modifiedType: "additive",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 2,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 2);
           },
         },
         {
           statToModify: "critDamage",
           amount: 0.2,
           modifiedType: "additive",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 3,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 3);
           },
         }
       );
@@ -818,48 +654,24 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
           statToModify: "critDamage",
           amount: 0.1,
           modifiedType: "additive",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 1,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation");
           },
         },
         {
           statToModify: "critDamage",
           amount: 0.1,
           modifiedType: "additive",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 2,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 2);
           },
         },
         {
           statToModify: "critDamage",
           amount: 0.1,
           modifiedType: "additive",
-          condition: {
-            buffs: [
-              {
-                name: "Translation",
-                stacks: 3,
-                id: uuid(),
-                duration: 0,
-                sourceAbility: this,
-              },
-            ],
+          condition: () => {
+            return ally.statusEffect.hasBuff("Translation", undefined, 3);
           },
         }
       );

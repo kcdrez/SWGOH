@@ -225,6 +225,11 @@ export abstract class ActiveAbility extends CharacterAbility {
     super(id, name, text, parentCharacter);
   }
 
+  /** Determines if this ability can be used */
+  public get canBeUsed() {
+    return true;
+  }
+
   /** Initializes the ability */
   public initialize() {
     if (this.cooldown) {
@@ -318,6 +323,7 @@ export abstract class ActiveAbility extends CharacterAbility {
         name,
         id: uuid(),
         duration: amount,
+        sourceAbility: srcAbility,
       })
     ) {
       gameEngine.addLogs(
@@ -326,7 +332,9 @@ export abstract class ActiveAbility extends CharacterAbility {
           statusEffects: {
             immune: true,
             type: amount > 0 ? "debuff" : "buff",
-            list: [{ name, duration: amount, id: uuid() }],
+            list: [
+              { name, duration: amount, id: uuid(), sourceAbility: srcAbility },
+            ],
           },
         })
       );
@@ -343,7 +351,9 @@ export abstract class ActiveAbility extends CharacterAbility {
               character: this._character,
               statusEffects: {
                 resisted: true,
-                list: [{ name, duration: 0, id: uuid() }],
+                list: [
+                  { name, duration: 0, id: uuid(), sourceAbility: srcAbility },
+                ],
                 type: "debuff",
               },
             })

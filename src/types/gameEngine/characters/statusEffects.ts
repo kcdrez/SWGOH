@@ -17,7 +17,7 @@ export class StatusEffect {
     sourceId: string;
     value: boolean;
     effect: string;
-    condition?: iCondition;
+    condition?: Function;
     sourceAbility?: Ability;
   }[] = [];
 
@@ -132,22 +132,28 @@ export class StatusEffect {
   /** Checks to see if the character has any of the listed debuffs
    * @param debuffs - The list of debuffs to check. If an array, checks that ALL of the ones listed are present
    * @param duration - The duration to check if there are any remaining turns left on the debuff
+   * @param stacks - The number to check if there are at least this many stacks of the given buffs
    * @returns true if the character has the debuffs
    */
   public hasDebuff(
     debuffs: tDebuff | tDebuff[] | iDebuff | iDebuff[] | null,
-    duration?: number
+    duration?: number,
+    stacks?: number
   ): boolean {
     if (Array.isArray(debuffs)) {
       return (debuffs as (tDebuff | iDebuff)[]).every((x) =>
         this.hasDebuff(x, duration)
       );
     } else {
+      let stacksCount = 0;
       return this.debuffs.some((d) => {
         if (typeof debuffs === "string") {
           if (d.name === debuffs) {
             if (duration) {
               return duration <= d.duration;
+            } else if (stacks) {
+              stacksCount++;
+              return stacks <= stacksCount;
             }
             return true;
           }
@@ -185,7 +191,7 @@ export class StatusEffect {
               return duration <= b.duration;
             } else if (stacks) {
               stacksCount++;
-              return stacks <= (b?.stacks ?? 0) || stacks <= stacksCount;
+              return stacks <= stacksCount;
             } else if (isNew !== undefined) {
               return b.isNew === isNew;
             }
@@ -285,11 +291,13 @@ export class StatusEffect {
    * @param buff - The buff being added
    * @param scalar - The amount the duration should be scaled by (usually 1)
    * @param sourceAbility - The source ability that is adding the buff
+   * @param maxStacks - The maximum amount of stacks that can be applied for this debuff
    */
   public addBuff(
     buff: iBuff | iBuff[],
     scalar: number,
-    sourceAbility: Ability | null
+    sourceAbility: Ability | null,
+    maxStacks?: number
   ) {
     const hasBuffImmunity = this.hasDebuff("Buff Immunity");
     const hasConfuse = this.hasDebuff("Confuse");
@@ -340,29 +348,40 @@ export class StatusEffect {
             statusEffects: { type: "buff", immune: true, list: [buff] },
           })
         );
-      } else if (this.hasBuff(buff.name)) {
+      } else if (this.hasBuff(buff.name, undefined, maxStacks)) {
         if (buff.name === "Protection Up") {
-          const match = this.buffs.find(
-            (b) => b.sourceAbility === buff.sourceAbility
-          );
-          if (match) {
-            match.stacks = Math.max(buff?.stacks ?? 0, match?.stacks ?? 0);
+          if (buff.isStackable) {
+            this.buffs.push(buff);
             logAndDispatch();
             return;
+          } else {
+            const match = this.buffs.find(
+              (b) => b.sourceAbility === buff.sourceAbility
+            );
+
+            if (match) {
+              match.value = Math.max(buff?.value ?? 0, match?.value ?? 0);
+              match.duration = Math.max(
+                buff?.duration ?? 0,
+                match?.duration ?? 0
+              );
+              logAndDispatch();
+              return;
+            }
           }
         }
 
-        const match = this.buffs.find((b) => b.name === buff.name);
-        if (match) {
-          if (buff.isStackable) {
-            match.stacks = (match?.stacks ?? 0) + (buff?.stacks ?? 1);
+        this.buffs.forEach((b) => {
+          if (b.name === buff.name) {
+            this.resetDuration(
+              buff.name,
+              Math.max(b.duration, buff.duration),
+              "buff",
+              sourceAbility ?? undefined
+            );
+            this._character.dispatchEvent("buffed", { buff });
           }
-          if (buff.duration) {
-            match.duration = Math.max(match.duration, buff.duration);
-          }
-          logAndDispatch();
-          return;
-        }
+        });
       }
 
       this._buffs.push({
@@ -406,7 +425,7 @@ export class StatusEffect {
   }
 
   /** Removes a buff from the character
-   * @param buff - The buff being added
+   * @param buff - The buff being removed
    * @param character - The character that is causing the removal
    * @param sourceAbility - The ability that is causing the removal
    */
@@ -476,13 +495,10 @@ export class StatusEffect {
             character == undefined
           );
         }
-        // listOfRemovedBuffs.forEach((buff) => {
-        //   buff.triggers?.forEach((trigger) => {
-        //     if (trigger.triggerType === "expires") {
-        //       logs.push(...this.executeTrigger(trigger));
-        //     }
-        //   });
-        // });
+
+        this._character.dispatchEvent("dispel", {
+          effects: listOfRemovedBuffs,
+        });
       }
     }
   }
@@ -492,12 +508,14 @@ export class StatusEffect {
    * @param targetCharacter - The character receiving the debuffs
    * @param scalar - The amount the duration should be scaled by (usually 1)
    * @param sourceAbility - The source ability that is adding the debuff
+   * @param maxStacks - The maximum amount of stacks that can be applied for this debuff
    */
   public inflictDebuff(
     debuffs: iDebuff[],
     targetCharacter: Character,
     scalar: number = 1,
-    sourceAbility?: Ability | null
+    sourceAbility?: Ability | null,
+    maxStacks?: number
   ) {
     if (targetCharacter.isDead) {
       return;
@@ -516,7 +534,11 @@ export class StatusEffect {
           })
         );
       } else if (
-        !targetCharacter.statusEffect.hasDebuff(debuff.name, debuff.duration) ||
+        !targetCharacter.statusEffect.hasDebuff(
+          debuff.name,
+          debuff.duration,
+          maxStacks
+        ) ||
         debuff.isStackable
       ) {
         const resistedChance = Math.max(
@@ -846,7 +868,7 @@ export class StatusEffect {
   public addImmune(
     sourceId: string,
     effect: string,
-    condition?: iCondition,
+    condition?: Function,
     sourceAbility?: Ability
   ) {
     this._immunity.push({
@@ -1010,8 +1032,8 @@ export interface iStatusEffect {
   sourceAbility: Ability | null;
   /** Determines if more than one of the effect can be applied to a target */
   isStackable?: boolean;
-  /** How many stacks of the effect the unit has. Also used for the value for Protection Up */
-  stacks?: number;
+  /** Generic value for holding information, such as the amount for Protection Up */
+  value?: number;
   /** The maximum number of stacks that can be present */
-  maxStacks?: number;
+  // maxStacks?: number;
 }

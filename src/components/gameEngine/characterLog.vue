@@ -327,9 +327,6 @@ export default defineComponent({
       if (effect.duration) {
         textLines.push("Turns Remaining: " + effect.duration);
       }
-      if (effect.stacks) {
-        textLines.push("Stacks: " + effect.stacks);
-      }
       if (effect.unique) {
         textLines.push("Is Unique");
       }

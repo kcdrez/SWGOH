@@ -128,7 +128,7 @@ export interface iStatsCheck {
     /** How often the effect is checked to see if it should be removed */
     frequency: "turn";
   };
-  condition?: iCondition;
+  condition?: Function;
   characterSourceId?: string;
 }
 
@@ -207,7 +207,7 @@ export class Stats {
   public get bonusProtection() {
     return this._character.statusEffect.buffs.reduce((total, buff) => {
       if (buff.name === "Protection Up") {
-        total += buff.stacks ?? 0;
+        total += buff.value ?? 0;
       }
       return total;
     }, 0);
@@ -276,23 +276,25 @@ export class Stats {
     if (type === "health") {
       this._curHealth -= amount;
       this._curHealth = Math.max(this._curHealth, 0);
+      this._character.dispatchEvent("loseHealth");
     } else if (type === "protection") {
       this._curProtection -= amount;
       this._curProtection = Math.max(this._curProtection, 0);
+      this._character.dispatchEvent("loseProtection");
     } else if (this._character.statusEffect.hasBuff("Protection Up")) {
       const match = this._character.statusEffect.buffs.find(
         (x) => x.name === "Protection Up"
       );
-      if (match?.stacks) {
-        if (match?.stacks && match?.stacks > amount) {
-          match.stacks -= amount;
+      if (match?.value) {
+        if (match?.value && match?.value > amount) {
+          match.value -= amount;
         } else {
-          const diff = amount - match.stacks;
-          match.stacks = 0;
+          const diff = amount - match.value;
+          match.value = 0;
           this.loseHealth(diff);
         }
 
-        if (match?.stacks <= 0) {
+        if (match?.value <= 0) {
           this._character.statusEffect.removeBuff({
             id: match.id,
             duration: 0,
@@ -304,13 +306,16 @@ export class Stats {
     } else if (this._curProtection > 0) {
       if (this._curProtection > amount) {
         this._curProtection -= amount;
+        this._character.dispatchEvent("loseProtection");
       } else {
         const diff = amount - this._curProtection;
         this._curProtection = 0;
+        this._character.dispatchEvent("loseProtection");
         this.loseHealth(diff);
       }
     } else {
       this._curHealth -= amount;
+      this._character.dispatchEvent("loseHealth");
     }
   }
 

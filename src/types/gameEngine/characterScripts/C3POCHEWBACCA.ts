@@ -40,7 +40,14 @@ class basicskill_C3POCHEWBACCA extends ActiveAbility {
             canBeCountered
           );
           this._character.statusEffect.inflictDebuff(
-            [{ name: "Evasion Down", id: uuid(), duration: 2 }],
+            [
+              {
+                name: "Evasion Down",
+                id: uuid(),
+                duration: 2,
+                sourceAbility: this,
+              },
+            ],
             primaryTarget,
             1,
             this
@@ -87,7 +94,7 @@ class specialskill_C3POCHEWBACCA01 extends ActiveAbility {
         );
 
         target.statusEffect.addBuff(
-          [{ name: "Advantage", duration: 2, id: uuid() }],
+          [{ name: "Advantage", duration: 2, id: uuid(), sourceAbility: this }],
           1,
           this
         );
@@ -96,7 +103,7 @@ class specialskill_C3POCHEWBACCA01 extends ActiveAbility {
       this._character.opponents.forEach((target) => {
         target.statusEffect.removeBuff("all", this._character, this);
         this._character.statusEffect.inflictDebuff(
-          [{ name: "Blind", duration: 2, id: uuid() }],
+          [{ name: "Blind", duration: 2, id: uuid(), sourceAbility: this }],
           target,
           1,
           this
@@ -407,17 +414,18 @@ class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
         statToModify: "tenacity",
         amount: -0.5,
         modifiedType: "additive",
-        condition: {
-          debuffs: ["Blind"],
+        condition: () => {
+          return target.statusEffect.hasDebuff("Blind");
         },
+
         characterSourceId: this._character.uniqueId,
       });
 
       target.statusEffect.addImmune(
         this._character.uniqueId,
         "Assisting",
-        {
-          debuffs: ["Blind"],
+        () => {
+          return target.statusEffect.hasDebuff("Blind");
         },
         this
       );
@@ -425,8 +433,8 @@ class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
       target.statusEffect.addImmune(
         this._character.uniqueId,
         "CounterAttacking",
-        {
-          debuffs: ["Blind"],
+        () => {
+          return target.statusEffect.hasDebuff("Blind");
         },
         this
       );

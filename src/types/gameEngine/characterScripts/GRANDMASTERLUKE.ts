@@ -90,7 +90,7 @@ class specialskill_GRANDMASTERLUKE01 extends ActiveAbility {
     stats?: iStatsCheck[],
     canBeCountered?: boolean
   ): void {
-    const primaryTarget = this.findRandomEnemy();
+    const primaryTarget = this.findRandomEnemy(targetCharacter);
 
     super.execute(primaryTarget, stats, canBeCountered, () => {
       if (primaryTarget) {
@@ -162,13 +162,12 @@ class specialskill_GRANDMASTERLUKE01 extends ActiveAbility {
                   id: uuid(),
                   sourceAbility: this,
                   isStackable: true,
-                  stacks: 1,
-                  maxStacks: 3,
                   unique: true,
                 },
               ],
               1,
-              this
+              this,
+              3
             );
           }
         }
@@ -321,6 +320,8 @@ class leaderskill_GRANDMASTERLUKE extends PassiveAbility {
       return ally.hasTags("Jedi", this._character.id);
     });
 
+    const triggeredList: string[] = [];
+
     lightSideNonJediAllies.forEach((target) => {
       target.stats.tempStats.push(
         {
@@ -371,7 +372,244 @@ class leaderskill_GRANDMASTERLUKE extends PassiveAbility {
           characterSourceId: this._character?.uniqueId,
         }
       );
+
+      target.events.push({
+        eventType: "loseHealth",
+        characterSourceId: this._character.uniqueId,
+        callback: ({ previousHealth }) => {
+          if (
+            target.stats.health < target.stats.maxHealth &&
+            previousHealth >= target.stats.maxHealth
+          ) {
+            const alreadyTriggered = triggeredList.some(
+              (x) => x === target.uniqueId
+            );
+            if (!alreadyTriggered) {
+              triggeredList.push(target.uniqueId);
+              target.statusEffect.removeDebuff("all");
+              target.statusEffect.addBuff(
+                [
+                  {
+                    name: "Critical Hit Immunity",
+                    id: uuid(),
+                    duration: 2,
+                    sourceAbility: this,
+                  },
+                  {
+                    name: "Defense Up",
+                    id: uuid(),
+                    duration: 2,
+                    sourceAbility: this,
+                  },
+                  {
+                    name: "Tenacity Up",
+                    id: uuid(),
+                    duration: 2,
+                    sourceAbility: this,
+                  },
+                ],
+                1,
+                this
+              );
+              this._character.statusEffect.addBuff(
+                [
+                  {
+                    name: "Taunt",
+                    duration: 2,
+                    id: uuid(),
+                    sourceAbility: this,
+                    unique: true,
+                    cantDispel: true,
+                    cantPrevent: true,
+                  },
+                ],
+                1,
+                this
+              );
+            }
+          }
+        },
+      });
+
+      target.addGrantedAbility(
+        new grantedability_grandmasterluke_inherited_teachings(target)
+      );
     });
+
+    const allAreJediAllies = this._character.teammates.every((ally) => {
+      return ally.hasTags("Jedi", this._character.id);
+    });
+
+    if (allAreJediAllies) {
+      const tauntId = "GRANDMASTERLUKE_TauntWhileProtection";
+      this._character.events.push(
+        {
+          eventType: "matchSetup",
+          characterSourceId: this._character.uniqueId,
+          callback: () => {
+            this._character.statusEffect.addBuff(
+              [
+                {
+                  name: "Taunt",
+                  duration: Infinity,
+                  sourceAbility: this,
+                  id: tauntId,
+                },
+              ],
+              1,
+              this
+            );
+          },
+        },
+        {
+          eventType: "loseProtection",
+          characterSourceId: this._character.uniqueId,
+          callback: () => {
+            if (this._character.stats.protection <= 0) {
+              this._character.statusEffect.removeBuff({
+                name: null,
+                duration: 0,
+                sourceAbility: this,
+                id: tauntId,
+              });
+            }
+          },
+        },
+        {
+          eventType: "dispel",
+          characterSourceId: this._character.uniqueId,
+          callback: ({ effects }: { effects: iBuff[] }) => {
+            effects.forEach((effect) => {
+              if (effect.id === tauntId) {
+                this._character.statusEffect.addBuff(
+                  [
+                    {
+                      name: "Taunt",
+                      duration: Infinity,
+                      sourceAbility: this,
+                      id: tauntId,
+                    },
+                  ],
+                  1,
+                  this
+                );
+              }
+            });
+          },
+        }
+      );
+    }
+  }
+}
+
+class grantedability_grandmasterluke_inherited_teachings extends ActiveAbility {
+  constructor(character: Character) {
+    super(
+      "grantedability_grandmasterluke_inherited_teachings",
+      "Inherited Teachings",
+      `Gain Jedi Lessons for 3 turns and call target other Light Side ally to assist, dealing 90% less damage. Then, they deal true damage to the target enemy based on 60% of Jedi Master Luke Skywalker's base Max Protection, which can't be evaded.
+      
+      If that ally is a Jedi, they gain Jedi Lessons for 3 turns and 15% Turn Meter, recover Protection equal to 5% of Luke's base Max Protection, and reduce the cooldown of their Inherited Teachings ability by 1.
+      
+      This ability can't be used if there are no other Jedi allies. (Cooldown: 2)`,
+      character
+    );
+    this.cooldown = 2;
+  }
+
+  public get canBeUsed() {
+    return (
+      this._character.teammates.filter((ally) =>
+        ally.hasTags("Jedi", this._character.id)
+      ).length > 0
+    );
+  }
+
+  public execute(
+    targetCharacter?: Character,
+    stats?: iStatsCheck[],
+    canBeCountered?: boolean
+  ) {
+    this._character.statusEffect.addBuff(
+      [{ name: "Jedi Lessons", id: uuid(), duration: 3, sourceAbility: this }],
+      1,
+      this
+    );
+
+    const lightSideAlly = this.findTargets(
+      this._character.teammates.filter((ally) =>
+        ally.hasTags("Light Side", this._character.id)
+      )
+    );
+
+    if (lightSideAlly) {
+      lightSideAlly.assist(
+        [
+          {
+            statToModify: "specialOffense",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+          },
+          {
+            statToModify: "physicalOffense",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+          },
+        ],
+        targetCharacter,
+        this
+      );
+
+      const jml = this._character.teammates.find(
+        (ally) => ally.id === "GRANDMASTERLUKE"
+      );
+
+      if (jml) {
+        targetCharacter?.receiveDamage(
+          "true",
+          jml.stats.baseStats.maxProtection * 0.6,
+          0,
+          0,
+          0,
+          []
+        );
+      }
+
+      if (lightSideAlly.hasTags("Jedi", this._character.id)) {
+        lightSideAlly.statusEffect.addBuff(
+          [
+            {
+              name: "Jedi Lessons",
+              id: uuid(),
+              duration: 3,
+              sourceAbility: this,
+            },
+          ],
+          1,
+          this
+        );
+        lightSideAlly.changeTurnMeter(15, this, this._character);
+
+        if (jml) {
+          lightSideAlly.heal(
+            {
+              healthType: "protection",
+              amount: 0.05 * jml?.stats.baseStats.maxProtection,
+              amountType: "additive",
+            },
+            this
+          );
+        }
+
+        const ineritedTeaching = lightSideAlly.specialAbilities.find(
+          (ability) =>
+            ability.id === "grantedability_grandmasterluke_inherited_teachings"
+        );
+        if (ineritedTeaching) {
+          ineritedTeaching.changeCooldown(-1, this, this._character);
+        }
+      }
+    }
   }
 }
 

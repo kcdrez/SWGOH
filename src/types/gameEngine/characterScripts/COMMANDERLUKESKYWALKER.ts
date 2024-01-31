@@ -38,16 +38,16 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
           );
 
           if (
-            primaryTarget.checkCondition({
-              debuffs: ["Speed Down"],
+            primaryTarget.checkCondition(() => {
+              return primaryTarget.statusEffect.hasDebuff("Speed Down");
             })
           ) {
             primaryTarget.changeTurnMeter(-30, this);
           }
 
           if (
-            primaryTarget.checkCondition({
-              debuffs: ["Defense Down"],
+            primaryTarget.checkCondition(() => {
+              return primaryTarget.statusEffect.hasDebuff("Defense Down");
             })
           ) {
             this._character?.statusEffect.inflictDebuff(
@@ -118,8 +118,8 @@ class specialskill_COMMANDERLUKESKYWALKER02 extends ActiveAbility {
       );
 
       if (
-        this._character?.checkCondition({
-          buffs: ["Call to Action"],
+        this._character?.checkCondition(() => {
+          return this._character.statusEffect.hasBuff("Call to Action");
         })
       ) {
         this._character?.statusEffect.removeBuff(
@@ -273,16 +273,13 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
   }
 
   public override activate(): void {
-    const doesntHaveCallToAction: iCondition = {
-      buffs: ["Call to Action"],
-      inverted: true,
-    };
-
     this._character?.stats.tempStats.push({
       statToModify: "counterChance",
       amount: 0.5,
       modifiedType: "additive",
-      condition: doesntHaveCallToAction,
+      condition: () => {
+        return !this._character.statusEffect.hasBuff("Call to Action");
+      },
       characterSourceId: this._character.uniqueId,
     });
 
@@ -291,14 +288,18 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
         statToModify: "physicalCritAvoid",
         amount: 0.5,
         modifiedType: "additive",
-        condition: doesntHaveCallToAction,
+        condition: () => {
+          return !this._character.statusEffect.hasBuff("Call to Action");
+        },
         characterSourceId: this._character.uniqueId,
       },
       {
         statToModify: "specialCritAvoid",
         amount: 0.5,
         modifiedType: "additive",
-        condition: doesntHaveCallToAction,
+        condition: () => {
+          return !this._character.statusEffect.hasBuff("Call to Action");
+        },
         characterSourceId: this._character.uniqueId,
       }
     );
@@ -308,14 +309,18 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
         statToModify: "physicalArmor",
         amount: 0.5,
         modifiedType: "multiplicative",
-        condition: doesntHaveCallToAction,
+        condition: () => {
+          return !this._character.statusEffect.hasBuff("Call to Action");
+        },
         characterSourceId: this._character.uniqueId,
       },
       {
         statToModify: "specialArmor",
         amount: 0.5,
         modifiedType: "multiplicative",
-        condition: doesntHaveCallToAction,
+        condition: () => {
+          return !this._character.statusEffect.hasBuff("Call to Action");
+        },
         characterSourceId: this._character.uniqueId,
       }
     );
@@ -324,7 +329,9 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
       statToModify: "tenacity",
       amount: 1,
       modifiedType: "additive",
-      condition: doesntHaveCallToAction,
+      condition: () => {
+        return !this._character.statusEffect.hasBuff("Call to Action");
+      },
       characterSourceId: this._character.uniqueId,
     });
 
