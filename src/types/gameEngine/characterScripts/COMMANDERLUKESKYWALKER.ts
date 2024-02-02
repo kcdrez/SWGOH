@@ -217,11 +217,16 @@ class uniqueskill_COMMANDERLUKESKYWALKER02 extends PassiveAbility {
   }
 
   public override activate(): void {
-    this._character?.stats.tempStats.push({
-      statToModify: "potency",
-      amount: 0.4,
-      modifiedType: "additive",
-    });
+    this._character?.stats.addTempStats(
+      [
+        {
+          statToModify: "potency",
+          amount: 0.4,
+          modifiedType: "additive",
+        },
+      ],
+      this
+    );
 
     this._character?.events.push(
       {
@@ -273,67 +278,83 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
   }
 
   public override activate(): void {
-    this._character?.stats.tempStats.push({
-      statToModify: "counterChance",
-      amount: 0.5,
-      modifiedType: "additive",
-      condition: () => {
-        return !this._character.statusEffect.hasBuff("Call to Action");
-      },
-      characterSourceId: this._character.uniqueId,
-    });
-
-    this._character?.stats.tempStats.push(
-      {
-        statToModify: "physicalCritAvoid",
-        amount: 0.5,
-        modifiedType: "additive",
-        condition: () => {
-          return !this._character.statusEffect.hasBuff("Call to Action");
+    this._character?.stats.addTempStats(
+      [
+        {
+          statToModify: "counterChance",
+          amount: 0.5,
+          modifiedType: "additive",
+          condition: () => {
+            return !this._character.statusEffect.hasBuff("Call to Action");
+          },
+          characterSourceId: this._character.uniqueId,
         },
-        characterSourceId: this._character.uniqueId,
-      },
-      {
-        statToModify: "specialCritAvoid",
-        amount: 0.5,
-        modifiedType: "additive",
-        condition: () => {
-          return !this._character.statusEffect.hasBuff("Call to Action");
-        },
-        characterSourceId: this._character.uniqueId,
-      }
+      ],
+      this
     );
 
-    this._character?.stats.tempStats.push(
-      {
-        statToModify: "physicalArmor",
-        amount: 0.5,
-        modifiedType: "multiplicative",
-        condition: () => {
-          return !this._character.statusEffect.hasBuff("Call to Action");
+    this._character?.stats.addTempStats(
+      [
+        {
+          statToModify: "physicalCritAvoid",
+          amount: 0.5,
+          modifiedType: "additive",
+          condition: () => {
+            return !this._character.statusEffect.hasBuff("Call to Action");
+          },
+          characterSourceId: this._character.uniqueId,
         },
-        characterSourceId: this._character.uniqueId,
-      },
-      {
-        statToModify: "specialArmor",
-        amount: 0.5,
-        modifiedType: "multiplicative",
-        condition: () => {
-          return !this._character.statusEffect.hasBuff("Call to Action");
+        {
+          statToModify: "specialCritAvoid",
+          amount: 0.5,
+          modifiedType: "additive",
+          condition: () => {
+            return !this._character.statusEffect.hasBuff("Call to Action");
+          },
+          characterSourceId: this._character.uniqueId,
         },
-        characterSourceId: this._character.uniqueId,
-      }
+      ],
+      this
     );
 
-    this._character?.stats.tempStats.push({
-      statToModify: "tenacity",
-      amount: 1,
-      modifiedType: "additive",
-      condition: () => {
-        return !this._character.statusEffect.hasBuff("Call to Action");
-      },
-      characterSourceId: this._character.uniqueId,
-    });
+    this._character?.stats.addTempStats(
+      [
+        {
+          statToModify: "physicalArmor",
+          amount: 0.5,
+          modifiedType: "multiplicative",
+          condition: () => {
+            return !this._character.statusEffect.hasBuff("Call to Action");
+          },
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          statToModify: "specialArmor",
+          amount: 0.5,
+          modifiedType: "multiplicative",
+          condition: () => {
+            return !this._character.statusEffect.hasBuff("Call to Action");
+          },
+          characterSourceId: this._character.uniqueId,
+        },
+      ],
+      this
+    );
+
+    this._character?.stats.addTempStats(
+      [
+        {
+          statToModify: "tenacity",
+          amount: 1,
+          modifiedType: "additive",
+          condition: () => {
+            return !this._character.statusEffect.hasBuff("Call to Action");
+          },
+          characterSourceId: this._character.uniqueId,
+        },
+      ],
+      this
+    );
 
     const targetList = this._character.teammates.filter((ally) => {
       return ally.hasTags("Rebel & !Self", this._character.id);
@@ -367,7 +388,7 @@ class leaderskill_COMMANDERLUKESKYWALKER extends PassiveAbility {
     });
 
     targetList.forEach((target) => {
-      target.stats.tempStats.push(
+      target.stats.addTempStats([
         {
           statToModify: "counterChance",
           amount: 0.5,
@@ -397,8 +418,8 @@ class leaderskill_COMMANDERLUKESKYWALKER extends PassiveAbility {
           amount: 0.15,
           modifiedType: "multiplicative",
           characterSourceId: this._character?.uniqueId,
-        }
-      );
+        },
+      ]);
 
       target.events.push({
         characterSourceId: this._character?.uniqueId ?? "",

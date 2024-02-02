@@ -197,11 +197,16 @@ class uniqueskill_C3POLEGENDARY01 extends PassiveAbility {
   }
 
   public override activate(): void {
-    this._character?.stats.tempStats.push({
-      statToModify: "speed",
-      amount: 20,
-      modifiedType: "additive",
-    });
+    this._character?.stats.addTempStats(
+      [
+        {
+          statToModify: "speed",
+          amount: 20,
+          modifiedType: "additive",
+        },
+      ],
+      this
+    );
 
     const rebelAllies = this._character.teammates.filter((ally) =>
       anyTagsMatch(ally, ["Rebel & !Self"], this._character.id)
@@ -277,7 +282,7 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
       (x) => x.id === "R2D2LEGENDARY" || x.id === this._character.id
     );
     validTargets.forEach((target) => {
-      target.stats.tempStats.push(
+      target.stats.addTempStats([
         {
           modifiedType: "additive",
           statToModify: "physicalDodge",
@@ -331,8 +336,8 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
             return target.statusEffect.hasBuff("Translation", undefined, 3);
           },
           characterSourceId: this._character.uniqueId,
-        }
-      );
+        },
+      ]);
 
       target.events.push({
         eventType: "matchSetup",
@@ -401,17 +406,20 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
 
   public override activate(): void {
     this._character.teammates.forEach((ally) => {
-      ally.stats.tempStats.push(
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-        },
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-        }
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+          },
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+          },
+        ],
+        this
       );
     });
 
@@ -456,108 +464,114 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
     });
 
     ewokAllies.forEach((ally) => {
-      ally.stats.tempStats.push(
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation");
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 2);
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 3);
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation");
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 2);
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 3);
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        }
+        ],
+        this
       );
     });
 
     republicAllies.forEach((ally) => {
-      ally.stats.tempStats.push(
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation");
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 2);
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 3);
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation");
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 2);
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 3);
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        }
+        ],
+        this
       );
     });
   }
@@ -575,11 +589,16 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
 
   public override activate(): void {
     this._character.teammates.forEach((ally) => {
-      ally.stats.tempStats.push({
-        statToModify: "critDamage",
-        amount: 0.1,
-        modifiedType: "additive",
-      });
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "critDamage",
+            amount: 0.1,
+            modifiedType: "additive",
+          },
+        ],
+        this
+      );
     });
 
     const ewokAllies = this._character.teammates.filter((ally) =>
@@ -620,60 +639,66 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
     });
 
     ewokAllies.forEach((ally) => {
-      ally.stats.tempStats.push(
-        {
-          statToModify: "critDamage",
-          amount: 0.2,
-          modifiedType: "additive",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation");
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "critDamage",
+            amount: 0.2,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "critDamage",
-          amount: 0.2,
-          modifiedType: "additive",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 2);
+          {
+            statToModify: "critDamage",
+            amount: 0.2,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "critDamage",
-          amount: 0.2,
-          modifiedType: "additive",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 3);
+          {
+            statToModify: "critDamage",
+            amount: 0.2,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        }
+        ],
+        this
       );
     });
 
     resistanceAllies.forEach((ally) => {
-      ally.stats.tempStats.push(
-        {
-          statToModify: "critDamage",
-          amount: 0.1,
-          modifiedType: "additive",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation");
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "critDamage",
+            amount: 0.1,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "critDamage",
-          amount: 0.1,
-          modifiedType: "additive",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 2);
+          {
+            statToModify: "critDamage",
+            amount: 0.1,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "critDamage",
-          amount: 0.1,
-          modifiedType: "additive",
-          condition: () => {
-            return ally.statusEffect.hasBuff("Translation", undefined, 3);
+          {
+            statToModify: "critDamage",
+            amount: 0.1,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        }
+        ],
+        this
       );
     });
   }

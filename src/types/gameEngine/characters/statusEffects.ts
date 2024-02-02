@@ -714,6 +714,9 @@ export class StatusEffect {
           match.duration = effect.duration;
           match.isNew = true;
         }
+        this._character.dispatchEvent("gainStatusEffect", {
+          statusEffect: effect,
+        });
 
         gameEngine.addLogs(
           new Log({
@@ -1000,7 +1003,7 @@ export type tBuff =
   | "all";
 
 /** A type for all of the available status effect names */
-export type tStatusEffect = "Guard";
+export type tStatusEffect = "Guard" | "Armor Shred" | "Advance" | "Cover";
 
 /** A generic status effect, usually a buff or debuff, that contains various data used to apply it correctly */
 export interface iStatusEffect {

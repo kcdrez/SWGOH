@@ -1,6 +1,8 @@
-import { Ability, IUnit, Unit } from "types/unit";
+import { IUnit, Unit } from "types/unit";
 import { Character } from "./index";
-import { iCondition } from "../gameEngine";
+import { gameEngine, iCondition } from "../gameEngine";
+import { Log } from "./log";
+import { Ability } from "./abilities";
 
 /** A generic interface that contains all of the base stats for a character */
 export interface iStats {
@@ -130,17 +132,18 @@ export interface iStatsCheck {
   };
   condition?: Function;
   characterSourceId?: string;
+  id?: string;
 }
 
 /** A container class used to hold all of a character's status any utility functions */
 export class Stats {
   public baseStats: iStats;
-  public tempStats: iStatsCheck[] = [];
-  private _role: IUnit["role"];
-  private _primaryStat: IUnit["primaryStat"];
-  private _character: Character;
-  private _curHealth: number = 0;
-  private _curProtection: number = 0;
+  protected tempStats: iStatsCheck[] = [];
+  protected _role: IUnit["role"];
+  protected _primaryStat: IUnit["primaryStat"];
+  protected _character: Character;
+  protected _curHealth: number = 0;
+  protected _curProtection: number = 0;
 
   constructor(data: Unit, parentCharacter: Character) {
     this._character = parentCharacter;
@@ -270,13 +273,18 @@ export class Stats {
   /**
    * Calculates how much should be removed from Protection Up, Protection, or Health
    * @param amount - The amount of health/protection that is lost
-   * @param type - The type of health lost if targetting a specific type (e.g. lose health, ignoring protection)
+   * @param type - The type of health lost if targeting a specific type (e.g. lose health, ignoring protection)
    */
   public loseHealth(amount: number, type?: "health" | "protection") {
     if (type === "health") {
+      if (this._character.statusEffect.isImmune("loseHealth")) {
+        return;
+      }
       this._curHealth -= amount;
       this._curHealth = Math.max(this._curHealth, 0);
-      this._character.dispatchEvent("loseHealth");
+      this._character.dispatchEvent("loseHealth", {
+        previousHealth: this._curHealth + amount,
+      });
     } else if (type === "protection") {
       this._curProtection -= amount;
       this._curProtection = Math.max(this._curProtection, 0);
@@ -314,8 +322,13 @@ export class Stats {
         this.loseHealth(diff);
       }
     } else {
+      if (this._character.statusEffect.isImmune("loseHealth")) {
+        return;
+      }
       this._curHealth -= amount;
-      this._character.dispatchEvent("loseHealth");
+      this._character.dispatchEvent("loseHealth", {
+        previousHealth: this._curHealth + amount,
+      });
     }
   }
 
@@ -627,6 +640,18 @@ export class Stats {
           self._character.statusEffect.hasDebuff("Defense Down");
         const hasBreach = self._character.statusEffect.hasDebuff("Breach");
 
+        const armorShredCount =
+          self._character.statusEffect.statusEffects.filter(
+            (s) => s.name === "Armor Shred"
+          ).length;
+
+        const armorShredValue = self._character.hasTags(
+          "Galactic Legend",
+          self._character.id
+        )
+          ? -0.25
+          : -0.5;
+
         return self.getModifiedStats(
           [
             {
@@ -636,6 +661,11 @@ export class Stats {
             {
               hasEffect: self._character.statusEffect.hasBuff("Defense Up"),
               value: 0.5,
+            },
+            {
+              hasEffect:
+                self._character.statusEffect.hasStatusEffect("Armor Shred"),
+              value: armorShredCount * armorShredValue,
             },
           ],
           stat,
@@ -917,6 +947,18 @@ export class Stats {
           }
         }
 
+        const armorShredCount =
+          self._character.statusEffect.statusEffects.filter(
+            (s) => s.name === "Armor Shred"
+          ).length;
+
+        const armorShredValue = self._character.hasTags(
+          "Galactic Legend",
+          self._character.id
+        )
+          ? -0.25
+          : -0.5;
+
         return self.getModifiedStats(
           [
             {
@@ -926,6 +968,11 @@ export class Stats {
             {
               hasEffect: self._character.statusEffect.hasBuff("Defense Up"),
               value: 0.5,
+            },
+            {
+              hasEffect:
+                self._character.statusEffect.hasStatusEffect("Armor Shred"),
+              value: armorShredCount * armorShredValue,
             },
           ],
           stat,
@@ -1254,6 +1301,48 @@ export class Stats {
       );
     }
     return mapping;
+  }
+
+  public addTempStats(statsList: iStatsCheck[], srcAbility?: Ability) {
+    this.tempStats.push(...statsList);
+    statsList.forEach((stat) => {
+      let amountLabel = stat.amount.toString();
+      if (stat.modifiedType === "multiplicative") {
+        amountLabel = `${stat.amount * 100}%`;
+      }
+      let conditionLabel = stat.condition ? " (if a condition is met)" : "";
+
+      gameEngine.addLogs(
+        new Log({
+          character: this._character,
+          customMessage: `gained ${amountLabel} (${stat.modifiedType}) ${stat.statToModify}${conditionLabel}`,
+          ability: { source: srcAbility },
+        })
+      );
+    });
+  }
+
+  public removeTempStats(characterId?: string, effectId?: string) {
+    this.tempStats = this.tempStats.filter((stat) => {
+      if (
+        stat.characterSourceId === characterId ||
+        (stat.id === effectId && effectId !== undefined)
+      ) {
+        let amountLabel = stat.amount.toString();
+        if (stat.modifiedType === "multiplicative") {
+          amountLabel = `${stat.amount * 100}%`;
+        }
+
+        gameEngine.addLogs(
+          new Log({
+            character: this._character,
+            customMessage: `removed ${amountLabel} (${stat.modifiedType}) ${stat.statToModify}`,
+          })
+        );
+        return false;
+      }
+      return true;
+    });
   }
 
   /** Removes any stats that shouldnt be present any more after the turn has ended */

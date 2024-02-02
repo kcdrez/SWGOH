@@ -193,19 +193,22 @@ class specialskill_C3POCHEWBACCA02 extends ActiveAbility {
       });
 
       for (let i = 0; i < defeatedByAbility; i++) {
-        this._character.stats.tempStats.push(
-          {
-            statToModify: "physicalOffense",
-            modifiedType: "multiplicative",
-            amount: 0.1,
-            characterSourceId: this._character.uniqueId,
-          },
-          {
-            statToModify: "specialOffense",
-            modifiedType: "multiplicative",
-            amount: 0.1,
-            characterSourceId: this._character.uniqueId,
-          }
+        this._character.stats.addTempStats(
+          [
+            {
+              statToModify: "physicalOffense",
+              modifiedType: "multiplicative",
+              amount: 0.1,
+              characterSourceId: this._character.uniqueId,
+            },
+            {
+              statToModify: "specialOffense",
+              modifiedType: "multiplicative",
+              amount: 0.1,
+              characterSourceId: this._character.uniqueId,
+            },
+          ],
+          this
         );
       }
     });
@@ -236,117 +239,53 @@ class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
       teamLeader &&
       anyTagsMatch(teamLeader, ["Rebel & !Galactic Legend"], teamLeader.id)
     ) {
-      this._character.stats.tempStats.push(
-        {
-          statToModify: "maxHealth",
-          amount: 0.4 * teamLeader.stats.baseStats.maxHealth,
-          modifiedType: "additive",
-          characterSourceId: this._character.uniqueId,
-        },
-        {
-          statToModify: "maxProtection",
-          amount: 0.4 * teamLeader.stats.baseStats.maxProtection,
-          modifiedType: "additive",
-          characterSourceId: this._character.uniqueId,
-        },
-        {
-          statToModify: "physicalOffense",
-          amount: 0.4 * teamLeader.stats.baseStats.physical.offense,
-          modifiedType: "additive",
-          characterSourceId: this._character.uniqueId,
-        },
-        {
-          statToModify: "specialOffense",
-          amount: 0.4 * teamLeader.stats.baseStats.special.offense,
-          modifiedType: "additive",
-          characterSourceId: this._character.uniqueId,
-        },
-        {
-          statToModify: "physicalArmor",
-          amount: 0.4 * teamLeader.stats.baseStats.physical.armor,
-          modifiedType: "additive",
-          characterSourceId: this._character.uniqueId,
-        },
-        {
-          statToModify: "specialArmor",
-          amount: 0.4 * teamLeader.stats.baseStats.special.armor,
-          modifiedType: "additive",
-          characterSourceId: this._character.uniqueId,
-        },
-        {
-          statToModify: "potency",
-          amount: 0.4 * teamLeader.stats.baseStats.potency,
-          modifiedType: "additive",
-          characterSourceId: this._character.uniqueId,
-        },
-        {
-          statToModify: "tenacity",
-          amount: 0.4 * teamLeader.stats.baseStats.tenacity,
-          modifiedType: "additive",
-          characterSourceId: this._character.uniqueId,
-        },
-        {
-          statToModify: "physicalCritAvoid",
-          amount: 0.15,
-          modifiedType: "additive",
-          characterSourceId: this._character.uniqueId,
-        },
-        {
-          statToModify: "specialCritAvoid",
-          amount: 0.15,
-          modifiedType: "additive",
-          characterSourceId: this._character.uniqueId,
-        }
-      );
-      this._character.stats.initialize();
-
-      otherRebels.forEach((character) => {
-        character.stats.tempStats.push(
+      this._character.stats.addTempStats(
+        [
           {
             statToModify: "maxHealth",
-            amount: 0.2 * teamLeader.stats.baseStats.maxHealth,
+            amount: 0.4 * teamLeader.stats.baseStats.maxHealth,
             modifiedType: "additive",
             characterSourceId: this._character.uniqueId,
           },
           {
             statToModify: "maxProtection",
-            amount: 0.2 * teamLeader.stats.baseStats.maxProtection,
+            amount: 0.4 * teamLeader.stats.baseStats.maxProtection,
             modifiedType: "additive",
             characterSourceId: this._character.uniqueId,
           },
           {
             statToModify: "physicalOffense",
-            amount: 0.2 * teamLeader.stats.baseStats.physical.offense,
+            amount: 0.4 * teamLeader.stats.baseStats.physical.offense,
             modifiedType: "additive",
             characterSourceId: this._character.uniqueId,
           },
           {
             statToModify: "specialOffense",
-            amount: 0.2 * teamLeader.stats.baseStats.special.offense,
+            amount: 0.4 * teamLeader.stats.baseStats.special.offense,
             modifiedType: "additive",
             characterSourceId: this._character.uniqueId,
           },
           {
             statToModify: "physicalArmor",
-            amount: 0.2 * teamLeader.stats.baseStats.physical.armor,
+            amount: 0.4 * teamLeader.stats.baseStats.physical.armor,
             modifiedType: "additive",
             characterSourceId: this._character.uniqueId,
           },
           {
             statToModify: "specialArmor",
-            amount: 0.2 * teamLeader.stats.baseStats.special.armor,
+            amount: 0.4 * teamLeader.stats.baseStats.special.armor,
             modifiedType: "additive",
             characterSourceId: this._character.uniqueId,
           },
           {
             statToModify: "potency",
-            amount: 0.2 * teamLeader.stats.baseStats.potency,
+            amount: 0.4 * teamLeader.stats.baseStats.potency,
             modifiedType: "additive",
             characterSourceId: this._character.uniqueId,
           },
           {
             statToModify: "tenacity",
-            amount: 0.2 * teamLeader.stats.baseStats.tenacity,
+            amount: 0.4 * teamLeader.stats.baseStats.tenacity,
             modifiedType: "additive",
             characterSourceId: this._character.uniqueId,
           },
@@ -361,7 +300,77 @@ class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
             amount: 0.15,
             modifiedType: "additive",
             characterSourceId: this._character.uniqueId,
-          }
+          },
+        ],
+        this
+      );
+      this._character.stats.initialize();
+
+      otherRebels.forEach((character) => {
+        character.stats.addTempStats(
+          [
+            {
+              statToModify: "maxHealth",
+              amount: 0.2 * teamLeader.stats.baseStats.maxHealth,
+              modifiedType: "additive",
+              characterSourceId: this._character.uniqueId,
+            },
+            {
+              statToModify: "maxProtection",
+              amount: 0.2 * teamLeader.stats.baseStats.maxProtection,
+              modifiedType: "additive",
+              characterSourceId: this._character.uniqueId,
+            },
+            {
+              statToModify: "physicalOffense",
+              amount: 0.2 * teamLeader.stats.baseStats.physical.offense,
+              modifiedType: "additive",
+              characterSourceId: this._character.uniqueId,
+            },
+            {
+              statToModify: "specialOffense",
+              amount: 0.2 * teamLeader.stats.baseStats.special.offense,
+              modifiedType: "additive",
+              characterSourceId: this._character.uniqueId,
+            },
+            {
+              statToModify: "physicalArmor",
+              amount: 0.2 * teamLeader.stats.baseStats.physical.armor,
+              modifiedType: "additive",
+              characterSourceId: this._character.uniqueId,
+            },
+            {
+              statToModify: "specialArmor",
+              amount: 0.2 * teamLeader.stats.baseStats.special.armor,
+              modifiedType: "additive",
+              characterSourceId: this._character.uniqueId,
+            },
+            {
+              statToModify: "potency",
+              amount: 0.2 * teamLeader.stats.baseStats.potency,
+              modifiedType: "additive",
+              characterSourceId: this._character.uniqueId,
+            },
+            {
+              statToModify: "tenacity",
+              amount: 0.2 * teamLeader.stats.baseStats.tenacity,
+              modifiedType: "additive",
+              characterSourceId: this._character.uniqueId,
+            },
+            {
+              statToModify: "physicalCritAvoid",
+              amount: 0.15,
+              modifiedType: "additive",
+              characterSourceId: this._character.uniqueId,
+            },
+            {
+              statToModify: "specialCritAvoid",
+              amount: 0.15,
+              modifiedType: "additive",
+              characterSourceId: this._character.uniqueId,
+            },
+          ],
+          this
         );
         character.stats.initialize();
       });
@@ -410,16 +419,20 @@ class uniqueskill_C3POCHEWBACCA extends PassiveAbility {
     });
 
     this._character.opponents.forEach((target) => {
-      target.stats.tempStats.push({
-        statToModify: "tenacity",
-        amount: -0.5,
-        modifiedType: "additive",
-        condition: () => {
-          return target.statusEffect.hasDebuff("Blind");
-        },
-
-        characterSourceId: this._character.uniqueId,
-      });
+      target.stats.addTempStats(
+        [
+          {
+            statToModify: "tenacity",
+            amount: -0.5,
+            modifiedType: "additive",
+            condition: () => {
+              return target.statusEffect.hasDebuff("Blind");
+            },
+            characterSourceId: this._character.uniqueId,
+          },
+        ],
+        this
+      );
 
       target.statusEffect.addImmune(
         this._character.uniqueId,

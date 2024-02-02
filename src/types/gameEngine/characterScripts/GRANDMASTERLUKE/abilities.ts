@@ -4,12 +4,13 @@ import {
   ActiveAbility,
   PassiveAbility,
 } from "types/gameEngine/characters/abilities";
-import { Character } from "../characters/index";
-import { iStatsCheck } from "../characters/stats";
-import { gameEngine } from "../gameEngine";
-import { Log } from "../characters/log";
-import { anyTagsMatch } from "../characters/index";
-import { iBuff } from "../characters/statusEffects";
+import { Character } from "../../characters/index";
+import { iStatsCheck } from "../../characters/stats";
+import { gameEngine } from "../../gameEngine";
+import { Log } from "../../characters/log";
+import { anyTagsMatch } from "../../characters/index";
+import { iBuff } from "../../characters/statusEffects";
+import { IUnit, Unit } from "types/unit";
 
 class basicskill_GRANDMASTERLUKE extends ActiveAbility {
   constructor(character: Character) {
@@ -62,12 +63,17 @@ class basicskill_GRANDMASTERLUKE extends ActiveAbility {
       }
 
       if (stackCounter < 20) {
-        this._character.stats.tempStats.push({
-          characterSourceId: this._character.uniqueId,
-          statToModify: "maxHealth",
-          amount: 0.02 * this._character.stats.maxHealth,
-          modifiedType: "additive",
-        });
+        this._character.stats.addTempStats(
+          [
+            {
+              characterSourceId: this._character.uniqueId,
+              statToModify: "maxHealth",
+              amount: 0.02 * this._character.stats.maxHealth,
+              modifiedType: "additive",
+            },
+          ],
+          this
+        );
         stackCounter++;
       }
     });
@@ -323,54 +329,60 @@ class leaderskill_GRANDMASTERLUKE extends PassiveAbility {
     const triggeredList: string[] = [];
 
     lightSideNonJediAllies.forEach((target) => {
-      target.stats.tempStats.push(
-        {
-          statToModify: "maxHealth",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          characterSourceId: this._character?.uniqueId,
-        },
-        {
-          statToModify: "maxProtection",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          characterSourceId: this._character?.uniqueId,
-        }
+      target.stats.addTempStats(
+        [
+          {
+            statToModify: "maxHealth",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            characterSourceId: this._character?.uniqueId,
+          },
+          {
+            statToModify: "maxProtection",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            characterSourceId: this._character?.uniqueId,
+          },
+        ],
+        this
       );
     });
 
     jediAllies.forEach((target) => {
-      target.stats.tempStats.push(
-        {
-          statToModify: "maxHealth",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          characterSourceId: this._character?.uniqueId,
-        },
-        {
-          statToModify: "maxProtection",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          characterSourceId: this._character?.uniqueId,
-        },
-        {
-          statToModify: "physicalOffense",
-          amount: 0.3,
-          modifiedType: "multiplicative",
-          characterSourceId: this._character?.uniqueId,
-        },
-        {
-          statToModify: "specialOffense",
-          amount: 0.3,
-          modifiedType: "multiplicative",
-          characterSourceId: this._character?.uniqueId,
-        },
-        {
-          statToModify: "speed",
-          amount: 40,
-          modifiedType: "additive",
-          characterSourceId: this._character?.uniqueId,
-        }
+      target.stats.addTempStats(
+        [
+          {
+            statToModify: "maxHealth",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            characterSourceId: this._character?.uniqueId,
+          },
+          {
+            statToModify: "maxProtection",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            characterSourceId: this._character?.uniqueId,
+          },
+          {
+            statToModify: "physicalOffense",
+            amount: 0.3,
+            modifiedType: "multiplicative",
+            characterSourceId: this._character?.uniqueId,
+          },
+          {
+            statToModify: "specialOffense",
+            amount: 0.3,
+            modifiedType: "multiplicative",
+            characterSourceId: this._character?.uniqueId,
+          },
+          {
+            statToModify: "speed",
+            amount: 40,
+            modifiedType: "additive",
+            characterSourceId: this._character?.uniqueId,
+          },
+        ],
+        this
       );
 
       target.events.push({
@@ -613,6 +625,150 @@ class grantedability_grandmasterluke_inherited_teachings extends ActiveAbility {
   }
 }
 
+class uniqueability_grandmasterluke01 extends PassiveAbility {
+  constructor(character: Character) {
+    super(
+      "uniqueability_grandmasterluke01",
+      "Jedi Legacy",
+      `Jedi allies may gain Jedi Lessons.
+
+      The first time each other Light Side ally falls below 100% Health, they recover 25% Health and Protection, doubled for Jedi allies.
+      
+      At the start of battle, Jedi Master Luke Skywalker gains Jedi Legacy until the end of battle, which can't be copied, dispelled, or prevented.
+      
+      Jedi Legacy: +100% Mastery and ignores Taunt effects during their turn; can't gain Jedi Lessons`,
+      character
+    );
+  }
+
+  public override activate(): void {
+    const lightSideAllies = this._character.teammates.filter((ally) => {
+      return ally.hasTags("Light Side", this._character.id);
+    });
+
+    const triggeredList: string[] = [];
+
+    lightSideAllies.forEach((target) => {
+      target.events.push({
+        eventType: "loseHealth",
+        characterSourceId: this._character.uniqueId,
+        callback: ({ previousHealth }) => {
+          if (
+            target.stats.health < target.stats.maxHealth &&
+            previousHealth >= target.stats.maxHealth
+          ) {
+            const alreadyTriggered = triggeredList.some(
+              (x) => x === target.uniqueId
+            );
+            if (!alreadyTriggered) {
+              triggeredList.push(target.uniqueId);
+              const isJedi = target.hasTags("Jedi", this._character.id);
+              target.heal(
+                {
+                  amount: isJedi ? 0.5 : 0.25,
+                  healthType: "health",
+                  amountType: "multiplicative",
+                },
+                this
+              );
+              target.heal(
+                {
+                  amount: isJedi ? 0.5 : 0.25,
+                  healthType: "protection",
+                  amountType: "multiplicative",
+                },
+                this
+              );
+            }
+          }
+        },
+      });
+    });
+
+    this._character.events.push({
+      eventType: "matchSetup",
+      characterSourceId: this._character.uniqueId,
+      callback: () => {
+        this._character.statusEffect.addBuff(
+          [
+            {
+              name: "Jedi Legacy",
+              id: uuid(),
+              duration: Infinity,
+              cantDispel: true,
+              unique: true,
+              cantPrevent: true,
+              sourceAbility: this,
+            },
+          ],
+          1,
+          this
+        );
+      },
+    });
+  }
+}
+
+class uniqueability_galacticlegend01 extends PassiveAbility {
+  constructor(character: Character) {
+    super(
+      "uniqueability_galacticlegend01",
+      "Galactic Legend",
+      `This unit takes reduced damage from percent Health damage effects and massive damage effects. They take massive damage from destroy effects (excludes raid bosses) and are immune to stun effects.
+
+      This unit has +10% Max Health and Max Protection per Relic Amplifier level, and damage they receive is decreased by 30%.`,
+      character
+    );
+  }
+
+  public override activate(): void {
+    this._character.stats.addTempStats(
+      [
+        {
+          statToModify: "protection",
+          amount:
+            0.1 *
+            this._character.relicLevel *
+            this._character.stats.maxProtection,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          statToModify: "health",
+          amount:
+            0.1 * this._character.relicLevel * this._character.stats.maxHealth,
+          modifiedType: "additive",
+          characterSourceId: this._character.uniqueId,
+        },
+      ],
+      this
+    );
+
+    //todo
+    // this._character.events.push({
+    //   eventType: "destroy",
+    //   characterSourceId: this._character.uniqueId,
+    //   callback: () => {
+
+    //   }
+    // })
+
+    this._character.statusEffect.addImmune(
+      "jml_galactic_legend",
+      "Fear",
+      undefined,
+      this
+    );
+    this._character.statusEffect.addImmune(
+      "jml_galactic_legend",
+      "Stun",
+      undefined,
+      this
+    );
+    // this._character.statusEffect.addImmune("jml_galactic_legend", "Destroy", undefined, this)
+  }
+}
+
 const basicAbility = new Map([
   ["basicskill_GRANDMASTERLUKE", basicskill_GRANDMASTERLUKE],
 ]);
@@ -622,7 +778,9 @@ const specialAbilities = new Map([
   ["specialskill_GRANDMASTERLUKE02", specialskill_GRANDMASTERLUKE02],
 ]);
 
-const uniqueAbilities = new Map([]);
+const uniqueAbilities = new Map([
+  ["uniqueability_grandmasterluke01", uniqueability_grandmasterluke01],
+]);
 
 const leaderAbility = new Map([
   ["leaderskill_GRANDMASTERLUKE", leaderskill_GRANDMASTERLUKE],

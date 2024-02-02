@@ -110,9 +110,15 @@ abstract class CharacterAbility extends Ability {
    * @returns The character target or null if no valid targets exist
    */
   public findRandomEnemy(forcedTarget?: Character, ignoreTaunt?: boolean) {
-    return this.findTargets(this._character.opponents, forcedTarget, {
-      taunt: ignoreTaunt ?? this._character.effects.ignoreTaunt,
-    });
+    return this.findTargets(
+      this._character.opponents.filter(
+        (c) => !c.statusEffect.isImmune("Targeting")
+      ),
+      forcedTarget,
+      {
+        taunt: ignoreTaunt ?? this._character.effects.ignoreTaunt,
+      }
+    );
   }
 
   /**
@@ -253,7 +259,17 @@ export abstract class ActiveAbility extends CharacterAbility {
       gameEngine.addLogs(
         new Log({ character: this._character, ability: { used: this } })
       );
+      this._character.dispatchEvent("beforeUseAbility", {
+        abilityId: this.id,
+        target: targetCharacter,
+      });
+
       additionalEffects();
+
+      if (this.cooldown) {
+        this.turnsRemaining = this.cooldown;
+      }
+
       this._character.dispatchEvent("useAbility", {
         abilityId: this.id,
         target: targetCharacter,
@@ -409,18 +425,14 @@ export abstract class PassiveAbility extends CharacterAbility {
       target.events = target.events.filter((event) => {
         return event.characterSourceId !== this._character?.uniqueId;
       });
-      target.stats.tempStats = target.stats.tempStats.filter((stat) => {
-        return stat.characterSourceId !== this._character?.uniqueId;
-      });
+      target.stats.removeTempStats(this._character?.uniqueId);
     });
 
     this._character?.opponents.forEach((target) => {
       target.events = target.events.filter((event) => {
         return event.characterSourceId !== this._character?.uniqueId;
       });
-      target.stats.tempStats = target.stats.tempStats.filter((stat) => {
-        return stat.characterSourceId !== this._character?.uniqueId;
-      });
+      target.stats.removeTempStats(this._character?.uniqueId);
     });
   }
 }

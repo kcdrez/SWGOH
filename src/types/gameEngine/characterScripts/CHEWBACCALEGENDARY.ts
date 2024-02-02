@@ -345,43 +345,46 @@ class uniqueskill_CHEWBACCALEGENDARY02 extends PassiveAbility {
         characterSourceId: this._character.uniqueId,
         callback: ({ attackSource }) => {
           if (attackSource) {
-            this._character.stats.tempStats.push(
-              {
-                statToModify: "physicalOffense",
-                amount: 0.25,
-                modifiedType: "multiplicative",
-                expires: {
-                  count: 1,
-                  frequency: "turn",
+            this._character.stats.addTempStats(
+              [
+                {
+                  statToModify: "physicalOffense",
+                  amount: 0.25,
+                  modifiedType: "multiplicative",
+                  expires: {
+                    count: 1,
+                    frequency: "turn",
+                  },
                 },
-              },
-              {
-                statToModify: "specialOffense",
-                amount: 0.25,
-                modifiedType: "multiplicative",
-                expires: {
-                  count: 1,
-                  frequency: "turn",
+                {
+                  statToModify: "specialOffense",
+                  amount: 0.25,
+                  modifiedType: "multiplicative",
+                  expires: {
+                    count: 1,
+                    frequency: "turn",
+                  },
                 },
-              },
-              {
-                statToModify: "physicalCritChance",
-                amount: 0.25,
-                modifiedType: "additive",
-                expires: {
-                  count: 1,
-                  frequency: "turn",
+                {
+                  statToModify: "physicalCritChance",
+                  amount: 0.25,
+                  modifiedType: "additive",
+                  expires: {
+                    count: 1,
+                    frequency: "turn",
+                  },
                 },
-              },
-              {
-                statToModify: "specialCritChance",
-                amount: 0.25,
-                modifiedType: "additive",
-                expires: {
-                  count: 1,
-                  frequency: "turn",
+                {
+                  statToModify: "specialCritChance",
+                  amount: 0.25,
+                  modifiedType: "additive",
+                  expires: {
+                    count: 1,
+                    frequency: "turn",
+                  },
                 },
-              }
+              ],
+              this
             );
           }
         },

@@ -173,22 +173,25 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
   public override activate(): void {
     this.triggerCount = 0;
 
-    this._character?.stats.tempStats.push(
-      {
-        statToModify: "counterChance",
-        amount: 0.35,
-        modifiedType: "additive",
-      },
-      {
-        statToModify: "physicalCritChance",
-        amount: 0.2,
-        modifiedType: "additive",
-      },
-      {
-        statToModify: "specialCritChance",
-        amount: 0.2,
-        modifiedType: "additive",
-      }
+    this._character?.stats.addTempStats(
+      [
+        {
+          statToModify: "counterChance",
+          amount: 0.35,
+          modifiedType: "additive",
+        },
+        {
+          statToModify: "physicalCritChance",
+          amount: 0.2,
+          modifiedType: "additive",
+        },
+        {
+          statToModify: "specialCritChance",
+          amount: 0.2,
+          modifiedType: "additive",
+        },
+      ],
+      this
     );
 
     this._character?.events.push(

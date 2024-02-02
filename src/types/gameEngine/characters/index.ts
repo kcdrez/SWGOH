@@ -7,21 +7,23 @@ import { iHeal, iStats, iStatsCheck, Stats } from "./stats";
 import { StatusEffect } from "./statusEffects";
 import { Ability, ActiveAbility, PassiveAbility } from "./abilities";
 import { IUnit, Unit } from "types/unit";
-import characterList from "../characterScripts";
+import { abilitiesList } from "../characterScripts/abilitiesList";
 import { Log, tLogData } from "./log";
 
-import { gameEngine, iCondition } from "../gameEngine";
+import { gameEngine } from "../gameEngine";
 
 /**
  * A type to determine what events are supported
  * @type tEventType
  */
 type tEventType =
+  | "beforeUseAbility"
   | "buffed"
   | "dealDamage"
   | "death"
   | "dispel"
   | "endOfTurn"
+  | "gainStatusEffect"
   | "inflicted"
   | "loseHealth"
   | "loseProtection"
@@ -43,8 +45,10 @@ export class Character {
   public id: string;
   public name: string;
   private _tm: number = 0;
+  public relicLevel: number = 0;
   private _basicAbility: ActiveAbility | null = null;
   private _specialAbilities: ActiveAbility[] = [];
+  protected _hiddenAbilities: ActiveAbility[] = [];
   private _uniqueAbilities: PassiveAbility[] = [];
   private _leaderAbility: PassiveAbility | null = null;
   public owner: string;
@@ -57,7 +61,10 @@ export class Character {
     eventType: tEventType;
     characterSourceId?: string;
     callback: Function;
+    id?: string;
   }[] = [];
+  public keywords: string[] = [];
+  public hasBonusTurn: boolean = false;
 
   constructor(data: Unit, owner: string, isLeader?: boolean) {
     this.stats = new Stats(data, this);
@@ -69,8 +76,9 @@ export class Character {
     this._alignment = data.alignment;
     this._categories = data.categories;
     this.isLeader = isLeader ?? false;
+    this.relicLevel = data.relicLevel;
 
-    const abilityList = characterList[this.id];
+    const abilityList = abilitiesList[this.id];
     data.abilities.forEach((x) => {
       if (x.id.includes("basic")) {
         const abilityClass = abilityList.basicAbility.get(x.id);
@@ -114,6 +122,11 @@ export class Character {
   /** The character's special abilities */
   public get specialAbilities() {
     return this._specialAbilities;
+  }
+
+  /** The character's hidden abilities */
+  public get hiddenAbilities() {
+    return this._hiddenAbilities;
   }
 
   /** A list of abilities including the basic ability and specials */
@@ -375,6 +388,7 @@ export class Character {
         a.turnsRemaining = Math.max(a.turnsRemaining - 1, 0);
       }
     });
+    this.hasBonusTurn = false;
   }
 
   /**
@@ -391,7 +405,8 @@ export class Character {
       return this._basicAbility;
     } else if (
       this._specialAbilities.every(
-        (a) => a.turnsRemaining !== null && a.turnsRemaining > 0 && !a.canBeUsed
+        (a) =>
+          (a.turnsRemaining !== null && a.turnsRemaining > 0) || !a.canBeUsed
       )
     ) {
       return this._basicAbility;
@@ -407,15 +422,17 @@ export class Character {
       }
     });
 
-    if (ability) {
-      ability.turnsRemaining = ability.cooldown;
-    }
     return ability ?? null;
   }
 
   /** Checks if the user has any leader abilities */
   public get hasLeaderAbility() {
     return !!this._leaderAbility;
+  }
+
+  /** Gets the leader ability */
+  public get leaderAbility() {
+    return this.leaderAbility;
   }
 
   /** Assists with their basic attack
@@ -599,7 +616,7 @@ export class Character {
    * @param health - The amount of health that should be set as the current amount
    */
   public revive(protection: number, health: number) {
-    if (this.isDead) {
+    if (this.isDead && !this.statusEffect.isImmune("Revive")) {
       this.initialize();
       this.stats.gainHealth(protection, "protection");
       this.stats.gainHealth(health, "health");

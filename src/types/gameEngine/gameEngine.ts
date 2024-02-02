@@ -275,7 +275,9 @@ export class Engine {
 
       this.turns.push(new Turn(turnNumber, character));
       character.takeAction();
-      this.allCharacters.forEach((c) => c.dispatchEvent("endOfTurn"));
+      this.allCharacters.forEach((c) =>
+        c.dispatchEvent("endOfTurn", { character })
+      );
     }
   }
 

@@ -200,42 +200,44 @@
                         turn.logs.length > 0 || turn.endOfTurnLogs.length > 0
                       "
                     >
-                    <Popper arrow placement="right">
-                      <h6 class="turn-label">{{ turn.label }}:</h6>
-                      <template #content>
-                        <div>
-                          <div
-                            class="input-group input-group-sm"
-                            v-for="(character, index) in turn.characterList"
-                            :key="index"
-                          >
-                            <span class="input-group-text character-name"
-                              >{{ character.name }} ({{
-                                character.owner
-                              }})</span
+                      <Popper arrow placement="right">
+                        <h6 class="turn-label">{{ turn.label }}:</h6>
+                        <template #content>
+                          <div>
+                            <div
+                              class="input-group input-group-sm"
+                              v-for="(character, index) in turn.characterList"
+                              :key="index"
                             >
-                            <span class="input-group-text fill turn-meter">
-                              <ProgressBar
-                                :percent="character.turnMeter"
-                                class="w-100"
-                              />
-                            </span>
+                              <span class="input-group-text character-name"
+                                >{{ character.name }} ({{
+                                  character.owner
+                                }})</span
+                              >
+                              <span class="input-group-text fill turn-meter">
+                                <ProgressBar
+                                  :percent="character.turnMeter"
+                                  class="w-100"
+                                />
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </template>
-                    </Popper>
-                    <ul>
-                      <li v-for="(log, index) in turn.logs" :key="index">
-                        <Log :log="log" />
-                      </li>
-                      <li v-if="turn.endOfTurnLogs.length">- End of Turn -</li>
-                      <li
-                        v-for="(log, index) in turn.endOfTurnLogs"
-                        :key="index"
-                      >
-                        <Log :log="log" />
-                      </li>
-                    </ul>
+                        </template>
+                      </Popper>
+                      <ul>
+                        <li v-for="(log, index) in turn.logs" :key="index">
+                          <Log :log="log" />
+                        </li>
+                        <li v-if="turn.endOfTurnLogs.length">
+                          - End of Turn -
+                        </li>
+                        <li
+                          v-for="(log, index) in turn.endOfTurnLogs"
+                          :key="index"
+                        >
+                          <Log :log="log" />
+                        </li>
+                      </ul>
                     </template>
                   </template>
                 </div>
@@ -266,7 +268,8 @@ import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
 import Trigger from "components/gameEngine/triggers/trigger.vue";
 import Log from "components/gameEngine/log.vue";
-import characterList from "types/gameEngine/characterScripts";
+import { abilitiesList } from "types/gameEngine/characterScripts/abilitiesList";
+import charactersList from "types/gameEngine/characterScripts/charactersList";
 import { loadingState } from "types/loading";
 
 interface dataModel {
@@ -302,7 +305,7 @@ export default defineComponent({
     playerUnitList(): Unit[] {
       return this.player?.units.filter((unit: Unit) => {
         return (
-          unit.id in characterList &&
+          unit.id in abilitiesList &&
           !this.playerTeam.some((x) => x.id === unit.id)
         );
       });
@@ -310,7 +313,7 @@ export default defineComponent({
     opponentUnitList(): Unit[] {
       return this.opponent?.units.filter((unit: Unit) => {
         return (
-          unit.id in characterList &&
+          unit.id in abilitiesList &&
           !this.opponentTeam.some((x) => x.id === unit.id)
         );
       });
@@ -331,15 +334,31 @@ export default defineComponent({
       if (unit instanceof Unit) {
         if (teamName === "player") {
           if (!this.playerTeam.some((x) => x.id === unit.id)) {
-            this.playerTeam.push(
-              new Character(unit, this.player.name, isLeader)
-            );
+            const characterClass = charactersList.get(unit.id);
+
+            if (characterClass) {
+              this.playerTeam.push(
+                new characterClass(unit, this.player.name, isLeader)
+              );
+            } else {
+              this.playerTeam.push(
+                new Character(unit, this.player.name, isLeader)
+              );
+            }
           }
         } else {
           if (!this.opponentTeam.some((x) => x.id === unit.id)) {
-            this.opponentTeam.push(
-              new Character(unit, this.opponent.name, isLeader)
-            );
+            const characterClass = charactersList.get(unit.id);
+
+            if (characterClass) {
+              this.opponentTeam.push(
+                new characterClass(unit, this.player.name, isLeader)
+              );
+            } else {
+              this.opponentTeam.push(
+                new Character(unit, this.player.name, isLeader)
+              );
+            }
           }
         }
         this.saveData();
@@ -450,3 +469,4 @@ export default defineComponent({
   width: 150px;
 }
 </style>
+types
