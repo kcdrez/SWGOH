@@ -36,7 +36,14 @@ class basicskill_CHEWBACCALEGENDARY extends ActiveAbility {
             canBeCountered
           );
           this._character.statusEffect.inflictDebuff(
-            [{ name: "Tenacity Down", id: uuid(), duration: 2 }],
+            [
+              {
+                name: "Tenacity Down",
+                id: uuid(),
+                duration: 2,
+                sourceAbility: this,
+              },
+            ],
             primaryTarget,
             1,
             this
@@ -94,8 +101,13 @@ class specialskill_CHEWBACCALEGENDARY01 extends ActiveAbility {
 
       this._character.statusEffect.addBuff(
         [
-          { name: "Offense Up", duration: 2, id: uuid() },
-          { name: "Critical Chance Up", duration: 2, id: uuid() },
+          { name: "Offense Up", duration: 2, id: uuid(), sourceAbility: this },
+          {
+            name: "Critical Chance Up",
+            duration: 2,
+            id: uuid(),
+            sourceAbility: this,
+          },
         ],
         1,
         this
@@ -129,7 +141,7 @@ class specialskill_CHEWBACCALEGENDARY02 extends ActiveAbility {
     super.execute(primaryTarget, stats, canBeCountered, () => {
       if (primaryTarget) {
         this._character.statusEffect.inflictDebuff(
-          [{ name: "Stun", duration: 1, id: uuid() }],
+          [{ name: "Stun", duration: 1, id: uuid(), sourceAbility: this }],
           primaryTarget,
           1,
           this
@@ -194,7 +206,12 @@ class uniqueskill_CHEWBACCALEGENDARY01 extends PassiveAbility {
           [weakestCharacter, hansolo].forEach((target) => {
             if (target) {
               target.statusEffect.addStatusEffect(
-                { name: "Guard", duration: Infinity, id: uuid() },
+                {
+                  name: "Guard",
+                  duration: Infinity,
+                  id: uuid(),
+                  sourceAbility: this,
+                },
                 this
               );
               target.events.push({
@@ -328,43 +345,46 @@ class uniqueskill_CHEWBACCALEGENDARY02 extends PassiveAbility {
         characterSourceId: this._character.uniqueId,
         callback: ({ attackSource }) => {
           if (attackSource) {
-            this._character.stats.tempStats.push(
-              {
-                statToModify: "physicalOffense",
-                amount: 0.25,
-                modifiedType: "multiplicative",
-                expires: {
-                  count: 1,
-                  frequency: "turn",
+            this._character.stats.addTempStats(
+              [
+                {
+                  statToModify: "physicalOffense",
+                  amount: 0.25,
+                  modifiedType: "multiplicative",
+                  expires: {
+                    count: 1,
+                    frequency: "turn",
+                  },
                 },
-              },
-              {
-                statToModify: "specialOffense",
-                amount: 0.25,
-                modifiedType: "multiplicative",
-                expires: {
-                  count: 1,
-                  frequency: "turn",
+                {
+                  statToModify: "specialOffense",
+                  amount: 0.25,
+                  modifiedType: "multiplicative",
+                  expires: {
+                    count: 1,
+                    frequency: "turn",
+                  },
                 },
-              },
-              {
-                statToModify: "physicalCritChance",
-                amount: 0.25,
-                modifiedType: "additive",
-                expires: {
-                  count: 1,
-                  frequency: "turn",
+                {
+                  statToModify: "physicalCritChance",
+                  amount: 0.25,
+                  modifiedType: "additive",
+                  expires: {
+                    count: 1,
+                    frequency: "turn",
+                  },
                 },
-              },
-              {
-                statToModify: "specialCritChance",
-                amount: 0.25,
-                modifiedType: "additive",
-                expires: {
-                  count: 1,
-                  frequency: "turn",
+                {
+                  statToModify: "specialCritChance",
+                  amount: 0.25,
+                  modifiedType: "additive",
+                  expires: {
+                    count: 1,
+                    frequency: "turn",
+                  },
                 },
-              }
+              ],
+              this
             );
           }
         },

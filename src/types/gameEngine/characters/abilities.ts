@@ -4,8 +4,7 @@ import _ from "lodash";
 import { Character, anyTagsMatch } from "./index";
 import { iStatsCheck } from "./stats";
 import { tBuff, tDebuff, tStatusEffect } from "./statusEffects";
-import { chanceOfEvent, randomNumber } from "utils";
-import { gameEngine } from "types/gameEngine/gameEngine";
+import { chanceOfEvent, randomNumber } from "./utils";
 import { Log } from "./log";
 
 /**
@@ -28,6 +27,10 @@ export class Ability {
     this.text = text;
     this._character = parentCharacter;
   }
+
+  public sanitize() {
+    return { id: this.id, name: this.name, text: this.text };
+  }
 }
 
 /**
@@ -46,137 +49,12 @@ abstract class CharacterAbility extends Ability {
   }
 
   /**
-   * @param targetData - The target data used to determine how to find valid targets
-   * @param forcedTarget - Used in the case that the targetData should use an already selected target (such as for an assist)
-   * @param include - Used to ignore specific attributes, such as dead characters. By default, these characters are not considered for selection
-   * @returns targetList - List of valid targets, primaryTarget - primary opponent target
+   * Finds a valid target from the provided list with the ability to ignore certain effects (like taunt)
+   * @param validTargets - A List of all the valid targets to select from
+   * @param forcedTarget - The target that must be selected, if able
+   * @param include - A configuration to ignore certain effects
+   * @returns The character target or null if no valid targets exist
    */
-  // public findTargets(
-  //   targetData: iTargetData,
-  //   forcedTarget?: Character | null,
-  //   include?: {
-  //     dead?: boolean;
-  //   }
-  // ): { targetList: Character[]; primaryTarget: Character | null } {
-  //   let primaryTarget: Character | null = forcedTarget ?? null;
-
-  //   const validTargets: Character[] = [
-  //     ...(this._character?.teammates ?? []),
-  //     ...(this._character?.opponents ?? []),
-  //   ].filter((char: Character) => {
-  //     let shouldInclude = true;
-
-  //     if (char.isDead) {
-  //       shouldInclude = include?.dead ?? false;
-  //     }
-  //     return shouldInclude;
-  //   });
-
-  //   let filteredList = validTargets.filter((char) => {
-  //     return targetData.filters?.every((targetFilter) => {
-  //       if (targetFilter.allies) {
-  //         return char.owner === this._character?.owner;
-  //       } else if (targetFilter.allies === false) {
-  //         if (targetData.targetCount && !targetData.ignoreTaunt) {
-  //           if (char.owner !== this._character?.owner) {
-  //             const anyForced = validTargets.some((c) => {
-  //               return c.owner !== this._character?.owner && c.hasTauntEffect;
-  //             });
-  //             if (anyForced) {
-  //               return char.hasTauntEffect;
-  //             } else if (char.statusEffect.hasBuff("Stealth")) {
-  //               const allAlliesHaveStealth = char.teammates.every((ally) => {
-  //                 return (
-  //                   ally.uniqueId === char.uniqueId ||
-  //                   ally.statusEffect.hasBuff("Stealth")
-  //                 );
-  //               });
-  //               return allAlliesHaveStealth ? true : false;
-  //             }
-  //           }
-  //         }
-  //         return char.owner !== this._character?.owner;
-  //       } else if (targetFilter.buffs) {
-  //         return char.statusEffect.hasBuff(targetFilter.buffs);
-  //       } else if (targetFilter.debuffs) {
-  //         return char.statusEffect.hasDebuff(targetFilter.debuffs);
-  //       } else if (targetFilter.isLeader) {
-  //         return char.isLeader;
-  //       } else if (targetFilter.statusEffects) {
-  //         return char.statusEffect.hasStatusEffect(targetFilter.statusEffects);
-  //       } else if (targetFilter.tags) {
-  //         return anyTagsMatch(char, targetFilter.tags, this._character.id);
-  //       } else if (targetFilter.primary) {
-  //         return char.isSelf(forcedTarget ?? undefined);
-  //       } else if (targetFilter.targetIds) {
-  //         return anyTagsMatch(char, targetFilter.targetIds, this._character.id);
-  //       }
-  //       return false;
-  //     });
-  //   });
-
-  //   if (targetData.weakest) {
-  //     let tempList: Character[] = [];
-  //     filteredList.forEach((cur) => {
-  //       if (tempList.length === 0) {
-  //         tempList.push(cur);
-  //       } else {
-  //         const totalStatsCur = cur.stats.health + cur.stats.protection;
-  //         const isWeakest = tempList.every(
-  //           (c) => totalStatsCur < c.stats.health + c.stats.protection
-  //         );
-  //         if (isWeakest) {
-  //           tempList = [cur];
-  //         }
-  //       }
-  //     });
-  //     filteredList = tempList;
-  //   } else if (targetData.targetCount) {
-  //     const tempList: Character[] = [];
-  //     if (forcedTarget) {
-  //       tempList.push(forcedTarget);
-  //     }
-
-  //     while (
-  //       tempList.length < targetData.targetCount &&
-  //       filteredList.length >= targetData.targetCount
-  //     ) {
-  //       const rand: number = randomNumber(0, filteredList.length - 1);
-  //       const el = filteredList[rand];
-  //       const exists = tempList.some((x) => x.id === el.id);
-  //       if (!exists) {
-  //         tempList.push(filteredList[rand]);
-  //       }
-  //     }
-  //     filteredList = tempList;
-  //   }
-
-  //   filteredList = filteredList.filter((x) => !!x);
-  //   const opponentsList = filteredList.filter(
-  //     (x) => x.owner !== this._character?.owner
-  //   );
-  //   const tauntingList = (this._character?.opponents ?? []).filter(
-  //     (t) => t.hasTauntEffect
-  //   );
-
-  //   if (tauntingList.length > 0 && !targetData.ignoreTaunt) {
-  //     const randIndex = randomNumber(0, tauntingList.length - 1);
-  //     primaryTarget = tauntingList[randIndex];
-  //   } else if (forcedTarget) {
-  //     primaryTarget = forcedTarget;
-  //   } else if (opponentsList.length > 0) {
-  //     const randIndex = randomNumber(0, opponentsList.length - 1);
-  //     primaryTarget = opponentsList[randIndex];
-  //   } else {
-  //     const randIndex = randomNumber(
-  //       0,
-  //       (this._character?.opponents?.length ?? 0) - 1
-  //     );
-  //     primaryTarget = this._character?.opponents[randIndex] ?? null;
-  //   }
-  //   return { targetList: filteredList, primaryTarget };
-  // }
-
   public findTargets(
     validTargets: Character[],
     forcedTarget?: Character,
@@ -228,17 +106,38 @@ abstract class CharacterAbility extends Ability {
     }
   }
 
+  /**
+   * Finds a random enemy to target
+   * @param forcedTarget - The target that must be selected, if able
+   * @param ignoreTaunt - If true, ignores the taunt effects and can select any valid enemy
+   * @returns The character target or null if no valid targets exist
+   */
   public findRandomEnemy(forcedTarget?: Character, ignoreTaunt?: boolean) {
-    return this.findTargets(this._character.opponents, forcedTarget, {
-      taunt: ignoreTaunt ?? this._character.effects.ignoreTaunt,
-    });
+    return this.findTargets(
+      this._character.opponents.filter(
+        (c) => !c.statusEffect.isImmune("Targeting")
+      ),
+      forcedTarget,
+      {
+        taunt: ignoreTaunt ?? this._character.effects.ignoreTaunt,
+      }
+    );
   }
 
+  /**
+   * Finds a random ally to target
+   * @param forcedTarget - The target that must be selected, if able
+   * @returns The character target or null if no valid targets exist
+   */
   public findRandomAlly(forcedTarget?: Character) {
-    return this.findTargets(this._character.teammates, forcedTarget, {
-      taunt: true,
-      stealth: true,
-    });
+    return this.findTargets(
+      this._character.teammates.filter((ally) => !this._character.isSelf(ally)),
+      forcedTarget,
+      {
+        taunt: true,
+        stealth: true,
+      }
+    );
   }
 
   /** Deals damage to a target
@@ -261,14 +160,12 @@ abstract class CharacterAbility extends Ability {
     if (targetCharacter.isDead) {
       return;
     }
-
     const { offense, critChance, armorPen } =
       this._character.stats.getCombatStats(damageType, stats);
     const varianceOffense =
       damageType === "true"
         ? 1
         : offense * (1 - randomNumber(0 - variance, variance) / 100);
-
     const { isCrit, damageTotal } = targetCharacter.receiveDamage(
       damageType,
       varianceOffense * abilityModifier,
@@ -277,18 +174,16 @@ abstract class CharacterAbility extends Ability {
       this._character.stats.critDamage,
       stats
     );
-
-    gameEngine.addLogs([
-      new Log({
-        target: targetCharacter,
+    this._character.gameEngine.addLogs([
+      {
+        targetLogData: targetCharacter.getLogs(),
         damage: {
           amount: _.round(damageTotal, 0),
           isCrit,
         },
-        ability: { source: srcAbility },
-      }),
+        ability: { source: srcAbility?.sanitize() },
+      },
     ]);
-
     this._character.heal(
       {
         amountType: "additive",
@@ -297,23 +192,19 @@ abstract class CharacterAbility extends Ability {
       },
       new HealthSteal(this._character)
     );
-
     this._character?.checkDeath(targetCharacter);
-
     this._character.dispatchEvent("dealDamage", {
       damageAmount: damageTotal,
       isCrit,
       damageType,
       target: targetCharacter,
     });
-
     targetCharacter.dispatchEvent("receiveDamage", {
       damageAmount: damageTotal,
       isCrit,
       damageType,
       attackSource: this.id,
     });
-
     targetCharacter.counterAttack(this._character, canBeCountered);
   }
 }
@@ -333,6 +224,11 @@ export abstract class ActiveAbility extends CharacterAbility {
     parentCharacter: Character
   ) {
     super(id, name, text, parentCharacter);
+  }
+
+  /** Determines if this ability can be used */
+  public get canBeUsed() {
+    return true;
   }
 
   /** Initializes the ability */
@@ -355,13 +251,24 @@ export abstract class ActiveAbility extends CharacterAbility {
     additionalEffects: Function = () => {}
   ) {
     if (targetCharacter) {
-      gameEngine.addLogs(
-        new Log({ character: this._character, ability: { used: this } })
-      );
+      this._character.gameEngine.addLogs({
+        characterLogData: this._character.getLogs(),
+        ability: { used: this.sanitize() },
+      });
+      this._character.dispatchEvent("beforeUseAbility", {
+        abilityId: this.id,
+        target: targetCharacter,
+      });
       additionalEffects();
+
+      if (this.cooldown) {
+        this.turnsRemaining = this.cooldown;
+      }
+
       this._character.dispatchEvent("useAbility", {
         abilityId: this.id,
         target: targetCharacter,
+        canBeCountered,
       });
     } else {
       console.error("Could not find a valid target for ", this.id);
@@ -391,12 +298,10 @@ export abstract class ActiveAbility extends CharacterAbility {
       const attackMissed = chanceOfEvent(dodge - accuracy * 100);
 
       if (attackMissed) {
-        gameEngine.addLogs(
-          new Log({
-            character: targetCharacter,
-            damage: { evaded: true },
-          })
-        );
+        this._character.gameEngine.addLogs({
+          characterLogData: targetCharacter.getLogs(),
+          damage: { evaded: true },
+        });
         return true;
       } else {
         return false;
@@ -410,11 +315,13 @@ export abstract class ActiveAbility extends CharacterAbility {
    * @param amount - The amount that the cooldown should be manipulated (negative number decreases the cooldown, positive number increases the cooldown)
    * @param srcAbility - The source ability that is causing the cooldown change
    * @param srcCharacter - The Character that is causing the cooldown change
+   * @param cantResist - The effect cannot be resisted
    */
   public changeCooldown(
     amount: number,
     srcAbility: Ability,
-    srcCharacter?: Character
+    srcCharacter?: Character,
+    cantResist?: boolean
   ) {
     if (this.turnsRemaining === null) {
       return;
@@ -426,18 +333,19 @@ export abstract class ActiveAbility extends CharacterAbility {
         name,
         id: uuid(),
         duration: amount,
+        sourceAbility: srcAbility,
       })
     ) {
-      gameEngine.addLogs(
-        new Log({
-          character: this._character,
-          statusEffects: {
-            immune: true,
-            type: amount > 0 ? "debuff" : "buff",
-            list: [{ name, duration: amount, id: uuid() }],
-          },
-        })
-      );
+      this._character.gameEngine.addLogs({
+        characterLogData: this._character.getLogs(),
+        statusEffects: {
+          immune: true,
+          type: amount > 0 ? "debuff" : "buff",
+          list: [
+            { name, duration: amount, sourceAbility: srcAbility.sanitize() },
+          ],
+        },
+      });
     } else {
       if (amount > 0 && !!srcCharacter) {
         const resistedChance = Math.max(
@@ -445,17 +353,17 @@ export abstract class ActiveAbility extends CharacterAbility {
           0.15
         );
 
-        if (chanceOfEvent(resistedChance)) {
-          gameEngine.addLogs(
-            new Log({
-              character: this._character,
-              statusEffects: {
-                resisted: true,
-                list: [{ name, duration: 0, id: uuid() }],
-                type: "debuff",
-              },
-            })
-          );
+        if (chanceOfEvent(resistedChance) && !cantResist) {
+          this._character.gameEngine.addLogs({
+            characterLogData: this._character.getLogs(),
+            statusEffects: {
+              resisted: true,
+              list: [
+                { name, duration: 0, sourceAbility: srcAbility.sanitize() },
+              ],
+              type: "debuff",
+            },
+          });
           this._character?.dispatchEvent("resisted", {
             effect: "Cooldown Increase",
           });
@@ -472,13 +380,13 @@ export abstract class ActiveAbility extends CharacterAbility {
       }
       this.turnsRemaining += finalAmount;
 
-      gameEngine.addLogs(
-        new Log({
-          character: this._character,
-          ability: { source: srcAbility },
-          effects: { cooldown: { ability: this, amount: finalAmount } },
-        })
-      );
+      this._character.gameEngine.addLogs({
+        characterLogData: this._character.getLogs(),
+        ability: { source: srcAbility.sanitize() },
+        effects: {
+          cooldown: { ability: this.sanitize(), amount: finalAmount },
+        },
+      });
     }
   }
 }
@@ -507,18 +415,14 @@ export abstract class PassiveAbility extends CharacterAbility {
       target.events = target.events.filter((event) => {
         return event.characterSourceId !== this._character?.uniqueId;
       });
-      target.stats.tempStats = target.stats.tempStats.filter((stat) => {
-        return stat.characterSourceId !== this._character?.uniqueId;
-      });
+      target.stats.removeTempStats(this._character?.uniqueId);
     });
 
     this._character?.opponents.forEach((target) => {
       target.events = target.events.filter((event) => {
         return event.characterSourceId !== this._character?.uniqueId;
       });
-      target.stats.tempStats = target.stats.tempStats.filter((stat) => {
-        return stat.characterSourceId !== this._character?.uniqueId;
-      });
+      target.stats.removeTempStats(this._character?.uniqueId);
     });
   }
 }

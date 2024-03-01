@@ -75,7 +75,6 @@ export async function initializeModules(
   if (synchronously) {
     for (let i = 0; i < modulesList.length; i++) {
       const moduleName = modulesList[i];
-      //this doesnt fucking work for player module
       await store.dispatch(`${moduleName}/initialize`, params);
     }
   } else {

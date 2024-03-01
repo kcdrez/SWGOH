@@ -1,27 +1,30 @@
-import { round } from "lodash";
+import { round, cloneDeep } from "lodash";
 import { v4 as uuid } from "uuid";
 
-import { chanceOfEvent, randomNumber, unvue } from "utils";
+import { chanceOfEvent, randomNumber } from "./utils";
 
-import { iHeal, iStats, iStatsCheck, Stats } from "./stats";
+import { iHeal, iStatsCheck, Stats } from "./stats";
 import { StatusEffect } from "./statusEffects";
 import { Ability, ActiveAbility, PassiveAbility } from "./abilities";
-import { IUnit, Unit } from "types/unit";
-import characterList from "../characterScripts";
+import { abilitiesList } from "../characterScripts/abilitiesList";
 import { Log, tLogData } from "./log";
-
-import { gameEngine, iCondition } from "../gameEngine";
+import { Engine } from "../gameEngine";
 
 /**
  * A type to determine what events are supported
  * @type tEventType
  */
 type tEventType =
+  | "beforeUseAbility"
   | "buffed"
   | "dealDamage"
   | "death"
+  | "dispel"
   | "endOfTurn"
+  | "gainStatusEffect"
   | "inflicted"
+  | "loseHealth"
+  | "loseProtection"
   | "matchSetup"
   | "matchStart"
   | "receiveDamage"
@@ -29,6 +32,27 @@ type tEventType =
   | "resisted"
   | "startOfTurn"
   | "useAbility";
+
+export interface iUnit {
+  id: string;
+  name: string;
+  aliases?: string[];
+  categories: string[];
+  ability_classes: string[];
+  role: "Attacker" | "Tank" | "Support" | "Healer";
+  alignment: "Light Side" | "Dark Side" | "Neutral";
+  primaryStat: "str" | "agi" | "tac";
+  isLeader?: boolean;
+
+  tier?: number;
+  stats: Record<string, number>;
+  ability_data: { id: string; name: string }[];
+  relic_tier?: number;
+  has_ultimate?: boolean;
+  is_ship?: boolean;
+  zeta_abilities: string[];
+  omicron_abilities: string[];
+}
 
 /**
  * A Character, otherwise known as unit or toon, that can have abilities and affect the flow of the game
@@ -40,12 +64,14 @@ export class Character {
   public id: string;
   public name: string;
   private _tm: number = 0;
+  public relicLevel: number = 0;
   private _basicAbility: ActiveAbility | null = null;
   private _specialAbilities: ActiveAbility[] = [];
+  protected _hiddenAbilities: ActiveAbility[] = [];
   private _uniqueAbilities: PassiveAbility[] = [];
   private _leaderAbility: PassiveAbility | null = null;
   public owner: string;
-  private _alignment: IUnit["alignment"];
+  private _alignment: "Light Side" | "Dark Side" | "Neutral";
   private _categories: string[];
   public teammates: Character[] = [];
   public opponents: Character[] = [];
@@ -54,9 +80,19 @@ export class Character {
     eventType: tEventType;
     characterSourceId?: string;
     callback: Function;
+    id?: string;
   }[] = [];
+  public keywords: string[] = [];
+  public hasBonusTurn: boolean = false;
+  public gameEngine: Engine;
 
-  constructor(data: Unit, owner: string, isLeader?: boolean) {
+  constructor(
+    data: iUnit,
+    owner: string,
+    isLeader: boolean,
+    gameEngine: Engine
+  ) {
+    this.gameEngine = gameEngine;
     this.stats = new Stats(data, this);
     this.statusEffect = new StatusEffect(this);
 
@@ -66,9 +102,10 @@ export class Character {
     this._alignment = data.alignment;
     this._categories = data.categories;
     this.isLeader = isLeader ?? false;
+    this.relicLevel = data.relic_tier ?? 0;
 
-    const abilityList = characterList[this.id];
-    data.abilities.forEach((x) => {
+    const abilityList = abilitiesList[this.id];
+    data.ability_data.forEach((x) => {
       if (x.id.includes("basic")) {
         const abilityClass = abilityList.basicAbility.get(x.id);
         if (abilityClass) {
@@ -113,6 +150,11 @@ export class Character {
     return this._specialAbilities;
   }
 
+  /** The character's hidden abilities */
+  public get hiddenAbilities() {
+    return this._hiddenAbilities;
+  }
+
   /** A list of abilities including the basic ability and specials */
   public get activeAbilities() {
     const arr: ActiveAbility[] = [];
@@ -128,12 +170,20 @@ export class Character {
     return this._uniqueAbilities;
   }
 
+  /** Adds a new granted ability */
+  public addGrantedAbility(ability: ActiveAbility) {
+    this._specialAbilities.push(ability);
+  }
+
   /** A map of different effects that may exist on the character */
   public get effects() {
     const self = this;
     return {
       get ignoreTaunt() {
-        return self.statusEffect.hasBuff("Call to Action");
+        return (
+          self.statusEffect.hasBuff("Call to Action") ||
+          self.statusEffect.hasBuff("Jedi Legacy")
+        );
       },
     };
   }
@@ -159,53 +209,51 @@ export class Character {
     srcCharacter?: Character
   ) {
     if (amount === 0 || this.isDead) {
-      return null;
+      return;
     }
     let diff = 0;
-
     if (this._tm >= 100 && amount < 0) {
       const resistedChance = Math.max(
         this.stats.tenacity - (srcCharacter?.stats.potency ?? 0),
         0.15
       );
       if (chanceOfEvent(resistedChance)) {
-        gameEngine.addLogs(
-          new Log({
-            character: this,
-            statusEffects: {
-              resisted: true,
-              list: [{ name: "TM Decrease", duration: amount, id: uuid() }],
-              type: "debuff",
-            },
-          })
-        );
+        this.gameEngine.addLogs({
+          characterLogData: this.getLogs(),
+          statusEffects: {
+            resisted: true,
+            list: [
+              {
+                name: "TM Decrease",
+                duration: amount,
+                sourceAbility: srcAbility?.sanitize(),
+              },
+            ],
+            type: "debuff",
+          },
+        });
         this.dispatchEvent("resisted", { effect: "TM Decrease" });
         return;
       }
-
       diff = Math.abs(amount);
       this._tm = 100 + amount; //note this will remove tm since amount is a negative number
     } else {
       diff = amount < 0 ? Math.min(Math.abs(amount), this._tm) : amount;
       this._tm += amount;
     }
-
     if (this._tm < 0) {
       this._tm = 0;
     }
-
     if (srcAbility) {
-      gameEngine.addLogs(
-        new Log({
-          character: this,
-          effects: {
-            turnMeter: round(amount > 0 ? diff : 0 - diff, 2),
-          },
-          ability: {
-            source: srcAbility,
-          },
-        })
-      );
+      this.gameEngine.addLogs({
+        characterLogData: this.getLogs(),
+        effects: {
+          turnMeter: round(amount > 0 ? diff : 0 - diff, 2),
+        },
+        ability: {
+          source: srcAbility.sanitize(),
+        },
+      });
     }
   }
   /**
@@ -294,13 +342,11 @@ export class Character {
    */
   public checkDeath(targetCharacter: Character) {
     if (targetCharacter.isDead) {
-      gameEngine.addLogs(
-        new Log({
-          character: this,
-          target: targetCharacter,
-          effects: { defeated: true },
-        })
-      );
+      this.gameEngine.addLogs({
+        characterLogData: this.getLogs(),
+        targetLogData: targetCharacter.getLogs(),
+        effects: { defeated: true },
+      });
       targetCharacter._uniqueAbilities.forEach((a) => a.deactivate());
       targetCharacter.dispatchEvent("death");
     }
@@ -319,9 +365,10 @@ export class Character {
     this._tm = 0;
     let ability: ActiveAbility | null = null;
     if (this.statusEffect.hasDebuff("Stun")) {
-      gameEngine.addLogs(
-        new Log({ character: this, effects: { stunned: true } })
-      );
+      this.gameEngine.addLogs({
+        characterLogData: this.getLogs(),
+        effects: { stunned: true },
+      });
     } else {
       ability = this.chooseAbility();
       ability?.execute();
@@ -357,6 +404,7 @@ export class Character {
         a.turnsRemaining = Math.max(a.turnsRemaining - 1, 0);
       }
     });
+    this.hasBonusTurn = false;
   }
 
   /**
@@ -373,7 +421,8 @@ export class Character {
       return this._basicAbility;
     } else if (
       this._specialAbilities.every(
-        (a) => a.turnsRemaining !== null && a.turnsRemaining > 0
+        (a) =>
+          (a.turnsRemaining !== null && a.turnsRemaining > 0) || !a.canBeUsed
       )
     ) {
       return this._basicAbility;
@@ -383,19 +432,23 @@ export class Character {
       if (abilityId) {
         return a.id === abilityId;
       } else {
-        return a.turnsRemaining !== null && a.turnsRemaining <= 0;
+        return (
+          a.turnsRemaining !== null && a.turnsRemaining <= 0 && a.canBeUsed
+        );
       }
     });
 
-    if (ability) {
-      ability.turnsRemaining = ability.cooldown;
-    }
     return ability ?? null;
   }
 
   /** Checks if the user has any leader abilities */
   public get hasLeaderAbility() {
     return !!this._leaderAbility;
+  }
+
+  /** Gets the leader ability */
+  public get leaderAbility() {
+    return this.leaderAbility;
   }
 
   /** Assists with their basic attack
@@ -410,23 +463,20 @@ export class Character {
   ) {
     if (this._basicAbility && !targetCharacter?.isDead) {
       if (this.statusEffect.isImmune("Assisting")) {
-        gameEngine.addLogs(
-          new Log({
-            character: this,
-            effects: { assisted: false },
-            ability: {
-              source: this.statusEffect.immunity.Assisting.sourceAbility,
-            },
-          })
-        );
+        this.gameEngine.addLogs({
+          characterLogData: this.getLogs(),
+          effects: { assisted: false },
+          ability: {
+            source:
+              this.statusEffect.immunity.Assisting.sourceAbility?.sanitize(),
+          },
+        });
       } else {
-        gameEngine.addLogs(
-          new Log({
-            character: this,
-            effects: { assisted: true },
-            ability: { source: srcAbility },
-          })
-        );
+        this.gameEngine.addLogs({
+          characterLogData: this.getLogs(),
+          effects: { assisted: true },
+          ability: { source: srcAbility?.sanitize() },
+        });
         this._basicAbility.execute(targetCharacter, modifiers, false);
       }
     }
@@ -471,13 +521,11 @@ export class Character {
       this.stats.gainHealth(finalAmount, healthType);
 
       if (round(diff) > 0) {
-        gameEngine.addLogs(
-          new Log({
-            character: this,
-            heal: { amount: round(diff), type: healthType },
-            ability: { source: sourceAbility },
-          })
-        );
+        this.gameEngine.addLogs({
+          characterLogData: this.getLogs(),
+          heal: { amount: round(diff), type: healthType },
+          ability: { source: sourceAbility?.sanitize() },
+        });
       }
     }
   }
@@ -494,23 +542,19 @@ export class Character {
         this.owner !== targetCharacter.owner
       ) {
         if (this.statusEffect.isImmune("CounterAttacking")) {
-          gameEngine.addLogs(
-            new Log({
-              character: this,
-              effects: { countered: false },
-              ability: {
-                source:
-                  this.statusEffect.immunity.CounterAttacking.sourceAbility,
-              },
-            })
-          );
+          this.gameEngine.addLogs({
+            characterLogData: this.getLogs(),
+            effects: { countered: false },
+            ability: {
+              source:
+                this.statusEffect.immunity.CounterAttacking.sourceAbility?.sanitize(),
+            },
+          });
         } else {
-          gameEngine.addLogs(
-            new Log({
-              character: this,
-              effects: { countered: true },
-            })
-          );
+          this.gameEngine.addLogs({
+            characterLogData: this.getLogs(),
+            effects: { countered: true },
+          });
 
           this._basicAbility?.execute(
             targetCharacter,
@@ -579,17 +623,15 @@ export class Character {
    * @param health - The amount of health that should be set as the current amount
    */
   public revive(protection: number, health: number) {
-    if (this.isDead) {
+    if (this.isDead && !this.statusEffect.isImmune("Revive")) {
       this.initialize();
       this.stats.gainHealth(protection, "protection");
       this.stats.gainHealth(health, "health");
 
-      gameEngine.addLogs(
-        new Log({
-          character: this,
-          effects: { revived: true },
-        })
-      );
+      this.gameEngine.addLogs({
+        characterLogData: this.getLogs(),
+        effects: { revived: true },
+      });
 
       this.dispatchEvent("revive", { target: this });
     }
@@ -610,99 +652,15 @@ export class Character {
 
   /**
    * Checks whether a condition is true
-   * @param condition - The data that is used to determine if it is true or not
+   * @param condition - A function to be ran when a condition should be checked
    * @returns True if the condition has been met, otherwise false
    */
-  public checkCondition(condition?: iCondition): boolean {
+  public checkCondition(condition?: Function): boolean {
     if (!condition) {
       return true;
+    } else {
+      return condition();
     }
-
-    const { buffs, debuffs, stats, inverted, isNew, tags, tm, onTurn } =
-      condition;
-    let results = false;
-    if (buffs) {
-      const hasBuffs = buffs.every((buff) => {
-        if (typeof buff === "string") {
-          const match = this.statusEffect.buffs.find((x) => x.name === buff);
-          if (match) {
-            return isNew === false ? !match.isNew : true;
-          } else return false;
-        } else {
-          return this.statusEffect.hasBuff(
-            buff.name,
-            buff.duration,
-            buff.stacks
-          );
-        }
-      });
-      results = hasBuffs || results;
-    }
-    if (debuffs) {
-      const hasDebuffs = debuffs.every((debuff) => {
-        const match = this.statusEffect.debuffs.find((x) => {
-          return x.name === debuff;
-        });
-
-        if (match) {
-          return isNew ? match.isNew : true;
-        }
-        return false;
-      });
-
-      results = hasDebuffs || results;
-    }
-    if (stats) {
-      let meetsStatRequirement = false;
-      const stat = this.stats[stats.statToModify];
-      if (!isNaN(stat)) {
-        //if it is a number
-        const num = Number(stat);
-        if (
-          stats.statToModify === "health" &&
-          stats.modifiedType === "multiplicative"
-        ) {
-          const percent = num / this.stats.maxHealth;
-          // meetsStatRequirement =
-          //   stats.amountType === "greater"
-          //     ? stats.amount < percent
-          //     : stats.amount > percent;
-        } else if (
-          stats.statToModify === "protection" &&
-          stats.modifiedType === "multiplicative"
-        ) {
-          const percent = num / this.stats.maxProtection;
-          // meetsStatRequirement =
-          //   stats.amountType === "greater"
-          //     ? stats.amount > percent
-          //     : stats.amount < percent;
-        } else {
-          // meetsStatRequirement =
-          //   stats.amountType === "greater"
-          //     ? stats.amount < num
-          //     : stats.amount > num;
-        }
-      } else {
-        console.warn(`Could not find stat ${stat.type} on ${this.name}`);
-      }
-
-      results = meetsStatRequirement || results;
-    }
-    if (tags) {
-      results = anyTagsMatch(this, tags, this.id) || results;
-    }
-    if (tm) {
-      if (tm.greaterThan) {
-        results = this.turnMeter > tm.amount || results;
-      } else {
-        results = this.turnMeter < tm.amount || results;
-      }
-    }
-    if (onTurn) {
-      results =
-        this.isSelf(gameEngine.currentCharactersTurn ?? undefined) || results;
-    }
-    return inverted ? !results : results;
   }
 
   /**
@@ -744,18 +702,44 @@ export class Character {
         current: round(this.stats.protection, 0),
         max: round(this.stats.maxProtection, 0),
         base: round(this.stats.baseStats.maxProtection, 0),
+        bonus: round(this.stats.bonusProtection, 0),
       },
       activeAbilities: this.activeAbilities.map((a) => {
         return {
-          id: a.id,
-          name: a.name,
+          ...a.sanitize(),
           cooldown: a.turnsRemaining,
-          text: a.text,
         };
       }),
-      buffs: unvue(this.statusEffect.buffs),
-      debuffs: unvue(this.statusEffect.debuffs),
-      statusEffects: unvue(this.statusEffect.statusEffects),
+      buffs: this.statusEffect.buffs.map((buff) => {
+        return {
+          name: buff.name ?? "",
+          duration: buff.duration,
+          cantDispel: buff.cantDispel,
+          cantPrevent: buff.cantPrevent,
+          cantResist: buff.cantResist,
+          unique: buff.unique,
+        };
+      }),
+      debuffs: this.statusEffect.debuffs.map((debuff) => {
+        return {
+          name: debuff.name ?? "",
+          duration: debuff.duration,
+          cantDispel: debuff.cantDispel,
+          cantPrevent: debuff.cantPrevent,
+          cantResist: debuff.cantResist,
+          unique: debuff.unique,
+        };
+      }),
+      statusEffects: this.statusEffect.statusEffects.map((effect) => {
+        return {
+          name: effect.name ?? "",
+          duration: effect.duration,
+          cantDispel: effect.cantDispel,
+          cantPrevent: effect.cantPrevent,
+          cantResist: effect.cantResist,
+          unique: effect.unique,
+        };
+      }),
       physical: [
         {
           label: "Offense",
@@ -910,10 +894,10 @@ export class Character {
           isPercent: true,
         },
       ],
-      otherEffects: unvue({
+      otherEffects: {
         ...this.effects,
-        immunity: unvue(this.statusEffect.immunity),
-      }),
+        immunity: this.statusEffect.sanitizeImmunity(),
+      },
       turnMeter: round(this.turnMeter, 0),
     };
   }

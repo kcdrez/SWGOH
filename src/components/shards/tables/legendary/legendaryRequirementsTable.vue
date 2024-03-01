@@ -86,7 +86,7 @@
           </div>
           <div
             class="input-group input-group-sm mb-1"
-            v-if="unit.glTiers.tier6.tickets > 0"
+            v-if="unit?.glTiers.tier6.tickets > 0"
           >
             <span
               class="input-group-text c-help"

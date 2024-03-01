@@ -84,11 +84,12 @@ class specialskill_HANSOLO01 extends ActiveAbility {
       if (primaryTarget) {
         if (!this.checkEvade("physical", primaryTarget)) {
           this._character?.statusEffect.inflictDebuff(
-            [{ name: "Stun", duration: 1, id: uuid() }],
+            [{ name: "Stun", duration: 1, id: uuid(), sourceAbility: this }],
             primaryTarget,
             1,
             this
           );
+
           this.dealDamage(
             "physical",
             primaryTarget,
@@ -124,7 +125,12 @@ class specialskill_HANSOLO02 extends ActiveAbility {
     super.execute(primaryTarget, stats, canBeCountered, () => {
       this._character.changeTurnMeter(50, this);
       this._character.statusEffect.addBuff(
-        { name: "Critical Damage Up", duration: 2, id: uuid() },
+        {
+          name: "Critical Damage Up",
+          duration: 2,
+          id: uuid(),
+          sourceAbility: this,
+        },
         1,
         this
       );
@@ -132,8 +138,18 @@ class specialskill_HANSOLO02 extends ActiveAbility {
       this._character.teammates.forEach((target) => {
         target.statusEffect.addBuff(
           [
-            { name: "Critical Chance Up", duration: 2, id: uuid() },
-            { name: "Evasion Up", duration: 2, id: uuid() },
+            {
+              name: "Critical Chance Up",
+              duration: 2,
+              id: uuid(),
+              sourceAbility: this,
+            },
+            {
+              name: "Evasion Up",
+              duration: 2,
+              id: uuid(),
+              sourceAbility: this,
+            },
           ],
           1,
           this
@@ -158,29 +174,32 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
   public override activate(): void {
     this.triggerCount = 0;
 
-    this._character?.stats.tempStats.push(
-      {
-        statToModify: "counterChance",
-        amount: 0.35,
-        modifiedType: "additive",
-      },
-      {
-        statToModify: "physicalCritChance",
-        amount: 0.2,
-        modifiedType: "additive",
-      },
-      {
-        statToModify: "specialCritChance",
-        amount: 0.2,
-        modifiedType: "additive",
-      }
+    this._character?.stats.addTempStats(
+      [
+        {
+          statToModify: "counterChance",
+          amount: 0.35,
+          modifiedType: "additive",
+        },
+        {
+          statToModify: "physicalCritChance",
+          amount: 0.2,
+          modifiedType: "additive",
+        },
+        {
+          statToModify: "specialCritChance",
+          amount: 0.2,
+          modifiedType: "additive",
+        },
+      ],
+      this
     );
 
     this._character?.events.push(
       {
         characterSourceId: this._character.uniqueId,
         eventType: "useAbility",
-        callback: ({ abilityId, target }) => {
+        callback: ({ abilityId, target, canBeCountered }) => {
           if (abilityId === "basicskill_HANSOLO" && this.triggerCount < 1) {
             this.triggerCount++;
             const ability = this._character.activeAbilities.find(
@@ -200,7 +219,7 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
                   modifiedType: "multiplicative",
                 },
               ],
-              true
+              canBeCountered
             );
           }
         },
@@ -222,7 +241,15 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
           if (primaryTarget) {
             ability?.execute(primaryTarget, [], true, () => {
               this._character.statusEffect.inflictDebuff(
-                [{ name: "Stun", duration: 1, id: uuid(), cantResist: true }],
+                [
+                  {
+                    name: "Stun",
+                    duration: 1,
+                    id: uuid(),
+                    cantResist: true,
+                    sourceAbility: this,
+                  },
+                ],
                 primaryTarget,
                 1,
                 this

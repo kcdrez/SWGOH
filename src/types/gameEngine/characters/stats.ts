@@ -1,6 +1,6 @@
-import { Ability, IUnit, Unit } from "types/unit";
-import { Character } from "./index";
-import { iCondition } from "../gameEngine";
+import { Character, iUnit } from "./index";
+import { Log } from "./log";
+import { Ability } from "./abilities";
 
 /** A generic interface that contains all of the base stats for a character */
 export interface iStats {
@@ -70,6 +70,7 @@ export interface iStatsCheck {
    * health: The amount of health
    * healthSteal: The percentage (decimal) amount that is healed when dealing damage with an attack
    * maxHealth/maxProtection: The max health or protection
+   * mastery: The amount of mastery
    * physicalAccuracy: The percentage (decimal) that decrease the chance of the physical attack missing
    * physicalArmor: The amount of armor used to mitigate damage from a physical attack
    * physicalArmorPen: The amount of armor that is ignored when dealing damage with a physical attack
@@ -95,6 +96,7 @@ export interface iStatsCheck {
     | "critDamage"
     | "health"
     | "healthSteal"
+    | "mastery"
     | "maxHealth"
     | "maxProtection"
     | "physicalAccuracy"
@@ -126,56 +128,71 @@ export interface iStatsCheck {
     /** How often the effect is checked to see if it should be removed */
     frequency: "turn";
   };
-  condition?: iCondition;
+  condition?: Function;
   characterSourceId?: string;
+  id?: string;
 }
 
 /** A container class used to hold all of a character's status any utility functions */
 export class Stats {
   public baseStats: iStats;
-  public tempStats: iStatsCheck[] = [];
-  private _role: IUnit["role"];
-  private _primaryStat: IUnit["primaryStat"];
-  private _character: Character;
-  private _curHealth: number = 0;
-  private _curProtection: number = 0;
+  protected tempStats: iStatsCheck[] = [];
+  protected _role: "Attacker" | "Tank" | "Support" | "Healer";
+  protected _primaryStat: "str" | "agi" | "tac";
+  protected _character: Character;
+  protected _curHealth: number = 0;
+  protected _curProtection: number = 0;
 
-  constructor(data: Unit, parentCharacter: Character) {
+  constructor(data: iUnit, parentCharacter: Character) {
+    const masteryMapping = {
+      0: 0,
+      1: 5,
+      2: 10,
+      3: 15,
+      4: 20,
+      5: 25,
+      6: 35,
+      7: 45,
+      8: 60,
+      9: 70,
+    };
+
     this._character = parentCharacter;
     this._role = data.role;
     this._primaryStat = data.primaryStat;
     this.baseStats = {
-      maxHealth: data.health,
-      health: data.health,
-      maxProtection: data.protection,
-      protection: data.protection,
-      speed: data.speed,
+      maxHealth: data.stats["1"],
+      health: data.stats["1"],
+      maxProtection: data.stats["28"],
+      protection: data.stats["28"],
+      speed: data.stats["5"],
       physical: {
-        offense: data.offense.physical,
-        armor: (data.physicalArmor * 637.5) / (100 - data.physicalArmor),
-        armorPen: data.armorPen,
-        critChance: data.critChance.physical / 100,
-        accuracy: data.physicalAccuracy / 100,
-        dodge: data.physicalDodge / 100,
-        critAvoid: data.physicalCritAvoid / 100,
+        offense: data.stats["6"],
+        armor: (data.stats["8"] * 637.5) / (100 - data.stats["8"]),
+        armorPen: data.stats["10"],
+        critChance: data.stats["14"] / 100,
+        accuracy: data.stats["37"] / 100,
+        dodge: data.stats["12"] / 100,
+        critAvoid: data.stats["39"] / 100,
       },
       special: {
-        offense: data.offense.special,
-        armor: (data.armor.special * 637.5) / (100 - data.armor.special),
-        armorPen: data.resistancePen,
-        critChance: data.critChance.special / 100,
-        accuracy: data.specialAccuracy / 100,
-        dodge: data.specialDodge / 100,
-        critAvoid: data.specialCritAvoid / 100,
+        offense: data.stats["7"],
+        armor: (data.stats["9"] * 637.5) / (100 - data.stats["9"]),
+        armorPen: data.stats["11"],
+        critChance: data.stats["15"] / 100,
+        accuracy: data.stats["38"] / 100,
+        dodge: data.stats["13"] / 100,
+        critAvoid: data.stats["40"] / 100,
       },
-      critDamage: data.critDamage / 100,
-      tenacity: data.tenacity / 100,
-      potency: data.potency / 100,
-      healthSteal: data.healthSteal,
-      mastery: data.mastery,
+      critDamage: data.stats["16"],
+      tenacity: data.stats["18"],
+      potency: data.stats["17"],
+      healthSteal: data.stats["27"],
+      mastery: masteryMapping[data.relic_tier ?? 0],
     };
-    this._curHealth = data.health;
-    this._curProtection = data.protection;
+
+    this._curHealth = data.stats["1"];
+    this._curProtection = data.stats["28"];
   }
 
   /** An initializer function that resets various properties */
@@ -201,6 +218,14 @@ export class Stats {
   }
   public set maxProtection(val) {
     this.baseStats.maxProtection = val;
+  }
+  public get bonusProtection() {
+    return this._character.statusEffect.buffs.reduce((total, buff) => {
+      if (buff.name === "Protection Up") {
+        total += buff.value ?? 0;
+      }
+      return total;
+    }, 0);
   }
   /** The modified maximum amount of Health */
   public get maxHealth() {
@@ -231,12 +256,17 @@ export class Stats {
           value: 0.15,
         },
         {
-          hasEffect: this._character.statusEffect.hasBuff("Translation"),
+          hasEffect: this._character.statusEffect.hasBuff(
+            "Translation",
+            undefined,
+            1
+          ),
           value: 0.3,
         },
       ],
       stat,
-      this.getTempStat("maxHealth")
+      this.getTempStat("maxHealth"),
+      true
     );
   }
   public set maxHealth(val) {
@@ -255,46 +285,62 @@ export class Stats {
   /**
    * Calculates how much should be removed from Protection Up, Protection, or Health
    * @param amount - The amount of health/protection that is lost
-   * @param type - The type of health lost if targetting a specific type (e.g. lose health, ignoring protection)
+   * @param type - The type of health lost if targeting a specific type (e.g. lose health, ignoring protection)
    */
   public loseHealth(amount: number, type?: "health" | "protection") {
     if (type === "health") {
+      if (this._character.statusEffect.isImmune("loseHealth")) {
+        return;
+      }
       this._curHealth -= amount;
       this._curHealth = Math.max(this._curHealth, 0);
+      this._character.dispatchEvent("loseHealth", {
+        previousHealth: this._curHealth + amount,
+      });
     } else if (type === "protection") {
       this._curProtection -= amount;
       this._curProtection = Math.max(this._curProtection, 0);
+      this._character.dispatchEvent("loseProtection");
     } else if (this._character.statusEffect.hasBuff("Protection Up")) {
       const match = this._character.statusEffect.buffs.find(
         (x) => x.name === "Protection Up"
       );
-      if (match?.stacks) {
-        if (match?.stacks && match?.stacks > amount) {
-          match.stacks -= amount;
+      if (match?.value) {
+        if (match?.value && match?.value > amount) {
+          match.value -= amount;
         } else {
-          const diff = amount - match.stacks;
-          match.stacks = 0;
+          const diff = amount - match.value;
+          match.value = 0;
           this.loseHealth(diff);
         }
 
-        if (match?.stacks <= 0) {
+        if (match?.value <= 0) {
           this._character.statusEffect.removeBuff({
             id: match.id,
             duration: 0,
             name: null,
+            sourceAbility: null,
           });
         }
       }
     } else if (this._curProtection > 0) {
       if (this._curProtection > amount) {
         this._curProtection -= amount;
+        this._character.dispatchEvent("loseProtection");
       } else {
         const diff = amount - this._curProtection;
         this._curProtection = 0;
+        this._character.dispatchEvent("loseProtection");
         this.loseHealth(diff);
       }
     } else {
+      if (this._character.statusEffect.isImmune("loseHealth")) {
+        return;
+      }
       this._curHealth -= amount;
+      this._character.dispatchEvent("loseHealth", {
+        previousHealth: this._curHealth + amount,
+      });
     }
   }
 
@@ -329,7 +375,9 @@ export class Stats {
     return this.getModifiedStats(
       [
         {
-          hasEffect: this._character.statusEffect.hasDebuff("Speed Down"),
+          hasEffect:
+            this._character.statusEffect.hasDebuff("Speed Down") ||
+            this._character.statusEffect.hasDebuff("Breach"),
           value: -0.25,
         },
         {
@@ -344,7 +392,43 @@ export class Stats {
   }
   /** The current mastery of the character */
   public get mastery() {
-    return this.baseStats.mastery;
+    let stat = this.baseStats.mastery;
+
+    return this.getModifiedStats(
+      [
+        {
+          hasEffect: this._character.statusEffect.hasBuff(
+            "Jedi Lessons",
+            undefined,
+            1
+          ),
+          value: 0.2,
+        },
+        {
+          hasEffect: this._character.statusEffect.hasBuff(
+            "Jedi Lessons",
+            undefined,
+            2
+          ),
+          value: 0.2,
+        },
+        {
+          hasEffect: this._character.statusEffect.hasBuff(
+            "Jedi Lessons",
+            undefined,
+            3
+          ),
+          value: 0.2,
+        },
+        {
+          hasEffect: this._character.statusEffect.hasBuff("Jedi Legacy"),
+          value: 1,
+        },
+      ],
+      stat,
+      this.getTempStat("mastery"),
+      true
+    );
   }
   /** The current Critical Damage (decimal) */
   public get critDamage() {
@@ -564,15 +648,36 @@ export class Stats {
           }
         }
 
+        const hasDefDown =
+          self._character.statusEffect.hasDebuff("Defense Down");
+        const hasBreach = self._character.statusEffect.hasDebuff("Breach");
+
+        const armorShredCount =
+          self._character.statusEffect.statusEffects.filter(
+            (s) => s.name === "Armor Shred"
+          ).length;
+
+        const armorShredValue = self._character.hasTags(
+          "Galactic Legend",
+          self._character.id
+        )
+          ? -0.25
+          : -0.5;
+
         return self.getModifiedStats(
           [
             {
-              hasEffect: self._character.statusEffect.hasDebuff("Defense Down"),
-              value: -0.5,
+              hasEffect: hasDefDown || hasBreach,
+              value: hasDefDown ? -0.5 : -0.25,
             },
             {
               hasEffect: self._character.statusEffect.hasBuff("Defense Up"),
               value: 0.5,
+            },
+            {
+              hasEffect:
+                self._character.statusEffect.hasStatusEffect("Armor Shred"),
+              value: armorShredCount * armorShredValue,
             },
           ],
           stat,
@@ -854,6 +959,18 @@ export class Stats {
           }
         }
 
+        const armorShredCount =
+          self._character.statusEffect.statusEffects.filter(
+            (s) => s.name === "Armor Shred"
+          ).length;
+
+        const armorShredValue = self._character.hasTags(
+          "Galactic Legend",
+          self._character.id
+        )
+          ? -0.25
+          : -0.5;
+
         return self.getModifiedStats(
           [
             {
@@ -863,6 +980,11 @@ export class Stats {
             {
               hasEffect: self._character.statusEffect.hasBuff("Defense Up"),
               value: 0.5,
+            },
+            {
+              hasEffect:
+                self._character.statusEffect.hasStatusEffect("Armor Shred"),
+              value: armorShredCount * armorShredValue,
             },
           ],
           stat,
@@ -1060,19 +1182,15 @@ export class Stats {
    * @returns An array of stats that should be changed
    */
   private getTempStat(statName: iStatsCheck["statToModify"]): iStatsCheck[] {
-    const tempStatMapping: Record<string, iStatsCheck[]> =
-      this.tempStats.reduce((statsMapping, stat) => {
-        if (this._character.checkCondition(stat.condition)) {
-          if (stat.statToModify in statsMapping) {
-            statsMapping[stat.statToModify].push(stat);
-          } else {
-            statsMapping[stat.statToModify] = [stat];
-          }
-        }
-        return statsMapping;
-      }, {});
-
-    return tempStatMapping[statName] ?? [];
+    return this.tempStats.reduce((list: iStatsCheck[], stat) => {
+      if (
+        stat.statToModify === statName &&
+        this._character.checkCondition(stat.condition)
+      ) {
+        list.push(stat);
+      }
+      return list;
+    }, []);
   }
 
   /**
@@ -1191,6 +1309,50 @@ export class Stats {
       );
     }
     return mapping;
+  }
+
+  public addTempStats(statsList: iStatsCheck[], srcAbility?: Ability) {
+    this.tempStats.push(...statsList);
+
+    let statLabels: string[] = [];
+
+    statsList.forEach((stat) => {
+      let amountLabel = stat.amount.toString();
+      if (stat.modifiedType === "multiplicative" || stat.amount <= 1) {
+        amountLabel = `${stat.amount * 100}%`;
+      }
+      const conditionLabel = stat.condition ? " (if a condition is met)" : "";
+      statLabels.push(`${amountLabel} ${stat.statToModify}${conditionLabel}`);
+    });
+
+    if (statLabels.length > 0) {
+      this._character.gameEngine.addLogs({
+        characterLogData: this._character.getLogs(),
+        customMessage: `gained ${statLabels.join(", ")}`,
+        ability: { source: srcAbility?.sanitize() },
+      });
+    }
+  }
+
+  public removeTempStats(characterId?: string, effectId?: string) {
+    this.tempStats = this.tempStats.filter((stat) => {
+      if (
+        stat.characterSourceId === characterId ||
+        (stat.id === effectId && effectId !== undefined)
+      ) {
+        let amountLabel = stat.amount.toString();
+        if (stat.modifiedType === "multiplicative") {
+          amountLabel = `${stat.amount * 100}%`;
+        }
+
+        this._character.gameEngine.addLogs({
+          characterLogData: this._character.getLogs(),
+          customMessage: `removed ${amountLabel} (${stat.modifiedType}) ${stat.statToModify}`,
+        });
+        return false;
+      }
+      return true;
+    });
   }
 
   /** Removes any stats that shouldnt be present any more after the turn has ended */

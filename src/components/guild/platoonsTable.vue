@@ -48,6 +48,12 @@ export default defineComponent({
       required: true,
       type: Number,
     },
+    excludedPlayers: {
+      type: Array as () => string[],
+      default: () => {
+        return [];
+      },
+    },
   },
   data() {
     return {
@@ -348,7 +354,10 @@ export default defineComponent({
       return this.players
         .reduce((list: iGoalPlayer[], player: iGoalPlayer) => {
           const match = player.units.find((x) => x.base_id === unitId);
-          if (match) {
+          const shouldExclude = this.excludedPlayers.some(
+            (playerName) => playerName === player.name
+          );
+          if (match && !shouldExclude) {
             if (requirement.type === "Stars") {
               if (match.stars >= requirement.amount) {
                 list.push(player);
@@ -382,8 +391,10 @@ export default defineComponent({
         }
 
         const unitMatch = player.units.find((x) => x.base_id === unitId);
-
-        if (unitMatch) {
+        const shouldExclude = this.excludedPlayers.some(
+          (playerName) => playerName === player.name
+        );
+        if (unitMatch && !shouldExclude) {
           if (requirement.type === "Stars") {
             if (unitMatch.stars < requirement.amount) {
               if (totalNeeded > playerList.length) {

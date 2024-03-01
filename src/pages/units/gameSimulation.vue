@@ -69,7 +69,7 @@
               </span>
               <span
                 class="float-end d-flex align-items-center"
-                v-if="character.hasLeaderAbility"
+                v-if="!!character.leaderAbility"
               >
                 <input
                   type="checkbox"
@@ -104,7 +104,7 @@
               </span>
               <span
                 class="float-end d-flex align-items-center"
-                v-if="character.hasLeaderAbility"
+                v-if="!!character.leaderAbility"
               >
                 <input
                   type="checkbox"
@@ -126,7 +126,7 @@
               <input
                 class="form-control form-control-sm"
                 type="number"
-                v-model.number="gameEngine.totalSimulations"
+                v-model.number="simulationCount"
                 min="1"
                 max="10"
               />
@@ -139,7 +139,7 @@
         <div class="row">
           <div class="col">
             <Loading
-              :state="gameEngine.status"
+              :state="loadingState"
               message="Loading match results"
               size="lg"
               displayText="Please wait...This may take a few minutes."
@@ -159,7 +159,7 @@
                 <li
                   class="nav-item"
                   role="presentation"
-                  v-for="(match, index) in gameEngine.matchHistory"
+                  v-for="(match, index) in results.matchHistory"
                   :key="index"
                 >
                   <button
@@ -175,20 +175,20 @@
               </ul>
               <div class="tab-content">
                 <div class="tab-pane fade show active" id="simulationSummary">
-                  <div>{{ player.name }} Wins: {{ gameEngine.playerWins }}</div>
+                  <div>{{ player.name }} Wins: {{ results.playerWins }}</div>
                   <div>
-                    {{ opponent.name }} Wins: {{ gameEngine.opponentWins }}
+                    {{ opponent.name }} Wins: {{ results.opponentWins }}
                   </div>
                   <div>
                     Winrate:
-                    {{ gameEngine.playerWinRate }}%
+                    {{ results.playerWinRate }}%
                   </div>
                 </div>
                 <div
                   class="tab-pane fade"
                   :id="`match-${index}`"
                   role="tabpanel"
-                  v-for="(match, index) in gameEngine.matchHistory"
+                  v-for="(match, index) in results.matchHistory"
                   :key="index"
                 >
                   <template
@@ -200,42 +200,44 @@
                         turn.logs.length > 0 || turn.endOfTurnLogs.length > 0
                       "
                     >
-                    <Popper arrow placement="right">
-                      <h6 class="turn-label">{{ turn.label }}:</h6>
-                      <template #content>
-                        <div>
-                          <div
-                            class="input-group input-group-sm"
-                            v-for="(character, index) in turn.characterList"
-                            :key="index"
-                          >
-                            <span class="input-group-text character-name"
-                              >{{ character.name }} ({{
-                                character.owner
-                              }})</span
+                      <Popper arrow placement="right">
+                        <h6 class="turn-label">{{ turn.label }}:</h6>
+                        <template #content>
+                          <div>
+                            <div
+                              class="input-group input-group-sm"
+                              v-for="(character, index) in turn.characterList"
+                              :key="index"
                             >
-                            <span class="input-group-text fill turn-meter">
-                              <ProgressBar
-                                :percent="character.turnMeter"
-                                class="w-100"
-                              />
-                            </span>
+                              <span class="input-group-text character-name"
+                                >{{ character.name }} ({{
+                                  character.owner
+                                }})</span
+                              >
+                              <span class="input-group-text fill turn-meter">
+                                <ProgressBar
+                                  :percent="character.turnMeter"
+                                  class="w-100"
+                                />
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </template>
-                    </Popper>
-                    <ul>
-                      <li v-for="(log, index) in turn.logs" :key="index">
-                        <Log :log="log" />
-                      </li>
-                      <li v-if="turn.endOfTurnLogs.length">- End of Turn -</li>
-                      <li
-                        v-for="(log, index) in turn.endOfTurnLogs"
-                        :key="index"
-                      >
-                        <Log :log="log" />
-                      </li>
-                    </ul>
+                        </template>
+                      </Popper>
+                      <ul>
+                        <li v-for="(log, index) in turn.logs" :key="index">
+                          <Log :log="log" />
+                        </li>
+                        <li v-if="turn.endOfTurnLogs.length">
+                          - End of Turn -
+                        </li>
+                        <li
+                          v-for="(log, index) in turn.endOfTurnLogs"
+                          :key="index"
+                        >
+                          <Log :log="log" />
+                        </li>
+                      </ul>
                     </template>
                   </template>
                 </div>
@@ -258,23 +260,26 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions, mapGetters } from "vuex";
+import _ from "lodash";
 
 import { numbersOnly } from "utils";
 import { Character } from "types/gameEngine/characters/index";
-import { gameEngine, Engine } from "types/gameEngine/gameEngine";
+import { Engine, iSimulation } from "types/gameEngine/gameEngine";
 import { Unit } from "types/unit";
 import UnitSearch from "components/units/unitSearch.vue";
 import Trigger from "components/gameEngine/triggers/trigger.vue";
 import Log from "components/gameEngine/log.vue";
-import characterList from "types/gameEngine/characterScripts";
+import { abilitiesList } from "types/gameEngine/characterScripts/abilitiesList";
 import { loadingState } from "types/loading";
 
 interface dataModel {
-  gameEngine: Engine;
-  playerTeam: Character[];
-  opponentTeam: Character[];
+  playerTeam: Unit[];
+  opponentTeam: Unit[];
   showDeleteOpponentConfirm: boolean;
   allyCode: string;
+  loadingState: loadingState;
+  results: iSimulation;
+  simulationCount: number;
 }
 
 export default defineComponent({
@@ -282,7 +287,15 @@ export default defineComponent({
   components: { UnitSearch, Trigger, Log },
   data() {
     return {
-      gameEngine,
+      results: {
+        matchHistory: [],
+        playerWins: 0,
+        opponentWins: 0,
+        playerWinRate: 0,
+        total: 0,
+      },
+      simulationCount: 1,
+      loadingState: loadingState.ready,
       playerTeam: [],
       opponentTeam: [],
       showDeleteOpponentConfirm: false,
@@ -302,7 +315,7 @@ export default defineComponent({
     playerUnitList(): Unit[] {
       return this.player?.units.filter((unit: Unit) => {
         return (
-          unit.id in characterList &&
+          unit.id in abilitiesList &&
           !this.playerTeam.some((x) => x.id === unit.id)
         );
       });
@@ -310,7 +323,7 @@ export default defineComponent({
     opponentUnitList(): Unit[] {
       return this.opponent?.units.filter((unit: Unit) => {
         return (
-          unit.id in characterList &&
+          unit.id in abilitiesList &&
           !this.opponentTeam.some((x) => x.id === unit.id)
         );
       });
@@ -327,23 +340,68 @@ export default defineComponent({
       refreshMatches: "refreshMatches",
       removeMatch: "removeMatch",
     }),
+    start() {
+      this.loadingState = loadingState.loading;
+      const myWorker = new Worker(new URL("./worker.ts", import.meta.url));
+
+      myWorker.onmessage = (e) => {
+        console.log("Message received from worker", e.data);
+      };
+
+      const dataToSend = {
+        playerList: this.playerTeam.map((unit) => {
+          return _.cloneDeep(unit.sanitize());
+        }),
+        opponentList: this.opponentTeam.map((unit) => {
+          return _.cloneDeep(unit.sanitize());
+        }),
+        playerName: this.player.name,
+        opponentName: this.opponent.name,
+        simulationCount: this.simulationCount,
+      };
+      myWorker.postMessage(dataToSend);
+
+      myWorker.onmessage = (e) => {
+        console.log(e.data);
+        this.results = e.data;
+        this.loadingState = loadingState.ready;
+      };
+    },
     addToTeam(teamName: "player" | "opponent", unit: Unit, isLeader?: boolean) {
       if (unit instanceof Unit) {
         if (teamName === "player") {
           if (!this.playerTeam.some((x) => x.id === unit.id)) {
-            this.playerTeam.push(
-              new Character(unit, this.player.name, isLeader)
-            );
+            this.playerTeam.push(unit);
+            // const characterClass = charactersList.get(unit.id);
+
+            // if (characterClass) {
+            //   this.playerTeam.push(
+            //     new characterClass(unit, this.player.name, isLeader)
+            //   );
+            // } else {
+            //   this.playerTeam.push(
+            //     new Character(unit, this.player.name, isLeader)
+            //   );
+            // }
           }
         } else {
           if (!this.opponentTeam.some((x) => x.id === unit.id)) {
-            this.opponentTeam.push(
-              new Character(unit, this.opponent.name, isLeader)
-            );
+            this.opponentTeam.push(unit);
+            // const characterClass = charactersList.get(unit.id);
+
+            // if (characterClass) {
+            //   this.opponentTeam.push(
+            //     new characterClass(unit, this.player.name, isLeader)
+            //   );
+            // } else {
+            //   this.opponentTeam.push(
+            //     new Character(unit, this.player.name, isLeader)
+            //   );
+            // }
           }
         }
         this.saveData();
-        gameEngine.status = loadingState.initial;
+        // gameEngine.status = loadingState.initial;
       }
     },
     removeCharacter(teamName: "player" | "opponent", index: number) {
@@ -365,12 +423,6 @@ export default defineComponent({
             return { id, isLeader };
           }),
         })
-      );
-    },
-    start() {
-      this.gameEngine.startSimulation(
-        this.playerTeam as Character[],
-        this.opponentTeam as Character[]
       );
     },
     removeOpponent() {
@@ -450,3 +502,4 @@ export default defineComponent({
   width: 150px;
 }
 </style>
+types

@@ -32,7 +32,8 @@
     "src/api/swgoh.gg.ts",
     "src/enums"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "files": ["./src/pages/units/worker.ts"]
 }
 
 // {

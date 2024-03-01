@@ -6,8 +6,6 @@ import {
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
 import { iStatsCheck } from "../characters/stats";
-import { gameEngine, iCondition } from "../gameEngine";
-import { Log } from "../characters/log";
 import { anyTagsMatch } from "../characters/index";
 import { iBuff } from "../characters/statusEffects";
 
@@ -16,12 +14,7 @@ class basicskill_C3POLEGENDARY extends ActiveAbility {
     super(
       "basicskill_C3POLEGENDARY",
       "Baffling Trick",
-      `C-3PO inflicts the unique debuff Confuse for 3 turns (max 3 stacks, can't be evaded or copied). If target is already Confused, duration of their stacks resets to 3 turns. Reduce target's Turn Meter by 6% and 3% more for each stack of Translation on C-3PO. (See Protocol Droid for Translation.)
-      \n\n
-      Confuse - Detrimental effects build based on the cumulative number of stacks:
-      1: Cannot gain buffs
-      2: Cannot counter, assist, or gain bonus Turn Meter (Raid bosses and Galactic Legends: -30% Counter Chance)
-      3: When this character uses their Basic ability, increase their cooldowns by 1, which can't be resisted (Raid bosses and Galactic Legends: -50% Defense, doesn't stack with Defense Down)`,
+      `C-3PO inflicts the unique debuff Confuse for 3 turns (max 3 stacks, can't be evaded or copied). If target is already Confused, duration of their stacks resets to 3 turns. Reduce target's Turn Meter by 6% and 3% more for each stack of Translation on C-3PO. (See Protocol Droid for Translation.)\n\nConfuse - Detrimental effects build based on the cumulative number of stacks:\n1: Cannot gain buffs\n2: Cannot counter, assist, or gain bonus Turn Meter (Raid bosses and Galactic Legends: -30% Counter Chance)\n3: When this character uses their Basic ability, increase their cooldowns by 1, which can't be resisted (Raid bosses and Galactic Legends: -50% Defense, doesn't stack with Defense Down)`,
       character
     );
   }
@@ -45,11 +38,13 @@ class basicskill_C3POLEGENDARY extends ActiveAbility {
                 id: uuid(),
                 unique: true,
                 isStackable: true,
+                sourceAbility: this,
               },
             ],
             primaryTarget,
             1,
-            this
+            this,
+            3
           );
         }
 
@@ -88,9 +83,7 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
     super(
       "specialability_C3POLEGENDARY01",
       "Oh My Goodness!",
-      `C-3PO gains Potency Up and Stealth for 2 turns, then he and target other ally gain Translation for 3 turns. C-3PO inflicts Confuse twice on target enemy for 3 turns, then calls all other allies with Translation to assist, dealing 50% less damage.
-      \n\n
-      (See Protocol Droid for a description of Translation.)`,
+      `C-3PO gains Potency Up and Stealth for 2 turns, then he and target other ally gain Translation for 3 turns. C-3PO inflicts Confuse twice on target enemy for 3 turns, then calls all other allies with Translation to assist, dealing 50% less damage.\n\n(See Protocol Droid for a description of Translation.)`,
       character
     );
     this.cooldown = 3;
@@ -103,15 +96,15 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
     super.execute(primaryEnemy, stats, false, () => {
       this._character.statusEffect.addBuff(
         [
-          { name: "Potency Up", id: uuid(), duration: 2 },
-          { name: "Stealth", id: uuid(), duration: 2 },
+          { name: "Potency Up", id: uuid(), duration: 2, sourceAbility: this },
+          { name: "Stealth", id: uuid(), duration: 2, sourceAbility: this },
           {
             name: "Translation",
             id: uuid(),
             duration: 3,
             unique: true,
             isStackable: true,
-            stacks: 1,
+            sourceAbility: this,
           },
         ],
         1,
@@ -127,7 +120,7 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
               duration: 3,
               unique: true,
               isStackable: true,
-              stacks: 1,
+              sourceAbility: this,
             },
           ],
           1,
@@ -151,13 +144,21 @@ class specialskill_C3POLEGENDARY01 extends ActiveAbility {
               id: uuid(),
               unique: true,
               isStackable: true,
-              stacks: 2,
-              maxStacks: 3,
+              sourceAbility: this,
+            },
+            {
+              name: "Confuse",
+              duration: 3,
+              id: uuid(),
+              unique: true,
+              isStackable: true,
+              sourceAbility: this,
             },
           ],
           primaryEnemy,
           1,
-          this
+          this,
+          3
         );
 
         allTranslationAllies.forEach((target) => {
@@ -188,22 +189,22 @@ class uniqueskill_C3POLEGENDARY01 extends PassiveAbility {
     super(
       "uniqueskill_C3POLEGENDARY01",
       "Protocol Droid",
-      `C-3PO has +20 Speed. While C-3PO is active, Galactic Republic, Rebel, Resistance, and Ewok allies gain Translation for 3 turns (max 3 stacks) each time they use a Special ability. Translation cannot be copied. If the character already has Translation, the duration for all current stacks on that character resets to 3 turns. If all allies that can apply Translation are defeated, all stacks of Translation expire.
-
-      Translation - Beneficial effects build based on the cumulative number of stacks:
-      1: Gain +30% Max Health
-      2: Gain +15% Critical Chance
-      3: If only one ally who grants Translation is present, decrease this character's cooldowns by 1 when that ally uses their Basic ability (limit once per turn)`,
+      `C-3PO has +20 Speed. While C-3PO is active, Galactic Republic, Rebel, Resistance, and Ewok allies gain Translation for 3 turns (max 3 stacks) each time they use a Special ability. Translation cannot be copied. If the character already has Translation, the duration for all current stacks on that character resets to 3 turns. If all allies that can apply Translation are defeated, all stacks of Translation expire.\n\nTranslation - Beneficial effects build based on the cumulative number of stacks:\n1: Gain +30% Max Health\n2: Gain +15% Critical Chance\n3: If only one ally who grants Translation is present, decrease this character's cooldowns by 1 when that ally uses their Basic ability (limit once per turn)`,
       character
     );
   }
 
   public override activate(): void {
-    this._character?.stats.tempStats.push({
-      statToModify: "speed",
-      amount: 20,
-      modifiedType: "additive",
-    });
+    this._character?.stats.addTempStats(
+      [
+        {
+          statToModify: "speed",
+          amount: 20,
+          modifiedType: "additive",
+        },
+      ],
+      this
+    );
 
     const rebelAllies = this._character.teammates.filter((ally) =>
       anyTagsMatch(ally, ["Rebel & !Self"], this._character.id)
@@ -233,15 +234,15 @@ class uniqueskill_C3POLEGENDARY01 extends PassiveAbility {
                 {
                   name: "Translation",
                   duration: 3,
-                  maxStacks: 3,
                   isStackable: true,
                   unique: true,
                   id: uuid(),
-                  stacks: 1,
+                  sourceAbility: this,
                 },
               ],
               1,
-              this
+              this,
+              3
             );
           }
         },
@@ -279,26 +280,13 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
       (x) => x.id === "R2D2LEGENDARY" || x.id === this._character.id
     );
     validTargets.forEach((target) => {
-      target.stats.tempStats.push(
+      target.stats.addTempStats([
         {
           modifiedType: "additive",
           statToModify: "physicalDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
-            ],
-          },
-          characterSourceId: this._character.uniqueId,
-        },
-        {
-          modifiedType: "additive",
-          statToModify: "physicalDodge",
-          amount: 0.1,
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation");
           },
           characterSourceId: this._character.uniqueId,
         },
@@ -306,10 +294,17 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           modifiedType: "additive",
           statToModify: "physicalDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation", undefined, 2);
+          },
+          characterSourceId: this._character.uniqueId,
+        },
+        {
+          modifiedType: "additive",
+          statToModify: "physicalDodge",
+          amount: 0.1,
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation", undefined, 3);
           },
           characterSourceId: this._character.uniqueId,
         },
@@ -317,10 +312,8 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           modifiedType: "additive",
           statToModify: "specialDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation");
           },
           characterSourceId: this._character.uniqueId,
         },
@@ -328,10 +321,8 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           modifiedType: "additive",
           statToModify: "specialDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation", undefined, 2);
           },
           characterSourceId: this._character.uniqueId,
         },
@@ -339,14 +330,12 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
           modifiedType: "additive",
           statToModify: "specialDodge",
           amount: 0.1,
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
-            ],
+          condition: () => {
+            return target.statusEffect.hasBuff("Translation", undefined, 3);
           },
           characterSourceId: this._character.uniqueId,
-        }
-      );
+        },
+      ]);
 
       target.events.push({
         eventType: "matchSetup",
@@ -358,13 +347,14 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
               duration: 3,
               unique: true,
               isStackable: true,
-              maxStacks: 3,
               id: uuid(),
-              stacks: 1,
+              sourceAbility: this,
             },
             1,
-            this
+            this,
+            3
           );
+          target.stats.gainHealth(Infinity, "health");
         },
       });
     });
@@ -386,13 +376,11 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
                   this._character.stats.maxHealth,
                   "health"
                 );
-                gameEngine.addLogs(
-                  new Log({
-                    character: this._character,
-                    customMessage: "escaped from the battle",
-                    ability: { source: this },
-                  })
-                );
+                this._character.gameEngine.addLogs({
+                  characterLogData: this._character.getLogs(),
+                  customMessage: "escaped from the battle",
+                  ability: { source: this.sanitize() },
+                });
               }
             },
           });
@@ -414,17 +402,20 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
 
   public override activate(): void {
     this._character.teammates.forEach((ally) => {
-      ally.stats.tempStats.push(
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-        },
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-        }
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+          },
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+          },
+        ],
+        this
       );
     });
 
@@ -440,7 +431,6 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
         eventType: "buffed",
         characterSourceId: this._character.uniqueId,
         callback: ({ buff }: { buff: iBuff }) => {
-          console.log(buff, ally.statusEffect.buffs);
           if (
             !ally.statusEffect.hasBuff(
               buff.name,
@@ -451,14 +441,13 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
             buff.name !== "Protection Up" &&
             !buff.unique
           ) {
-            console.log("adding prot up");
             ally.statusEffect.addBuff(
               [
                 {
                   name: "Protection Up",
                   duration: 1,
-                  stacks: 0.15 * ally.stats.maxHealth,
-                  id: uuid(),
+                  value: 0.15 * ally.stats.maxHealth,
+                  id: "uniqueskill_C3POLEGENDARY03_ProtectionUp",
                   sourceAbility: this,
                 },
               ],
@@ -471,132 +460,114 @@ class uniqueskill_C3POLEGENDARY03 extends PassiveAbility {
     });
 
     ewokAllies.forEach((ally) => {
-      ally.stats.tempStats.push(
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
-            ],
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.2,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.2,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        }
+        ],
+        this
       );
     });
 
     republicAllies.forEach((ally) => {
-      ally.stats.tempStats.push(
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
-            ],
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "specialArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "specialArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "physicalArmorPen",
-          amount: 0.1,
-          modifiedType: "multiplicative",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "physicalArmorPen",
+            amount: 0.1,
+            modifiedType: "multiplicative",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        }
+        ],
+        this
       );
     });
   }
@@ -614,11 +585,16 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
 
   public override activate(): void {
     this._character.teammates.forEach((ally) => {
-      ally.stats.tempStats.push({
-        statToModify: "critDamage",
-        amount: 0.1,
-        modifiedType: "additive",
-      });
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "critDamage",
+            amount: 0.1,
+            modifiedType: "additive",
+          },
+        ],
+        this
+      );
     });
 
     const ewokAllies = this._character.teammates.filter((ally) =>
@@ -641,7 +617,14 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
         }) => {
           if (ally.specialAbilities.some((x) => x.id === abilityId)) {
             ally.statusEffect.inflictDebuff(
-              [{ name: "Offense Down", duration: 2, id: uuid() }],
+              [
+                {
+                  name: "Offense Down",
+                  duration: 2,
+                  id: uuid(),
+                  sourceAbility: this,
+                },
+              ],
               target,
               1,
               this
@@ -652,72 +635,66 @@ class uniqueskill_C3POLEGENDARY04 extends PassiveAbility {
     });
 
     ewokAllies.forEach((ally) => {
-      ally.stats.tempStats.push(
-        {
-          statToModify: "critDamage",
-          amount: 0.2,
-          modifiedType: "additive",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
-            ],
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "critDamage",
+            amount: 0.2,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "critDamage",
-          amount: 0.2,
-          modifiedType: "additive",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "critDamage",
+            amount: 0.2,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "critDamage",
-          amount: 0.2,
-          modifiedType: "additive",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "critDamage",
+            amount: 0.2,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        }
+        ],
+        this
       );
     });
 
     resistanceAllies.forEach((ally) => {
-      ally.stats.tempStats.push(
-        {
-          statToModify: "critDamage",
-          amount: 0.1,
-          modifiedType: "additive",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 1, id: uuid(), duration: 0 },
-            ],
+      ally.stats.addTempStats(
+        [
+          {
+            statToModify: "critDamage",
+            amount: 0.1,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation");
+            },
           },
-        },
-        {
-          statToModify: "critDamage",
-          amount: 0.1,
-          modifiedType: "additive",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 2, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "critDamage",
+            amount: 0.1,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 2);
+            },
           },
-        },
-        {
-          statToModify: "critDamage",
-          amount: 0.1,
-          modifiedType: "additive",
-          condition: {
-            buffs: [
-              { name: "Translation", stacks: 3, id: uuid(), duration: 0 },
-            ],
+          {
+            statToModify: "critDamage",
+            amount: 0.1,
+            modifiedType: "additive",
+            condition: () => {
+              return ally.statusEffect.hasBuff("Translation", undefined, 3);
+            },
           },
-        }
+        ],
+        this
       );
     });
   }
