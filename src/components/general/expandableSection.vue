@@ -30,10 +30,11 @@
       </h3>
       <div v-if="options?.buttons">
         <i
-          v-for="button in options.buttons"
+          v-for="(button, index) in options.buttons"
           :class="button.classes"
           :title="button.title"
           @click="button.click()"
+          :key="index"
         ></i>
       </div>
       <div class="toggles-container" v-if="showOptionsContainer">

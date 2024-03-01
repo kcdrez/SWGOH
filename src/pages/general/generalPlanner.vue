@@ -1,8 +1,5 @@
 <template>
   <div class="container swgoh-page">
-    <div v-if="fullUnitList.length === 0">
-      You have no units in the General Planner.
-    </div>
     <div class="input-group input-group-sm my-2 search-units-input-group">
       <UnitSearch @select="selected = $event" />
       <button

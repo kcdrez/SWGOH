@@ -1,6 +1,4 @@
-import { IUnit, Unit } from "types/unit";
-import { Character } from "./index";
-import { gameEngine, iCondition } from "../gameEngine";
+import { Character, iUnit } from "./index";
 import { Log } from "./log";
 import { Ability } from "./abilities";
 
@@ -139,48 +137,62 @@ export interface iStatsCheck {
 export class Stats {
   public baseStats: iStats;
   protected tempStats: iStatsCheck[] = [];
-  protected _role: IUnit["role"];
-  protected _primaryStat: IUnit["primaryStat"];
+  protected _role: "Attacker" | "Tank" | "Support" | "Healer";
+  protected _primaryStat: "str" | "agi" | "tac";
   protected _character: Character;
   protected _curHealth: number = 0;
   protected _curProtection: number = 0;
 
-  constructor(data: Unit, parentCharacter: Character) {
+  constructor(data: iUnit, parentCharacter: Character) {
+    const masteryMapping = {
+      0: 0,
+      1: 5,
+      2: 10,
+      3: 15,
+      4: 20,
+      5: 25,
+      6: 35,
+      7: 45,
+      8: 60,
+      9: 70,
+    };
+
     this._character = parentCharacter;
     this._role = data.role;
     this._primaryStat = data.primaryStat;
     this.baseStats = {
-      maxHealth: data.health,
-      health: data.health,
-      maxProtection: data.protection,
-      protection: data.protection,
-      speed: data.speed,
+      maxHealth: data.stats["1"],
+      health: data.stats["1"],
+      maxProtection: data.stats["28"],
+      protection: data.stats["28"],
+      speed: data.stats["5"],
       physical: {
-        offense: data.offense.physical,
-        armor: (data.physicalArmor * 637.5) / (100 - data.physicalArmor),
-        armorPen: data.armorPen,
-        critChance: data.critChance.physical / 100,
-        accuracy: data.physicalAccuracy / 100,
-        dodge: data.physicalDodge / 100,
-        critAvoid: data.physicalCritAvoid / 100,
+        offense: data.stats["6"],
+        armor: (data.stats["8"] * 637.5) / (100 - data.stats["8"]),
+        armorPen: data.stats["10"],
+        critChance: data.stats["14"] / 100,
+        accuracy: data.stats["37"] / 100,
+        dodge: data.stats["12"] / 100,
+        critAvoid: data.stats["39"] / 100,
       },
       special: {
-        offense: data.offense.special,
-        armor: (data.armor.special * 637.5) / (100 - data.armor.special),
-        armorPen: data.resistancePen,
-        critChance: data.critChance.special / 100,
-        accuracy: data.specialAccuracy / 100,
-        dodge: data.specialDodge / 100,
-        critAvoid: data.specialCritAvoid / 100,
+        offense: data.stats["7"],
+        armor: (data.stats["9"] * 637.5) / (100 - data.stats["9"]),
+        armorPen: data.stats["11"],
+        critChance: data.stats["15"] / 100,
+        accuracy: data.stats["38"] / 100,
+        dodge: data.stats["13"] / 100,
+        critAvoid: data.stats["40"] / 100,
       },
-      critDamage: data.critDamage / 100,
-      tenacity: data.tenacity / 100,
-      potency: data.potency / 100,
-      healthSteal: data.healthSteal,
-      mastery: data.mastery,
+      critDamage: data.stats["16"],
+      tenacity: data.stats["18"],
+      potency: data.stats["17"],
+      healthSteal: data.stats["27"],
+      mastery: masteryMapping[data.relic_tier ?? 0],
     };
-    this._curHealth = data.health;
-    this._curProtection = data.protection;
+
+    this._curHealth = data.stats["1"];
+    this._curProtection = data.stats["28"];
   }
 
   /** An initializer function that resets various properties */
@@ -1170,19 +1182,15 @@ export class Stats {
    * @returns An array of stats that should be changed
    */
   private getTempStat(statName: iStatsCheck["statToModify"]): iStatsCheck[] {
-    const tempStatMapping: Record<string, iStatsCheck[]> =
-      this.tempStats.reduce((statsMapping, stat) => {
-        if (this._character.checkCondition(stat.condition)) {
-          if (stat.statToModify in statsMapping) {
-            statsMapping[stat.statToModify].push(stat);
-          } else {
-            statsMapping[stat.statToModify] = [stat];
-          }
-        }
-        return statsMapping;
-      }, {});
-
-    return tempStatMapping[statName] ?? [];
+    return this.tempStats.reduce((list: iStatsCheck[], stat) => {
+      if (
+        stat.statToModify === statName &&
+        this._character.checkCondition(stat.condition)
+      ) {
+        list.push(stat);
+      }
+      return list;
+    }, []);
   }
 
   /**
@@ -1305,21 +1313,25 @@ export class Stats {
 
   public addTempStats(statsList: iStatsCheck[], srcAbility?: Ability) {
     this.tempStats.push(...statsList);
+
+    let statLabels: string[] = [];
+
     statsList.forEach((stat) => {
       let amountLabel = stat.amount.toString();
-      if (stat.modifiedType === "multiplicative") {
+      if (stat.modifiedType === "multiplicative" || stat.amount <= 1) {
         amountLabel = `${stat.amount * 100}%`;
       }
-      let conditionLabel = stat.condition ? " (if a condition is met)" : "";
-
-      gameEngine.addLogs(
-        new Log({
-          character: this._character,
-          customMessage: `gained ${amountLabel} (${stat.modifiedType}) ${stat.statToModify}${conditionLabel}`,
-          ability: { source: srcAbility },
-        })
-      );
+      const conditionLabel = stat.condition ? " (if a condition is met)" : "";
+      statLabels.push(`${amountLabel} ${stat.statToModify}${conditionLabel}`);
     });
+
+    if (statLabels.length > 0) {
+      this._character.gameEngine.addLogs({
+        characterLogData: this._character.getLogs(),
+        customMessage: `gained ${statLabels.join(", ")}`,
+        ability: { source: srcAbility?.sanitize() },
+      });
+    }
   }
 
   public removeTempStats(characterId?: string, effectId?: string) {
@@ -1333,12 +1345,10 @@ export class Stats {
           amountLabel = `${stat.amount * 100}%`;
         }
 
-        gameEngine.addLogs(
-          new Log({
-            character: this._character,
-            customMessage: `removed ${amountLabel} (${stat.modifiedType}) ${stat.statToModify}`,
-          })
-        );
+        this._character.gameEngine.addLogs({
+          characterLogData: this._character.getLogs(),
+          customMessage: `removed ${amountLabel} (${stat.modifiedType}) ${stat.statToModify}`,
+        });
         return false;
       }
       return true;

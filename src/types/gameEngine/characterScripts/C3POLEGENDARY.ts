@@ -6,8 +6,6 @@ import {
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
 import { iStatsCheck } from "../characters/stats";
-import { gameEngine } from "../gameEngine";
-import { Log } from "../characters/log";
 import { anyTagsMatch } from "../characters/index";
 import { iBuff } from "../characters/statusEffects";
 
@@ -378,13 +376,11 @@ class uniqueskill_C3POLEGENDARY02 extends PassiveAbility {
                   this._character.stats.maxHealth,
                   "health"
                 );
-                gameEngine.addLogs(
-                  new Log({
-                    character: this._character,
-                    customMessage: "escaped from the battle",
-                    ability: { source: this },
-                  })
-                );
+                this._character.gameEngine.addLogs({
+                  characterLogData: this._character.getLogs(),
+                  customMessage: "escaped from the battle",
+                  ability: { source: this.sanitize() },
+                });
               }
             },
           });

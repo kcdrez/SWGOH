@@ -5,8 +5,8 @@
     :href="`#${header.collapseTarget ?? ''}`"
     :title="header.title"
   >
-    <template v-for="h in header.headers">
-      <tr class="sort-methods" v-if="showSortMethods">
+    <template v-for="(h, index) in header.headers">
+      <tr class="sort-methods" v-if="showSortMethods" :key="index">
         <th colspan="100%">
           <SortMethods
             :headerRow="h"
@@ -15,11 +15,9 @@
           />
         </th>
       </tr>
-      <tr class="sort-methods" v-if="header.multiOptions">
+      <tr class="sort-methods" v-if="header.multiOptions" :key="index">
         <th class="show-on-moblie">
           <MultiSelect
-            class="filter-mats"
-            label="Filter Relic Mats"
             :options="header.multiOptions"
             :storageKey="header.storageKey"
             @checked="handleSelect($event)"
@@ -28,6 +26,7 @@
       </tr>
       <TableHeaderRow
         v-if="showHeaders"
+        :key="index"
         class="text-center align-middle"
         :header="h"
         @searchChange="handleSearchChange($event)"

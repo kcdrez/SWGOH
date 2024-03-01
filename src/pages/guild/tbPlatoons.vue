@@ -8,6 +8,16 @@
           size="lg"
           displayText="Please wait...This may take a few minutes."
         >
+          <div>
+            Exclude Players:
+            <MultiSelect
+              class="select-columns"
+              :options="playerOptions"
+              storageKey="platoonsExcludePlayers"
+              label="Exclude Players"
+              @checked="excludePlayers = $event"
+            />
+          </div>
           <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item" role="presentation">
               <button
@@ -89,22 +99,22 @@
           </ul>
           <div class="tab-content">
             <div class="tab-pane fade show active" id="phase1" role="tabpanel">
-              <PlatoonsTable :phase="1" />
+              <PlatoonsTable :phase="1" :excludedPlayers="excludePlayers" />
             </div>
             <div class="tab-pane fade" id="phase2" role="tabpanel">
-              <PlatoonsTable :phase="2" />
+              <PlatoonsTable :phase="2" :excludedPlayers="excludePlayers" />
             </div>
             <div class="tab-pane fade" id="phase3" role="tabpanel">
-              <PlatoonsTable :phase="3" />
+              <PlatoonsTable :phase="3" :excludedPlayers="excludePlayers" />
             </div>
             <div class="tab-pane fade" id="phase4" role="tabpanel">
-              <PlatoonsTable :phase="4" />
+              <PlatoonsTable :phase="4" :excludedPlayers="excludePlayers" />
             </div>
             <div class="tab-pane fade" id="phase5" role="tabpanel">
-              <PlatoonsTable :phase="5" />
+              <PlatoonsTable :phase="5" :excludedPlayers="excludePlayers" />
             </div>
             <div class="tab-pane fade" id="phase6" role="tabpanel">
-              <PlatoonsTable :phase="6" />
+              <PlatoonsTable :phase="6" :excludedPlayers="excludePlayers" />
             </div>
             <div class="tab-pane fade" id="playerPlatoons" role="tabpanel">
               <SwgohTable :table="{ header, body }" />
@@ -130,6 +140,7 @@ import PlatoonsTable from "components/guild/platoonsTable.vue";
 
 interface dataModel {
   loading: loadingState;
+  excludePlayers: string[];
 }
 
 const storageKey = "TBPlatoons";
@@ -154,6 +165,7 @@ export default defineComponent({
   data() {
     return {
       loading: loadingState.initial,
+      excludePlayers: [],
     } as dataModel;
   },
   computed: {
@@ -401,6 +413,18 @@ export default defineComponent({
           return 0;
         });
     },
+    playerOptions(): any[] {
+      return this.players
+        .map((player: iGoalPlayer) => {
+          return {
+            label: player.name,
+            value: player.name,
+          };
+        })
+        .sort((a, b) => {
+          return sortValues(a.label, b.label, "asc");
+        });
+    },
   },
   methods: {
     ...mapActions("guild", ["fetchGuildUnitData"]),
@@ -454,6 +478,9 @@ export default defineComponent({
       }
 
       return phaseData;
+    },
+    addExcludedPlayer(player) {
+      console.log(player);
     },
   },
   async created() {

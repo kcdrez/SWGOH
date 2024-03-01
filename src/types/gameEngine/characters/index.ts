@@ -1,16 +1,14 @@
-import { round } from "lodash";
+import { round, cloneDeep } from "lodash";
 import { v4 as uuid } from "uuid";
 
-import { chanceOfEvent, randomNumber, unvue } from "utils";
+import { chanceOfEvent, randomNumber } from "./utils";
 
-import { iHeal, iStats, iStatsCheck, Stats } from "./stats";
+import { iHeal, iStatsCheck, Stats } from "./stats";
 import { StatusEffect } from "./statusEffects";
 import { Ability, ActiveAbility, PassiveAbility } from "./abilities";
-import { IUnit, Unit } from "types/unit";
 import { abilitiesList } from "../characterScripts/abilitiesList";
 import { Log, tLogData } from "./log";
-
-import { gameEngine } from "../gameEngine";
+import { Engine } from "../gameEngine";
 
 /**
  * A type to determine what events are supported
@@ -35,6 +33,27 @@ type tEventType =
   | "startOfTurn"
   | "useAbility";
 
+export interface iUnit {
+  id: string;
+  name: string;
+  aliases?: string[];
+  categories: string[];
+  ability_classes: string[];
+  role: "Attacker" | "Tank" | "Support" | "Healer";
+  alignment: "Light Side" | "Dark Side" | "Neutral";
+  primaryStat: "str" | "agi" | "tac";
+  isLeader?: boolean;
+
+  tier?: number;
+  stats: Record<string, number>;
+  ability_data: { id: string; name: string }[];
+  relic_tier?: number;
+  has_ultimate?: boolean;
+  is_ship?: boolean;
+  zeta_abilities: string[];
+  omicron_abilities: string[];
+}
+
 /**
  * A Character, otherwise known as unit or toon, that can have abilities and affect the flow of the game
  * @class Character
@@ -52,7 +71,7 @@ export class Character {
   private _uniqueAbilities: PassiveAbility[] = [];
   private _leaderAbility: PassiveAbility | null = null;
   public owner: string;
-  private _alignment: IUnit["alignment"];
+  private _alignment: "Light Side" | "Dark Side" | "Neutral";
   private _categories: string[];
   public teammates: Character[] = [];
   public opponents: Character[] = [];
@@ -65,8 +84,15 @@ export class Character {
   }[] = [];
   public keywords: string[] = [];
   public hasBonusTurn: boolean = false;
+  public gameEngine: Engine;
 
-  constructor(data: Unit, owner: string, isLeader?: boolean) {
+  constructor(
+    data: iUnit,
+    owner: string,
+    isLeader: boolean,
+    gameEngine: Engine
+  ) {
+    this.gameEngine = gameEngine;
     this.stats = new Stats(data, this);
     this.statusEffect = new StatusEffect(this);
 
@@ -76,10 +102,10 @@ export class Character {
     this._alignment = data.alignment;
     this._categories = data.categories;
     this.isLeader = isLeader ?? false;
-    this.relicLevel = data.relicLevel;
+    this.relicLevel = data.relic_tier ?? 0;
 
     const abilityList = abilitiesList[this.id];
-    data.abilities.forEach((x) => {
+    data.ability_data.forEach((x) => {
       if (x.id.includes("basic")) {
         const abilityClass = abilityList.basicAbility.get(x.id);
         if (abilityClass) {
@@ -183,60 +209,51 @@ export class Character {
     srcCharacter?: Character
   ) {
     if (amount === 0 || this.isDead) {
-      return null;
+      return;
     }
     let diff = 0;
-
     if (this._tm >= 100 && amount < 0) {
       const resistedChance = Math.max(
         this.stats.tenacity - (srcCharacter?.stats.potency ?? 0),
         0.15
       );
       if (chanceOfEvent(resistedChance)) {
-        gameEngine.addLogs(
-          new Log({
-            character: this,
-            statusEffects: {
-              resisted: true,
-              list: [
-                {
-                  name: "TM Decrease",
-                  duration: amount,
-                  id: uuid(),
-                  sourceAbility: srcAbility ?? null,
-                },
-              ],
-              type: "debuff",
-            },
-          })
-        );
+        this.gameEngine.addLogs({
+          characterLogData: this.getLogs(),
+          statusEffects: {
+            resisted: true,
+            list: [
+              {
+                name: "TM Decrease",
+                duration: amount,
+                sourceAbility: srcAbility?.sanitize(),
+              },
+            ],
+            type: "debuff",
+          },
+        });
         this.dispatchEvent("resisted", { effect: "TM Decrease" });
         return;
       }
-
       diff = Math.abs(amount);
       this._tm = 100 + amount; //note this will remove tm since amount is a negative number
     } else {
       diff = amount < 0 ? Math.min(Math.abs(amount), this._tm) : amount;
       this._tm += amount;
     }
-
     if (this._tm < 0) {
       this._tm = 0;
     }
-
     if (srcAbility) {
-      gameEngine.addLogs(
-        new Log({
-          character: this,
-          effects: {
-            turnMeter: round(amount > 0 ? diff : 0 - diff, 2),
-          },
-          ability: {
-            source: srcAbility,
-          },
-        })
-      );
+      this.gameEngine.addLogs({
+        characterLogData: this.getLogs(),
+        effects: {
+          turnMeter: round(amount > 0 ? diff : 0 - diff, 2),
+        },
+        ability: {
+          source: srcAbility.sanitize(),
+        },
+      });
     }
   }
   /**
@@ -325,13 +342,11 @@ export class Character {
    */
   public checkDeath(targetCharacter: Character) {
     if (targetCharacter.isDead) {
-      gameEngine.addLogs(
-        new Log({
-          character: this,
-          target: targetCharacter,
-          effects: { defeated: true },
-        })
-      );
+      this.gameEngine.addLogs({
+        characterLogData: this.getLogs(),
+        targetLogData: targetCharacter.getLogs(),
+        effects: { defeated: true },
+      });
       targetCharacter._uniqueAbilities.forEach((a) => a.deactivate());
       targetCharacter.dispatchEvent("death");
     }
@@ -350,9 +365,10 @@ export class Character {
     this._tm = 0;
     let ability: ActiveAbility | null = null;
     if (this.statusEffect.hasDebuff("Stun")) {
-      gameEngine.addLogs(
-        new Log({ character: this, effects: { stunned: true } })
-      );
+      this.gameEngine.addLogs({
+        characterLogData: this.getLogs(),
+        effects: { stunned: true },
+      });
     } else {
       ability = this.chooseAbility();
       ability?.execute();
@@ -447,23 +463,20 @@ export class Character {
   ) {
     if (this._basicAbility && !targetCharacter?.isDead) {
       if (this.statusEffect.isImmune("Assisting")) {
-        gameEngine.addLogs(
-          new Log({
-            character: this,
-            effects: { assisted: false },
-            ability: {
-              source: this.statusEffect.immunity.Assisting.sourceAbility,
-            },
-          })
-        );
+        this.gameEngine.addLogs({
+          characterLogData: this.getLogs(),
+          effects: { assisted: false },
+          ability: {
+            source:
+              this.statusEffect.immunity.Assisting.sourceAbility?.sanitize(),
+          },
+        });
       } else {
-        gameEngine.addLogs(
-          new Log({
-            character: this,
-            effects: { assisted: true },
-            ability: { source: srcAbility },
-          })
-        );
+        this.gameEngine.addLogs({
+          characterLogData: this.getLogs(),
+          effects: { assisted: true },
+          ability: { source: srcAbility?.sanitize() },
+        });
         this._basicAbility.execute(targetCharacter, modifiers, false);
       }
     }
@@ -508,13 +521,11 @@ export class Character {
       this.stats.gainHealth(finalAmount, healthType);
 
       if (round(diff) > 0) {
-        gameEngine.addLogs(
-          new Log({
-            character: this,
-            heal: { amount: round(diff), type: healthType },
-            ability: { source: sourceAbility },
-          })
-        );
+        this.gameEngine.addLogs({
+          characterLogData: this.getLogs(),
+          heal: { amount: round(diff), type: healthType },
+          ability: { source: sourceAbility?.sanitize() },
+        });
       }
     }
   }
@@ -531,23 +542,19 @@ export class Character {
         this.owner !== targetCharacter.owner
       ) {
         if (this.statusEffect.isImmune("CounterAttacking")) {
-          gameEngine.addLogs(
-            new Log({
-              character: this,
-              effects: { countered: false },
-              ability: {
-                source:
-                  this.statusEffect.immunity.CounterAttacking.sourceAbility,
-              },
-            })
-          );
+          this.gameEngine.addLogs({
+            characterLogData: this.getLogs(),
+            effects: { countered: false },
+            ability: {
+              source:
+                this.statusEffect.immunity.CounterAttacking.sourceAbility?.sanitize(),
+            },
+          });
         } else {
-          gameEngine.addLogs(
-            new Log({
-              character: this,
-              effects: { countered: true },
-            })
-          );
+          this.gameEngine.addLogs({
+            characterLogData: this.getLogs(),
+            effects: { countered: true },
+          });
 
           this._basicAbility?.execute(
             targetCharacter,
@@ -621,12 +628,10 @@ export class Character {
       this.stats.gainHealth(protection, "protection");
       this.stats.gainHealth(health, "health");
 
-      gameEngine.addLogs(
-        new Log({
-          character: this,
-          effects: { revived: true },
-        })
-      );
+      this.gameEngine.addLogs({
+        characterLogData: this.getLogs(),
+        effects: { revived: true },
+      });
 
       this.dispatchEvent("revive", { target: this });
     }
@@ -701,15 +706,40 @@ export class Character {
       },
       activeAbilities: this.activeAbilities.map((a) => {
         return {
-          id: a.id,
-          name: a.name,
+          ...a.sanitize(),
           cooldown: a.turnsRemaining,
-          text: a.text,
         };
       }),
-      buffs: unvue(this.statusEffect.buffs),
-      debuffs: unvue(this.statusEffect.debuffs),
-      statusEffects: unvue(this.statusEffect.statusEffects),
+      buffs: this.statusEffect.buffs.map((buff) => {
+        return {
+          name: buff.name ?? "",
+          duration: buff.duration,
+          cantDispel: buff.cantDispel,
+          cantPrevent: buff.cantPrevent,
+          cantResist: buff.cantResist,
+          unique: buff.unique,
+        };
+      }),
+      debuffs: this.statusEffect.debuffs.map((debuff) => {
+        return {
+          name: debuff.name ?? "",
+          duration: debuff.duration,
+          cantDispel: debuff.cantDispel,
+          cantPrevent: debuff.cantPrevent,
+          cantResist: debuff.cantResist,
+          unique: debuff.unique,
+        };
+      }),
+      statusEffects: this.statusEffect.statusEffects.map((effect) => {
+        return {
+          name: effect.name ?? "",
+          duration: effect.duration,
+          cantDispel: effect.cantDispel,
+          cantPrevent: effect.cantPrevent,
+          cantResist: effect.cantResist,
+          unique: effect.unique,
+        };
+      }),
       physical: [
         {
           label: "Offense",
@@ -864,10 +894,10 @@ export class Character {
           isPercent: true,
         },
       ],
-      otherEffects: unvue({
+      otherEffects: {
         ...this.effects,
-        immunity: unvue(this.statusEffect.immunity),
-      }),
+        immunity: this.statusEffect.sanitizeImmunity(),
+      },
       turnMeter: round(this.turnMeter, 0),
     };
   }

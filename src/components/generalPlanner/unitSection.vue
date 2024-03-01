@@ -3,8 +3,9 @@
     title="Unit Summary"
     :idRef="refName"
     :options="expandOptions"
+    class="mb-3"
   >
-    <SwgohTable :table="{ header, body }" />
+    <SwgohTable :table="{ header, body, classes: 'mb-0' }" />
   </ExpandableSection>
 </template>
 
@@ -178,7 +179,7 @@ export default defineComponent({
     },
     body(): iTableBody {
       return {
-        classes: "align-middle text-center",
+        classes: "align-middle text-center mb-0",
         rows: this.unitList.map((unit: Unit) => {
           return {
             cells: [

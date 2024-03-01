@@ -6,7 +6,6 @@ import {
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
 import { iStatsCheck } from "../characters/stats";
-import { iCondition } from "../gameEngine";
 
 class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
   constructor(character: Character) {
@@ -36,7 +35,6 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
             stats,
             canBeCountered
           );
-
           if (
             primaryTarget.checkCondition(() => {
               return primaryTarget.statusEffect.hasDebuff("Speed Down");
@@ -44,7 +42,6 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
           ) {
             primaryTarget.changeTurnMeter(-30, this);
           }
-
           if (
             primaryTarget.checkCondition(() => {
               return primaryTarget.statusEffect.hasDebuff("Defense Down");
@@ -57,7 +54,6 @@ class basicskill_COMMANDERLUKESKYWALKER extends ActiveAbility {
               this
             );
           }
-
           this._character?.statusEffect.inflictDebuff(
             [
               {
@@ -116,7 +112,6 @@ class specialskill_COMMANDERLUKESKYWALKER02 extends ActiveAbility {
         },
         this
       );
-
       if (
         this._character?.checkCondition(() => {
           return this._character.statusEffect.hasBuff("Call to Action");
@@ -170,7 +165,6 @@ class specialskill_COMMANDERLUKESKYWALKER01 extends ActiveAbility {
         if (primaryTarget.stats.health < primaryTarget.stats.maxHealth) {
           this.changeCooldown(-1, this);
         }
-
         primaryTarget.statusEffect.removeBuff("all");
         this._character?.statusEffect.inflictDebuff(
           [
@@ -289,12 +283,6 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
           },
           characterSourceId: this._character.uniqueId,
         },
-      ],
-      this
-    );
-
-    this._character?.stats.addTempStats(
-      [
         {
           statToModify: "physicalCritAvoid",
           amount: 0.5,
@@ -313,12 +301,6 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
           },
           characterSourceId: this._character.uniqueId,
         },
-      ],
-      this
-    );
-
-    this._character?.stats.addTempStats(
-      [
         {
           statToModify: "physicalArmor",
           amount: 0.5,
@@ -337,12 +319,6 @@ class uniqueskill_COMMANDERLUKESKYWALKER01 extends PassiveAbility {
           },
           characterSourceId: this._character.uniqueId,
         },
-      ],
-      this
-    );
-
-    this._character?.stats.addTempStats(
-      [
         {
           statToModify: "tenacity",
           amount: 1,
@@ -388,38 +364,41 @@ class leaderskill_COMMANDERLUKESKYWALKER extends PassiveAbility {
     });
 
     targetList.forEach((target) => {
-      target.stats.addTempStats([
-        {
-          statToModify: "counterChance",
-          amount: 0.5,
-          modifiedType: "additive",
-          characterSourceId: this._character?.uniqueId,
-        },
-        {
-          statToModify: "physicalArmor",
-          amount: 0.5,
-          modifiedType: "multiplicative",
-          characterSourceId: this._character?.uniqueId,
-        },
-        {
-          statToModify: "specialArmor",
-          amount: 0.5,
-          modifiedType: "multiplicative",
-          characterSourceId: this._character?.uniqueId,
-        },
-        {
-          statToModify: "physicalOffense",
-          amount: 0.15,
-          modifiedType: "multiplicative",
-          characterSourceId: this._character?.uniqueId,
-        },
-        {
-          statToModify: "specialOffense",
-          amount: 0.15,
-          modifiedType: "multiplicative",
-          characterSourceId: this._character?.uniqueId,
-        },
-      ]);
+      target.stats.addTempStats(
+        [
+          {
+            statToModify: "counterChance",
+            amount: 0.5,
+            modifiedType: "additive",
+            characterSourceId: this._character?.uniqueId,
+          },
+          {
+            statToModify: "physicalArmor",
+            amount: 0.5,
+            modifiedType: "multiplicative",
+            characterSourceId: this._character?.uniqueId,
+          },
+          {
+            statToModify: "specialArmor",
+            amount: 0.5,
+            modifiedType: "multiplicative",
+            characterSourceId: this._character?.uniqueId,
+          },
+          {
+            statToModify: "physicalOffense",
+            amount: 0.15,
+            modifiedType: "multiplicative",
+            characterSourceId: this._character?.uniqueId,
+          },
+          {
+            statToModify: "specialOffense",
+            amount: 0.15,
+            modifiedType: "multiplicative",
+            characterSourceId: this._character?.uniqueId,
+          },
+        ],
+        this
+      );
 
       target.events.push({
         characterSourceId: this._character?.uniqueId ?? "",

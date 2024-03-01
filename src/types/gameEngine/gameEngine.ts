@@ -1,7 +1,8 @@
-import store from "vuex-store/store";
+import _ from "lodash";
+// import store from "vuex-store/store";
 import { Character } from "./characters/index";
-import { randomNumber, round } from "utils";
-import { Log } from "./characters/log";
+import { randomNumber } from "./characters/utils";
+import { Log, iLog } from "./characters/log";
 import { iBuff, tBuff, tDebuff } from "./characters/statusEffects";
 import { iStatsCheck } from "./characters/stats";
 import { loadingState } from "types/loading";
@@ -32,19 +33,21 @@ export interface iCondition {
 }
 
 export class Turn {
-  public logs: Log[] = [];
-  public endOfTurnLogs: Log[] = [];
+  public logs: iLog[] = [];
+  public endOfTurnLogs: iLog[] = [];
   private _turnNumber: number = 0;
   private _character: Character | null = null;
   private _label: string | null = null;
   public characterList: { name: string; owner: string; turnMeter: number }[] =
     [];
+  private engine: Engine;
 
   constructor(
     turnNumber: number,
     character: Character | null,
-    logs?: Log[],
-    endOfTurnLogs?: Log[],
+    gameEngine: Engine,
+    logs?: iLog[],
+    endOfTurnLogs?: iLog[],
     label?: string | null
   ) {
     this._turnNumber = turnNumber;
@@ -52,14 +55,15 @@ export class Turn {
     this.logs = logs ?? [];
     this.endOfTurnLogs = endOfTurnLogs ?? [];
     this._label = label ?? null;
+    this.engine = gameEngine;
 
-    this.characterList = gameEngine.allCharacters
+    this.characterList = this.engine.allCharacters
       .map((c) => {
         const logs = c.getLogs();
         return {
           name: c.name,
           owner: c.owner,
-          turnMeter: round(logs.turnMeter, 2),
+          turnMeter: _.round(logs.turnMeter, 2),
         };
       })
       .sort((a, b) => {
@@ -77,48 +81,66 @@ export class Turn {
     return this._label ?? `Turn ${this.turnNumber}`;
   }
 
-  addLogs(logs: Log[], endOfTurn?: boolean) {
-    if (endOfTurn) {
+  addLogs(logs: iLog[], endOfTurn?: boolean) {
+    if (endOfTurn || this.endOfTurnLogs.length > 0) {
       this.endOfTurnLogs.push(...logs.filter((l) => !!l));
     } else {
       this.logs.push(...logs.filter((l) => !!l));
     }
   }
+
+  public sanitize(): iTurn {
+    return {
+      label: this.label,
+      turnNumber: this.turnNumber,
+      logs: this.logs,
+      endOfTurnLogs: this.endOfTurnLogs,
+      characterList: this.characterList,
+    };
+  }
 }
 
-interface iSimulation {
-  total: number;
+export interface iTurn {
+  label: string;
+  turnNumber: number;
+  logs: iLog[];
+  endOfTurnLogs: iLog[];
+  characterList: { name: string; owner: string; turnMeter: number }[];
+}
+
+export interface iSimulation {
+  matchHistory: iTurn[][];
   playerWins: number;
   opponentWins: number;
-  matchHistory: Turn[][];
+  playerWinRate?: number;
+  // total: number;
 }
 
 export class Engine {
   private _playerCharacters: Character[] = [];
   private _opponentCharacters: Character[] = [];
   private _simulationData: iSimulation = {
-    total: 1,
+    // total: 1,
     playerWins: 0,
     opponentWins: 0,
     matchHistory: [],
   };
   public turns: Turn[] = [];
-  public status: loadingState = loadingState.initial;
 
   constructor() {}
 
   public get allCharacters() {
     return [...this._playerCharacters, ...this._opponentCharacters];
   }
-  public get totalSimulations() {
-    return this._simulationData.total;
-  }
-  public set totalSimulations(val: number) {
-    if (val <= 10) {
-      this._simulationData.total = val;
-    }
-  }
-  public get matchHistory(): Turn[][] {
+  // public get totalSimulations() {
+  //   return this._simulationData.total;
+  // }
+  // public set totalSimulations(val: number) {
+  //   if (val <= 10) {
+  //     this._simulationData.total = val;
+  //   }
+  // }
+  public get matchHistory(): iTurn[][] {
     return this._simulationData.matchHistory;
   }
   public get playerWins() {
@@ -129,12 +151,13 @@ export class Engine {
   }
   public get playerWinRate(): number {
     return (
-      round(this.playerWins / (this.playerWins + this.opponentWins), 2) * 100
+      _.round(this.playerWins / (this.playerWins + this.opponentWins), 2) * 100
     );
   }
   public get opponentWinRate(): number {
     return (
-      round(this.opponentWins / (this.playerWins + this.opponentWins), 2) * 100
+      _.round(this.opponentWins / (this.playerWins + this.opponentWins), 2) *
+      100
     );
   }
   public get currentCharactersTurn() {
@@ -145,33 +168,46 @@ export class Engine {
     }
   }
 
-  public startSimulation(playerUnits: Character[], opponentUnits: Character[]) {
+  public startSimulation(
+    playerUnits: Character[],
+    opponentUnits: Character[],
+    amountOfSimulations: number
+  ): iSimulation {
     this._simulationData.matchHistory = [];
     this._simulationData.opponentWins = 0;
     this._simulationData.playerWins = 0;
-    this.status = loadingState.loading;
 
-    for (let i = 0; i < this._simulationData.total; i++) {
+    for (let i = 0; i < amountOfSimulations; i++) {
       this.initializeMatch(playerUnits, opponentUnits);
 
       let turnNumber = 0;
       do {
+        console.time("turn");
         turnNumber++;
         this.nextTurn(turnNumber);
         if (this.checkMatchEnd(turnNumber, 9999)) {
-          this._simulationData.matchHistory.push(this.turns);
+          this._simulationData.matchHistory.push(
+            this.turns.map((t) => t.sanitize())
+          );
           break;
         }
+        console.timeEnd("turn");
       } while (true);
     }
-    this.status = loadingState.ready;
+
+    return {
+      matchHistory: this.matchHistory,
+      playerWins: this._simulationData.playerWins,
+      opponentWins: this._simulationData.opponentWins,
+      playerWinRate: this.playerWinRate,
+    };
   }
 
   private initializeMatch(
     playerUnits: Character[],
     opponentUnits: Character[]
   ) {
-    this.turns = [];
+    this.turns = [new Turn(0, null, this, [], [], "Initialilze Match")];
     this._playerCharacters = [];
     this._opponentCharacters = [];
 
@@ -180,6 +216,7 @@ export class Engine {
         this._playerCharacters.push(unit);
       }
     });
+
     opponentUnits.forEach((unit) => {
       if (!this._opponentCharacters.some((x) => x.id === unit.id)) {
         this._opponentCharacters.push(unit);
@@ -201,14 +238,13 @@ export class Engine {
 
     this.allCharacters.forEach((character) => character.initialize());
 
+    this.turns.push(new Turn(0.1, null, this, [], [], "Match Set Up"));
+
     this.allCharacters
       .filter((char) => {
         return char.events.some((x) => x.eventType === "matchSetup");
       })
       .forEach((character, index) => {
-        this.turns.push(
-          new Turn(0 + 0.1 * index, character, [], [], "Match Set Up")
-        );
         character.dispatchEvent("matchSetup");
       });
 
@@ -236,10 +272,7 @@ export class Engine {
         return 0;
       })
       .forEach((char, index) => {
-        this.turns.push(
-          new Turn(0 + 0.2 * index, char, [], [], "Start of Match")
-        );
-
+        this.turns.push(new Turn(0.2, char, this, [], [], "Start of Match"));
         char.dispatchEvent("matchStart");
       });
 
@@ -273,7 +306,7 @@ export class Engine {
         }
       });
 
-      this.turns.push(new Turn(turnNumber, character));
+      this.turns.push(new Turn(turnNumber, character, this));
       character.takeAction();
       this.allCharacters.forEach((c) =>
         c.dispatchEvent("endOfTurn", { character })
@@ -291,14 +324,15 @@ export class Engine {
         new Turn(
           Infinity,
           null,
+          this,
           [
-            new Log({
-              effects: {
-                winner: opponentLost
-                  ? store.state.player.player?.name
-                  : store.state.opponents.player?.name,
-              },
-            }),
+            // {
+            //   effects: {
+            //     winner: opponentLost
+            //       ? store.state.player.player?.name
+            //       : store.state.opponents.player?.name,
+            //   },
+            // },
           ],
           [],
           "Final Score"
@@ -315,7 +349,7 @@ export class Engine {
     return false;
   }
 
-  public addLogs(logs: Log | Log[], endOfTurn?: boolean) {
+  public addLogs(logs: iLog | iLog[], endOfTurn?: boolean) {
     if (this.turns.length <= 0) {
       console.error("cannot add logs because there are no turns");
       return;
@@ -330,5 +364,5 @@ export class Engine {
   }
 }
 
-const gameEngine = new Engine();
-export { gameEngine };
+// const gameEngine = new Engine();
+// export { gameEngine };

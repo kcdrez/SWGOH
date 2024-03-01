@@ -7,7 +7,6 @@ import {
 import { Character } from "../../characters/index";
 import { iStatsCheck } from "../../characters/stats";
 import { iStatusEffect } from "types/gameEngine/characters/statusEffects";
-import { gameEngine } from "types/gameEngine/gameEngine";
 
 class basicskill_GENERALSKYWALKER extends ActiveAbility {
   constructor(character: Character) {
@@ -277,7 +276,9 @@ class uniqueskill_GENERALSKYWALKER01 extends PassiveAbility {
         }) => {
           if (
             isCrit &&
-            gameEngine.currentCharactersTurn?.isSelf(this._character) &&
+            this._character.gameEngine.currentCharactersTurn?.isSelf(
+              this._character
+            ) &&
             !target.hasTags("Galactic Legend", "")
           ) {
             target.specialAbilities.forEach((ability) => {
@@ -309,7 +310,9 @@ class uniqueskill_GENERALSKYWALKER01 extends PassiveAbility {
 
     this._character.opponents.forEach((opponent) => {
       opponent.statusEffect.addImmune("cant_crit_out_of_turn", "Crit", () => {
-        return !gameEngine.currentCharactersTurn?.isSelf(opponent);
+        return !this._character.gameEngine.currentCharactersTurn?.isSelf(
+          opponent
+        );
       });
     });
   }

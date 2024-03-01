@@ -4,6 +4,7 @@
     :idRef="refName"
     :options="expandOptions"
     class="mt-3"
+    v-if="plannerList.length > 0"
   >
     <ShardTable
       :ref="refName"

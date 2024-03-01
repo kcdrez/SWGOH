@@ -4,8 +4,7 @@ import _ from "lodash";
 import { Character, anyTagsMatch } from "./index";
 import { iStatsCheck } from "./stats";
 import { tBuff, tDebuff, tStatusEffect } from "./statusEffects";
-import { chanceOfEvent, randomNumber } from "utils";
-import { gameEngine } from "types/gameEngine/gameEngine";
+import { chanceOfEvent, randomNumber } from "./utils";
 import { Log } from "./log";
 
 /**
@@ -27,6 +26,10 @@ export class Ability {
     this.name = name;
     this.text = text;
     this._character = parentCharacter;
+  }
+
+  public sanitize() {
+    return { id: this.id, name: this.name, text: this.text };
   }
 }
 
@@ -157,14 +160,12 @@ abstract class CharacterAbility extends Ability {
     if (targetCharacter.isDead) {
       return;
     }
-
     const { offense, critChance, armorPen } =
       this._character.stats.getCombatStats(damageType, stats);
     const varianceOffense =
       damageType === "true"
         ? 1
         : offense * (1 - randomNumber(0 - variance, variance) / 100);
-
     const { isCrit, damageTotal } = targetCharacter.receiveDamage(
       damageType,
       varianceOffense * abilityModifier,
@@ -173,18 +174,16 @@ abstract class CharacterAbility extends Ability {
       this._character.stats.critDamage,
       stats
     );
-
-    gameEngine.addLogs([
-      new Log({
-        target: targetCharacter,
+    this._character.gameEngine.addLogs([
+      {
+        targetLogData: targetCharacter.getLogs(),
         damage: {
           amount: _.round(damageTotal, 0),
           isCrit,
         },
-        ability: { source: srcAbility },
-      }),
+        ability: { source: srcAbility?.sanitize() },
+      },
     ]);
-
     this._character.heal(
       {
         amountType: "additive",
@@ -193,23 +192,19 @@ abstract class CharacterAbility extends Ability {
       },
       new HealthSteal(this._character)
     );
-
     this._character?.checkDeath(targetCharacter);
-
     this._character.dispatchEvent("dealDamage", {
       damageAmount: damageTotal,
       isCrit,
       damageType,
       target: targetCharacter,
     });
-
     targetCharacter.dispatchEvent("receiveDamage", {
       damageAmount: damageTotal,
       isCrit,
       damageType,
       attackSource: this.id,
     });
-
     targetCharacter.counterAttack(this._character, canBeCountered);
   }
 }
@@ -256,14 +251,14 @@ export abstract class ActiveAbility extends CharacterAbility {
     additionalEffects: Function = () => {}
   ) {
     if (targetCharacter) {
-      gameEngine.addLogs(
-        new Log({ character: this._character, ability: { used: this } })
-      );
+      this._character.gameEngine.addLogs({
+        characterLogData: this._character.getLogs(),
+        ability: { used: this.sanitize() },
+      });
       this._character.dispatchEvent("beforeUseAbility", {
         abilityId: this.id,
         target: targetCharacter,
       });
-
       additionalEffects();
 
       if (this.cooldown) {
@@ -273,6 +268,7 @@ export abstract class ActiveAbility extends CharacterAbility {
       this._character.dispatchEvent("useAbility", {
         abilityId: this.id,
         target: targetCharacter,
+        canBeCountered,
       });
     } else {
       console.error("Could not find a valid target for ", this.id);
@@ -302,12 +298,10 @@ export abstract class ActiveAbility extends CharacterAbility {
       const attackMissed = chanceOfEvent(dodge - accuracy * 100);
 
       if (attackMissed) {
-        gameEngine.addLogs(
-          new Log({
-            character: targetCharacter,
-            damage: { evaded: true },
-          })
-        );
+        this._character.gameEngine.addLogs({
+          characterLogData: targetCharacter.getLogs(),
+          damage: { evaded: true },
+        });
         return true;
       } else {
         return false;
@@ -342,18 +336,16 @@ export abstract class ActiveAbility extends CharacterAbility {
         sourceAbility: srcAbility,
       })
     ) {
-      gameEngine.addLogs(
-        new Log({
-          character: this._character,
-          statusEffects: {
-            immune: true,
-            type: amount > 0 ? "debuff" : "buff",
-            list: [
-              { name, duration: amount, id: uuid(), sourceAbility: srcAbility },
-            ],
-          },
-        })
-      );
+      this._character.gameEngine.addLogs({
+        characterLogData: this._character.getLogs(),
+        statusEffects: {
+          immune: true,
+          type: amount > 0 ? "debuff" : "buff",
+          list: [
+            { name, duration: amount, sourceAbility: srcAbility.sanitize() },
+          ],
+        },
+      });
     } else {
       if (amount > 0 && !!srcCharacter) {
         const resistedChance = Math.max(
@@ -362,18 +354,16 @@ export abstract class ActiveAbility extends CharacterAbility {
         );
 
         if (chanceOfEvent(resistedChance) && !cantResist) {
-          gameEngine.addLogs(
-            new Log({
-              character: this._character,
-              statusEffects: {
-                resisted: true,
-                list: [
-                  { name, duration: 0, id: uuid(), sourceAbility: srcAbility },
-                ],
-                type: "debuff",
-              },
-            })
-          );
+          this._character.gameEngine.addLogs({
+            characterLogData: this._character.getLogs(),
+            statusEffects: {
+              resisted: true,
+              list: [
+                { name, duration: 0, sourceAbility: srcAbility.sanitize() },
+              ],
+              type: "debuff",
+            },
+          });
           this._character?.dispatchEvent("resisted", {
             effect: "Cooldown Increase",
           });
@@ -390,13 +380,13 @@ export abstract class ActiveAbility extends CharacterAbility {
       }
       this.turnsRemaining += finalAmount;
 
-      gameEngine.addLogs(
-        new Log({
-          character: this._character,
-          ability: { source: srcAbility },
-          effects: { cooldown: { ability: this, amount: finalAmount } },
-        })
-      );
+      this._character.gameEngine.addLogs({
+        characterLogData: this._character.getLogs(),
+        ability: { source: srcAbility.sanitize() },
+        effects: {
+          cooldown: { ability: this.sanitize(), amount: finalAmount },
+        },
+      });
     }
   }
 }

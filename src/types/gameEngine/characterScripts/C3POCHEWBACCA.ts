@@ -6,9 +6,7 @@ import {
 } from "types/gameEngine/characters/abilities";
 import { Character } from "../characters/index";
 import { iStatsCheck } from "../characters/stats";
-import { gameEngine } from "../gameEngine";
-import { randomNumber } from "utils";
-import { Log } from "../characters/log";
+import { randomNumber } from "../characters/utils";
 import { anyTagsMatch } from "../characters/index";
 
 class basicskill_C3POCHEWBACCA extends ActiveAbility {
@@ -154,14 +152,14 @@ class specialskill_C3POCHEWBACCA02 extends ActiveAbility {
               stats
             );
 
-            gameEngine.addLogs([
-              new Log({
-                target,
+            this._character.gameEngine.addLogs([
+              {
+                targetLogData: target.getLogs(),
                 damage: {
                   amount: damageTotal,
                   isCrit,
                 },
-              }),
+              },
             ]);
 
             this._character?.checkDeath(target);

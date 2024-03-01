@@ -1,15 +1,11 @@
-import { v4 as uuid } from "uuid";
-
 import { Character } from "../../characters/index";
-import { iStatsCheck, Stats } from "../../characters/stats";
-import { Unit } from "types/unit";
-import { Log } from "types/gameEngine/characters/log";
-import { gameEngine } from "types/gameEngine/gameEngine";
+import { Stats } from "../../characters/stats";
+import { Engine } from "types/gameEngine/gameEngine";
 import abilityList from "./abilities";
 
 class GENERALSKYWALKER extends Character {
-  constructor(data: Unit, owner: string, isLeader?: boolean) {
-    super(data, owner, isLeader);
+  constructor(data: any, owner: string, isLeader: boolean, gameEngine: Engine) {
+    super(data, owner, isLeader, gameEngine);
 
     let usedAbilityId: null | string = null;
 
@@ -100,14 +96,13 @@ class GENERALSKYWALKER_stats extends Stats {
     }
 
     if (this._character.statusEffect.hasStatusEffect("Cover")) {
-      gameEngine.addLogs(
-        new Log({
-          character: this._character,
-          ability: { source: this._character.leaderAbility },
-          customMessage:
-            "cannot lose health or protection due to being in Cover",
-        })
-      );
+      this._character.gameEngine.addLogs({
+        characterLogData: this._character.getLogs(),
+        ability: {
+          source: this._character.leaderAbility.sanitize(),
+        },
+        customMessage: "cannot lose health or protection due to being in Cover",
+      });
       return;
     }
 

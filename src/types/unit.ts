@@ -48,6 +48,7 @@ export interface IUnit {
   alignment: "Light Side" | "Dark Side" | "Neutral";
   statMultipliers?: IStatMultiplier;
   primaryStat: "str" | "agi" | "tac";
+  isLeader?: boolean;
 
   //attributes that only exist when the character is unlocked
   gear_level?: number;
@@ -101,6 +102,8 @@ export class Unit {
   private _stat_multipliers?: IStatMultiplier;
 
   private _estimatedTime: number = 0;
+
+  public isLeader: boolean = false;
 
   constructor(payload: IUnit) {
     this._id = payload.id;
@@ -570,7 +573,7 @@ export class Unit {
           ultMats: 1,
         },
       },
-      REY: {
+      GLREY: {
         tier1: {
           tickets: 15,
           count: 8,
@@ -1509,6 +1512,38 @@ export class Unit {
     });
     const match = this.shardNodes.find((n) => n.id === matchFarmingNode?.id);
     return match?.priority ?? 0;
+  }
+
+  public sanitize(): IUnit {
+    return {
+      id: this._id,
+      name: this._name,
+      image: this._image,
+      categories: this._categories,
+      ability_classes: this._ability_classes,
+      role: this._role,
+      alignment: this._alignment,
+      primaryStat: this._primaryStat,
+      zeta_abilities: this._zeta_abilities ?? [],
+      omicron_abilities: this._omicron_abilities ?? [],
+      stats: this._stats,
+      aliases: this._aliases,
+      gear_level: this._gear_level,
+      gear: this._current_level_gear,
+      ability_data: this._ability_data,
+      relic_tier: this._relic_tier,
+      mods: this._mods,
+      stars: this._stars,
+      level: this._level,
+      is_ship: this._is_ship,
+      gear_levels: this._gear_list,
+      power: this._power,
+      has_ultimate: this._has_ultimate,
+      stat_diffs: this._stat_diffs,
+      crew: this._crew,
+      statMultipliers: this._stat_multipliers,
+      isLeader: this.isLeader,
+    };
   }
 }
 export interface UnitGear {

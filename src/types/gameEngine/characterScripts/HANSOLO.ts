@@ -89,6 +89,7 @@ class specialskill_HANSOLO01 extends ActiveAbility {
             1,
             this
           );
+
           this.dealDamage(
             "physical",
             primaryTarget,
@@ -198,7 +199,7 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
       {
         characterSourceId: this._character.uniqueId,
         eventType: "useAbility",
-        callback: ({ abilityId, target }) => {
+        callback: ({ abilityId, target, canBeCountered }) => {
           if (abilityId === "basicskill_HANSOLO" && this.triggerCount < 1) {
             this.triggerCount++;
             const ability = this._character.activeAbilities.find(
@@ -218,7 +219,7 @@ class uniqueskill_HANSOLO01 extends PassiveAbility {
                   modifiedType: "multiplicative",
                 },
               ],
-              true
+              canBeCountered
             );
           }
         },
