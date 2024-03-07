@@ -1666,7 +1666,6 @@ export function getUnitPercent(
   let starsLevel = 0;
   let shardsAmount = 0;
   let gearPieces = 0;
-  // const { gearLevel, gearPiecesCount } = unit;
 
   if (playerUnit) {
     power = playerUnit.power;
@@ -1701,8 +1700,7 @@ export function getUnitPercent(
     return (gearPercent + relicPercent + shardsPercent) * 100;
   } else if (type === "Gear") {
     const { gearScale, shardsScale } = getScale(gearLevel);
-    const gearPercent =
-      getGearPercent(gearLevel, gearPieces, maxGearLevel) * gearScale;
+    const gearPercent = getGearPercent(gearLevel, gearPieces, target);
     const shardsPercent = (shardsAmount + 0.01) / 330;
 
     return (gearPercent * gearScale + shardsPercent * shardsScale) * 100;

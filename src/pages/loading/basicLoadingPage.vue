@@ -8,7 +8,6 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import { loadingState } from "types/loading";
 import { initializeModules } from "utils";
 
 export default defineComponent({
