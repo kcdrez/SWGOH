@@ -25,7 +25,6 @@ import GuildStats from "pages/guild/guildStats.vue";
 import TBPlatoons from "pages/guild/tbPlatoons.vue";
 import WidgetsPage from "pages/general/widgets.vue";
 import GearListPage from "pages/gear/gearList.vue";
-// import GearPage from "pages/gearPage.vue";
 import ScavengerPage from "pages/relic/scavenger.vue";
 import UnitSearchPage from "pages/units/unitSearch.vue";
 import RelicCalculatorPage from "pages/relic/relicCalculator.vue";
@@ -35,7 +34,6 @@ const routes = [
   {
     path: "/",
     name: "home",
-    // redirect: { name: "GeneralPlannerPage" },
     components: {
       default: HomePage,
     },
