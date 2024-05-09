@@ -750,7 +750,7 @@ const scavengerFarming: IScavenger[] = [
       {
         id: "035", //Mk 2 Chiewab Hypo Syringe
         scavenger: [{ id: "carbonite_circuit_board", amount: 3 }],
-        notes: "Recommended to save 100-120 in reserves.",
+        notes: "Recommended to save 20-40 in reserves.",
       },
     ],
   },

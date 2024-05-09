@@ -18,7 +18,7 @@ import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
   baseUrl = "https://wb0l29fz82.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3001/dev";
+  // baseUrl = "http://localhost:3000/dev";
 
   constructor() {}
 
