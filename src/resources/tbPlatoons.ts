@@ -1,6 +1,7 @@
 export default [
   {
     phase: 1,
+    label: 'Phase 1',
     characters: {
       requirement: {
         type: "Relic",
@@ -753,6 +754,7 @@ export default [
   },
   {
     phase: 2,
+    label: 'Phase 2',
     characters: {
       requirement: {
         type: "Relic",
@@ -1465,6 +1467,7 @@ export default [
   },
   {
     phase: 3,
+    label: 'Phase 3',
     characters: {
       requirement: {
         type: "Relic",
@@ -2132,6 +2135,7 @@ export default [
   },
   {
     phase: 4,
+    label: 'Phase 4',
     characters: {
       requirement: {
         type: "Relic",
@@ -2864,6 +2868,7 @@ export default [
   },
   {
     phase: 5,
+    label: 'Phase 5',
     characters: {
       requirement: {
         type: "Relic",
@@ -3583,6 +3588,7 @@ export default [
   },
   {
     phase: 6,
+    label: 'Phase 6',
     characters: {
       requirement: {
         type: "Relic",
@@ -4301,4 +4307,190 @@ export default [
       ],
     },
   },
+  {
+    phase: 'zeffo',
+    label: 'Zeffo',
+    characters: {
+      requirement: {
+        type: "Relic",
+        amount: 7
+      },
+      lightside: [                {
+        id: "COMMANDERAHSOKA",
+        amount: 1,
+        difficulty: 3,
+      },        {
+        id: "JEDIKNIGHTLUKE",
+        amount: 5,
+        difficulty: 4,
+      },        {
+        id: "GENERALKENOBI",
+        amount: 2,
+        difficulty: 5,
+      },        {
+        id: "KYLEKATARN",
+        amount: 3,
+        difficulty: 2,
+      },        {
+        id: "GRANDMASTERLUKE",
+        amount: 6,
+        difficulty: 2,
+      },        {
+        id: "BB8",
+        amount: 1,
+        difficulty: 3,
+      },        {
+        id: "HANSOLO",
+        amount: 3,
+        difficulty: 5,
+      },        {
+        id: "CHIRRUTIMWE",
+        amount: 2,
+        difficulty: 1,
+      },        {
+        id: "JOLEEBINDO",
+        amount: 3,
+        difficulty: 2,
+      },        {
+        id: "GLREY",
+        amount: 3,
+        difficulty: 2,
+      },        {
+        id: "GENERALSKYWALKER",
+        amount: 6,
+        difficulty: 4,
+      },        {
+        id: "KIADIMUNDI",
+        amount: 6,
+        difficulty: 2,
+      },        {
+        id: "JEDIKNIGHTCONSULAR",
+        amount: 3,
+        difficulty: 1,
+      },        {
+        id: "HERMITYODA",
+        amount: 1,
+        difficulty: 2,
+      },        {
+        id: "JEDIMASTERKENOBI",
+        amount: 4,
+        difficulty: 2,
+      },        {
+        id: "CHEWBACCALEGENDARY",
+        amount: 3,
+        difficulty: 3,
+      },        {
+        id: "CLONESERGEANTPHASEI",
+        amount: 2,
+        difficulty: 2,
+      },{
+        id: "CHIEFCHIRPA",
+        amount: 2,
+        difficulty: 1,
+      },{
+        id: "JEDIKNIGHTGUARDIAN",
+        amount: 3,
+        difficulty: 1,
+      },        {
+        id: "BENSOLO",
+        amount: 3,
+        difficulty: 2,
+      },        {
+        id: "C3POLEGENDARY",
+        amount: 1,
+        difficulty: 5,
+      },        {
+        id: "JUHANI",
+        amount: 1,
+        difficulty: 2,
+      },        {
+        id: "REYJEDITRAINING",
+        amount: 3,
+        difficulty: 4,
+        },{
+          id: "LUKESKYWALKER",
+          amount: 2,
+          difficulty: 1,
+          },{
+            id: "QIRA",
+            amount: 1,
+            difficulty: 1,
+            },        {
+              id: "JEDIKNIGHTREVAN",
+              amount: 1,
+              difficulty: 3,
+            },        {
+              id: "COMMANDERLUKESKYWALKER",
+              amount: 3,
+              difficulty: 5,
+            },        {
+              id: "KITFISTO",
+              amount: 1,
+              difficulty: 1,
+            },        {
+              id: "BADBATCHWRECKER",
+              amount: 1,
+              difficulty: 1,
+            },        {
+              id: "ENFYSNEST",
+              amount: 1,
+              difficulty: 2,
+        },{
+          id: "R2D2_LEGENDARY",
+          amount: 1,
+          difficulty: 4,
+    },{
+      id: "ZEBS3",
+      amount: 1,
+      difficulty: 1,
+      },{
+        id: "AAYLASECURA",
+        amount: 1,
+        difficulty: 2,
+        },{
+          id: "PLOKOON",
+          amount: 1,
+          difficulty: 2,
+          },{
+            id: "PADMEAMIDALA",
+            amount: 1,
+            difficulty: 4,
+            },{
+              id: "VISASMARR",
+              amount: 1,
+              difficulty: 2,
+              }
+            
+      ]
+        
+    },
+    ships: {
+      requirement: {
+        type: "Stars",
+        amount: 7,
+      },
+      lightside: [{
+        id: "JEDISTARFIGHTERCONSULAR",
+        amount: 1,
+        difficulty: 5,
+      },{
+        id: "MG100STARFORTRESSSF17",
+        amount: 2,
+        difficulty: 5,
+      },{
+        id: "RAZORCREST",
+        amount: 2,
+        difficulty: 5,
+      },{
+        id: "ARC170CLONESERGEANT",
+        amount: 2,
+        difficulty: 5,
+        },{
+          id: "CAPITALRADDUS",
+          amount: 1,
+          difficulty: 5,
+          }
+        ]
+    }
+  }
 ];
