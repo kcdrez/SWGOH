@@ -1879,11 +1879,6 @@ export default [
           difficulty: 2,
         },
         {
-          id: "THEMANDALORIANBESKARARMOR",
-          amount: 5,
-          difficulty: 2,
-        },
-        {
           id: "R2D2_LEGENDARY",
           amount: 4,
           difficulty: 4,
@@ -1997,6 +1992,11 @@ export default [
           id: "UNDERCOVERLANDO",
           amount: 1,
           difficulty: 3,
+        },
+        {
+          id: "GREEFKARGA",
+          amount: 5,
+          difficulty: 1,
         },
       ],
     },
