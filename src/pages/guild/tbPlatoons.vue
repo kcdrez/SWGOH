@@ -499,50 +499,55 @@ export default defineComponent({
     },
   },
   async created() {
-    this.loading = loadingState.loading;
-    await this.fetchGuildUnitData({
-      guildId: this.fetchGuildId,
-      unitId: platoonData.reduce((ids: string[], el) => {
-        (el.characters.darkside ?? []).forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        (el.ships.darkside ?? []).forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        (el.characters.mixed ?? []).forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        (el.ships.mixed ?? []).forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        (el.characters.lightside ?? []).forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        (el.ships.lightside ?? []).forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        return ids;
-      }, []),
-    });
-    this.loading = loadingState.ready;
+    try {
+      this.loading = loadingState.loading;
+      await this.fetchGuildUnitData({
+        guildId: this.fetchGuildId,
+        unitId: platoonData.reduce((ids: string[], el) => {
+          (el.characters.darkside ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          (el.ships.darkside ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          (el.characters.mixed ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          (el.ships.mixed ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          (el.characters.lightside ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          (el.ships.lightside ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          return ids;
+        }, []),
+      });
+      this.loading = loadingState.ready;
+    } catch (err) {
+      this.loading = loadingState.error;
+      console.log(err);
+    }
   },
 });
 </script>
