@@ -17,8 +17,8 @@ import {
 import { IDailyCurrency, IWallet } from "types/currency";
 
 class ApiClient {
-  baseUrl = "https://wb0l29fz82.execute-api.us-east-1.amazonaws.com/dev";
-  // baseUrl = "http://localhost:3001/dev";
+  // baseUrl = "https://wb0l29fz82.execute-api.us-east-1.amazonaws.com/dev";
+  baseUrl = "http://localhost:3000/dev";
 
   constructor() {}
 
@@ -30,6 +30,12 @@ class ApiClient {
       units: (data?.units ?? []).map((u: IUnit) => new Unit(u)),
       goalList: (data?.goalList ?? []).map((el: IGoal) => new Goal(el)),
     };
+  }
+
+  async fetchPlayerAPI(allyCode: string): Promise<any> {
+    const response = await axios.get(`${this.baseUrl}/gg/player/${allyCode}`);
+    const { data } = response;
+    return data;
   }
 
   async fetchOpponent(playerId: string | undefined) {
@@ -59,7 +65,9 @@ class ApiClient {
   }
 
   async fetchAllUnits(): Promise<Unit[]> {
-    const response = await axios.get(`${this.baseUrl}/unit/unitList`);
+    const response = await axios.get(`${this.baseUrl}/unit/unitList`, {
+      headers: { "Access-Control-Allow-Origin": "*" },
+    });
     return response.data.map((x: IUnit) => new Unit(x));
   }
 
@@ -159,6 +167,11 @@ class ApiClient {
 
   async fetchGuild(guildId: string): Promise<GuildPayload> {
     const response = await axios.get(`${this.baseUrl}/guild/${guildId}`);
+    return response.data;
+  }
+
+  async fetchGuildApi(guildId: string): Promise<any> {
+    const response = await axios.get(`${this.baseUrl}/gg/guild/${guildId}`);
     return response.data;
   }
 

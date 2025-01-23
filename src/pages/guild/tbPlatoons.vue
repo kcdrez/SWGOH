@@ -9,7 +9,6 @@
           displayText="Please wait...This may take a few minutes."
         >
           <div>
-            Exclude Players:
             <MultiSelect
               class="select-columns"
               :options="playerOptions"

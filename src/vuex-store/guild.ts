@@ -354,71 +354,40 @@ const store = {
       }
     ) {
       const guildId = data.guildId ?? state.guildId;
-      if (Array.isArray(data.unitId) || data.unitId === undefined) {
-        const filteredIds =
-          data.unitId?.filter((unitId) => {
-            if (state.players.length === 0) {
-              return true;
-            }
-            const anyPlayerHasIt = state.players.some((player) => {
-              if (player.units.length === 0) {
-                return true;
-              }
-              const exists = player.units.some(
-                (unit) => unit?.base_id === unitId
-              );
-              return exists;
-            });
-            return !anyPlayerHasIt;
-          }) ?? undefined;
-        if (filteredIds?.length ?? 0 > 0) {
-          const response = await apiClient.fetchGuildUnits(
-            guildId,
-            filteredIds
-          );
-          commit("SET_PLAYER_DATA", response);
-        }
-      } else {
-        const playerData = state.players.reduce(
-          (acc: any, player: any) => {
-            const { units, ...restPlayer } = player;
-            if (units.length === 0) {
-              acc.exists = true;
-            }
-            const unitMatch = units.find(
-              (unit) => unit?.base_id === data.unitId
-            );
-            acc.exists = !!unitMatch || acc.exists;
-            acc.list.push({
-              unit: unitMatch,
-              ...restPlayer,
-            });
-            return acc;
-          },
-          { exists: false, list: [] }
+
+      const guildData = await apiClient.fetchGuildApi(guildId);
+
+      const membersListNeedData = guildData.members.filter((member) => {
+        return !state.players.some(
+          (player) => player.allyCode === member.ally_code
         );
+      });
 
-        if (playerData.exists) {
-          return apiClient.mapGuildUnit(playerData.list);
-        } else {
-          const players = await apiClient.fetchGuildUnitData(
-            guildId,
-            data.unitId
-          );
-          commit(
-            "SET_PLAYER_DATA",
-            players.map((player) => {
-              const { unit, ...restPlayer } = player;
-              return {
-                units: [unit],
-                ...restPlayer,
-              };
-            })
-          );
+      const results = await Promise.all(
+        membersListNeedData.map((member) => {
+          return apiClient.fetchPlayerAPI(member.ally_code);
+        })
+      );
 
-          return apiClient.mapGuildUnit(players);
-        }
-      }
+      const playerData: iGoalPlayer[] = results.map((player: any) => {
+        const newPlayer: iGoalPlayer = {
+          units: player.units.map((unit: any) => {
+            return {
+              relic_tier: unit.data.relic_tier - 2,
+              stars: unit.data.rarity,
+              base_id: unit.data.base_id,
+              name: unit.data.name,
+              gear_level: unit.data.gear_level,
+              power: unit.data.power,
+            };
+          }),
+          name: player.data.name,
+          allyCode: player.data.ally_code,
+          totalGP: player.data.galactic_power,
+        };
+        return newPlayer;
+      });
+      commit("SET_PLAYER_DATA", playerData);
     },
     addRaidEvent({ dispatch, state }: ActionCtx, event: iRaidEvent) {
       dispatch("saveRaidEvents", [...state.raidEvents, event]);
