@@ -65,9 +65,7 @@ class ApiClient {
   }
 
   async fetchAllUnits(): Promise<Unit[]> {
-    const response = await axios.get(`${this.baseUrl}/unit/unitList`, {
-      headers: { "Access-Control-Allow-Origin": "*" },
-    });
+    const response = await axios.get(`${this.baseUrl}/unit/unitList`);
     return response.data.map((x: IUnit) => new Unit(x));
   }
 
