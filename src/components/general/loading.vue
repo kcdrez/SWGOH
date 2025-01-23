@@ -4,7 +4,9 @@
       <i class="fas fa-spinner fa-spin" :class="sizeClass" :title="message" />
       <div v-if="displayText">{{ displayText }}</div>
     </div>
-    <slot name="error" v-else-if="state === 'ERROR'" />
+    <slot name="error" v-else-if="state === 'ERROR'">
+      An unexpected error occurred. Please refresh and try again.
+    </slot>
     <slot name="initial" v-else-if="state === 'INITIAL'" />
     <slot v-else />
   </div>

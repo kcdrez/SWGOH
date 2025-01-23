@@ -46,7 +46,7 @@ export default defineComponent({
   props: {
     phase: {
       required: true,
-      type: Number,
+      type: [Number, String],
     },
     excludedPlayers: {
       type: Array as () => string[],
@@ -67,25 +67,25 @@ export default defineComponent({
 
       if (phaseData) {
         const characterList = [
-          ...phaseData.characters.darkside.map((x) => {
+          ...(phaseData.characters.darkside ?? []).map((x) => {
             return { ...x, alignment: "Dark Side" };
           }),
-          ...phaseData.characters.mixed.map((x) => {
+          ...(phaseData.characters.mixed ?? []).map((x) => {
             return { ...x, alignment: "Mixed" };
           }),
-          ...phaseData.characters.lightside.map((x) => {
+          ...(phaseData.characters.lightside ?? []).map((x) => {
             return { ...x, alignment: "Light Side" };
           }),
         ];
 
         const shipsList = [
-          ...phaseData.ships.darkside.map((x) => {
+          ...(phaseData.ships.darkside ?? []).map((x) => {
             return { ...x, alignment: "Dark Side", isShip: true };
           }),
-          ...phaseData.ships.mixed.map((x) => {
+          ...(phaseData.ships.mixed ?? []).map((x) => {
             return { ...x, alignment: "Mixed", isShip: true };
           }),
-          ...phaseData.ships.lightside.map((x) => {
+          ...(phaseData.ships.lightside ?? []).map((x) => {
             return { ...x, alignment: "Light Side", isShip: true };
           }),
         ];

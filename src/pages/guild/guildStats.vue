@@ -395,8 +395,13 @@ export default defineComponent({
   async created() {
     if (this.fetchGuildId) {
       this.loading = loadingState.loading;
-      this.gp = await apiClient.fetchGuildStats(this.fetchGuildId);
-      this.loading = loadingState.ready;
+      try {
+        this.gp = await apiClient.fetchGuildStats(this.fetchGuildId);
+        this.loading = loadingState.ready;
+      } catch (err) {
+        console.error(err)
+        this.loading = loadingState.error;
+      }
     }
   },
 });

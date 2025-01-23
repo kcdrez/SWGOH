@@ -88,6 +88,17 @@
               <button
                 class="nav-link"
                 data-bs-toggle="tab"
+                data-bs-target="#zeffo"
+                type="button"
+                role="tab"
+              >
+                Zeffo
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                data-bs-toggle="tab"
                 data-bs-target="#playerPlatoons"
                 type="button"
                 role="tab"
@@ -114,6 +125,9 @@
             </div>
             <div class="tab-pane fade" id="phase6" role="tabpanel">
               <PlatoonsTable :phase="6" :excludedPlayers="excludePlayers" />
+            </div>
+            <div class="tab-pane fade" id="zeffo" role="tabpanel">
+              <PlatoonsTable :phase="'zeffo'" :excludedPlayers="excludePlayers" />
             </div>
             <div class="tab-pane fade" id="playerPlatoons" role="tabpanel">
               <SwgohTable :table="{ header, body }" />
@@ -435,16 +449,17 @@ export default defineComponent({
         phase4: [],
         phase5: [],
         phase6: [],
+        phasezeffo: [],
         total: 0,
       };
 
       platoonData.forEach((phase) => {
-        processData(phase.characters.darkside, phase);
-        processData(phase.characters.mixed, phase);
+        processData(phase.characters?.darkside ?? [], phase);
+        processData(phase.characters?.mixed ?? [], phase);
         processData(phase.characters.lightside, phase);
-        processData(phase.ships.darkside, phase);
-        processData(phase.ships.mixed, phase);
-        processData(phase.ships.lightside, phase);
+        processData(phase.ships?.darkside ?? [], phase);
+        processData(phase.ships?.mixed ?? [], phase);
+        processData(phase.ships?.lightside ?? [], phase);
 
         phaseData[`phase${phase.phase}`].sort((a, b) =>
           a.name.localeCompare(b.name)
@@ -483,50 +498,55 @@ export default defineComponent({
     },
   },
   async created() {
-    this.loading = loadingState.loading;
-    await this.fetchGuildUnitData({
-      guildId: this.fetchGuildId,
-      unitId: platoonData.reduce((ids: string[], el) => {
-        el.characters.darkside.forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        el.ships.darkside.forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        el.characters.mixed.forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        el.ships.mixed.forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        el.characters.lightside.forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        el.ships.lightside.forEach((c) => {
-          const exists = ids.some((i) => i === c.id);
-          if (!exists) {
-            ids.push(c.id);
-          }
-        });
-        return ids;
-      }, []),
-    });
-    this.loading = loadingState.ready;
+    try {
+      this.loading = loadingState.loading;
+      await this.fetchGuildUnitData({
+        guildId: this.fetchGuildId,
+        unitId: platoonData.reduce((ids: string[], el) => {
+          (el.characters.darkside ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          (el.ships.darkside ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          (el.characters.mixed ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          (el.ships.mixed ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          (el.characters.lightside ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          (el.ships.lightside ?? []).forEach((c) => {
+            const exists = ids.some((i) => i === c.id);
+            if (!exists) {
+              ids.push(c.id);
+            }
+          });
+          return ids;
+        }, []),
+      });
+      this.loading = loadingState.ready;
+    } catch (err) {
+      this.loading = loadingState.error;
+      console.log(err);
+    }
   },
 });
 </script>

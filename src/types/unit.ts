@@ -1899,7 +1899,7 @@ function getRelicPercent(
   target: number = maxRelicLevel,
   value: number = 0
 ): number {
-  value = value || unit.relicLevel;
+  value = value ?? unit.relicLevel;
   const { fragmented_white, incomplete_green, flawed_blue } =
     store.state.relic.relicConfig;
   const whiteProgress = fragmented_white.percentApplied(value, target);
