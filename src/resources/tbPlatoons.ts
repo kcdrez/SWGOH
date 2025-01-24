@@ -1,7 +1,7 @@
-export default [
+const platoonData = [
   {
     phase: 1,
-    label: 'Phase 1',
+    label: "Phase 1",
     characters: {
       requirement: {
         type: "Relic",
@@ -11,22 +11,22 @@ export default [
         {
           id: "DARTHTRAYA",
           amount: 7,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "DARTHREVAN",
           amount: 5,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "GRIEVOUS",
           amount: 5,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "TRIPLEZERO",
           amount: 4,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "EMPERORPALPATINE",
@@ -36,12 +36,12 @@ export default [
         {
           id: "WATTAMBOR",
           amount: 4,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "GRANDADMIRALTHRAWN",
           amount: 3,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "UGNAUGHT",
@@ -51,17 +51,17 @@ export default [
         {
           id: "BT1",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "CANDEROUSORDO",
           amount: 2,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "MAUL",
           amount: 2,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "DARTHSIDIOUS",
@@ -71,7 +71,7 @@ export default [
         {
           id: "DARTHSION",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "VADER",
@@ -81,17 +81,17 @@ export default [
         {
           id: "DROIDEKA",
           amount: 2,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "FIRSTORDEROFFICERMALE",
           amount: 2,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "FIRSTORDERSPECIALFORCESPILOT",
           amount: 2,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "IG88",
@@ -101,17 +101,17 @@ export default [
         {
           id: "IMPERIALPROBEDROID",
           amount: 1,
-          difficulty: 1,
+          difficulty: 4,
         },
         {
           id: "ASAJVENTRESS",
           amount: 1,
-          difficulty: 1,
+          difficulty: 5,
         },
         {
           id: "B1BATTLEDROIDV2",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "BOBAFETT",
@@ -121,22 +121,22 @@ export default [
         {
           id: "COUNTDOOKU",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "DARKTROOPER",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "DENGAR",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "EMBO",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "FIFTHBROTHER",
@@ -146,7 +146,7 @@ export default [
         {
           id: "GAMORREANGUARD",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "IG86SENTINELDROID",
@@ -156,17 +156,17 @@ export default [
         {
           id: "IMPERIALSUPERCOMMANDO",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "JANGOFETT",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "MARAJADE",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "NIGHTSISTERINITIATE",
@@ -181,17 +181,17 @@ export default [
         {
           id: "NUTEGUNRAY",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "SITHASSASSIN",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "FOSITHTROOPER",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "TIEFIGHTERPILOT",
@@ -201,7 +201,7 @@ export default [
         {
           id: "TUSKENSHAMAN",
           amount: 1,
-          difficulty: 1,
+          difficulty: 3,
         },
       ],
       mixed: [
@@ -213,7 +213,7 @@ export default [
         {
           id: "DARTHREVAN",
           amount: 5,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "C3POLEGENDARY",
@@ -228,7 +228,7 @@ export default [
         {
           id: "COMMANDERAHSOKA",
           amount: 3,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "COMMANDERLUKESKYWALKER",
@@ -238,12 +238,12 @@ export default [
         {
           id: "DARTHTRAYA",
           amount: 3,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "BENSOLO",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "DARTHMALGUS",
@@ -258,7 +258,7 @@ export default [
         {
           id: "GEONOSIANBROODALPHA",
           amount: 2,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "GRANDMASTERYODA",
@@ -273,7 +273,7 @@ export default [
         {
           id: "KIADIMUNDI",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "R2D2_LEGENDARY",
@@ -283,7 +283,7 @@ export default [
         {
           id: "THEMANDALORIANBESKARARMOR",
           amount: 2,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "WATTAMBOR",
@@ -298,7 +298,7 @@ export default [
         {
           id: "BB8",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "BOSSK",
@@ -308,7 +308,7 @@ export default [
         {
           id: "BT1",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "CLONESERGEANTPHASEI",
@@ -323,12 +323,12 @@ export default [
         {
           id: "MAUL",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "DARTHSION",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "VADER",
@@ -338,7 +338,7 @@ export default [
         {
           id: "EETHKOTH",
           amount: 1,
-          difficulty: 1,
+          difficulty: 4,
         },
         {
           id: "EMPERORPALPATINE",
@@ -383,7 +383,7 @@ export default [
         {
           id: "JOLEEBINDO",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "LOGRAY",
@@ -393,7 +393,7 @@ export default [
         {
           id: "PADMEAMIDALA",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "PAPLOO",
@@ -408,7 +408,7 @@ export default [
         {
           id: "HOTHLEIA",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "REYJEDITRAINING",
@@ -418,7 +418,7 @@ export default [
         {
           id: "SANASTARROS",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "FOSITHTROOPER",
@@ -428,7 +428,7 @@ export default [
         {
           id: "T3_M4",
           amount: 1,
-          difficulty: 1,
+          difficulty: 4,
         },
         {
           id: "TALIA",
@@ -465,12 +465,12 @@ export default [
         {
           id: "THEMANDALORIANBESKARARMOR",
           amount: 5,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "SANASTARROS",
           amount: 4,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "C3POLEGENDARY",
@@ -520,7 +520,7 @@ export default [
         {
           id: "REYJEDITRAINING",
           amount: 2,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "C3POCHEWBACCA",
@@ -530,7 +530,7 @@ export default [
         {
           id: "FULCRUMAHSOKA",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "AMILYNHOLDO",
@@ -540,7 +540,7 @@ export default [
         {
           id: "BARRISSOFFEE",
           amount: 1,
-          difficulty: 1,
+          difficulty: 3,
         },
         {
           id: "CC2224",
@@ -550,57 +550,57 @@ export default [
         {
           id: "GREEFKARGA",
           amount: 1,
-          difficulty: 1,
+          difficulty: 4,
         },
         {
           id: "HONDO",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "JOLEEBINDO",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "JYNERSO",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "KIADIMUNDI",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "KUIIL",
           amount: 1,
-          difficulty: 1,
+          difficulty: 4,
         },
         {
           id: "L3_37",
           amount: 1,
-          difficulty: 1,
+          difficulty: 4,
         },
         {
           id: "LOBOT",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "PADMEAMIDALA",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "HOTHLEIA",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "SABINEWRENS3",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "TEEBO",
@@ -610,12 +610,12 @@ export default [
         {
           id: "ARMORER",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "VISASMARR",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "ZAALBAR",
@@ -754,7 +754,7 @@ export default [
   },
   {
     phase: 2,
-    label: 'Phase 2',
+    label: "Phase 2",
     characters: {
       requirement: {
         type: "Relic",
@@ -769,7 +769,7 @@ export default [
         {
           id: "DARTHREVAN",
           amount: 6,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "DARTHMALGUS",
@@ -784,12 +784,12 @@ export default [
         {
           id: "GRANDADMIRALTHRAWN",
           amount: 4,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "MAULS7",
           amount: 4,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "DARTHMALAK",
@@ -799,7 +799,7 @@ export default [
         {
           id: "GRANDINQUISITOR",
           amount: 3,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "IMPERIALPROBEDROID",
@@ -829,12 +829,12 @@ export default [
         {
           id: "SITHPALPATINE",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "SUPREMELEADERKYLOREN",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "WATTAMBOR",
@@ -844,7 +844,7 @@ export default [
         {
           id: "ASAJVENTRESS",
           amount: 1,
-          difficulty: 1,
+          difficulty: 4,
         },
         {
           id: "CADBANE",
@@ -854,12 +854,12 @@ export default [
         {
           id: "COLONELSTARCK",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "DARTHTALON",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "DEATHTROOPER",
@@ -868,23 +868,18 @@ export default [
         },
         {
           id: "DENGAR",
-          amount: 1,
+          amount: 2,
           difficulty: 2,
         },
         {
           id: "DROIDEKA",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "DARKTROOPER",
           amount: 1,
-          difficulty: 2,
-        },
-        {
-          id: "DENGAR",
-          amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "GRIEVOUS",
@@ -899,7 +894,7 @@ export default [
         {
           id: "HK47",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "MAGMATROOPER",
@@ -911,7 +906,7 @@ export default [
         {
           id: "COMMANDERAHSOKA",
           amount: 6,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "BOBAFETTSCION",
@@ -926,32 +921,32 @@ export default [
         {
           id: "GENERALSKYWALKER",
           amount: 4,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "MAULS7",
           amount: 4,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "HOTHLEIA",
           amount: 4,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "BENSOLO",
           amount: 3,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "GRANDINQUISITOR",
           amount: 3,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "JEDIKNIGHTLUKE",
           amount: 3,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "EMBO",
@@ -961,7 +956,7 @@ export default [
         {
           id: "SITHPALPATINE",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "WATTAMBOR",
@@ -991,12 +986,12 @@ export default [
         {
           id: "COUNTDOOKU",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "DARTHMALAK",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "DEATHTROOPER",
@@ -1026,7 +1021,7 @@ export default [
         {
           id: "HERMITYODA",
           amount: 1,
-          difficulty: 4,
+          difficulty: 3,
         },
         {
           id: "IMPERIALPROBEDROID",
@@ -1041,7 +1036,7 @@ export default [
         {
           id: "GRANDMASTERLUKE",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "KIADIMUNDI",
@@ -1071,22 +1066,22 @@ export default [
         {
           id: "LORDVADER",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "GLREY",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "SANASTARROS",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "FOSITHTROOPER",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "SNOWTROOPER",
@@ -1096,12 +1091,12 @@ export default [
         {
           id: "STARKILLER",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "SUPREMELEADERKYLOREN",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "THEMANDALORIAN",
@@ -1123,12 +1118,12 @@ export default [
         {
           id: "BENSOLO",
           amount: 10,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "COMMANDERAHSOKA",
           amount: 5,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "GRANDMASTERYODA",
@@ -1138,7 +1133,7 @@ export default [
         {
           id: "BB8",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "C3POLEGENDARY",
@@ -1153,12 +1148,12 @@ export default [
         {
           id: "GREEFKARGA",
           amount: 2,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "JEDIMASTERKENOBI",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "KANANJARRUSS3",
@@ -1173,12 +1168,12 @@ export default [
         {
           id: "GLREY",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "REYJEDITRAINING",
           amount: 2,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "AAYLASECURA",
@@ -1188,12 +1183,12 @@ export default [
         {
           id: "ADMIRALRADDUS",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "ARCTROOPER501ST",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "BODHIROOK",
@@ -1213,17 +1208,17 @@ export default [
         {
           id: "CT210408",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "CT5555",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "CT7567",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "ENFYSNEST",
@@ -1233,12 +1228,12 @@ export default [
         {
           id: "EZRABRIDGERS3",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "JEDIKNIGHTREVAN",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "JUHANI",
@@ -1248,7 +1243,7 @@ export default [
         {
           id: "L3_37",
           amount: 1,
-          difficulty: 1,
+          difficulty: 4,
         },
         {
           id: "MONMOTHMA",
@@ -1263,7 +1258,7 @@ export default [
         {
           id: "PADMEAMIDALA",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "PAO",
@@ -1467,7 +1462,7 @@ export default [
   },
   {
     phase: 3,
-    label: 'Phase 3',
+    label: "Phase 3",
     characters: {
       requirement: {
         type: "Relic",
@@ -1477,17 +1472,17 @@ export default [
         {
           id: "DARTHMALGUS",
           amount: 9,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "LORDVADER",
           amount: 6,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "MAULS7",
           amount: 6,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "BOBAFETTSCION",
@@ -1497,7 +1492,7 @@ export default [
         {
           id: "SITHPALPATINE",
           amount: 4,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "GRIEVOUS",
@@ -1522,7 +1517,7 @@ export default [
         {
           id: "SUPREMELEADERKYLOREN",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "TUSKENRAIDER",
@@ -1537,7 +1532,7 @@ export default [
         {
           id: "AURRA_SING",
           amount: 1,
-          difficulty: 3,
+          difficulty: 2,
         },
         {
           id: "CADBANE",
@@ -1552,17 +1547,17 @@ export default [
         {
           id: "MAUL",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "DARTHREVAN",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "DARTHTRAYA",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "DIRECTORKRENNIC",
@@ -1572,7 +1567,7 @@ export default [
         {
           id: "EMBO",
           amount: 1,
-          difficulty: 3,
+          difficulty: 2,
         },
         {
           id: "FIRSTORDERSPECIALFORCESPILOT",
@@ -1587,52 +1582,52 @@ export default [
         {
           id: "GENERALHUX",
           amount: 1,
-          difficulty: 4,
+          difficulty: 2,
         },
         {
           id: "GRANDADMIRALTHRAWN",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "GRANDMOFFTARKIN",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "HK47",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "IG88",
           amount: 1,
-          difficulty: 3,
+          difficulty: 2,
         },
         {
           id: "MOTHERTALZIN",
           amount: 1,
-          difficulty: 1,
+          difficulty: 3,
         },
         {
           id: "SAVAGEOPRESS",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "SEVENTHSISTER",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "SITHASSASSIN",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "FOSITHTROOPER",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "TALIA",
@@ -1649,47 +1644,47 @@ export default [
         {
           id: "DARTHMALGUS",
           amount: 5,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "MAULS7",
           amount: 5,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "JEDIKNIGHTLUKE",
           amount: 4,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "COMMANDERAHSOKA",
           amount: 4,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "JEDIMASTERKENOBI",
           amount: 3,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "SITHPALPATINE",
           amount: 3,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "BASTILASHANDARK",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "DARTHMALAK",
           amount: 2,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "GRANDMASTERLUKE",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "OLDBENKENOBI",
@@ -1699,7 +1694,7 @@ export default [
         {
           id: "GLREY",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "STARKILLER",
@@ -1709,7 +1704,7 @@ export default [
         {
           id: "SUPREMELEADERKYLOREN",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "50RT",
@@ -1724,12 +1719,12 @@ export default [
         {
           id: "BARRISSOFFEE",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "BENSOLO",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "BODHIROOK",
@@ -1769,22 +1764,22 @@ export default [
         {
           id: "GENERALSKYWALKER",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "GEONOSIANSPY",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "HK47",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "HONDO",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "HOTHREBELSCOUT",
@@ -1799,27 +1794,27 @@ export default [
         {
           id: "KYLORENUNMASKED",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "LUMINARAUNDULI",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "MARAJADE",
           amount: 1,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "NIGHTSISTERACOLYTE",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "QUIGONJINN",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "EPIXFINN",
@@ -1839,7 +1834,7 @@ export default [
         {
           id: "UNDERCOVERLANDO",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "TEEBO",
@@ -1856,17 +1851,17 @@ export default [
         {
           id: "BENSOLO",
           amount: 6,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "COMMANDERAHSOKA",
           amount: 6,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "GRANDMASTERLUKE",
           amount: 5,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "LOGRAY",
@@ -1876,27 +1871,27 @@ export default [
         {
           id: "GLREY",
           amount: 5,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "R2D2_LEGENDARY",
           amount: 4,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "BB8",
           amount: 3,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "C3POLEGENDARY",
           amount: 3,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "COMMANDERLUKESKYWALKER",
           amount: 3,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "KIADIMUNDI",
@@ -1906,7 +1901,7 @@ export default [
         {
           id: "PADMEAMIDALA",
           amount: 3,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "GRANDMASTERYODA",
@@ -1916,7 +1911,7 @@ export default [
         {
           id: "HANSOLO",
           amount: 2,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "HERMITYODA",
@@ -1926,12 +1921,12 @@ export default [
         {
           id: "JEDIKNIGHTREVAN",
           amount: 2,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "HOTHLEIA",
           amount: 2,
-          difficulty: 2,
+          difficulty: 4,
         },
         {
           id: "RESISTANCETROOPER",
@@ -1971,7 +1966,7 @@ export default [
         {
           id: "ANAKINKNIGHT",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "K2SO",
@@ -1981,22 +1976,22 @@ export default [
         {
           id: "MACEWINDU",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "REYJEDITRAINING",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "UNDERCOVERLANDO",
           amount: 1,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "GREEFKARGA",
           amount: 5,
-          difficulty: 1,
+          difficulty: 2,
         },
       ],
     },
@@ -2135,7 +2130,7 @@ export default [
   },
   {
     phase: 4,
-    label: 'Phase 4',
+    label: "Phase 4",
     characters: {
       requirement: {
         type: "Relic",
@@ -2150,22 +2145,22 @@ export default [
         {
           id: "LORDVADER",
           amount: 5,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "SUPREMELEADERKYLOREN",
           amount: 5,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "SITHPALPATINE",
           amount: 4,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "DARTHMALAK",
           amount: 3,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "MAULS7",
@@ -2175,7 +2170,7 @@ export default [
         {
           id: "ASAJVENTRESS",
           amount: 2,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "AURRA_SING",
@@ -2220,7 +2215,7 @@ export default [
         {
           id: "VADER",
           amount: 1,
-          difficulty: 3,
+          difficulty: 2,
         },
         {
           id: "DATHCHA",
@@ -2275,7 +2270,7 @@ export default [
         {
           id: "IDENVERSIOEMPIRE",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "IG88",
@@ -2285,7 +2280,7 @@ export default [
         {
           id: "KRRSANTAN",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "MARAJADE",
@@ -2325,12 +2320,12 @@ export default [
         {
           id: "SECONDSISTER",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "SEVENTHSISTER",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "TIEFIGHTERPILOT",
@@ -2352,22 +2347,22 @@ export default [
         {
           id: "GLREY",
           amount: 6,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "SITHPALPATINE",
           amount: 5,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "GENERALSKYWALKER",
           amount: 4,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "JEDIKNIGHTLUKE",
           amount: 4,
-          difficulty: 3,
+          difficulty: 2,
         },
         {
           id: "BENSOLO",
@@ -2377,7 +2372,7 @@ export default [
         {
           id: "DARTHMALAK",
           amount: 3,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "MAULS7",
@@ -2392,7 +2387,7 @@ export default [
         {
           id: "COMMANDERAHSOKA",
           amount: 2,
-          difficulty: 2,
+          difficulty: 5,
         },
         {
           id: "DARTHMALGUS",
@@ -2402,7 +2397,7 @@ export default [
         {
           id: "LORDVADER",
           amount: 2,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "NIGHTSISTERINITIATE",
@@ -2412,7 +2407,7 @@ export default [
         {
           id: "SUPREMELEADERKYLOREN",
           amount: 2,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "50RT",
@@ -2427,7 +2422,7 @@ export default [
         {
           id: "ASAJVENTRESS",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "AURRA_SING",
@@ -2487,7 +2482,7 @@ export default [
         {
           id: "JEDIMASTERKENOBI",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "KYLOREN",
@@ -2502,7 +2497,7 @@ export default [
         {
           id: "SEVENTHSISTER",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "SITHTROOPER",
@@ -2519,12 +2514,12 @@ export default [
         {
           id: "GRANDMASTERLUKE",
           amount: 8,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "COMMANDERAHSOKA",
           amount: 5,
-          difficulty: 2,
+          difficulty: 5,
         },
         {
           id: "HERMITYODA",
@@ -2544,7 +2539,7 @@ export default [
         {
           id: "GENERALKENOBI",
           amount: 3,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "50RT",
@@ -2554,22 +2549,22 @@ export default [
         {
           id: "CHEWBACCALEGENDARY",
           amount: 2,
-          difficulty: 3,
+          difficulty: 4,
         },
         {
           id: "HANSOLO",
           amount: 2,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "JEDIKNIGHTREVAN",
           amount: 2,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "JEDIMASTERKENOBI",
           amount: 2,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "KIADIMUNDI",
@@ -2584,7 +2579,7 @@ export default [
         {
           id: "PADMEAMIDALA",
           amount: 2,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "SCARIFREBEL",
@@ -2634,7 +2629,7 @@ export default [
         {
           id: "EETHKOTH",
           amount: 1,
-          difficulty: 1,
+          difficulty: 4,
         },
         {
           id: "FINN",
@@ -2644,7 +2639,7 @@ export default [
         {
           id: "GRANDMASTERYODA",
           amount: 1,
-          difficulty: 4,
+          difficulty: 5,
         },
         {
           id: "MACEWINDU",
@@ -2684,17 +2679,17 @@ export default [
         {
           id: "REYJEDITRAINING",
           amount: 1,
-          difficulty: 3,
+          difficulty: 2,
         },
         {
           id: "GLREY",
           amount: 1,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "R2D2_LEGENDARY",
           amount: 1,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "KYLEKATARN",
@@ -2868,7 +2863,7 @@ export default [
   },
   {
     phase: 5,
-    label: 'Phase 5',
+    label: "Phase 5",
     characters: {
       requirement: {
         type: "Relic",
@@ -2898,7 +2893,7 @@ export default [
         {
           id: "DARTHMALAK",
           amount: 6,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "LORDVADER",
@@ -2943,7 +2938,7 @@ export default [
         {
           id: "BOBAFETT",
           amount: 1,
-          difficulty: 3,
+          difficulty: 2,
         },
         {
           id: "COLONELSTARCK",
@@ -3040,7 +3035,7 @@ export default [
         {
           id: "COMMANDERAHSOKA",
           amount: 6,
-          difficulty: 2,
+          difficulty: 5,
         },
         {
           id: "STARKILLER",
@@ -3050,7 +3045,7 @@ export default [
         {
           id: "DARTHMALAK",
           amount: 3,
-          difficulty: 3,
+          difficulty: 5,
         },
         {
           id: "GENERALSKYWALKER",
@@ -3067,7 +3062,6 @@ export default [
           amount: 2,
           difficulty: 2,
         },
-
         {
           id: "BOBAFETTSCION",
           amount: 2,
@@ -3082,7 +3076,7 @@ export default [
         {
           id: "GRANDMASTERLUKE",
           amount: 2,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "DAKA",
@@ -3107,12 +3101,12 @@ export default [
         {
           id: "FULCRUMAHSOKA",
           amount: 1,
-          difficulty: 1,
+          difficulty: 5,
         },
         {
           id: "BARRISSOFFEE",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "BASTILASHAN",
@@ -3254,7 +3248,7 @@ export default [
         {
           id: "GRANDMASTERLUKE",
           amount: 6,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "GRANDMASTERYODA",
@@ -3294,7 +3288,7 @@ export default [
         {
           id: "EETHKOTH",
           amount: 2,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "R2D2_LEGENDARY",
@@ -3314,7 +3308,7 @@ export default [
         {
           id: "BARRISSOFFEE",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "BASTILASHAN",
@@ -3588,7 +3582,7 @@ export default [
   },
   {
     phase: 6,
-    label: 'Phase 6',
+    label: "Phase 6",
     characters: {
       requirement: {
         type: "Relic",
@@ -3778,7 +3772,7 @@ export default [
         {
           id: "SAVAGEOPRESS",
           amount: 1,
-          difficulty: 1,
+          difficulty: 2,
         },
         {
           id: "SHORETROOPER",
@@ -3815,7 +3809,7 @@ export default [
         {
           id: "COMMANDERAHSOKA",
           amount: 5,
-          difficulty: 2,
+          difficulty: 5,
         },
         {
           id: "GLREY",
@@ -3852,7 +3846,7 @@ export default [
         {
           id: "HANSOLO",
           amount: 3,
-          difficulty: 3,
+          difficulty: 2,
         },
         {
           id: "LORDVADER",
@@ -3877,7 +3871,7 @@ export default [
         {
           id: "GRANDMASTERLUKE",
           amount: 2,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "SANASTARROS",
@@ -4025,7 +4019,7 @@ export default [
         {
           id: "GRANDMASTERLUKE",
           amount: 7,
-          difficulty: 2,
+          difficulty: 3,
         },
         {
           id: "BASTILASHAN",
@@ -4050,7 +4044,7 @@ export default [
         {
           id: "COMMANDERAHSOKA",
           amount: 4,
-          difficulty: 2,
+          difficulty: 5,
         },
         {
           id: "HERMITYODA",
@@ -4308,189 +4302,602 @@ export default [
     },
   },
   {
-    phase: 'zeffo',
-    label: 'Zeffo',
+    phase: "zeffo",
+    label: "Zeffo",
     characters: {
       requirement: {
         type: "Relic",
-        amount: 7
+        amount: 7,
       },
-      lightside: [                {
-        id: "COMMANDERAHSOKA",
-        amount: 1,
-        difficulty: 3,
-      },        {
-        id: "JEDIKNIGHTLUKE",
-        amount: 5,
-        difficulty: 4,
-      },        {
-        id: "GENERALKENOBI",
-        amount: 2,
-        difficulty: 5,
-      },        {
-        id: "KYLEKATARN",
-        amount: 3,
-        difficulty: 2,
-      },        {
-        id: "GRANDMASTERLUKE",
-        amount: 6,
-        difficulty: 2,
-      },        {
-        id: "BB8",
-        amount: 1,
-        difficulty: 3,
-      },        {
-        id: "HANSOLO",
-        amount: 3,
-        difficulty: 5,
-      },        {
-        id: "CHIRRUTIMWE",
-        amount: 2,
-        difficulty: 1,
-      },        {
-        id: "JOLEEBINDO",
-        amount: 3,
-        difficulty: 2,
-      },        {
-        id: "GLREY",
-        amount: 3,
-        difficulty: 2,
-      },        {
-        id: "GENERALSKYWALKER",
-        amount: 6,
-        difficulty: 4,
-      },        {
-        id: "KIADIMUNDI",
-        amount: 6,
-        difficulty: 2,
-      },        {
-        id: "JEDIKNIGHTCONSULAR",
-        amount: 3,
-        difficulty: 1,
-      },        {
-        id: "HERMITYODA",
-        amount: 1,
-        difficulty: 2,
-      },        {
-        id: "JEDIMASTERKENOBI",
-        amount: 4,
-        difficulty: 2,
-      },        {
-        id: "CHEWBACCALEGENDARY",
-        amount: 3,
-        difficulty: 3,
-      },        {
-        id: "CLONESERGEANTPHASEI",
-        amount: 2,
-        difficulty: 2,
-      },{
-        id: "CHIEFCHIRPA",
-        amount: 2,
-        difficulty: 1,
-      },{
-        id: "JEDIKNIGHTGUARDIAN",
-        amount: 3,
-        difficulty: 1,
-      },        {
-        id: "BENSOLO",
-        amount: 3,
-        difficulty: 2,
-      },        {
-        id: "C3POLEGENDARY",
-        amount: 1,
-        difficulty: 5,
-      },        {
-        id: "JUHANI",
-        amount: 1,
-        difficulty: 2,
-      },        {
-        id: "REYJEDITRAINING",
-        amount: 3,
-        difficulty: 4,
-        },{
+      lightside: [
+        {
+          id: "COMMANDERAHSOKA",
+          amount: 1,
+          difficulty: 5,
+        },
+        {
+          id: "JEDIKNIGHTLUKE",
+          amount: 5,
+          difficulty: 4,
+        },
+        {
+          id: "GENERALKENOBI",
+          amount: 2,
+          difficulty: 5,
+        },
+        {
+          id: "KYLEKATARN",
+          amount: 3,
+          difficulty: 2,
+        },
+        {
+          id: "GRANDMASTERLUKE",
+          amount: 6,
+          difficulty: 4,
+        },
+        {
+          id: "BB8",
+          amount: 1,
+          difficulty: 5,
+        },
+        {
+          id: "HANSOLO",
+          amount: 3,
+          difficulty: 5,
+        },
+        {
+          id: "CHIRRUTIMWE",
+          amount: 2,
+          difficulty: 1,
+        },
+        {
+          id: "JOLEEBINDO",
+          amount: 3,
+          difficulty: 2,
+        },
+        {
+          id: "GLREY",
+          amount: 3,
+          difficulty: 4,
+        },
+        {
+          id: "GENERALSKYWALKER",
+          amount: 6,
+          difficulty: 5,
+        },
+        {
+          id: "KIADIMUNDI",
+          amount: 6,
+          difficulty: 2,
+        },
+        {
+          id: "JEDIKNIGHTCONSULAR",
+          amount: 3,
+          difficulty: 1,
+        },
+        {
+          id: "HERMITYODA",
+          amount: 1,
+          difficulty: 2,
+        },
+        {
+          id: "JEDIMASTERKENOBI",
+          amount: 4,
+          difficulty: 4,
+        },
+        {
+          id: "CHEWBACCALEGENDARY",
+          amount: 3,
+          difficulty: 3,
+        },
+        {
+          id: "CLONESERGEANTPHASEI",
+          amount: 2,
+          difficulty: 2,
+        },
+        {
+          id: "CHIEFCHIRPA",
+          amount: 2,
+          difficulty: 1,
+        },
+        {
+          id: "JEDIKNIGHTGUARDIAN",
+          amount: 3,
+          difficulty: 1,
+        },
+        {
+          id: "BENSOLO",
+          amount: 3,
+          difficulty: 2,
+        },
+        {
+          id: "C3POLEGENDARY",
+          amount: 1,
+          difficulty: 5,
+        },
+        {
+          id: "JUHANI",
+          amount: 1,
+          difficulty: 2,
+        },
+        {
+          id: "REYJEDITRAINING",
+          amount: 3,
+          difficulty: 5,
+        },
+        {
           id: "LUKESKYWALKER",
           amount: 2,
           difficulty: 1,
-          },{
-            id: "QIRA",
-            amount: 1,
-            difficulty: 1,
-            },        {
-              id: "JEDIKNIGHTREVAN",
-              amount: 1,
-              difficulty: 3,
-            },        {
-              id: "COMMANDERLUKESKYWALKER",
-              amount: 3,
-              difficulty: 5,
-            },        {
-              id: "KITFISTO",
-              amount: 1,
-              difficulty: 1,
-            },        {
-              id: "BADBATCHWRECKER",
-              amount: 1,
-              difficulty: 1,
-            },        {
-              id: "ENFYSNEST",
-              amount: 1,
-              difficulty: 2,
-        },{
-          id: "R2D2_LEGENDARY",
+        },
+        {
+          id: "QIRA",
+          amount: 1,
+          difficulty: 1,
+        },
+        {
+          id: "JEDIKNIGHTREVAN",
           amount: 1,
           difficulty: 4,
-    },{
-      id: "ZEBS3",
-      amount: 1,
-      difficulty: 1,
-      },{
-        id: "AAYLASECURA",
-        amount: 1,
-        difficulty: 2,
-        },{
-          id: "PLOKOON",
+        },
+        {
+          id: "COMMANDERLUKESKYWALKER",
+          amount: 3,
+          difficulty: 5,
+        },
+        {
+          id: "KITFISTO",
+          amount: 1,
+          difficulty: 1,
+        },
+        {
+          id: "BADBATCHWRECKER",
+          amount: 1,
+          difficulty: 1,
+        },
+        {
+          id: "ENFYSNEST",
           amount: 1,
           difficulty: 2,
-          },{
-            id: "PADMEAMIDALA",
-            amount: 1,
-            difficulty: 4,
-            },{
-              id: "VISASMARR",
-              amount: 1,
-              difficulty: 2,
-              }
-            
-      ]
-        
+        },
+        {
+          id: "R2D2_LEGENDARY",
+          amount: 1,
+          difficulty: 5,
+        },
+        {
+          id: "ZEBS3",
+          amount: 1,
+          difficulty: 1,
+        },
+        {
+          id: "AAYLASECURA",
+          amount: 1,
+          difficulty: 2,
+        },
+        {
+          id: "PLOKOON",
+          amount: 1,
+          difficulty: 4,
+        },
+        {
+          id: "PADMEAMIDALA",
+          amount: 1,
+          difficulty: 5,
+        },
+        {
+          id: "VISASMARR",
+          amount: 1,
+          difficulty: 2,
+        },
+      ],
     },
     ships: {
       requirement: {
         type: "Stars",
         amount: 7,
       },
-      lightside: [{
-        id: "JEDISTARFIGHTERCONSULAR",
-        amount: 1,
-        difficulty: 5,
-      },{
-        id: "MG100STARFORTRESSSF17",
-        amount: 2,
-        difficulty: 5,
-      },{
-        id: "RAZORCREST",
-        amount: 2,
-        difficulty: 5,
-      },{
-        id: "ARC170CLONESERGEANT",
-        amount: 2,
-        difficulty: 5,
-        },{
+      lightside: [
+        {
+          id: "JEDISTARFIGHTERCONSULAR",
+          amount: 1,
+          difficulty: 5,
+        },
+        {
+          id: "MG100STARFORTRESSSF17",
+          amount: 2,
+          difficulty: 5,
+        },
+        {
+          id: "RAZORCREST",
+          amount: 2,
+          difficulty: 5,
+        },
+        {
+          id: "ARC170CLONESERGEANT",
+          amount: 2,
+          difficulty: 5,
+        },
+        {
           id: "CAPITALRADDUS",
           amount: 1,
           difficulty: 5,
-          }
-        ]
-    }
-  }
+        },
+      ],
+    },
+  },
+  {
+    phase: "mandalore",
+    label: "Mandalore",
+    characters: {
+      requirement: {
+        type: "Relic",
+        amount: 8,
+      },
+      mixed: [
+        {
+          id: "GLLEIA",
+          amount: 4,
+          difficulty: 4,
+        },
+        {
+          id: "DOCTORAPHRA",
+          amount: 4,
+          difficulty: 3,
+        },
+        {
+          id: "COMMANDERAHSOKA",
+          amount: 3,
+          difficulty: 5,
+        },
+        {
+          id: "CAPTAINDROGAN",
+          amount: 2,
+          difficulty: 4,
+        },
+        {
+          id: "PRINCESSKNEESAA",
+          amount: 2,
+          difficulty: 2,
+        },
+        {
+          id: "GLREY",
+          amount: 2,
+          difficulty: 3,
+        },
+        {
+          id: "WATTAMBOR",
+          amount: 3,
+          difficulty: 2,
+        },
+        {
+          id: "BENSOLO",
+          amount: 1,
+          difficulty: 3,
+        },
+        {
+          id: "CEREJUNDA",
+          amount: 3,
+          difficulty: 2,
+        },
+        {
+          id: "SITHPALPATINE",
+          amount: 3,
+          difficulty: 3,
+        },
+        {
+          id: "DARTHMALAK",
+          amount: 1,
+          difficulty: 5,
+        },
+        {
+          id: "KELLERANBEQ",
+          amount: 2,
+          difficulty: 2,
+        },
+        {
+          id: "LORDVADER",
+          amount: 3,
+          difficulty: 3,
+        },
+        {
+          id: "JEDIKNIGHTLUKE",
+          amount: 2,
+          difficulty: 3,
+        },
+        {
+          id: "BOBAFETTSCION",
+          amount: 1,
+          difficulty: 2,
+        },
+        {
+          id: "KRRSANTAN",
+          amount: 2,
+          difficulty: 3,
+        },
+        {
+          id: "TARONMALICOS",
+          amount: 3,
+          difficulty: 3,
+        },
+        {
+          id: "TRENCH",
+          amount: 3,
+          difficulty: 2,
+        },
+        {
+          id: "GENERALSKYWALKER",
+          amount: 3,
+          difficulty: 4,
+        },
+        {
+          id: "STARKILLER",
+          amount: 3,
+          difficulty: 3,
+        },
+        {
+          id: "TUSKENHUNTRESS",
+          amount: 2,
+          difficulty: 2,
+        },
+        {
+          id: "KIADIMUNDI",
+          amount: 2,
+          difficulty: 3,
+        },
+        {
+          id: "DARTHBANE",
+          amount: 2,
+          difficulty: 3,
+        },
+        {
+          id: "TUSKENCHIEFTAIN",
+          amount: 1,
+          difficulty: 2,
+        },
+        {
+          id: "CAPTAINREX",
+          amount: 2,
+          difficulty: 3,
+        },
+        {
+          id: "SUPREMELEADERKYLOREN",
+          amount: 1,
+          difficulty: 3,
+        },
+        {
+          id: "JEDIMASTERKENOBI",
+          amount: 1,
+          difficulty: 3,
+        },
+        {
+          id: "MERRIN",
+          amount: 2,
+          difficulty: 2,
+        },
+        {
+          id: "DARTHMALGUS",
+          amount: 1,
+          difficulty: 3,
+        },
+        {
+          id: "STAP",
+          amount: 2,
+          difficulty: 1,
+        },
+        {
+          id: "CORUSCANTUNDERWORLDPOLICE",
+          amount: 1,
+          difficulty: 1,
+        },
+        {
+          id: "BENSOLO",
+          amount: 1,
+          difficulty: 3,
+        },
+      ],
+    },
+    ships: {
+      requirement: {
+        type: "Stars",
+        amount: 7,
+      },
+      lightside: [
+        {
+          id: "CAPITALLEVIATHAN",
+          amount: 4,
+          difficulty: 4,
+        },
+        {
+          id: "COMEUPPANCE",
+          amount: 3,
+          difficulty: 5,
+        },
+        {
+          id: "TIEDAGGER",
+          amount: 3,
+          difficulty: 5,
+        },
+        {
+          id: "CAPITALEXECUTOR",
+          amount: 3,
+          difficulty: 4,
+        },
+        {
+          id: "FURYCLASSINTERCEPTOR",
+          amount: 3,
+          difficulty: 4,
+        },
+        {
+          id: "SITHSUPREMACYCLASS",
+          amount: 2,
+          difficulty: 4,
+        },
+        {
+          id: "SCYTHE",
+          amount: 1,
+          difficulty: 4,
+        },
+        {
+          id: "TIEINTERCEPTOR",
+          amount: 1,
+          difficulty: 4,
+        },
+        {
+          id: "RAZORCREST",
+          amount: 1,
+          difficulty: 4,
+        },
+        {
+          id: "CAPITALPROFUNDITY",
+          amount: 1,
+          difficulty: 5,
+        },
+      ],
+    },
+  },
 ];
+
+// export const linchpins = [
+//   { id: "ARMORER", level: 5 },
+//   { id: "GAMORREANGUARD", level: 5 },
+//   { id: "IG86SENTINELDROID", level: 5 },
+//   { id: "IMAGUNDI", level: 5 },
+//   { id: "IMPERIALSUPERCOMMANDO", level: 5 },
+//   { id: "JAWAENGINEER", level: 5 },
+//   { id: "LOBOT", level: 5 },
+//   { id: "NIGHTSISTERINITIATE", level: 5 },
+//   { id: "PAPLOO", level: 5 },
+//   { id: "SABINEWRENS3", level: 5 },
+//   { id: "TUSKENSHAMAN", level: 5 }, //excess
+//   { id: "UGNAUGHT", level: 5 },
+//   { id: "ADMIRALACKBAR", level: 6 },
+//   { id: "B2SUPERBATTLEDROID", level: 6 },
+//   { id: "BT1", level: 6 },
+//   { id: "DROIDEKA", level: 6 },
+//   { id: "DEATHTROOPER", level: 6 },
+//   { id: "EZRABRIDGERS3", level: 6 },
+//   { id: "FIRSTORDEROFFICERMALE", level: 6 },
+//   { id: "JAWA", level: 6 },
+//   { id: "KANANJARRUSS3", level: 6 },
+//   { id: "KUIIL", level: 6 },
+//   { id: "L3_37", level: 6 },
+//   { id: "ADMINISTRATORLANDO", level: 6 },
+//   { id: "MAGMATROOPER", level: 6 },
+//   { id: "MONMOTHMA", level: 6 },
+//   { id: "BADBATCHOMEGA", level: 6 },
+//   { id: "PAO", level: 6 },
+//   { id: "SNOWTROOPER", level: 6 },
+//   { id: "DARTHTALON", level: 6 },
+//   { id: "THEMANDALORIAN", level: 6 },
+//   { id: "YOUNGCHEWBACCA", level: 6 },
+//   { id: "SMUGGLERCHEWBACCA", level: 6 },
+//   { id: "WEDGEANTILLES", level: 6 },
+//   { id: "ZAALBAR", level: 6 },
+//   { id: "TRIPLEZERO", level: 7 },
+//   { id: "50RT", level: 7 },
+//   { id: "AURRA_SING", level: 7 },
+//   { id: "B1BATTLEDROIDV2", level: 7 },
+//   { id: "BARRISSOFFEE", level: 7 },
+//   { id: "BODHIROOK", level: 7 },
+//   { id: "CADBANE", level: 7 },
+//   { id: "CHIEFCHIRPA", level: 7, specialMission: "zeffo" },
+//   { id: "CHIRRUTIMWE", level: 7, specialMission: "zeffo" },
+//   { id: "CLONESERGEANTPHASEI", level: 7 },
+//   { id: "CORUSCANTUNDERWORLDPOLICE", level: 7 },
+//   { id: "DARKTROOPER", level: 7 },
+//   { id: "BOBAFETTSCION", level: 7 },
+//   { id: "DENGAR", level: 7 },
+//   { id: "EMBO", level: 7 },
+//   { id: "ENFYSNEST", level: 7, specialMission: "zeffo" },
+//   { id: "EWOKELDER", level: 7 },
+//   { id: "EWOKSCOUT", level: 7 },
+//   { id: "LUKESKYWALKER", level: 7, specialMission: "zeffo" },
+//   { id: "GARSAXON", level: 7 },
+//   { id: "GEONOSIANSPY", level: 7 },
+//   { id: "GREEFKARGA", level: 7 },
+//   { id: "EPIXFINN", level: 7 },
+//   { id: "EPIXPOE", level: 7 },
+//   { id: "HONDO", level: 7 },
+//   { id: "HOTHREBELSCOUT", level: 7 },
+//   { id: "BADBATCHHUNTER", level: 7 },
+//   { id: "GENERALHUX", level: 7 },
+//   { id: "IG88", level: 7 },
+//   { id: "IMPERIALPROBEDROID", level: 7 },
+//   { id: "JEDIKNIGHTCONSULAR", level: 7, specialMission: "zeffo" },
+//   { id: "JEDIKNIGHTGUARDIAN", level: 7, specialMission: "zeffo" },
+//   { id: "JOLEEBINDO", level: 7, specialMission: "zeffo" },
+//   { id: "JUHANI", level: 7, specialMission: "zeffo" },
+//   { id: "K2SO", level: 7 },
+//   { id: "DIRECTORKRENNIC", level: 7 },
+//   { id: "KYLEKATARN", level: 7, specialMission: "zeffo" },
+//   { id: "LOGRAY", level: 7 },
+//   { id: "MARAJADE", level: 7 },
+//   { id: "MAUL", level: 7 },
+//   { id: "MISSIONVAO", level: 7, specialMission: "zeffo" },
+//   { id: "NIGHTSISTERACOLYTE", level: 7 },
+//   { id: "OLDBENKENOBI", level: 7 },
+//   { id: "QIRA", level: 7, specialMission: "zeffo" },
+//   { id: "RESISTANCETROOPER", level: 7 },
+//   { id: "HOTHLEIA", level: 7 },
+//   { id: "ROSETICO", level: 7 },
+//   { id: "SAVAGEOPRESS", level: 7 },
+//   { id: "FIRSTORDERSPECIALFORCESPILOT", level: 7 },
+//   { id: "TALIA", level: 7 },
+//   { id: "TEEBO", level: 7 },
+//   { id: "DARTHTRAYA", level: 7 },
+//   { id: "TUSKENRAIDER", level: 7 },
+//   { id: "VISASMARR", level: 7, specialMission: "zeffo" },
+//   { id: "YOUNGHAN", level: 7 },
+//   { id: "BADBATCHWRECKER", level: 7, specialMission: "zeffo" },
+//   { id: "ZEBS3", level: 7, specialMission: "zeffo" },
+// ];
+
+type Linchpin = {
+  id: string;
+  level: number;
+};
+
+const difficultyMinimum = 2;
+
+const linchpins = platoonData.reduce((acc: Linchpin[], phase) => {
+  phase.characters.darkside?.forEach((character) => {
+    if (character.difficulty <= difficultyMinimum) {
+      const existsAlready = acc.find((x) => x.id === character.id);
+      if (!existsAlready) {
+        acc.push({
+          id: character.id,
+          level: phase.characters.requirement.amount,
+        });
+      }
+    }
+  });
+
+  phase.characters.mixed?.forEach((character) => {
+    if (character.difficulty <= difficultyMinimum) {
+      const existsAlready = acc.find((x) => x.id === character.id);
+      if (!existsAlready) {
+        acc.push({
+          id: character.id,
+          level: phase.characters.requirement.amount,
+        });
+      }
+    }
+  });
+
+  phase.characters.lightside?.forEach((character) => {
+    if (character.difficulty <= difficultyMinimum) {
+      const existsAlready = acc.find((x) => x.id === character.id);
+      if (!existsAlready) {
+        acc.push({
+          id: character.id,
+          level: phase.characters.requirement.amount,
+        });
+      }
+    }
+  });
+
+  return acc;
+}, []);
+
+export { platoonData, linchpins };

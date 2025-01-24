@@ -349,14 +349,12 @@ const store = {
     async fetchGuildUnitData(
       { state, commit }: ActionCtx,
       data: {
-        unitId: string | string[] | undefined;
         guildId: string | undefined;
       }
     ) {
       const guildId = data.guildId ?? state.guildId;
 
       const guildData = await apiClient.fetchGuildApi(guildId);
-
       const membersListNeedData = guildData.members.filter((member) => {
         return !state.players.some(
           (player) => player.allyCode === member.ally_code
@@ -368,7 +366,6 @@ const store = {
           return apiClient.fetchPlayerAPI(member.ally_code);
         })
       );
-
       const playerData: iGoalPlayer[] = results.map((player: any) => {
         const newPlayer: iGoalPlayer = {
           units: player.units.map((unit: any) => {

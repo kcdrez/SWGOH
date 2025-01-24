@@ -9,7 +9,7 @@ import { mapActions, mapState } from "vuex";
 
 import { loadingState } from "types/loading";
 import { iTableBody, iTableHead } from "types/general";
-import platoonData from "resources/tbPlatoons";
+import { platoonData } from "resources/tbPlatoons";
 import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { iGoalPlayer } from "types/goals";
 

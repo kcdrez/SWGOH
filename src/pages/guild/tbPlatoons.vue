@@ -99,6 +99,28 @@
               <button
                 class="nav-link"
                 data-bs-toggle="tab"
+                data-bs-target="#mandalore"
+                type="button"
+                role="tab"
+              >
+                Mandalore
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#linchpins"
+                type="button"
+                role="tab"
+              >
+                Linchpins
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                data-bs-toggle="tab"
                 data-bs-target="#playerPlatoons"
                 type="button"
                 role="tab"
@@ -127,7 +149,18 @@
               <PlatoonsTable :phase="6" :excludedPlayers="excludePlayers" />
             </div>
             <div class="tab-pane fade" id="zeffo" role="tabpanel">
-              <PlatoonsTable :phase="'zeffo'" :excludedPlayers="excludePlayers" />
+              <PlatoonsTable phase="zeffo" :excludedPlayers="excludePlayers" />
+            </div>
+            <div class="tab-pane fade" id="mandalore" role="tabpanel">
+              <PlatoonsTable
+                phase="mandalore"
+                :excludedPlayers="excludePlayers"
+              />
+            </div>
+            <div class="tab-pane fade" id="linchpins" role="tabpanel">
+              <SwgohTable
+                :table="{ header: linchpinHeader, body: linchpinBody }"
+              />
             </div>
             <div class="tab-pane fade" id="playerPlatoons" role="tabpanel">
               <SwgohTable :table="{ header, body }" />
@@ -141,14 +174,14 @@
 
 <script lang="ts">
 import _ from "lodash";
-import { defineComponent, Ref, ref } from "vue";
+import { defineComponent } from "vue";
 import { mapActions, mapState } from "vuex";
 
 import { loadingState } from "types/loading";
 import { iTableBody, iTableHead } from "types/general";
-import platoonData from "resources/tbPlatoons";
+import { platoonData, linchpins } from "resources/tbPlatoons";
 import { setupSorting, sortValues } from "utils";
-import { iGoalPlayer } from "types/goals";
+import { iGoalPlayer, iGoalUnit } from "types/goals";
 import PlatoonsTable from "components/guild/platoonsTable.vue";
 
 interface dataModel {
@@ -204,7 +237,7 @@ export default defineComponent({
                   },
                   value: this.searchText,
                   click: () => {
-                    this.sortBy("unit");
+                    this.sortBy("player");
                   },
                 },
               },
@@ -394,7 +427,7 @@ export default defineComponent({
         }),
       };
     },
-    playerData(): any {
+    playerData(): { name: string; units: iGoalUnit[]; phaseMapping: any }[] {
       return this.players
         .map((player: iGoalPlayer) => {
           return {
@@ -438,6 +471,126 @@ export default defineComponent({
           return sortValues(a.label, b.label, "asc");
         });
     },
+    linchpinHeader(): iTableHead {
+      return {
+        headers: [
+          {
+            cells: [
+              {
+                label: "Player",
+                show: true, //this.showCol("unit"),
+                icon: this.sortIcon("player"),
+                input: {
+                  type: "input",
+                  classes: "mx-auto my-1 w-75",
+                  placeholder: "Search",
+                  change: (val: string) => {
+                    this.searchText = val;
+                  },
+                  value: this.searchText,
+                  click: () => {
+                    this.sortBy("player");
+                  },
+                },
+              },
+              {
+                label: "Linchpins",
+                show: true,
+                click: () => {
+                  this.sortBy("linchpins");
+                },
+                icon: this.sortIcon("player"),
+              },
+            ],
+          },
+        ],
+      };
+    },
+    linchpinBody(): iTableBody {
+      const filteredData = this.playerData.filter((player) => {
+        const name = player.name.toLowerCase().replace(/\s/g, "");
+        const compare = this.searchText.toLowerCase().replace(/\s/g, "");
+        return name.includes(compare);
+      });
+
+      const checkIfLinchpin = (unit: iGoalUnit) => {
+        //get how many are needed
+        let neededAmount = 0;
+        let ownedAmount: string[] = [];
+        platoonData.forEach((phase) => {
+          if (unit.relic_tier >= phase.characters.requirement.amount) {
+            phase.characters.darkside?.forEach((character) => {
+              if (character.id === unit.base_id) {
+                neededAmount += character.amount;
+              }
+            });
+          }
+
+          this.playerData.forEach((player) => {
+            const match = player.units.find(
+              (u) =>
+                u.base_id === unit.base_id &&
+                u.relic_tier >= phase.characters.requirement.amount
+            );
+            if (match) {
+              const alreadyCounted = ownedAmount.find(
+                (id) => id === unit.base_id
+              );
+              if (!alreadyCounted) {
+                ownedAmount.push(unit.base_id);
+              }
+            }
+          });
+        });
+        console.log(
+          unit.name,
+          unit.relic_tier,
+          neededAmount,
+          ownedAmount.length
+        );
+      };
+
+      return {
+        classes: "align-middle text-center",
+        rows: filteredData.map((player) => {
+          return {
+            cells: [
+              {
+                show: true,
+                data: player.name,
+              },
+              {
+                show: true,
+                label: "Linchpins",
+                type: "list",
+                data: {
+                  classes: "text-left mb-0",
+                  list: player.units
+                    .filter((unit) => {
+                      const linchpinMatch = linchpins.find(
+                        (linchpin) => linchpin.id === unit.base_id
+                      );
+                      if (linchpinMatch) {
+                        if (unit.relic_tier >= linchpinMatch.level) {
+                          return true;
+                        }
+                      }
+                      // checkIfLinchpin(unit);
+                      return false;
+                    })
+                    .map((unit) => {
+                      return {
+                        message: `${unit.name} (Relic ${unit.relic_tier})`,
+                        id: `${player.name}-${unit.name}`,
+                      };
+                    }),
+                },
+              },
+            ],
+          };
+        }),
+      };
+    },
   },
   methods: {
     ...mapActions("guild", ["fetchGuildUnitData"]),
@@ -450,13 +603,14 @@ export default defineComponent({
         phase5: [],
         phase6: [],
         phasezeffo: [],
+        phasemandalore: [],
         total: 0,
       };
 
       platoonData.forEach((phase) => {
         processData(phase.characters?.darkside ?? [], phase);
         processData(phase.characters?.mixed ?? [], phase);
-        processData(phase.characters.lightside, phase);
+        processData(phase.characters?.lightside ?? [], phase);
         processData(phase.ships?.darkside ?? [], phase);
         processData(phase.ships?.mixed ?? [], phase);
         processData(phase.ships?.lightside ?? [], phase);
@@ -490,7 +644,6 @@ export default defineComponent({
           }
         });
       }
-
       return phaseData;
     },
     addExcludedPlayer(player) {
@@ -502,45 +655,6 @@ export default defineComponent({
       this.loading = loadingState.loading;
       await this.fetchGuildUnitData({
         guildId: this.fetchGuildId,
-        unitId: platoonData.reduce((ids: string[], el) => {
-          (el.characters.darkside ?? []).forEach((c) => {
-            const exists = ids.some((i) => i === c.id);
-            if (!exists) {
-              ids.push(c.id);
-            }
-          });
-          (el.ships.darkside ?? []).forEach((c) => {
-            const exists = ids.some((i) => i === c.id);
-            if (!exists) {
-              ids.push(c.id);
-            }
-          });
-          (el.characters.mixed ?? []).forEach((c) => {
-            const exists = ids.some((i) => i === c.id);
-            if (!exists) {
-              ids.push(c.id);
-            }
-          });
-          (el.ships.mixed ?? []).forEach((c) => {
-            const exists = ids.some((i) => i === c.id);
-            if (!exists) {
-              ids.push(c.id);
-            }
-          });
-          (el.characters.lightside ?? []).forEach((c) => {
-            const exists = ids.some((i) => i === c.id);
-            if (!exists) {
-              ids.push(c.id);
-            }
-          });
-          (el.ships.lightside ?? []).forEach((c) => {
-            const exists = ids.some((i) => i === c.id);
-            if (!exists) {
-              ids.push(c.id);
-            }
-          });
-          return ids;
-        }, []),
       });
       this.loading = loadingState.ready;
     } catch (err) {
