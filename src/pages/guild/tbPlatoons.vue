@@ -179,10 +179,15 @@ import { mapActions, mapState } from "vuex";
 
 import { loadingState } from "types/loading";
 import { iTableBody, iTableHead } from "types/general";
-import { platoonData, linchpins } from "resources/tbPlatoons";
+import {
+  platoonData,
+  characterMapping,
+  redundancyCoverageAmount,
+} from "resources/tbPlatoons";
 import { setupSorting, sortValues } from "utils";
 import { iGoalPlayer, iGoalUnit } from "types/goals";
 import PlatoonsTable from "components/guild/platoonsTable.vue";
+import { maxRelicLevel } from "types/relic";
 
 interface dataModel {
   loading: loadingState;
@@ -507,47 +512,33 @@ export default defineComponent({
       };
     },
     linchpinBody(): iTableBody {
+      console.info(this.coverage);
       const filteredData = this.playerData.filter((player) => {
         const name = player.name.toLowerCase().replace(/\s/g, "");
         const compare = this.searchText.toLowerCase().replace(/\s/g, "");
         return name.includes(compare);
       });
 
-      const checkIfLinchpin = (unit: iGoalUnit) => {
-        //get how many are needed
-        let neededAmount = 0;
-        let ownedAmount: string[] = [];
-        platoonData.forEach((phase) => {
-          if (unit.relic_tier >= phase.characters.requirement.amount) {
-            phase.characters.darkside?.forEach((character) => {
-              if (character.id === unit.base_id) {
-                neededAmount += character.amount;
-              }
-            });
-          }
+      const isLinchpin = (unit: iGoalUnit): boolean => {
+        const unitMatch = this.coverage[unit.base_id];
+        if (unitMatch) {
+          let totalCoverage = 0;
+          for (let i = maxRelicLevel; i > 0; i--) {
+            if (unitMatch[i]) {
+              const { requirements, coverage } = unitMatch[i];
+              totalCoverage += coverage;
 
-          this.playerData.forEach((player) => {
-            const match = player.units.find(
-              (u) =>
-                u.base_id === unit.base_id &&
-                u.relic_tier >= phase.characters.requirement.amount
-            );
-            if (match) {
-              const alreadyCounted = ownedAmount.find(
-                (id) => id === unit.base_id
-              );
-              if (!alreadyCounted) {
-                ownedAmount.push(unit.base_id);
+              if (
+                requirements > 0 &&
+                totalCoverage <= requirements + 1 &&
+                unit.relic_tier >= i
+              ) {
+                return true;
               }
             }
-          });
-        });
-        console.log(
-          unit.name,
-          unit.relic_tier,
-          neededAmount,
-          ownedAmount.length
-        );
+          }
+        }
+        return false;
       };
 
       return {
@@ -567,16 +558,7 @@ export default defineComponent({
                   classes: "text-left mb-0",
                   list: player.units
                     .filter((unit) => {
-                      const linchpinMatch = linchpins.find(
-                        (linchpin) => linchpin.id === unit.base_id
-                      );
-                      if (linchpinMatch) {
-                        if (unit.relic_tier >= linchpinMatch.level) {
-                          return true;
-                        }
-                      }
-                      // checkIfLinchpin(unit);
-                      return false;
+                      return isLinchpin(unit);
                     })
                     .map((unit) => {
                       return {
@@ -590,6 +572,23 @@ export default defineComponent({
           };
         }),
       };
+    },
+    coverage(): any {
+      return this.players.reduce((acc, player: iGoalPlayer) => {
+        player.units.forEach((unit) => {
+          if (acc[unit.base_id]) {
+            if (acc[unit.base_id][unit.relic_tier]) {
+              acc[unit.base_id][unit.relic_tier].coverage++;
+            } else if (unit.relic_tier > 0) {
+              acc[unit.base_id][unit.relic_tier] = {
+                coverage: 1,
+                requirements: 0,
+              };
+            }
+          }
+        });
+        return acc;
+      }, characterMapping);
     },
   },
   methods: {
@@ -646,9 +645,6 @@ export default defineComponent({
       }
       return phaseData;
     },
-    addExcludedPlayer(player) {
-      console.log(player);
-    },
   },
   async created() {
     try {
@@ -659,7 +655,7 @@ export default defineComponent({
       this.loading = loadingState.ready;
     } catch (err) {
       this.loading = loadingState.error;
-      console.log(err);
+      console.error(err);
     }
   },
 });

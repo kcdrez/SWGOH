@@ -9,13 +9,9 @@ import { mapActions, mapState } from "vuex";
 
 import { loadingState } from "types/loading";
 import { iTableBody, iTableHead } from "types/general";
-import { platoonData } from "resources/tbPlatoons";
+import { platoonData, redundancyCoverageAmount } from "resources/tbPlatoons";
 import { setupColumnEvents, setupSorting, sortValues } from "utils";
 import { iGoalPlayer } from "types/goals";
-
-interface dataModel {
-  redundancyCoverageAmount: number;
-}
 
 type platoonType = {
   id: string;
@@ -56,9 +52,7 @@ export default defineComponent({
     },
   },
   data() {
-    return {
-      redundancyCoverageAmount: 3,
-    } as dataModel;
+    return {};
   },
   computed: {
     ...mapState("guild", ["players"]),
@@ -104,16 +98,14 @@ export default defineComponent({
               exists.closePlayerList = this.getClosePlayerList(
                 char.id,
                 requirement,
-                exists.total +
-                  this.redundancyCoverageAmount -
-                  exists.players.length
+                exists.total + redundancyCoverageAmount - exists.players.length
               );
             } else {
               const playerList = this.getPlayerList(char.id, requirement);
               const closePlayerList = this.getClosePlayerList(
                 char.id,
                 requirement,
-                char.amount + this.redundancyCoverageAmount - playerList.length //char.players.length - char.total
+                char.amount + redundancyCoverageAmount - playerList.length //char.players.length - char.total
               );
 
               acc.push({
@@ -310,8 +302,7 @@ export default defineComponent({
                 show: true,
                 data: {
                   classes:
-                    char.players.length <
-                    char.total + this.redundancyCoverageAmount
+                    char.players.length < char.total + redundancyCoverageAmount
                       ? "text-warning"
                       : "text-success",
                   message: `Redundant Coverage: ${Math.max(

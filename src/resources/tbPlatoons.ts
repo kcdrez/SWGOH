@@ -1,3 +1,5 @@
+const redundancyCoverageAmount = 3;
+
 const platoonData = [
   {
     phase: 1,
@@ -4758,146 +4760,35 @@ const platoonData = [
   },
 ];
 
-// export const linchpins = [
-//   { id: "ARMORER", level: 5 },
-//   { id: "GAMORREANGUARD", level: 5 },
-//   { id: "IG86SENTINELDROID", level: 5 },
-//   { id: "IMAGUNDI", level: 5 },
-//   { id: "IMPERIALSUPERCOMMANDO", level: 5 },
-//   { id: "JAWAENGINEER", level: 5 },
-//   { id: "LOBOT", level: 5 },
-//   { id: "NIGHTSISTERINITIATE", level: 5 },
-//   { id: "PAPLOO", level: 5 },
-//   { id: "SABINEWRENS3", level: 5 },
-//   { id: "TUSKENSHAMAN", level: 5 }, //excess
-//   { id: "UGNAUGHT", level: 5 },
-//   { id: "ADMIRALACKBAR", level: 6 },
-//   { id: "B2SUPERBATTLEDROID", level: 6 },
-//   { id: "BT1", level: 6 },
-//   { id: "DROIDEKA", level: 6 },
-//   { id: "DEATHTROOPER", level: 6 },
-//   { id: "EZRABRIDGERS3", level: 6 },
-//   { id: "FIRSTORDEROFFICERMALE", level: 6 },
-//   { id: "JAWA", level: 6 },
-//   { id: "KANANJARRUSS3", level: 6 },
-//   { id: "KUIIL", level: 6 },
-//   { id: "L3_37", level: 6 },
-//   { id: "ADMINISTRATORLANDO", level: 6 },
-//   { id: "MAGMATROOPER", level: 6 },
-//   { id: "MONMOTHMA", level: 6 },
-//   { id: "BADBATCHOMEGA", level: 6 },
-//   { id: "PAO", level: 6 },
-//   { id: "SNOWTROOPER", level: 6 },
-//   { id: "DARTHTALON", level: 6 },
-//   { id: "THEMANDALORIAN", level: 6 },
-//   { id: "YOUNGCHEWBACCA", level: 6 },
-//   { id: "SMUGGLERCHEWBACCA", level: 6 },
-//   { id: "WEDGEANTILLES", level: 6 },
-//   { id: "ZAALBAR", level: 6 },
-//   { id: "TRIPLEZERO", level: 7 },
-//   { id: "50RT", level: 7 },
-//   { id: "AURRA_SING", level: 7 },
-//   { id: "B1BATTLEDROIDV2", level: 7 },
-//   { id: "BARRISSOFFEE", level: 7 },
-//   { id: "BODHIROOK", level: 7 },
-//   { id: "CADBANE", level: 7 },
-//   { id: "CHIEFCHIRPA", level: 7, specialMission: "zeffo" },
-//   { id: "CHIRRUTIMWE", level: 7, specialMission: "zeffo" },
-//   { id: "CLONESERGEANTPHASEI", level: 7 },
-//   { id: "CORUSCANTUNDERWORLDPOLICE", level: 7 },
-//   { id: "DARKTROOPER", level: 7 },
-//   { id: "BOBAFETTSCION", level: 7 },
-//   { id: "DENGAR", level: 7 },
-//   { id: "EMBO", level: 7 },
-//   { id: "ENFYSNEST", level: 7, specialMission: "zeffo" },
-//   { id: "EWOKELDER", level: 7 },
-//   { id: "EWOKSCOUT", level: 7 },
-//   { id: "LUKESKYWALKER", level: 7, specialMission: "zeffo" },
-//   { id: "GARSAXON", level: 7 },
-//   { id: "GEONOSIANSPY", level: 7 },
-//   { id: "GREEFKARGA", level: 7 },
-//   { id: "EPIXFINN", level: 7 },
-//   { id: "EPIXPOE", level: 7 },
-//   { id: "HONDO", level: 7 },
-//   { id: "HOTHREBELSCOUT", level: 7 },
-//   { id: "BADBATCHHUNTER", level: 7 },
-//   { id: "GENERALHUX", level: 7 },
-//   { id: "IG88", level: 7 },
-//   { id: "IMPERIALPROBEDROID", level: 7 },
-//   { id: "JEDIKNIGHTCONSULAR", level: 7, specialMission: "zeffo" },
-//   { id: "JEDIKNIGHTGUARDIAN", level: 7, specialMission: "zeffo" },
-//   { id: "JOLEEBINDO", level: 7, specialMission: "zeffo" },
-//   { id: "JUHANI", level: 7, specialMission: "zeffo" },
-//   { id: "K2SO", level: 7 },
-//   { id: "DIRECTORKRENNIC", level: 7 },
-//   { id: "KYLEKATARN", level: 7, specialMission: "zeffo" },
-//   { id: "LOGRAY", level: 7 },
-//   { id: "MARAJADE", level: 7 },
-//   { id: "MAUL", level: 7 },
-//   { id: "MISSIONVAO", level: 7, specialMission: "zeffo" },
-//   { id: "NIGHTSISTERACOLYTE", level: 7 },
-//   { id: "OLDBENKENOBI", level: 7 },
-//   { id: "QIRA", level: 7, specialMission: "zeffo" },
-//   { id: "RESISTANCETROOPER", level: 7 },
-//   { id: "HOTHLEIA", level: 7 },
-//   { id: "ROSETICO", level: 7 },
-//   { id: "SAVAGEOPRESS", level: 7 },
-//   { id: "FIRSTORDERSPECIALFORCESPILOT", level: 7 },
-//   { id: "TALIA", level: 7 },
-//   { id: "TEEBO", level: 7 },
-//   { id: "DARTHTRAYA", level: 7 },
-//   { id: "TUSKENRAIDER", level: 7 },
-//   { id: "VISASMARR", level: 7, specialMission: "zeffo" },
-//   { id: "YOUNGHAN", level: 7 },
-//   { id: "BADBATCHWRECKER", level: 7, specialMission: "zeffo" },
-//   { id: "ZEBS3", level: 7, specialMission: "zeffo" },
-// ];
+const characterMapping = platoonData.reduce((acc, phase) => {
+  const addCharacter = (character) => {
+    if (acc[character.id]) {
+      if (acc[character.id][relicLevel]) {
+        acc[character.id][relicLevel].requirements += character.amount;
+      } else {
+        acc[character.id][relicLevel] = {
+          requirements: character.amount,
+          coverage: 0,
+        };
+      }
+    } else {
+      acc[character.id] = {
+        [relicLevel]: { requirements: character.amount, coverage: 0 },
+      };
+    }
+  };
 
-type Linchpin = {
-  id: string;
-  level: number;
-};
-
-const difficultyMinimum = 2;
-
-const linchpins = platoonData.reduce((acc: Linchpin[], phase) => {
+  const relicLevel = phase.characters.requirement.amount;
   phase.characters.darkside?.forEach((character) => {
-    if (character.difficulty <= difficultyMinimum) {
-      const existsAlready = acc.find((x) => x.id === character.id);
-      if (!existsAlready) {
-        acc.push({
-          id: character.id,
-          level: phase.characters.requirement.amount,
-        });
-      }
-    }
+    addCharacter(character);
   });
-
   phase.characters.mixed?.forEach((character) => {
-    if (character.difficulty <= difficultyMinimum) {
-      const existsAlready = acc.find((x) => x.id === character.id);
-      if (!existsAlready) {
-        acc.push({
-          id: character.id,
-          level: phase.characters.requirement.amount,
-        });
-      }
-    }
+    addCharacter(character);
   });
-
   phase.characters.lightside?.forEach((character) => {
-    if (character.difficulty <= difficultyMinimum) {
-      const existsAlready = acc.find((x) => x.id === character.id);
-      if (!existsAlready) {
-        acc.push({
-          id: character.id,
-          level: phase.characters.requirement.amount,
-        });
-      }
-    }
+    addCharacter(character);
   });
-
   return acc;
-}, []);
+}, {});
 
-export { platoonData, linchpins };
+export { platoonData, characterMapping, redundancyCoverageAmount };
