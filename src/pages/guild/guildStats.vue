@@ -114,7 +114,13 @@ import { mapActions, mapState } from "vuex";
 import { loadingState } from "types/loading";
 import { apiClient } from "../../api/api-client";
 import { maxRelicLevel } from "types/relic";
-import { iHeaderCell, iTableBody, iTableHead } from "types/general";
+import {
+  iHeaderCell,
+  iTable,
+  iTableBody,
+  iTableCell,
+  iTableHead,
+} from "types/general";
 
 interface dataModel {
   maxRelicLevel: number;
@@ -309,36 +315,34 @@ export default defineComponent({
         );
       } else if (this.viewMode === "Level") {
         return Object.entries(this.unitsByLevel).reduce(
-          (acc: any, val: any) => {
+          (acc: iTableBody, val: any) => {
             const [level, units] = val;
 
-            acc.rows.push({
-              cells: [
+            const cells: iTableCell[] = [
+              {
+                show: true,
+                type: "unitLevel",
+                data: {
+                  type: "Relic",
+                  value: level,
+                  classes: "sticky-name",
+                },
+              },
+            ];
+
+            units.forEach((unit: any) => {
+              cells.push(
                 {
                   show: true,
-                  type: "unitLevel",
-                  data: {
-                    type: "Relic",
-                    value: level,
-                    classes: "sticky-name",
-                  },
+                  data: unit.name,
                 },
-              ],
+                {
+                  show: true,
+                  data: unit.owner,
+                }
+              );
             });
-            units.forEach((unit: any) => {
-              acc.rows.push({
-                cells: [
-                  {
-                    show: true,
-                    data: unit.name,
-                  },
-                  {
-                    show: true,
-                    data: unit.owner,
-                  },
-                ],
-              });
-            });
+            acc.rows.push({ cells });
             return acc;
           },
           {
@@ -399,7 +403,7 @@ export default defineComponent({
         this.gp = await apiClient.fetchGuildStats(this.fetchGuildId);
         this.loading = loadingState.ready;
       } catch (err) {
-        console.error(err)
+        console.error(err);
         this.loading = loadingState.error;
       }
     }
