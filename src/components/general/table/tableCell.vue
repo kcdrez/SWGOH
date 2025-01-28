@@ -8,11 +8,7 @@
     <span class="row-label mx-1" :class="cell.labelClasses" v-if="cell.label">{{
       cell.label
     }}</span>
-    <div
-      v-if="cell.zeroState?.show"
-      class="text-center"
-      :class="cell.zeroState?.classes"
-    >
+    <div v-if="cell.zeroState?.show" :class="cell.zeroState?.classes">
       {{ cell.zeroState.message }}
     </div>
     <template v-else>

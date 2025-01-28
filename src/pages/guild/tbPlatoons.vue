@@ -17,7 +17,7 @@
               @checked="excludePlayers = $event"
             />
           </div>
-          <ul class="nav nav-tabs" role="tablist">
+          <ul class="nav nav-tabs nav-justified" role="tablist">
             <li class="nav-item" role="presentation">
               <button
                 class="nav-link active"
@@ -117,7 +117,7 @@
                 Linchpins
               </button>
             </li>
-            <li class="nav-item" role="presentation">
+            <!-- <li class="nav-item" role="presentation">
               <button
                 class="nav-link"
                 data-bs-toggle="tab"
@@ -127,7 +127,7 @@
               >
                 Players Overview
               </button>
-            </li>
+            </li> -->
           </ul>
           <div class="tab-content">
             <div class="tab-pane fade show active" id="phase1" role="tabpanel">
@@ -158,13 +158,14 @@
               />
             </div>
             <div class="tab-pane fade" id="linchpins" role="tabpanel">
-              <SwgohTable
+              <LinchpinTable :playerData="playerData" />
+              <!-- <SwgohTable
                 :table="{ header: linchpinHeader, body: linchpinBody }"
-              />
+              /> -->
             </div>
-            <div class="tab-pane fade" id="playerPlatoons" role="tabpanel">
+            <!-- <div class="tab-pane fade" id="playerPlatoons" role="tabpanel">
               <SwgohTable :table="{ header, body }" />
-            </div>
+            </div> -->
           </div>
         </Loading>
       </div>
@@ -182,11 +183,14 @@ import { iTableBody, iTableHead } from "types/general";
 import {
   platoonData,
   characterMapping,
-  redundancyCoverageAmount,
+  CharacterMapping,
+  PlatoonCharacter,
+  PlatoonData,
 } from "resources/tbPlatoons";
-import { setupSorting, sortValues } from "utils";
+import { setupSorting, sortValues, unvue } from "utils";
 import { iGoalPlayer, iGoalUnit } from "types/goals";
 import PlatoonsTable from "components/guild/platoonsTable.vue";
+import LinchpinTable from "components/guild/linchpinTable.vue";
 import { maxRelicLevel } from "types/relic";
 
 interface dataModel {
@@ -200,6 +204,7 @@ export default defineComponent({
   name: "TBPlatoons",
   components: {
     PlatoonsTable,
+    LinchpinTable,
   },
   setup(_props) {
     const { sortDir, sortMethod, sortBy, sortIcon, searchText } =
@@ -231,7 +236,7 @@ export default defineComponent({
             cells: [
               {
                 label: "Player",
-                show: true, //this.showCol("unit"),
+                show: true,
                 icon: this.sortIcon("player"),
                 input: {
                   type: "input",
@@ -476,120 +481,6 @@ export default defineComponent({
           return sortValues(a.label, b.label, "asc");
         });
     },
-    linchpinHeader(): iTableHead {
-      return {
-        headers: [
-          {
-            cells: [
-              {
-                label: "Player",
-                show: true, //this.showCol("unit"),
-                icon: this.sortIcon("player"),
-                input: {
-                  type: "input",
-                  classes: "mx-auto my-1 w-75",
-                  placeholder: "Search",
-                  change: (val: string) => {
-                    this.searchText = val;
-                  },
-                  value: this.searchText,
-                  click: () => {
-                    this.sortBy("player");
-                  },
-                },
-              },
-              {
-                label: "Linchpins",
-                show: true,
-                click: () => {
-                  this.sortBy("linchpins");
-                },
-                icon: this.sortIcon("player"),
-              },
-            ],
-          },
-        ],
-      };
-    },
-    linchpinBody(): iTableBody {
-      console.info(this.coverage);
-      const filteredData = this.playerData.filter((player) => {
-        const name = player.name.toLowerCase().replace(/\s/g, "");
-        const compare = this.searchText.toLowerCase().replace(/\s/g, "");
-        return name.includes(compare);
-      });
-
-      const isLinchpin = (unit: iGoalUnit): boolean => {
-        const unitMatch = this.coverage[unit.base_id];
-        if (unitMatch) {
-          let totalCoverage = 0;
-          for (let i = maxRelicLevel; i > 0; i--) {
-            if (unitMatch[i]) {
-              const { requirements, coverage } = unitMatch[i];
-              totalCoverage += coverage;
-
-              if (
-                requirements > 0 &&
-                totalCoverage <= requirements + 1 &&
-                unit.relic_tier >= i
-              ) {
-                return true;
-              }
-            }
-          }
-        }
-        return false;
-      };
-
-      return {
-        classes: "align-middle text-center",
-        rows: filteredData.map((player) => {
-          return {
-            cells: [
-              {
-                show: true,
-                data: player.name,
-              },
-              {
-                show: true,
-                label: "Linchpins",
-                type: "list",
-                data: {
-                  classes: "text-left mb-0",
-                  list: player.units
-                    .filter((unit) => {
-                      return isLinchpin(unit);
-                    })
-                    .map((unit) => {
-                      return {
-                        message: `${unit.name} (Relic ${unit.relic_tier})`,
-                        id: `${player.name}-${unit.name}`,
-                      };
-                    }),
-                },
-              },
-            ],
-          };
-        }),
-      };
-    },
-    coverage(): any {
-      return this.players.reduce((acc, player: iGoalPlayer) => {
-        player.units.forEach((unit) => {
-          if (acc[unit.base_id]) {
-            if (acc[unit.base_id][unit.relic_tier]) {
-              acc[unit.base_id][unit.relic_tier].coverage++;
-            } else if (unit.relic_tier > 0) {
-              acc[unit.base_id][unit.relic_tier] = {
-                coverage: 1,
-                requirements: 0,
-              };
-            }
-          }
-        });
-        return acc;
-      }, characterMapping);
-    },
   },
   methods: {
     ...mapActions("guild", ["fetchGuildUnitData"]),
@@ -619,7 +510,10 @@ export default defineComponent({
         );
       });
 
-      function processData(characterList: any[], phase: any) {
+      function processData(
+        characterList: PlatoonCharacter[],
+        phase: PlatoonData
+      ) {
         characterList.forEach((character) => {
           const match = player.units.find((x) => x.base_id === character.id);
           if (match) {

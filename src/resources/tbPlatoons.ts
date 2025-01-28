@@ -1,6 +1,29 @@
 const redundancyCoverageAmount = 3;
 
-const platoonData = [
+export type PlatoonData = {
+  phase: number | "zeffo" | "mandalore";
+  label: string;
+  characters: PlatoonPhase;
+  ships?: PlatoonPhase;
+};
+
+export type PlatoonCharacter = {
+  id: string;
+  amount: number;
+  difficulty: number;
+};
+
+type PlatoonPhase = {
+  requirement: {
+    type: "Relic" | "Gear" | "Stars";
+    amount: number;
+  };
+  darkside?: PlatoonCharacter[];
+  mixed?: PlatoonCharacter[];
+  lightside?: PlatoonCharacter[];
+};
+
+const platoonData: PlatoonData[] = [
   {
     phase: 1,
     label: "Phase 1",
@@ -4760,7 +4783,12 @@ const platoonData = [
   },
 ];
 
-const characterMapping = platoonData.reduce((acc, phase) => {
+export type CharacterMapping = Record<
+  string,
+  Record<number, { coverage: number; requirements: number }>
+>;
+
+const characterMapping = platoonData.reduce((acc: CharacterMapping, phase) => {
   const addCharacter = (character) => {
     if (acc[character.id]) {
       if (acc[character.id][relicLevel]) {
@@ -4791,4 +4819,59 @@ const characterMapping = platoonData.reduce((acc, phase) => {
   return acc;
 }, {});
 
-export { platoonData, characterMapping, redundancyCoverageAmount };
+type CharacterAmount = { amount: number; difficulty: number };
+
+const getCharacterMapping = (
+  characterList: PlatoonCharacter[]
+): Record<string, CharacterAmount> => {
+  return characterList.reduce((acc, character) => {
+    acc[character.id] = {
+      amount: character.amount,
+      difficulty: character.difficulty,
+    };
+    return acc;
+  }, {});
+};
+
+type MappedPlatoonData = {
+  phase: PlatoonData["phase"];
+  label: PlatoonData["label"];
+  characters: {
+    requirement: PlatoonPhase["requirement"];
+    mixed: Record<string, CharacterAmount>;
+    darkside: Record<string, CharacterAmount>;
+    lightside: Record<string, CharacterAmount>;
+  };
+  ships: {
+    requirement: PlatoonPhase["requirement"];
+    mixed: Record<string, CharacterAmount>;
+    darkside: Record<string, CharacterAmount>;
+    lightside: Record<string, CharacterAmount>;
+  };
+};
+
+const newPlatoonData: MappedPlatoonData[] = platoonData.map((phase) => {
+  return {
+    phase: phase.phase,
+    label: phase.label,
+    characters: {
+      requirement: phase.characters.requirement,
+      mixed: getCharacterMapping(phase.characters?.mixed ?? []),
+      darkside: getCharacterMapping(phase.characters?.darkside ?? []),
+      lightside: getCharacterMapping(phase.characters?.lightside ?? []),
+    },
+    ships: {
+      requirement: phase.ships?.requirement ?? { type: "Stars", amount: 7 },
+      mixed: getCharacterMapping(phase.ships?.mixed ?? []),
+      darkside: getCharacterMapping(phase.ships?.darkside ?? []),
+      lightside: getCharacterMapping(phase.ships?.lightside ?? []),
+    },
+  };
+});
+
+export {
+  platoonData,
+  newPlatoonData,
+  characterMapping,
+  redundancyCoverageAmount,
+};

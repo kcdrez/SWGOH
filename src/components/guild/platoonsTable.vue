@@ -4,14 +4,17 @@
 
 <script lang="ts">
 import _ from "lodash";
-import { defineComponent, Ref, ref } from "vue";
-import { mapActions, mapState } from "vuex";
+import { defineComponent } from "vue";
+import { mapState } from "vuex";
 
-import { loadingState } from "types/loading";
 import { iTableBody, iTableHead } from "types/general";
-import { platoonData, redundancyCoverageAmount } from "resources/tbPlatoons";
-import { setupColumnEvents, setupSorting, sortValues } from "utils";
-import { iGoalPlayer } from "types/goals";
+import {
+  newPlatoonData,
+  platoonData,
+  redundancyCoverageAmount,
+} from "resources/tbPlatoons";
+import { setupSorting, sortValues } from "utils";
+import { iGoalPlayer, iGoalUnit } from "types/goals";
 
 type platoonType = {
   id: string;
@@ -73,23 +76,24 @@ export default defineComponent({
         ];
 
         const shipsList = [
-          ...(phaseData.ships.darkside ?? []).map((x) => {
+          ...(phaseData.ships?.darkside ?? []).map((x) => {
             return { ...x, alignment: "Dark Side", isShip: true };
           }),
-          ...(phaseData.ships.mixed ?? []).map((x) => {
+          ...(phaseData.ships?.mixed ?? []).map((x) => {
             return { ...x, alignment: "Mixed", isShip: true };
           }),
-          ...(phaseData.ships.lightside ?? []).map((x) => {
+          ...(phaseData.ships?.lightside ?? []).map((x) => {
             return { ...x, alignment: "Light Side", isShip: true };
           }),
         ];
 
         return [...characterList, ...shipsList].reduce(
           (acc: platoonType[], char: any) => {
-            const exists: any = acc.find((x: any) => x.id === char.id);
-            const requirement = char.isShip
-              ? phaseData.ships.requirement
-              : phaseData.characters.requirement;
+            const exists = acc.find((x) => x.id === char.id);
+            const requirement =
+              char.isShip && phaseData.ships
+                ? phaseData.ships.requirement
+                : phaseData.characters.requirement;
 
             if (exists) {
               exists[char.alignment] = exists[char.alignment] ?? 0;
@@ -105,14 +109,14 @@ export default defineComponent({
               const closePlayerList = this.getClosePlayerList(
                 char.id,
                 requirement,
-                char.amount + redundancyCoverageAmount - playerList.length //char.players.length - char.total
+                char.amount + redundancyCoverageAmount - playerList.length
               );
 
               acc.push({
                 ...char,
                 [char.alignment]: char.amount,
                 total: char.amount,
-                players: playerList.map((x) => x.name),
+                players: playerList,
                 closePlayerList,
                 requirement,
               });
@@ -143,10 +147,12 @@ export default defineComponent({
                 label: "Unit",
                 show: true, //this.showCol("unit"),
                 icon: this.sortIcon("unit"),
+                sortMethodShow: true,
                 input: {
                   type: "input",
                   classes: "mx-auto my-1 w-75",
                   placeholder: "Search",
+                  label: "Unit Name",
                   change: (val: string) => {
                     this.searchText = val;
                   },
@@ -155,14 +161,17 @@ export default defineComponent({
                     this.sortBy("unit");
                   },
                 },
+                value: "unit",
               },
               {
                 label: "Requirements",
                 show: true, //this.showCol("requirements"),
                 icon: this.sortIcon("total"),
+                sortMethodShow: true,
                 click: () => {
                   this.sortBy("total");
                 },
+                value: "total",
               },
               {
                 label: "Players",
@@ -172,33 +181,41 @@ export default defineComponent({
                 label: "Coverage",
                 show: true, //this.showCol("requirements"),
                 icon: this.sortIcon("coverage"),
+                sortMethodShow: true,
                 click: () => {
                   this.sortBy("coverage");
                 },
+                value: "coverage",
               },
               {
                 label: "Redundancy",
                 show: true, //this.showCol("requirements"),
                 icon: this.sortIcon("redundancy"),
+                sortMethodShow: true,
                 click: () => {
                   this.sortBy("redundancy");
                 },
+                value: "redundancy",
               },
               {
                 label: "Closest Players",
                 show: true, //this.showCol("requirements"),
                 icon: this.sortIcon("closest"),
+                sortMethodShow: true,
                 click: () => {
                   this.sortBy("closest");
                 },
+                value: "closest",
               },
               {
                 label: "Difficulty",
                 show: true, //this.showCol("requirements"),
                 icon: this.sortIcon("difficulty"),
+                sortMethodShow: true,
                 click: () => {
                   this.sortBy("difficulty");
                 },
+                value: "difficulty",
               },
             ],
           },
@@ -336,32 +353,54 @@ export default defineComponent({
         }),
       };
     },
+    playerListMapping(): Record<string, any> {
+      return this.players
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .reduce((mapping: Record<string, any>, player: iGoalPlayer) => {
+          const shouldExclude = this.excludedPlayers.some(
+            (playerName) => playerName === player.name
+          );
+
+          if (!shouldExclude) {
+            const unitMapping: Record<string, iGoalUnit> = player.units.reduce(
+              (unitMapping, unit) => {
+                unitMapping[unit.base_id] = unit;
+                return unitMapping;
+              },
+              {}
+            );
+            mapping[player.allyCode] = {
+              ...player,
+              units: unitMapping,
+            };
+          }
+          return mapping;
+        }, {});
+    },
   },
   methods: {
     getPlayerList(
       unitId: string,
       requirement: { amount: number; type: string }
-    ) {
-      return this.players
-        .reduce((list: iGoalPlayer[], player: iGoalPlayer) => {
-          const match = player.units.find((x) => x.base_id === unitId);
-          const shouldExclude = this.excludedPlayers.some(
-            (playerName) => playerName === player.name
-          );
-          if (match && !shouldExclude) {
+    ): string[] {
+      return Object.values(this.playerListMapping).reduce(
+        (list: string[], player: iGoalPlayer) => {
+          const match = player.units[unitId];
+          if (match) {
             if (requirement.type === "Stars") {
               if (match.stars >= requirement.amount) {
-                list.push(player);
+                list.push(player.name);
               }
             } else if (requirement.type === "Relic") {
               if (match.relic_tier >= requirement.amount) {
-                list.push(player);
+                list.push(player.name);
               }
             }
           }
           return list;
-        }, [])
-        .sort((a, b) => a.name.localeCompare(b.name));
+        },
+        []
+      );
     },
     getClosePlayerList(
       unitId: string,
@@ -373,19 +412,10 @@ export default defineComponent({
         levelType: string;
         levelValue: number;
       }[] = [];
-      let i = 0;
-      do {
-        const player: iGoalPlayer = this.players[i];
 
-        if (!player) {
-          break;
-        }
-
-        const unitMatch = player.units.find((x) => x.base_id === unitId);
-        const shouldExclude = this.excludedPlayers.some(
-          (playerName) => playerName === player.name
-        );
-        if (unitMatch && !shouldExclude) {
+      Object.values(this.playerListMapping).forEach((player) => {
+        const unitMatch = player.units[unitId];
+        if (unitMatch) {
           if (requirement.type === "Stars") {
             if (unitMatch.stars < requirement.amount) {
               if (totalNeeded > playerList.length) {
@@ -455,9 +485,7 @@ export default defineComponent({
             }
           }
         }
-        i++;
-      } while (i < this.players.length);
-
+      });
       return playerList.sort((a, b) => {
         if (a.levelType === b.levelType) {
           return a.levelValue > b.levelValue ? -1 : 1;

@@ -111,6 +111,7 @@ export default defineComponent({
   },
   watch: {
     _sortMethod(newVal: string) {
+      console.log("sort method change", newVal);
       if (this.header.methodChange && !!newVal) {
         this.header.methodChange(newVal);
       }
