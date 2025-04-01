@@ -64,7 +64,7 @@ export class Gear {
     this._image = data.image;
     this._name = data.name;
     this._mark = data.mark;
-    this._locations = data.locations.map((location) => {
+    this._locations = (data?.locations ?? []).map((location) => {
       const match = store.state.shards.shardFarming.find(
         (x) => x.id === location.id
       );
@@ -83,7 +83,7 @@ export class Gear {
     this._tier = data.tier;
     this._ingredients = data.ingredients;
     this._recipes = data.recipes;
-    this._scavenger = data.scavenger;
+    this._scavenger = data?.scavenger ?? [];
   }
 
   public get id() {
