@@ -182,16 +182,13 @@ import { loadingState } from "types/loading";
 import { iTableBody, iTableHead } from "types/general";
 import {
   platoonData,
-  characterMapping,
-  CharacterMapping,
   PlatoonCharacter,
   PlatoonData,
 } from "resources/tbPlatoons";
-import { setupSorting, sortValues, unvue } from "utils";
+import { setupSorting, sortValues } from "utils";
 import { iGoalPlayer, iGoalUnit } from "types/goals";
 import PlatoonsTable from "components/guild/platoonsTable.vue";
 import LinchpinTable from "components/guild/linchpinTable.vue";
-import { maxRelicLevel } from "types/relic";
 
 interface dataModel {
   loading: loadingState;

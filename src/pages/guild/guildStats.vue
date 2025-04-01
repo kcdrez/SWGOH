@@ -318,31 +318,35 @@ export default defineComponent({
           (acc: iTableBody, val: any) => {
             const [level, units] = val;
 
-            const cells: iTableCell[] = [
-              {
-                show: true,
-                type: "unitLevel",
-                data: {
-                  type: "Relic",
-                  value: level,
-                  classes: "sticky-name",
+            acc.rows.push({
+              cells: [
+                {
+                  show: true,
+                  type: "unitLevel",
+                  rowspan: units.length + 1,
+                  data: {
+                    type: "Relic",
+                    value: level,
+                    classes: "sticky-name",
+                  },
                 },
-              },
-            ];
+              ],
+            });
 
             units.forEach((unit: any) => {
-              cells.push(
-                {
-                  show: true,
-                  data: unit.name,
-                },
-                {
-                  show: true,
-                  data: unit.owner,
-                }
-              );
+              acc.rows.push({
+                cells: [
+                  {
+                    show: true,
+                    data: unit.name,
+                  },
+                  {
+                    show: true,
+                    data: unit.owner,
+                  },
+                ],
+              });
             });
-            acc.rows.push({ cells });
             return acc;
           },
           {

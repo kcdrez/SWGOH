@@ -687,6 +687,44 @@ export class Unit {
           ultMats: 6,
         },
       },
+      GLAHSOKATANO: {
+        tier1: {
+          tickets: 15,
+          count: 4,
+          shards: 10,
+          ultMats: 0,
+        },
+        tier2: {
+          tickets: 30,
+          count: 4,
+          shards: 20,
+          ultMats: 0,
+        },
+        tier3: {
+          tickets: 60,
+          count: 4,
+          shards: 20,
+          ultMats: 0,
+        },
+        tier4: {
+          tickets: 70,
+          count: 3,
+          shards: 50,
+          ultMats: 0,
+        },
+        tier5: {
+          tickets: 70,
+          count: 3,
+          shards: 0,
+          ultMats: 0,
+        },
+        tier6: {
+          tickets: 70,
+          count: 10,
+          shards: 0,
+          ultMats: 10,
+        },
+      },
     };
     return glShardsTiers[this.id];
   }
