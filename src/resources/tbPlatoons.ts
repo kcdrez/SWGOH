@@ -4561,7 +4561,7 @@ const platoonData: PlatoonData[] = [
       },
       mixed: [
         {
-          id: "Tarfful",
+          id: "TARFFUL",
           amount: 1,
           difficulty: 1,
         },
