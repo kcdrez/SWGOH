@@ -313,7 +313,7 @@ export default defineComponent({
                     {
                       label: "-divider-",
                     },
-                    ...this.relicLevelCols[unit?.id ?? ""],
+                    ...(this.relicLevelCols?.[unit?.id ?? ""] ?? []),
                   ],
                 },
               },
