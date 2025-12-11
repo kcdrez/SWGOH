@@ -252,36 +252,33 @@ const store = {
       { commit, state, rootState, dispatch }: ActionCtx,
       routeParams: any = {}
     ) {
-      const guildId =
-        routeParams?.guildId || rootState.player.player?.guild_id || "";
-      const allyCode = rootState.player.allyCode;
-
-      if (state.requestState !== loadingState.initial) {
-        commit("SET_REQUEST_STATE", loadingState.ready);
-        return;
-      } else if (!guildId) {
-        console.error("guildId not set");
-        commit("SET_REQUEST_STATE", loadingState.ready);
-        return;
-      }
-
-      commit("SET_REQUEST_STATE", loadingState.loading);
-      commit("SET_GUILD_ID", guildId);
-
-      if (allyCode) {
-        const guildData = await apiClient.fetchGuild(guildId);
-        if (guildData) {
-          commit("SET_EVENTS", guildData);
-        } else {
-          await apiClient.createGuild(guildId);
-        }
-        await dispatch("fetchAccessCode", { guildId, allyCode });
-      } else {
-        const guildData = await apiClient.fetchGuild(guildId);
-        commit("SET_EVENTS", guildData);
-      }
-
       commit("SET_REQUEST_STATE", loadingState.ready);
+      // const guildId =
+      //   routeParams?.guildId || rootState.player.player?.guild_id || "";
+      // const allyCode = rootState.player.allyCode;
+      // if (state.requestState !== loadingState.initial) {
+      //   commit("SET_REQUEST_STATE", loadingState.ready);
+      //   return;
+      // } else if (!guildId) {
+      //   console.error("guildId not set");
+      //   commit("SET_REQUEST_STATE", loadingState.ready);
+      //   return;
+      // }
+      // commit("SET_REQUEST_STATE", loadingState.loading);
+      // commit("SET_GUILD_ID", guildId);
+      // if (allyCode) {
+      //   const guildData = await apiClient.fetchGuild(guildId);
+      //   if (guildData) {
+      //     commit("SET_EVENTS", guildData);
+      //   } else {
+      //     await apiClient.createGuild(guildId);
+      //   }
+      //   await dispatch("fetchAccessCode", { guildId, allyCode });
+      // } else {
+      //   const guildData = await apiClient.fetchGuild(guildId);
+      //   commit("SET_EVENTS", guildData);
+      // }
+      // commit("SET_REQUEST_STATE", loadingState.ready);
     },
     async fetchAccessCode(
       { commit }: ActionCtx,
@@ -352,20 +349,39 @@ const store = {
         guildId: string | undefined;
       }
     ) {
-      const guildId = data.guildId ?? state.guildId;
+      // const guildId = data.guildId ?? state.guildId;
 
-      const guildData = await apiClient.fetchGuildApi(guildId);
-      const membersListNeedData = guildData.members.filter((member) => {
-        return !state.players.some(
-          (player) => player.allyCode === member.ally_code
-        );
-      });
+      const results = await apiClient.fetchERS();
+      // const membersListNeedData = guildData.members.filter((member) => {
+      //   return !state.players.some(
+      //     (player) => player.allyCode === member.ally_code
+      //   );
+      // });
 
-      const results = await Promise.all(
-        membersListNeedData.map((member) => {
-          return apiClient.fetchPlayerAPI(member.ally_code);
-        })
-      );
+      // const results = await Promise.all(
+      //   membersListNeedData.map((member) => {
+      //     return apiClient.fetchPlayerAPI(member.ally_code);
+      //   })
+      // );
+      // const playerData: iGoalPlayer[] = results.map((player: any) => {
+      //   const newPlayer: iGoalPlayer = {
+      //     units: player.units.map((unit: any) => {
+      //       return {
+      //         relic_tier: unit.data.relic_tier - 2,
+      //         stars: unit.data.rarity,
+      //         base_id: unit.data.base_id,
+      //         name: unit.data.name,
+      //         gear_level: unit.data.gear_level,
+      //         power: unit.data.power,
+      //       };
+      //     }),
+      //     name: player.data.name,
+      //     allyCode: player.data.ally_code,
+      //     totalGP: player.data.galactic_power,
+      //   };
+      //   return newPlayer;
+      // });
+
       const playerData: iGoalPlayer[] = results.map((player: any) => {
         const newPlayer: iGoalPlayer = {
           units: player.units.map((unit: any) => {

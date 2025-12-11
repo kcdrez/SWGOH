@@ -239,15 +239,18 @@ export default defineComponent({
       }, []);
     },
     allAbilityTags(): { name: string }[] {
-      return this.unitList.reduce((list: { name: string }[], unit: Unit) => {
-        unit.abilityClasses.forEach((ability) => {
-          const exists = list.some((tag) => tag.name === ability);
-          if (!exists) {
-            list.push({ name: ability });
-          }
-        });
-        return list;
-      }, []);
+      return this.unitList.reduce(
+        (list: { name: string }[], unit: Unit) => {
+          unit.abilityClasses.forEach((ability) => {
+            const exists = list.some((tag) => tag.name === ability);
+            if (!exists) {
+              list.push({ name: ability });
+            }
+          });
+          return list;
+        },
+        [{ name: "Physical" }, { name: "Special" }, { name: "True" }]
+      );
     },
     alignmentList(): { name: string }[] {
       return this.unitList.reduce((list: { name: string }[], unit: Unit) => {

@@ -173,6 +173,11 @@ class ApiClient {
     return response.data;
   }
 
+  async fetchERS(): Promise<any> {
+    const response = await axios.get(`${this.baseUrl}/guild/ers`);
+    return response.data;
+  }
+
   async fetchAccessLevel(
     guildId: string,
     allyCode: string

@@ -106,8 +106,6 @@ export const processData = () => {
       i++;
     } while (remainingGP > 0 && i <= 3);
   });
-
-  console.log(getResults(results, remainingGP));
 };
 
 const findLowest = (
