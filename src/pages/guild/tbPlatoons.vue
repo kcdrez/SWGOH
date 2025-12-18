@@ -117,17 +117,17 @@
                 Linchpins
               </button>
             </li>
-            <!-- <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation">
               <button
                 class="nav-link"
                 data-bs-toggle="tab"
-                data-bs-target="#playerPlatoons"
+                data-bs-target="#needs"
                 type="button"
                 role="tab"
               >
-                Players Overview
+                Guild Needs
               </button>
-            </li> -->
+            </li>
           </ul>
           <div class="tab-content">
             <div class="tab-pane fade show active" id="phase1" role="tabpanel">
@@ -159,13 +159,13 @@
             </div>
             <div class="tab-pane fade" id="linchpins" role="tabpanel">
               <LinchpinTable :playerData="playerData" />
-              <!-- <SwgohTable
-                :table="{ header: linchpinHeader, body: linchpinBody }"
-              /> -->
             </div>
-            <!-- <div class="tab-pane fade" id="playerPlatoons" role="tabpanel">
-              <SwgohTable :table="{ header, body }" />
-            </div> -->
+            <div class="tab-pane fade" id="needs" role="tabpanel">
+              <button class="btn btn-primary" @click="generateGuildNeeds()">
+                Generate Report
+              </button>
+              <pre>{{ results }}</pre>
+            </div>
           </div>
         </Loading>
       </div>
@@ -189,11 +189,187 @@ import { setupSorting, sortValues } from "utils";
 import { iGoalPlayer, iGoalUnit } from "types/goals";
 import PlatoonsTable from "components/guild/platoonsTable.vue";
 import LinchpinTable from "components/guild/linchpinTable.vue";
+import { getUnit } from "types/unit";
 
 interface dataModel {
   loading: loadingState;
   excludePlayers: string[];
+  results: string;
 }
+
+type NeedResult = {
+  id: string;
+  name?: string;
+  phase: PlatoonData["phase"];
+  amount: number;
+  difficulty: number;
+  eligibleCount: number;
+  sides: Side[];
+  relicRequired: number;
+};
+
+type AggregatedRequirement = PlatoonCharacter & {
+  sides: Set<Side>;
+};
+
+type Side = "darkside" | "lightside" | "mixed";
+
+type PlayerUnit = {
+  base_id: string;
+  relic_tier: number;
+  gear_level: number;
+  name: string;
+};
+
+type Player = {
+  id: string;
+  units: PlayerUnit[];
+  name: string;
+};
+
+type IgnoreRule = {
+  phase: number | "zeffo" | "mandalore";
+  sides?: Side[]; // if omitted → ignore entire phase
+};
+
+type DemotionRule = {
+  phase: number | "zeffo" | "mandalore";
+  sides?: Side[];
+  ownedAtLeast: number;
+};
+
+const ignoreRules: IgnoreRule[] = [
+  { phase: 5 },
+  { phase: 6 },
+  { phase: 4, sides: ["darkside"] },
+];
+
+const demotionRules: DemotionRule[] = [
+  {
+    phase: 2,
+    ownedAtLeast: 1,
+    sides: ["darkside"],
+  },
+  {
+    phase: 3,
+    ownedAtLeast: 1,
+    sides: ["mixed", "darkside"],
+  },
+  {
+    phase: 4,
+    ownedAtLeast: 1,
+    sides: ["lightside", "mixed"],
+  },
+  {
+    phase: "zeffo",
+    ownedAtLeast: 1,
+  },
+  {
+    phase: "zeffo",
+    ownedAtLeast: 1,
+  },
+  {
+    phase: "mandalore",
+    ownedAtLeast: 1,
+  },
+];
+
+const shouldDemote = (result: NeedResult, rules: DemotionRule[]): boolean => {
+  for (const rule of rules) {
+    if (result.phase !== rule.phase) continue;
+
+    if (rule.sides && !rule.sides.some((side) => result.sides.includes(side))) {
+      continue;
+    }
+
+    if (result.eligibleCount >= rule.ownedAtLeast) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const applyDemotions = (
+  results: {
+    hard: NeedResult[];
+    soft: NeedResult[];
+    nice: NeedResult[];
+  },
+  rules: DemotionRule[]
+) => {
+  // track units that have already been demoted
+  const demotedUnits = new Set<string>();
+
+  const getUniqueId = (r: NeedResult) => `${r.id}|${r.phase}`;
+
+  const demoteBucket = (source: NeedResult[], target: NeedResult[]) => {
+    const kept: NeedResult[] = [];
+    for (const r of source) {
+      const uid = getUniqueId(r);
+      if (demotedUnits.has(uid)) {
+        kept.push(r);
+        continue;
+      }
+      if (shouldDemote(r, rules)) {
+        target.push(r);
+        demotedUnits.add(uid);
+      } else {
+        kept.push(r);
+      }
+    }
+    return kept;
+  };
+
+  // one-pass demotion
+  results.hard = demoteBucket(results.hard, results.soft);
+  results.soft = demoteBucket(results.soft, results.nice);
+  results.nice = results.nice.filter((r) => !demotedUnits.has(getUniqueId(r)));
+};
+
+const shouldIgnoreSide = (
+  phase: PlatoonData["phase"],
+  side: Side,
+  rules: IgnoreRule[]
+): boolean => {
+  for (const rule of rules) {
+    if (rule.phase !== phase) continue;
+
+    // Ignore entire phase
+    if (!rule.sides) {
+      return true;
+    }
+
+    if (rule.sides.includes(side)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const formatResults = (results: {
+  hard: NeedResult[];
+  soft: NeedResult[];
+  nice: NeedResult[];
+}) => {
+  const lines: string[] = [];
+
+  const formatSection = (title: string, items: NeedResult[]) => {
+    if (items.length === 0) return;
+    lines.push(`** ${title} **`);
+    for (const r of items) {
+      lines.push(`- ${r.name ?? r.id} R${r.relicRequired}`);
+    }
+    lines.push(""); // extra newline between sections
+  };
+
+  formatSection("Hard", results.hard);
+  formatSection("Soft", results.soft);
+  formatSection("Nice to Have", results.nice);
+
+  return lines.join("\n");
+};
 
 const storageKey = "TBPlatoons";
 
@@ -219,6 +395,7 @@ export default defineComponent({
     return {
       loading: loadingState.initial,
       excludePlayers: [],
+      results: "",
     } as dataModel;
   },
   computed: {
@@ -535,6 +712,118 @@ export default defineComponent({
         });
       }
       return phaseData;
+    },
+    generateGuildNeeds() {
+      const results = {
+        hard: [] as NeedResult[],
+        soft: [] as NeedResult[],
+        nice: [] as NeedResult[],
+      };
+
+      for (const phase of platoonData) {
+        const { characters } = phase;
+
+        /**
+         * Phase + requirement filtering
+         */
+        if (characters.requirement.type !== "Relic") {
+          continue;
+        }
+
+        const relicRequired = characters.requirement.amount;
+
+        /**
+         * Build eligible relic counts (with +2 offset)
+         */
+        const relicCountByUnit = new Map<string, number>();
+
+        const excluded = new Set(this.excludePlayers);
+
+        for (const player of this.players as Player[]) {
+          if (excluded.has(player.id)) continue;
+
+          for (const unit of player.units) {
+            if (unit.relic_tier >= relicRequired) {
+              // Count eligible units
+              relicCountByUnit.set(
+                unit.base_id,
+                (relicCountByUnit.get(unit.base_id) ?? 0) + 1
+              );
+            }
+          }
+        }
+
+        /**
+         * Aggregate requirements per unit across sides
+         */
+        const aggregatedRequirements = new Map<string, AggregatedRequirement>();
+
+        const collect = (side: Side, list?: PlatoonCharacter[]) => {
+          if (!list) return;
+
+          if (shouldIgnoreSide(phase.phase, side, ignoreRules)) {
+            return;
+          }
+
+          for (const character of list) {
+            const existing = aggregatedRequirements.get(character.id);
+
+            if (existing) {
+              existing.amount += character.amount;
+              existing.sides.add(side);
+            } else {
+              aggregatedRequirements.set(character.id, {
+                ...character,
+                sides: new Set([side]),
+              });
+            }
+          }
+        };
+
+        collect("darkside", characters.darkside);
+        collect("lightside", characters.lightside);
+        collect("mixed", characters.mixed);
+
+        /**
+         * Classify needs
+         */
+        for (const aggregated of aggregatedRequirements.values()) {
+          const eligibleCount = relicCountByUnit.get(aggregated.id) ?? 0;
+
+          const result: NeedResult = {
+            id: aggregated.id,
+            name: getUnit(aggregated.id)?.name ?? "unknown name",
+            phase: phase.phase,
+            amount: aggregated.amount,
+            difficulty: aggregated.difficulty,
+            eligibleCount,
+            sides: Array.from(aggregated.sides),
+            relicRequired,
+          };
+
+          if (eligibleCount === 0) {
+            results.hard.push(result);
+          } else if (eligibleCount < aggregated.amount) {
+            if (aggregated.amount > 1) {
+              results.soft.push(result);
+            } else {
+              results.hard.push(result);
+            }
+          } else if (eligibleCount === aggregated.amount) {
+            if (aggregated.amount > 1) {
+              results.nice.push(result);
+            } else {
+              results.soft.push(result);
+            }
+          } else if (eligibleCount + 1 === aggregated.amount) {
+            results.soft.push(result);
+          }
+        }
+      }
+      applyDemotions(results, demotionRules);
+
+      console.log(results);
+      this.results = formatResults(results);
     },
   },
   async created() {

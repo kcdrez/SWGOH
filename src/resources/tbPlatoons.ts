@@ -11,6 +11,7 @@ export type PlatoonCharacter = {
   id: string;
   amount: number;
   difficulty: number;
+  name?: string;
 };
 
 type PlatoonPhase = {
