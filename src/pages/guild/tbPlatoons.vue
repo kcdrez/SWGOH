@@ -161,9 +161,21 @@
               <LinchpinTable :playerData="playerData" />
             </div>
             <div class="tab-pane fade" id="needs" role="tabpanel">
-              <button class="btn btn-primary" @click="generateGuildNeeds()">
-                Generate Report
-              </button>
+              <div
+                class="btn-group btn-group-sm text-center mt-1 d-block"
+                role="group"
+              >
+                <button class="btn btn-primary" @click="generateGuildNeeds()">
+                  Generate Report
+                </button>
+                <button
+                  @click="copyResults"
+                  v-if="results"
+                  class="btn btn-secondary"
+                >
+                  Copy Results
+                </button>
+              </div>
               <pre>{{ results }}</pre>
             </div>
           </div>
@@ -190,6 +202,7 @@ import { iGoalPlayer, iGoalUnit } from "types/goals";
 import PlatoonsTable from "components/guild/platoonsTable.vue";
 import LinchpinTable from "components/guild/linchpinTable.vue";
 import { getUnit } from "types/unit";
+import moment from "moment";
 
 interface dataModel {
   loading: loadingState;
@@ -247,30 +260,30 @@ const ignoreRules: IgnoreRule[] = [
 const demotionRules: DemotionRule[] = [
   {
     phase: 2,
-    ownedAtLeast: 1,
+    ownedAtLeast: 2,
     sides: ["darkside"],
   },
   {
     phase: 3,
-    ownedAtLeast: 1,
+    ownedAtLeast: 2,
     sides: ["mixed", "darkside"],
   },
   {
     phase: 4,
-    ownedAtLeast: 1,
+    ownedAtLeast: 2,
     sides: ["lightside", "mixed"],
   },
   {
     phase: "zeffo",
-    ownedAtLeast: 1,
+    ownedAtLeast: 2,
   },
   {
     phase: "zeffo",
-    ownedAtLeast: 1,
+    ownedAtLeast: 2,
   },
   {
     phase: "mandalore",
-    ownedAtLeast: 1,
+    ownedAtLeast: 2,
   },
 ];
 
@@ -353,22 +366,64 @@ const formatResults = (results: {
   soft: NeedResult[];
   nice: NeedResult[];
 }) => {
-  const lines: string[] = [];
+  const lines: string[] = [
+    `Last Updated ${moment().format("DD MMM YYYY")}`,
+    "",
+  ];
 
-  const formatSection = (title: string, items: NeedResult[]) => {
+  const formatSection = (
+    title: string,
+    subtitle: string,
+    items: NeedResult[]
+  ) => {
     if (items.length === 0) return;
     lines.push(`** ${title} **`);
+    lines.push(`${subtitle}`);
     for (const r of items) {
       lines.push(`- ${r.name ?? r.id} R${r.relicRequired}`);
     }
     lines.push(""); // extra newline between sections
   };
 
-  formatSection("Hard", results.hard);
-  formatSection("Soft", results.soft);
-  formatSection("Nice to Have", results.nice);
+  formatSection(
+    "Hard Need",
+    "(We have a deficit of these characters and our star goals are struggling as a result)",
+    results.hard
+  );
+  formatSection(
+    "Soft Need",
+    "(We have enough of these characters right now, but if someone leaves the guild or is on LOA then we may struggle to meet our star goals)",
+    results.soft
+  );
+  formatSection(
+    "Nice to Have",
+    "(We have some extra coverage on these, but having some more backups wouldn't hurt)",
+    results.nice
+  );
 
   return lines.join("\n");
+};
+
+export const copyToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // Fallback for older browsers / non-secure contexts
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    const success = document.execCommand("copy");
+    document.body.removeChild(textarea);
+
+    return success;
+  }
 };
 
 const storageKey = "TBPlatoons";
@@ -822,8 +877,16 @@ export default defineComponent({
       }
       applyDemotions(results, demotionRules);
 
-      console.log(results);
       this.results = formatResults(results);
+    },
+    async copyResults() {
+      const success = await copyToClipboard(this.results);
+      if (success) {
+        this.$toast(`Contents Copied`, {
+          positionY: "top",
+          class: "toast-success",
+        });
+      }
     },
   },
   async created() {
