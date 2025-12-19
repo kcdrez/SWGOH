@@ -176,6 +176,184 @@
                   Copy Results
                 </button>
               </div>
+              <h3>Ignore Phase Rules</h3>
+              <div class="row mb-2 small">
+                <div class="col-2">Phase</div>
+                <div class="col">Ignored Sides</div>
+              </div>
+              <div
+                v-for="toggle in ignoreToggles"
+                :key="toggle.phase"
+                class="row align-items-center mb-2"
+              >
+                <!-- Phase label -->
+                <div class="col-2 fw-bold">Phase {{ toggle.phase }}</div>
+
+                <!-- Checkboxes -->
+                <div class="col">
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      v-model="toggle.darkside"
+                      :id="`ignore-${toggle.phase}-dark`"
+                    />
+                    <label
+                      class="form-check-label"
+                      :for="`ignore-${toggle.phase}-dark`"
+                    >
+                      Dark
+                    </label>
+                  </div>
+
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      v-model="toggle.lightside"
+                      :id="`ignore-${toggle.phase}-light`"
+                    />
+                    <label
+                      class="form-check-label"
+                      :for="`ignore-${toggle.phase}-light`"
+                    >
+                      Light
+                    </label>
+                  </div>
+
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      v-model="toggle.mixed"
+                      :id="`ignore-${toggle.phase}-mixed`"
+                    />
+                    <label
+                      class="form-check-label"
+                      :for="`ignore-${toggle.phase}-mixed`"
+                    >
+                      Mixed
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <hr />
+              <h3>Demotion Rules</h3>
+              <!-- Header -->
+              <div class="row mb-2 small">
+                <div class="col-2">Phase</div>
+                <div class="col-2">Owned</div>
+                <div class="col">Sides</div>
+                <div class="col-auto"></div>
+              </div>
+
+              <!-- Rules -->
+              <div
+                v-for="(rule, i) in demotionToggles"
+                :key="i"
+                class="row align-items-center mb-2"
+              >
+                <!-- Phase -->
+                <div class="col-2">
+                  <input
+                    type="number"
+                    class="form-control form-control-sm"
+                    v-model.number="rule.phase"
+                    min="1"
+                    max="6"
+                  />
+                </div>
+
+                <!-- Owned threshold -->
+                <div class="col-2">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text">≥</span>
+                    <input
+                      type="number"
+                      class="form-control"
+                      v-model.number="rule.ownedAtLeast"
+                      min="0"
+                    />
+                  </div>
+                </div>
+
+                <!-- Sides -->
+                <div class="col">
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value="darkside"
+                      v-model="rule.sides"
+                      :id="`demote-${i}-dark`"
+                    />
+                    <label class="form-check-label" :for="`demote-${i}-dark`">
+                      Dark
+                    </label>
+                  </div>
+
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value="lightside"
+                      v-model="rule.sides"
+                      :id="`demote-${i}-light`"
+                    />
+                    <label class="form-check-label" :for="`demote-${i}-light`">
+                      Light
+                    </label>
+                  </div>
+
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value="mixed"
+                      v-model="rule.sides"
+                      :id="`demote-${i}-mixed`"
+                    />
+                    <label class="form-check-label" :for="`demote-${i}-mixed`">
+                      Mixed
+                    </label>
+                  </div>
+
+                  <small
+                    v-if="!rule.sides || rule.sides.length === 0"
+                    class="text-muted ms-2"
+                  >
+                    (All sides)
+                  </small>
+                </div>
+
+                <!-- Remove -->
+                <div class="col-auto">
+                  <button
+                    class="btn btn-sm btn-danger"
+                    title="Remove rule"
+                    @click="demotionToggles.splice(i, 1)"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              <!-- Add Rule -->
+              <div class="mt-3">
+                <button
+                  class="btn btn-sm btn-primary"
+                  @click="
+                    demotionToggles.push({
+                      phase: 1,
+                      ownedAtLeast: 1,
+                      sides: [],
+                    })
+                  "
+                >
+                  + Add rule
+                </button>
+              </div>
+
               <pre>{{ results }}</pre>
             </div>
           </div>
@@ -208,6 +386,8 @@ interface dataModel {
   loading: loadingState;
   excludePlayers: string[];
   results: string;
+  ignoreToggles: IgnoreToggle[];
+  demotionToggles: DemotionToggle[];
 }
 
 type NeedResult = {
@@ -251,56 +431,25 @@ type DemotionRule = {
   ownedAtLeast: number;
 };
 
-const ignoreRules: IgnoreRule[] = [
-  { phase: 5 },
-  { phase: 6 },
-  { phase: 4, sides: ["darkside"] },
-];
+type DemotionToggle = {
+  phase: PlatoonData["phase"];
+  ownedAtLeast: number;
+  sides?: Side[]; // optional = all sides
+};
 
-const demotionRules: DemotionRule[] = [
-  {
-    phase: 2,
-    ownedAtLeast: 2,
-    sides: ["darkside"],
-  },
-  {
-    phase: 3,
-    ownedAtLeast: 2,
-    sides: ["mixed", "darkside"],
-  },
-  {
-    phase: 4,
-    ownedAtLeast: 2,
-    sides: ["lightside", "mixed"],
-  },
-  {
-    phase: "zeffo",
-    ownedAtLeast: 2,
-  },
-  {
-    phase: "zeffo",
-    ownedAtLeast: 2,
-  },
-  {
-    phase: "mandalore",
-    ownedAtLeast: 2,
-  },
-];
-
-const shouldDemote = (result: NeedResult, rules: DemotionRule[]): boolean => {
-  for (const rule of rules) {
-    if (result.phase !== rule.phase) continue;
-
-    if (rule.sides && !rule.sides.some((side) => result.sides.includes(side))) {
-      continue;
-    }
-
-    if (result.eligibleCount >= rule.ownedAtLeast) {
-      return true;
-    }
+const ruleApplies = (result: NeedResult, rule: DemotionRule): boolean => {
+  // Phase match
+  if (result.phase !== rule.phase) {
+    return false;
   }
 
-  return false;
+  // Side match (if specified)
+  if (rule.sides && !rule.sides.some((s) => result.sides.includes(s))) {
+    return false;
+  }
+
+  // Owned threshold
+  return result.eligibleCount >= rule.ownedAtLeast;
 };
 
 const applyDemotions = (
@@ -311,33 +460,33 @@ const applyDemotions = (
   },
   rules: DemotionRule[]
 ) => {
-  // track units that have already been demoted
-  const demotedUnits = new Set<string>();
-
-  const getUniqueId = (r: NeedResult) => `${r.id}|${r.phase}`;
-
-  const demoteBucket = (source: NeedResult[], target: NeedResult[]) => {
-    const kept: NeedResult[] = [];
-    for (const r of source) {
-      const uid = getUniqueId(r);
-      if (demotedUnits.has(uid)) {
-        kept.push(r);
-        continue;
-      }
-      if (shouldDemote(r, rules)) {
-        target.push(r);
-        demotedUnits.add(uid);
-      } else {
-        kept.push(r);
+  for (const rule of rules) {
+    // HARD → SOFT
+    for (let i = results.hard.length - 1; i >= 0; i--) {
+      const item = results.hard[i];
+      if (ruleApplies(item, rule)) {
+        results.hard.splice(i, 1);
+        results.soft.push(item);
       }
     }
-    return kept;
-  };
 
-  // one-pass demotion
-  results.hard = demoteBucket(results.hard, results.soft);
-  results.soft = demoteBucket(results.soft, results.nice);
-  results.nice = results.nice.filter((r) => !demotedUnits.has(getUniqueId(r)));
+    // SOFT → NICE
+    for (let i = results.soft.length - 1; i >= 0; i--) {
+      const item = results.soft[i];
+      if (ruleApplies(item, rule)) {
+        results.soft.splice(i, 1);
+        results.nice.push(item);
+      }
+    }
+
+    // NICE → REMOVED
+    for (let i = results.nice.length - 1; i >= 0; i--) {
+      const item = results.nice[i];
+      if (ruleApplies(item, rule)) {
+        results.nice.splice(i, 1);
+      }
+    }
+  }
 };
 
 const shouldIgnoreSide = (
@@ -426,6 +575,13 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   }
 };
 
+type IgnoreToggle = {
+  phase: PlatoonData["phase"];
+  darkside: boolean;
+  lightside: boolean;
+  mixed: boolean;
+};
+
 const storageKey = "TBPlatoons";
 
 export default defineComponent({
@@ -451,6 +607,35 @@ export default defineComponent({
       loading: loadingState.initial,
       excludePlayers: [],
       results: "",
+      ignoreToggles: [
+        { phase: 1, darkside: false, lightside: false, mixed: false },
+        { phase: 2, darkside: false, lightside: false, mixed: false },
+        { phase: 3, darkside: false, lightside: false, mixed: false },
+        { phase: 4, darkside: true, lightside: false, mixed: false },
+        { phase: 5, darkside: true, lightside: true, mixed: true },
+        { phase: 6, darkside: true, lightside: true, mixed: true },
+        { phase: "zeffo", darkside: false, lightside: false, mixed: false },
+        { phase: "mandalore", darkside: false, lightside: false, mixed: false },
+      ] as IgnoreToggle[],
+      demotionToggles: [
+        {
+          phase: 1,
+          ownedAtLeast: 3,
+          sides: ["darkside", "lightside"],
+        },
+        {
+          phase: 3,
+          ownedAtLeast: 1,
+        },
+        {
+          phase: 3,
+          ownedAtLeast: 5,
+        },
+        {
+          phase: "zeffo",
+          ownedAtLeast: 1,
+        },
+      ] as DemotionToggle[],
     } as dataModel;
   },
   computed: {
@@ -710,6 +895,28 @@ export default defineComponent({
           return sortValues(a.label, b.label, "asc");
         });
     },
+    ignoreRules(): IgnoreRule[] {
+      const rules: IgnoreRule[] = [];
+
+      for (const toggle of this.ignoreToggles) {
+        const sides: Side[] = [];
+
+        if (toggle.darkside) sides.push("darkside");
+        if (toggle.lightside) sides.push("lightside");
+        if (toggle.mixed) sides.push("mixed");
+
+        if (sides.length === 0) continue;
+
+        // All sides checked → ignore entire phase
+        if (sides.length === 3) {
+          rules.push({ phase: toggle.phase });
+        } else {
+          rules.push({ phase: toggle.phase, sides });
+        }
+      }
+
+      return rules;
+    },
   },
   methods: {
     ...mapActions("guild", ["fetchGuildUnitData"]),
@@ -816,7 +1023,7 @@ export default defineComponent({
         const collect = (side: Side, list?: PlatoonCharacter[]) => {
           if (!list) return;
 
-          if (shouldIgnoreSide(phase.phase, side, ignoreRules)) {
+          if (shouldIgnoreSide(phase.phase, side, this.ignoreRules)) {
             return;
           }
 
@@ -875,7 +1082,7 @@ export default defineComponent({
           }
         }
       }
-      applyDemotions(results, demotionRules);
+      applyDemotions(results, this.demotionToggles);
 
       this.results = formatResults(results);
     },

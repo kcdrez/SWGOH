@@ -25,6 +25,44 @@ type platoonType = {
   difficulty: number;
 };
 
+type ClosePlayer = {
+  name: string;
+  levelType: "Stars" | "Gear" | "Relic";
+  levelValue: number;
+};
+
+const getUnitProgress = (
+  unit: any,
+  requirement: { amount: number; type: string }
+): ClosePlayer | null => {
+  if (requirement.type === "Stars") {
+    if (unit.stars >= requirement.amount) return null;
+
+    return {
+      name: "",
+      levelType: "Stars",
+      levelValue: unit.stars,
+    };
+  }
+
+  // Relic requirement
+  if (unit.relic_tier >= requirement.amount) return null;
+
+  if (unit.relic_tier > 0) {
+    return {
+      name: "",
+      levelType: "Relic",
+      levelValue: unit.relic_tier,
+    };
+  }
+
+  return {
+    name: "",
+    levelType: "Gear",
+    levelValue: unit.gear_level,
+  };
+};
+
 const storageKey = "PlatoonsTable";
 
 export default defineComponent({
@@ -407,96 +445,67 @@ export default defineComponent({
       requirement: { amount: number; type: string },
       totalNeeded: number
     ) {
-      const playerList: {
-        name: string;
-        levelType: string;
-        levelValue: number;
-      }[] = [];
+      const candidates: ClosePlayer[] = [];
 
-      Object.values(this.playerListMapping).forEach((player) => {
-        const unitMatch = player.units[unitId];
-        if (unitMatch) {
-          if (requirement.type === "Stars") {
-            if (unitMatch.stars < requirement.amount) {
-              if (totalNeeded > playerList.length) {
-                playerList.push({
-                  name: player.name,
-                  levelType: "Stars",
-                  levelValue: unitMatch.stars,
-                });
-              } else {
-                const index = playerList.findIndex((p) => {
-                  return unitMatch.stars > p.levelValue;
-                });
-                if (index >= 0) {
-                  playerList.splice(0, index, {
-                    name: player.name,
-                    levelType: "Stars",
-                    levelValue: unitMatch.stars,
-                  });
-                }
-              }
-            }
-          } else if (requirement.type === "Relic") {
-            if (unitMatch.relic_tier < requirement.amount) {
-              if (totalNeeded > playerList.length) {
-                if (unitMatch.relic_tier <= 0) {
-                  playerList.push({
-                    name: player.name,
-                    levelType: "Gear",
-                    levelValue: unitMatch.gear_level,
-                  });
-                } else {
-                  playerList.push({
-                    name: player.name,
-                    levelType: "Relic",
-                    levelValue: unitMatch.relic_tier,
-                  });
-                }
-              } else {
-                const index = playerList.findIndex((p) => {
-                  if (p.levelType === "Relic") {
-                    return unitMatch.relic_tier > p.levelValue;
-                  } else if (p.levelType === "Gear") {
-                    return unitMatch.relic_tier > 0
-                      ? true
-                      : unitMatch.gear_level > p.levelValue;
-                  }
-                });
+      for (const player of Object.values(this.playerListMapping)) {
+        const unit = player.units[unitId];
+        if (!unit) continue;
 
-                if (index >= 0) {
-                  let levelType = "Relic";
-                  let levelValue = unitMatch.relic_tier;
-                  if (playerList[index].levelType === "Gear") {
-                    levelType = unitMatch.relic_tier > 0 ? "Relic" : "Gear";
-                    levelValue =
-                      unitMatch.relic_tier > 0
-                        ? unitMatch.relic_tier
-                        : unitMatch.gear_level;
-                  }
+        const progress = getUnitProgress(unit, requirement);
+        if (!progress) continue;
 
-                  playerList.splice(index, 1, {
-                    name: player.name,
-                    levelType,
-                    levelValue,
-                  });
-                }
-              }
-            }
-          }
-        }
-      });
-      return playerList.sort((a, b) => {
+        candidates.push({
+          ...progress,
+          name: player.name,
+        });
+      }
+
+      // Sort by closeness (highest first)
+      candidates.sort((a, b) => {
         if (a.levelType === b.levelType) {
-          return a.levelValue > b.levelValue ? -1 : 1;
-        } else if (a.levelType === "Relic") {
-          return -1;
-        } else if (b.levelType === "Relic") {
-          return 1;
-        } else {
-          return a.name > b.name ? 1 : -1;
+          return b.levelValue - a.levelValue;
         }
+
+        // Relic > Gear > Stars
+        if (a.levelType === "Relic") return -1;
+        if (b.levelType === "Relic") return 1;
+        if (a.levelType === "Gear") return -1;
+        if (b.levelType === "Gear") return 1;
+
+        return 0;
       });
+
+      if (totalNeeded <= 0 || candidates.length === 0) {
+        return [];
+      }
+
+      if (candidates.length <= totalNeeded) {
+        return candidates;
+      }
+
+      const result = candidates.slice(0, totalNeeded);
+
+      // If slicing somehow produced nothing, stop
+      if (result.length === 0) {
+        return [];
+      }
+
+      const cutoff = result[result.length - 1];
+
+      for (let i = totalNeeded; i < candidates.length; i++) {
+        const next = candidates[i];
+
+        if (
+          next.levelType === cutoff.levelType &&
+          next.levelValue === cutoff.levelValue
+        ) {
+          result.push(next);
+        } else {
+          break;
+        }
+      }
+
+      return result;
     },
   },
 });
