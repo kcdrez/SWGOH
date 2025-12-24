@@ -255,13 +255,19 @@
               >
                 <!-- Phase -->
                 <div class="col-2">
-                  <input
-                    type="number"
+                  <select
                     class="form-control form-control-sm"
                     v-model.number="rule.phase"
-                    min="1"
-                    max="6"
-                  />
+                  >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="zeffo">Zeffo</option>
+                    <option value="mandalore">Mandalore</option>
+                  </select>
                 </div>
 
                 <!-- Owned threshold -->
@@ -427,14 +433,14 @@ type IgnoreRule = {
 
 type DemotionRule = {
   phase: number | "zeffo" | "mandalore";
-  sides?: Side[];
+  sides: Side[];
   ownedAtLeast: number;
 };
 
 type DemotionToggle = {
   phase: PlatoonData["phase"];
   ownedAtLeast: number;
-  sides?: Side[]; // optional = all sides
+  sides: Side[];
 };
 
 const ruleApplies = (result: NeedResult, rule: DemotionRule): boolean => {
@@ -618,22 +624,30 @@ export default defineComponent({
         { phase: "mandalore", darkside: false, lightside: false, mixed: false },
       ] as IgnoreToggle[],
       demotionToggles: [
+        // {
+        //   phase: 1,
+        //   ownedAtLeast: 3,
+        //   sides: ["darkside", "lightside"],
+        // },
+        // {
+        //   phase: 3,
+        //   ownedAtLeast: 2,
+        //   sides: [],
+        // },
+        // {
+        //   phase: 3,
+        //   ownedAtLeast: 5,
+        //   sides: [],
+        // },
+        // {
+        //   phase: "zeffo",
+        //   ownedAtLeast: 1,
+        //   sides: [],
+        // },
         {
-          phase: 1,
+          phase: 4,
           ownedAtLeast: 3,
-          sides: ["darkside", "lightside"],
-        },
-        {
-          phase: 3,
-          ownedAtLeast: 1,
-        },
-        {
-          phase: 3,
-          ownedAtLeast: 5,
-        },
-        {
-          phase: "zeffo",
-          ownedAtLeast: 1,
+          sides: ["mixed", "lightside"],
         },
       ] as DemotionToggle[],
     } as dataModel;
